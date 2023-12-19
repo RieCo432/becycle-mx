@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from app.routers import clients
+import app.routers as routers
 import uvicorn
 from app.dependencies import get_db
 from app.database.db import engine, Base
@@ -8,7 +8,7 @@ from app.database.db import engine, Base
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(dependencies=[Depends(get_db)])
-app.include_router(clients.router)
+app.include_router(routers.clients)
 
 
 if __name__ == "__main__":
