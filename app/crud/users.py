@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
 import bcrypt
+from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException, status
 
 
 def get_user(username: str, db: Session) -> models.User | None:
@@ -33,8 +35,14 @@ def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
         rentalChecker=user_data.rentalChecker,
         treasurer=user_data.treasurer
     )
-    db.add(user)
-    db.commit()
+    try:
+        db.add(user)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Integrity Error: Does this user already exist?"
+        )
     return user
 
 
