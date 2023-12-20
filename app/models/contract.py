@@ -1,6 +1,5 @@
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-
 from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
