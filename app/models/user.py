@@ -8,7 +8,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
-    username: Mapped[str] = mapped_column("username", String(40), nullable=False, index=True, quote=False)
+    username: Mapped[str] = mapped_column("username", String(40), nullable=False, index=True, quote=False, unique=True)
     password: Mapped[str] = mapped_column("password", String(60), nullable=False, index=True, quote=False)
     pin: Mapped[str] = mapped_column("pin", String(60), nullable=True, quote=False)
     admin: Mapped[bool] = mapped_column("admin", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)

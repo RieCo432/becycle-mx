@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 import app.models as models
+import app.schemas as schemas
 import bcrypt
 
 
@@ -19,4 +20,21 @@ def authenticate_user(username: str, password_cleartext: str, db: Session) -> mo
         return None
     else:
         return user
+
+
+def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
+    user = models.User(
+        username=user_data.username,
+        password=bcrypt.hashpw(user_data.password_cleartext, bcrypt.gensalt()),
+        pin=bcrypt.hashpw(user_data.pin_cleartext, bcrypt.gensalt()) if user_data.pin_cleartext is not None else None,
+        admin=user_data.admin,
+        depositBearer=user_data.depositBearer,
+        appointmentManager=user_data.appointmentManager,
+        rentalChecker=user_data.rentalChecker,
+        treasurer=user_data.treasurer
+    )
+    db.add(user)
+    db.commit()
+    return user
+
 

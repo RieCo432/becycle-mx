@@ -16,7 +16,11 @@ def get_clients(db: Session, first_name: str, last_name: str, email_address: str
 
 
 def post_client(db: Session, client_to_create: schemas.ClientCreate) -> models.Client:
-    client = models.Client(firstName=client_to_create.firstName, lastName=client_to_create.lastName, emailAddress=client_to_create.emailAddress)
+    client = models.Client(
+        firstName=client_to_create.firstName,
+        lastName=client_to_create.lastName,
+        emailAddress=client_to_create.emailAddress
+    )
     db.add(client)
     db.commit()
     return client
