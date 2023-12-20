@@ -12,6 +12,7 @@ app = FastAPI(dependencies=[Depends(get_db)])
 app.include_router(routers.clients)
 app.include_router(routers.users)
 app.include_router(routers.login)
+app.include_router(routers.bikes)
 
 
 if __name__ == "__main__":
