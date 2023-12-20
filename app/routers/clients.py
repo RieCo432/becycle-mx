@@ -23,7 +23,7 @@ async def get_clients(
 
 @clients.post("/client")
 async def create_client(
-        client: schemas.ClientCreate,
+        client_data: schemas.ClientCreate,
         db: Session = Depends(dep.get_db)) -> schemas.Client:
 
-    return crud.post_client(db=db, client_to_create=client)
+    return crud.post_client(db=db, client_data=client_data)
