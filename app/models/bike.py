@@ -1,7 +1,8 @@
 from sqlalchemy import String, UUID, text
 from uuid import uuid4
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
+from typing import List
 
 
 class Bike(Base):
@@ -13,3 +14,5 @@ class Bike(Base):
     colour: Mapped[str] = mapped_column("colour", String(40), nullable=False, quote=False)
     decals: Mapped[str] = mapped_column("decals", String(40), nullable=True, quote=False)
     serialNumber: Mapped[str] = mapped_column("serialNumber", String(40), nullable=False, quote=False)
+
+    contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="bike")

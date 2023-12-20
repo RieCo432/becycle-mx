@@ -1,7 +1,9 @@
 from sqlalchemy import String, UUID, Boolean, text
 from uuid import uuid4
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
+from typing import List
+from .contract import Contract
 
 
 class User(Base):
@@ -17,3 +19,9 @@ class User(Base):
     appointmentManager: Mapped[bool] = mapped_column("appointmentManager", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
     treasurer: Mapped[bool] = mapped_column("treasurer", Boolean, default=False, nullable=False, server_default=text("FALSE"), quote=False)
     softDeleted: Mapped[bool] = mapped_column("softDeleted", Boolean, default=False, nullable=False, server_default=text("FALSE"), quote=False)
+
+    workedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.workingUserId], back_populates="workingUser")
+    checkedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.checkingUserId], back_populates="checkingUser")
+    depositCollectedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.depositCollectingUserId], back_populates="depositCollectingUser")
+    returnedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.returnAcceptingUserId], back_populates="returnAcceptingUser")
+    depositReturnedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.depositReturningUserId], back_populates="depositReturningUser")
