@@ -2,13 +2,13 @@ from jose import jwt, JWTError
 from app.database.db import SessionLocal
 from fastapi.security import OAuth2PasswordBearer
 from typing import Annotated
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Body
 import app.models as models
 import app.crud as crud
 from sqlalchemy.orm import Session
 from app.config import SECRET_KEY, ALGORITHM
 import app.schemas as schemas
-from uuid import UUID
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -62,7 +62,10 @@ async def get_current_admin_user(current_user: Annotated[models.User, Depends(ge
     return current_user
 
 
-async def get_working_user(working_username: str, working_user_password_or_pin: str, db: Session = Depends(get_db)) -> models.User:
+async def get_working_user(
+        working_username: str = Body("working_username"),
+        working_user_password_or_pin: str = Body("working_user_password_or_pin"),
+        db: Session = Depends(get_db)) -> models.User:
     working_user = crud.validate_user_signature(username=working_username, password_or_pin=working_user_password_or_pin, db=db)
     if working_user is None:
         raise HTTPException(
@@ -73,7 +76,10 @@ async def get_working_user(working_username: str, working_user_password_or_pin: 
     return working_user
 
 
-async def get_checking_user(checking_username: str, checking_user_password_or_pin: str, db: Session = Depends(get_db)) -> models.User:
+async def get_checking_user(
+        checking_username: str = Body("checking_username"),
+        checking_user_password_or_pin: str = Body("checking_user_password_or_pin"),
+        db: Session = Depends(get_db)) -> models.User:
     checking_user = crud.validate_user_signature(username=checking_username, password_or_pin=checking_user_password_or_pin, db=db)
     if checking_user is None:
         raise HTTPException(
@@ -84,7 +90,10 @@ async def get_checking_user(checking_username: str, checking_user_password_or_pi
     return checking_user
 
 
-async def get_deposit_collecting_user(deposit_collecting_username: str, deposit_collecting_user_password: str, db: Session = Depends(get_db)) -> models.User:
+async def get_deposit_collecting_user(
+        deposit_collecting_username: str = Body("deposit_collecting_username"),
+        deposit_collecting_user_password: str = Body("deposit_collecting_user_password"),
+        db: Session = Depends(get_db)) -> models.User:
     deposit_collecting_user = crud.authenticate_user(username=deposit_collecting_username, password_cleartext=deposit_collecting_user_password, db=db)
     if deposit_collecting_user is None:
         raise HTTPException(
