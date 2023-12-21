@@ -24,6 +24,20 @@ def authenticate_user(username: str, password_cleartext: str, db: Session) -> mo
         return user
 
 
+def validate_user_signature(username: str, password_or_pin, db: Session) -> models.User | None:
+    user = get_user(username=username, db=db)
+    if user is None:
+        return None
+    if bcrypt.checkpw(password_or_pin, user.password):
+        return user
+    if user.pin is None:
+        return None
+    if bcrypt.checkpw(password_or_pin, user.pin):
+        return user
+
+    return None
+
+
 def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
     user = models.User(
         username=user_data.username,

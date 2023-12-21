@@ -6,9 +6,6 @@ from datetime import date
 class ContractBase(BaseModel):
     clientId: UUID
     bikeId: UUID
-    workingUserId: UUID
-    checkingUserId: UUID
-    depositCollectingUserId: UUID
 
     depositAmountCollected: int
 
@@ -17,13 +14,16 @@ class ContractBase(BaseModel):
     notes: str | None = None
 
 
-
 class ContractCreate(ContractBase):
     pass
 
 
 class Contract(ContractBase):
     id: UUID
+
+    workingUserId: UUID
+    checkingUserId: UUID
+    depositCollectingUserId: UUID
 
     startDate: date
     endDate: date

@@ -4,6 +4,7 @@ import app.crud as crud
 import app.dependencies as dep
 from uuid import UUID
 from sqlalchemy.orm import Session
+import app.models as models
 
 
 contracts = APIRouter(
@@ -23,6 +24,14 @@ async def get_contracts(
 @contracts.post("/contract")
 async def create_contract(
         contract_data: schemas.ContractCreate,
+        working_user: models.User = Depends(dep.get_working_user),
+        checking_user: models.User = Depends(dep.get_checking_user),
+        deposit_collecting_user: models.User = Depends(dep.get_deposit_collecting_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
-    return crud.create_contract(contract_data=contract_data, db=db)
+    return crud.create_contract(
+        contract_data=contract_data,
+        working_user_id=working_user.id,
+        checking_user_id=checking_user.id,
+        deposit_collecting_user_id=deposit_collecting_user.id,
+        db=db)
 
