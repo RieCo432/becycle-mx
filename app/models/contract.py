@@ -3,6 +3,8 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.config import CONTRACT_EXPIRE_MONTHS
 from app.database.db import Base
 
 
@@ -33,7 +35,7 @@ class Contract(Base):
     depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")
 
     startDate: Mapped[date] = mapped_column("startDate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, quote=False)
-    endDate: Mapped[date] = mapped_column("endDate", Date, default=datetime.utcnow().date() + relativedelta(months=6), server_default=text("(current_date at time zone 'utc' + make_interval(months => 6))"), nullable=False, quote=False)
+    endDate: Mapped[date] = mapped_column("endDate", Date, default=datetime.utcnow().date() + relativedelta(months=CONTRACT_EXPIRE_MONTHS), server_default=text("(current_date at time zone 'utc' + make_interval(months => {:d}))".format(CONTRACT_EXPIRE_MONTHS)), nullable=False, quote=False)
 
     returnedDate: Mapped[date] = mapped_column("returnedDate", Date, nullable=True, quote=False)
 

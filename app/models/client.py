@@ -1,6 +1,8 @@
 from sqlalchemy import String, UUID, text, DateTime, ForeignKey
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.config import CLIENT_LOGIN_CODE_EXPIRE_MINUTES, CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES
 from app.database.db import Base
 from typing import List
 from random import random
@@ -31,7 +33,7 @@ class ClientTemp(Base):
     emailAddress: Mapped[str] = mapped_column("emailAddress", String(255), nullable=False, quote=False, unique=True)
 
     verificationCode: Mapped[DateTime] = mapped_column("verificationCode", String(6), nullable=False, default="{:06d}".format(int(random()*1000000)), server_default=text("TO_CHAR(FLOOR(RANDOM()*1000000), 'fm000000')"), quote=False)
-    expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime, default=datetime.utcnow() + relativedelta(hours=24), server_default=text("(current_timestamp at time zone 'utc' + make_interval(hours => 24))"), nullable=False, quote=False)
+    expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime, default=datetime.utcnow() + relativedelta(minutes=CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES), server_default=text("(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES)), nullable=False, quote=False)
 
 
 class ClientLogin(Base):
@@ -49,7 +51,7 @@ class ClientLogin(Base):
                                                        server_default=text(
                                                            "TO_CHAR(FLOOR(RANDOM()*1000000), 'fm000000')"), quote=False)
     expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,
-                                                         default=datetime.utcnow() + relativedelta(minutes=60),
+                                                         default=datetime.utcnow() + relativedelta(minutes=CLIENT_LOGIN_CODE_EXPIRE_MINUTES),
                                                          server_default=text(
-                                                             "(current_timestamp at time zone 'utc' + make_interval(minutes => 60))"),
+                                                             "(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(CLIENT_LOGIN_CODE_EXPIRE_MINUTES)),
                                                          nullable=False, quote=False)
