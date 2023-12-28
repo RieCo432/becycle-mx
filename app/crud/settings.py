@@ -3,6 +3,7 @@ import datetime
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 import app.models as models
 import app.schemas as schemas
 
@@ -34,7 +35,10 @@ def add_appointment_concurrency_limit(
         maxConcurrent=appointment_concurrency_limit_data.maxConcurrent
     )
 
-    db.add(new_appointment_concurrency_limit)
-    db.commit()
+    try:
+        db.add(new_appointment_concurrency_limit)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "There already is a concurrency limit for this time!"})
 
     return new_appointment_concurrency_limit
