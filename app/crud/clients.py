@@ -25,3 +25,14 @@ def post_client(db: Session, client_data: schemas.ClientCreate) -> models.Client
     db.commit()
     return client
 
+
+def post_client_temp(db: Session, client_data: schemas.ClientCreate) -> models.ClientTemp:
+    client_temp = models.ClientTemp(
+        firstName=client_data.firstName,
+        lastName=client_data.lastName,
+        emailAddress=client_data.emailAddress
+    )
+    db.add(client_temp)
+    db.commit()
+    return client_temp
+

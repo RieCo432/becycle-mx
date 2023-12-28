@@ -1,5 +1,6 @@
 from uuid import UUID
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class ClientBase(BaseModel):
@@ -10,6 +11,11 @@ class ClientBase(BaseModel):
 
 class ClientCreate(ClientBase):
     pass
+
+
+class ClientTemp(ClientBase):
+    id: UUID
+    expirationDateTime: datetime
 
 
 class Client(ClientBase):
