@@ -5,8 +5,8 @@ from app.database.db import Base
 from datetime import time
 
 
-class AppointmentGeneral(Base):
-    __tablename__ = "appointmentgeneral"
+class AppointmentGeneralSettings(Base):
+    __tablename__ = "appointmentgeneralsettings"
 
     id: Mapped[int] = mapped_column("id", Integer, primary_key=True, nullable=False, default=1, server_default=text("1"), index=True, quote=False)
     openingDays: Mapped[list[int]] = mapped_column("openingDays", ARRAY(Integer), nullable=False, quote=False)
@@ -15,8 +15,8 @@ class AppointmentGeneral(Base):
     slotDuration: Mapped[int] = mapped_column("slotDuration", Integer, nullable=False, quote=False)
 
 
-class AppointmentConcurrency(Base):
-    __tablename__ = "appointmentconcurrency"
+class AppointmentConcurrencyLimit(Base):
+    __tablename__ = "appointmentconcurrencylimits"
 
     afterTime: Mapped[time] = mapped_column("afterTime", Time, primary_key=True, nullable=False, index=True, quote=False)
     maxConcurrent: Mapped[int] = mapped_column("maxConcurrent", Integer, nullable=False, quote=False)
