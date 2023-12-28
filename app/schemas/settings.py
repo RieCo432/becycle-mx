@@ -18,5 +18,5 @@ class AppointmentGeneralSettings(BaseModel):
 
 
 class AppointmentConcurrencyLimit(BaseModel):
-    timeAfter: time
+    afterTime: time
     maxConcurrent: int

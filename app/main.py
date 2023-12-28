@@ -13,6 +13,7 @@ app.include_router(routers.clients)
 app.include_router(routers.users)
 app.include_router(routers.bikes)
 app.include_router(routers.contracts)
+app.include_router(routers.settings)
 
 
 if __name__ == "__main__":

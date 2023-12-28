@@ -80,6 +80,16 @@ async def get_current_active_user(current_user: Annotated[models.User, Depends(g
     return current_user
 
 
+async def get_current_appointment_manager_user(current_user: Annotated[models.User, Depends(get_current_active_user)]) -> models.User:
+    if not current_user.appointmentManager:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Appointment manager privileges are required for this action!",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return current_user
+
+
 async def get_current_admin_user(current_user: Annotated[models.User, Depends(get_current_active_user)]) -> models.User:
     if not current_user.admin:
         raise HTTPException(
