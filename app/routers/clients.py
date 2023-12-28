@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body, HTTPException, status
 import app.crud as crud
 import app.schemas as schemas
 import app.dependencies as dep
 from sqlalchemy.orm import Session
-from typing import List
-
+from uuid import UUID
+from typing import Annotated
 
 clients = APIRouter(
     tags=["clients"],
@@ -36,3 +36,18 @@ async def create_client_temp(
         db: Session = Depends(dep.get_db)) -> schemas.ClientTemp:
 
     return crud.post_client_temp(db=db, client_data=client_data)
+
+
+@clients.put("/client/temp/verify")
+async def verify_client_temp(
+        client_temp_id: UUID | None = None,
+        verification_code: Annotated[str, None] = Body("verification_code"),
+        db: Session = Depends(dep.get_db)) -> schemas.Client:
+
+    if client_temp_id is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No client ID provided."})
+    if verification_code is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No verification code provided."})
+
+    return crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
+
