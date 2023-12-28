@@ -10,7 +10,7 @@ from app.config import SECRET_KEY, ALGORITHM
 import app.schemas as schemas
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
 
 
 def get_db():
