@@ -1,10 +1,18 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, Body, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+
+import app.models as models
 import app.crud as crud
 import app.schemas as schemas
 import app.dependencies as dep
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import Annotated
+
+from app import auth
+from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
 
 clients = APIRouter(
     tags=["clients"],
@@ -56,8 +64,8 @@ async def verify_client_temp(
     return crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
 
 
-@clients.get("/client/auth-code")
-async def get_client_auth_code(
+@clients.get("/client/login-code")
+async def get_client_login_code(
         email_address: str,
         db: Session = Depends(dep.get_db)) -> schemas.Client:
 
@@ -74,7 +82,25 @@ async def get_client_auth_code(
     return client
 
 
+@clients.post("/clients/token")
+async def get_token(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: Session = Depends(dep.get_db)) -> schemas.Token:
 
-#@clients.post("/clients/token")
+    client = crud.authenticate_client(db=db, client_id=UUID(form_data.username), login_code=form_data.password)
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(data={"sub": str(client.id)}, expires_delta=access_token_expires)
+
+    return schemas.Token(
+        access_token=access_token,
+        token_type="bearer"
+    )
+
+
+@clients.get("/clients/me")
+async def get_client_me(client: Annotated[models.Client, Depends(dep.get_current_client)]) -> schemas.Client:
+
+    return client
 
 

@@ -8,9 +8,16 @@ import app.crud as crud
 from sqlalchemy.orm import Session
 from app.config import SECRET_KEY, ALGORITHM
 import app.schemas as schemas
+from uuid import UUID
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
+user_oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="users/token",
+    scheme_name="user_oauth2_scheme")
+
+client_oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="clients/token",
+    scheme_name="client_oauth2_scheme")
 
 
 def get_db():
@@ -21,7 +28,7 @@ def get_db():
         db.close()
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)) -> models.User:
+async def get_current_user(token: Annotated[str, Depends(user_oauth2_scheme)], db: Session = Depends(get_db)) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -40,6 +47,27 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Se
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_client(token: Annotated[str, Depends(client_oauth2_scheme)], db: Session = Depends(get_db)) -> models.Client:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        client_id_str: str = payload.get("sub")
+        if client_id_str is None:
+            raise credentials_exception
+        token_data = schemas.ClientTokenData(client_id=UUID(client_id_str))
+    except JWTError:
+        raise credentials_exception
+
+    client = crud.get_client(client_id=token_data.client_id, db=db)
+    if client is None:
+        raise credentials_exception
+    return client
 
 
 async def get_current_active_user(current_user: Annotated[models.User, Depends(get_current_user)]) -> models.User:

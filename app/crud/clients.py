@@ -19,6 +19,15 @@ def get_clients(db: Session, first_name: str, last_name: str, email_address: str
     )]
 
 
+def get_client(db: Session, client_id: UUID) -> models.Client:
+    client = db.scalar(
+        select(models.Client)
+        .where(models.Client.id == client_id)
+    )
+
+    return client
+
+
 def post_client(db: Session, client_data: schemas.ClientCreate) -> models.Client:
     client = models.Client(
         firstName=client_data.firstName,
@@ -84,6 +93,31 @@ def create_client_login_code(db: Session, client: models.Client) -> models.Clien
 
     return client_login
 
+
+def authenticate_client(db: Session, client_id: UUID, login_code: str) -> models.Client:
+    client_login = db.scalars(
+        select(models.ClientLogin)
+        .where(models.ClientLogin.clientId == client_id)
+        .order_by(models.ClientLogin.expirationDateTime.desc())
+    ).first()
+
+    if client_login is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "This ID does not correspond to any client, or this client has not requested a login!"})
+
+    if login_code != client_login.code:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This code is not valid."})
+    if datetime.datetime.utcnow() > client_login.expirationDateTime:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This code is not valid."})
+
+    client = get_client(db=db, client_id=client_login.clientId)
+
+    if client is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Some unknown error has occured!"})
+
+    db.delete(client_login)
+    db.commit()
+
+    return client
 
 
 

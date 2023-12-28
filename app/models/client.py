@@ -49,7 +49,7 @@ class ClientLogin(Base):
                                                        server_default=text(
                                                            "TO_CHAR(FLOOR(RANDOM()*1000000), 'fm000000')"), quote=False)
     expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,
-                                                         default=datetime.utcnow() + relativedelta(minutes=15),
+                                                         default=datetime.utcnow() + relativedelta(minutes=60),
                                                          server_default=text(
-                                                             "(current_timestamp at time zone 'utc' + make_interval(hours => 24))"),
+                                                             "(current_timestamp at time zone 'utc' + make_interval(minutes => 60))"),
                                                          nullable=False, quote=False)
