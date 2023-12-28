@@ -35,13 +35,17 @@ async def create_client_temp(
         client_data: schemas.ClientCreate,
         db: Session = Depends(dep.get_db)) -> schemas.ClientTemp:
 
-    return crud.post_client_temp(db=db, client_data=client_data)
+    client_temp = crud.post_client_temp(db=db, client_data=client_data)
+
+    # TODO: email verification code
+
+    return client_temp
 
 
 @clients.put("/client/temp/verify")
 async def verify_client_temp(
-        client_temp_id: UUID | None = None,
-        verification_code: Annotated[str, None] = Body("verification_code"),
+        client_temp_id: UUID,
+        verification_code: Annotated[str, Body(embed=True)],
         db: Session = Depends(dep.get_db)) -> schemas.Client:
 
     if client_temp_id is None:
@@ -50,4 +54,27 @@ async def verify_client_temp(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No verification code provided."})
 
     return crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
+
+
+@clients.get("/client/auth-code")
+async def get_client_auth_code(
+        email_address: str,
+        db: Session = Depends(dep.get_db)) -> schemas.Client:
+
+    client = crud.get_client_by_email(db=db, email_address=email_address)
+
+    if client is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no client associated with this email address."})
+
+
+    client_login = crud.create_client_login_code(db=db, client=client)
+
+    # TODO: send email with code
+
+    return client
+
+
+
+#@clients.post("/clients/token")
+
 

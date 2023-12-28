@@ -1,4 +1,4 @@
-from .client import Client, ClientTemp
+from .client import *
 from .user import User
 from .bike import Bike
 from .contract import Contract

@@ -17,7 +17,7 @@ users = APIRouter(
 )
 
 
-@users.post("/users/token", response_model=schemas.Token)
+@users.post("/users/token", response_model=schemas.UserToken)
 async def get_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(dep.get_db)):
     user = crud.authenticate_user(username=form_data.username, password_cleartext=form_data.password, db=db)
 

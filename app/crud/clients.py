@@ -65,3 +65,26 @@ def verify_client_temp(db: Session, client_temp_id: UUID, verification_code: str
     return client
 
 
+def get_client_by_email(db: Session, email_address: str) -> models.Client:
+    client = db.scalar(
+        select(models.Client)
+        .where(models.Client.emailAddress == email_address)
+    )
+
+    return client
+
+
+def create_client_login_code(db: Session, client: models.Client) -> models.ClientLogin:
+    client_login = models.ClientLogin(
+        clientId=client.id
+    )
+
+    db.add(client_login)
+    db.commit()
+
+    return client_login
+
+
+
+
+
