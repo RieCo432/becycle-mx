@@ -1,8 +1,6 @@
 from datetime import timedelta
-
-from fastapi import APIRouter, Depends, Body, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordRequestForm
-
 import app.models as models
 import app.crud as crud
 import app.schemas as schemas
@@ -10,9 +8,9 @@ import app.dependencies as dep
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import Annotated
-
 from app import auth
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
+
 
 clients = APIRouter(
     tags=["clients"],
@@ -45,15 +43,15 @@ async def create_client_temp(
 
     client_temp = crud.post_client_temp(db=db, client_data=client_data)
 
-    # TODO: email verification code
+    client_temp.send_email_verification_link()
 
     return client_temp
 
 
-@clients.put("/client/temp/verify")
+@clients.post("/client/temp/verify")
 async def verify_client_temp(
-        client_temp_id: UUID,
-        verification_code: Annotated[str, Body(embed=True)],
+        client_temp_id: Annotated[UUID, Form()],
+        verification_code: Annotated[str, Form()],
         db: Session = Depends(dep.get_db)) -> schemas.Client:
 
     if client_temp_id is None:
@@ -61,7 +59,9 @@ async def verify_client_temp(
     if verification_code is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No verification code provided."})
 
-    return crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
+    client = crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
+
+    return client
 
 
 @clients.get("/client/login-code")
@@ -74,10 +74,9 @@ async def get_client_login_code(
     if client is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no client associated with this email address."})
 
-
     client_login = crud.create_client_login_code(db=db, client=client)
 
-    # TODO: send email with code
+    client_login.send_login_code()
 
     return client
 

@@ -1,13 +1,13 @@
 from sqlalchemy import String, UUID, text, DateTime, ForeignKey
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.config import CLIENT_LOGIN_CODE_EXPIRE_MINUTES, CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES
 from app.database.db import Base
 from typing import List
 from random import random
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import app.services as services
 
 
 class Client(Base):
@@ -36,6 +36,14 @@ class ClientTemp(Base):
     verificationCode: Mapped[DateTime] = mapped_column("verificationCode", String(6), nullable=False, default="{:06d}".format(int(random()*1000000)), server_default=text("TO_CHAR(FLOOR(RANDOM()*1000000), 'fm000000')"), quote=False)
     expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime, default=datetime.utcnow() + relativedelta(minutes=CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES), server_default=text("(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES)), nullable=False, quote=False)
 
+    def send_email_verification_link(self):
+        email_html_content = services.email.build_email_verification_html(
+            client_temp_id=self.id, verification_code=self.verificationCode)
+        services.send_email(
+            destination=self.emailAddress,
+            subject="Verify your email address",
+            content=email_html_content)
+
 
 class ClientLogin(Base):
     # this is where temporary login codes for clients get stored
@@ -56,3 +64,11 @@ class ClientLogin(Base):
                                                          server_default=text(
                                                              "(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(CLIENT_LOGIN_CODE_EXPIRE_MINUTES)),
                                                          nullable=False, quote=False)
+
+    def send_login_code(self):
+        email_html_content = services.email.build_client_login_code_html(login_code=self.code)
+        services.email.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Log-in code",
+            content=email_html_content)
+
