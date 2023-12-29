@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 import app.schemas as schemas
 import app.crud as crud
 import app.dependencies as dep
 from uuid import UUID
 from sqlalchemy.orm import Session
 import app.models as models
+from typing import Annotated
+from datetime import date
 
 
 settings = APIRouter(
@@ -36,4 +38,20 @@ def create_appointment_concurrency_limit(
     return crud.add_appointment_concurrency_limit(
         db=db,
         appointment_concurrency_limit_data=appointment_concurrency_limit_data)
+
+
+@settings.post("/settings/closed-day", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+def create_closed_day(
+        closed_day_data: schemas.ClosedDay,
+        db: Session = Depends(dep.get_db)) -> schemas.ClosedDay:
+
+    return crud.create_closed_day(db=db, closed_day_data=closed_day_data)
+
+
+@settings.delete("/settings/closed-day", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+def delete_closed_day(
+        closed_day_date: Annotated[date, Body(embed=True)],
+        db: Session = Depends(dep.get_db)):
+
+    crud.delete_closed_day(db=db, closed_day_date=closed_day_date)
 

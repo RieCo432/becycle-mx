@@ -1,8 +1,8 @@
-from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time
+from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.db import Base
-from datetime import time
+from datetime import time, date
 
 
 class AppointmentGeneralSettings(Base):
@@ -30,3 +30,10 @@ class AppointmentType(Base):
     title: Mapped[str] = mapped_column("title", String(40), nullable=False, quote=False)
     description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
     duration: Mapped[int] = mapped_column("duration", Integer, nullable=False, quote=False)
+
+
+class ClosedDay(Base):
+    __tablename__ = "closeddays"
+
+    date: Mapped[date] = mapped_column("date", Date, primary_key=True, nullable=False, index=True, quote=False)
+    note: Mapped[str] = mapped_column("note", Text, nullable=False, quote=False)

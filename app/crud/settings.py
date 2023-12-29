@@ -1,5 +1,4 @@
-import datetime
-
+from datetime import date
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -51,3 +50,42 @@ def add_appointment_concurrency_limit(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "There already is a concurrency limit for this time!"})
 
     return new_appointment_concurrency_limit
+
+
+def get_closed_day(db: Session, closed_day_date: date) -> models.ClosedDay:
+    closed_day = db.scalar(
+        select(models.ClosedDay)
+        .where(models.ClosedDay.date == closed_day_date)
+    )
+
+    if closed_day is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This date is not registered as a closed day."})
+
+    return closed_day
+
+
+def create_closed_day(
+        db: Session,
+        closed_day_data: schemas.ClosedDay) -> models.ClosedDay:
+
+    closed_day = models.ClosedDay(
+        date=closed_day_data.date,
+        note=closed_day_data.note
+    )
+
+    try:
+        db.add(closed_day)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This day is already closed."})
+
+    return closed_day
+
+
+def delete_closed_day(
+        db: Session,
+        closed_day_date: date) -> None:
+    closed_day = get_closed_day(db=db, closed_day_date=closed_day_date)
+
+    db.delete(closed_day)
+    db.commit()

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import time
+from datetime import time, date
 
 
 class AppointmentType(BaseModel):
@@ -20,3 +20,8 @@ class AppointmentGeneralSettings(BaseModel):
 class AppointmentConcurrencyLimit(BaseModel):
     afterTime: time
     maxConcurrent: int
+
+
+class ClosedDay(BaseModel):
+    date: date
+    note: str
