@@ -26,6 +26,8 @@ async def create_deposit_exchange(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    # TODO: check that giving volunteer has enough funds
+
     return crud.create_deposit_exchange(db=db, deposit_exchange_data=deposit_exchange_data, from_user_id=from_user.id, to_user_id=to_user.id)
 
 

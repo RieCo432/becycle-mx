@@ -43,3 +43,5 @@ async def create_contract(
         deposit_collecting_user_id=deposit_collecting_user.id,
         db=db)
 
+# TODO: returns
+
