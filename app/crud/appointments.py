@@ -14,7 +14,7 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate)
     appointment = models.Appointment(
         clientId=appointment_data.clientId,
         typeId=appointment_data.typeId,
-        startDateTIme=appointment_data.startDateTime,
+        startDateTime=appointment_data.startDateTime,
         endDateTime=appointment_data.startDateTime + relativedelta(minutes=appointment_type.duration),
         notes=appointment_data.notes,
         confirmed=True
