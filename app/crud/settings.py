@@ -26,6 +26,15 @@ def get_appointment_concurrency_limits(db: Session) -> list[models.AppointmentCo
     return appointment_concurrency_limits
 
 
+def get_appointment_type(db: Session, appointment_type_id: str) -> models.AppointmentType:
+    appointment_type = db.scalar(
+        select(models.AppointmentType)
+        .where(models.AppointmentType.id == appointment_type_id)
+    )
+
+    return appointment_type
+
+
 def add_appointment_concurrency_limit(
         db: Session,
         appointment_concurrency_limit_data: schemas.AppointmentConcurrencyLimit) -> models.AppointmentConcurrencyLimit:
