@@ -46,3 +46,36 @@ def request_appointment(db: Session, appointment_data: schemas.AppointmentReques
     # TODO: send confirmation of reception of request
 
     return appointment
+
+
+def get_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
+    appointment = db.scalar(
+        select(models.Appointment)
+        .where(models.Appointment.id == appointment_id)
+    )
+
+    return appointment
+
+
+def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
+    appointment = get_appointment(db=db, appointment_id=appointment_id)
+
+    appointment.confirmed = True
+
+    db.commit()
+
+    # TODO: send confirmation email
+
+    return appointment
+
+
+def cancel_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
+    appointment = get_appointment(db=db, appointment_id=appointment_id)
+
+    appointment.cancelled = True
+
+    db.commit()
+
+    # TODO: send cancellation email
+
+    return appointment
