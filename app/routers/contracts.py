@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 import app.schemas as schemas
 import app.crud as crud
 import app.dependencies as dep
@@ -28,6 +28,14 @@ async def create_contract(
         checking_user: models.User = Depends(dep.get_checking_user),
         deposit_collecting_user: models.User = Depends(dep.get_deposit_receiving_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
+
+    if working_user.id == checking_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Working and checking volunteer cannot be the same!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     return crud.create_contract(
         contract_data=contract_data,
         working_user_id=working_user.id,

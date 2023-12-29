@@ -19,6 +19,13 @@ async def create_deposit_exchange(
         to_user: models.User = Depends(dep.get_deposit_receiving_user),
         db: Session = Depends(dep.get_db)) -> schemas.DepositExchange:
 
+    if to_user.id == from_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "To and From cannot be the same!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     return crud.create_deposit_exchange(db=db, deposit_exchange_data=deposit_exchange_data, from_user_id=from_user.id, to_user_id=to_user.id)
 
 
