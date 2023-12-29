@@ -128,15 +128,39 @@ async def get_checking_user(
     return checking_user
 
 
-async def get_deposit_collecting_user(
-        deposit_collecting_username: str = Body("deposit_collecting_username"),
-        deposit_collecting_user_password: str = Body("deposit_collecting_user_password"),
+async def get_deposit_receiving_user(
+        deposit_receiving_username: Annotated[str, Body()],
+        deposit_receiving_user_password: Annotated[str, Body()],
         db: Session = Depends(get_db)) -> models.User:
-    deposit_collecting_user = crud.authenticate_user(username=deposit_collecting_username, password_cleartext=deposit_collecting_user_password, db=db)
-    if deposit_collecting_user is None:
+    deposit_receiving_user = crud.authenticate_user(username=deposit_receiving_username, password_cleartext=deposit_receiving_user_password, db=db)
+    if deposit_receiving_user is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Deposit collecting user wrong password",
+            detail="Deposit receiving user wrong password",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    return deposit_collecting_user
+    if not deposit_receiving_user.depositBearer:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Not a deposit bearer!"}
+        )
+    return deposit_receiving_user
+
+
+async def get_deposit_giving_user(
+        deposit_giving_username: Annotated[str, Body()],
+        deposit_giving_user_password: Annotated[str, Body()],
+        db: Session = Depends(get_db)) -> models.User:
+    deposit_giving_user = crud.authenticate_user(username=deposit_giving_username, password_cleartext=deposit_giving_user_password, db=db)
+    if deposit_giving_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Deposit giving user wrong password",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if not deposit_giving_user.depositBearer:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Not a deposit bearer!"}
+        )
+    return deposit_giving_user

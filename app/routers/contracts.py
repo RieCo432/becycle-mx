@@ -26,7 +26,7 @@ async def create_contract(
         contract_data: schemas.ContractCreate,
         working_user: models.User = Depends(dep.get_working_user),
         checking_user: models.User = Depends(dep.get_checking_user),
-        deposit_collecting_user: models.User = Depends(dep.get_deposit_collecting_user),
+        deposit_collecting_user: models.User = Depends(dep.get_deposit_receiving_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
     return crud.create_contract(
         contract_data=contract_data,
