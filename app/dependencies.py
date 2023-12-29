@@ -31,7 +31,7 @@ def get_db():
 async def get_current_user(token: Annotated[str, Depends(user_oauth2_scheme)], db: Session = Depends(get_db)) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail={"description": "Could not validate credentials"},
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -52,7 +52,7 @@ async def get_current_user(token: Annotated[str, Depends(user_oauth2_scheme)], d
 async def get_current_client(token: Annotated[str, Depends(client_oauth2_scheme)], db: Session = Depends(get_db)) -> models.Client:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail={"description": "Could not validate credentials"},
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -74,7 +74,7 @@ async def get_current_active_user(current_user: Annotated[models.User, Depends(g
     if current_user.softDeleted:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Soft-deleted User",
+            detail={"description": "Soft-deleted User"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     return current_user
@@ -84,7 +84,7 @@ async def get_current_appointment_manager_user(current_user: Annotated[models.Us
     if not current_user.appointmentManager:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Appointment manager privileges are required for this action!",
+            detail={"description": "Appointment manager privileges are required for this action!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     return current_user
@@ -94,7 +94,7 @@ async def get_current_admin_user(current_user: Annotated[models.User, Depends(ge
     if not current_user.admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin privileges are required for this action!",
+            detail={"description": "Admin privileges are required for this action!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     return current_user
@@ -108,7 +108,7 @@ async def get_working_user(
     if working_user is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Working User wrong password or pin",
+            detail={"description": "Working User wrong password or pin"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     return working_user
@@ -122,7 +122,13 @@ async def get_checking_user(
     if checking_user is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Checking User wrong password or pin",
+            detail={"description": "Checking User wrong password or pin"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if not checking_user.rentalChecker:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Not a rental checker!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     return checking_user
@@ -136,13 +142,14 @@ async def get_deposit_receiving_user(
     if deposit_receiving_user is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Deposit receiving user wrong password",
+            detail={"description": "Deposit receiving user wrong password"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     if not deposit_receiving_user.depositBearer:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Not a deposit bearer!"}
+            detail={"description": "Not a deposit bearer!"},
+            headers={"WWW-Authenticate": "Bearer"}
         )
     return deposit_receiving_user
 
@@ -155,12 +162,13 @@ async def get_deposit_giving_user(
     if deposit_giving_user is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Deposit giving user wrong password",
+            detail={"description": "Deposit giving user wrong password"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     if not deposit_giving_user.depositBearer:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Not a deposit bearer!"}
+            detail={"description": "Not a deposit bearer!"},
+            headers={"WWW-Authenticate": "Bearer"}
         )
     return deposit_giving_user
