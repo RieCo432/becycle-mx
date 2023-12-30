@@ -21,7 +21,11 @@ async def request_appointment(
         client: Annotated[models.Client, Depends(dep.get_current_client)],
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    return crud.request_appointment(db=db, appointment_data=appointment_data, client_id=client.id)
+    appointment = crud.request_appointment(db=db, appointment_data=appointment_data, client_id=client.id)
+    
+    appointment.send_request_received_email()
+
+    return appointment
 
 
 @appointments.post("/appointment", dependencies=[Depends(dep.get_current_appointment_manager_user)])
@@ -29,7 +33,11 @@ async def create_appointment(
         appointment_data: schemas.AppointmentCreate,
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    return crud.create_appointment(db=db, appointment_data=appointment_data)
+    appointment = crud.create_appointment(db=db, appointment_data=appointment_data)
+
+    appointment.send_confirmation_email()
+
+    return appointment
 
 
 @appointments.patch("/appointments/{appointment_id}/confirm", dependencies=[Depends(dep.get_current_appointment_manager_user)])
@@ -37,12 +45,25 @@ async def confirm_appointment(
         appointment_id: UUID,
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    return crud.confirm_appointment(db=db, appointment_id=appointment_id)
+    appointment = crud.confirm_appointment(db=db, appointment_id=appointment_id)
+
+    appointment.send_confirmation_email()
+
+    return appointment
+
+
 
 @appointments.patch("/appointments/{appointment_id}/cancel", dependencies=[Depends(dep.get_current_appointment_manager_user)])
 async def cancel_appointment(
         appointment_id: UUID,
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    return crud.cancel_appointment(db=db, appointment_id=appointment_id)
+    appointment = crud.cancel_appointment(db=db, appointment_id=appointment_id)
+
+    if appointment.confirmed:
+        appointment.send_cancellation_email()
+    else:
+        appointment.send_request_denied_email()
+
+    return appointment
 
