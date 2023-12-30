@@ -7,7 +7,6 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
 
-# TODO: should probably make this run as a background task to speed up API responses
 def send_email(destination: str, subject: str, content: str) -> None:
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
