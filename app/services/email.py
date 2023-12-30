@@ -5,6 +5,7 @@ from app.config import GOOGLE_APP_PASSWORD, GOOGLE_ACCOUNT, SMTP_PORT, SMTP_SERV
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
+import app.schemas as schemas
 
 
 def send_email(destination: str, subject: str, content: str) -> None:
@@ -137,3 +138,26 @@ def build_appointment_cancellation_by_client_email(appointment_title: str, appoi
                 appointment_start_datetime.hour,
                 appointment_start_datetime.minute
             ))
+
+
+def build_contract_created_email(contract: schemas.Contract):
+    return ("<html>"
+            "   <body>"
+            "       <h2>Your Contract Details</h2>"
+            "       <p>{:s} {:s}"
+            "           {:s} {:s}"
+            "       </p>"
+            "   </body>"
+            "</html>".format(contract.client.firstName, contract.client.lastName, contract.bike.make, contract.bike.model))
+
+
+def build_contract_returned_email(contract: schemas.Contract):
+    return ("<html>"
+            "   <body>"
+            "       <h2>Your Contract Details</h2>"
+            "       <p>{:s} {:s}"
+            "           {:s} {:s}"
+            "       </p>"
+            "   </body>"
+            "</html>".format(contract.client.firstName, contract.client.lastName, contract.bike.make,
+                             contract.bike.model))

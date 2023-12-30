@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
@@ -10,6 +12,13 @@ def get_contracts(client_id: UUID, db: Session) -> list[models.Contract]:
         select(models.Contract)
         .where(models.Contract.clientId == client_id)
     )]
+
+
+def get_contract(db: Session, contract_id: UUID) -> models.Contract:
+    return db.scalar(
+        select(models.Contract)
+        .where(models.Contract.id == contract_id)
+    )
 
 
 def create_contract(
@@ -33,4 +42,22 @@ def create_contract(
 
     db.add(contract)
     db.commit()
+    return contract
+
+
+def return_contract(
+        db: Session,
+        contract_return_details: schemas.ContractReturn,
+        return_accepting_user_id: UUID,
+        deposit_returning_user_id: UUID) -> models.Contract:
+
+    contract = get_contract(db=db, contract_id=contract_return_details.id)
+
+    contract.returnAcceptingUserId = return_accepting_user_id
+    contract.depositReturningUserId = deposit_returning_user_id
+    contract.returnedDate = datetime.datetime.utcnow()
+    contract.depositAmountReturned = contract_return_details.depositAmountReturned
+
+    db.commit()
+
     return contract

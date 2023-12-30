@@ -3,9 +3,9 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.config import CONTRACT_EXPIRE_MONTHS
 from app.database.db import Base
+import app.services as services
 
 
 class Contract(Base):
@@ -50,3 +50,19 @@ class Contract(Base):
     detailsSent: Mapped[bool] = mapped_column("detailsSent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     expiryReminderSent: Mapped[bool] = mapped_column("expiryReminderSent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returnDetailsSent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+
+    def send_creation_email(self):
+        email_html_content = services.email.build_contract_created_email(self)
+        services.email.send_email(
+            destination=self.client.emailAddress,
+            subject="Your lending agreement",
+            content=email_html_content
+        )
+
+    def send_return_email(self):
+        email_html_content = services.email.build_contract_returned_email(self)
+        services.email.send_email(
+            destination=self.client.emailAddress,
+            subject="You have returned your bike",
+            content=email_html_content
+        )

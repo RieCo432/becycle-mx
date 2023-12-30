@@ -18,6 +18,11 @@ class ContractCreate(ContractBase):
     pass
 
 
+class ContractReturn(BaseModel):
+    id: UUID
+    depositAmountReturned: int
+
+
 class Contract(ContractBase):
     id: UUID
 
