@@ -57,6 +57,13 @@ async def return_bike(
         deposit_returning_user: models.User = Depends(dep.get_deposit_giving_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
+    if contract_return_details.depositAmountReturned > deposit_returning_user.get_deposit_bearer_balance():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "This deposit bearer does not have enough funds!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     contract = crud.return_contract(db=db,
                                     contract_return_details=contract_return_details,
                                     return_accepting_user_id=working_user.id,

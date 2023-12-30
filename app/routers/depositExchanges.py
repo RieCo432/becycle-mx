@@ -26,7 +26,12 @@ async def create_deposit_exchange(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    # TODO: check that giving volunteer has enough funds
+    if deposit_exchange_data.amount > from_user.get_deposit_bearer_balance():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "From User does not have enough funds!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
     return crud.create_deposit_exchange(db=db, deposit_exchange_data=deposit_exchange_data, from_user_id=from_user.id, to_user_id=to_user.id)
 
