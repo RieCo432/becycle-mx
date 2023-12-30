@@ -39,6 +39,13 @@ async def get_user_me(
     return current_user
 
 
+@users.get("/users/me/deposit_balance")
+async def get_my_deposit_balance(
+        current_user: Annotated[models.User, Depends(dep.get_current_deposit_bearer_user)]
+) -> int:
+    return current_user.get_deposit_bearer_balance()
+
+
 @users.post("/user", dependencies=[Depends(dep.get_current_admin_user)])
 async def create_user(
         user_data: schemas.UserCreate,

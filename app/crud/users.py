@@ -58,5 +58,3 @@ def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
             detail="Integrity Error: Does this user already exist?"
         )
     return user
-
-

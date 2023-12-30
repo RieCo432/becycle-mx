@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
 from typing import List
 from .contract import Contract
+from .depositExchange import DepositExchange
 
 
 class User(Base):
@@ -25,3 +26,16 @@ class User(Base):
     depositCollectedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.depositCollectingUserId], back_populates="depositCollectingUser")
     returnedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.returnAcceptingUserId], back_populates="returnAcceptingUser")
     depositReturnedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.depositReturningUserId], back_populates="depositReturningUser")
+
+    depositExchangesReceived: Mapped[List[DepositExchange]] = relationship("DepositExchange", foreign_keys=[DepositExchange.toUserId], back_populates="toUser")
+    depositExchangesGiven: Mapped[List[DepositExchange]] = relationship("DepositExchange", foreign_keys=[DepositExchange.fromUserId], back_populates="fromUser")
+
+    def get_deposit_bearer_balance(self):
+        contract_balance = sum([contract.depositAmountCollected for contract in self.depositCollectedContracts]) - sum(
+            [contract.depositAmountReturned for contract in self.depositReturnedContracts])
+
+        deposit_exchange_balance = sum(
+            [deposit_exchange.amount for deposit_exchange in self.depositExchangesReceived]) - sum(
+            [deposit_exchange.amount for deposit_exchange in self.depositExchangesGiven])
+
+        return contract_balance + deposit_exchange_balance
