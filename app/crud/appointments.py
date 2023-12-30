@@ -23,7 +23,7 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate)
     db.add(appointment)
     db.commit()
 
-    # TODO: send confirmation email
+    appointment.send_confirmation_email()
 
     return appointment
 
@@ -43,7 +43,7 @@ def request_appointment(db: Session, appointment_data: schemas.AppointmentReques
     db.add(appointment)
     db.commit()
 
-    # TODO: send confirmation of reception of request
+    appointment.send_request_received_email()
 
     return appointment
 
@@ -64,7 +64,7 @@ def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment
 
     db.commit()
 
-    # TODO: send confirmation email
+    appointment.send_confirmation_email()
 
     return appointment
 
@@ -76,6 +76,9 @@ def cancel_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
 
     db.commit()
 
-    # TODO: send cancellation email
+    if appointment.confirmed:
+        appointment.send_cancellation_email()
+    else:
+        appointment.send_request_denied_email()
 
     return appointment

@@ -3,6 +3,7 @@ from sqlalchemy import UUID, text, ForeignKey, Text, Boolean, DateTime
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
+import app.services as services
 
 
 class Appointment(Base):
@@ -24,3 +25,35 @@ class Appointment(Base):
     cancelled: Mapped[bool] = mapped_column("cancelled", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
     reminderSent: Mapped[bool] = mapped_column("reminderSent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+
+    def send_request_received_email(self):
+        email_html_content = services.email.build_appointment_request_received_email(self.type.title, self.startDateTime)
+        services.email.send_email(
+            destination=self.client.emailAddress,
+            subject="Appointment Request Received",
+            content=email_html_content
+        )
+
+    def send_confirmation_email(self):
+        email_html_content = services.email.build_appointment_confirmation_email(self.type.title, self.startDateTime)
+        services.email.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Appointment Confirmation",
+            content=email_html_content
+        )
+
+    def send_request_denied_email(self):
+        email_html_content = services.email.build_appointment_request_denied_email(self.type.title, self.startDateTime)
+        services.email.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Apoointment Request has been denied",
+            content=email_html_content
+        )
+
+    def send_cancellation_email(self):
+        email_html_content = services.email.build_appointment_cancellation_email(self.type.title, self.startDateTime)
+        services.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Appointment has been cancelled",
+            content=email_html_content
+        )
