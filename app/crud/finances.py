@@ -51,20 +51,18 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
                 else:
                     deposit_balances_book[deposit_transaction_date].diff[username] += diff
 
+        deposit_balances_book[deposit_transaction_date].balances = {username: balance for username, balance in previous_balances.items() if balance != 0}
+
         for username, diff in deposit_balances_book[deposit_transaction_date].diff.items():
             if diff == 0:
                 continue
-            deposit_balances_book[deposit_transaction_date].balances[username] = previous_balances.get(username, 0) + diff
+            deposit_balances_book[deposit_transaction_date].balances[username] = deposit_balances_book[deposit_transaction_date].balances.get(username, 0) + diff
             if deposit_balances_book[deposit_transaction_date].balances[username] < 0:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail={"description": "One of the deposit bearers has a negative balance!"},
                     headers={"WWW-Authenticate": "Bearer"}
                 )
-
-        for username, balance in previous_balances:
-            if username not in deposit_balances_book[deposit_transaction_date].balances:
-                deposit_balances_book[deposit_transaction_date].balances[username] = balance
 
         previous_balances = deposit_balances_book[deposit_transaction_date].balances
 
