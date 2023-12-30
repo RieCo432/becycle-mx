@@ -20,4 +20,4 @@ class DepositExchange(Base):
     toUser: Mapped["User"] = relationship("User", foreign_keys=[toUserId])
 
     amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)
-    timestamp: Mapped[datetime] = mapped_column("date", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=False, quote=False)
+    date: Mapped[date] = mapped_column("date", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, quote=False)

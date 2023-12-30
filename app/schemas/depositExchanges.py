@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import date
 from uuid import UUID
 
 
@@ -15,4 +15,4 @@ class DepositExchange(DepositExchangeBase):
     id: UUID
     fromUserId: UUID
     toUserId: UUID
-    timestamp: datetime
+    date: date

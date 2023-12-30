@@ -1,4 +1,4 @@
-import datetime
+from datetime import date, datetime
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
@@ -11,6 +11,44 @@ def get_contracts(db: Session) -> list[models.Contract]:
     return [contract for contract in db.scalars(
         select(models.Contract)
     )]
+
+
+def get_contract_start_dates(db: Session) -> list[date]:
+    return [_ for _ in db.scalars(
+        select(models.Contract.startDate)
+        .distinct()
+    )]
+
+
+def get_contract_returned_dates(db: Session) -> list[date]:
+    return [_ for _ in db.scalars(
+        select(models.Contract.returnedDate)
+        .distinct()
+    )]
+
+
+def get_contracts_by_start_date(db: Session, start_date: date) -> list[models.Contract]:
+    return [_ for _ in db.scalars(
+        select(models.Contract)
+        .where(models.Contract.startDate == start_date)
+    )]
+
+
+def get_contracts_by_returned_date(db: Session, returned_date: date) -> list[models.Contract]:
+    return [_ for _ in db.scalars(
+        select(models.Contract)
+        .where(models.Contract.returnedDate == returned_date)
+    )]
+
+
+def get_contracts_grouped_by_start_date(db: Session) -> dict[date, list[models.Contract]]:
+    contracts_by_start_date = {start_date: get_contracts_by_start_date(db=db, start_date=start_date) for start_date in get_contract_start_dates(db=db)}
+    return contracts_by_start_date
+
+
+def get_contracts_grouped_by_returned_date(db: Session) -> dict[date, list[models.Contract]]:
+    contracts_by_returned_date = {returned_date: get_contracts_by_returned_date(db=db, returned_date=returned_date) for returned_date in get_contract_returned_dates(db=db)}
+    return contracts_by_returned_date
 
 
 def get_contract(db: Session, contract_id: UUID) -> models.Contract:
@@ -61,7 +99,7 @@ def return_contract(
 
     contract.returnAcceptingUserId = return_accepting_user_id
     contract.depositReturningUserId = deposit_returning_user_id
-    contract.returnedDate = datetime.datetime.utcnow()
+    contract.returnedDate = datetime.utcnow()
     contract.depositAmountReturned = contract_return_details.depositAmountReturned
 
     db.commit()

@@ -6,3 +6,4 @@ from .contract import *
 from .settings import *
 from .appointments import *
 from .depositExchanges import *
+from .finances import *
