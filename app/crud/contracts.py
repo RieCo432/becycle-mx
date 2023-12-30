@@ -7,10 +7,9 @@ from uuid import UUID
 from fastapi import HTTPException, status
 
 
-def get_contracts(client_id: UUID, db: Session) -> list[models.Contract]:
+def get_contracts(db: Session) -> list[models.Contract]:
     return [contract for contract in db.scalars(
         select(models.Contract)
-        .where(models.Contract.clientId == client_id)
     )]
 
 
