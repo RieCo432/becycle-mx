@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 import app.schemas as schemas
 from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date
 from .depositExchanges import get_deposit_exchanges_grouped_by_date
+from fastapi import HTTPException, status
 
 
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
@@ -51,6 +52,20 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
                     deposit_balances_book[deposit_transaction_date].diff[username] += diff
 
         for username, diff in deposit_balances_book[deposit_transaction_date].diff.items():
+            if diff == 0:
+                continue
             deposit_balances_book[deposit_transaction_date].balances[username] = previous_balances.get(username, 0) + diff
+            if deposit_balances_book[deposit_transaction_date].balances[username] < 0:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail={"description": "One of the deposit bearers has a negative balance!"},
+                    headers={"WWW-Authenticate": "Bearer"}
+                )
+
+        for username, balance in previous_balances:
+            if username not in deposit_balances_book[deposit_transaction_date].balances:
+                deposit_balances_book[deposit_transaction_date].balances[username] = balance
+
+        previous_balances = deposit_balances_book[deposit_transaction_date].balances
 
     return schemas.DepositBalancesBook(dayBalances=deposit_balances_book)
