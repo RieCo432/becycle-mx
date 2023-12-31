@@ -12,9 +12,18 @@ from uuid import UUID
 from .settings import get_closed_dates_after_date, get_min_book_ahead, get_max_book_ahead, get_opening_week_days
 
 
-def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate) -> models.Appointment:
-    # this is to be used by volunteers at the workshop. Client ID is specified in advance and the appointment is confirmed immediately
+def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate, auto_confirm: bool = False) -> models.Appointment:
+    # auto_confirm can be used if appointment is created by staff directly
     appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
+
+    required_consecutive_slots = math.ceil(appointment_type.duration / get_slot_duration(db=db))
+
+    if not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots, dt=appointment_data.startDateTime):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "There are not enough free slots for this appointment"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
     appointment = models.Appointment(
         clientId=appointment_data.clientId,
@@ -22,25 +31,7 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate)
         startDateTime=appointment_data.startDateTime,
         endDateTime=appointment_data.startDateTime + relativedelta(minutes=appointment_type.duration),
         notes=appointment_data.notes,
-        confirmed=True
-    )
-
-    db.add(appointment)
-    db.commit()
-
-    return appointment
-
-
-def request_appointment(db: Session, appointment_data: schemas.AppointmentRequest, client_id: UUID) -> models.Appointment:
-    # This is what clients use to request an appointment. The Client ID is pulled from the logged in client and the appointment must be confirmed separately
-    appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
-
-    appointment = models.Appointment(
-        clientId=client_id,
-        typeId=appointment_data.typeId,
-        startDateTime=appointment_data.startDateTime,
-        endDateTime=appointment_data.startDateTime + relativedelta(minutes=appointment_type.duration),
-        notes=appointment_data.notes
+        confirmed=auto_confirm
     )
 
     db.add(appointment)

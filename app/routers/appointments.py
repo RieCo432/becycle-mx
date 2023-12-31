@@ -18,12 +18,19 @@ appointments = APIRouter(
 
 @appointments.post("/appointment/request")
 async def request_appointment(
-        appointment_data: schemas.AppointmentRequest,
+        appointment_request_data: schemas.AppointmentRequest,
         client: Annotated[models.Client, Depends(dep.get_current_client)],
         email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    appointment = crud.request_appointment(db=db, appointment_data=appointment_data, client_id=client.id)
+    appointment_create_data = schemas.AppointmentCreate(
+        typeId=appointment_request_data.typeId,
+        startDateTime=appointment_request_data.startDateTime,
+        notes=appointment_request_data.notes,
+        clientId=client.id
+    )
+
+    appointment = crud.create_appointment(db=db, appointment_data=appointment_create_data)
 
     email_tasks.add_task(appointment.send_request_received_email)
 
@@ -36,7 +43,7 @@ async def create_appointment(
         email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    appointment = crud.create_appointment(db=db, appointment_data=appointment_data)
+    appointment = crud.create_appointment(db=db, appointment_data=appointment_data, auto_confirm=True)
 
     email_tasks.add_task(appointment.send_confirmation_email)
 
