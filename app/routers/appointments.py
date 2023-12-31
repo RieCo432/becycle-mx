@@ -6,6 +6,7 @@ import app.dependencies as dep
 from sqlalchemy.orm import Session
 from typing import Annotated
 from uuid import UUID
+from datetime import datetime, time, date
 
 
 appointments = APIRouter(
@@ -69,4 +70,21 @@ async def cancel_appointment(
         email_tasks.add_task(appointment.send_request_denied_email)
 
     return appointment
+
+
+@appointments.get("/appointments/available")
+async def get_available_appointments(
+        appointment_type_id: str,
+        db: Session = Depends(dep.get_db)) -> dict[date, list[time]]:
+    available_slots = crud.get_available_start_dates_and_times_for_appointment_type(db=db, appointment_type_id=appointment_type_id)
+
+    return available_slots
+
+
+@appointments.get("/appointments/maximum-concurrent")
+async def get_maximum_concurrent_appointments(
+        db: Session = Depends(dep.get_db)) -> dict[date, dict[time, int]]:
+    concurrency_limits_by_date = crud.get_maximum_concurrent_appointments_for_each_slot(db=db)
+
+    return concurrency_limits_by_date
 

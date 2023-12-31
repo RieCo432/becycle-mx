@@ -64,6 +64,13 @@ def get_closed_day(db: Session, closed_day_date: date) -> models.ClosedDay:
     return closed_day
 
 
+def get_closed_dates_after_date(db: Session, after_date: date) -> list[date]:
+    return [_ for _ in db.scalars(
+        select(models.ClosedDay.date)
+        .where(models.ClosedDay.date >= after_date)
+    )]
+
+
 def create_closed_day(
         db: Session,
         closed_day_data: schemas.ClosedDay) -> models.ClosedDay:
@@ -89,3 +96,26 @@ def delete_closed_day(
 
     db.delete(closed_day)
     db.commit()
+
+
+def get_min_book_ahead(db: Session) -> int:
+    return db.scalar(
+        select(models.AppointmentGeneralSettings.minBookAhead)
+    )
+
+
+def get_max_book_ahead(db: Session) -> int:
+    return db.scalar(
+        select(models.AppointmentGeneralSettings.maxBookAhead)
+    )
+
+
+def get_opening_week_days(db: Session) -> list[int]:
+    return db.scalar(
+        select(models.AppointmentGeneralSettings.openingDays)
+    )
+
+def get_slot_duration(db: Session) -> int:
+    return db.scalar(
+        select(models.AppointmentGeneralSettings.slotDuration)
+    )

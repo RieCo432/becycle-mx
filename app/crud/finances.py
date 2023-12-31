@@ -11,10 +11,10 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
 
     deposit_exchanges_grouped_by_date = get_deposit_exchanges_grouped_by_date(db=db)
 
-    deposit_transaction_dates = list(
+    deposit_transaction_dates = sorted(list(
         contracts_grouped_by_start_date.keys()
         | contracts_grouped_by_returned_date.keys()
-        | deposit_exchanges_grouped_by_date.keys())
+        | deposit_exchanges_grouped_by_date.keys()), reverse=True)
 
     deposit_balances_book = {}
     previous_balances = {}
