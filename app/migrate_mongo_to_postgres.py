@@ -16,8 +16,6 @@ db.query(models.DepositExchange).delete()
 db.query(models.Appointment).delete()
 db.query(models.AppointmentType).delete()
 db.query(models.Client).delete()
-
-
 db.query(models.User).delete()
 
 user_map = {}
@@ -255,3 +253,7 @@ for mongo_contract in get_contracts():
 with open("loosely_typed_names_map.json", "w") as fout:
     json.dump(loosely_typed_names_map, fout)
 
+
+# TODO: deposit exchanges
+
+# TODO: workshop days
