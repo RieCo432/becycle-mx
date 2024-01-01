@@ -132,6 +132,7 @@ for mongo_appointment in get_appointments():
 
     postgres_client_id = client_map_email.get(mongo_email_address, None)
     if postgres_client_id is None:
+        print("adding client: {}".format(mongo_email_address)) 
         postgres_client = models.Client(
             firstName=mongo_first_name,
             lastName=mongo_last_name,
