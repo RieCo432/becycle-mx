@@ -15,6 +15,26 @@ def get_users():
     return [user for user in users_collection.find()]
 
 
+def get_bikes():
+    bikes_collection = db["bikes"]
+    return [bike for bike in bikes_collection.find()]
+
+
+def get_persons():
+    persons_collection = db["persons"]
+    return [person for person in persons_collection.find()]
+
+
+def get_appointment_types():
+    appointment_types_collection = db["appointmentTypes"]
+    return [appointment_type for appointment_type in appointment_types_collection.find()]
+
+
+def get_appointments():
+    appointments_collection = db["appointments"]
+    return [appointment for appointment in appointments_collection.find()]
+
+
 # read contracts
 def get_contracts():
     contracts_collection = db["contracts"]

@@ -25,7 +25,7 @@ class AppointmentConcurrencyLimit(Base):
 class AppointmentType(Base):
     __tablename__ = "appointmenttypes"
 
-    id: Mapped[str] = mapped_column("id", String(5), primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
+    id: Mapped[str] = mapped_column("id", String(5), primary_key=True, nullable=False, index=True, quote=False)
     active: Mapped[bool] = mapped_column("active", Boolean, nullable=False, default=True, server_default=text("TRUE"), quote=False)
     title: Mapped[str] = mapped_column("title", String(40), nullable=False, quote=False)
     description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
