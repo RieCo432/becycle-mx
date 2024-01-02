@@ -1,5 +1,3 @@
-from fastapi import Depends
-
 from mongodb import *
 import app.models as models
 from app.database.db import SessionLocal
