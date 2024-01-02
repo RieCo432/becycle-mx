@@ -16,6 +16,7 @@ db.query(models.DepositExchange).delete()
 db.query(models.Appointment).delete()
 db.query(models.AppointmentType).delete()
 db.query(models.Client).delete()
+db.query(models.ClosedDay).delete()
 db.query(models.User).delete()
 
 user_map = {}
@@ -159,7 +160,7 @@ for mongo_appointment in get_appointments():
     db.commit()
 
 try:
-    with open("loosely_types_names_map.json", "r") as fin:
+    with open("loosely_typed_names_map.json", "r") as fin:
         loosely_typed_names_map = json.load(fin)
 except FileNotFoundError:
     loosely_typed_names_map = {}
@@ -255,6 +256,24 @@ with open("loosely_typed_names_map.json", "w") as fout:
     json.dump(loosely_typed_names_map, fout)
 
 
-# TODO: deposit exchanges
+for mongo_deposit_exchange in get_deposit_exchanges():
+    mongo_from = mongo_deposit_exchange["from"]
+    mongo_to = mongo_deposit_exchange["to"]
+    mongo_date = mongo_deposit_exchange["date"]
+    mongo_amount = mongo_deposit_exchange["amount"]
+    mongo_initiator = mongo_deposit_exchange["initiator"]
+
+    postgres_from_user = get_user(mongo_from, db=db)
+    postgres_to_user = get_user(mongo_to, db=db)
+
+    postgres_deposit_exchange = models.DepositExchange(
+        fromUserId=postgres_from_user.id if postgres_from_user is not None else None,
+        toUserId=postgres_to_user.id if postgres_to_user is not None else None,
+        date=mongo_date,
+        amount=mongo_amount
+    )
+
+    db.add(postgres_deposit_exchange)
+    db.commit()
 
 # TODO: workshop days

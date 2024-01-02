@@ -42,25 +42,11 @@ def get_contracts():
 
 
 # read deposit exchanges
+def get_deposit_exchanges():
+    deposit_exchanges_collection = db["depositExchanges"]
+    return [deposit_exchange for deposit_exchange in deposit_exchanges_collection.find()]
 
 
-
-
-
-# read persons
-
-
-# read bikes
-
-
-# read appointments
-
-
-# read workshop days
-
-
-
-
-
-
-
+def get_workshop_days():
+    workshop_days_collection = db["workshopdays"]
+    return [workshop_day for workshop_day in workshop_days_collection.find()]
