@@ -276,4 +276,14 @@ for mongo_deposit_exchange in get_deposit_exchanges():
     db.add(postgres_deposit_exchange)
     db.commit()
 
-# TODO: workshop days
+
+for mongo_workshop_day in get_workshop_days():
+    mongo_date = mongo_workshop_day["date"]
+
+    postgres_workshop_day = models.ClosedDay(
+        date=mongo_date,
+        note="Workshop Day"
+    )
+
+    db.add(postgres_workshop_day)
+    db.commit()
