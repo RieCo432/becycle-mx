@@ -267,9 +267,6 @@ for mongo_contract in get_contracts():
     with open("loosely_typed_names_map.json", "w") as fout:
         json.dump(loosely_typed_names_map, fout)
 
-
-
-
 for mongo_deposit_exchange in get_deposit_exchanges():
     mongo_from = mongo_deposit_exchange["from"]
     mongo_to = mongo_deposit_exchange["to"]
