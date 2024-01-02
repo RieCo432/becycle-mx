@@ -23,6 +23,7 @@ def get_contract_start_dates(db: Session) -> list[date]:
 def get_contract_returned_dates(db: Session) -> list[date]:
     return [_ for _ in db.scalars(
         select(models.Contract.returnedDate)
+        .where(models.Contract.returnedDate != None)
         .distinct()
     )]
 

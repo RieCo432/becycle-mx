@@ -14,7 +14,7 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
     deposit_transaction_dates = sorted(list(
         contracts_grouped_by_start_date.keys()
         | contracts_grouped_by_returned_date.keys()
-        | deposit_exchanges_grouped_by_date.keys()), reverse=True)
+        | deposit_exchanges_grouped_by_date.keys()))
 
     deposit_balances_book = {}
     previous_balances = {}
@@ -32,7 +32,7 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
         for contract in contracts_grouped_by_returned_date.get(deposit_transaction_date, []):
             deposit_balances_book[deposit_transaction_date].transactions.append(schemas.DepositTransaction(
                 title="{} {}".format(contract.client.firstName, contract.client.lastName),
-                diff_by_username={contract.depositCollectingUser.username: -contract.depositAmountReturned}
+                diff_by_username={contract.depositReturningUser.username: -contract.depositAmountReturned}
             ))
 
         for deposit_exchange in deposit_exchanges_grouped_by_date.get(deposit_transaction_date, []):

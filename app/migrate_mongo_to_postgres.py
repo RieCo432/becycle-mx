@@ -145,6 +145,8 @@ for mongo_appointment in get_appointments():
 
         postgres_client_id = postgres_client.id
 
+        client_map_email[mongo_email_address] = postgres_client_id
+
     postgres_appointment = models.Appointment(
         clientId=postgres_client_id,
         typeId=mongo_type,
@@ -170,14 +172,14 @@ for mongo_contract in get_contracts():
     mongo_bike = deref(mongo_contract["bike"])
     mongo_checking_volunteer = mongo_contract["checkingVolunteer"]
     mongo_condition = mongo_contract["condition"]
-    mongo_contract_sent_to_email = mongo_contract["contractSentToEmail"]
+    mongo_contract_sent_to_email = mongo_contract["contractSentToEmail"] if "contractSentToEmail" in mongo_contract else False
     mongo_contract_type = mongo_contract["contractType"]
     mongo_deposit_amount_paid = mongo_contract["depositAmountPaid"]
     mongo_deposit_amount_returned = mongo_contract["depositAmountReturned"]
     mongo_deposit_collected_by = mongo_contract["depositCollectedBy"]
     mongo_deposit_returned_by = mongo_contract["depositReturnedBy"]
     mongo_end_date = mongo_contract["endDate"]
-    mongo_expiry_reminder_sent_to_email = mongo_contract["expiryReminderSentToEmail"]
+    mongo_expiry_reminder_sent_to_email = mongo_contract["expiryReminderSentToEmail"] if "expiryReminderSentToEmail" in mongo_contract else False
     mongo_notes = mongo_contract["notes"]
     mongo_person = deref(mongo_contract["person"])
     mongo_returned_date = mongo_contract["returnedDate"]
@@ -209,21 +211,31 @@ for mongo_contract in get_contracts():
         loosely_typed_names_map[mongo_deposit_collected_by] = manual_username
         postgres_deposit_collecting_user = get_user(manual_username, db=db)
 
-    postgres_return_accepting_user = get_user(mongo_volunteer_received, db=db)
-    if postgres_return_accepting_user is None and mongo_volunteer_received in loosely_typed_names_map:
-        postgres_return_accepting_user = get_user(loosely_typed_names_map[mongo_volunteer_received], db=db)
-    if postgres_return_accepting_user is None:
-        manual_username = input("Enter username for '{}': ".format(mongo_volunteer_received))
-        loosely_typed_names_map[mongo_volunteer_received] = manual_username
-        postgres_return_accepting_user = get_user(manual_username, db=db)
+    if mongo_volunteer_received is not None:
 
-    postgres_deposit_returning_user = get_user(mongo_deposit_returned_by, db=db)
-    if postgres_deposit_returning_user is None and mongo_deposit_returned_by in loosely_typed_names_map:
-        postgres_deposit_returning_user = get_user(loosely_typed_names_map[mongo_deposit_returned_by], db=db)
-    if postgres_deposit_returning_user is None:
-        manual_username = input("Enter username for '{}': ".format(mongo_deposit_returned_by))
-        loosely_typed_names_map[mongo_deposit_returned_by] = manual_username
-        postgres_deposit_returning_user = get_user(manual_username, db=db)
+        postgres_return_accepting_user = get_user(mongo_volunteer_received, db=db)
+        if postgres_return_accepting_user is None and mongo_volunteer_received in loosely_typed_names_map:
+            postgres_return_accepting_user = get_user(loosely_typed_names_map[mongo_volunteer_received], db=db)
+        if postgres_return_accepting_user is None:
+            manual_username = input("Enter username for '{}': ".format(mongo_volunteer_received))
+            loosely_typed_names_map[mongo_volunteer_received] = manual_username
+            postgres_return_accepting_user = get_user(manual_username, db=db)
+
+    else:
+        postgres_return_accepting_user = None
+
+    if mongo_deposit_returned_by is not None:
+
+        postgres_deposit_returning_user = get_user(mongo_deposit_returned_by, db=db)
+        if postgres_deposit_returning_user is None and mongo_deposit_returned_by in loosely_typed_names_map:
+            postgres_deposit_returning_user = get_user(loosely_typed_names_map[mongo_deposit_returned_by], db=db)
+        if postgres_deposit_returning_user is None:
+            manual_username = input("Enter username for '{}': ".format(mongo_deposit_returned_by))
+            loosely_typed_names_map[mongo_deposit_returned_by] = manual_username
+            postgres_deposit_returning_user = get_user(manual_username, db=db)
+
+    else:
+        postgres_deposit_returning_user = None
 
     postgres_bike_id = bike_map[mongo_bike["_id"]]
     postgres_client_id = client_map[mongo_person["_id"]]
@@ -234,11 +246,11 @@ for mongo_contract in get_contracts():
         workingUserId=postgres_working_user.id,
         checkingUserId=postgres_checking_user.id,
         depositCollectingUserId=postgres_deposit_collecting_user.id,
-        returnAcceptingUserId=postgres_return_accepting_user.id,
-        depositReturningUserId=postgres_deposit_returning_user.id,
-        startDate=mongo_start_date,
-        endDate=mongo_end_date,
-        returnedDate=mongo_returned_date,
+        returnAcceptingUserId=postgres_return_accepting_user.id if postgres_return_accepting_user is not None else None,
+        depositReturningUserId=postgres_deposit_returning_user.id if postgres_deposit_returning_user is not None else None,
+        startDate=mongo_start_date.date(),
+        endDate=mongo_end_date.date(),
+        returnedDate=mongo_returned_date.date() if mongo_returned_date is not None else None,
         depositAmountCollected=mongo_deposit_amount_paid,
         depositAmountReturned=mongo_deposit_amount_returned,
         conditionOfBike=mongo_condition,
@@ -252,8 +264,10 @@ for mongo_contract in get_contracts():
     db.add(postgres_contract)
     db.commit()
 
-with open("loosely_typed_names_map.json", "w") as fout:
-    json.dump(loosely_typed_names_map, fout)
+    with open("loosely_typed_names_map.json", "w") as fout:
+        json.dump(loosely_typed_names_map, fout)
+
+
 
 
 for mongo_deposit_exchange in get_deposit_exchanges():
@@ -264,12 +278,25 @@ for mongo_deposit_exchange in get_deposit_exchanges():
     mongo_initiator = mongo_deposit_exchange["initiator"]
 
     postgres_from_user = get_user(mongo_from, db=db)
+    if postgres_from_user is None and mongo_from in loosely_typed_names_map:
+        postgres_from_user = get_user(loosely_typed_names_map[mongo_from], db=db)
+    if postgres_from_user is None:
+        manual_username = input("Enter username for '{}': ".format(mongo_from))
+        loosely_typed_names_map[mongo_from] = manual_username
+        postgres_from_user = get_user(manual_username, db=db)
+
     postgres_to_user = get_user(mongo_to, db=db)
+    if postgres_to_user is None and mongo_to in loosely_typed_names_map:
+        postgres_to_user = get_user(loosely_typed_names_map[mongo_to], db=db)
+    if postgres_to_user is None:
+        manual_username = input("Enter username for '{}': ".format(mongo_to))
+        loosely_typed_names_map[mongo_to] = manual_username
+        postgres_to_user = get_user(manual_username, db=db)
 
     postgres_deposit_exchange = models.DepositExchange(
         fromUserId=postgres_from_user.id if postgres_from_user is not None else None,
         toUserId=postgres_to_user.id if postgres_to_user is not None else None,
-        date=mongo_date,
+        date=mongo_date.date(),
         amount=mongo_amount
     )
 
