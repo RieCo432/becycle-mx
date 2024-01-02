@@ -71,3 +71,15 @@ async def return_bike(
     email_tasks.add_task(contract.send_return_email)
 
     return contract
+
+
+@contracts.patch("/contract/extend", dependencies=[Depends(dep.get_current_active_user)])
+async def extend_contract(
+        contract_extend_data: schemas.ContractExtend,
+        db: Session = Depends(dep.get_db)) -> schemas.Contract:
+
+    contract = crud.extend_contract(db=db, contract_id=contract_extend_data.id)
+
+    contract.send_creation_email()
+    
+    return contract

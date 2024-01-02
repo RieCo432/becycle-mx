@@ -5,6 +5,7 @@ import app.schemas as schemas
 from sqlalchemy import select
 from uuid import UUID
 from fastapi import HTTPException, status
+from dateutil.relativedelta import relativedelta
 
 
 def get_contracts(db: Session) -> list[models.Contract]:
@@ -102,6 +103,16 @@ def return_contract(
     contract.depositReturningUserId = deposit_returning_user_id
     contract.returnedDate = datetime.utcnow()
     contract.depositAmountReturned = contract_return_details.depositAmountReturned
+
+    db.commit()
+
+    return contract
+
+
+def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
+    contract = get_contract(db=db, contract_id=contract_id)
+
+    contract.endDate = (datetime.utcnow() + relativedelta(months=6)).date()
 
     db.commit()
 
