@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
@@ -8,9 +8,11 @@ from fastapi import HTTPException, status
 
 
 def get_user(username: str, db: Session) -> models.User | None:
+    if username is None:
+        return None
     return db.scalar(
         select(models.User)
-        .where(models.User.username == username)
+        .where(func.lower(models.User.username) == username.lower())
     )
 
 
