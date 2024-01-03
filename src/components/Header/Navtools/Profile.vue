@@ -40,6 +40,8 @@
 import { MenuItem } from "@headlessui/vue";
 import Dropdown from "@/components/Dropdown";
 import Icon from "@/components/Icon";
+import { ProfileMenu } from "@/constant/data";
+
 export default {
   components: {
     Icon,
@@ -48,30 +50,10 @@ export default {
   },
   data() {
     return {
-      ProfileMenu: [
-        {
-          label: "Profile",
-          icon: "heroicons-outline:user",
-          link: () => {
-            this.$router.push("profile");
-          },
-        },
-        {
-          label: "Settings",
-          icon: "heroicons-outline:cog",
-          link: () => {
-            this.$router.push("settings");
-          },
-        },
-        {
-          label: "Logout",
-          icon: "heroicons-outline:login",
-          link: () => {
-            this.$router.push("/");
-            localStorage.removeItem("activeUser");
-          },
-        },
-      ],
+      ProfileMenu: ProfileMenu.map( item => ({
+        label: item.label,
+        icon: item.icon,
+        link: () => {this.$router.push(item.link)}}))
     };
   },
 };
