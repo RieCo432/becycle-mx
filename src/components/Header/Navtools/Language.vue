@@ -66,8 +66,7 @@
 </template>
 
 <script setup>
-import langImg1 from "@/assets/images/flags/usa.png"
-import langImg2 from "@/assets/images/flags/gn.png"
+import engbImg from "@/assets/images/lang/en-gb.svg"
 import { ref } from "vue";
 import {
   Listbox,
@@ -77,8 +76,7 @@ import {
 } from "@headlessui/vue";
 
 const months = [
-  { name: "En", image: langImg1 },
-  { name: "Gn", image: langImg2 },
+  { name: "en-gb", image: engbImg },
 ];
 const selectLanguage = ref(months[0]);
 </script>

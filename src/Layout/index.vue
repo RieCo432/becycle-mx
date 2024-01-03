@@ -24,7 +24,6 @@
       ></div>
     </Transition>
     <!-- mobile sidebar -->
-    <Settings />
 
     <div
       class="content-wrapper transition-all duration-150"

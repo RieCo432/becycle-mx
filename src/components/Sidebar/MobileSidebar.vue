@@ -29,29 +29,6 @@
 
     <div class="sidebar-menu px-4 h-[calc(100%-100px)]" data-simplebar>
       <Navmenu :items="menuItems" />
-      <div
-        class="bg-slate-900 mb-[100px] mt-14 p-4 relative text-center rounded-2xl text-white"
-        v-if="!this.$store.themeSettingsStore.sidebarCollasp"
-      >
-        <img
-          src="@/assets/images/svg/rabit.svg"
-          alt=""
-          class="mx-auto relative -mt-[73px]"
-        />
-        <div class="max-w-[160px] mx-auto mt-6">
-          <div class="widget-title">Unlimited Access</div>
-          <div class="text-xs font-light">
-            Upgrade your system to business plan
-          </div>
-        </div>
-        <div class="mt-6">
-          <button
-            class="btn bg-white hover:bg-opacity-80 text-slate-900 btn-sm w-full block"
-          >
-            Upgrade
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </template>

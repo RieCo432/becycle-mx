@@ -34,7 +34,6 @@
           <handle-mobile-menu
             v-if="window.width < 1280 && window.width > 768"
           />
-          <SearchModal />
         </div>
         <div
           v-if="this.$store.themeSettingsStore.menuLayout === 'horizontal'"
@@ -54,9 +53,6 @@
         >
           <LanguageVue />
           <SwitchDark />
-          <MonochromeMode />
-          <Message v-if="window.width > 768" />
-          <Notification v-if="window.width > 768" />
           <Profile v-if="window.width > 768" />
           <handle-mobile-menu v-if="window.width < 768" />
         </div>
@@ -66,13 +62,9 @@
 </template>
 <script>
 import Profile from "./Navtools/Profile.vue";
-import Notification from "./Navtools/Notification.vue";
-import Message from "./Navtools/Message.vue";
 import SwitchDark from "./Navtools/SwitchDark.vue";
-import MonochromeMode from "./Navtools/MonochromeMode.vue";
 import Mainnav from "./horizental-nav.vue";
 import Icon from "../Icon";
-import SearchModal from "./Navtools/SearchModal.vue";
 import LanguageVue from "./Navtools/Language.vue";
 import Logo from "./Navtools/Logo.vue";
 import MobileLogo from "./Navtools/MobileLogo.vue";
@@ -83,14 +75,10 @@ export default {
   mixins: [window],
   components: {
     Profile,
-    Notification,
-    Message,
     SwitchDark,
-    MonochromeMode,
     Mainnav,
     Icon,
     LanguageVue,
-    SearchModal,
     Logo,
     MobileLogo,
     HandleMobileMenu,
