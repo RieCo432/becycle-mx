@@ -110,8 +110,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import Icon from "@/components/Icon";
+import {ref, computed} from 'vue';
+import Icon from '@/components/Icon';
 
 import {
   TransitionRoot,
@@ -122,52 +122,52 @@ import {
   ComboboxInput,
   ComboboxOptions,
   ComboboxOption,
-} from "@headlessui/vue";
+} from '@headlessui/vue';
 
 const isOpen = ref(false);
 const searchList = [
   {
     id: 1,
-    name: "What is Dashcode ?",
+    name: 'What is Dashcode ?',
   },
   {
     id: 2,
-    name: "Our Services",
+    name: 'Our Services',
   },
   {
     id: 3,
-    name: "Our Team",
+    name: 'Our Team',
   },
   {
     id: 4,
-    name: "Our Clients",
+    name: 'Our Clients',
   },
   {
     id: 5,
-    name: "Our Partners",
+    name: 'Our Partners',
   },
   {
     id: 6,
-    name: "Our Blog",
+    name: 'Our Blog',
   },
   {
     id: 7,
-    name: "Our Contact",
+    name: 'Our Contact',
   },
 ];
 
-let selected = ref(searchList[0]);
-let query = ref("");
+const selected = ref(searchList[0]);
+const query = ref('');
 
-let filteredsearchList = computed(() =>
-  query.value === ""
-    ? searchList
-    : searchList.filter((item) =>
-        item.name
+const filteredsearchList = computed(() =>
+  query.value === '' ?
+    searchList :
+    searchList.filter((item) =>
+      item.name
           .toLowerCase()
-          .replace(/\s+/g, "")
-          .includes(query.value.toLowerCase().replace(/\s+/g, ""))
-      )
+          .replace(/\s+/g, '')
+          .includes(query.value.toLowerCase().replace(/\s+/g, '')),
+    ),
 );
 
 function closeModal() {

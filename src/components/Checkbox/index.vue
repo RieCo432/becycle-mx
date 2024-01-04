@@ -40,9 +40,9 @@
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref } from "vue";
+import {computed, defineComponent, ref} from 'vue';
 export default defineComponent({
-  name: "Checkbox",
+  name: 'Checkbox',
   inheritAttrs: false,
   props: {
     label: {
@@ -58,12 +58,12 @@ export default defineComponent({
     },
     name: {
       type: String,
-      default: "checkbox",
+      default: 'checkbox',
     },
     activeClass: {
       type: String,
       default:
-        " ring-black-500  bg-slate-900 dark:bg-slate-700 dark:ring-slate-700 ",
+        ' ring-black-500  bg-slate-900 dark:bg-slate-700 dark:ring-slate-700 ',
     },
     value: {
       type: null,
@@ -73,7 +73,7 @@ export default defineComponent({
     },
   },
   emits: {
-    "update:modelValue": (newValue) => ({
+    'update:modelValue': (newValue) => ({
       modelValue: newValue,
     }),
     // use newValue
@@ -90,10 +90,10 @@ export default defineComponent({
 
     const localValue = computed({
       get: () => props.modelValue,
-      set: (newValue) => context.emit("update:modelValue", newValue),
+      set: (newValue) => context.emit('update:modelValue', newValue),
     });
 
-    return { localValue, ck, onChange };
+    return {localValue, ck, onChange};
   },
 });
 </script>

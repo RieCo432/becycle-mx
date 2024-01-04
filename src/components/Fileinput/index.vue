@@ -94,11 +94,11 @@
 </template>
 <script>
 export default {
-  name: "Fileinput",
+  name: 'Fileinput',
   props: {
     name: {
       type: String,
-      default: "name",
+      default: 'name',
     },
     multiple: {
       type: Boolean,
@@ -110,15 +110,15 @@ export default {
     },
     placeholder: {
       type: String,
-      default: "Choose a file or drop it here...",
+      default: 'Choose a file or drop it here...',
     },
     label: {
       type: String,
-      default: "Browse",
+      default: 'Browse',
     },
     classInput: {
       type: String,
-      default: "",
+      default: '',
     },
     filenametag: {
       type: Boolean,
@@ -142,7 +142,7 @@ export default {
         this.multipleurls.push(URL.createObjectURL(file));
       });
 
-      this.$emit("input", this.selectedFile);
+      this.$emit('input', this.selectedFile);
     },
   },
 };

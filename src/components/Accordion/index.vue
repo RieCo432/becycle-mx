@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import Icon from "@/components/Icon";
+import Icon from '@/components/Icon';
 export default {
   components: {
     Icon,
@@ -59,7 +59,7 @@ export default {
   props: {
     parentClass: {
       type: String,
-      default: "",
+      default: '',
     },
     items: {
       type: Array,
@@ -68,19 +68,19 @@ export default {
 
       default: () => [
         {
-          title: "How does Dashcode work?",
+          title: 'How does Dashcode work?',
           content:
-            "Jornalists call this critical, introductory section the  and when bridge properly executed, it's the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.",
+            'Jornalists call this critical, introductory section the  and when bridge properly executed, it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
         },
         {
-          title: "Where i can learn more about using Dashcode?",
+          title: 'Where i can learn more about using Dashcode?',
           content:
-            "Jornalists call this critical, introductory section the  and when bridge properly executed, it's the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.",
+            'Jornalists call this critical, introductory section the  and when bridge properly executed, it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
         },
         {
-          title: "Why Dashcode is so important?",
+          title: 'Why Dashcode is so important?',
           content:
-            "Jornalists call this critical, introductory section the  and when bridge properly executed, it's the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.",
+            'Jornalists call this critical, introductory section the  and when bridge properly executed, it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
         },
       ],
     },
@@ -94,7 +94,7 @@ export default {
     beforeEnter(element) {
       requestAnimationFrame(() => {
         if (!element.style.height) {
-          element.style.height = "0px";
+          element.style.height = '0px';
         }
 
         element.style.display = null;
@@ -120,7 +120,7 @@ export default {
     leave(element) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          element.style.height = "0px";
+          element.style.height = '0px';
         });
       });
     },

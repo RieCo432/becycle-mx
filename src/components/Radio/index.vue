@@ -35,9 +35,9 @@
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref } from "vue";
+import {computed, defineComponent, ref} from 'vue';
 export default defineComponent({
-  name: "Radio",
+  name: 'Radio',
   inheritAttrs: false,
   props: {
     label: {
@@ -53,11 +53,11 @@ export default defineComponent({
     },
     name: {
       type: String,
-      default: "checkbox",
+      default: 'checkbox',
     },
     activeClass: {
       type: String,
-      default: "ring-slate-500 dark:ring-slate-400",
+      default: 'ring-slate-500 dark:ring-slate-400',
     },
     value: {
       type: null,
@@ -67,7 +67,7 @@ export default defineComponent({
     },
   },
   emits: {
-    "update:modelValue": (newValue) => ({
+    'update:modelValue': (newValue) => ({
       modelValue: newValue,
     }),
   },
@@ -82,10 +82,10 @@ export default defineComponent({
 
     const localValue = computed({
       get: () => props.modelValue,
-      set: (newValue) => context.emit("update:modelValue", newValue),
+      set: (newValue) => context.emit('update:modelValue', newValue),
     });
 
-    return { localValue, ck, onChange };
+    return {localValue, ck, onChange};
   },
 });
 </script>

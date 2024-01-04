@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-import DesktopMenu from "./Navtools/DesktopMenu";
+import DesktopMenu from './Navtools/DesktopMenu';
 export default {
   components: {
     DesktopMenu,

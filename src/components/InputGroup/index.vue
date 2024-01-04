@@ -12,12 +12,12 @@
     <div
       class="flex items-stretch inputGroup"
       :class="`
-    
+
     ${append || appendIcon ? 'has-append' : ''}
     ${prepend || prependIcon ? 'has-prepend' : ''}
 
     ${error ? 'is-invalid' : ''}  ${validate ? 'is-valid' : ''}
-    
+
     ${$slots.prepend ? 'has-prepend-slot' : ''}
     ${$slots.append ? 'has-append-slot' : ''}
     ${horizontal ? 'flex-1' : ''}
@@ -128,10 +128,10 @@
   </div>
 </template>
 <script>
-import Icon from "@/components/Icon";
-import Cleave from "vue-cleave-component";
+import Icon from '@/components/Icon';
+import Cleave from 'vue-cleave-component';
 export default {
-  components: { Icon, Cleave },
+  components: {Icon, Cleave},
   props: {
     prepend: {
       type: String,
@@ -141,30 +141,30 @@ export default {
     },
     placeholder: {
       type: String,
-      default: "Search",
+      default: 'Search',
     },
     label: {
       type: String,
     },
     classLabel: {
       type: String,
-      default: " ",
+      default: ' ',
     },
     classInput: {
       type: String,
-      default: "classinput",
+      default: 'classinput',
     },
     type: {
       type: String,
-      default: "text",
-      //required: true,
+      default: 'text',
+      // required: true,
     },
     name: {
       type: String,
     },
     modelValue: {
       type: String,
-      default: "",
+      default: '',
     },
     error: {
       type: String,
@@ -213,7 +213,7 @@ export default {
       type: Object,
       default: () => ({
         creditCard: true,
-        delimiter: "-",
+        delimiter: '-',
       }),
     },
   },
@@ -225,14 +225,14 @@ export default {
   methods: {
     toggleType() {
       // toggle the type of the input field
-      this.types = this.types === "text" ? "password" : "text";
+      this.types = this.types === 'text' ? 'password' : 'text';
     },
   },
 };
 </script>
 <style lang="scss">
 .input-group-control {
-  @apply bg-white dark:bg-slate-900 dark:placeholder:text-slate-400 transition duration-300 ease-in-out border border-slate-200 dark:border-slate-700 focus:ring-0  focus:outline-none  
+  @apply bg-white dark:bg-slate-900 dark:placeholder:text-slate-400 transition duration-300 ease-in-out border border-slate-200 dark:border-slate-700 focus:ring-0  focus:outline-none
   rounded placeholder:text-slate-400 text-slate-900 text-sm px-3  placeholder:font-light focus:border-slate-600  dark:focus:border-slate-900 dark:text-white;
 }
 .input-label {

@@ -5,7 +5,7 @@
 </template>
 <script>
 export default {
-  name: "LoaderElement",
+  name: 'LoaderElement',
   data() {
     return {
       isLoading: false,
@@ -14,7 +14,7 @@ export default {
   mounted() {
     // onreadystatechange
     document.onreadystatechange = () => {
-      if (document.readyState === "complete") {
+      if (document.readyState === 'complete') {
         this.isLoading = true;
       }
     };

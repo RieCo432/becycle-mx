@@ -7,7 +7,7 @@
       ${item.child ? 'item-has-children' : ''}
       ${activeSubmenu === i ? 'open' : ''}
       ${this.$route.name === item.link ? 'menu-item-active' : ''}
-      
+
       `"
       class="single-sidebar-menu"
     >
@@ -112,8 +112,8 @@
   </ul>
 </template>
 <script>
-import { useRouter } from "vue-router";
-import Icon from "../Icon";
+import {useRouter} from 'vue-router';
+import Icon from '../Icon';
 export default {
   components: {
     Icon,
@@ -128,25 +128,25 @@ export default {
   props: {
     title: {
       type: String,
-      default: "",
+      default: '',
     },
     icon: {
       type: String,
-      default: "",
+      default: '',
     },
     link: {
       type: String,
-      default: "",
+      default: '',
     },
-    items: { type: Array, required: true },
-    childrenLinks: { type: Array, default: null },
+    items: {type: Array, required: true},
+    childrenLinks: {type: Array, default: null},
   },
 
   methods: {
     beforeEnter(element) {
       requestAnimationFrame(() => {
         if (!element.style.height) {
-          element.style.height = "0px";
+          element.style.height = '0px';
         }
 
         element.style.display = null;
@@ -172,7 +172,7 @@ export default {
     leave(element) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          element.style.height = "0px";
+          element.style.height = '0px';
         });
       });
     },

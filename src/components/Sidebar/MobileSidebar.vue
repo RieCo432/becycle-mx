@@ -28,16 +28,16 @@
     </div>
 
     <div class="sidebar-menu px-4 h-[calc(100%-100px)]" data-simplebar>
-      <Navmenu :items="menuItems" />
+      <Navmenu :items="topMenu" />
     </div>
   </div>
 </template>
 <script>
-import { Icon } from "@iconify/vue";
-import { defineComponent } from "vue";
-import { menuItems } from "../../constant/data";
-import Navmenu from "./Navmenu";
-import { useThemeSettingsStore } from "@/store/themeSettings";
+import {Icon} from '@iconify/vue';
+import {defineComponent} from 'vue';
+import {topMenu} from '@/constant/data';
+import Navmenu from './Navmenu';
+import {useThemeSettingsStore} from '@/store/themeSettings';
 const themeSettingsStore = useThemeSettingsStore();
 
 export default defineComponent({
@@ -47,14 +47,14 @@ export default defineComponent({
   },
   data() {
     return {
-      menuItems,
-      openClass: "w-[248px]",
-      closeClass: "w-[72px] close_sidebar",
+      topMenu,
+      openClass: 'w-[248px]',
+      closeClass: 'w-[72px] close_sidebar',
     };
   },
   methods: {
     toggleMsidebar() {
-      themeSettingsStore.toggleMsidebar()
+      themeSettingsStore.toggleMsidebar();
     },
   },
 });

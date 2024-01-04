@@ -74,7 +74,7 @@ export default {
 
   computed: {
     items() {
-      return Array.from({ length: this.count });
+      return Array.from({length: this.count});
     },
   },
 };

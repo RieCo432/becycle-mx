@@ -11,7 +11,7 @@
           : this.openClass
       }
       ${this.$store.themeSettingsStore.isMouseHovered ? 'sidebar-hovered' : ''}
-      
+
       `"
       @mouseenter="this.$store.themeSettingsStore.isMouseHovered = true"
       @mouseleave="this.$store.themeSettingsStore.isMouseHovered = false"
@@ -27,7 +27,7 @@
             : ' border-none'
         }
         ${this.$store.themeSettingsStore.isMouseHovered ? 'logo-hovered' : ''}
-        
+
         `"
       >
         <router-link
@@ -115,19 +115,19 @@
           }
         "
       >
-        <Navmenu :items="menuItems" />
+        <Navmenu :items="topMenu" />
       </SimpleBar>
     </div>
   </div>
 </template>
 <script>
 // import { Icon } from "@iconify/vue";
-import { defineComponent } from "vue";
-import { menuItems } from "../../constant/data";
-import Navmenu from "./Navmenu";
-import { gsap } from "gsap";
-import { SimpleBar } from "simplebar-vue3";
-import { ref, onMounted } from "vue";
+import {defineComponent} from 'vue';
+import {topMenu} from '../../constant/data';
+import Navmenu from './Navmenu';
+import {gsap} from 'gsap';
+import {SimpleBar} from 'simplebar-vue3';
+import {ref, onMounted} from 'vue';
 
 export default defineComponent({
   components: {
@@ -137,9 +137,9 @@ export default defineComponent({
   },
   data() {
     return {
-      menuItems,
-      openClass: "w-[248px]",
-      closeClass: "w-[72px] close_sidebar",
+      topMenu,
+      openClass: 'w-[248px]',
+      closeClass: 'w-[72px] close_sidebar',
     };
   },
 
@@ -148,18 +148,18 @@ export default defineComponent({
     const simplebarInstance = ref(null);
     onMounted(() => {
       simplebarInstance.value
-        .getScrollElement()
-        .addEventListener("scroll", () => {
-          if (simplebarInstance.value.getScrollElement().scrollTop > 50) {
-            simplebarInstance.value.getScrollElement().classList.add("scroll");
-            shadowbase.value = true;
-          } else {
-            simplebarInstance.value
-              .getScrollElement()
-              .classList.remove("scroll");
-            shadowbase.value = false;
-          }
-        });
+          .getScrollElement()
+          .addEventListener('scroll', () => {
+            if (simplebarInstance.value.getScrollElement().scrollTop > 50) {
+              simplebarInstance.value.getScrollElement().classList.add('scroll');
+              shadowbase.value = true;
+            } else {
+              simplebarInstance.value
+                  .getScrollElement()
+                  .classList.remove('scroll');
+              shadowbase.value = false;
+            }
+          });
     });
 
     return {

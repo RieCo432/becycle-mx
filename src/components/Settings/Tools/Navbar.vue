@@ -38,20 +38,20 @@ export default {
       navType: this.$store.themeSettingsStore.navbarType,
       navbarTypes: [
         {
-          value: "floating",
-          label: "Floating",
+          value: 'floating',
+          label: 'Floating',
         },
         {
-          value: "sticky",
-          label: "Sticky",
+          value: 'sticky',
+          label: 'Sticky',
         },
         {
-          value: "static",
-          label: "Static",
+          value: 'static',
+          label: 'Static',
         },
         {
-          value: "hidden",
-          label: "Hidden",
+          value: 'hidden',
+          label: 'Hidden',
         },
       ],
     };

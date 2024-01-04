@@ -87,12 +87,12 @@ export default {
       menuHideen: this.$store.themeSettingsStore.sidebarHidden,
       layouts: [
         {
-          value: "vertical",
-          label: "Vertical",
+          value: 'vertical',
+          label: 'Vertical',
         },
         {
-          value: "horizontal",
-          label: "Horizontal",
+          value: 'horizontal',
+          label: 'Horizontal',
         },
       ],
     };
@@ -101,16 +101,16 @@ export default {
     layout: {
       handler() {
         switch (this.layout) {
-          case "vertical":
+          case 'vertical':
             this.$store.themeSettingsStore.menuLayout = this.layout;
-            document.documentElement.setAttribute("menu-layout", this.layout);
-            localStorage.setItem("menuLayout", this.layout);
+            document.documentElement.setAttribute('menu-layout', this.layout);
+            localStorage.setItem('menuLayout', this.layout);
 
             break;
-          case "horizontal":
+          case 'horizontal':
             this.$store.themeSettingsStore.menuLayout = this.layout;
-            document.documentElement.setAttribute("menu-layout", this.layout);
-            localStorage.setItem("menuLayout", this.layout);
+            document.documentElement.setAttribute('menu-layout', this.layout);
+            localStorage.setItem('menuLayout', this.layout);
 
             break;
         }

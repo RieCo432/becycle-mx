@@ -8,9 +8,9 @@
   </span>
 </template>
 <script>
-import Icon from "@/components/Icon";
-import { useThemeSettingsStore } from "@/store/themeSettings";
-const themeSettingsStore = useThemeSettingsStore()
+import Icon from '@/components/Icon';
+import {useThemeSettingsStore} from '@/store/themeSettings';
+const themeSettingsStore = useThemeSettingsStore();
 
 export default {
   components: {
@@ -18,7 +18,7 @@ export default {
   },
   methods: {
     toogleDark() {
-      themeSettingsStore.toogleDark()
+      themeSettingsStore.toogleDark();
     },
   },
 };

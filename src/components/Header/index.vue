@@ -43,7 +43,7 @@
           <MobileLogo v-else />
           <handle-mobile-menu v-if="window.width < 1280" />
         </div>
-        <Mainnav
+        <MainNav
           v-if="
             this.$store.themeSettingsStore.menuLayout === 'horizontal' && window.width > 1280
           "
@@ -61,22 +61,22 @@
   </header>
 </template>
 <script>
-import Profile from "./Navtools/Profile.vue";
-import SwitchDark from "./Navtools/SwitchDark.vue";
-import Mainnav from "./horizental-nav.vue";
-import Icon from "../Icon";
-import LanguageVue from "./Navtools/Language.vue";
-import Logo from "./Navtools/Logo.vue";
-import MobileLogo from "./Navtools/MobileLogo.vue";
-import window from "@/mixins/window";
-import HandleMobileMenu from "./Navtools/HandleMobileMenu.vue";
+import Profile from './Navtools/Profile.vue';
+import SwitchDark from './Navtools/SwitchDark.vue';
+import MainNav from './horizental-nav.vue';
+import Icon from '../Icon';
+import LanguageVue from './Navtools/Language.vue';
+import Logo from './Navtools/Logo.vue';
+import MobileLogo from './Navtools/MobileLogo.vue';
+import window from '@/mixins/window';
+import HandleMobileMenu from './Navtools/HandleMobileMenu.vue';
 
 export default {
   mixins: [window],
   components: {
     Profile,
     SwitchDark,
-    Mainnav,
+    MainNav: MainNav,
     Icon,
     LanguageVue,
     Logo,
@@ -87,31 +87,31 @@ export default {
   methods: {
     navbarTypeClass() {
       switch (this.$store.themeSettingsStore.navbarType) {
-        case "floating":
-          return "floating";
-        case "sticky":
-          return "sticky top-0 z-[999]";
-        case "static":
-          return "static";
-        case "hidden":
-          return "hidden";
+        case 'floating':
+          return 'floating';
+        case 'sticky':
+          return 'sticky top-0 z-[999]';
+        case 'static':
+          return 'static';
+        case 'hidden':
+          return 'hidden';
         default:
-          return "sticky top-0";
+          return 'sticky top-0';
       }
     },
     borderSwicthClass() {
       if (
-        this.$store.themeSettingsStore.skin === "bordered" &&
-        this.$store.themeSettingsStore.navbarType !== "floating"
+        this.$store.themeSettingsStore.skin === 'bordered' &&
+        this.$store.themeSettingsStore.navbarType !== 'floating'
       ) {
-        return "border-b border-gray-5002 dark:border-slate-700";
+        return 'border-b border-gray-5002 dark:border-slate-700';
       } else if (
-        this.$store.themeSettingsStore.skin === "bordered" &&
-        this.$store.themeSettingsStore.navbarType === "floating"
+        this.$store.themeSettingsStore.skin === 'bordered' &&
+        this.$store.themeSettingsStore.navbarType === 'floating'
       ) {
-        return "border border-gray-5002 dark:border-slate-700";
+        return 'border border-gray-5002 dark:border-slate-700';
       } else {
-        return "dark:border-b dark:border-slate-700 dark:border-opacity-60";
+        return 'dark:border-b dark:border-slate-700 dark:border-opacity-60';
       }
     },
   },

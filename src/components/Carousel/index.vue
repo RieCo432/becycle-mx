@@ -39,17 +39,17 @@ import {
   A11y,
   Autoplay,
   EffectFade,
-} from "swiper";
+} from 'swiper';
 
 // Import Swiper Vue.js components
-import { Swiper, SwiperSlide } from "swiper/vue";
+import {Swiper, SwiperSlide} from 'swiper/vue';
 
 // Import Swiper styles
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/scrollbar";
-import "swiper/css/effect-fade";
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
+import 'swiper/css/effect-fade';
 
 // Import Swiper styles
 export default {

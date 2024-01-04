@@ -35,12 +35,12 @@ export default {
       theme: this.$store.themeSettingsStore.theme,
       thems: [
         {
-          value: "light",
-          label: "Light",
+          value: 'light',
+          label: 'Light',
         },
         {
-          value: "dark",
-          label: "Dark",
+          value: 'dark',
+          label: 'Dark',
         },
       ],
     };
@@ -53,30 +53,30 @@ export default {
     theme: {
       handler() {
         switch (this.theme) {
-          case "light":
+          case 'light':
             this.$store.themeSettingsStore.theme = this.theme;
-            document.body.classList.remove("dark");
+            document.body.classList.remove('dark');
             document.body.classList.add(this.theme);
             this.$store.themeSettingsStore.isDark = false;
-            localStorage.setItem("theme", this.theme);
+            localStorage.setItem('theme', this.theme);
             break;
-          case "dark":
+          case 'dark':
             this.$store.themeSettingsStore.theme = this.theme;
 
             // set body class by theme name
-            document.body.classList.remove("light");
+            document.body.classList.remove('light');
             document.body.classList.add(this.theme);
             this.$store.themeSettingsStore.isDark = true;
-            localStorage.setItem("theme", this.theme);
+            localStorage.setItem('theme', this.theme);
 
             break;
           default:
             this.$store.themeSettingsStore.theme = this.theme;
 
             // set body class by theme name
-            document.body.classList.remove("dark");
+            document.body.classList.remove('dark');
             document.body.classList.add(this.theme);
-            localStorage.setItem("theme", this.theme);
+            localStorage.setItem('theme', this.theme);
         }
       },
       immediate: true,

@@ -15,9 +15,9 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
-import { VideoPlayer } from "@videojs-player/vue";
-import "video.js/dist/video-js.css";
+import {defineComponent} from 'vue';
+import {VideoPlayer} from '@videojs-player/vue';
+import 'video.js/dist/video-js.css';
 
 export default defineComponent({
   components: {

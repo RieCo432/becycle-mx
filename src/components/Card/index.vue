@@ -5,9 +5,9 @@
         ? ' border border-gray-5002 dark:border-slate-700'
         : 'shadow-base'
     }
-   
+
     ${className}
-    
+
     `"
     v-if="!overlay"
   >
@@ -22,7 +22,7 @@
           ? ''
           : 'border-b border-slate-100 dark:border-slate-700 pb-5  -mx-6 px-6'
       }
-      
+
       `"
       >
         <div class="flex-1">
@@ -49,10 +49,10 @@
         ${gapNull ? '-mx-6 ' : ''}
         ${gapNull && imgTop ? '-mt-6 ' : ''}
         ${gapNull && imgBottom ? '-mb-6 ' : ''}
-        
+
         ${imgBottom ? 'order-3 mt-6' : ' mb-6'}
-        
-        
+
+
         `"
       >
         <img

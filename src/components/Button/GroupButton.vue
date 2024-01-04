@@ -13,7 +13,7 @@
   </div>
 </template>
 <script>
-import Button from "./index";
+import Button from './index';
 export default {
   components: {
     Button,
@@ -21,19 +21,19 @@ export default {
   props: {
     btnClass: {
       type: String,
-      default: "btn-outline-primary",
+      default: 'btn-outline-primary',
     },
     groupButtons: {
       type: Array,
       default: () => [
         {
-          title: "Weekly",
+          title: 'Weekly',
         },
         {
-          title: "Monthly",
+          title: 'Monthly',
         },
         {
-          title: "Yearly",
+          title: 'Yearly',
         },
       ],
     },

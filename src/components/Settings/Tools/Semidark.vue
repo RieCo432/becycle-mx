@@ -35,14 +35,14 @@ export default {
       handler() {
         if (this.semidark) {
           this.$store.themeSettingsStore.semidark = this.semidark;
-          document.body.classList.remove("semi-light");
-          document.body.classList.add("semi-dark");
-          localStorage.setItem("semiDark", this.semidark);
+          document.body.classList.remove('semi-light');
+          document.body.classList.add('semi-dark');
+          localStorage.setItem('semiDark', this.semidark);
         } else {
           this.$store.themeSettingsStore.semidark = this.semidark;
-          document.body.classList.remove("semi-dark");
-          document.body.classList.add("semi-light");
-          localStorage.setItem("semiDark", this.semidark);
+          document.body.classList.remove('semi-dark');
+          document.body.classList.add('semi-light');
+          localStorage.setItem('semiDark', this.semidark);
         }
       },
       immediate: true,

@@ -11,7 +11,7 @@
   </span>
 </template>
 <script>
-import Icon from "@/components/Icon";
+import Icon from '@/components/Icon';
 export default {
   components: {
     Icon,
@@ -19,15 +19,15 @@ export default {
   props: {
     label: {
       type: String,
-      default: "primary-500",
+      default: 'primary-500',
     },
     badgeClass: {
       type: String,
-      default: "bg-primary-500 text-white",
+      default: 'bg-primary-500 text-white',
     },
     icon: {
       type: String,
-      default: "",
+      default: '',
     },
   },
 };

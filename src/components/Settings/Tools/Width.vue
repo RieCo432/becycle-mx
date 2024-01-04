@@ -35,12 +35,12 @@ export default {
 
       contentWidths: [
         {
-          value: "full",
-          label: "Full Width",
+          value: 'full',
+          label: 'Full Width',
         },
         {
-          value: "boxed",
-          label: "Boxed",
+          value: 'boxed',
+          label: 'Boxed',
         },
       ],
     };
@@ -52,11 +52,11 @@ export default {
     contentWidth: {
       handler() {
         switch (this.contentWidth) {
-          case "full":
+          case 'full':
             this.$store.themeSettingsStore.cWidth = this.contentWidth;
 
             break;
-          case "boxed":
+          case 'boxed':
             this.$store.themeSettingsStore.cWidth = this.contentWidth;
 
             break;

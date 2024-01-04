@@ -70,7 +70,7 @@
   </div>
 </template>
 <script>
-import Icon from "@/components/Icon";
+import Icon from '@/components/Icon';
 export default {
   components: {
     Icon,
@@ -78,18 +78,18 @@ export default {
   props: {
     placeholder: {
       type: String,
-      default: "message",
+      default: 'message',
     },
     label: {
       type: String,
     },
     classLabel: {
       type: String,
-      default: " ",
+      default: ' ',
     },
     classInput: {
       type: String,
-      default: "classinput",
+      default: 'classinput',
     },
 
     name: {
@@ -97,7 +97,7 @@ export default {
     },
     modelValue: {
       type: String,
-      default: "",
+      default: '',
     },
     error: {
       type: String,
@@ -138,7 +138,7 @@ export default {
   methods: {
     toggleType() {
       // toggle the type of the input field
-      this.types = this.types === "text" ? "password" : "text";
+      this.types = this.types === 'text' ? 'password' : 'text';
     },
   },
 };

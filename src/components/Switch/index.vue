@@ -60,10 +60,10 @@
   </div>
 </template>
 <script>
-import Icon from "@/components/Icon";
-import { computed, defineComponent, ref } from "vue";
+import Icon from '@/components/Icon';
+import {computed, defineComponent, ref} from 'vue';
 export default defineComponent({
-  name: "Checkbox",
+  name: 'Checkbox',
   inheritAttrs: false,
   components: {
     Icon,
@@ -82,11 +82,11 @@ export default defineComponent({
     },
     name: {
       type: String,
-      default: "checkbox",
+      default: 'checkbox',
     },
     activeClass: {
       type: String,
-      default: "bg-slate-900 dark:bg-slate-900 ",
+      default: 'bg-slate-900 dark:bg-slate-900 ',
     },
     value: {
       type: null,
@@ -104,15 +104,15 @@ export default defineComponent({
     },
     prevIcon: {
       type: String,
-      default: "heroicons-outline:volume-up",
+      default: 'heroicons-outline:volume-up',
     },
     nextIcon: {
       type: String,
-      default: "heroicons-outline:volume-off",
+      default: 'heroicons-outline:volume-off',
     },
   },
   emits: {
-    "update:modelValue": (newValue) => ({
+    'update:modelValue': (newValue) => ({
       modelValue: newValue,
     }),
     // use newValue
@@ -129,10 +129,10 @@ export default defineComponent({
 
     const localValue = computed({
       get: () => props.modelValue,
-      set: (newValue) => context.emit("update:modelValue", newValue),
+      set: (newValue) => context.emit('update:modelValue', newValue),
     });
 
-    return { localValue, ck, onChange };
+    return {localValue, ck, onChange};
   },
 });
 </script>

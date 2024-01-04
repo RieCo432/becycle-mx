@@ -126,15 +126,15 @@
 </template>
 
 <script>
-import Icon from "@/components/Icon";
+import Icon from '@/components/Icon';
 
 import {
   TransitionRoot,
   TransitionChild,
   Dialog,
   DialogPanel,
-} from "@headlessui/vue";
-import { defineComponent, ref } from "vue";
+} from '@headlessui/vue';
+import {defineComponent, ref} from 'vue';
 export default defineComponent({
   components: {
     Icon,
@@ -147,7 +147,7 @@ export default defineComponent({
   props: {
     labelClass: {
       type: String,
-      default: "btn-primary",
+      default: 'btn-primary',
     },
     centered: {
       type: Boolean,
@@ -155,11 +155,11 @@ export default defineComponent({
     },
     title: {
       type: String,
-      default: "Basic Modal",
+      default: 'Basic Modal',
     },
     label: {
       type: String,
-      default: "Basic Modal",
+      default: 'Basic Modal',
     },
     disableBackdrop: {
       type: Boolean,
@@ -172,11 +172,11 @@ export default defineComponent({
     themeClass: {
       type: String,
       default:
-        "bg-slate-900 dark:bg-slate-800 dark:border-b dark:border-slate-700",
+        'bg-slate-900 dark:bg-slate-800 dark:border-b dark:border-slate-700',
     },
     sizeClass: {
       type: String,
-      default: "max-w-xl",
+      default: 'max-w-xl',
     },
     scrollContent: {
       type: Boolean,
@@ -200,7 +200,7 @@ export default defineComponent({
       isOpen.value = false;
     };
 
-    return { closeModal, openModal, isOpen };
+    return {closeModal, openModal, isOpen};
   },
 });
 </script>

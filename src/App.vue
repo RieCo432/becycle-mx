@@ -3,13 +3,13 @@
 </template>
 
 <script>
-import { useThemeSettingsStore } from "@/store/themeSettings";
+import {useThemeSettingsStore} from '@/store/themeSettings';
 
 export default {
   mounted() {
-    this.$store.themeSettingsStore = useThemeSettingsStore()
-  }
-}
+    this.$store.themeSettingsStore = useThemeSettingsStore();
+  },
+};
 </script>
 
 <style></style>

@@ -21,22 +21,21 @@
       </div>
     </div>
   </template>
-  <script>
-  export default {
-      data() {
-          return {
-              monochrome: this.$store.themeSettingsStore.monochrome,
-          };
-      },
-      mounted() {
-      },
-  
-      methods: {
-        toggleMonochrome() {
-          this.$store.themeSettingsStore.toggleMonochrome();
-        },
-      },
-  };
-  </script>
+<script>
+export default {
+  data() {
+    return {
+      monochrome: this.$store.themeSettingsStore.monochrome,
+    };
+  },
+  mounted() {
+  },
+
+  methods: {
+    toggleMonochrome() {
+      this.$store.themeSettingsStore.toggleMonochrome();
+    },
+  },
+};
+</script>
   <style lang=""></style>
-  

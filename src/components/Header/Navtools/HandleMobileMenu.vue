@@ -7,14 +7,14 @@
   </div>
 </template>
 <script setup>
-import Icon from "@/components/Icon";
-import { useThemeSettingsStore } from "@/store/themeSettings";
+import Icon from '@/components/Icon';
+import {useThemeSettingsStore} from '@/store/themeSettings';
 
-const themeSettingsStore = useThemeSettingsStore()
+const themeSettingsStore = useThemeSettingsStore();
 
 // dispath toggleMsidebar
 const toggleMsidebar = () => {
-  themeSettingsStore.toggleMsidebar()
+  themeSettingsStore.toggleMsidebar();
 };
 </script>
 <style lang="scss"></style>

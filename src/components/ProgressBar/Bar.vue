@@ -20,7 +20,7 @@ export default {
 
     barColor: {
       type: String,
-      default: "bg-slate-900",
+      default: 'bg-slate-900',
     },
     showValue: {
       type: Boolean,
@@ -45,9 +45,9 @@ export default {
       // add backgroudn image
       if (this.striped === true) {
         el.style.backgroundImage =
-          "linear-gradient(45deg,hsla(0,0%,100%,.15) 25%,transparent 0,transparent 50%,hsla(0,0%,100%,.15) 0,hsla(0,0%,100%,.15) 75%,transparent 0,transparent)";
+          'linear-gradient(45deg,hsla(0,0%,100%,.15) 25%,transparent 0,transparent 50%,hsla(0,0%,100%,.15) 0,hsla(0,0%,100%,.15) 75%,transparent 0,transparent)';
 
-        el.style.backgroundSize = ".857rem .857rem";
+        el.style.backgroundSize = '.857rem .857rem';
       }
     },
   },

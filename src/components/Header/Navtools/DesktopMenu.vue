@@ -101,8 +101,8 @@
   </ul>
 </template>
 <script>
-import { topMenu } from "../../../constant/data.js";
-import Icon from "../../Icon";
+import {topMenu} from '@/constant/data';
+import Icon from '../../Icon';
 export default {
   components: {
     Icon,
@@ -114,9 +114,9 @@ export default {
   },
 
   computed: {
-    newMenulist: function () {
-      return this.topMenu.filter(function (item) {
-        return Boolean(!item.isHeadr);
+    newMenulist: function() {
+      return this.topMenu.filter(function(item) {
+        return Boolean(!item.isHeader);
       });
     },
   },
@@ -150,7 +150,7 @@ export default {
 
 .main-menu > ul > li.menu-item-has-children > ul.sub-menu,
 .main-menu > ul > li.menu-item-has-children > .rt-mega-menu {
-  @apply absolute  left-0 min-w-[178px] w-max top-[110%] px-4 py-3  bg-white  
+  @apply absolute  left-0 min-w-[178px] w-max top-[110%] px-4 py-3  bg-white
   rounded-[4px] dark:bg-slate-800 z-[999] invisible opacity-0 transition-all duration-150
   shadow-base2;
 }

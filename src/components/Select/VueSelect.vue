@@ -66,9 +66,9 @@
   </div>
 </template>
 <script>
-import vSelect from "vue-select";
-import "vue-select/dist/vue-select.css";
-import Icon from "@/components/Icon";
+import vSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
+import Icon from '@/components/Icon';
 export default {
   components: {
     vSelect,
@@ -77,18 +77,18 @@ export default {
   props: {
     placeholder: {
       type: String,
-      default: "Select Option",
+      default: 'Select Option',
     },
     label: {
       type: String,
     },
     classLabel: {
       type: String,
-      default: " ",
+      default: ' ',
     },
     classInput: {
       type: String,
-      default: "classinput",
+      default: 'classinput',
     },
 
     name: {
@@ -96,7 +96,7 @@ export default {
     },
     modelValue: {
       // type: String || Array,
-      default: "",
+      default: '',
     },
     error: {
       type: String,

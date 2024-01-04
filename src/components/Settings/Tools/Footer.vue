@@ -36,16 +36,16 @@ export default {
       footer: this.$store.themeSettingsStore.footerType,
       footerTypes: [
         {
-          value: "sticky",
-          label: "Sticky",
+          value: 'sticky',
+          label: 'Sticky',
         },
         {
-          value: "static",
-          label: "Static",
+          value: 'static',
+          label: 'Static',
         },
         {
-          value: "hidden",
-          label: "Hidden",
+          value: 'hidden',
+          label: 'Hidden',
         },
       ],
     };
@@ -57,19 +57,19 @@ export default {
     footer: {
       handler() {
         switch (this.footer) {
-          case "floating":
+          case 'floating':
             this.$store.themeSettingsStore.footerType = this.footer;
 
             break;
-          case "sticky":
+          case 'sticky':
             this.$store.themeSettingsStore.footerType = this.footer;
 
             break;
-          case "static":
+          case 'static':
             this.$store.themeSettingsStore.footerType = this.footer;
 
             break;
-          case "hidden":
+          case 'hidden':
             this.$store.themeSettingsStore.footerType = this.footer;
 
             break;

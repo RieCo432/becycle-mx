@@ -68,17 +68,17 @@
   </div>
 </template>
 <script>
-import Icon from "../Icon";
-import Footer from "./Tools/Footer";
-import MenuLayout from "./Tools/MenuLayout";
-import Navbar from "./Tools/Navbar";
-import Skin from "./Tools/Skin";
-import Width from "./Tools/Width";
-import window from "@/mixins/window";
-import Theme from "./Tools/Theme";
-import Semidark from "./Tools/Semidark";
-import Monochrome from "./Tools/Monochrome";
-import Rlt from "./Tools/Rtl.vue";
+import Icon from '../Icon';
+import Footer from './Tools/Footer';
+import MenuLayout from './Tools/MenuLayout';
+import Navbar from './Tools/Navbar';
+import Skin from './Tools/Skin';
+import Width from './Tools/Width';
+import window from '@/mixins/window';
+import Theme from './Tools/Theme';
+import Semidark from './Tools/Semidark';
+import Monochrome from './Tools/Monochrome';
+import Rlt from './Tools/Rtl.vue';
 export default {
   mixins: [window],
   components: {

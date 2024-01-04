@@ -73,18 +73,18 @@ export default {
   props: {
     placeholder: {
       type: String,
-      default: "Select Option",
+      default: 'Select Option',
     },
     label: {
       type: String,
     },
     classLabel: {
       type: String,
-      default: " ",
+      default: ' ',
     },
     classInput: {
       type: String,
-      default: "classinput",
+      default: 'classinput',
     },
 
     name: {
@@ -92,7 +92,7 @@ export default {
     },
     modelValue: {
       // type: String || Array,
-      default: "",
+      default: '',
     },
     error: {
       type: String,
@@ -135,12 +135,12 @@ export default {
       type: Array,
       default: () => [
         {
-          value: "",
-          label: "Select Option",
+          value: '',
+          label: 'Select Option',
         },
         {
-          value: "",
-          label: "Select Option2",
+          value: '',
+          label: 'Select Option2',
         },
       ],
     },

@@ -26,12 +26,12 @@ export default {
   methods: {
     footerClass() {
       switch (this.$store.themeSettingsStore.footerType) {
-        case "sticky":
-          return "sticky bottom-0 z-[999]";
-        case "static":
-          return "static";
-        case "hidden":
-          return "hidden";
+        case 'sticky':
+          return 'sticky bottom-0 z-[999]';
+        case 'static':
+          return 'static';
+        case 'hidden':
+          return 'hidden';
       }
     },
   },

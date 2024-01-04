@@ -28,7 +28,7 @@
   </div>
 </template>
 <script>
-import Bar from "./Bar.vue";
+import Bar from './Bar.vue';
 export default {
   components: {
     Bar,
@@ -36,7 +36,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: "",
+      default: '',
     },
     value: {
       type: Number,
@@ -44,7 +44,7 @@ export default {
     },
     height: {
       type: String,
-      default: "h-2",
+      default: 'h-2',
     },
     max: {
       type: Number,
@@ -52,11 +52,11 @@ export default {
     },
     barColor: {
       type: String,
-      default: "bg-slate-900 dark:bg-slate-900",
+      default: 'bg-slate-900 dark:bg-slate-900',
     },
     backColor: {
       type: String,
-      default: "bg-slate-900 dark:bg-slate-700",
+      default: 'bg-slate-900 dark:bg-slate-700',
     },
     showValue: {
       type: Boolean,

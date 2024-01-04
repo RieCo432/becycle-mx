@@ -52,11 +52,11 @@ export default {
     },
     classLabel: {
       type: String,
-      default: " ",
+      default: ' ',
     },
     classInput: {
       type: String,
-      default: "classinput",
+      default: 'classinput',
     },
 
     name: {

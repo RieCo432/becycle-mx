@@ -97,37 +97,37 @@
   </div>
 </template>
 <script>
-import Icon from "@/components/Icon";
-import Cleave from "vue-cleave-component";
+import Icon from '@/components/Icon';
+import Cleave from 'vue-cleave-component';
 export default {
-  components: { Icon, Cleave },
+  components: {Icon, Cleave},
   props: {
     placeholder: {
       type: String,
-      default: "Search",
+      default: 'Search',
     },
     label: {
       type: String,
     },
     classLabel: {
       type: String,
-      default: " ",
+      default: ' ',
     },
     classInput: {
       type: String,
-      default: "classinput",
+      default: 'classinput',
     },
     type: {
       type: String,
-      default: "text",
-      //required: true,
+      default: 'text',
+      // required: true,
     },
     name: {
       type: String,
     },
     modelValue: {
       type: String,
-      default: "",
+      default: '',
     },
     error: {
       type: String,
@@ -166,7 +166,7 @@ export default {
       type: Object,
       default: () => ({
         creditCard: true,
-        delimiter: "-",
+        delimiter: '-',
       }),
     },
   },
@@ -179,7 +179,7 @@ export default {
   methods: {
     toggleType() {
       // toggle the type of the input field
-      this.types = this.types === "text" ? "password" : "text";
+      this.types = this.types === 'text' ? 'password' : 'text';
     },
   },
 };

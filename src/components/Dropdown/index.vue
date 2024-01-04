@@ -68,8 +68,8 @@
 </template>
 
 <script>
-import Icon from "@/components/Icon";
-import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import Icon from '@/components/Icon';
+import {Menu, MenuButton, MenuItems, MenuItem} from '@headlessui/vue';
 export default {
   components: {
     Menu,
@@ -81,42 +81,42 @@ export default {
   props: {
     label: {
       type: String,
-      default: "DropDown",
+      default: 'DropDown',
     },
     labelClass: {
       type: String,
     },
     classMenuItems: {
       type: String,
-      default: "mt-2 w-[220px]",
+      default: 'mt-2 w-[220px]',
     },
     classItem: {
       type: String,
-      default: "px-4 py-2",
+      default: 'px-4 py-2',
     },
     parentClass: {
       type: String,
-      default: "inline-block",
+      default: 'inline-block',
     },
     items: {
       type: Array,
 
       default: () => [
         {
-          label: "Action",
-          link: "#",
+          label: 'Action',
+          link: '#',
         },
         {
-          label: "Another action",
-          link: "#",
+          label: 'Another action',
+          link: '#',
         },
         {
-          label: "Something else here",
-          link: "#",
+          label: 'Something else here',
+          link: '#',
         },
         {
-          label: "Separated link",
-          link: "#",
+          label: 'Separated link',
+          link: '#',
           hasDivider: true,
         },
       ],

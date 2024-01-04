@@ -102,11 +102,11 @@
 </template>
 
 <script>
-import Icon from "@/components/Icon";
-import Select from "@/components/Select";
-import { defineComponent } from "vue";
+import Icon from '@/components/Icon';
+import Select from '@/components/Select';
+import {defineComponent} from 'vue';
 export default defineComponent({
-  name: "Pagination",
+  name: 'Pagination',
   components: {
     Icon,
     Select,
@@ -156,83 +156,83 @@ export default defineComponent({
     },
     textBeforeInput: {
       type: String,
-      default: "Go to page",
+      default: 'Go to page',
     },
     textAfterInput: {
       type: String,
-      default: "Go",
+      default: 'Go',
     },
     paginationClass: {
       type: String,
-      default: "default",
+      default: 'default',
     },
     searchClasss: {
       type: String,
-      default: "default",
+      default: 'default',
     },
     wrapperClass: {
       type: String,
-      default: "justify-between",
+      default: 'justify-between',
     },
   },
   data() {
     return {
-      input: "",
+      input: '',
       input2: null,
     };
   },
   methods: {
-    hasFirst: function () {
+    hasFirst: function() {
       return this.rangeStart !== 1;
     },
-    hasLast: function () {
+    hasLast: function() {
       return this.rangeEnd < this.totalPages;
     },
-    hasPrev: function () {
+    hasPrev: function() {
       return this.current > 1;
     },
-    hasNext: function () {
+    hasNext: function() {
       return this.current < this.totalPages;
     },
-    changePage: function (page) {
+    changePage: function(page) {
       if (page > 0 && page <= this.totalPages) {
-        this.$emit("page-changed", page);
+        this.$emit('page-changed', page);
       }
       if (this.pageChanged) {
-        this.pageChanged({ currentPage: page });
+        this.pageChanged({currentPage: page});
       }
     },
     customPerPageChange(page) {
-      this.perPageChanged({ currentPerPage: page });
+      this.perPageChanged({currentPerPage: page});
     },
   },
   computed: {
-    pages: function () {
-      var pages = [];
+    pages: function() {
+      const pages = [];
 
-      for (var i = this.rangeStart; i <= this.rangeEnd; i++) {
+      for (let i = this.rangeStart; i <= this.rangeEnd; i++) {
         pages.push(i);
       }
 
       return pages;
     },
-    rangeStart: function () {
-      var start = this.current - this.pageRange;
+    rangeStart: function() {
+      const start = this.current - this.pageRange;
 
       return start > 0 ? start : 1;
     },
-    rangeEnd: function () {
-      var end = this.current + this.pageRange;
+    rangeEnd: function() {
+      const end = this.current + this.pageRange;
 
       return end < this.totalPages ? end : this.totalPages;
     },
-    totalPages: function () {
+    totalPages: function() {
       return Math.ceil(this.total / this.perPage);
     },
-    nextPage: function () {
+    nextPage: function() {
       return this.current + 1;
     },
-    prevPage: function () {
+    prevPage: function() {
       return this.current - 1;
     },
   },

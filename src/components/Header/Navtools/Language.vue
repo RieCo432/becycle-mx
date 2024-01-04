@@ -66,17 +66,17 @@
 </template>
 
 <script setup>
-import engbImg from "@/assets/images/lang/en-gb.svg"
-import { ref } from "vue";
+import engbImg from '@/assets/images/lang/en-gb.svg';
+import {ref} from 'vue';
 import {
   Listbox,
   ListboxButton,
   ListboxOptions,
   ListboxOption,
-} from "@headlessui/vue";
+} from '@headlessui/vue';
 
 const months = [
-  { name: "en-gb", image: engbImg },
+  {name: 'en-gb', image: engbImg},
 ];
 const selectLanguage = ref(months[0]);
 </script>

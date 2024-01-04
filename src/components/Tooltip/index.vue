@@ -49,38 +49,38 @@
   </tippy>
 </template>
 <script>
-import "tippy.js/animations/perspective-extreme.css";
-import "tippy.js/animations/perspective-subtle.css";
-import "tippy.js/animations/perspective.css";
-import "tippy.js/animations/scale-extreme.css";
-import "tippy.js/animations/scale-subtle.css";
-import "tippy.js/animations/scale.css";
-import "tippy.js/animations/shift-away-extreme.css";
-import "tippy.js/animations/shift-away-subtle.css";
-import "tippy.js/animations/shift-away.css";
-import "tippy.js/animations/shift-toward-extreme.css";
-import "tippy.js/animations/shift-toward-subtle.css";
-import "tippy.js/animations/shift-toward.css";
-import "tippy.js/dist/tippy.css";
-import "tippy.js/themes/light.css";
+import 'tippy.js/animations/perspective-extreme.css';
+import 'tippy.js/animations/perspective-subtle.css';
+import 'tippy.js/animations/perspective.css';
+import 'tippy.js/animations/scale-extreme.css';
+import 'tippy.js/animations/scale-subtle.css';
+import 'tippy.js/animations/scale.css';
+import 'tippy.js/animations/shift-away-extreme.css';
+import 'tippy.js/animations/shift-away-subtle.css';
+import 'tippy.js/animations/shift-away.css';
+import 'tippy.js/animations/shift-toward-extreme.css';
+import 'tippy.js/animations/shift-toward-subtle.css';
+import 'tippy.js/animations/shift-toward.css';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light.css';
 
 export default {
   props: {
     title: {
       type: String,
-      default: "Tooltip on top",
+      default: 'Tooltip on top',
     },
     content: {
       type: String,
-      default: "Tooltip on top!",
+      default: 'Tooltip on top!',
     },
     btnClass: {
       type: String,
-      default: "btn-outline-dark",
+      default: 'btn-outline-dark',
     },
     placement: {
       type: String,
-      default: "top",
+      default: 'top',
     },
     arrow: {
       type: Boolean,
@@ -88,15 +88,15 @@ export default {
     },
     theme: {
       type: String,
-      default: "",
+      default: '',
     },
     animation: {
       type: String,
-      default: "scale",
+      default: 'scale',
     },
     trigger: {
       type: String,
-      default: "mouseenter",
+      default: 'mouseenter',
     },
     interactive: {
       type: Boolean,
@@ -116,11 +116,11 @@ export default {
     },
     maxWidth: {
       type: String,
-      default: "",
+      default: '',
     },
     distance: {
       type: String,
-      default: "1rem",
+      default: '1rem',
     },
     offset: {
       type: Array,

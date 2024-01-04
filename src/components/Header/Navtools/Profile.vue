@@ -37,10 +37,10 @@
   </Dropdown>
 </template>
 <script>
-import { MenuItem } from "@headlessui/vue";
-import Dropdown from "@/components/Dropdown";
-import Icon from "@/components/Icon";
-import { ProfileMenu } from "@/constant/data";
+import {MenuItem} from '@headlessui/vue';
+import Dropdown from '@/components/Dropdown';
+import Icon from '@/components/Icon';
+import {ProfileMenu} from '@/constant/data';
 
 export default {
   components: {
@@ -50,10 +50,12 @@ export default {
   },
   data() {
     return {
-      ProfileMenu: ProfileMenu.map( item => ({
+      ProfileMenu: ProfileMenu.map( (item) => ({
         label: item.label,
         icon: item.icon,
-        link: () => {this.$router.push(item.link)}}))
+        link: () => {
+          this.$router.push(item.link);
+        }})),
     };
   },
 };
