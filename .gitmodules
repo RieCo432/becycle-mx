@@ -1,0 +1,6 @@
+[submodule "vuejs"]
+	path = vuejs
+	url = https://github.com/RieCo432/becycle-mx-vuejs
+[submodule "fastapi"]
+	path = fastapi
+	url = https://github.com/RieCo432/becycle-mx-api
