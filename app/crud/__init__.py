@@ -6,3 +6,4 @@ from .settings import *
 from .appointments import *
 from .depositExchanges import *
 from .finances import *
+from .public import *

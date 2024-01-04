@@ -6,3 +6,4 @@ from .settings import settings
 from .appointments import appointments
 from .depositExchanges import deposit_exchanges
 from .finances import finances
+from .public import public

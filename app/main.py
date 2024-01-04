@@ -17,6 +17,7 @@ app.include_router(routers.settings)
 app.include_router(routers.appointments)
 app.include_router(routers.deposit_exchanges)
 app.include_router(routers.finances)
+app.include_router(routers.public)
 
 
 if __name__ == "__main__":
