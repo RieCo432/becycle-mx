@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from config import SECRET_KEY, ALGORITHM
+from app.config import SECRET_KEY, ALGORITHM
 from jose import jwt
 
 
