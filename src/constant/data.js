@@ -15,7 +15,7 @@ export const ProfileMenu = [
   {
     label: 'Profile',
     icon: 'heroicons-outline:user',
-    link: '#',
+    link: '/user/me',
   },
   {
     label: 'Settings',
@@ -35,16 +35,9 @@ export const topMenu = [
     title: 'DASHBOARD',
   },
   {
-    title: 'Dashboard',
+    title: 'Home',
     icon: 'heroicons-outline:home',
     link: '/app/home',
-    child: [
-      {
-        childtitle: 'Analytics Dashboard',
-        childlink: 'home',
-        childicon: 'heroicons:presentation-chart-line',
-      },
-    ],
   },
   {
     title: 'App',
@@ -68,8 +61,8 @@ export const topMenu = [
         megamenuicon: 'heroicons-outline:user',
         singleMegamenu: [
           {
-            m_childtitle: 'Signin One',
-            m_childlink: '/',
+            m_childtitle: 'User Login',
+            m_childlink: '/login/user',
           },
           {
             m_childtitle: 'Signin Two',

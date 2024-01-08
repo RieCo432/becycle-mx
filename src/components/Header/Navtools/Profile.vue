@@ -6,7 +6,7 @@
       >
         <span
           class="overflow-hidden text-ellipsis whitespace-nowrap w-[85px] block"
-          >Albert Flores</span
+          >{{ name }}</span
         >
         <span class="text-base inline-block ltr:ml-[10px] rtl:mr-[10px]"
           ><Icon icon="heroicons-outline:chevron-down"></Icon
@@ -50,6 +50,7 @@ export default {
   },
   data() {
     return {
+      name: 'loading...',
       ProfileMenu: ProfileMenu.map( (item) => ({
         label: item.label,
         icon: item.icon,
@@ -57,6 +58,9 @@ export default {
           this.$router.push(item.link);
         }})),
     };
+  },
+  mounted() {
+    this.name = localStorage.getItem('name');
   },
 };
 </script>

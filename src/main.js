@@ -15,7 +15,7 @@ import VueClickAway from 'vue3-click-away';
 import App from './App.vue';
 import './assets/scss/auth.scss';
 import './assets/scss/tailwind.scss';
-import router from './router';
+import router from '@/router';
 import VCalendar from 'v-calendar';
 import {createPinia} from 'pinia';
 import 'v-calendar/dist/style.css';
@@ -42,6 +42,7 @@ app.config.globalProperties.$store = {};
 app.mount('#app');
 
 import {useThemeSettingsStore} from '@/store/themeSettings';
+
 const themeSettingsStore = useThemeSettingsStore();
 if (localStorage.users === undefined) {
   const users = [

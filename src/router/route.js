@@ -15,6 +15,16 @@ const routes = [
         name: 'template',
         component: () => import('@/views/template.vue'),
       },
+      {
+        path: '/login/user',
+        name: 'Volunteer Login',
+        component: () => import('@/views/login/user.vue'),
+      },
+      {
+        path: '/user/me',
+        name: 'Me',
+        component: () => import ('@/views/user/me.vue'),
+      },
     ],
   },
 ];

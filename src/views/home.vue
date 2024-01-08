@@ -6,7 +6,7 @@
             </Card>
         </div>
         <div class="lg:col-span-4 col-span-12">
-            <Card title="Opening Times">
+            <Card title="Opening Times" v-if="!loading">
                 <vue-good-table
                   :columns="columns"
                   :rows="openingTimes"
@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import getOpeningTimes from '@/requests/public';
+import requests from '@/requests';
 import Card from '@/components/Card';
 
 export default {
@@ -29,6 +29,8 @@ export default {
   },
   data() {
     return {
+      loading: true,
+      openingTimes: null,
       columns: [
         {
           label: 'Day',
@@ -45,8 +47,11 @@ export default {
       ],
     };
   },
-  computed: {
-    openingTimes: getOpeningTimes(),
+  mounted() {
+    requests.getOpeningTimes().then((response) => {
+      this.openingTimes = response.data;
+      this.loading = false;
+    });
   },
 };
 

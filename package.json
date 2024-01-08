@@ -2,6 +2,7 @@
   "name": "becycle-mx",
   "version": "1.0.0",
   "private": true,
+  "proxy": "http://localhost:8000",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
