@@ -13,7 +13,7 @@ public = APIRouter(
 )
 
 
-@public.get("/public/opening-times")
+@public.get("/public/opening-hours")
 def get_opening_times(db: Session = Depends(dep.get_db)) -> list[schemas.DayOpeningTimes]:
 
     return crud.get_opening_times(db=db)

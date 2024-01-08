@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from mongodb_config import mongodb_user, mongodb_pwd, mongodb_host, mongodb_port
+from app.mongodb_config import mongodb_user, mongodb_pwd, mongodb_host, mongodb_port
 
 client = MongoClient(f"mongodb://{mongodb_user}:{mongodb_pwd}@{mongodb_host}:{mongodb_port}")
 db = client["becycleDB"]

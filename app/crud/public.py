@@ -17,8 +17,11 @@ def get_opening_times(db: Session) -> list[schemas.DayOpeningTimes]:
             if open_time is None and appointment_concurrency_limit.maxConcurrent > 0:
                 open_time = appointment_concurrency_limit.afterTime
 
-            if appointment_concurrency_limit.maxConcurrent > 0:
+            if appointment_concurrency_limit.maxConcurrent == 0:
                 close_time = appointment_concurrency_limit.afterTime
+
+            if open_time is not None and close_time is not None and close_time > open_time:
+                break
 
         opening_times.append(
             schemas.DayOpeningTimes(
