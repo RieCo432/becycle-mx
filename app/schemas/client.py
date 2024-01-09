@@ -13,6 +13,10 @@ class ClientCreate(ClientBase):
     pass
 
 
+class ClientPreAuth(BaseModel):
+    id: UUID
+
+
 class ClientTemp(ClientBase):
     id: UUID
     expirationDateTime: datetime
