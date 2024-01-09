@@ -53,7 +53,7 @@
         >
           <LanguageVue />
           <SwitchDark />
-          <Profile v-if="window.width > 768" />
+          <Profile v-if="showProfileDropdown" :name="profileName" />
           <handle-mobile-menu v-if="window.width < 768" />
         </div>
       </div>
@@ -70,6 +70,9 @@ import Logo from './Navtools/Logo.vue';
 import MobileLogo from './Navtools/MobileLogo.vue';
 import window from '@/mixins/window';
 import HandleMobileMenu from './Navtools/HandleMobileMenu.vue';
+import {useCredentialsStore} from '@/store/credentialsStore';
+
+const credentialsStore = useCredentialsStore();
 
 export default {
   mixins: [window],
@@ -82,6 +85,15 @@ export default {
     Logo,
     MobileLogo,
     HandleMobileMenu,
+  },
+
+  computed: {
+    profileName() {
+      return credentialsStore.name;
+    },
+    showProfileDropdown() {
+      return (credentialsStore.name !== null);
+    },
   },
 
   methods: {

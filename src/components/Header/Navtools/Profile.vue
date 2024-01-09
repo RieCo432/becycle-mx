@@ -33,6 +33,26 @@
           </div>
         </div>
       </MenuItem>
+
+      <MenuItem v-slot="{ active }">
+        <div
+          type="button"
+          :class="`${
+            active
+              ? 'bg-slate-100 dark:bg-slate-700 dark:bg-opacity-70 text-slate-900 dark:text-slate-300'
+              : 'text-slate-600 dark:text-slate-300'
+          } `"
+          class="inline-flex items-center space-x-2 rtl:space-x-reverse w-full px-4 py-2 first:rounded-t last:rounded-b font-normal cursor-pointer"
+          @click="logout"
+        >
+          <div class="flex-none text-lg">
+            <Icon icon="heroicons-outline:logout" />
+          </div>
+          <div class="flex-1 text-sm">
+            Logout
+          </div>
+        </div>
+      </MenuItem>
     </template>
   </Dropdown>
 </template>
@@ -41,8 +61,13 @@ import {MenuItem} from '@headlessui/vue';
 import Dropdown from '@/components/Dropdown';
 import Icon from '@/components/Icon';
 import {ProfileMenu} from '@/constant/data';
+import {useCredentialsStore} from '@/store/credentialsStore';
+
+const credentialsStore = useCredentialsStore();
+
 
 export default {
+  props: ['name'],
   components: {
     Icon,
     Dropdown,
@@ -50,7 +75,6 @@ export default {
   },
   data() {
     return {
-      name: 'loading...',
       ProfileMenu: ProfileMenu.map( (item) => ({
         label: item.label,
         icon: item.icon,
@@ -59,8 +83,11 @@ export default {
         }})),
     };
   },
-  mounted() {
-    this.name = localStorage.getItem('name');
+  methods: {
+    logout() {
+      credentialsStore.logout();
+      this.$router.push('/home');
+    },
   },
 };
 </script>

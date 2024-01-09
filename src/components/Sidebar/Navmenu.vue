@@ -99,16 +99,6 @@
         </ul>
       </Transition>
     </li>
-    <li class="single-sidebar-menu">
-      <a
-        href="https://dashcode-doc.codeshaper.tech/"
-        target="_blank"
-        class="menu-link"
-      >
-        <span class="menu-icon"><Icon icon="heroicons:document" /></span>
-        <div class="text-box">Documentation</div>
-      </a>
-    </li>
   </ul>
 </template>
 <script>
