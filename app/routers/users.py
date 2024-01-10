@@ -46,6 +46,27 @@ async def get_my_deposit_balance(
     return current_user.get_deposit_bearer_balance()
 
 
+@users.post("/user/check/password")
+async def post_user_password_check(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: Session = Depends(dep.get_db)
+) -> bool:
+    user = crud.authenticate_user(db=db, username=form_data.username, password_cleartext=form_data.password)
+
+    return user is not None
+
+    
+@users.post("/user/check/password-or-pin")
+async def post_user_password_or_pin_check(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: Session = Depends(dep.get_db)
+) -> bool:
+    user = crud.validate_user_signature(db=db, username=form_data.username, password_or_pin=form_data.password)
+
+    return user is not None
+
+
+
 @users.post("/user", dependencies=[Depends(dep.get_current_admin_user)])
 async def create_user(
         user_data: schemas.UserCreate,
