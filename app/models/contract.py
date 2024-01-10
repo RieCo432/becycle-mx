@@ -66,3 +66,13 @@ class Contract(Base):
             subject="You have returned your bike",
             content=email_html_content
         )
+
+
+class PaperContract(Base):
+    __tablename__ = "papercontracts"
+
+    id: Mapped[str] = mapped_column("id", String(24), primary_key=True, nullable=False, index=True, quote=False)
+
+    contractId: Mapped[UUID] = mapped_column("contractId", ForeignKey(Contract.id), nullable=False, quote=False)
+    contract: Mapped[Contract] = relationship("Contract")
+

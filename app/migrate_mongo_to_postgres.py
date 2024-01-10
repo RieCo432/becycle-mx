@@ -3,11 +3,14 @@ import app.models as models
 from app.database.db import SessionLocal
 from app.crud.users import get_user
 import json
+from app.database.db import engine, Base
 
 
 db = SessionLocal()
 
+Base.metadata.create_all(bind=engine)
 
+db.query(models.PaperContract).delete()
 db.query(models.Contract).delete()
 db.query(models.Bike).delete()
 db.query(models.DepositExchange).delete()
@@ -16,6 +19,7 @@ db.query(models.AppointmentType).delete()
 db.query(models.Client).delete()
 db.query(models.ClosedDay).delete()
 db.query(models.User).delete()
+
 
 user_map = {}
 
@@ -167,6 +171,7 @@ except FileNotFoundError:
 
 
 for mongo_contract in get_contracts():
+    mongo_id = mongo_contract["_id"]
     mongo_bike = deref(mongo_contract["bike"])
     mongo_checking_volunteer = mongo_contract["checkingVolunteer"]
     mongo_condition = mongo_contract["condition"]
@@ -260,6 +265,14 @@ for mongo_contract in get_contracts():
     )
 
     db.add(postgres_contract)
+    db.commit()
+
+    postgres_paper_contract = models.PaperContract(
+        id=str(mongo_id),
+        contractId=postgres_contract.id
+    )
+
+    db.add(postgres_paper_contract)
     db.commit()
 
     with open("loosely_typed_names_map.json", "w") as fout:
