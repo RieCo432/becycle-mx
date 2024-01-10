@@ -42,8 +42,10 @@ app.config.globalProperties.$store = {};
 app.mount('#app');
 
 import {useThemeSettingsStore} from '@/store/themeSettings';
+import {useCredentialsStore} from '@/store/credentialsStore';
 
 const themeSettingsStore = useThemeSettingsStore();
+const credentialsStore = useCredentialsStore();
 if (localStorage.users === undefined) {
   const users = [
     {

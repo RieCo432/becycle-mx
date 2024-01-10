@@ -3,9 +3,9 @@ import {useCredentialsStore} from '@/store/credentialsStore';
 
 const credentialsStore = useCredentialsStore();
 
+
 const axiosClient = axios.create({
   baseURL: 'http://localhost:8000',
-  headers: {'Authorization': 'Bearer ' + credentialsStore.token},
 });
 
 export default {
@@ -23,7 +23,9 @@ export default {
     });
   },
   getUserMe() {
-    return axiosClient.get('/users/me');
+    return axiosClient.get('/users/me', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
   },
   getClientLoginCode(emailAddress) {
     return axiosClient.get('/client/login-code', {
@@ -43,6 +45,29 @@ export default {
     });
   },
   getClientMe() {
-    return axiosClient.get('/clients/me');
+    return axiosClient.get('/clients/me', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getClientByEmail(emailAddress) {
+    return axiosClient.get('/clients', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        emailAddress: emailAddress,
+      },
+    });
+  },
+  postNewClient(clientData) {
+    return axiosClient.post('/client', clientData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getEmailAddressSuggestions(emailAddress) {
+    return axiosClient.get('/clients/email-address-suggestions', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        email_address: emailAddress,
+      },
+    });
   },
 };

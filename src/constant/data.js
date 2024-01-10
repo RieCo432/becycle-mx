@@ -46,6 +46,18 @@ export const topMenu = [
       },
     ],
   },
+  {
+    title: 'Contracts',
+    icon: 'heroicons-outline:clipboard-document-list',
+    link: '/contracts',
+    child: [
+      {
+        childtitle: 'New Contract',
+        childicon: 'heroicons-outline:document-plus',
+        childlink: '/contracts/new',
+      },
+    ],
+  },
   // {
   //   title: 'Widgets',
   //   icon: 'heroicons-outline:view-grid-add',

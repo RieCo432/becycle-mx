@@ -1,5 +1,4 @@
 import {defineStore} from 'pinia';
-import requests from '@/requests';
 
 export const useCredentialsStore = defineStore('credentialsStore', {
   state: () => ({
@@ -14,16 +13,9 @@ export const useCredentialsStore = defineStore('credentialsStore', {
 
       localStorage.setItem('token', this.token);
       localStorage.setItem('tokenType', this.tokenType);
-
-      if (tokenType === 'user') {
-        requests.getUserMe().then((response) => (
-          this.name = response.data['username']));
-      } else if (tokenType === 'client') {
-        requests.getClientMe().then((response) => (
-          this.name = response.data['firstName'] + ' ' + response.data['lastName']
-        ));
-      }
-
+    },
+    setName(name) {
+      this.name = name;
       localStorage.setItem('name', this.name);
     },
     logout() {
@@ -34,6 +26,13 @@ export const useCredentialsStore = defineStore('credentialsStore', {
       localStorage.removeItem('token');
       localStorage.removeItem('tokenType');
       localStorage.removeItem('name');
+    },
+    getApiRequestHeader() {
+      if (this.token !== null) {
+        return {'Authorization': 'Bearer ' + localStorage.getItem('token')};
+      } else {
+        return {};
+      };
     },
   },
 });

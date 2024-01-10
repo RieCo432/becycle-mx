@@ -48,6 +48,14 @@ const routes = [
         name: 'Me',
         component: () => import('@/views/client/me.vue'),
       },
+      {
+        path: '/contracts/new',
+        name: 'New Contract',
+        meta: {
+          hide: true,
+        },
+        component: () => import('@/views/contracts/new.vue'),
+      },
     ],
   },
 ];
