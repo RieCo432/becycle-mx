@@ -55,7 +55,7 @@ async def post_user_password_check(
 
     return user is not None
 
-    
+
 @users.post("/user/check/password-or-pin")
 async def post_user_password_or_pin_check(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],

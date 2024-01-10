@@ -28,6 +28,13 @@ async def get_clients(
     return crud.get_clients(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
 
 
+@clients.get("/clients/email-address-suggestions", dependencies=[Depends(dep.get_current_active_user)])
+async def get_client_email_address_suggestions(
+        email_address: str,
+        db: Session = Depends(dep.get_db)) -> list[str]:
+    return crud.get_similar_email_addresses(email_address=email_address, db=db)
+
+
 @clients.post("/client", dependencies=[Depends(dep.get_current_active_user)])
 async def create_client(
         client_data: schemas.ClientCreate,

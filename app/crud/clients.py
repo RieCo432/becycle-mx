@@ -120,5 +120,14 @@ def authenticate_client(db: Session, client_id: UUID, login_code: str) -> models
     return client
 
 
+def get_similar_email_addresses(db: Session, email_address: str) -> list[str]:
+    similar_email_addresses = [_ for _ in db.scalars(
+        select(models.Client.emailAddress)
+        .where(models.Client.emailAddress.startswith(email_address))
+    )]
+
+    return similar_email_addresses
+
+
 
 
