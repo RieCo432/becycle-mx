@@ -10,6 +10,14 @@ from dateutil.relativedelta import relativedelta
 import app.services as services
 
 
+def generate_6_digit_code():
+    return "{:06d}".format(int(random() * 1000000))
+
+
+def generate_6_digit_code_sql():
+    return text("TO_CHAR(FLOOR(RANDOM()*1000000), 'fm000000')")
+
+
 class Client(Base):
     __tablename__ = "clients"
 
@@ -33,7 +41,7 @@ class ClientTemp(Base):
     lastName: Mapped[str] = mapped_column("lastName", String(40), nullable=False, index=True, quote=False)
     emailAddress: Mapped[str] = mapped_column("emailAddress", String(255), nullable=False, quote=False, unique=True)
 
-    verificationCode: Mapped[DateTime] = mapped_column("verificationCode", String(6), nullable=False, default="{:06d}".format(int(random()*1000000)), server_default=text("TO_CHAR(FLOOR(RANDOM()*1000000), 'fm000000')"), quote=False)
+    verificationCode: Mapped[DateTime] = mapped_column("verificationCode", String(6), nullable=False, default=generate_6_digit_code, server_default=generate_6_digit_code_sql(), quote=False)
     expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime, default=datetime.utcnow() + relativedelta(minutes=CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES), server_default=text("(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES)), nullable=False, quote=False)
 
     def send_email_verification_link(self):
@@ -56,9 +64,8 @@ class ClientLogin(Base):
     client: Mapped["Client"] = relationship("Client")
 
     code: Mapped[DateTime] = mapped_column("code", String(6), nullable=False,
-                                                       default="{:06d}".format(int(random() * 1000000)),
-                                                       server_default=text(
-                                                           "TO_CHAR(FLOOR(RANDOM()*1000000), 'fm000000')"), quote=False)
+                                                       default=generate_6_digit_code,
+                                                       server_default=generate_6_digit_code_sql(), quote=False)
     expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,
                                                          default=datetime.utcnow() + relativedelta(minutes=CLIENT_LOGIN_CODE_EXPIRE_MINUTES),
                                                          server_default=text(
