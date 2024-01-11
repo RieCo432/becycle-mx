@@ -60,10 +60,10 @@
                 name="emailAddress"
                 v-model="emailAddress"
                 :error="emailAddressError"
-                @input="suggestEmailAddresses"
+                @input="fetchEmailSuggestions"
               />
               <ul>
-                <li v-for="(suggestion, i) in email_suggestions" :key="i">
+                <li v-for="(suggestion, i) in filtered_email_suggestions" :key="i">
                   {{ suggestion }}
                 </li>
               </ul>
@@ -185,6 +185,9 @@ import {computed, ref} from 'vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import requests from '@/requests';
+import {debounce} from 'lodash-es';
+
+
 export default {
   components: {
     Card,
@@ -283,6 +286,7 @@ export default {
     const {value: firstName, errorMessage: firstNameError} = useField('firstName');
     const {value: lastName, errorMessage: lastNameError} = useField('lastName');
 
+
     const {value: phone, errorMessage: phoneError} = useField('phone');
     const {value: password, errorMessage: passwordError} =
       useField('password');
@@ -350,11 +354,19 @@ export default {
       email_suggestions: [],
     };
   },
+  created() {
+    this.fetchEmailSuggestions = debounce(this.fetchEmailSuggestions, 500);
+  },
   methods: {
-    suggestEmailAddresses() {
+    fetchEmailSuggestions() {
       requests.getEmailAddressSuggestions(this.emailAddress).then((response) => {
         this.email_suggestions = response.data;
       });
+    },
+  },
+  computed: {
+    filtered_email_suggestions() {
+      return this.email_suggestions.filter((suggestion) => (suggestion.startsWith(this.emailAddress)));
     },
   },
 };
