@@ -311,20 +311,15 @@ export default {
             timeout: 2000,
           });
       } else {
-        console.log(stepNumber.value);
         if (stepNumber.value === 0) {
-          console.log(clientId.value);
           requests.getClientByEmail(emailAddress.value).then((response) => {
-            console.log(response);
             if (response.data.length === 0) {
-              console.log('Email does not match any client, creating...');
               requests.postNewClient({
                 firstName: firstName.value,
                 lastName: lastName.value,
                 emailAddress: emailAddress.value,
               }).then((response) => clientId.value = response['id']);
             } else {
-              console.log('Email could be matched to client');
               clientId.value = response.data[0]['id'];
             }
           });
