@@ -50,7 +50,7 @@
             <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-2 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Enter Your Account Details
+                  Enter the Lendee's Information
                 </h4>
               </div>
               <ComboboxTextInput
@@ -95,25 +95,73 @@
             <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
               <div class="md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Enter Your Personal info-500
+                  Enter the bike's details
                 </h4>
               </div>
+
+              <ComboboxTextInput
+                :field-model-value="make"
+                :suggestions="filtered_make_suggestions"
+                :selected-callback="selectMake">
+                <Textinput
+                  label="Make"
+                  type="text"
+                  placeholder="Make"
+                  name="make"
+                  v-model="make"
+                  :error="makeError"
+                  @input="fetchBikeMakeSuggestions"
+                />
+              </ComboboxTextInput>
+
+              <ComboboxTextInput
+                :field-model-value="model"
+                :suggestions="filtered_model_suggestions"
+                :selected-callback="selectModel">
+                <Textinput
+                  label="Model"
+                  type="text"
+                  placeholder="Model"
+                  name="model"
+                  v-model="model"
+                  :error="modelError"
+                  @input="fetchBikeModelSuggestions"
+                />
+              </ComboboxTextInput>
+
               <Textinput
-                label="First name"
+                label="Colour"
                 type="text"
-                placeholder="First name"
-                name="firstname"
-                v-model="fname"
-                :error="fnameError"
+                placeholder="Colour"
+                name="colour"
+                v-model="colour"
+                :error="colourError"
               />
+
               <Textinput
-                label="Last name"
+                label="Decals"
                 type="text"
-                placeholder="Last name"
-                name="lasttname"
-                v-model="lname"
-                :error="lnameError"
+                placeholder="Decals"
+                name="decals"
+                v-model="decals"
+                :error="decalsError"
               />
+
+              <ComboboxTextInput
+                :field-model-value="serialNumber"
+                :suggestions="filtered_serial_number_suggestions"
+                :selected-callback="selectSerialNumber">
+                <Textinput
+                  label="Serial Number"
+                  type="text"
+                  placeholder="Serial Number"
+                  name="serialnumber"
+                  v-model="serialNumber"
+                  :error="serialNumberError"
+                  @input="fetchSerialNumberSuggestions"
+                />
+              </ComboboxTextInput>
+
             </div>
           </div>
           <div v-if="stepNumber === 2">
@@ -245,10 +293,16 @@ export default {
           .oneOf([yup.ref('emailAddress'), null], 'Email Addresses must match'),
     });
 
-    const personalSchema = yup.object().shape({
-      fname: yup.string().required(' First name is required'),
-      lname: yup.string().required(' Last name is required'),
+    const bikeId = ref('');
+
+    const bikeSchema = yup.object().shape({
+      make: yup.string().required(' Make is required'),
+      model: yup.string().required(' Model is required '),
+      colour: yup.string().required(' Colour is required'),
+      decals: yup.string(),
+      serialNumber: yup.string().required(' Serial Number is required '),
     });
+
     const addressSchema = yup.object().shape({
       address: yup.string().required(' Address is required'),
     });
@@ -268,7 +322,7 @@ export default {
         case 0:
           return clientSchema;
         case 1:
-          return personalSchema;
+          return bikeSchema;
         case 2:
           return addressSchema;
         case 3:
@@ -288,14 +342,18 @@ export default {
     const {value: firstName, errorMessage: firstNameError} = useField('firstName');
     const {value: lastName, errorMessage: lastNameError} = useField('lastName');
 
+    const {value: make, errorMessage: makeError} = useField('make');
+    const {value: model, errorMessage: modelError} = useField('model');
+    const {value: colour, errorMessage: colourError} = useField('colour');
+    const {value: decals, errorMessage: decalsError} = useField('decals');
+    const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
 
     const {value: phone, errorMessage: phoneError} = useField('phone');
     const {value: password, errorMessage: passwordError} =
       useField('password');
     const {value: confirmpass, errorMessage: confirmpassError} =
       useField('confirmpass');
-    const {value: fname, errorMessage: fnameError} = useField('fname');
-    const {value: lname, errorMessage: lnameError} = useField('lname');
+
     const {value: address, errorMessage: addressError} = useField('address');
     const {value: fburl, errorMessage: fbError} = useField('fburl');
 
@@ -343,16 +401,23 @@ export default {
       lastNameError,
       clientId,
 
+      make,
+      makeError,
+      model,
+      modelError,
+      colour,
+      colourError,
+      decals,
+      decalsError,
+      serialNumber,
+      serialNumberError,
+
       phone,
       phoneError,
       password,
       passwordError,
       confirmpass,
       confirmpassError,
-      fname,
-      fnameError,
-      lname,
-      lnameError,
       address,
       addressError,
 
@@ -368,10 +433,16 @@ export default {
     return {
       emailTyped: '',
       email_suggestions: [],
+      make_suggestions: [],
+      model_suggestions: [],
+      serial_number_suggestions: [],
     };
   },
   created() {
     this.fetchEmailSuggestions = debounce(this.fetchEmailSuggestions, 500);
+    this.fetchBikeMakeSuggestions = debounce(this.fetchBikeMakeSuggestions, 500);
+    this.fetchBikeModelSuggestions = debounce(this.fetchBikeModelSuggestions, 500);
+    this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500);
   },
   methods: {
     fetchEmailSuggestions() {
@@ -379,6 +450,22 @@ export default {
         this.email_suggestions = response.data;
       });
     },
+    fetchBikeMakeSuggestions() {
+      requests.getBikeMakeSuggestions(this.make).then((response) => {
+        this.make_suggestions = response.data;
+      });
+    },
+    fetchBikeModelSuggestions() {
+      requests.getBikeModelSuggestions(this.model).then((response) => {
+        this.model_suggestions = response.data;
+      });
+    },
+    fetchSerialNumberSuggestions() {
+      requests.getBikeSerialNumberSuggestions(this.serialNumber).then((response) => {
+        this.serial_number_suggestions = response.data;
+      });
+    },
+
     selectEmail(event) {
       this.emailAddress = event.target.innerText;
       requests.getClientByEmail(this.emailAddress).then((response) => {
@@ -388,10 +475,28 @@ export default {
         this.lastName = response.data[0]['lastName'];
       });
     },
+    selectMake(event) {
+      this.make = event.target.innerText;
+    },
+    selectModel(event) {
+      this.model = event.target.innerText;
+    },
+    selectSerialNumber(event) {
+      this.serialNumber = event.target.innerText;
+    },
   },
   computed: {
     filtered_email_suggestions() {
       return this.email_suggestions.filter((suggestion) => (suggestion.startsWith(this.emailAddress))).slice(0, 4);
+    },
+    filtered_make_suggestions() {
+      return this.make_suggestions.filter((suggestion) => (suggestion.startsWith(this.make))).slice(0, 4);
+    },
+    filtered_model_suggestions() {
+      return this.model_suggestions.filter((suggestion) => (suggestion.startsWith(this.model))).slice(0, 4);
+    },
+    filtered_serial_number_suggestions() {
+      return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber))).slice(0, 4);
     },
   },
 };

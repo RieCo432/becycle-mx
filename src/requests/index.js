@@ -78,4 +78,28 @@ export default {
       },
     });
   },
+  getBikeMakeSuggestions(make) {
+    return axiosClient.get('/bikes/suggest/makes', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        make: make,
+      },
+    });
+  },
+  getBikeModelSuggestions(model) {
+    return axiosClient.get('/bikes/suggest/models', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        model: model,
+      },
+    });
+  },
+  getBikeSerialNumberSuggestions(serialNumber) {
+    return axiosClient.get('/bikes/suggest/serial-numbers', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        serial_number: serialNumber,
+      },
+    });
+  },
 };
