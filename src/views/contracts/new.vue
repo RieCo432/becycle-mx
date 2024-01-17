@@ -86,7 +86,9 @@
                     v-for="(suggestion, i) in filtered_email_suggestions"
                     :key="i"
                     :value="suggestion"
-                    v-slot="{ active }">
+                    v-slot="{ active }"
+                    @click="selectEmail"
+                  >
                     <li
                       :class="{
                       'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': active,
@@ -237,7 +239,7 @@ export default {
     ComboboxLabel,
     ComboboxButton,
     ComboboxOptions,
-    ComboboxOption
+    ComboboxOption,
   },
 
   setup() {
@@ -270,8 +272,10 @@ export default {
     const toast = useToast();
     const stepNumber = ref(0);
 
-    // step by step yup schemea
-    const stepSchema = yup.object().shape({
+    const clientId = ref('');
+
+    // step by step yup schema
+    const clientSchema = yup.object().shape({
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('First name is required'),
       emailAddress: yup
@@ -306,7 +310,7 @@ export default {
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
         case 0:
-          return stepSchema;
+          return clientSchema;
         case 1:
           return personalSchema;
         case 2:
@@ -314,7 +318,7 @@ export default {
         case 3:
           return socialSchema;
         default:
-          return stepSchema;
+          return clientSchema;
       }
     });
 
@@ -351,6 +355,18 @@ export default {
             timeout: 2000,
           });
       } else {
+        console.log(stepNumber.value);
+        if (stepNumber.value === 0) {
+          console.log(clientId.value);
+          if (clientId.value === '') {
+            console.log(firstName);
+            requests.postNewClient({
+              firstName: firstName.value,
+              lastName: lastName.value,
+              emailAddress: emailAddress.value,
+            }).then((response) => clientId.value = response['id']);
+          }
+        }
         stepNumber.value++;
       }
     });
@@ -368,6 +384,7 @@ export default {
       firstNameError,
       lastName,
       lastNameError,
+      clientId,
 
       phone,
       phoneError,
@@ -392,7 +409,6 @@ export default {
   },
   data() {
     return {
-      client_id: null,
       emailTyped: '',
       email_suggestions: [],
     };
@@ -408,15 +424,24 @@ export default {
     },
     selectEmail(event) {
       this.emailAddress = event.target.innerText;
-      requests.getClientIdEmailAddress(this.emailAddress).then((response) => {
-        this.client_id = response.data['id'];
-        this.stepNumber = 1;
+      requests.getClientByEmail(this.emailAddress).then((response) => {
+        this.clientId = response.data[0]['id'];
+        this.confirmEmailAddress = response.data[0]['emailAddress'];
+        this.firstName = response.data[0]['firstName'];
+        this.lastName = response.data[0]['lastName'];
       });
     },
   },
+  /*watch: {
+    emailAddress(newValue, oldValue) {
+      console.log(newValue, oldValue, newValue !== oldValue);
+      if (newValue !== oldValue) {
+        this.fetchEmailSuggestions();
+      }
+    },
+  },*/
   computed: {
     filtered_email_suggestions() {
-      this.fetchEmailSuggestions();
       return this.email_suggestions.filter((suggestion) => (suggestion.startsWith(this.emailAddress))).slice(0, 4);
     },
   },

@@ -53,7 +53,7 @@ export default {
     return axiosClient.get('/clients', {
       headers: credentialsStore.getApiRequestHeader(),
       params: {
-        emailAddress: emailAddress,
+        email_address: emailAddress,
       },
     });
   },
