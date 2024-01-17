@@ -31,3 +31,27 @@ async def create_bike(
         db: Session = Depends(dep.get_db)
 ) -> schemas.Bike:
     return crud.create_bike(bike_data=bike_data, db=db)
+
+
+@bikes.get("/bikes/suggest-makes", dependencies=[Depends(dep.get_current_active_user)])
+async def get_make_suggestions(
+        make: str,
+        db: Session = Depends(dep.get_db)
+) -> list[str]:
+    return crud.get_similar_makes(db=db, make=make.lower())
+
+
+@bikes.get("/bikes/suggest-models", dependencies=[Depends(dep.get_current_active_user)])
+async def get_model_suggestions(
+        model: str,
+        db: Session = Depends(dep.get_db)
+) -> list[str]:
+    return crud.get_similar_models(db=db, model=model.lower())
+
+
+@bikes.get("/bikes/suggest-serial-numbers", dependencies=[Depends(dep.get_current_active_user)])
+async def get_serial_number_suggestions(
+        serial_number: str,
+        db: Session = Depends(dep.get_db)
+) -> list[str]:
+    return crud.get_similar_serial_numbers(db=db, serial_number=serial_number.lower())
