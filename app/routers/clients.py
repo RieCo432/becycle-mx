@@ -28,6 +28,15 @@ async def get_clients(
     return crud.get_clients(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
 
 
+@clients.get("/client/id-by-email", dependencies=[Depends(dep.get_current_active_user)])
+async def get_client_id_by_email(
+        email_address: str,
+        db: Session = Depends(dep.get_db)) -> dict[str, UUID]:
+
+    client = crud.get_client_by_email(db=db, email_address=email_address)
+    return {"id": client.id}
+
+
 @clients.get("/clients/email-address-suggestions", dependencies=[Depends(dep.get_current_active_user)])
 async def get_client_email_address_suggestions(
         email_address: str,
