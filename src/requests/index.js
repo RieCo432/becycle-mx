@@ -70,4 +70,12 @@ export default {
       },
     });
   },
+  getClientIdEmailAddress(emailAddress) {
+    return axiosClient.get('/client/id-by-email', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        email_address: emailAddress,
+      },
+    });
+  },
 };
