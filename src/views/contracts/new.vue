@@ -53,56 +53,17 @@
                   Enter Your Account Details
                 </h4>
               </div>
-
-              <Combobox v-model="emailAddress">
-                <ComboboxInput as="template">
-                  <Textinput label="Email" type="email" placeholder="Type your email"
-                             name="emailAddress"
-                             v-model="emailAddress"
-                             :error="emailAddressError"
-                             @input="fetchEmailSuggestions"
-                  />
-                </ComboboxInput>
-                <!-- TODO: move the options menu so it sits below the input field -->
-                <ComboboxOptions
-                  class="absolute w-max mt-1 max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5 focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700 shadow-dropdown z-[9999]">
-                  <ComboboxOption
-                    v-if="filtered_email_suggestions.indexOf(emailAddress) === -1"
-                    :value="emailAddress"
-                    v-slot="{ active }">
-                    <li
-                      :class="{
-                      'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': active,
-                      'text-slate-600 dark:text-slate-300': !active,
-                      }"
-                      class="relative w-full cursor-default select-none py-2 px-4"
-                    >
-                      <span class="block">
-                        Create {{ emailAddress }}
-                      </span>
-                    </li>
-                  </ComboboxOption>
-                  <ComboboxOption
-                    v-for="(suggestion, i) in filtered_email_suggestions"
-                    :key="i"
-                    :value="suggestion"
-                    v-slot="{ active }"
-                    @click="selectEmail"
-                  >
-                    <li
-                      :class="{
-                      'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': active,
-                      'text-slate-600 dark:text-slate-300': !active,
-                      }"
-                      class="relative cursor-default select-none py-2 px-4"
-                    >
-                      <span class="block truncate">
-                        {{ suggestion }}
-                      </span>
-                    </li>
-                  </ComboboxOption>
-                </ComboboxOptions>
-              </Combobox>
+              <ComboboxTextInput
+                :field-model-value="emailAddress"
+                :suggestions="filtered_email_suggestions"
+                :selected-callback="selectEmail">
+                <Textinput label="Email" type="email" placeholder="Type your email"
+                           name="emailAddress"
+                           v-model="emailAddress"
+                           :error="emailAddressError"
+                           @input="fetchEmailSuggestions"
+                />
+              </ComboboxTextInput>
 
               <Textinput
                 label="Confirm Email"
@@ -223,7 +184,7 @@ import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
-import {Combobox, ComboboxButton, ComboboxInput, ComboboxOptions, ComboboxOption, ComboboxLabel} from '@headlessui/vue';
+import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 
 
 export default {
@@ -234,12 +195,7 @@ export default {
     Textinput,
     InputGroup,
     Textarea,
-    Combobox,
-    ComboboxInput,
-    ComboboxLabel,
-    ComboboxButton,
-    ComboboxOptions,
-    ComboboxOption,
+    ComboboxTextInput,
   },
 
   setup() {
@@ -358,14 +314,20 @@ export default {
         console.log(stepNumber.value);
         if (stepNumber.value === 0) {
           console.log(clientId.value);
-          if (clientId.value === '') {
-            console.log(firstName);
-            requests.postNewClient({
-              firstName: firstName.value,
-              lastName: lastName.value,
-              emailAddress: emailAddress.value,
-            }).then((response) => clientId.value = response['id']);
-          }
+          requests.getClientByEmail(emailAddress.value).then((response) => {
+            console.log(response);
+            if (response.data.length === 0) {
+              console.log('Email does not match any client, creating...');
+              requests.postNewClient({
+                firstName: firstName.value,
+                lastName: lastName.value,
+                emailAddress: emailAddress.value,
+              }).then((response) => clientId.value = response['id']);
+            } else {
+              console.log('Email could be matched to client');
+              clientId.value = response.data[0]['id'];
+            }
+          });
         }
         stepNumber.value++;
       }
@@ -432,14 +394,6 @@ export default {
       });
     },
   },
-  /*watch: {
-    emailAddress(newValue, oldValue) {
-      console.log(newValue, oldValue, newValue !== oldValue);
-      if (newValue !== oldValue) {
-        this.fetchEmailSuggestions();
-      }
-    },
-  },*/
   computed: {
     filtered_email_suggestions() {
       return this.email_suggestions.filter((suggestion) => (suggestion.startsWith(this.emailAddress))).slice(0, 4);
