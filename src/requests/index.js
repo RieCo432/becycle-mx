@@ -102,4 +102,27 @@ export default {
       },
     });
   },
+  getBike(make, model, colour, decals, serialNumber) {
+    return axiosClient.get('/bike', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        make: make,
+        model: model,
+        colour: colour,
+        decals: decals,
+        serial_number: serialNumber,
+      },
+    });
+  },
+  postNewBike(make, model, colour, decals, serialNumber) {
+    return axiosClient.post('/bike', {
+      make: make,
+      model: model,
+      colour: colour,
+      decals: decals,
+      serialNumber: serialNumber,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

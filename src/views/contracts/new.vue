@@ -370,19 +370,41 @@ export default {
           });
       } else {
         if (stepNumber.value === 0) {
+          // Client details processing
           requests.getClientByEmail(emailAddress.value).then((response) => {
             if (response.data.length === 0) {
               requests.postNewClient({
                 firstName: firstName.value,
                 lastName: lastName.value,
                 emailAddress: emailAddress.value,
-              }).then((response) => clientId.value = response['id']);
+              }).then((response) => {
+                clientId.value = response['id'];
+                stepNumber.value++;
+              });
             } else {
               clientId.value = response.data[0]['id'];
+              stepNumber.value++;
             }
           });
+        } else if (stepNumber.value === 1) {
+          // Bike details processing
+          requests.getBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
+              .then((response) => {
+                console.log('found bike');
+                bikeId.value = response.data['id'];
+                stepNumber.value++;
+              }).catch((error) => {
+                if (error.response.status === 404) {
+                  requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
+                      .then((response) => {
+                        bikeId.value = response.data['id'];
+                        console.log('added bike');
+                        stepNumber.value++;
+                      });
+                }
+              });
+          console.log(bikeId.value);
         }
-        stepNumber.value++;
       }
     });
 
