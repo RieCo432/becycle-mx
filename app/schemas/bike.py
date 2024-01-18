@@ -6,7 +6,7 @@ class BikeBase(BaseModel):
     make: str
     model: str
     colour: str
-    decals: str
+    decals: str | None = None
     serialNumber: str
 
 

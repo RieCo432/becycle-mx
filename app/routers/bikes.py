@@ -13,16 +13,15 @@ bikes = APIRouter(
 )
 
 
-@bikes.get("/bikes", dependencies=[Depends(dep.get_current_active_user)])
-async def get_bikes(
-        make: str = None,
-        model: str = None,
-        colour: str = None,
+@bikes.get("/bike", dependencies=[Depends(dep.get_current_active_user)])
+async def get_bike(
+        make: str,
+        model: str,
+        colour: str,
+        serial_number: str,
         decals: str = None,
-        serial_number: str = None,
-        db: Session = Depends(dep.get_db)
-    ) -> list[schemas.Bike]:
-    return crud.get_bikes(make=make, model=model, colour=colour, decals=decals, serialNumber=serial_number, db=db)
+        db: Session = Depends(dep.get_db)) -> schemas.Bike:
+    return crud.get_bikes(make=make, model=model, colour=colour, decals=decals, serialNumber=serial_number, db=db)[0]
 
 
 @bikes.post("/bike", dependencies=[Depends(dep.get_current_active_user)])
