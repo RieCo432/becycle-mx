@@ -165,20 +165,51 @@
             </div>
           </div>
           <div v-if="stepNumber === 2">
-            <div class="grid grid-cols-1 gap-5">
-              <div class="">
+            <div class="grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-5">
+              <div class="lg:col-span-6 md:col-span-4 col-span-2">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Enter Your Address
+                  Enter the Lendee's Information
                 </h4>
               </div>
-              <Textarea
-                label="Address"
-                type="text"
-                placeholder="Write Address"
-                name="address"
-                v-model="address"
-                :error="addressError"
-              />
+
+              <div class="col-span-1">
+                <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Contract Type</h5>
+                <Radio
+                  v-for="(contractType, i) in contractTypes"
+                  :key="i"
+                  :label="contractType"
+                  class="mb-5"
+                  name="contracttype"
+                  v-model="type"
+                  :value="contractType"
+                />
+                <ErrorMessage name="type" :error="typeError"/>
+              </div>
+
+              <div class="col-span-1">
+                <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Bike Condition</h5>
+                <Radio
+                  v-for="(bikeCondition, i) in bikeConditions"
+                  :key="i"
+                  :label="bikeCondition"
+                  class="mb-5"
+                  name="bikecondition"
+                  v-model="condition"
+                  :value="bikeCondition"
+                />
+                <ErrorMessage name="condition" :error="conditionError"/>
+              </div>
+
+              <div class="md:col-span-4 col-span-2">
+                <Textarea
+                  label="Notes"
+                  type="text"
+                  placeholder="anything noteworth"
+                  name="notes"
+                  v-model="notes"
+                  :error="notesError"
+                />
+              </div>
             </div>
           </div>
           <div v-if="stepNumber === 3">
@@ -226,7 +257,9 @@ import Icon from '@/components/Icon';
 import InputGroup from '@/components/InputGroup';
 import Textarea from '@/components/Textarea';
 import Textinput from '@/components/Textinput';
-import {useField, useForm} from 'vee-validate';
+import Radio from '@/components/Radio/index.vue';
+import VueSelect from '@/components/Select/VueSelect.vue';
+import {ErrorMessage, Field, useField, useForm} from 'vee-validate';
 import {computed, ref} from 'vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
@@ -237,6 +270,8 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 
 export default {
   components: {
+    ErrorMessage,
+    Field,
     Card,
     Button,
     Icon,
@@ -244,6 +279,7 @@ export default {
     InputGroup,
     Textarea,
     ComboboxTextInput,
+    Radio,
   },
 
   setup() {
@@ -262,19 +298,30 @@ export default {
       },
       {
         id: 4,
-        title: 'Mechanics',
-      },
-      {
-        id: 5,
         title: 'Deposit',
       },
       {
+        id: 5,
+        title: 'Mechanic',
+      },
+      {
         id: 6,
-        title: 'Review',
+        title: 'Safety Check',
+      },
+      {
+        id: 7,
+        title: 'Summary',
       },
     ];
+
+    const contractTypes = ref(['standard', 'child']);
+    requests.getContractTypes().then((response) => (contractTypes.value = response.data));
+
+    const bikeConditions = ref(['fair', 'good']);
+    requests.getBikeConditions().then((response) => (bikeConditions.value = response.data));
+
     const toast = useToast();
-    const stepNumber = ref(0);
+    const stepNumber = ref(2);
 
     const clientId = ref('');
 
@@ -303,9 +350,16 @@ export default {
       serialNumber: yup.string().required(' Serial Number is required '),
     });
 
-    const addressSchema = yup.object().shape({
-      address: yup.string().required(' Address is required'),
+    const contractSchema = yup.object().shape({
+      type: yup.string().required(' Type is required'),
+      condition: yup.string().required(' Condition is required '),
+      notes: yup.string(),
     });
+
+    const depositCollectionSchema = yup.object().shape({
+      depositAmountPaid: yup.number().positive().integer().required(' Deposit Amount is required '),
+    })
+
     const url =
       /^((ftp|http|https):\/\/)?(www.)?(?!.*(ftp|http|https|www.))[a-zA-Z0-9_-]+(\.[a-zA-Z]+)+((\/)[\w#]+)*(\/\w+\?[a-zA-Z0-9_]+=\w+(&[a-zA-Z0-9_]+=\w+)*)?$/gm;
 
@@ -324,7 +378,7 @@ export default {
         case 1:
           return bikeSchema;
         case 2:
-          return addressSchema;
+          return contractSchema;
         case 3:
           return socialSchema;
         default:
@@ -348,13 +402,17 @@ export default {
     const {value: decals, errorMessage: decalsError} = useField('decals');
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
 
+    const {value: type, errorMessage: typeError} = useField('type');
+    const {value: condition, errorMessage: conditionError} = useField('condition');
+    const {value: notes, errorMessage: notesError} = useField('notes');
+
     const {value: phone, errorMessage: phoneError} = useField('phone');
     const {value: password, errorMessage: passwordError} =
       useField('password');
     const {value: confirmpass, errorMessage: confirmpassError} =
       useField('confirmpass');
 
-    const {value: address, errorMessage: addressError} = useField('address');
+
     const {value: fburl, errorMessage: fbError} = useField('fburl');
 
     const submit = handleSubmit(() => {
@@ -434,14 +492,23 @@ export default {
       serialNumber,
       serialNumberError,
 
+      type,
+      typeError,
+      condition,
+      conditionError,
+      notes,
+      notesError,
+
+      contractTypes,
+      bikeConditions,
+
       phone,
       phoneError,
       password,
       passwordError,
       confirmpass,
       confirmpassError,
-      address,
-      addressError,
+
 
       submit,
       steps,

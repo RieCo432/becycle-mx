@@ -125,4 +125,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getContractTypes() {
+    return axiosClient.get('/contract/types', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getBikeConditions() {
+    return axiosClient.get('/bike/conditions', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
