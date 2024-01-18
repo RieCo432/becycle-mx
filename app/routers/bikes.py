@@ -54,3 +54,8 @@ async def get_serial_number_suggestions(
         db: Session = Depends(dep.get_db)
 ) -> list[str]:
     return crud.get_similar_serial_numbers(db=db, serial_number=serial_number.lower())
+
+
+@bikes.get("/bike/conditions", dependencies=[Depends(dep.get_current_active_user)])
+async def get_bike_conditions() -> list[str]:
+    return ["poor", "fair", "good", "excellent"]

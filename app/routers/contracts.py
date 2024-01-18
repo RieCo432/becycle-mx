@@ -83,3 +83,8 @@ async def extend_contract(
     contract.send_creation_email()
     
     return contract
+
+
+@contracts.get("/contract/types", dependencies=[Depends(dep.get_current_active_user)])
+async def get_contract_types() -> list[str]:
+    return ["standard", "refugee", "child", "premium"]

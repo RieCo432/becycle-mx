@@ -20,7 +20,7 @@ def get_clients(db: Session, first_name: str, last_name: str, email_address: str
 
     if len(clients) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "No clients"})
-    
+
     return clients
 
 
