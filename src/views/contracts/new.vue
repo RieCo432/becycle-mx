@@ -372,7 +372,10 @@ export default {
         if (stepNumber.value === 0) {
           // Client details processing
           requests.getClientByEmail(emailAddress.value).then((response) => {
-            if (response.data.length === 0) {
+            clientId.value = response.data[0]['id'];
+            stepNumber.value++;
+          }).catch((error) => {
+            if (error.response.status === 404) {
               requests.postNewClient({
                 firstName: firstName.value,
                 lastName: lastName.value,
@@ -381,9 +384,6 @@ export default {
                 clientId.value = response['id'];
                 stepNumber.value++;
               });
-            } else {
-              clientId.value = response.data[0]['id'];
-              stepNumber.value++;
             }
           });
         } else if (stepNumber.value === 1) {
