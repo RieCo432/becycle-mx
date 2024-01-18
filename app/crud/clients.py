@@ -30,9 +30,9 @@ def get_client(db: Session, client_id: UUID) -> models.Client:
 
 def post_client(db: Session, client_data: schemas.ClientCreate) -> models.Client:
     client = models.Client(
-        firstName=client_data.firstName,
-        lastName=client_data.lastName,
-        emailAddress=client_data.emailAddress
+        firstName=client_data.firstName.lower(),
+        lastName=client_data.lastName.lower(),
+        emailAddress=client_data.emailAddress.lower()
     )
     db.add(client)
     db.commit()
@@ -41,9 +41,9 @@ def post_client(db: Session, client_data: schemas.ClientCreate) -> models.Client
 
 def post_client_temp(db: Session, client_data: schemas.ClientCreate) -> models.ClientTemp:
     client_temp = models.ClientTemp(
-        firstName=client_data.firstName,
-        lastName=client_data.lastName,
-        emailAddress=client_data.emailAddress
+        firstName=client_data.firstName.lower(),
+        lastName=client_data.lastName.lower(),
+        emailAddress=client_data.emailAddress.lower()
     )
     db.add(client_temp)
     db.commit()
