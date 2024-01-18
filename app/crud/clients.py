@@ -9,7 +9,7 @@ from uuid import UUID
 
 
 def get_clients(db: Session, first_name: str, last_name: str, email_address: str) -> list[models.Client]:
-    return [_ for _ in db.scalars(
+    clients = [_ for _ in db.scalars(
         select(models.Client)
         .where(
             (models.Client.firstName == first_name)
@@ -17,6 +17,11 @@ def get_clients(db: Session, first_name: str, last_name: str, email_address: str
             | (models.Client.emailAddress == email_address)
         )
     )]
+
+    if len(clients) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "No clients"})
+    
+    return clients
 
 
 def get_client(db: Session, client_id: UUID) -> models.Client:
