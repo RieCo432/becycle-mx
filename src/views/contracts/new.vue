@@ -216,17 +216,46 @@
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Enter Your Address
+                  Deposit Collection
                 </h4>
               </div>
+
+
               <Textinput
-                label="Facebook"
-                type="text"
-                placeholder="https://www.facebook.com/profile"
-                name="fburl"
-                v-model="fburl"
-                :error="fbError"
+                label="Deposit Amount (&pound;)"
+                type="number"
+                placeholder="40"
+                name="depositAmountCollected"
+                v-model="depositAmountCollected"
+                :error="depositAmountCollectedError"
               />
+
+              <Select
+                :options="depositBearers"
+                label="Deposit Collector"
+                v-model="depositCollectingUser"
+                name="depositCollectingUser"
+                :error="depositCollectingUserError"
+              />
+
+              <Textinput
+                label="Deposit Collector Password"
+                type="password"
+                placeholder="Password"
+                name="depositCollectingPassword"
+                v-model="depositCollectingPassword"
+                :error="depositCollectingPasswordError"
+                hasicon/>
+            </div>
+          </div>
+
+          <div v-if="stepNumber === 4">
+            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                  Mechanic
+                </h4>
+              </div>
             </div>
           </div>
 
@@ -266,10 +295,12 @@ import * as yup from 'yup';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
+import Select from '@/components/Select';
 
 
 export default {
   components: {
+    VueSelect,
     ErrorMessage,
     Field,
     Card,
@@ -280,6 +311,7 @@ export default {
     Textarea,
     ComboboxTextInput,
     Radio,
+    Select,
   },
 
   setup() {
@@ -321,7 +353,7 @@ export default {
     requests.getBikeConditions().then((response) => (bikeConditions.value = response.data));
 
     const toast = useToast();
-    const stepNumber = ref(2);
+    const stepNumber = ref(3);
 
     const clientId = ref('');
 
@@ -356,19 +388,43 @@ export default {
       notes: yup.string(),
     });
 
+    const validateDepositCollectingPassword = debounce((username, password) => {
+      return requests.checkUserPassword(username, password).then((response) => {
+        console.log(response.data);
+        return response.data;
+      });
+    }, 500);
+
     const depositCollectionSchema = yup.object().shape({
-      depositAmountPaid: yup.number().positive().integer().required(' Deposit Amount is required '),
-    })
-
-    const url =
-      /^((ftp|http|https):\/\/)?(www.)?(?!.*(ftp|http|https|www.))[a-zA-Z0-9_-]+(\.[a-zA-Z]+)+((\/)[\w#]+)*(\/\w+\?[a-zA-Z0-9_]+=\w+(&[a-zA-Z0-9_]+=\w+)*)?$/gm;
-
-    const socialSchema = yup.object().shape({
-      fburl: yup
-          .string()
-          .required('Facebook url is required')
-          .matches(url, 'Facebook url is not valid'),
+      depositAmountCollected: yup.number().positive().integer().required(' Deposit Amount is required '),
+      depositCollectingUser: yup.string().required(' Deposit Collector Username is required '),
+      // TODO: this validation thing needs to be working... Works fine un-debounced, but not with debounce
+      depositCollectingPassword: yup.string().required(), /*.test({
+        name: 'depositCollectingPasswordIsCorrect',
+        test: async (value, ctx) => {
+          if (!depositCollectingUser.value || !value) {
+            return ctx.createError({message: 'Empty Password!'});
+          }
+          if (await validateDepositCollectingPassword(depositCollectingUser.value, value)) {
+            return true;
+          }
+          return ctx.createError({message: 'Wrong Password!'});
+        },
+      }),*/
     });
+
+    const mechanicSchema = yup.object().shape({
+
+    });
+
+    const safetyCheckSchema = yup.object().shape({
+
+    });
+
+    const reviewSchema = yup.object().shape({
+
+    });
+
 
     // find current step schema
     const currentSchema = computed(() => {
@@ -380,7 +436,13 @@ export default {
         case 2:
           return contractSchema;
         case 3:
-          return socialSchema;
+          return depositCollectionSchema;
+        case 4:
+          return mechanicSchema;
+        case 5:
+          return safetyCheckSchema;
+        case 6:
+          return reviewSchema;
         default:
           return clientSchema;
       }
@@ -406,14 +468,11 @@ export default {
     const {value: condition, errorMessage: conditionError} = useField('condition');
     const {value: notes, errorMessage: notesError} = useField('notes');
 
-    const {value: phone, errorMessage: phoneError} = useField('phone');
-    const {value: password, errorMessage: passwordError} =
-      useField('password');
-    const {value: confirmpass, errorMessage: confirmpassError} =
-      useField('confirmpass');
+    const {value: depositAmountCollected, errorMessage: depositAmountCollectedError} = useField('depositAmountCollected');
+    const {value: depositCollectingUser, errorMessage: depositCollectingUserError} = useField('depositCollectingUser');
+    const {value: depositCollectingPassword, errorMessage: depositCollectingPasswordError} = useField('depositCollectingPassword');
 
 
-    const {value: fburl, errorMessage: fbError} = useField('fburl');
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
@@ -448,7 +507,6 @@ export default {
           // Bike details processing
           requests.getBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
               .then((response) => {
-                console.log('found bike');
                 bikeId.value = response.data['id'];
                 stepNumber.value++;
               }).catch((error) => {
@@ -456,12 +514,22 @@ export default {
                   requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
                       .then((response) => {
                         bikeId.value = response.data['id'];
-                        console.log('added bike');
                         stepNumber.value++;
                       });
                 }
               });
-          console.log(bikeId.value);
+        } else if (stepNumber.value === 2) {
+          // Nothing to process
+          stepNumber.value++;
+        } else if (stepNumber.value === 3) {
+          // Check password of deposit collector
+          requests.checkUserPassword(depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
+            if (response.data) {
+              stepNumber.value++;
+            } else {
+              throw new yup.ValidationError('Wrong Password!', 'Not sure', 'depositCollectingPassword');
+            }
+          });
         }
       }
     });
@@ -502,20 +570,18 @@ export default {
       contractTypes,
       bikeConditions,
 
-      phone,
-      phoneError,
-      password,
-      passwordError,
-      confirmpass,
-      confirmpassError,
+      depositAmountCollected,
+      depositAmountCollectedError,
+      depositCollectingUser,
+      depositCollectingUserError,
+      depositCollectingPassword,
+      depositCollectingPasswordError,
 
 
       submit,
       steps,
       stepNumber,
       prev,
-      fburl,
-      fbError,
     };
   },
   data() {
@@ -525,6 +591,8 @@ export default {
       make_suggestions: [],
       model_suggestions: [],
       serial_number_suggestions: [],
+      depositBearers: [],
+      rentalCheckers: [],
     };
   },
   created() {
@@ -587,6 +655,20 @@ export default {
     filtered_serial_number_suggestions() {
       return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber))).slice(0, 4);
     },
+  },
+  mounted() {
+    requests.getDepositBearers().then((response) => (this.depositBearers = response.data.map((user) =>
+      ({
+        label: user.username,
+        value: user.username,
+      }),
+    )));
+    requests.getRentalCheckers().then((response) => (this.rentalCheckers = response.data.map((user) =>
+      ({
+        label: user.username,
+        value: user.username,
+      }),
+    )));
   },
 };
 </script>

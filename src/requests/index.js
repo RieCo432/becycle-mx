@@ -135,4 +135,34 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getDepositBearers() {
+    return axiosClient.get('/users/deposit-bearers', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getRentalCheckers() {
+    return axiosClient.get('/users/rental-checkers', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  checkUserPassword(username, password) {
+    return axiosClient.post('/user/check/password', {
+      'username': username,
+      'password': password,
+    }, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+  },
+  checkUserPasswordOrPin(username, password) {
+    return axiosClient.post('/user/check/password-or-pin', {
+      'username': username,
+      'password': password,
+    }, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+  },
 };
