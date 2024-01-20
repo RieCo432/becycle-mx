@@ -60,3 +60,27 @@ def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
             detail="Integrity Error: Does this user already exist?"
         )
     return user
+
+
+def get_deposit_bearers(db: Session) -> list[models.User]:
+    deposit_bearers = [_ for _ in db.scalars(
+        select(models.User)
+        .where(
+            models.User.depositBearer
+            & (~models.User.softDeleted)
+        )
+    )]
+
+    return deposit_bearers
+
+
+def get_rental_checkers(db: Session) -> list[models.User]:
+    rental_checkers = [_ for _ in db.scalars(
+        select(models.User)
+        .where(
+            models.User.rentalChecker
+            & (~models.User.softDeleted)
+        )
+    )]
+
+    return rental_checkers

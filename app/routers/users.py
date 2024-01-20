@@ -66,7 +66,6 @@ async def post_user_password_or_pin_check(
     return user is not None
 
 
-
 @users.post("/user", dependencies=[Depends(dep.get_current_admin_user)])
 async def create_user(
         user_data: schemas.UserCreate,
@@ -74,3 +73,20 @@ async def create_user(
 ) -> schemas.User:
     created_user = crud.create_user(user_data=user_data, db=db)
     return created_user
+
+
+@users.get("/users/deposit-bearers", dependencies=[Depends(dep.get_current_active_user)])
+async def get_deposit_bearers(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.User]:
+    deposit_bearers = crud.get_deposit_bearers(db=db)
+    return deposit_bearers
+
+
+@users.get("/users/rental-checkers", dependencies=[Depends(dep.get_current_active_user)])
+async def get_rental_checkers(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.User]:
+    rental_checkers = crud.get_rental_checkers(db=db)
+    return rental_checkers
+

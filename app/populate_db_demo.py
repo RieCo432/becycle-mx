@@ -151,7 +151,7 @@ demo_contracts = [models.Contract(
         returnDetailsSent=False),
 ]
 
-db.add_all(demo_contracts)
+# db.add_all(demo_contracts)
 db.commit()
 
 
