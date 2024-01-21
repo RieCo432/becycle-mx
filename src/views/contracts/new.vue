@@ -238,14 +238,14 @@
                 :error="depositCollectingUserError"
               />
 
-              <Textinput
-                label="Deposit Collector Password"
-                type="password"
-                placeholder="Password"
-                name="depositCollectingPassword"
-                v-model="depositCollectingPassword"
-                :error="depositCollectingPasswordError"
-                hasicon/>
+                <Textinput
+                  label="Deposit Collector Password"
+                  type="password"
+                  placeholder="Password"
+                  name="depositCollectingPassword"
+                  v-model="depositCollectingPassword"
+                  :error="depositCollectingPasswordError"
+                  hasicon/>
             </div>
           </div>
 
@@ -388,29 +388,10 @@ export default {
       notes: yup.string(),
     });
 
-    const validateDepositCollectingPassword = debounce((username, password) => {
-      return requests.checkUserPassword(username, password).then((response) => {
-        console.log(response.data);
-        return response.data;
-      });
-    }, 500);
-
     const depositCollectionSchema = yup.object().shape({
       depositAmountCollected: yup.number().positive().integer().required(' Deposit Amount is required '),
       depositCollectingUser: yup.string().required(' Deposit Collector Username is required '),
-      // TODO: this validation thing needs to be working... Works fine un-debounced, but not with debounce
-      depositCollectingPassword: yup.string().required(), /*.test({
-        name: 'depositCollectingPasswordIsCorrect',
-        test: async (value, ctx) => {
-          if (!depositCollectingUser.value || !value) {
-            return ctx.createError({message: 'Empty Password!'});
-          }
-          if (await validateDepositCollectingPassword(depositCollectingUser.value, value)) {
-            return true;
-          }
-          return ctx.createError({message: 'Wrong Password!'});
-        },
-      }),*/
+      depositCollectingPassword: yup.string().required(),
     });
 
     const mechanicSchema = yup.object().shape({
@@ -470,7 +451,7 @@ export default {
 
     const {value: depositAmountCollected, errorMessage: depositAmountCollectedError} = useField('depositAmountCollected');
     const {value: depositCollectingUser, errorMessage: depositCollectingUserError} = useField('depositCollectingUser');
-    const {value: depositCollectingPassword, errorMessage: depositCollectingPasswordError} = useField('depositCollectingPassword');
+    const {value: depositCollectingPassword, errorMessage: depositCollectingPasswordError, setErrors: depositCollectingPasswordSetErrors} = useField('depositCollectingPassword');
 
 
 
@@ -527,7 +508,7 @@ export default {
             if (response.data) {
               stepNumber.value++;
             } else {
-              throw new yup.ValidationError('Wrong Password!', 'Not sure', 'depositCollectingPassword');
+              depositCollectingPasswordSetErrors('Wrong Password!');
             }
           });
         }
@@ -640,6 +621,11 @@ export default {
     },
     selectSerialNumber(event) {
       this.serialNumber = event.target.innerText;
+    },
+    validateDepositBearerPassword() {
+      return true; /*requests.checkUserPassword(this.depositCollectingUser, this.depositCollectingPassword).then((response) => {
+        return response.data ? true : 'Wrong Password!';
+      });*/
     },
   },
   computed: {
