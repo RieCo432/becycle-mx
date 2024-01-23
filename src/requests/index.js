@@ -140,6 +140,11 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getActiveUsers() {
+    return axiosClient.get('/users/active-users', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
   getRentalCheckers() {
     return axiosClient.get('/users/rental-checkers', {
       headers: credentialsStore.getApiRequestHeader(),

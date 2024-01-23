@@ -250,6 +250,61 @@
           </div>
 
           <div v-if="stepNumber === 4">
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
+              <div class="md:col-span-2 col-span-1">
+                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                  Main Mechanic
+                </h4>
+              </div>
+
+              <Select
+                  :options="activeUsers"
+                  label="Working Volunteer"
+                  v-model="workingUser"
+                  name="workingUser"
+                  :error="workingUserError"
+              />
+
+              <Textinput
+                  label="Working User Password or Pin"
+                  type="password"
+                  placeholder="Password or Pin"
+                  name="workingUserPasswordOrPin"
+                  v-model="workingPasswordOrPin"
+                  :error="workingPasswordOrPinError"
+                  hasicon/>
+            </div>
+          </div>
+
+
+          <div v-if="stepNumber === 5">
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
+              <div class="md:col-span-2 col-span-1">
+                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                  Checking Volunteer
+                </h4>
+              </div>
+
+              <Select
+                  :options="rentalCheckers"
+                  label="Safety Checking User"
+                  v-model="checkingUser"
+                  name="checkingUser"
+                  :error="checkingUserError"
+              />
+
+              <Textinput
+                  label="Checking User Password or Pin"
+                  type="password"
+                  placeholder="Password Or Pin"
+                  name="checkingPasswordOrPin"
+                  v-model="checkingPasswordOrPin"
+                  :error="checkingPasswordOrPinError"
+                  hasicon/>
+            </div>
+          </div>
+
+          <div v-if="stepNumber === 6">
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -394,12 +449,14 @@ export default {
       depositCollectingPassword: yup.string().required(),
     });
 
-    const mechanicSchema = yup.object().shape({
-
+    const workingUserSchema = yup.object().shape({
+      workingUser: yup.string().required(' Main mechanic Username is required '),
+      workingPasswordOrPin: yup.string().required(' Password or Pin is required '),
     });
 
-    const safetyCheckSchema = yup.object().shape({
-
+    const checkingUserSchema = yup.object().shape({
+      checkingUser: yup.string().required(' Checking Username is required '),
+      checkingPasswordOrPin: yup.string().required(' Password or Pin is required '),
     });
 
     const reviewSchema = yup.object().shape({
@@ -419,9 +476,9 @@ export default {
         case 3:
           return depositCollectionSchema;
         case 4:
-          return mechanicSchema;
+          return workingUserSchema;
         case 5:
-          return safetyCheckSchema;
+          return checkingUserSchema;
         case 6:
           return reviewSchema;
         default:
@@ -453,7 +510,11 @@ export default {
     const {value: depositCollectingUser, errorMessage: depositCollectingUserError} = useField('depositCollectingUser');
     const {value: depositCollectingPassword, errorMessage: depositCollectingPasswordError, setErrors: depositCollectingPasswordSetErrors} = useField('depositCollectingPassword');
 
+    const {value: workingUser, errorMessage: workingUserError} = useField('workingUser');
+    const {value: workingPasswordOrPin, errorMessage: workingPasswordOrPinError, setErrors: workingPasswordOrPinSetErrors} = useField('workingPasswordOrPin');
 
+    const {value: checkingUser, errorMessage: checkingUserError} = useField('checkingUser');
+    const {value: checkingPasswordOrPin, errorMessage: checkingPasswordOrPinError, setErrors: checkingPasswordOrPinSetErrors} = useField('checkingPasswordOrPin');
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
@@ -511,6 +572,24 @@ export default {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
           });
+        } else if (stepNumber.value === 4) {
+          // check password or pin of working volunteer
+          requests.checkUserPasswordOrPin(workingUser.value, workingPasswordOrPin.value).then((response) => {
+            if (response.data) {
+              stepNumber.value++;
+            } else {
+              workingPasswordOrPinSetErrors('Wrong Password or Pin!');
+            }
+          });
+        } else if (stepNumber.value === 5) {
+          // check password or pin of checking volunteer
+          requests.checkUserPasswordOrPin(checkingUser.value, checkingPasswordOrPin.value).then((response) => {
+            if (response.data) {
+              stepNumber.value++;
+            } else {
+              checkingPasswordOrPinSetErrors('Wrong Password or Pin!');
+            }
+          });
         }
       }
     });
@@ -558,6 +637,16 @@ export default {
       depositCollectingPassword,
       depositCollectingPasswordError,
 
+      workingUser,
+      workingUserError,
+      workingPasswordOrPin,
+      workingPasswordOrPinError,
+
+      checkingUser,
+      checkingUserError,
+      checkingPasswordOrPin,
+      checkingPasswordOrPinError,
+
 
       submit,
       steps,
@@ -574,6 +663,7 @@ export default {
       serial_number_suggestions: [],
       depositBearers: [],
       rentalCheckers: [],
+      activeUsers: [],
     };
   },
   created() {
@@ -622,11 +712,6 @@ export default {
     selectSerialNumber(event) {
       this.serialNumber = event.target.innerText;
     },
-    validateDepositBearerPassword() {
-      return true; /*requests.checkUserPassword(this.depositCollectingUser, this.depositCollectingPassword).then((response) => {
-        return response.data ? true : 'Wrong Password!';
-      });*/
-    },
   },
   computed: {
     filtered_email_suggestions() {
@@ -644,6 +729,12 @@ export default {
   },
   mounted() {
     requests.getDepositBearers().then((response) => (this.depositBearers = response.data.map((user) =>
+      ({
+        label: user.username,
+        value: user.username,
+      }),
+    )));
+    requests.getActiveUsers().then((response) => (this.activeUsers = response.data.map((user) =>
       ({
         label: user.username,
         value: user.username,
