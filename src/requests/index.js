@@ -170,4 +170,25 @@ export default {
       },
     });
   },
+  postNewContract(clientId, bikeId, depositAmountCollected, conditionOfBike, contractType, notes, workingUser,
+      workingPasswordOrPin, checkingUser, checkingPasswordOrPin, depositCollectingUser, depositCollectingPassword) {
+    return axiosClient.post('/contract', {
+      contract_data: {
+        clientId: clientId,
+        bikeId: bikeId,
+        depositAmountCollected: depositAmountCollected,
+        conditionOfBike: conditionOfBike,
+        contractType: contractType,
+        notes: notes,
+      },
+      working_username: workingUser,
+      working_user_password_or_pin: workingPasswordOrPin,
+      checking_username: checkingUser,
+      checking_user_password_or_pin: checkingPasswordOrPin,
+      deposit_receiving_username: depositCollectingUser,
+      deposit_receiving_user_password: depositCollectingPassword,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

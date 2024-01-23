@@ -308,8 +308,17 @@
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Mechanic
+                  Final Check
                 </h4>
+              </div>
+              <div class="col-span-1">
+                <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h5>
+                <Checkbox
+                    label="I confirm this information is correct!"
+                    name="everythingCorrect"
+                    v-model="everythingCorrect"
+                    :error="everythingCorrectError"/>
+                <ErrorMessage name="everythingCorrect" :error="everythingCorrectError"></ErrorMessage>
               </div>
             </div>
           </div>
@@ -351,10 +360,12 @@ import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import Select from '@/components/Select';
+import Checkbox from "@/components/Switch/index.vue";
 
 
 export default {
   components: {
+    Checkbox,
     VueSelect,
     ErrorMessage,
     Field,
@@ -408,7 +419,7 @@ export default {
     requests.getBikeConditions().then((response) => (bikeConditions.value = response.data));
 
     const toast = useToast();
-    const stepNumber = ref(3);
+    const stepNumber = ref(0);
 
     const clientId = ref('');
 
@@ -424,7 +435,7 @@ export default {
           .string()
           .email('Email is not valid')
           .required('Confirm Email is required')
-          .oneOf([yup.ref('emailAddress'), null], 'Email Addresses must match'),
+          .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
     });
 
     const bikeId = ref('');
@@ -455,12 +466,12 @@ export default {
     });
 
     const checkingUserSchema = yup.object().shape({
-      checkingUser: yup.string().required(' Checking Username is required '),
+      checkingUser: yup.string().required(' Checking Username is required ').notOneOf([yup.ref('workingUser')], 'Checking volunteer must be different from working volunteer'),
       checkingPasswordOrPin: yup.string().required(' Password or Pin is required '),
     });
 
     const reviewSchema = yup.object().shape({
-
+      everythingCorrect: yup.bool().required('This check is required!'),
     });
 
 
@@ -516,17 +527,17 @@ export default {
     const {value: checkingUser, errorMessage: checkingUserError} = useField('checkingUser');
     const {value: checkingPasswordOrPin, errorMessage: checkingPasswordOrPinError, setErrors: checkingPasswordOrPinSetErrors} = useField('checkingPasswordOrPin');
 
+    const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
+
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
       const totalSteps = steps.length;
       const isLastStep = stepNumber.value === totalSteps - 1;
       if (isLastStep) {
         stepNumber.value = totalSteps - 1;
-
-        toast.success -
-          500('Form Submited', {
-            timeout: 2000,
-          });
+        requests.postNewContract(clientId.value, bikeId.value, depositAmountCollected.value, condition.value, type.value, notes.value, workingUser.value, workingPasswordOrPin.value, checkingUser.value, checkingPasswordOrPin.value, depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
+          console.log(response.data.id);
+        });
       } else {
         if (stepNumber.value === 0) {
           // Client details processing
@@ -646,6 +657,9 @@ export default {
       checkingUserError,
       checkingPasswordOrPin,
       checkingPasswordOrPinError,
+
+      everythingCorrect,
+      everythingCorrectError,
 
 
       submit,
