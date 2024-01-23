@@ -24,19 +24,19 @@ db.query(models.ClosedDay).delete()
 db.query(models.User).delete()
 
 demo_clients = [
-    models.Client(firstName="Alice", lastName="Humphrey", emailAddress="alice.humphrey@example.com"),
-    models.Client(firstName="Bob", lastName="Frank", emailAddress="bob.frank@example.com"),
-    models.Client(firstName="Charlie", lastName="Maurice", emailAddress="charlie.maurice@example.com"),
-    models.Client(firstName="Debby", lastName="Smith", emailAddress="daurice.smith@exmaple.com")
+    models.Client(firstName="alice", lastName="humphrey", emailAddress="alice.humphrey@example.com"),
+    models.Client(firstName="bob", lastName="frank", emailAddress="bob.frank@example.com"),
+    models.Client(firstName="charlie", lastName="maurice", emailAddress="charlie.maurice@example.com"),
+    models.Client(firstName="debby", lastName="smith", emailAddress="daurice.smith@exmaple.com")
 ]
 
 db.add_all(demo_clients)
 db.commit()
 
 demo_bikes = [
-    models.Bike(make="Apollo", model="Skidmarks", colour="Brown", decals=None, serialNumber="abcd1234"),
-    models.Bike(make="Raleigh", model="Chloe", colour="Pink", decals=None, serialNumber="efgh5678"),
-    models.Bike(make="ElephantBike", model="Heavy AF", colour="Blue", decals=None, serialNumber="ijkl9012")
+    models.Bike(make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
+    models.Bike(make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
+    models.Bike(make="elephantbike", model="heavy af", colour="blue", decals=None, serialNumber="ijkl9012")
 ]
 
 db.add_all(demo_bikes)
