@@ -84,3 +84,14 @@ def get_rental_checkers(db: Session) -> list[models.User]:
     )]
 
     return rental_checkers
+
+
+def get_active_users(db: Session) -> list[models.User]:
+    active_users = [_ for _ in db.scalars(
+        select(models.User)
+        .where(
+            ~models.User.softDeleted
+        )
+    )]
+
+    return active_users

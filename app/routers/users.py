@@ -78,6 +78,14 @@ async def create_user(
     return created_user
 
 
+@users.get("/users/active-users", dependencies=[Depends(dep.get_current_active_user)])
+async def get_active_users(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.User]:
+    active_users = crud.get_active_users(db=db)
+    return active_users
+
+
 @users.get("/users/deposit-bearers", dependencies=[Depends(dep.get_current_active_user)])
 async def get_deposit_bearers(
         db: Session = Depends(dep.get_db)
