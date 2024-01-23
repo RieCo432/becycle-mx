@@ -1,1 +1,2 @@
 postgresql/data
+secrets/*.env

@@ -1,0 +1,22 @@
+services:
+    api:
+        build: fastapi/.
+        ports:
+            - "8000:8000"
+        env_file:
+            - secrets/api.env
+            - secrets/postgres.env
+            
+    postgres:
+        image: postgres:16.1
+        volumes:
+            - becycle_db_volume:/var/lib/postgresql/data
+            - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+        ports:
+            - "5432:5432"
+        env_file:
+            - secrets/postgres.env
+        
+        
+volumes:
+    becycle_db_volume:
