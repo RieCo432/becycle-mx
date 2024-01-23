@@ -681,10 +681,10 @@ export default {
     };
   },
   created() {
-    this.fetchEmailSuggestions = debounce(this.fetchEmailSuggestions, 500);
-    this.fetchBikeMakeSuggestions = debounce(this.fetchBikeMakeSuggestions, 500);
-    this.fetchBikeModelSuggestions = debounce(this.fetchBikeModelSuggestions, 500);
-    this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500);
+    this.fetchEmailSuggestions = debounce(this.fetchEmailSuggestions, 500, {leading: true, trailing: true});
+    this.fetchBikeMakeSuggestions = debounce(this.fetchBikeMakeSuggestions, 500, {leading: true, trailing: true});
+    this.fetchBikeModelSuggestions = debounce(this.fetchBikeModelSuggestions, 500, {leading: true, trailing: true});
+    this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500, {leading: true, trailing: true});
   },
   methods: {
     fetchEmailSuggestions() {
