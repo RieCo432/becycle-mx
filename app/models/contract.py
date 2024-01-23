@@ -3,9 +3,12 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.config import CONTRACT_EXPIRE_MONTHS
+import os
 from app.database.db import Base
 import app.services as services
+
+
+CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
 
 class Contract(Base):

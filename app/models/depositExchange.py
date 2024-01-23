@@ -3,8 +3,6 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean, DateTime
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.config import CONTRACT_EXPIRE_MONTHS
 from app.database.db import Base
 
 

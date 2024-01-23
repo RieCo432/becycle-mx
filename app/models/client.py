@@ -1,13 +1,17 @@
 from sqlalchemy import String, UUID, text, DateTime, ForeignKey
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.config import CLIENT_LOGIN_CODE_EXPIRE_MINUTES, CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES
+import os
 from app.database.db import Base
 from typing import List
 from random import random
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import app.services as services
+
+
+CLIENT_LOGIN_CODE_EXPIRE_MINUTES = int(os.environ['CLIENT_LOGIN_CODE_EXPIRE_MINUTES'])
+CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES = int(os.environ['CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES'])
 
 
 def generate_6_digit_code():

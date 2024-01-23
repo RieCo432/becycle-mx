@@ -9,7 +9,10 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import Annotated
 from app import auth
-from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
+import os
+
+
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ['ACCESS_TOKEN_EXPIRE_MINUTES'])
 
 
 clients = APIRouter(

@@ -1,11 +1,19 @@
 import smtplib
 import ssl
 from uuid import UUID
-from app.config import GOOGLE_APP_PASSWORD, GOOGLE_ACCOUNT, SMTP_PORT, SMTP_SERVER, API_HOST_ADDRESS, API_HOST_PORT
+import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import app.schemas as schemas
+
+
+GOOGLE_APP_PASSWORD = os.environ['GOOGLE_APP_PASSWORD']
+GOOGLE_ACCOUNT = os.environ['GOOGLE_ACCOUNT']
+SMTP_PORT = os.environ['SMTP_PORT']
+SMTP_SERVER = os.environ['SMTP_SERVER']
+API_HOST_ADDRESS = os.environ['API_HOST_ADDRESS']
+API_HOST_PORT = os.environ['API_HOST_PORT']
 
 
 def send_email(destination: str, subject: str, content: str) -> None:

@@ -1,1 +1,1 @@
-from .email import *
+from .email_helpers import *

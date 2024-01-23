@@ -6,9 +6,13 @@ from fastapi import Depends, HTTPException, status, Body
 import app.models as models
 import app.crud as crud
 from sqlalchemy.orm import Session
-from app.config import SECRET_KEY, ALGORITHM
+import os
 import app.schemas as schemas
 from uuid import UUID
+
+
+API_SECRET = os.environ['API_SECRET']
+API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
 
 
 user_oauth2_scheme = OAuth2PasswordBearer(
@@ -35,7 +39,7 @@ async def get_current_user(token: Annotated[str, Depends(user_oauth2_scheme)], d
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, API_SECRET, algorithms=[API_SECRET_ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -56,7 +60,7 @@ async def get_current_client(token: Annotated[str, Depends(client_oauth2_scheme)
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, API_SECRET, algorithms=[API_SECRET_ALGORITHM])
         client_id_str: str = payload.get("sub")
         if client_id_str is None:
             raise credentials_exception

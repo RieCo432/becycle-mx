@@ -7,8 +7,11 @@ from typing import Annotated
 import app.models as models
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
-from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
+import os
 from app import auth
+
+
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ['ACCESS_TOKEN_EXPIRE_MINUTES'])
 
 
 users = APIRouter(

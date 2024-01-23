@@ -12,5 +12,17 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 #
 COPY ./app /code/app
 
+ENV CLIENT_LOGIN_CODE_EXPIRE_MINUTES=60
+# 1 DAY
+ENV CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES=1440
+ENV CONTRACT_EXPIRE_MONTHS=6
+ENV API_SECRET_ALGORITHM=HS256
+# 1 WEEK
+ENV ACCESS_TOKEN_EXPIRE_MINUTES=10080
+ENV SMTP_SERVER=smtp.gmail.com
+ENV SMTP_PORT=465
+ENV API_HOST_ADDRESS=0.0.0.0
+ENV API_HOST_PORT=8000
+
 #
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD uvicorn app.main:app --host ${API_HOST_ADDRESS} --port ${API_HOST_PORT}
