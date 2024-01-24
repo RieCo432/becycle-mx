@@ -64,3 +64,13 @@ def get_similar_serial_numbers(db: Session, serial_number: str) -> list[str]:
     )]
 
     return similar_serial_numbers
+
+
+def get_similar_colours(db: Session, colour: str) -> list[str]:
+    similar_colours = [_ for _ in db.scalars(
+        select(models.Bike.colour)
+        .where(models.Bike.colour.contains(colour))
+        .distinct()
+    )]
+
+    return similar_colours
