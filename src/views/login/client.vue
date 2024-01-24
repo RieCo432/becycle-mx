@@ -71,7 +71,7 @@ export default {
           .then((response) => {
             credentialsStore.login(response.data['access_token'], 'client');
             requests.getClientMe().then((response) => (credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName'])));
-            this.$router.push('/client/me');
+            this.$router.push('/me');
           });
     },
   },

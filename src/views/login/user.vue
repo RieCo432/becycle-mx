@@ -56,7 +56,7 @@ export default {
           .then((response) => {
             credentialsStore.login(response.data['access_token'], 'user');
             requests.getUserMe().then((response) => (credentialsStore.setName(response.data['username'])));
-            this.$router.push('/user/me');
+            this.$router.push('/me');
           });
     },
   },
