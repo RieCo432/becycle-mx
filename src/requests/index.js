@@ -102,6 +102,14 @@ export default {
       },
     });
   },
+  getBikeColourSuggestions(colour) {
+    return axiosClient.get('/bikes/suggest/colours', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        colour: colour,
+      },
+    });
+  },
   getBike(make, model, colour, decals, serialNumber) {
     return axiosClient.get('/bike', {
       headers: credentialsStore.getApiRequestHeader(),

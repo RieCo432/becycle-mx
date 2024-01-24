@@ -129,14 +129,22 @@
                 />
               </ComboboxTextInput>
 
-              <Textinput
-                label="Colour"
-                type="text"
-                placeholder="Colour"
-                name="colour"
-                v-model="colour"
-                :error="colourError"
-              />
+              <ComboboxTextInput
+                :field-model-value="colour"
+                :suggestions="filtered_colour_suggestions"
+                :selected-callback="selectColour">
+                <Textinput
+                    label="Colour"
+                    type="text"
+                    placeholder="Colour"
+                    name="colour"
+                    v-model="colour"
+                    :error="colourError"
+                    @input="fetchColourSuggestions"
+                />
+              </ComboboxTextInput>
+
+
 
               <Textinput
                 label="Decals"
@@ -674,6 +682,7 @@ export default {
       email_suggestions: [],
       make_suggestions: [],
       model_suggestions: [],
+      colour_suggestions: [],
       serial_number_suggestions: [],
       depositBearers: [],
       rentalCheckers: [],
@@ -685,6 +694,7 @@ export default {
     this.fetchBikeMakeSuggestions = debounce(this.fetchBikeMakeSuggestions, 500, {leading: true, trailing: true});
     this.fetchBikeModelSuggestions = debounce(this.fetchBikeModelSuggestions, 500, {leading: true, trailing: true});
     this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500, {leading: true, trailing: true});
+    this.fetchColourSuggestions = debounce(this.fetchColourSuggestions, 500, {leading: true, trailing: true});
   },
   methods: {
     fetchEmailSuggestions() {
@@ -707,7 +717,11 @@ export default {
         this.serial_number_suggestions = response.data;
       });
     },
-
+    fetchColourSuggestions() {
+      requests.getBikeColourSuggestions(this.colour).then((response) => {
+        this.colour_suggestions = response.data;
+      });
+    },
     selectEmail(event) {
       this.emailAddress = event.target.innerText;
       requests.getClientByEmail(this.emailAddress).then((response) => {
@@ -726,6 +740,9 @@ export default {
     selectSerialNumber(event) {
       this.serialNumber = event.target.innerText;
     },
+    selectColour(event) {
+      this.colour = event.target.innerText;
+    },
   },
   computed: {
     filtered_email_suggestions() {
@@ -739,6 +756,9 @@ export default {
     },
     filtered_serial_number_suggestions() {
       return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber))).slice(0, 4);
+    },
+    filtered_colour_suggestions() {
+      return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour))).slice(0, 4);
     },
   },
   mounted() {
