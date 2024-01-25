@@ -15,6 +15,7 @@ const router = createRouter({
   },
 });
 router.beforeEach((to, from, next) => {
+  console.log('to:', to);
   const titleText = to.name;
   const words = titleText.split(' ');
   const wordslength = words.length;

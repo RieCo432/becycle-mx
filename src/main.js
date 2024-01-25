@@ -23,9 +23,9 @@ import 'v-calendar/dist/style.css';
 const pinia = createPinia();
 
 // vue use
-const app = createApp(App)
-    .use(pinia)
-    .use(VueSweetalert2)
+const app = createApp(App);
+app.use(pinia);
+app.use(VueSweetalert2)
     .use(Toast, {
       toastClassName: 'dashcode-toast',
       bodyClassName: 'dashcode-toast-body',
@@ -42,20 +42,8 @@ app.config.globalProperties.$store = {};
 app.mount('#app');
 
 import {useThemeSettingsStore} from '@/store/themeSettings';
-import {useCredentialsStore} from '@/store/credentialsStore';
 
 const themeSettingsStore = useThemeSettingsStore();
-const credentialsStore = useCredentialsStore();
-if (localStorage.users === undefined) {
-  const users = [
-    {
-      name: 'dashcode',
-      email: 'dashcode@gmail.com',
-      password: 'dashcode',
-    },
-  ];
-  localStorage.setItem('users', JSON.stringify(users));
-}
 
 // check localStorage theme for dark light bordered
 if (localStorage.theme === 'dark') {

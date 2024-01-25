@@ -42,10 +42,13 @@
           }`"
         >
           <Breadcrumbs v-if="!this.$route.meta.hide" />
-          <router-view v-slot="{ Component }">
+          <!--<router-view >
             <transition name="router-animation" mode="out-in" appear>
               <component :is="Component"></component>
             </transition>
+          </router-view>-->
+          <router-view v-slot="{ Component }">
+            <component :is="Component"></component>
           </router-view>
         </div>
       </div>

@@ -34,5 +34,14 @@ export const useCredentialsStore = defineStore('credentialsStore', {
         return {};
       };
     },
+    isUserLoggedIn() {
+      return this.tokenType === 'user';
+    },
+    isClientLoggedin() {
+      return this.tokenType === 'client';
+    },
+    isLoggedIn() {
+      return this.token === null;
+    },
   },
 });

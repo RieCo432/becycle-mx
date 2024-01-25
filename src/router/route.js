@@ -1,3 +1,15 @@
+// import {useCredentialsStore} from '@/store/credentialsStore';
+
+// function checkUserLoggedIn(to) {
+//   const router = useRouter();
+//   const credentialsStore = useCredentialsStore();
+//   if (credentialsStore.isUserLoggedIn()) {
+//     return true;
+//   } else {
+//     router.push('/login/user');
+//   }
+// }
+
 const routes = [
   {
     path: '/',
@@ -49,12 +61,18 @@ const routes = [
         component: () => import('@/views/client/me.vue'),
       },
       {
-        path: '/contracts/new',
+        path: '/contract',
+        name: 'Contract',
+        component: () => import('@/views/contract/index.vue'),
+        children: [
+
+        ],
+
+      },
+      {
+        path: '/contract/new',
         name: 'New Contract',
-        meta: {
-          hide: true,
-        },
-        component: () => import('@/views/contracts/new.vue'),
+        component: () => import('@/views/contract/new.vue'),
       },
     ],
   },

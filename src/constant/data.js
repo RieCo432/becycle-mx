@@ -16,83 +16,52 @@ export const topMenu = [
     title: 'Home',
     icon: 'heroicons-outline:home',
     link: '/home',
+    showByDefault: true,
+    ignoreTags: [],
+    showTags: [],
   },
-  /* {
-    title: 'App',
-    icon: 'heroicons-outline:chip',
-    link: '/app/home',
-    child: [
-      {
-        childtitle: 'Projects',
-        childlink: 'projects',
-        childicon: 'heroicons-outline:document',
-      },
-    ],
-  },*/
   {
     title: 'Login',
     icon: 'heroicons-outline:login',
     link: '/app/home',
+    showByDefault: true,
+    ignoreTags: ['clientLoggedIn', 'userLoggedIn'],
+    showTags: [],
     child: [
       {
         childtitle: 'Volunteer Login',
         childlink: '/login/user',
         childicon: 'heroicons-outline:login',
+        showByDefault: true,
+        ignoreTags: [],
+        showTags: [],
       },
       {
         childtitle: 'Client Login',
         childlink: '/login/client',
         childicon: 'heroicons-outline:login',
+        showByDefault: true,
+        ignoreTags: [],
+        showTage: [],
       },
     ],
   },
   {
     title: 'Contracts',
     icon: 'heroicons-outline:clipboard-document-list',
-    link: '/contracts',
+    link: '/contract',
+    showByDefault: false,
+    ignoreTags: [],
+    showTags: [''],
     child: [
       {
         childtitle: 'New Contract',
         childicon: 'heroicons-outline:document-plus',
-        childlink: '/contracts/new',
+        childlink: '/contract/new',
+        ignoreTags: [],
       },
     ],
   },
-  // {
-  //   title: 'Widgets',
-  //   icon: 'heroicons-outline:view-grid-add',
-  //   link: 'form-elements',
-  //   child: [
-  //     {
-  //       childtitle: 'Basic',
-  //       childlink: 'basic',
-  //       childicon: 'heroicons-outline:document-text',
-  //     },
-  //     {
-  //       childtitle: 'Statistic',
-  //       childlink: 'statistic',
-  //       childicon: 'heroicons-outline:document-text',
-  //     },
-  //   ],
-  // },
-  //
-  // {
-  //   title: 'Extra',
-  //   icon: 'heroicons-outline:template',
-  //
-  //   child: [
-  //     {
-  //       childtitle: 'Chart js',
-  //       childlink: 'chartjs',
-  //       childicon: 'heroicons-outline:chart-bar',
-  //     },
-  //     {
-  //       childtitle: 'Map',
-  //       childlink: 'map',
-  //       childicon: 'heroicons-outline:map',
-  //     },
-  //   ],
-  // },
 ];
 
 export const alertType = [
