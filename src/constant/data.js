@@ -60,6 +60,12 @@ export const topMenu = [
         childlink: '/contract/new',
         ignoreTags: [],
       },
+      {
+        childtitle: 'Find Contract',
+        childicon: 'heroicons-outline:document-magnifying-glass',
+        childlink: '/contract/find',
+        ignoreTags: [],
+      },
     ],
   },
 ];

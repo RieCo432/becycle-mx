@@ -199,4 +199,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  findClient(firstName, lastName, emailAddress) {
+    return axiosClient.get('/client/find', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        first_name: firstName,
+        last_name: lastName,
+        
+      }
+    })
+  }
 };

@@ -376,6 +376,7 @@ import Checkbox from "@/components/Switch/index.vue";
 
 
 export default {
+  name: 'newContract',
   components: {
     Checkbox,
     VueSelect,

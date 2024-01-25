@@ -67,12 +67,16 @@ const routes = [
         children: [
 
         ],
-
       },
       {
         path: '/contract/new',
         name: 'New Contract',
-        component: () => import('@/views/contract/new.vue'),
+        component: () => import('@/views/contract/newContract.vue'),
+      },
+      {
+        path: '/contract/find',
+        name: 'Find Contract',
+        component: () => import('@/views/contract/findContract.vue'),
       },
     ],
   },
