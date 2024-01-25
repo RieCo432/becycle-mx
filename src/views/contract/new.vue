@@ -1,355 +1,359 @@
 <template>
-  <Card title="New Contract">
-    <div>
-      <div class="flex z-[5] items-center relative justify-center md:mx-8">
-        <div
-          class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
-          v-for="(item, i) in steps"
-          :key="i"
-        >
-          <div
-            :class="`   ${
+  <div class="grid grid-cols-12 gap-5">
+    <div class="col-span-12">
+      <Card title="New Contract">
+        <div>
+          <div class="flex z-[5] items-center relative justify-center md:mx-8">
+            <div
+                class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
+                v-for="(item, i) in steps"
+                :key="i"
+            >
+              <div
+                  :class="`   ${
             stepNumber >= i
               ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900'
               : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
           }`"
-            class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
-          >
-            <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
-            <span v-else class="text-3xl">
+                  class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
+              >
+                <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
+                <span v-else class="text-3xl">
             <Icon icon="bx:check-double" />
           </span>
-          </div>
+              </div>
 
-          <div
-            class="absolute top-1/2 h-[2px] w-full"
-            :class="
+              <div
+                  class="absolute top-1/2 h-[2px] w-full"
+                  :class="
             stepNumber >= i
               ? 'bg-slate-900 dark:bg-slate-900'
               : 'bg-[#E0EAFF] dark:bg-slate-700'
           "
-          ></div>
-          <div
-            class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100"
-            :class="
+              ></div>
+              <div
+                  class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100"
+                  :class="
             stepNumber >= i
               ? ' text-slate-900 dark:text-slate-300'
               : 'text-slate-500 dark:text-slate-300 dark:text-opacity-40'
           "
-          >
-            <span class="w-max">{{ item.title }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
-      >
-        <form @submit.prevent="submit">
-          <div v-if="stepNumber === 0">
-            <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-2 md:col-span-2 col-span-1">
-                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Enter the Lendee's Information
-                </h4>
-              </div>
-              <ComboboxTextInput
-                :field-model-value="emailAddress"
-                :suggestions="filtered_email_suggestions"
-                :selected-callback="selectEmail">
-                <Textinput label="Email" type="email" placeholder="Type your email"
-                           name="emailAddress"
-                           v-model="emailAddress"
-                           :error="emailAddressError"
-                           @input="fetchEmailSuggestions"
-                />
-              </ComboboxTextInput>
-
-              <Textinput
-                label="Confirm Email"
-                type="email"
-                placeholder="Confirm your email"
-                name="confirmEmailAddress"
-                v-model="confirmEmailAddress"
-                :error="confirmEmailAddressError"
-              />
-              <Textinput
-                label="First name"
-                type="text"
-                placeholder="First name"
-                name="firstname"
-                v-model="firstName"
-                :error="firstNameError"
-              />
-              <Textinput
-                label="Last name"
-                type="text"
-                placeholder="Last name"
-                name="lastname"
-                v-model="lastName"
-                :error="lastNameError"
-              />
-            </div>
-          </div>
-          <div v-if="stepNumber === 1">
-            <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="md:col-span-2 col-span-1">
-                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Enter the bike's details
-                </h4>
-              </div>
-
-              <ComboboxTextInput
-                :field-model-value="make"
-                :suggestions="filtered_make_suggestions"
-                :selected-callback="selectMake">
-                <Textinput
-                  label="Make"
-                  type="text"
-                  placeholder="Make"
-                  name="make"
-                  v-model="make"
-                  :error="makeError"
-                  @input="fetchBikeMakeSuggestions"
-                />
-              </ComboboxTextInput>
-
-              <ComboboxTextInput
-                :field-model-value="model"
-                :suggestions="filtered_model_suggestions"
-                :selected-callback="selectModel">
-                <Textinput
-                  label="Model"
-                  type="text"
-                  placeholder="Model"
-                  name="model"
-                  v-model="model"
-                  :error="modelError"
-                  @input="fetchBikeModelSuggestions"
-                />
-              </ComboboxTextInput>
-
-              <ComboboxTextInput
-                :field-model-value="colour"
-                :suggestions="filtered_colour_suggestions"
-                :selected-callback="selectColour">
-                <Textinput
-                    label="Colour"
-                    type="text"
-                    placeholder="Colour"
-                    name="colour"
-                    v-model="colour"
-                    :error="colourError"
-                    @input="fetchColourSuggestions"
-                />
-              </ComboboxTextInput>
-
-
-
-              <Textinput
-                label="Decals"
-                type="text"
-                placeholder="Decals"
-                name="decals"
-                v-model="decals"
-                :error="decalsError"
-              />
-
-              <ComboboxTextInput
-                :field-model-value="serialNumber"
-                :suggestions="filtered_serial_number_suggestions"
-                :selected-callback="selectSerialNumber">
-                <Textinput
-                  label="Serial Number"
-                  type="text"
-                  placeholder="Serial Number"
-                  name="serialnumber"
-                  v-model="serialNumber"
-                  :error="serialNumberError"
-                  @input="fetchSerialNumberSuggestions"
-                />
-              </ComboboxTextInput>
-
-            </div>
-          </div>
-          <div v-if="stepNumber === 2">
-            <div class="grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-5">
-              <div class="lg:col-span-6 md:col-span-4 col-span-2">
-                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Enter the Lendee's Information
-                </h4>
-              </div>
-
-              <div class="col-span-1">
-                <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Contract Type</h5>
-                <Radio
-                  v-for="(contractType, i) in contractTypes"
-                  :key="i"
-                  :label="contractType"
-                  class="mb-5"
-                  name="contracttype"
-                  v-model="type"
-                  :value="contractType"
-                />
-                <ErrorMessage name="type" :error="typeError"/>
-              </div>
-
-              <div class="col-span-1">
-                <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Bike Condition</h5>
-                <Radio
-                  v-for="(bikeCondition, i) in bikeConditions"
-                  :key="i"
-                  :label="bikeCondition"
-                  class="mb-5"
-                  name="bikecondition"
-                  v-model="condition"
-                  :value="bikeCondition"
-                />
-                <ErrorMessage name="condition" :error="conditionError"/>
-              </div>
-
-              <div class="md:col-span-4 col-span-2">
-                <Textarea
-                  label="Notes"
-                  type="text"
-                  placeholder="anything noteworth"
-                  name="notes"
-                  v-model="notes"
-                  :error="notesError"
-                />
-              </div>
-            </div>
-          </div>
-          <div v-if="stepNumber === 3">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
-                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Deposit Collection
-                </h4>
-              </div>
-
-
-              <Textinput
-                label="Deposit Amount (&pound;)"
-                type="number"
-                placeholder="40"
-                name="depositAmountCollected"
-                v-model="depositAmountCollected"
-                :error="depositAmountCollectedError"
-              />
-
-              <Select
-                :options="depositBearers"
-                label="Deposit Collector"
-                v-model="depositCollectingUser"
-                name="depositCollectingUser"
-                :error="depositCollectingUserError"
-              />
-
-                <Textinput
-                  label="Deposit Collector Password"
-                  type="password"
-                  placeholder="Password"
-                  name="depositCollectingPassword"
-                  v-model="depositCollectingPassword"
-                  :error="depositCollectingPasswordError"
-                  hasicon/>
-            </div>
-          </div>
-
-          <div v-if="stepNumber === 4">
-            <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="md:col-span-2 col-span-1">
-                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Main Mechanic
-                </h4>
-              </div>
-
-              <Select
-                  :options="activeUsers"
-                  label="Working Volunteer"
-                  v-model="workingUser"
-                  name="workingUser"
-                  :error="workingUserError"
-              />
-
-              <Textinput
-                  label="Working User Password or Pin"
-                  type="password"
-                  placeholder="Password or Pin"
-                  name="workingUserPasswordOrPin"
-                  v-model="workingPasswordOrPin"
-                  :error="workingPasswordOrPinError"
-                  hasicon/>
-            </div>
-          </div>
-
-
-          <div v-if="stepNumber === 5">
-            <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="md:col-span-2 col-span-1">
-                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Checking Volunteer
-                </h4>
-              </div>
-
-              <Select
-                  :options="rentalCheckers"
-                  label="Safety Checking User"
-                  v-model="checkingUser"
-                  name="checkingUser"
-                  :error="checkingUserError"
-              />
-
-              <Textinput
-                  label="Checking User Password or Pin"
-                  type="password"
-                  placeholder="Password Or Pin"
-                  name="checkingPasswordOrPin"
-                  v-model="checkingPasswordOrPin"
-                  :error="checkingPasswordOrPinError"
-                  hasicon/>
-            </div>
-          </div>
-
-          <div v-if="stepNumber === 6">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
-                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  Final Check
-                </h4>
-              </div>
-              <div class="col-span-1">
-                <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h5>
-                <Checkbox
-                    label="I confirm this information is correct!"
-                    name="everythingCorrect"
-                    v-model="everythingCorrect"
-                    :error="everythingCorrectError"/>
-                <ErrorMessage name="everythingCorrect" :error="everythingCorrectError"></ErrorMessage>
+              >
+                <span class="w-max">{{ item.title }}</span>
               </div>
             </div>
           </div>
 
           <div
-            class="mt-10"
-            :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
+              class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
           >
-            <Button
-              @click.prevent="prev()"
-              text="prev"
-              btnClass="btn-dark"
-              v-if="this.stepNumber !== 0"
-            />
-            <Button
-              :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
-              btnClass="btn-dark"
-            />
+            <form @submit.prevent="submit">
+              <div v-if="stepNumber === 0">
+                <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="lg:col-span-2 md:col-span-2 col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Enter the Lendee's Information
+                    </h4>
+                  </div>
+                  <ComboboxTextInput
+                      :field-model-value="emailAddress"
+                      :suggestions="filtered_email_suggestions"
+                      :selected-callback="selectEmail">
+                    <Textinput label="Email" type="email" placeholder="Type your email"
+                               name="emailAddress"
+                               v-model="emailAddress"
+                               :error="emailAddressError"
+                               @input="fetchEmailSuggestions"
+                    />
+                  </ComboboxTextInput>
+
+                  <Textinput
+                      label="Confirm Email"
+                      type="email"
+                      placeholder="Confirm your email"
+                      name="confirmEmailAddress"
+                      v-model="confirmEmailAddress"
+                      :error="confirmEmailAddressError"
+                  />
+                  <Textinput
+                      label="First name"
+                      type="text"
+                      placeholder="First name"
+                      name="firstname"
+                      v-model="firstName"
+                      :error="firstNameError"
+                  />
+                  <Textinput
+                      label="Last name"
+                      type="text"
+                      placeholder="Last name"
+                      name="lastname"
+                      v-model="lastName"
+                      :error="lastNameError"
+                  />
+                </div>
+              </div>
+              <div v-if="stepNumber === 1">
+                <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="md:col-span-2 col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Enter the bike's details
+                    </h4>
+                  </div>
+
+                  <ComboboxTextInput
+                      :field-model-value="make"
+                      :suggestions="filtered_make_suggestions"
+                      :selected-callback="selectMake">
+                    <Textinput
+                        label="Make"
+                        type="text"
+                        placeholder="Make"
+                        name="make"
+                        v-model="make"
+                        :error="makeError"
+                        @input="fetchBikeMakeSuggestions"
+                    />
+                  </ComboboxTextInput>
+
+                  <ComboboxTextInput
+                      :field-model-value="model"
+                      :suggestions="filtered_model_suggestions"
+                      :selected-callback="selectModel">
+                    <Textinput
+                        label="Model"
+                        type="text"
+                        placeholder="Model"
+                        name="model"
+                        v-model="model"
+                        :error="modelError"
+                        @input="fetchBikeModelSuggestions"
+                    />
+                  </ComboboxTextInput>
+
+                  <ComboboxTextInput
+                      :field-model-value="colour"
+                      :suggestions="filtered_colour_suggestions"
+                      :selected-callback="selectColour">
+                    <Textinput
+                        label="Colour"
+                        type="text"
+                        placeholder="Colour"
+                        name="colour"
+                        v-model="colour"
+                        :error="colourError"
+                        @input="fetchColourSuggestions"
+                    />
+                  </ComboboxTextInput>
+
+
+
+                  <Textinput
+                      label="Decals"
+                      type="text"
+                      placeholder="Decals"
+                      name="decals"
+                      v-model="decals"
+                      :error="decalsError"
+                  />
+
+                  <ComboboxTextInput
+                      :field-model-value="serialNumber"
+                      :suggestions="filtered_serial_number_suggestions"
+                      :selected-callback="selectSerialNumber">
+                    <Textinput
+                        label="Serial Number"
+                        type="text"
+                        placeholder="Serial Number"
+                        name="serialnumber"
+                        v-model="serialNumber"
+                        :error="serialNumberError"
+                        @input="fetchSerialNumberSuggestions"
+                    />
+                  </ComboboxTextInput>
+
+                </div>
+              </div>
+              <div v-if="stepNumber === 2">
+                <div class="grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-5">
+                  <div class="lg:col-span-6 md:col-span-4 col-span-2">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Enter the Lendee's Information
+                    </h4>
+                  </div>
+
+                  <div class="col-span-1">
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Contract Type</h5>
+                    <Radio
+                        v-for="(contractType, i) in contractTypes"
+                        :key="i"
+                        :label="contractType"
+                        class="mb-5"
+                        name="contracttype"
+                        v-model="type"
+                        :value="contractType"
+                    />
+                    <ErrorMessage name="type" :error="typeError"/>
+                  </div>
+
+                  <div class="col-span-1">
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Bike Condition</h5>
+                    <Radio
+                        v-for="(bikeCondition, i) in bikeConditions"
+                        :key="i"
+                        :label="bikeCondition"
+                        class="mb-5"
+                        name="bikecondition"
+                        v-model="condition"
+                        :value="bikeCondition"
+                    />
+                    <ErrorMessage name="condition" :error="conditionError"/>
+                  </div>
+
+                  <div class="md:col-span-4 col-span-2">
+                <Textarea
+                    label="Notes"
+                    type="text"
+                    placeholder="anything noteworth"
+                    name="notes"
+                    v-model="notes"
+                    :error="notesError"
+                />
+                  </div>
+                </div>
+              </div>
+              <div v-if="stepNumber === 3">
+                <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="lg:col-span-3 md:col-span-2 col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Deposit Collection
+                    </h4>
+                  </div>
+
+
+                  <Textinput
+                      label="Deposit Amount (&pound;)"
+                      type="number"
+                      placeholder="40"
+                      name="depositAmountCollected"
+                      v-model="depositAmountCollected"
+                      :error="depositAmountCollectedError"
+                  />
+
+                  <Select
+                      :options="depositBearers"
+                      label="Deposit Collector"
+                      v-model="depositCollectingUser"
+                      name="depositCollectingUser"
+                      :error="depositCollectingUserError"
+                  />
+
+                  <Textinput
+                      label="Deposit Collector Password"
+                      type="password"
+                      placeholder="Password"
+                      name="depositCollectingPassword"
+                      v-model="depositCollectingPassword"
+                      :error="depositCollectingPasswordError"
+                      hasicon/>
+                </div>
+              </div>
+
+              <div v-if="stepNumber === 4">
+                <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="md:col-span-2 col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Main Mechanic
+                    </h4>
+                  </div>
+
+                  <Select
+                      :options="activeUsers"
+                      label="Working Volunteer"
+                      v-model="workingUser"
+                      name="workingUser"
+                      :error="workingUserError"
+                  />
+
+                  <Textinput
+                      label="Working User Password or Pin"
+                      type="password"
+                      placeholder="Password or Pin"
+                      name="workingUserPasswordOrPin"
+                      v-model="workingPasswordOrPin"
+                      :error="workingPasswordOrPinError"
+                      hasicon/>
+                </div>
+              </div>
+
+
+              <div v-if="stepNumber === 5">
+                <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="md:col-span-2 col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Checking Volunteer
+                    </h4>
+                  </div>
+
+                  <Select
+                      :options="rentalCheckers"
+                      label="Safety Checking User"
+                      v-model="checkingUser"
+                      name="checkingUser"
+                      :error="checkingUserError"
+                  />
+
+                  <Textinput
+                      label="Checking User Password or Pin"
+                      type="password"
+                      placeholder="Password Or Pin"
+                      name="checkingPasswordOrPin"
+                      v-model="checkingPasswordOrPin"
+                      :error="checkingPasswordOrPinError"
+                      hasicon/>
+                </div>
+              </div>
+
+              <div v-if="stepNumber === 6">
+                <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="lg:col-span-3 md:col-span-2 col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Final Check
+                    </h4>
+                  </div>
+                  <div class="col-span-1">
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h5>
+                    <Checkbox
+                        label="I confirm this information is correct!"
+                        name="everythingCorrect"
+                        v-model="everythingCorrect"
+                        :error="everythingCorrectError"/>
+                    <ErrorMessage name="everythingCorrect" :error="everythingCorrectError"></ErrorMessage>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                  class="mt-10"
+                  :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
+              >
+                <Button
+                    @click.prevent="prev()"
+                    text="prev"
+                    btnClass="btn-dark"
+                    v-if="this.stepNumber !== 0"
+                />
+                <Button
+                    :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
+                    btnClass="btn-dark"
+                />
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
+        </div>
+      </Card>
     </div>
-  </Card>
+  </div>
 </template>
 <script>
 import Card from '@/components/Card';
