@@ -134,5 +134,19 @@ def get_similar_email_addresses(db: Session, email_address: str) -> list[str]:
     return similar_email_addresses
 
 
+def get_potential_matches(db: Session, first_name: str, last_name: str, email_address: str) -> list[models.Client]:
+    potential_matches = [_ for _ in db.scalars(
+        select(models.Client)
+        .where(
+            ((first_name is None) or (models.Client.firstName.startswith(first_name)))
+            & ((last_name is None) or (models.Client.lastName.startswith(last_name)))
+            & ((email_address is None) or (models.Client.emailAddress.startswith(email_address)))
+        )
+    )]
+
+    return potential_matches
+
+
+
 
 

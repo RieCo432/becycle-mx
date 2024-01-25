@@ -119,6 +119,15 @@ async def get_token(
     )
 
 
+@clients.get("/clients/find", dependencies=[Depends(dep.get_current_active_user)])
+async def find_client(
+        first_name: str = None,
+        last_name: str = None,
+        email_address: str = None,
+        db: Session = Depends(dep.get_db)) -> list[schemas.Client]:
+    return crud.get_potential_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
+
+
 @clients.get("/clients/me")
 async def get_client_me(client: Annotated[models.Client, Depends(dep.get_current_client)]) -> schemas.Client:
 
