@@ -1,13 +1,15 @@
 <script>
-import Card from '@/components/card';
+import Card from '@/components/Card/index.vue';
 import Textinput from "@/components/Textinput/index.vue";
 import ComboboxTextInput from "@/components/ComboboxTextInput/ComboboxTextInput.vue";
 import requests from "@/requests";
 import {debounce} from "lodash-es";
+import Button from "@/components/Button/index.vue";
 
 export default {
-  name: 'findContract',
+  name: 'findClient',
   components: {
+    Button,
     ComboboxTextInput, Textinput,
     Card,
   },
@@ -59,7 +61,7 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-8">
-      <Card title="Find Contract">
+      <Card title="Find Client">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-6">
             <ComboboxTextInput
@@ -113,6 +115,14 @@ export default {
                   @input="fetchClients"
               />
             </ComboboxTextInput>
+          </div>
+
+          <div class="col-span-3 mt-10">
+            <Button
+              text="Confirm"
+              class="btn-dark"
+              @click="$router.push({path: '/client', query: {id: selectedClient.id}})"
+            />
           </div>
 
         </div>

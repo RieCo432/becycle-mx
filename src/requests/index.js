@@ -110,8 +110,8 @@ export default {
       },
     });
   },
-  getBike(make, model, colour, decals, serialNumber) {
-    return axiosClient.get('/bike', {
+  findBike(make, model, colour, decals, serialNumber) {
+    return axiosClient.get('/bike/find', {
       headers: credentialsStore.getApiRequestHeader(),
       params: {
         make: make,
@@ -119,6 +119,14 @@ export default {
         colour: colour,
         decals: decals,
         serial_number: serialNumber,
+      },
+    });
+  },
+  getBike(id) {
+    return axiosClient.get('/bike', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        id: id,
       },
     });
   },
@@ -206,6 +214,22 @@ export default {
         first_name: firstName,
         last_name: lastName,
         email_address: emailAddress,
+      },
+    });
+  },
+  getClient(id) {
+    return axiosClient.get('/client', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        id: id,
+      },
+    });
+  },
+  getClientContracts(clientId) {
+    return axiosClient.get('/contracts', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        client_id: clientId,
       },
     });
   },

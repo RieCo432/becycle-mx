@@ -571,7 +571,7 @@ export default {
           });
         } else if (stepNumber.value === 1) {
           // Bike details processing
-          requests.getBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
+          requests.findBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
               .then((response) => {
                 bikeId.value = response.data['id'];
                 stepNumber.value++;

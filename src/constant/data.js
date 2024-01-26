@@ -63,7 +63,7 @@ export const topMenu = [
       {
         childtitle: 'Find Contract',
         childicon: 'heroicons-outline:document-magnifying-glass',
-        childlink: '/contract/find',
+        childlink: '/client/find',
         ignoreTags: [],
       },
     ],

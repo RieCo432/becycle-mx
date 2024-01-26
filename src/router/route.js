@@ -56,6 +56,11 @@ const routes = [
         component: () => import('@/views/user/me.vue'),
       },
       {
+        path: '/client',
+        name: 'Client',
+        component: () => import('@/views/client/clientView.vue'),
+      },
+      {
         path: '/client/me',
         name: 'Me',
         component: () => import('@/views/client/me.vue'),
@@ -74,9 +79,9 @@ const routes = [
         component: () => import('@/views/contract/newContract.vue'),
       },
       {
-        path: '/contract/find',
-        name: 'Find Contract',
-        component: () => import('@/views/contract/findContract.vue'),
+        path: '/client/find',
+        name: 'Find Client',
+        component: () => import('@/views/client/findClient.vue'),
       },
     ],
   },
