@@ -139,8 +139,8 @@ def get_potential_matches(db: Session, first_name: str, last_name: str, email_ad
         select(models.Client)
         .where(
             ((first_name is None) or (models.Client.firstName.startswith(first_name)))
-            & ((last_name is None) or (models.Client.lastName.startswith(last_name)))
-            & ((email_address is None) or (models.Client.emailAddress.startswith(email_address)))
+            | ((last_name is None) or (models.Client.lastName.startswith(last_name)))
+            | ((email_address is None) or (models.Client.emailAddress.startswith(email_address)))
         )
     )]
 
