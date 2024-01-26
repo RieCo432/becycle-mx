@@ -200,13 +200,13 @@ export default {
     });
   },
   findClient(firstName, lastName, emailAddress) {
-    return axiosClient.get('/client/find', {
+    return axiosClient.get('/clients/find', {
       headers: credentialsStore.getApiRequestHeader(),
       params: {
         first_name: firstName,
         last_name: lastName,
-        
-      }
-    })
-  }
+        email_address: emailAddress,
+      },
+    });
+  },
 };
