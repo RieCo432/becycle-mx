@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 import app.crud as crud
@@ -13,8 +15,8 @@ bikes = APIRouter(
 )
 
 
-@bikes.get("/bike", dependencies=[Depends(dep.get_current_active_user)])
-async def get_bike(
+@bikes.get("/bike/find", dependencies=[Depends(dep.get_current_active_user)])
+async def find_bike(
         make: str,
         model: str,
         colour: str,
@@ -22,6 +24,13 @@ async def get_bike(
         decals: str = None,
         db: Session = Depends(dep.get_db)) -> schemas.Bike:
     return crud.get_bikes(make=make, model=model, colour=colour, decals=decals, serialNumber=serial_number, db=db)[0]
+
+@bikes.get("/bike", dependencies=[Depends(dep.get_current_active_user)])
+async def get_bike(
+        id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Bike:
+    return crud.get_bike(db=db, id=id)
 
 
 @bikes.post("/bike", dependencies=[Depends(dep.get_current_active_user)])

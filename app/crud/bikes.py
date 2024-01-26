@@ -1,8 +1,17 @@
+from uuid import UUID
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
 from sqlalchemy import select, func
+
+
+def get_bike(db: Session, id: UUID) -> models.Bike:
+    return db.scalar(
+        select(models.Bike)
+        .where(models.Bike.id == id)
+    )
 
 
 def get_bikes(make: str, model: str, colour: str, decals: str, serialNumber: str, db: Session) -> list[schemas.Bike]:

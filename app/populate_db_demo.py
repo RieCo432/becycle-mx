@@ -27,7 +27,8 @@ demo_clients = [
     models.Client(firstName="alice", lastName="humphrey", emailAddress="alice.humphrey@example.com"),
     models.Client(firstName="bob", lastName="frank", emailAddress="bob.frank@example.com"),
     models.Client(firstName="charlie", lastName="maurice", emailAddress="charlie.maurice@example.com"),
-    models.Client(firstName="debby", lastName="smith", emailAddress="daurice.smith@exmaple.com")
+    models.Client(firstName="debby", lastName="smith", emailAddress="daurice.smith@exmaple.com"),
+    models.Client(firstName="alex", lastName="smith", emailAddress="alex.smith@example.com")
 ]
 
 db.add_all(demo_clients)
@@ -151,7 +152,7 @@ demo_contracts = [models.Contract(
         returnDetailsSent=False),
 ]
 
-# db.add_all(demo_contracts)
+db.add_all(demo_contracts)
 db.commit()
 
 

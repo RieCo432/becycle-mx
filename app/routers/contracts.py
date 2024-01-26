@@ -16,8 +16,9 @@ contracts = APIRouter(
 
 @contracts.get("/contracts")
 async def get_contracts(
+        client_id: UUID = None,
         db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
-    return crud.get_contracts(db=db)
+    return crud.get_contracts(db=db, client_id=client_id)
 
 
 @contracts.post("/contract")

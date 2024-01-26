@@ -8,9 +8,12 @@ from fastapi import HTTPException, status
 from dateutil.relativedelta import relativedelta
 
 
-def get_contracts(db: Session) -> list[models.Contract]:
+def get_contracts(db: Session, client_id: UUID) -> list[models.Contract]:
     return [contract for contract in db.scalars(
         select(models.Contract)
+        .where(
+            ((models.Contract.clientId == client_id) | (client_id is None))
+        )
     )]
 
 
