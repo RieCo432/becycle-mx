@@ -13,9 +13,11 @@ def get_contracts(db: Session, client_id: UUID = None, open: bool = True, closed
         select(models.Contract)
         .where(
             ((models.Contract.clientId == client_id) | (client_id == None))
-            & ((models.Contract.returnedDate == None) | closed)
-            & (((models.Contract.returnedDate != None) & (models.Contract.endDate < datetime.utcnow().date())) | open)
-            & (((models.Contract.returnedDate != None) & (models.Contract.endDate > datetime.utcnow().date())) | expired)
+            & (
+                ((models.Contract.returnedDate != None) & closed)
+                | ((models.Contract.returnedDate == None) & (models.Contract.endDate < datetime.utcnow().date()) & expired)
+                | ((models.Contract.returnedDate == None) & (models.Contract.endDate > datetime.utcnow().date()) & open)
+            )
         )
     )]
 
