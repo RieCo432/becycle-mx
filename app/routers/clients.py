@@ -138,3 +138,14 @@ async def get_client_me(client: Annotated[models.Client, Depends(dep.get_current
 async def get_client(id: UUID,
                      db: Session = Depends(dep.get_db)) -> schemas.Client:
     return crud.get_client(db=db, client_id=id)
+@clients.get("/clients/{client_id}/contracts", dependencies=[Depends(dep.get_current_active_user)])
+async def get_client_contracts(
+        client_id: UUID,
+        open: bool = True,
+        closed: bool = True,
+        expired: bool = True,
+        db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
+    return crud.get_contracts(db=db, client_id=client_id, open=open, closed=closed, expired=expired)
+
+
+

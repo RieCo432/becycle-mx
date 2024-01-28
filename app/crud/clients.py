@@ -145,8 +145,3 @@ def get_potential_matches(db: Session, first_name: str, last_name: str, email_ad
     )]
 
     return potential_matches
-
-
-
-
-
