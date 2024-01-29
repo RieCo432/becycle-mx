@@ -1,6 +1,6 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import requests from "@/requests";
+import requests from '@/requests';
 
 export default {
   name: 'clientView',
@@ -14,8 +14,12 @@ export default {
         emailAddress: null,
         id: null,
       },
-      contracts: [],
-      contractSummaries: [],
+      openContracts: [],
+      openContractSummaries: [],
+      closedContracts: [],
+      closedContractSummaries: [],
+      expiredContracts: [],
+      expiredContractSummaries: [],
     };
   },
   computed: {
@@ -25,8 +29,27 @@ export default {
   },
   async created() {
     this.client = (await requests.getClient(this.$route.query.id)).data;
-    this.contracts = (await requests.getClientContracts(this.$route.query.id)).data;
-    this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
+
+    this.openContracts = (await requests.getClientContracts(this.$route.query.id, true, false, false)).data;
+    this.openContractSummaries = (await Promise.all(this.openContracts.map(async (contract) => {
+      return {
+        startDate: contract.startDate,
+        endDate: contract.endDate,
+        bike: (await requests.getBike(contract.bikeId)).data,
+      };
+    })));
+
+    this.closedContracts = (await requests.getClientContracts(this.$route.query.id, false, true, false)).data;
+    this.closedContractSummaries = (await Promise.all(this.closedContracts.map(async (contract) => {
+      return {
+        startDate: contract.startDate,
+        endDate: contract.endDate,
+        bike: (await requests.getBike(contract.bikeId)).data,
+      };
+    })));
+
+    this.expiredContracts = (await requests.getClientContracts(this.$route.query.id, false, false, true)).data;
+    this.expiredContractSummaries = (await Promise.all(this.expiredContracts.map(async (contract) => {
       return {
         startDate: contract.startDate,
         endDate: contract.endDate,
@@ -46,9 +69,17 @@ export default {
             <h4>{{client.emailAddress}}</h4>
           </div>
           <div class="col-span-6">
-            <h4>Contracts:</h4>
+            <h4>Open Contracts:</h4>
             <ul>
-              <li v-for="contract in contractSummaries">{{contract}}</li>
+              <li v-for="contract in openContractSummaries">{{contract}}</li>
+            </ul>
+            <h4>Closed Contracts:</h4>
+            <ul>
+              <li v-for="contract in closedContractSummaries">{{contract}}</li>
+            </ul>
+            <h4>Expired Contracts:</h4>
+            <ul>
+              <li v-for="contract in expiredContractSummaries">{{contract}}</li>
             </ul>
           </div>
         </div>

@@ -225,11 +225,13 @@ export default {
       },
     });
   },
-  getClientContracts(clientId) {
-    return axiosClient.get('/contracts', {
+  getClientContracts(clientId, open, closed, expired) {
+    return axiosClient.get(`/clients/${clientId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
       params: {
-        client_id: clientId,
+        open: open,
+        closed: closed,
+        expired: expired,
       },
     });
   },
