@@ -15,10 +15,11 @@ contracts = APIRouter(
 
 
 @contracts.get("/contracts")
-async def get_contracts(
-        client_id: UUID = None,
-        db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
-    return crud.get_contracts(db=db, client_id=client_id)
+async def get_contracts(open: bool = True,
+                        closed: bool = True,
+                        expired: bool = True,
+                        db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
+    return crud.get_contracts(db=db, open=open, closed=closed, expired=expired)
 
 
 @contracts.post("/contract")
