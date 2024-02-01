@@ -1,10 +1,14 @@
 <script>
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
+import Advanced from '@/components/Tables/ContractSummaryTable.vue';
 
 export default {
   name: 'clientView',
-  components: {Card},
+  components: {
+    Card,
+    Advanced,
+  },
 
   data() {
     return {
@@ -14,12 +18,76 @@ export default {
         emailAddress: null,
         id: null,
       },
-      openContracts: [],
-      openContractSummaries: [],
-      closedContracts: [],
-      closedContractSummaries: [],
-      expiredContracts: [],
-      expiredContractSummaries: [],
+      contracts: [],
+      contractSummaries: [],
+
+      actions: [
+        {
+          name: 'View',
+          icon: 'heroicons-outline:eye',
+        },
+        {
+          name: 'Return',
+          icon: 'heroicons:pencil-square',
+        },
+      ],
+      options: [
+        {
+          value: '1',
+          label: '1',
+        },
+        {
+          value: '3',
+          label: '3',
+        },
+        {
+          value: '5',
+          label: '5',
+        },
+      ],
+      columns: [
+        {
+          label: 'Status',
+          field: 'status',
+        },
+        {
+          label: 'Start Date',
+          field: 'startDate',
+        },
+        {
+          label: 'End Date',
+          field: 'endDate',
+        },
+        {
+          label: 'Make',
+          field: 'bikeMake',
+        },
+        {
+          label: 'Model',
+          field: 'bikeModel',
+        },
+
+        {
+          label: 'Colour',
+          field: 'bikeColour',
+        },
+
+        {
+          label: 'Decals',
+          field: 'bikeDecals',
+        },
+
+        {
+          label: 'Serial Number',
+          field: 'bikeSerialNumber',
+        },
+        {
+          label: 'Action',
+          field: 'action',
+        },
+      ],
+
+
     };
   },
   computed: {
@@ -30,30 +98,28 @@ export default {
   async created() {
     this.client = (await requests.getClient(this.$route.query.id)).data;
 
-    this.openContracts = (await requests.getClientContracts(this.$route.query.id, true, false, false)).data;
-    this.openContractSummaries = (await Promise.all(this.openContracts.map(async (contract) => {
-      return {
-        startDate: contract.startDate,
-        endDate: contract.endDate,
-        bike: (await requests.getBike(contract.bikeId)).data,
-      };
-    })));
 
-    this.closedContracts = (await requests.getClientContracts(this.$route.query.id, false, true, false)).data;
-    this.closedContractSummaries = (await Promise.all(this.closedContracts.map(async (contract) => {
+    this.contracts = (await requests.getClientContracts(this.$route.query.id, true, true, true)).data;
+    this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
+      const bike = (await requests.getBike(contract.bikeId)).data;
+      let status = 'open';
+      if (contract.returnedDate != null) {
+        status = 'closed';
+      } else {
+        if (new Date(contract.endDate).getTime() < new Date().getTime()) {
+          status = 'expired';
+        }
+      }
       return {
         startDate: contract.startDate,
         endDate: contract.endDate,
-        bike: (await requests.getBike(contract.bikeId)).data,
-      };
-    })));
-
-    this.expiredContracts = (await requests.getClientContracts(this.$route.query.id, false, false, true)).data;
-    this.expiredContractSummaries = (await Promise.all(this.expiredContracts.map(async (contract) => {
-      return {
-        startDate: contract.startDate,
-        endDate: contract.endDate,
-        bike: (await requests.getBike(contract.bikeId)).data,
+        returnedDate: contract.returnedDate,
+        bikeMake: bike['make'],
+        bikeModel: bike.model,
+        bikeColour: bike.colour,
+        bikeDecals: bike.decals,
+        bikeSerialNumber: bike.serialNumber,
+        status: status,
       };
     })));
   },
@@ -62,25 +128,12 @@ export default {
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="lg:col-span-8 col-span-12">
+    <div class="col-span-12">
       <Card :title="name">
+
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <h4>{{client.emailAddress}}</h4>
-          </div>
-          <div class="col-span-6">
-            <h4>Open Contracts:</h4>
-            <ul>
-              <li v-for="contract in openContractSummaries">{{contract}}</li>
-            </ul>
-            <h4>Closed Contracts:</h4>
-            <ul>
-              <li v-for="contract in closedContractSummaries">{{contract}}</li>
-            </ul>
-            <h4>Expired Contracts:</h4>
-            <ul>
-              <li v-for="contract in expiredContractSummaries">{{contract}}</li>
-            </ul>
+            <Advanced :options="options" :actions="actions" :columns="columns" :advanced-table="contractSummaries" title="Contracts"></Advanced>
           </div>
         </div>
       </Card>
