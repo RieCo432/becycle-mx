@@ -11,7 +11,7 @@
     `"
     v-if="!overlay"
   >
-    <div class="card-body flex flex-col" :class="bodyClass">
+    <div class="card-body flex flex-col h-full" :class="bodyClass">
       <header
         v-if="title || subtitle"
         class="flex mb-5 items-center"
