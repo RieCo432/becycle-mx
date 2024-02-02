@@ -1,10 +1,10 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import Textinput from "@/components/Textinput/index.vue";
-import ComboboxTextInput from "@/components/ComboboxTextInput/ComboboxTextInput.vue";
-import requests from "@/requests";
-import {debounce} from "lodash-es";
-import Button from "@/components/Button/index.vue";
+import Textinput from '@/components/Textinput/index.vue';
+import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
+import requests from '@/requests';
+import {debounce} from 'lodash-es';
+import Button from '@/components/Button/index.vue';
 
 export default {
   name: 'findClient',
@@ -40,7 +40,7 @@ export default {
   computed: {
     filtered_client_suggestions() {
       return this.clientSuggestions.filter((client) => (
-          (client.firstName.startsWith(this.selectedClient.firstName) && (this.selectedClient.firstName)) ||
+        (client.firstName.startsWith(this.selectedClient.firstName) && (this.selectedClient.firstName)) ||
           (client.lastName.startsWith(this.selectedClient.lastName) && (this.selectedClient.lastName)) ||
           (client.emailAddress.startsWith(this.selectedClient.emailAddress) && (this.selectedClient.emailAddress))
       ));
@@ -121,7 +121,7 @@ export default {
             <Button
               text="Confirm"
               class="btn-dark"
-              @click="$router.push({path: '/client', query: {id: selectedClient.id}})"
+              @click="$router.push({path: `/clients/${selectedClient.id}`})"
             />
           </div>
 

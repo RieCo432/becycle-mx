@@ -56,7 +56,7 @@ const routes = [
         component: () => import('@/views/user/me.vue'),
       },
       {
-        path: '/client',
+        path: '/clients/:clientId',
         name: 'Client',
         component: () => import('@/views/client/clientView.vue'),
       },
@@ -69,6 +69,14 @@ const routes = [
         path: '/contract',
         name: 'Contract',
         component: () => import('@/views/contract/index.vue'),
+        children: [
+
+        ],
+      },
+      {
+        path: '/contracts/:contractId',
+        name: 'Contract',
+        component: () => import('@/views/contract/viewContract.vue'),
         children: [
 
         ],

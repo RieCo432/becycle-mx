@@ -122,12 +122,9 @@ export default {
       },
     });
   },
-  getBike(id) {
-    return axiosClient.get('/bike', {
+  getBike(bikeId) {
+    return axiosClient.get(`/bikes/${bikeId}`, {
       headers: credentialsStore.getApiRequestHeader(),
-      params: {
-        id: id,
-      },
     });
   },
   postNewBike(make, model, colour, decals, serialNumber) {
@@ -217,12 +214,9 @@ export default {
       },
     });
   },
-  getClient(id) {
-    return axiosClient.get('/client', {
+  getClient(clientId) {
+    return axiosClient.get(`/clients/${clientId}`, {
       headers: credentialsStore.getApiRequestHeader(),
-      params: {
-        id: id,
-      },
     });
   },
   getClientContracts(clientId, open, closed, expired) {
@@ -233,6 +227,16 @@ export default {
         closed: closed,
         expired: expired,
       },
+    });
+  },
+  getContract(contractId) {
+    return axiosClient.get(`/contracts/${contractId}/`, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getUser(userId) {
+    return axiosClient.get(`/users/${userId}/`, {
+      headers: credentialsStore.getApiRequestHeader(),
     });
   },
 };

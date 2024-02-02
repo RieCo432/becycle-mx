@@ -96,10 +96,10 @@ export default {
     },
   },
   async created() {
-    this.client = (await requests.getClient(this.$route.query.id)).data;
+    this.client = (await requests.getClient(this.$route.params.clientId)).data;
 
 
-    this.contracts = (await requests.getClientContracts(this.$route.query.id, true, true, true)).data;
+    this.contracts = (await requests.getClientContracts(this.$route.params.clientId, true, true, true)).data;
     this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
       const bike = (await requests.getBike(contract.bikeId)).data;
       let status = 'open';
@@ -111,6 +111,7 @@ export default {
         }
       }
       return {
+        id: contract.id,
         startDate: contract.startDate,
         endDate: contract.endDate,
         returnedDate: contract.returnedDate,

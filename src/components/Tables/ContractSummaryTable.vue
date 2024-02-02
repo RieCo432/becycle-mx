@@ -88,7 +88,7 @@
                 <Tooltip placement="top" arrow theme="dark" v-for="action in actions">
                   <template #button>
                     <div class="action-btn">
-                      <Icon :icon="action.icon" />
+                      <Icon :icon="action.icon" @click="$router.push({path:`/contracts/${props.row.id}`})"/>
                     </div>
                   </template>
                   <span>{{action.name}}</span>
