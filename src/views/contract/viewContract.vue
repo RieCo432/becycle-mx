@@ -1,9 +1,11 @@
 <script>
 import Card from '@/components/card';
 import requests from '@/requests';
+import Button from '@/components/Button/index.vue';
 export default {
   name: 'viewContract',
   components: {
+    Button,
     Card,
   },
   data() {
@@ -14,7 +16,17 @@ export default {
       depositCollectingUser: {},
       workingUser: {},
       checkingUser: {},
+      contractId: this.$route.params.contractId,
     };
+  },
+  methods: {
+    extendContract() {
+      requests.extendContract(this.contractId).then(() => {
+        requests.getContract(this.contractId).then((response) => {
+          this.contract = response.data;
+        });
+      });
+    },
   },
   async created() {
     this.contract = (await requests.getContract(this.$route.params.contractId)).data;
@@ -53,6 +65,10 @@ export default {
             <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUser.username}}</p>
             <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUser.username}}</p>
             <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUser.username}}</p>
+
+            <Button class="mt-5" @click="extendContract">
+              Extend Contract
+            </Button>
           </Card>
         </div>
         <div class="col-span-12 gap-5">
