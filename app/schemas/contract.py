@@ -23,10 +23,6 @@ class ContractReturn(BaseModel):
     depositAmountReturned: int
 
 
-class ContractExtend(BaseModel):
-    id: UUID
-
-
 class Contract(ContractBase):
     id: UUID
 

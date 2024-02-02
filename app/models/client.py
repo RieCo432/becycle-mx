@@ -77,8 +77,8 @@ class ClientLogin(Base):
                                                          nullable=False, quote=False)
 
     def send_login_code(self):
-        email_html_content = services.email.build_client_login_code_html(login_code=self.code)
-        services.email.send_email(
+        email_html_content = services.email_helpers.build_client_login_code_html(login_code=self.code)
+        services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Log-in code",
             content=email_html_content)

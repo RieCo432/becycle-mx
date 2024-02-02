@@ -24,11 +24,15 @@ def send_email(destination: str, subject: str, content: str) -> None:
 
     message.attach(MIMEText(content, "html"))
 
-    context = ssl.create_default_context()
+    # TODO: uncomment when production
+    
+    print(destination, subject, content)
 
-    with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
-        server.login(GOOGLE_ACCOUNT, GOOGLE_APP_PASSWORD)
-        server.sendmail(GOOGLE_ACCOUNT, destination, message.as_string())
+    # context = ssl.create_default_context()
+
+    # with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+    #     server.login(GOOGLE_ACCOUNT, GOOGLE_APP_PASSWORD)
+    #     server.sendmail(GOOGLE_ACCOUNT, destination, message.as_string())
 
 
 def build_email_verification_html(client_temp_id: UUID, verification_code: str) -> str:

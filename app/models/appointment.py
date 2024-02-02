@@ -27,31 +27,31 @@ class Appointment(Base):
     reminderSent: Mapped[bool] = mapped_column("reminderSent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
     def send_request_received_email(self):
-        email_html_content = services.email.build_appointment_request_received_email(self.type.title, self.startDateTime)
-        services.email.send_email(
+        email_html_content = services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime)
+        services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Appointment Request Received",
             content=email_html_content
         )
 
     def send_confirmation_email(self):
-        email_html_content = services.email.build_appointment_confirmation_email(self.type.title, self.startDateTime)
-        services.email.send_email(
+        email_html_content = services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime)
+        services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Confirmation",
             content=email_html_content
         )
 
     def send_request_denied_email(self):
-        email_html_content = services.email.build_appointment_request_denied_email(self.type.title, self.startDateTime)
-        services.email.send_email(
+        email_html_content = services.email_helpers.build_appointment_request_denied_email(self.type.title, self.startDateTime)
+        services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Apoointment Request has been denied",
             content=email_html_content
         )
 
     def send_cancellation_email(self):
-        email_html_content = services.email.build_appointment_cancellation_email(self.type.title, self.startDateTime)
+        email_html_content = services.email_helpers.build_appointment_cancellation_email(self.type.title, self.startDateTime)
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment has been cancelled",
