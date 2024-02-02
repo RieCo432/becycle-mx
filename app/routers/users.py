@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 import app.crud as crud
 import app.schemas as schemas
@@ -40,6 +42,11 @@ async def get_user_me(
         current_user: Annotated[models.User, Depends(dep.get_current_active_user)]
 ) -> schemas.User:
     return current_user
+
+
+@users.get("/users/{user_id}/", dependencies=[Depends(dep.get_current_active_user)])
+async def get_user(user_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.User:
+    return crud.get_user(db=db, user_id=user_id)
 
 
 @users.get("/users/me/deposit_balance")

@@ -25,12 +25,22 @@ async def find_bike(
         db: Session = Depends(dep.get_db)) -> schemas.Bike:
     return crud.get_bikes(make=make, model=model, colour=colour, decals=decals, serialNumber=serial_number, db=db)[0]
 
+
 @bikes.get("/bike", dependencies=[Depends(dep.get_current_active_user)])
 async def get_bike(
-        id: UUID,
+        bike_id: UUID,
         db: Session = Depends(dep.get_db)
 ) -> schemas.Bike:
-    return crud.get_bike(db=db, id=id)
+    print("/bike IS DEPRECIATED")
+    return crud.get_bike(db=db, bike_id=bike_id)
+
+
+@bikes.get("/bikes/{bike_id}", dependencies=[Depends(dep.get_current_active_user)])
+async def get_bike(
+        bike_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Bike:
+    return crud.get_bike(db=db, bike_id=bike_id)
 
 
 @bikes.post("/bike", dependencies=[Depends(dep.get_current_active_user)])

@@ -5,9 +5,10 @@ import app.schemas as schemas
 import bcrypt
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
+from uuid import UUID
 
 
-def get_user(username: str, db: Session) -> models.User | None:
+def get_user_by_username(username: str, db: Session) -> models.User | None:
     if username is None:
         return None
     return db.scalar(
@@ -16,8 +17,15 @@ def get_user(username: str, db: Session) -> models.User | None:
     )
 
 
+def get_user(db: Session, user_id: UUID) -> models.User | None:
+    return db.scalar(
+        select(models.User)
+        .where(models.User.id == user_id)
+    )
+
+
 def authenticate_user(username: str, password_cleartext: str, db: Session) -> models.User | None:
-    user = get_user(username=username, db=db)
+    user = get_user_by_username(username=username, db=db)
     if user is None:
         return None
     if not bcrypt.checkpw(password_cleartext, user.password):
@@ -27,7 +35,7 @@ def authenticate_user(username: str, password_cleartext: str, db: Session) -> mo
 
 
 def validate_user_signature(username: str, password_or_pin, db: Session) -> models.User | None:
-    user = get_user(username=username, db=db)
+    user = get_user_by_username(username=username, db=db)
     if user is None:
         return None
     if bcrypt.checkpw(password_or_pin, user.password):

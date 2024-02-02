@@ -2,7 +2,7 @@ from datetime import date, datetime
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
-from sqlalchemy import select, and_, or_, not_
+from sqlalchemy import select
 from uuid import UUID
 from fastapi import HTTPException, status
 from dateutil.relativedelta import relativedelta

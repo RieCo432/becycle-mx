@@ -14,6 +14,11 @@ contracts = APIRouter(
 )
 
 
+@contracts.get("/contracts/{contract_id}/", dependencies=[Depends(dep.get_current_active_user)])
+async def get_contract(contract_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.Contract:
+    return crud.get_contract(db=db, contract_id=contract_id)
+
+
 @contracts.get("/contracts")
 async def get_contracts(open: bool = True,
                         closed: bool = True,

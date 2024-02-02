@@ -7,10 +7,10 @@ import app.schemas as schemas
 from sqlalchemy import select, func
 
 
-def get_bike(db: Session, id: UUID) -> models.Bike:
+def get_bike(db: Session, bike_id: UUID) -> models.Bike:
     return db.scalar(
         select(models.Bike)
-        .where(models.Bike.id == id)
+        .where(models.Bike.id == bike_id)
     )
 
 
