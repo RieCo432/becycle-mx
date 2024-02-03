@@ -1,11 +1,15 @@
 <script>
 import Card from '@/components/card';
 import requests from '@/requests';
-import Button from '@/components/Button/index.vue';
+import DashButton from '@/components/Button/index.vue';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
+
 export default {
   name: 'viewContract',
   components: {
-    Button,
+    DashButton,
     Card,
   },
   data() {
@@ -22,6 +26,7 @@ export default {
   methods: {
     extendContract() {
       requests.extendContract(this.contractId).then(() => {
+        toast.success('Contract Extended!', {timeout: 1000});
         requests.getContract(this.contractId).then((response) => {
           this.contract = response.data;
         });
@@ -50,9 +55,9 @@ export default {
                 <p class="text-slate-600 dark:text-slate-300">{{client.firstName}} {{client.lastName}}</p>
                 <p class="text-slate-600 dark:text-slate-300">{{client.emailAddress}}</p>
               </div>
-              <Button @click="this.$router.push({path: `/clients/${client.id}`})">
+              <DashButton @click="this.$router.push({path: `/clients/${client.id}`})">
                 View Client
-              </Button>
+              </DashButton>
             </div>
           </Card>
         </div>
@@ -75,9 +80,9 @@ export default {
                 <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUser.username}}</p>
                 <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUser.username}}</p>
               </div>
-              <Button class="mt-5" @click="extendContract">
+              <DashButton class="mt-5" @click="extendContract">
                 Extend Contract
-              </Button>
+              </DashButton>
             </div>
           </Card>
         </div>

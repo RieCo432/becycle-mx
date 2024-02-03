@@ -147,7 +147,6 @@
                   </ComboboxTextInput>
 
 
-
                   <Textinput
                       label="Decals"
                       type="text"
@@ -372,7 +371,8 @@ import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import Select from '@/components/Select';
-import Checkbox from "@/components/Switch/index.vue";
+import Checkbox from '@/components/Switch/index.vue';
+import {useRouter} from 'vue-router';
 
 
 export default {
@@ -435,6 +435,9 @@ export default {
     const stepNumber = ref(0);
 
     const clientId = ref('');
+    const bikeId = ref('');
+
+    const router = useRouter();
 
     // step by step yup schema
     const clientSchema = yup.object().shape({
@@ -450,8 +453,6 @@ export default {
           .required('Confirm Email is required')
           .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
     });
-
-    const bikeId = ref('');
 
     const bikeSchema = yup.object().shape({
       make: yup.string().required(' Make is required'),
@@ -549,7 +550,8 @@ export default {
       if (isLastStep) {
         stepNumber.value = totalSteps - 1;
         requests.postNewContract(clientId.value, bikeId.value, depositAmountCollected.value, condition.value, type.value, notes.value, workingUser.value, workingPasswordOrPin.value, checkingUser.value, checkingPasswordOrPin.value, depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
-          console.log(response.data.id);
+          toast.success('Contract Recorded!', {timeout: 1000});
+          router.push({path: `/contracts/${response.data.id}`});
         });
       } else {
         if (stepNumber.value === 0) {
@@ -564,7 +566,8 @@ export default {
                 lastName: lastName.value,
                 emailAddress: emailAddress.value,
               }).then((response) => {
-                clientId.value = response['id'];
+                toast.success('New Client Created!', {timeout: 1000});
+                clientId.value = response.data['id'];
                 stepNumber.value++;
               });
             }
@@ -579,6 +582,7 @@ export default {
                 if (error.response.status === 404) {
                   requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
                       .then((response) => {
+                        toast.success('New Bike Created!', {timeout: 1000});
                         bikeId.value = response.data['id'];
                         stepNumber.value++;
                       });

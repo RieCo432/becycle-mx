@@ -169,7 +169,7 @@ export default {
   components: {
     Icon,
   },
-  name: 'Button',
+  name: 'DashButton',
   props: {
     text: {
       type: String,
