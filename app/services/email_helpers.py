@@ -25,7 +25,7 @@ def send_email(destination: str, subject: str, content: str) -> None:
     message.attach(MIMEText(content, "html"))
 
     # TODO: uncomment when production
-    
+
     print(destination, subject, content)
 
     # context = ssl.create_default_context()

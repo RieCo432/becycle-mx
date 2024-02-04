@@ -15,7 +15,7 @@ deposit_exchanges = APIRouter(
 @deposit_exchanges.post("/deposit-exchange", dependencies=[Depends(dep.get_current_active_user)])
 async def create_deposit_exchange(
         deposit_exchange_data: schemas.DepositExchangeCreate,
-        from_user: models.User = Depends(dep.get_deposit_giving_user),
+        from_user: models.User = Depends(dep.get_deposit_returning_user),
         to_user: models.User = Depends(dep.get_deposit_receiving_user),
         db: Session = Depends(dep.get_db)) -> schemas.DepositExchange:
 

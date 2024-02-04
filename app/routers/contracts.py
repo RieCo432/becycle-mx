@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
 import app.schemas as schemas
 import app.crud as crud
 import app.dependencies as dep
 from uuid import UUID
 from sqlalchemy.orm import Session
 import app.models as models
+from typing import Annotated
 
 
 contracts = APIRouter(
@@ -27,7 +28,7 @@ async def get_contracts(open: bool = True,
     return crud.get_contracts(db=db, open=open, closed=closed, expired=expired)
 
 
-@contracts.post("/contract")
+@contracts.post("/contract", dependencies=[Depends(dep.get_current_active_user)])
 async def create_contract(
         contract_data: schemas.ContractCreate,
         email_tasks: BackgroundTasks,
@@ -55,15 +56,16 @@ async def create_contract(
     return contract
 
 
-@contracts.post("/contract/return")
+@contracts.patch("/contracts/{contract_id}/return")
 async def return_bike(
-        contract_return_details: schemas.ContractReturn,
+        contract_id: UUID,
         email_tasks: BackgroundTasks,
+        deposit_amount_returned: Annotated[int, Body()],
         working_user: models.User = Depends(dep.get_working_user),
-        deposit_returning_user: models.User = Depends(dep.get_deposit_giving_user),
+        deposit_returning_user: models.User = Depends(dep.get_deposit_returning_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
-    if contract_return_details.depositAmountReturned > deposit_returning_user.get_deposit_bearer_balance():
+    if deposit_amount_returned > deposit_returning_user.get_deposit_bearer_balance():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "This deposit bearer does not have enough funds!"},
@@ -71,7 +73,8 @@ async def return_bike(
         )
 
     contract = crud.return_contract(db=db,
-                                    contract_return_details=contract_return_details,
+                                    contract_id=contract_id,
+                                    deposit_amount_returned=deposit_amount_returned,
                                     return_accepting_user_id=working_user.id,
                                     deposit_returning_user_id=deposit_returning_user.id)
 

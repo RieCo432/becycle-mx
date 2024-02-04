@@ -96,13 +96,14 @@ def create_contract(
 
 def return_contract(
         db: Session,
-        contract_return_details: schemas.ContractReturn,
+        contract_id: UUID,
+        deposit_amount_returned: int,
         return_accepting_user_id: UUID,
         deposit_returning_user_id: UUID) -> models.Contract:
 
-    contract = get_contract(db=db, contract_id=contract_return_details.id)
+    contract = get_contract(db=db, contract_id=contract_id)
 
-    if contract_return_details.depositAmountReturned > contract.depositAmountCollected:
+    if deposit_amount_returned > contract.depositAmountCollected:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Amount returned is higher than amount collected!"},
@@ -111,8 +112,8 @@ def return_contract(
 
     contract.returnAcceptingUserId = return_accepting_user_id
     contract.depositReturningUserId = deposit_returning_user_id
-    contract.returnedDate = datetime.utcnow()
-    contract.depositAmountReturned = contract_return_details.depositAmountReturned
+    contract.returnedDate = datetime.utcnow().date()
+    contract.depositAmountReturned = deposit_amount_returned
 
     db.commit()
 

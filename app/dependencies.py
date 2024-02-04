@@ -168,15 +168,15 @@ async def get_deposit_receiving_user(
     return deposit_receiving_user
 
 
-async def get_deposit_giving_user(
-        deposit_giving_username: Annotated[str, Body()],
-        deposit_giving_user_password: Annotated[str, Body()],
+async def get_deposit_returning_user(
+        deposit_returning_username: Annotated[str, Body()],
+        deposit_returning_user_password: Annotated[str, Body()],
         db: Session = Depends(get_db)) -> models.User:
-    deposit_giving_user = crud.authenticate_user(username=deposit_giving_username, password_cleartext=deposit_giving_user_password, db=db)
+    deposit_giving_user = crud.authenticate_user(username=deposit_returning_username, password_cleartext=deposit_returning_user_password, db=db)
     if deposit_giving_user is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Deposit giving user wrong password"},
+            detail={"description": "Deposit returning user wrong password"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     if not deposit_giving_user.depositBearer:
