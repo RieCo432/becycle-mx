@@ -93,7 +93,6 @@ async def get_client_login_code(
     if client is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no client associated with this email address."})
 
-    # TODO: this somehow always generates the same code and expiry datetime. Needs fixed
     client_login = crud.create_client_login_code(db=db, client=client)
 
     client_login.send_login_code()

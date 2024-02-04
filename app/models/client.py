@@ -9,7 +9,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import app.services as services
 
-
 CLIENT_LOGIN_CODE_EXPIRE_MINUTES = int(os.environ['CLIENT_LOGIN_CODE_EXPIRE_MINUTES'])
 CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES = int(os.environ['CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES'])
 
@@ -25,10 +24,12 @@ def generate_6_digit_code_sql():
 class Client(Base):
     __tablename__ = "clients"
 
-    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
+                                     server_default=text("uuid_generate_v4()"), index=True, quote=False)
     firstName: Mapped[str] = mapped_column("firstName", String(40), nullable=False, index=True, quote=False)
     lastName: Mapped[str] = mapped_column("lastName", String(40), nullable=False, index=True, quote=False)
-    emailAddress: Mapped[str] = mapped_column("emailAddress", String(255), nullable=False, quote=False)#, unique=True)
+    emailAddress: Mapped[str] = mapped_column("emailAddress", String(255), nullable=False,
+                                              quote=False)  # , unique=True)
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="client")
     appointments: Mapped[List["Appointment"]] = relationship("Appointment", back_populates="client")
 
@@ -45,8 +46,16 @@ class ClientTemp(Base):
     lastName: Mapped[str] = mapped_column("lastName", String(40), nullable=False, index=True, quote=False)
     emailAddress: Mapped[str] = mapped_column("emailAddress", String(255), nullable=False, quote=False, unique=True)
 
-    verificationCode: Mapped[DateTime] = mapped_column("verificationCode", String(6), nullable=False, default=generate_6_digit_code, server_default=generate_6_digit_code_sql(), quote=False)
-    expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime, default=datetime.utcnow() + relativedelta(minutes=CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES), server_default=text("(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES)), nullable=False, quote=False)
+    verificationCode: Mapped[DateTime] = mapped_column("verificationCode", String(6), nullable=False,
+                                                       default=lambda: generate_6_digit_code(),
+                                                       server_default=generate_6_digit_code_sql(), quote=False)
+    expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,
+                                                         default=lambda: datetime.utcnow() + relativedelta(
+                                                             minutes=CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES),
+                                                         server_default=text(
+                                                             "(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(
+                                                                 CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES)), nullable=False,
+                                                         quote=False)
 
     def send_email_verification_link(self):
         email_html_content = services.email.build_email_verification_html(
@@ -68,12 +77,14 @@ class ClientLogin(Base):
     client: Mapped["Client"] = relationship("Client")
 
     code: Mapped[DateTime] = mapped_column("code", String(6), nullable=False,
-                                                       default=generate_6_digit_code,
-                                                       server_default=generate_6_digit_code_sql(), quote=False)
+                                           default=lambda: generate_6_digit_code(),
+                                           server_default=generate_6_digit_code_sql(), quote=False)
     expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,
-                                                         default=datetime.utcnow() + relativedelta(minutes=CLIENT_LOGIN_CODE_EXPIRE_MINUTES),
+                                                         default=lambda: datetime.utcnow() + relativedelta(
+                                                             minutes=CLIENT_LOGIN_CODE_EXPIRE_MINUTES),
                                                          server_default=text(
-                                                             "(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(CLIENT_LOGIN_CODE_EXPIRE_MINUTES)),
+                                                             "(current_timestamp at time zone 'utc' + make_interval(mins => {:d}))".format(
+                                                                 CLIENT_LOGIN_CODE_EXPIRE_MINUTES)),
                                                          nullable=False, quote=False)
 
     def send_login_code(self):
@@ -82,4 +93,3 @@ class ClientLogin(Base):
             destination=self.client.emailAddress,
             subject="Your Log-in code",
             content=email_html_content)
-
