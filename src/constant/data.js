@@ -30,7 +30,7 @@ export const topMenu = [
     child: [
       {
         childtitle: 'Volunteer Login',
-        childlink: '/login/user',
+        childlink: '/users/login',
         childicon: 'heroicons-outline:login',
         showByDefault: true,
         ignoreTags: [],
@@ -38,7 +38,7 @@ export const topMenu = [
       },
       {
         childtitle: 'Client Login',
-        childlink: '/login/client',
+        childlink: '/clients/login',
         childicon: 'heroicons-outline:login',
         showByDefault: true,
         ignoreTags: [],
@@ -49,7 +49,7 @@ export const topMenu = [
   {
     title: 'Contracts',
     icon: 'heroicons-outline:clipboard-document-list',
-    link: '/contract',
+    link: '/contracts',
     showByDefault: false,
     ignoreTags: [],
     showTags: [''],
@@ -57,13 +57,13 @@ export const topMenu = [
       {
         childtitle: 'New Contract',
         childicon: 'heroicons-outline:document-plus',
-        childlink: '/contract/new',
+        childlink: '/contracts/new',
         ignoreTags: [],
       },
       {
         childtitle: 'Find Contract',
         childicon: 'heroicons-outline:document-magnifying-glass',
-        childlink: '/client/find',
+        childlink: '/clients/find',
         ignoreTags: [],
       },
     ],

@@ -15,16 +15,19 @@ const routes = [
     path: '/',
     name: 'Layout',
     redirect: '/home',
+    restrictTo: null,
     component: () => import('@/Layout/index.vue'),
     children: [
       {
         path: '/home',
         name: 'home',
+        restrictTo: null,
         component: () => import('@/views/home.vue'),
       },
       {
         path: '/me',
         name: 'Profile',
+        restrictTo: ['client', 'user'],
         component: () => {
           if (localStorage.getItem('tokenType') === 'user') {
             return import('@/views/user/me.vue');
@@ -38,57 +41,58 @@ const routes = [
       {
         path: '/template',
         name: 'template',
+        restrictTo: null,
         component: () => import('@/views/template.vue'),
       },
       {
-        path: '/login/user',
+        path: '/users/login',
         name: 'Volunteer Login',
+        restrictTo: null,
         component: () => import('@/views/login/user.vue'),
       },
       {
-        path: '/login/client',
+        path: '/clients/login',
         name: 'Client Login',
+        restrictTo: null,
         component: () => import('@/views/login/client.vue'),
       },
       {
-        path: '/user/me',
-        name: 'Me',
+        path: '/users/me',
+        name: 'User',
+        restrictTo: ['user'],
         component: () => import('@/views/user/me.vue'),
       },
       {
         path: '/clients/:clientId',
         name: 'Client',
+        restrictTo: ['user'],
         component: () => import('@/views/client/clientView.vue'),
       },
       {
-        path: '/client/me',
+        path: '/clients/me',
         name: 'Me',
+        restrictTo: ['user'],
         component: () => import('@/views/client/me.vue'),
-      },
-      {
-        path: '/contract',
-        name: 'Contract',
-        component: () => import('@/views/contract/index.vue'),
-        children: [
-
-        ],
       },
       {
         path: '/contracts/:contractId',
         name: 'Contract',
+        restrictTo: ['user'],
         component: () => import('@/views/contract/viewContract.vue'),
         children: [
 
         ],
       },
       {
-        path: '/contract/new',
+        path: '/contracts/new',
         name: 'New Contract',
+        restrictTo: ['user'],
         component: () => import('@/views/contract/newContract.vue'),
       },
       {
-        path: '/client/find',
+        path: '/clients/find',
         name: 'Find Client',
+        restrictTo: ['user'],
         component: () => import('@/views/client/findClient.vue'),
       },
     ],
