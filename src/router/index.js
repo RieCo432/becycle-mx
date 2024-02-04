@@ -1,4 +1,5 @@
 import {createRouter, createWebHistory} from 'vue-router';
+import {useCredentialsStore} from '@/store/credentialsStore';
 
 import routes from './route';
 
@@ -16,6 +17,7 @@ const router = createRouter({
 });
 router.beforeEach((to, from, next) => {
   console.log('to:', to);
+  const credentialsStore = useCredentialsStore();
   const titleText = to.name;
   const words = titleText.split(' ');
   const wordslength = words.length;
@@ -25,7 +27,18 @@ router.beforeEach((to, from, next) => {
 
   document.title = 'beCyCle  - ' + words;
 
-  next();
+  if (to.meta.restrictTo == null) {
+    console.log('no access restriction');
+    next();
+  } else {
+    if (to.meta.restrictTo.includes(credentialsStore.getTokenType())) {
+      console.log('access granted');
+      next();
+    } else {
+      console.log('access denied, redirecting');
+      next({path: '/home'});
+    }
+  }
 });
 
 router.afterEach(() => {

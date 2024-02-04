@@ -32,7 +32,7 @@ export const useCredentialsStore = defineStore('credentialsStore', {
         return {'Authorization': 'Bearer ' + localStorage.getItem('token')};
       } else {
         return {};
-      };
+      }
     },
     isUserLoggedIn() {
       return this.tokenType === 'user';
@@ -41,7 +41,10 @@ export const useCredentialsStore = defineStore('credentialsStore', {
       return this.tokenType === 'client';
     },
     isLoggedIn() {
-      return this.token === null;
+      return this.token !== null;
+    },
+    getTokenType() {
+      return this.isLoggedIn() ? this.tokenType : null;
     },
   },
 });

@@ -15,19 +15,19 @@ const routes = [
     path: '/',
     name: 'Layout',
     redirect: '/home',
-    restrictTo: null,
+    meta: {restrictTo: null},
     component: () => import('@/Layout/index.vue'),
     children: [
       {
         path: '/home',
         name: 'home',
-        restrictTo: null,
+        meta: {restrictTo: null},
         component: () => import('@/views/home.vue'),
       },
       {
         path: '/me',
         name: 'Profile',
-        restrictTo: ['client', 'user'],
+        meta: {restrictTo: ['client', 'user']},
         component: () => {
           if (localStorage.getItem('tokenType') === 'user') {
             return import('@/views/user/me.vue');
@@ -41,43 +41,43 @@ const routes = [
       {
         path: '/template',
         name: 'template',
-        restrictTo: null,
+        meta: {restrictTo: null},
         component: () => import('@/views/template.vue'),
       },
       {
         path: '/users/login',
         name: 'Volunteer Login',
-        restrictTo: null,
+        meta: {restrictTo: null},
         component: () => import('@/views/login/user.vue'),
       },
       {
         path: '/clients/login',
         name: 'Client Login',
-        restrictTo: null,
+        meta: {restrictTo: null},
         component: () => import('@/views/login/client.vue'),
       },
       {
         path: '/users/me',
         name: 'User',
-        restrictTo: ['user'],
+        meta: {restrictTo: ['user']},
         component: () => import('@/views/user/me.vue'),
       },
       {
         path: '/clients/:clientId',
         name: 'Client',
-        restrictTo: ['user'],
+        meta: {restrictTo: ['user']},
         component: () => import('@/views/client/clientView.vue'),
       },
       {
         path: '/clients/me',
         name: 'Me',
-        restrictTo: ['user'],
+        meta: {restrictTo: ['client']},
         component: () => import('@/views/client/me.vue'),
       },
       {
         path: '/contracts/:contractId',
         name: 'Contract',
-        restrictTo: ['user'],
+        meta: {restrictTo: ['user']},
         component: () => import('@/views/contract/viewContract.vue'),
         children: [
 
@@ -86,13 +86,13 @@ const routes = [
       {
         path: '/contracts/new',
         name: 'New Contract',
-        restrictTo: ['user'],
+        meta: {restrictTo: ['user']},
         component: () => import('@/views/contract/newContract.vue'),
       },
       {
         path: '/clients/find',
         name: 'Find Client',
-        restrictTo: ['user'],
+        meta: {restrictTo: ['user']},
         component: () => import('@/views/client/findClient.vue'),
       },
     ],
