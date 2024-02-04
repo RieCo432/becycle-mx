@@ -244,4 +244,16 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  patchReturnContract(contractId, depositAmountReturned, depositReturningUser, depositReturningPassword,
+      returnAcceptingUser, returnAcceptingPasswordOrPin) {
+    return axiosClient.patch(`/contracts/${contractId}/return`, {
+      deposit_amount_returned: depositAmountReturned,
+      deposit_returning_username: depositReturningUser,
+      deposit_returning_user_password: depositReturningPassword,
+      working_username: returnAcceptingUser,
+      working_user_password_or_pin: returnAcceptingPasswordOrPin,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
