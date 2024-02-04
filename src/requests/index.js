@@ -239,7 +239,7 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  extendContract(contractId) {
+  patchExtendContract(contractId) {
     return axiosClient.patch(`/contracts/${contractId}/extend`, null, {
       headers: credentialsStore.getApiRequestHeader(),
     });

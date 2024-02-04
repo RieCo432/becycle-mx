@@ -66,7 +66,7 @@ export default {
           <div class="col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedClient.firstName"
-                :suggestions="filtered_client_suggestions.map((client) => JSON.stringify(client))"
+                :suggestions="filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))"
                 :selected-callback="selectClient"
                 :allow-new=false
             >
@@ -84,7 +84,7 @@ export default {
           <div class="col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedClient.lastName"
-                :suggestions="filtered_client_suggestions.map((client) => JSON.stringify(client))"
+                :suggestions="filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))"
                 :selected-callback="selectClient"
                 :allow-new=false
             >
@@ -102,7 +102,7 @@ export default {
           <div class="col-span-12">
             <ComboboxTextInput
                 :field-model-value="selectedClient.emailAddress"
-                :suggestions="filtered_client_suggestions.map((client) => JSON.stringify(client))"
+                :suggestions="filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))"
                 :selected-callback="selectClient"
                 :allow-new=false
             >

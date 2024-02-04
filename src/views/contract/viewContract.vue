@@ -184,7 +184,7 @@ export default {
   },
   methods: {
     extendContract() {
-      requests.extendContract(this.contractId).then(() => {
+      requests.patchExtendContract(this.contractId).then(() => {
         toast.success('Contract Extended!', {timeout: 1000});
         requests.getContract(this.contractId).then((response) => {
           this.contract = response.data;
