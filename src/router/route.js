@@ -1,15 +1,3 @@
-// import {useCredentialsStore} from '@/store/credentialsStore';
-
-// function checkUserLoggedIn(to) {
-//   const router = useRouter();
-//   const credentialsStore = useCredentialsStore();
-//   if (credentialsStore.isUserLoggedIn()) {
-//     return true;
-//   } else {
-//     router.push('/login/user');
-//   }
-// }
-
 const routes = [
   {
     path: '/',
