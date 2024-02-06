@@ -38,13 +38,10 @@ def send_email(destination: str, subject: str, content: str) -> None:
 def build_email_verification_html(client_temp_id: UUID, verification_code: str) -> str:
     return ("<html>"
             "   <body>"
-            "       <form action='{}:{}/client/temp/verify' method='post'>"
-            "           <input type='hidden' id='client_temp_id' name='client_temp_id' value='{}'>"
-            "           <input type='hidden' id='verification_code' name='verification_code' value='{}' HIDDEN><br>"
-            "           <button type='submit'>Verify</button>"
-            "       </form>"
+            "       <h2>Enter this code on the website to verify your email address.</h2><br>"
+            "       <h2>{}</h2>"
             "   </body>"
-            "</html>".format(API_HOST_ADDRESS, API_HOST_PORT, client_temp_id, verification_code))
+            "</html>".format(verification_code))
 
 
 def build_client_login_code_html(login_code: str):

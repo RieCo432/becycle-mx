@@ -58,9 +58,9 @@ class ClientTemp(Base):
                                                          quote=False)
 
     def send_email_verification_link(self):
-        email_html_content = services.email.build_email_verification_html(
+        email_html_content = services.email_helpers.build_email_verification_html(
             client_temp_id=self.id, verification_code=self.verificationCode)
-        services.send_email(
+        services.email_helpers.send_email(
             destination=self.emailAddress,
             subject="Verify your email address",
             content=email_html_content)

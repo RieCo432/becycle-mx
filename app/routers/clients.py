@@ -71,7 +71,7 @@ async def create_client_temp(
 async def verify_client_temp(
         client_temp_id: Annotated[UUID, Form()],
         verification_code: Annotated[str, Form()],
-        db: Session = Depends(dep.get_db)) -> schemas.Client:
+        db: Session = Depends(dep.get_db)) -> schemas.Token:
 
     if client_temp_id is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No client ID provided."})
@@ -80,7 +80,13 @@ async def verify_client_temp(
 
     client = crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
 
-    return client
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(data={"sub": str(client.id)}, expires_delta=access_token_expires)
+
+    return schemas.Token(
+        access_token=access_token,
+        token_type="bearer"
+    )
 
 
 @clients.get("/client/login-code")
