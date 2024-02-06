@@ -256,4 +256,21 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  postNewTempClient(firstName, lastName, emailAddress) {
+    return axiosClient.post('/client/temp', {
+      firstName: firstName,
+      lastName: lastName,
+      emailAddress: emailAddress,
+    });
+  },
+  postTempClientVerificationCode(clientTempId, verificationCode) {
+    return axiosClient.post('/client/temp/verify', {
+      client_temp_id: clientTempId,
+      verification_code: verificationCode,
+    }, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+  },
 };
