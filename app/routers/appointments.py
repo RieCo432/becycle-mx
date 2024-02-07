@@ -16,7 +16,7 @@ appointments = APIRouter(
 )
 
 
-@appointments.post("/appointment/request")
+@appointments.post("/appointments/request")
 async def request_appointment(
         appointment_request_data: schemas.AppointmentRequest,
         client: Annotated[models.Client, Depends(dep.get_current_client)],
@@ -37,7 +37,7 @@ async def request_appointment(
     return appointment
 
 
-@appointments.post("/appointment", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+@appointments.post("/appointments/new", dependencies=[Depends(dep.get_current_appointment_manager_user)])
 async def create_appointment(
         appointment_data: schemas.AppointmentCreate,
         email_tasks: BackgroundTasks,
