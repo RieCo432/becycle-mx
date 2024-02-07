@@ -1,33 +1,53 @@
 <template>
-  <div class="grid grid-cols-12 gap-5">
-    <div class="lg:col-span-8 col-span-12">
-      <Card :title="name">
-        <p></p>
-      </Card>
-    </div>
+  <div>
+    <client-view :client="client" :contract-summaries="contractSummaries"></client-view>
   </div>
-
 </template>
 
 <script>
 
-import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
+import clientView from '@/views/client/clientView.vue';
 
 export default {
   components: {
-    Card,
+    clientView,
   },
   data() {
     return {
-      name: 'loading...',
+      client: {},
+      contracts: [],
+      contractSummaries: [],
     };
   },
-  mounted() {
-    requests.getClientMe().then((response) => {
-      console.log(response.data);
-      this.name = response.data.firstName + ' ' + response.data.lastName;
-    });
+  async created() {
+    this.client = (await requests.getClientMe()).data;
+    this.contracts = (await requests.getMyContracts(true, true, true)).data;
+
+
+    this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
+      const bike = (await requests.getBike(contract.bikeId)).data;
+      let status = 'open';
+      if (contract.returnedDate != null) {
+        status = 'closed';
+      } else {
+        if (new Date(contract.endDate).getTime() < new Date().getTime()) {
+          status = 'expired';
+        }
+      }
+      return {
+        id: contract.id,
+        startDate: contract.startDate,
+        endDate: contract.endDate,
+        returnedDate: contract.returnedDate,
+        bikeMake: bike['make'],
+        bikeModel: bike.model,
+        bikeColour: bike.colour,
+        bikeDecals: bike.decals,
+        bikeSerialNumber: bike.serialNumber,
+        status: status,
+      };
+    })));
   },
 };
 

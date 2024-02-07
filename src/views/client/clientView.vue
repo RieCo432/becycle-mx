@@ -1,6 +1,5 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import requests from '@/requests';
 import Advanced from '@/components/Tables/ContractSummaryTable.vue';
 
 export default {
@@ -9,17 +8,19 @@ export default {
     Card,
     Advanced,
   },
+  props: {
+    client: {
+      required: true,
+      type: Object,
+    },
+    contractSummaries: {
+      required: true,
+      type: Array,
+    },
+  },
 
   data() {
     return {
-      client: {
-        firstName: null,
-        lastName: null,
-        emailAddress: null,
-        id: null,
-      },
-      contracts: [],
-      contractSummaries: [],
 
       actions: [
         {
@@ -94,35 +95,6 @@ export default {
     name() {
       return this.client.firstName + ' ' + this.client.lastName;
     },
-  },
-  async created() {
-    this.client = (await requests.getClient(this.$route.params.clientId)).data;
-
-
-    this.contracts = (await requests.getClientContracts(this.$route.params.clientId, true, true, true)).data;
-    this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
-      const bike = (await requests.getBike(contract.bikeId)).data;
-      let status = 'open';
-      if (contract.returnedDate != null) {
-        status = 'closed';
-      } else {
-        if (new Date(contract.endDate).getTime() < new Date().getTime()) {
-          status = 'expired';
-        }
-      }
-      return {
-        id: contract.id,
-        startDate: contract.startDate,
-        endDate: contract.endDate,
-        returnedDate: contract.returnedDate,
-        bikeMake: bike['make'],
-        bikeModel: bike.model,
-        bikeColour: bike.colour,
-        bikeDecals: bike.decals,
-        bikeSerialNumber: bike.serialNumber,
-        status: status,
-      };
-    })));
   },
 };
 </script>

@@ -54,7 +54,7 @@ const routes = [
         path: '/clients/:clientId',
         name: 'Client',
         meta: {restrictTo: ['user']},
-        component: () => import('@/views/client/clientView.vue'),
+        component: () => import('@/views/client/index.vue'),
       },
       {
         path: '/clients/me',

@@ -229,6 +229,16 @@ export default {
       },
     });
   },
+  getMyContracts(open, closed, expired) {
+    return axiosClient.get('/clients/me/contracts', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        open: open,
+        closed: closed,
+        expired: expired,
+      },
+    });
+  },
   getContract(contractId) {
     return axiosClient.get(`/contracts/${contractId}/`, {
       headers: credentialsStore.getApiRequestHeader(),
