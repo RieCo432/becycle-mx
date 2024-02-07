@@ -273,4 +273,23 @@ export default {
       },
     });
   },
+  getAppointmentTypes() {
+    return axiosClient.get('/appointments/types');
+  },
+  getAvailableAppointmentSlots(appointmentTypeId) {
+    return axiosClient.get('/appointments/available', {
+      params: {
+        appointment_type_id: appointmentTypeId,
+      },
+    });
+  },
+  postAppointmentRequest(typeId, startDateTime, notes) {
+    return axiosClient.post('/appointments/request', {
+      typeId: typeId,
+      startDateTime: startDateTime,
+      notes: notes,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

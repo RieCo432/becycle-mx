@@ -83,6 +83,12 @@ const routes = [
         meta: {restrictTo: ['user']},
         component: () => import('@/views/client/findClient.vue'),
       },
+      {
+        path: '/appointments/book',
+        name: 'Book Appointment',
+        meta: {restrictTo: ['client']},
+        component: () => import('@/views/appointments/bookAppointment.vue'),
+      },
     ],
   },
 ];

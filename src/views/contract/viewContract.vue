@@ -32,7 +32,6 @@ export default {
   },
 
   setup() {
-    const router = useRouter();
     const route = useRoute();
 
     const contract = ref({});
