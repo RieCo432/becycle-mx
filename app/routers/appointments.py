@@ -88,6 +88,11 @@ async def get_available_appointments(
     return available_slots
 
 
+@appointments.get("/appointments/types")
+async def get_appointment_types(db: Session = Depends(dep.get_db)) -> list[schemas.AppointmentType]:
+    return crud.get_appointment_types(db=db)
+
+
 @appointments.get("/appointments/maximum-concurrent")
 async def get_maximum_concurrent_appointments(
         db: Session = Depends(dep.get_db)) -> dict[date, dict[time, int]]:

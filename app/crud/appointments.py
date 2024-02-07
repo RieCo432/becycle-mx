@@ -143,3 +143,9 @@ def get_available_start_dates_and_times_for_appointment_type(db: Session, appoin
                     available_appointment_start_dates_and_times[d].append(t)
 
     return available_appointment_start_dates_and_times
+
+
+def get_appointment_types(db: Session) -> list[models.AppointmentType]:
+    return [_ for _ in db.scalars(
+        select(models.AppointmentType)
+    )]
