@@ -149,6 +149,16 @@ async def get_my_contracts(
     return crud.get_contracts(db=db, client_id=client.id, open=open, closed=closed, expired=expired)
 
 
+@clients.get("/clients/me/appointments")
+async def get_my_appointments(
+        past: bool = True,
+        future: bool = True,
+        client: models.Client = Depends(dep.get_current_client),
+        db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
+    return crud.get_appointments(db=db, client_id=client.id, past=past, future=future)
+
+
+
 @clients.get("/clients/{client_id}", dependencies=[Depends(dep.get_current_active_user)])
 async def get_client(client_id: UUID,
                      db: Session = Depends(dep.get_db)) -> schemas.Client:
@@ -163,6 +173,15 @@ async def get_client_contracts(
         expired: bool = True,
         db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
     return crud.get_contracts(db=db, client_id=client_id, open=open, closed=closed, expired=expired)
+
+
+@clients.get("/clients/{client_id}/appointments", dependencies=[Depends(dep.get_current_active_user)])
+async def get_my_appointments(
+        client_id: UUID,
+        past: bool = True,
+        future: bool = True,
+        db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
+    return crud.get_appointments(db=db, client_id=client_id, past=past, future=future)
 
 
 

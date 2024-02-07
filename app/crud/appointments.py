@@ -1,3 +1,4 @@
+import datetime
 import math
 from copy import copy
 from sqlalchemy.orm import Session
@@ -149,4 +150,17 @@ def get_appointment_types(db: Session, inactive: bool) -> list[models.Appointmen
     return [_ for _ in db.scalars(
         select(models.AppointmentType)
         .where(models.AppointmentType.active | inactive)
+    )]
+
+
+def get_appointments(db: Session, client_id: UUID = None, past: bool = True, future: bool = True) -> list[models.Appointment]:
+    return [_ for _ in db.scalars(
+        select(models.Appointment)
+        .where(
+            ((models.Appointment.clientId == client_id) | (client_id == None))
+            & (
+                    ((models.Appointment.startDateTime < datetime.utcnow()) & past)
+                    | ((models.Appointment.startDateTime > datetime.utcnow()) & future)
+            )
+        )
     )]
