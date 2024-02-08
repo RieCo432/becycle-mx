@@ -50,14 +50,17 @@
               >{{ props.row.customer.name }}</span
             >
           </span>
-          <span v-if="props.column.field == 'order'">
-            {{ "#" + props.row.order }}
-          </span>
           <span
-            v-if="props.column.field == 'date'"
+            v-if="props.column.field == 'startDate'"
             class="text-slate-500 dark:text-slate-300"
           >
-            {{ props.row.date }}
+            {{ new Date(Date.parse(props.row.startDate)).toLocaleDateString() }}
+          </span>
+          <span
+              v-if="props.column.field == 'endDate'"
+              class="text-slate-500 dark:text-slate-300"
+          >
+            {{ new Date(Date.parse(props.row.endDate)).toLocaleDateString() }}
           </span>
           <span v-if="props.column.field == 'status'" class="block w-full">
             <span
