@@ -302,4 +302,16 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getMyAppointments(past, future) {
+    return axiosClient.get('/clients/me/appointments', {
+      params: {
+        past: past,
+        future: future,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getAppointmentType(typeId) {
+    return axiosClient.get(`/appointments/types/${typeId}`);
+  },
 };

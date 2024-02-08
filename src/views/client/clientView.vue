@@ -1,12 +1,17 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import Advanced from '@/components/Tables/ContractSummaryTable.vue';
+import ContractSummaryTable from '@/components/Tables/ContractSummaryTable.vue';
+import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
+import {useCredentialsStore} from '@/store/credentialsStore';
+
+const credentialsStore = useCredentialsStore();
 
 export default {
   name: 'clientView',
   components: {
+    AppointmentSummaryTable,
     Card,
-    Advanced,
+    Advanced: ContractSummaryTable,
   },
   props: {
     client: {
@@ -17,22 +22,25 @@ export default {
       required: true,
       type: Array,
     },
+    appointmentSummaries: {
+      required: true,
+      type: Array,
+    },
   },
 
   data() {
     return {
 
-      actions: [
+      contractActions: [
         {
           name: 'View',
           icon: 'heroicons-outline:eye',
-        },
-        {
+        }, ...(credentialsStore.isUserLoggedIn() ? [{
           name: 'Return',
           icon: 'heroicons:pencil-square',
-        },
+        }] : []),
       ],
-      options: [
+      contractOptions: [
         {
           value: '1',
           label: '1',
@@ -46,7 +54,7 @@ export default {
           label: '5',
         },
       ],
-      columns: [
+      contractColumns: [
         {
           label: 'Status',
           field: 'status',
@@ -88,6 +96,57 @@ export default {
         },
       ],
 
+      appointmentActions: [
+        {
+          name: 'Edit',
+          icon: 'heroicons:pencil-square',
+        },
+        {
+          name: 'Cancel',
+          icon: 'heroicons-outline:x-circle',
+        },
+      ],
+      appointmentOptions: [
+        {
+          value: '1',
+          label: '1',
+        },
+        {
+          value: '3',
+          label: '3',
+        },
+        {
+          value: '5',
+          label: '5',
+        },
+      ],
+      appointmentColumns: [
+        {
+          label: 'Status',
+          field: 'status',
+        },
+        {
+          label: 'Time',
+          field: 'startDateTime',
+        },
+        {
+          label: 'Type',
+          field: 'type',
+        },
+        {
+          label: 'Duration (minutes)',
+          field: 'duration',
+        },
+        {
+          label: 'Notes',
+          field: 'notes',
+        },
+        {
+          label: 'Action',
+          field: 'action',
+        },
+      ],
+
 
     };
   },
@@ -102,11 +161,20 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
-      <Card :title="name">
+      <Card>
+        <div class="grid grid-cols-12">
+          <div class="col-span-12">
+            <Advanced :options="contractOptions" :actions="contractActions" :columns="contractColumns" :advanced-table="contractSummaries" title="Contracts"></Advanced>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-12">
+      <Card>
 
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <Advanced :options="options" :actions="actions" :columns="columns" :advanced-table="contractSummaries" title="Contracts"></Advanced>
+            <AppointmentSummaryTable :options="appointmentOptions" :actions="appointmentActions" :columns="appointmentColumns" :advanced-table="appointmentSummaries" title="Appointments"></AppointmentSummaryTable>
           </div>
         </div>
       </Card>

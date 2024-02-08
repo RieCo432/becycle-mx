@@ -1,6 +1,6 @@
 <template>
   <div>
-    <client-view :client="client" :contract-summaries="contractSummaries"></client-view>
+    <client-view :client="client" :contract-summaries="contractSummaries" :appointment-summaries="appointmentSummaries"></client-view>
   </div>
 </template>
 
@@ -18,11 +18,14 @@ export default {
       client: {},
       contracts: [],
       contractSummaries: [],
+      appointments: [],
+      appointmentSummaries: [],
     };
   },
   async created() {
     this.client = (await requests.getClientMe()).data;
     this.contracts = (await requests.getMyContracts(true, true, true)).data;
+    this.appointments = (await requests.getMyAppointments(true, true)).data;
 
 
     this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
@@ -46,6 +49,29 @@ export default {
         bikeDecals: bike.decals,
         bikeSerialNumber: bike.serialNumber,
         status: status,
+      };
+    })));
+
+    this.appointmentSummaries = (await Promise.all(this.appointments.map(async (appointment) => {
+      const appointmentType = (await requests.getAppointmentType(appointment.typeId)).data;
+      let status = 'past';
+      if (appointment.cancelled) {
+        status = 'cancelled';
+      } else if (new Date(Date.parse(appointment.startDateTime)) > new Date()) {
+        if (appointment['confirmed']) {
+          status = 'confirmed';
+        } else {
+          status = 'pending';
+        }
+      }
+
+      return {
+        id: appointment.id,
+        status: status,
+        startDateTime: appointment.startDateTime,
+        type: appointmentType['title'],
+        duration: appointmentType['duration'],
+        notes: appointment.notes,
       };
     })));
   },
