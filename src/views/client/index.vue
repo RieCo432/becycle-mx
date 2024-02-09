@@ -11,12 +11,15 @@ export default {
       contracts: [],
       client: {},
       contractSummaries: [],
+      appointments: [],
+      appointmentSummaries: [],
     };
   },
 
   async created() {
     this.client = (await requests.getClient(this.$route.params.clientId)).data;
     this.contracts = (await requests.getClientContracts(this.client.id, true, true, true)).data;
+    this.appointments = (await requests.getClientAppointments(this.client.id, true, true)).data;
 
     this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
       const bike = (await requests.getBike(contract.bikeId)).data;
@@ -41,13 +44,36 @@ export default {
         status: status,
       };
     })));
+
+    this.appointmentSummaries = (await Promise.all(this.appointments.map(async (appointment) => {
+      const appointmentType = (await requests.getAppointmentType(appointment.typeId)).data;
+      let status = 'past';
+      if (appointment.cancelled) {
+        status = 'cancelled';
+      } else if (new Date(Date.parse(appointment.startDateTime)) > new Date()) {
+        if (appointment['confirmed']) {
+          status = 'confirmed';
+        } else {
+          status = 'pending';
+        }
+      }
+
+      return {
+        id: appointment.id,
+        status: status,
+        startDateTime: appointment.startDateTime,
+        type: appointmentType['title'],
+        duration: appointmentType['duration'],
+        notes: appointment.notes,
+      };
+    })));
   },
 };
 </script>
 
 <template>
   <div>
-    <client-view :client="client" :contract-summaries="contractSummaries"></client-view>
+    <client-view :client="client" :contract-summaries="contractSummaries" :appointment-summaries="appointmentSummaries"></client-view>
   </div>
 </template>
 
