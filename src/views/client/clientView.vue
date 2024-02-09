@@ -40,20 +40,6 @@ export default {
           icon: 'heroicons:pencil-square',
         }] : []),
       ],
-      contractOptions: [
-        {
-          value: '1',
-          label: '1',
-        },
-        {
-          value: '3',
-          label: '3',
-        },
-        {
-          value: '5',
-          label: '5',
-        },
-      ],
       contractColumns: [
         {
           label: 'Status',
@@ -106,20 +92,6 @@ export default {
           icon: 'heroicons-outline:x-circle',
         },
       ],
-      appointmentOptions: [
-        {
-          value: '1',
-          label: '1',
-        },
-        {
-          value: '3',
-          label: '3',
-        },
-        {
-          value: '5',
-          label: '5',
-        },
-      ],
       appointmentColumns: [
         {
           label: 'Status',
@@ -164,7 +136,7 @@ export default {
       <Card>
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <Advanced :options="contractOptions" :actions="contractActions" :columns="contractColumns" :advanced-table="contractSummaries" title="Contracts"></Advanced>
+            <Advanced :actions="contractActions" :columns="contractColumns" :advanced-table="contractSummaries" title="Contracts"></Advanced>
           </div>
         </div>
       </Card>
@@ -174,7 +146,7 @@ export default {
 
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <AppointmentSummaryTable :options="appointmentOptions" :actions="appointmentActions" :columns="appointmentColumns" :advanced-table="appointmentSummaries" title="Appointments"></AppointmentSummaryTable>
+            <AppointmentSummaryTable :actions="appointmentActions" :columns="appointmentColumns" :advanced-table="appointmentSummaries" title="Appointments"></AppointmentSummaryTable>
           </div>
         </div>
       </Card>

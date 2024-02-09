@@ -109,10 +109,7 @@
               @page-changed="current = $event"
               :pageChanged="props.pageChanged"
               :perPageChanged="props.perPageChanged"
-              enableSearch
-              :options="options"
-            >
-              >
+              enableSearch>
             </Pagination>
           </div>
         </template>
@@ -148,9 +145,6 @@ export default {
       required: true,
     },
     actions: {
-      required: true,
-    },
-    options: {
       required: true,
     },
     title: {
