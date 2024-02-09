@@ -139,6 +139,7 @@ async def get_client_me(client: Annotated[models.Client, Depends(dep.get_current
     return client
 
 
+# TODO: Implement query parameters for pagination
 @clients.get("/clients/me/contracts")
 async def get_my_contracts(
         open: bool = True,
@@ -149,6 +150,7 @@ async def get_my_contracts(
     return crud.get_contracts(db=db, client_id=client.id, open=open, closed=closed, expired=expired)
 
 
+# TODO: Implement query parameters for pagination
 @clients.get("/clients/me/appointments")
 async def get_my_appointments(
         past: bool = True,
@@ -158,13 +160,13 @@ async def get_my_appointments(
     return crud.get_appointments(db=db, client_id=client.id, past=past, future=future)
 
 
-
 @clients.get("/clients/{client_id}", dependencies=[Depends(dep.get_current_active_user)])
 async def get_client(client_id: UUID,
                      db: Session = Depends(dep.get_db)) -> schemas.Client:
     return crud.get_client(db=db, client_id=client_id)
 
 
+# TODO: Implement query parameters for pagination
 @clients.get("/clients/{client_id}/contracts", dependencies=[Depends(dep.get_current_active_user)])
 async def get_client_contracts(
         client_id: UUID,
@@ -175,6 +177,7 @@ async def get_client_contracts(
     return crud.get_contracts(db=db, client_id=client_id, open=open, closed=closed, expired=expired)
 
 
+# TODO: Implement query parameters for pagination
 @clients.get("/clients/{client_id}/appointments", dependencies=[Depends(dep.get_current_active_user)])
 async def get_my_appointments(
         client_id: UUID,
