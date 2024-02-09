@@ -19,7 +19,7 @@
         styleClass=" vgt-table bordered centered"
         :rows="advancedTable"
         :pagination-options="{
-          enabled: true,
+          enabled: false,
           perPage: perpage,
         }"
         :search-options="{
@@ -27,7 +27,7 @@
           externalQuery: searchTerm,
         }"
         :select-options="{
-          enabled: true,
+          enabled: false,
           selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
           selectioninfoClass: 'custom-class',
           selectionText: 'rows selected',
@@ -102,7 +102,7 @@
         <template #pagination-bottom="props">
           <div class="py-4 px-3">
             <Pagination
-              :total="50"
+              :total="advancedTable.length"
               :current="current"
               :per-page="perpage"
               :pageRange="pageRange"
@@ -110,7 +110,6 @@
               :pageChanged="props.pageChanged"
               :perPageChanged="props.perPageChanged"
               enableSearch
-              enableSelect
               :options="options"
             >
               >
