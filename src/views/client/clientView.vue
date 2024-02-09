@@ -26,6 +26,18 @@ export default {
       required: true,
       type: Array,
     },
+    cancelAppointment: {
+      type: Function,
+      required: true,
+    },
+    editAppointmentNotes: {
+      type: Function,
+      required: true,
+    },
+    rescheduleAppointment: {
+      type: Function,
+      required: true,
+    },
   },
 
   data() {
@@ -84,11 +96,18 @@ export default {
 
       appointmentActions: [
         {
-          name: 'Edit',
+          label: 'Edit Notes',
+          id: 'edit',
           icon: 'heroicons:pencil-square',
         },
         {
+          label: 'Reschedule',
+          id: 'reschedule',
+          icon: 'heroicons:clock',
+        },
+        {
           name: 'Cancel',
+          id: 'cancel',
           icon: 'heroicons-outline:x-circle',
         },
       ],
@@ -146,7 +165,7 @@ export default {
 
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <AppointmentSummaryTable :actions="appointmentActions" :columns="appointmentColumns" :advanced-table="appointmentSummaries" title="Appointments"></AppointmentSummaryTable>
+            <AppointmentSummaryTable :cancel-appointment="cancelAppointment" :edit-appointment-notes="editAppointmentNotes" :reschedule-appointment="rescheduleAppointment" :actions="appointmentActions" :columns="appointmentColumns" :advanced-table="appointmentSummaries" title="Appointments"></AppointmentSummaryTable>
           </div>
         </div>
       </Card>

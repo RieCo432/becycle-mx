@@ -1,6 +1,13 @@
 <template>
   <div>
-    <client-view :client="client" :contract-summaries="contractSummaries" :appointment-summaries="appointmentSummaries"></client-view>
+    <client-view
+        :client="client"
+        :contract-summaries="contractSummaries"
+        :appointment-summaries="appointmentSummaries"
+        :cancel-appointment="cancelMyAppointment"
+        :edit-appointment-notes="editMyAppointmentNotes"
+        :reschedule-appointment="rescheduleMyAppointment"
+    ></client-view>
   </div>
 </template>
 
@@ -21,6 +28,17 @@ export default {
       appointments: [],
       appointmentSummaries: [],
     };
+  },
+  methods: {
+    cancelMyAppointment(appointmentId) {
+      console.log('cancel');
+    },
+    editMyAppointmentNotes(appointmentId) {
+      console.log('edit notes');
+    },
+    rescheduleMyAppointment(appointmentId) {
+      console.log('reschedule');
+    },
   },
   async created() {
     this.client = (await requests.getClientMe()).data;

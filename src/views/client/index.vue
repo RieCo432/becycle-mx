@@ -15,7 +15,17 @@ export default {
       appointmentSummaries: [],
     };
   },
-
+  methods: {
+    cancelAppointment(appointmentId) {
+      console.log('cancel');
+    },
+    editAppointmentNotes(appointmentId) {
+      console.log('edit notes');
+    },
+    rescheduleAppointment(appointmentId) {
+      console.log('reschedule');
+    },
+  },
   async created() {
     this.client = (await requests.getClient(this.$route.params.clientId)).data;
     this.contracts = (await requests.getClientContracts(this.client.id, true, true, true)).data;
@@ -73,7 +83,14 @@ export default {
 
 <template>
   <div>
-    <client-view :client="client" :contract-summaries="contractSummaries" :appointment-summaries="appointmentSummaries"></client-view>
+    <client-view
+        :client="client"
+        :contract-summaries="contractSummaries"
+        :appointment-summaries="appointmentSummaries"
+        :cancel-appointment="cancelAppointment"
+        :edit-appointment-notes="editAppointmentNotes"
+        :reschedule-appointment="rescheduleAppointment"
+    ></client-view>
   </div>
 </template>
 

@@ -47,7 +47,7 @@
               }
             ${
               props.row.status === 'past'
-                ? 'text-black-500 bg-black-500'
+                ? 'text-black-400 bg-black-400'
                 : ''
             }
             ${
@@ -71,14 +71,18 @@
           </span>
           <span v-if="props.column.field == 'action'">
             <div class="flex space-x-3 rtl:space-x-reverse">
-                <Tooltip placement="top" arrow theme="dark" v-for="action in actions">
-                  <template #button>
+              <template v-for="action in actions">
+                <Tooltip placement="top" arrow theme="dark"  v-if="new Date(Date.parse(props.row.startDateTime)) > new Date()">
+                  <template #button >
                     <div class="action-btn">
-                      <Icon :icon="action.icon" @click="$router.push({path:`/contracts/${props.row.id}`})"/>
+                      <Icon v-if="(action.id === 'cancel') && props.row.status !== 'cancelled'" :icon="action.icon" @click="cancelAppointment(appointmentId)"/>
+                      <Icon v-else-if="(action.id === 'edit') && props.row.status !== 'cancelled'" :icon="action.icon" @click="editAppointmentNotes(appointmentId)"/>
+                      <Icon v-else-if="(action.id === 'reschedule')" :icon="action.icon" @click="rescheduleAppointment(appointmentId)"/>
                     </div>
                   </template>
-                  <span>{{action.name}}</span>
+                  <span>{{action.label}}</span>
                 </Tooltip>
+              </template>
             </div>
           </span>
         </template>
@@ -132,6 +136,18 @@ export default {
       required: true,
     },
     title: {
+      required: true,
+    },
+    cancelAppointment: {
+      type: Function,
+      required: true,
+    },
+    editAppointmentNotes: {
+      type: Function,
+      required: true,
+    },
+    rescheduleAppointment: {
+      type: Function,
       required: true,
     },
   },
