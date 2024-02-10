@@ -346,4 +346,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  confirmAppointment(appointmentId) {
+    return axiosClient.patch(`/appointments/${appointmentId}/confirm`, {}, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  cancelAppointment(appointmentId) {
+    return axiosClient.patch(`/appointments/${appointmentId}/cancel`, {}, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

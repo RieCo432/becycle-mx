@@ -5,9 +5,12 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
+import AppointmentInfoModal from '@/components/Modal/AppointmentInfoModal.vue';
+
 export default {
   name: 'appointmentCalendar',
   components: {
+    AppointmentInfoModal,
     FullCalendar,
     Card,
   },
@@ -33,6 +36,24 @@ export default {
       required: true,
     },
   },
+  methods: {
+    showEventDetail(eventClickInfo) {
+      console.log(eventClickInfo.event);
+      this.showAppointmentModal = !this.showAppointmentModal;
+      this.appointmentModalInfo = {
+        title: eventClickInfo.event.title,
+        startDateTime: eventClickInfo.event.start,
+        notes: eventClickInfo.event.extendedProps.notes,
+        id: eventClickInfo.event.id,
+        client: eventClickInfo.event.extendedProps.client,
+        endDateTime: eventClickInfo.event.end,
+        confirmed: eventClickInfo.event.extendedProps.confirmed,
+        cancelled: eventClickInfo.event.extendedProps.cancelled,
+        clientName: eventClickInfo.event.extendedProps.clientName,
+        typeTitle: eventClickInfo.event.extendedProps.typeTitle,
+      };
+    },
+  },
   data() {
     return {
       calendarOptions: {
@@ -45,9 +66,7 @@ export default {
         initialView: 'timeGridWeek',
         themeSystem: 'bootstrap',
         initialEvents: this.appointments,
-        dateClick: this.dateClicked,
-        eventClick: this.editEvent,
-        eventsSet: this.handleEvents,
+        eventClick: this.showEventDetail,
         firstDay: 1,
         editable: true,
         droppable: true,
@@ -63,6 +82,8 @@ export default {
         eventMaxStack: 6,
         slotEventOverlap: false,
       },
+      showAppointmentModal: false,
+      appointmentModalInfo: {},
     };
   },
 };
@@ -81,6 +102,12 @@ export default {
         </div>
       </Card>
     </div>
+    <AppointmentInfoModal
+        :active-modal="showAppointmentModal"
+        @close="showAppointmentModal = !showAppointmentModal"
+        :appointment="appointmentModalInfo"
+    >
+    </AppointmentInfoModal>
   </div>
 </template>
 
