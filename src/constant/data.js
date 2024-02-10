@@ -66,6 +66,12 @@ export const topMenu = [
       },
     ],
   },
+  {
+    title: 'Appointments',
+    icon: 'heroicons-outline:calendar',
+    link: '/appointments',
+    show: ['user'],
+  },
 ];
 
 export const alertType = [

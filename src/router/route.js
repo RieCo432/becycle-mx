@@ -93,6 +93,12 @@ const routes = [
         meta: {restrictTo: ['client']},
         component: () => import('@/views/appointments/bookAppointment.vue'),
       },
+      {
+        path: '/appointments',
+        name: 'Appointment Calendar',
+        meta: {restrictTo: ['user']},
+        component: () => import('@/views/appointments/index.vue'),
+      },
     ],
   },
 ];

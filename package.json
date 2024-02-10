@@ -49,6 +49,7 @@
     "vue-cleave-component": "^3.0.1",
     "vue-flatpickr-component": "^9",
     "vue-good-table-next": "^0.2.1",
+    "vue-moment": "^4.1.0",
     "vue-router": "^4.0.3",
     "vue-select": "^4.0.0-beta.5",
     "vue-sweetalert2": "^5.0.5",

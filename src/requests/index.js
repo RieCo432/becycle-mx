@@ -10,7 +10,7 @@ const axiosClient = axios.create({
 
 export default {
   getOpeningTimes() {
-    return axiosClient.get('/public/opening-hours');
+    return axiosClient.get('/public/opening-times');
   },
   getUserToken(username, password) {
     return axiosClient.post('/users/token', {
@@ -325,6 +325,24 @@ export default {
   },
   getMyContract(contractId) {
     return axiosClient.get(`/clients/me/contracts/${contractId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getOpeningDays() {
+    return axiosClient.get('/public/opening-days');
+  },
+  getOpeningHours() {
+    return axiosClient.get('/public/opening-hours');
+  },
+  getSlotDuration() {
+    return axiosClient.get('/public/slot-duration');
+  },
+  getAppointments(past, future) {
+    return axiosClient.get('/appointments', {
+      params: {
+        past: past,
+        future: future,
+      },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
