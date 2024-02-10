@@ -13,6 +13,8 @@ export default {
       contractSummaries: [],
       appointments: [],
       appointmentSummaries: [],
+      loadingContracts: true,
+      loadingAppointments: true,
     };
   },
   methods: {
@@ -57,6 +59,7 @@ export default {
         status: status,
       };
     })));
+    this.loadingContracts = false;
 
     this.appointmentSummaries = (await Promise.all(this.appointments.map(async (appointment) => {
       const appointmentType = (await requests.getAppointmentType(appointment.typeId)).data;
@@ -80,6 +83,7 @@ export default {
         notes: appointment.notes,
       };
     })));
+    this.loadingAppointments = false;
   },
 };
 </script>
@@ -94,6 +98,8 @@ export default {
         :edit-appointment-notes="editAppointmentNotes"
         :reschedule-appointment="rescheduleAppointment"
         :view-contract="viewContract"
+        :loading-contracts="loadingContracts"
+        :loading-appointments="loadingAppointments"
     ></client-view>
   </div>
 </template>

@@ -13,8 +13,8 @@
             merged
         />
       </div>
-
-      <vue-good-table
+      <TableSkeleton v-if="loading" :num-columns="columns.length"></TableSkeleton>
+      <vue-good-table v-else
           :columns="columns"
           styleClass=" vgt-table bordered centered"
           :rows="advancedTable"
@@ -112,6 +112,7 @@ import InputGroup from '@/components/InputGroup';
 import Pagination from '@/components/Pagination';
 import {MenuItem} from '@headlessui/vue';
 import Tooltip from '@/components/Tooltip';
+import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
 export default {
   name: 'AppointmentSummaryTable',
@@ -123,6 +124,7 @@ export default {
     Card,
     MenuItem,
     Tooltip,
+    TableSkeleton,
   },
 
   props: {
@@ -148,6 +150,10 @@ export default {
     },
     rescheduleAppointment: {
       type: Function,
+      required: true,
+    },
+    loading: {
+      type: Boolean,
       required: true,
     },
   },

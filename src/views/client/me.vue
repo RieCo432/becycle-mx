@@ -8,6 +8,8 @@
         :edit-appointment-notes="editMyAppointmentNotes"
         :reschedule-appointment="rescheduleMyAppointment"
         :view-contract="viewContract"
+        :loading-contracts="loadingContracts"
+        :loading-appointments="loadingAppointments"
     ></client-view>
   </div>
 </template>
@@ -28,6 +30,8 @@ export default {
       contractSummaries: [],
       appointments: [],
       appointmentSummaries: [],
+      loadingContracts: true,
+      loadingAppointments: true,
     };
   },
   methods: {
@@ -73,6 +77,7 @@ export default {
         status: status,
       };
     })));
+    this.loadingContracts = false;
 
     this.appointmentSummaries = (await Promise.all(this.appointments.map(async (appointment) => {
       const appointmentType = (await requests.getAppointmentType(appointment.typeId)).data;
@@ -96,6 +101,7 @@ export default {
         notes: appointment.notes,
       };
     })));
+    this.loadingAppointments = false;
   },
 };
 

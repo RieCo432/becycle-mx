@@ -3,12 +3,14 @@ import Card from '@/components/Card/index.vue';
 import ContractSummaryTable from '@/components/Tables/ContractSummaryTable.vue';
 import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
 const credentialsStore = useCredentialsStore();
 
 export default {
   name: 'clientView',
   components: {
+    TableSkeleton,
     AppointmentSummaryTable,
     Card,
     Advanced: ContractSummaryTable,
@@ -42,11 +44,18 @@ export default {
       type: Function,
       required: true,
     },
+    loadingContracts: {
+      type: Boolean,
+      required: true,
+    },
+    loadingAppointments: {
+      type: Boolean,
+      required: true,
+    },
   },
 
   data() {
     return {
-
       contractActions: [
         {
           name: 'View',
@@ -159,7 +168,7 @@ export default {
       <Card>
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <Advanced :actions="contractActions" :columns="contractColumns" :advanced-table="contractSummaries" title="Contracts" :view-contract="viewContract"></Advanced>
+            <Advanced :loading="loadingContracts" :actions="contractActions" :columns="contractColumns" :advanced-table="contractSummaries" title="Contracts" :view-contract="viewContract"></Advanced>
           </div>
         </div>
       </Card>
@@ -169,7 +178,7 @@ export default {
 
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <AppointmentSummaryTable :cancel-appointment="cancelAppointment" :edit-appointment-notes="editAppointmentNotes" :reschedule-appointment="rescheduleAppointment" :actions="appointmentActions" :columns="appointmentColumns" :advanced-table="appointmentSummaries" title="Appointments"></AppointmentSummaryTable>
+            <AppointmentSummaryTable :loading="loadingAppointments" :cancel-appointment="cancelAppointment" :edit-appointment-notes="editAppointmentNotes" :reschedule-appointment="rescheduleAppointment" :actions="appointmentActions" :columns="appointmentColumns" :advanced-table="appointmentSummaries" title="Appointments"></AppointmentSummaryTable>
           </div>
         </div>
       </Card>
