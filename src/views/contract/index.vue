@@ -21,34 +21,41 @@ export default {
       activeUsers: [],
       depositReturnedByUser: {},
       returnAcceptedByUser: {},
+      loadingBike: true,
+      loadingClient: true,
+      loadingContract: true,
     };
   },
-  async mounted() {
-    this.contract = (await requests.getContract(this.$route.params.contractId)).data;
-
-    requests.getBike(this.contract.bikeId).then((response) => {
-      this.bike = response.data;
-    });
-    requests.getClient(this.contract.clientId).then((response) => {
-      this.client = response.data;
-    });
-    requests.getUser(this.contract['depositCollectingUserId']).then((response) => {
-      this.depositCollectingUser = response.data;
-    });
-    requests.getUser(this.contract['workingUserId']).then((response) => {
-      this.workingUser = response.data;
-    });
-    requests.getUser(this.contract['checkingUserId']).then((response) => {
-      this.checkingUser = response.data;
-    });
-    if (this.contract.returnedDate != null) {
-      requests.getUser(this.contract['returnAcceptingUserId']).then((response) => {
-        this.returnAcceptedByUser = response.data;
+  mounted() {
+    requests.getContract(this.$route.params.contractId).then((response) => {
+      this.contract = response.data;
+      requests.getBike(this.contract.bikeId).then((response) => {
+        this.bike = response.data;
+        this.loadingBike = false;
       });
-      requests.getUser(this.contract['depositReturningUserId']).then((response) => {
-        this.depositReturnedByUser = response.data;
+      requests.getClient(this.contract.clientId).then((response) => {
+        this.client = response.data;
+        this.loadingClient = false;
       });
-    }
+      requests.getUser(this.contract['depositCollectingUserId']).then((response) => {
+        this.depositCollectingUser = response.data;
+      });
+      requests.getUser(this.contract['workingUserId']).then((response) => {
+        this.workingUser = response.data;
+      });
+      requests.getUser(this.contract['checkingUserId']).then((response) => {
+        this.checkingUser = response.data;
+      });
+      if (this.contract.returnedDate != null) {
+        requests.getUser(this.contract['returnAcceptingUserId']).then((response) => {
+          this.returnAcceptedByUser = response.data;
+        });
+        requests.getUser(this.contract['depositReturningUserId']).then((response) => {
+          this.depositReturnedByUser = response.data;
+        });
+      }
+      this.loadingContract = false;
+    });
     requests.getDepositBearers().then((response) => {
       this.depositBearers = response.data.map((user) => ({
         label: user.username,
@@ -76,6 +83,9 @@ export default {
                  :returnAcceptedByUsername="returnAcceptedByUser ? returnAcceptedByUser.username : null"
                  :deposit-bearers="depositBearers"
                  :active-users="activeUsers"
+                 :loading-client="loadingClient"
+                 :loading-bike="loadingBike"
+                 :loading-contract="loadingContract"
   ></view-contract>
 </template>
 

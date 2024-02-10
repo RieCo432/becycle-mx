@@ -19,22 +19,28 @@ export default {
       contractId: this.$route.params.contractId,
       depositReturnedByUsername: null,
       returnAcceptedByUsername: null,
+      loadingBike: true,
+      loadingClient: true,
+      loadingContract: true,
     };
   },
-  async mounted() {
-    this.contract = (await requests.getMyContract(this.$route.params.contractId)).data;
-
-    this.workingUsername = this.contract['workingUsername'];
-    this.checkingUsername = this.contract['checkingUsername'];
-    this.depositCollectingUsername = this.contract['depositCollectingUsername'];
-    this.returnAcceptedByUsername = this.contract['returnAcceptingUsername'];
-    this.depositReturnedByUsername = this.contract['depositReturningUsername'];
-
-    requests.getBike(this.contract.bikeId).then((response) => {
-      this.bike = response.data;
-    });
-    requests.getClientMe().then((response) => {
-      this.client = response.data;
+  mounted() {
+    requests.getMyContract(this.$route.params.contractId).then((response) => {
+      this.contract = response.data;
+      requests.getBike(this.contract.bikeId).then((response) => {
+        this.bike = response.data;
+        this.loadingBike = false;
+      });
+      requests.getClientMe().then((response) => {
+        this.client = response.data;
+        this.loadingClient = false;
+      });
+      this.workingUsername = this.contract['workingUsername'];
+      this.checkingUsername = this.contract['checkingUsername'];
+      this.depositCollectingUsername = this.contract['depositCollectingUsername'];
+      this.returnAcceptedByUsername = this.contract['returnAcceptingUsername'];
+      this.depositReturnedByUsername = this.contract['depositReturningUsername'];
+      this.loadingContract = false;
     });
   },
 };
@@ -49,6 +55,9 @@ export default {
                  :contract="contract"
                  :depositReturnedByUsername="depositReturnedByUsername"
                  :returnAcceptedByUsername="returnAcceptedByUsername"
+                 :loading-client="loadingClient"
+                 :loading-bike="loadingBike"
+                 :loading-contract="loadingContract"
   ></view-contract>
 </template>
 

@@ -11,10 +11,22 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
+import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkeleton.vue';
+import ContractCardSkeleton from '@/components/Skeleton/ContractCardSkeleton.vue';
 
 export default {
   name: 'viewContract',
-  components: {Checkbox, Select, Card, DashButton, Textinput},
+  components: {
+    Checkbox,
+    Select,
+    Card,
+    DashButton,
+    Textinput,
+    ContractClientCardSkeleton,
+    ContractBikeCardSkeleton,
+    ContractCardSkeleton,
+  },
   setup() {
     const route = useRoute();
 
@@ -212,6 +224,18 @@ export default {
       required: false,
       default: () => [],
     },
+    loadingContract: {
+      type: Boolean,
+      required: true,
+    },
+    loadingClient: {
+      type: Boolean,
+      required: true,
+    },
+    loadingBike: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
@@ -230,40 +254,48 @@ export default {
       <div class="grid grid-cols-12 gap-5">
         <div class="col-span-4 gap-5">
           <Card title="Lendee">
-            <div class="flex flex-col h-full">
-              <div class="flex-1">
-                <p class="text-slate-600 dark:text-slate-300">{{client.firstName}} {{client.lastName}}</p>
-                <p class="text-slate-600 dark:text-slate-300">{{client.emailAddress}}</p>
+            <ContractClientCardSkeleton v-if="loadingClient" count="1"></ContractClientCardSkeleton>
+            <template v-else>
+              <div class="flex flex-col h-full">
+                <div class="flex-1" >
+                  <p class="text-slate-600 dark:text-slate-300">{{client.firstName}} {{client.lastName}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{client.emailAddress}}</p>
+                </div>
+                <DashButton @click="goToClient()">
+                  View Client
+                </DashButton>
               </div>
-              <DashButton @click="goToClient()">
-                View Client
-              </DashButton>
-            </div>
+            </template>
           </Card>
         </div>
         <div class="col-span-4 gap-5">
           <Card title="Bike">
-            <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
-            <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
-            <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
-
+            <ContractBikeCardSkeleton v-if="loadingBike"></ContractBikeCardSkeleton>
+            <template v-else>
+              <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
+              <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
+              <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+            </template>
           </Card>
         </div>
         <div class="col-span-4 gap-5">
           <Card title="Contract">
-            <div class="flex flex-col h-full">
-              <div class="flex-1">
-                <p class="text-slate-600 dark:text-slate-300">From: {{contract.startDate}}&emsp; Until: {{contract.endDate}}</p>
-                <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
-                <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.condition}}</p>
-                <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}</p>
-                <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
-                <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
+            <ContractCardSkeleton v-if="loadingContract"></ContractCardSkeleton>
+            <template v-else>
+              <div class="flex flex-col h-full">
+                <div class="flex-1">
+                  <p class="text-slate-600 dark:text-slate-300">From: {{contract.startDate}}&emsp; Until: {{contract.endDate}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.condition}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
+                </div>
+                <DashButton v-if="isUserLoggedIn" class="mt-5" @click="extendContract">
+                  Extend Contract
+                </DashButton>
               </div>
-              <DashButton v-if="isUserLoggedIn" class="mt-5" @click="extendContract">
-                Extend Contract
-              </DashButton>
-            </div>
+            </template>
           </Card>
         </div>
         <div class="col-span-12 gap-5" v-if="((contract.returnedDate == null) && isUserLoggedIn) || (contract.returnedDate != null)">
