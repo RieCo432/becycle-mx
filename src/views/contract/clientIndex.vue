@@ -13,54 +13,28 @@ export default {
       client: {},
       bike: {},
       contract: {},
-      depositCollectingUser: {},
-      workingUser: {},
-      checkingUser: {},
+      depositCollectingUsername: null,
+      workingUsername: null,
+      checkingUsername: null,
       contractId: this.$route.params.contractId,
-      depositBearers: [],
-      activeUsers: [],
-      depositReturnedByUser: {},
-      returnAcceptedByUser: {},
+      depositReturnedByUsername: null,
+      returnAcceptedByUsername: null,
     };
   },
-
   async mounted() {
     this.contract = (await requests.getMyContract(this.$route.params.contractId)).data;
+
+    this.workingUsername = this.contract['workingUsername'];
+    this.checkingUsername = this.contract['checkingUsername'];
+    this.depositCollectingUsername = this.contract['depositCollectingUsername'];
+    this.returnAcceptedByUsername = this.contract['returnAcceptingUsername'];
+    this.depositReturnedByUsername = this.contract['depositReturningUsername'];
 
     requests.getBike(this.contract.bikeId).then((response) => {
       this.bike = response.data;
     });
     requests.getClientMe().then((response) => {
       this.client = response.data;
-    });
-    requests.getUser(this.contract['depositCollectingUserId']).then((response) => {
-      this.depositCollectingUser = response.data;
-    });
-    requests.getUser(this.contract['workingUserId']).then((response) => {
-      this.workingUser = response.data;
-    });
-    requests.getUser(this.contract['checkingUserId']).then((response) => {
-      this.checkingUser = response.data;
-    });
-    if (this.contract.returnedDate != null) {
-      requests.getUser(this.contract['returnAcceptingUserId']).then((response) => {
-        this.returnAcceptedByUser = response.data;
-      });
-      requests.getUser(this.contract['depositReturningUserId']).then((response) => {
-        this.depositReturnedByUser = response.data;
-      });
-    }
-    requests.getDepositBearers().then((response) => {
-      this.depositBearers = response.data.map((user) => ({
-        label: user.username,
-        value: user.username,
-      }));
-    });
-    requests.getActiveUsers().then((response) => {
-      this.activeUsers = response.data.map((user) => ({
-        label: user.username,
-        value: user.username,
-      }));
     });
   },
 };
@@ -69,14 +43,12 @@ export default {
 <template>
   <view-contract :client="client"
                  :bike="bike"
-                 :depositCollectingUsername="depositCollectingUser.username"
-                 :workingUsername="workingUser.username"
-                 :checkingUsername="checkingUser.username"
+                 :depositCollectingUsername="depositCollectingUsername"
+                 :workingUsername="workingUsername"
+                 :checkingUsername="checkingUsername"
                  :contract="contract"
-                 :depositReturnedByUsername="depositReturnedByUser ? depositReturnedByUser.username : null"
-                 :returnAcceptedByUsername="returnAcceptedByUser ? returnAcceptedByUser.username : null"
-                 :deposit-bearers="depositBearers"
-                 :active-users="activeUsers"
+                 :depositReturnedByUsername="depositReturnedByUsername"
+                 :returnAcceptedByUsername="returnAcceptedByUsername"
   ></view-contract>
 </template>
 

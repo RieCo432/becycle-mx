@@ -23,7 +23,6 @@ export default {
       returnAcceptedByUser: {},
     };
   },
-
   async mounted() {
     this.contract = (await requests.getContract(this.$route.params.contractId)).data;
 

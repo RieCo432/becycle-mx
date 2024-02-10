@@ -161,6 +161,13 @@ export default {
         });
       });
     },
+    goToClient() {
+      if (this.isUserLoggedIn) {
+        this.$router.push({path: `/clients/${this.client.id}`});
+      } else {
+        this.$router.push({path: '/me'});
+      }
+    },
   },
   props: {
     client: {
@@ -197,11 +204,13 @@ export default {
     },
     depositBearers: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     activeUsers: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
   },
   data() {
@@ -226,7 +235,7 @@ export default {
                 <p class="text-slate-600 dark:text-slate-300">{{client.firstName}} {{client.lastName}}</p>
                 <p class="text-slate-600 dark:text-slate-300">{{client.emailAddress}}</p>
               </div>
-              <DashButton @click="this.$router.push({path: `/clients/${client.id}`})">
+              <DashButton @click="goToClient()">
                 View Client
               </DashButton>
             </div>
