@@ -128,3 +128,13 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
     db.commit()
 
     return contract
+
+
+def get_client_contract(db: Session, client_id: UUID, contract_id: UUID) -> models.Contract:
+    return db.scalar(
+        select(models.Contract)
+        .where(
+            (models.Contract.id == contract_id)
+            & (models.Contract.clientId == client_id)
+        )
+    )

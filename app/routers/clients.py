@@ -150,6 +150,14 @@ async def get_my_contracts(
     return crud.get_contracts(db=db, client_id=client.id, open=open, closed=closed, expired=expired)
 
 
+@clients.get("/clients/me/contracts/{contract_id}")
+async def get_my_contract(
+        contract_id: UUID,
+        client: models.Client = Depends(dep.get_current_client),
+        db: Session = Depends(dep.get_db)) -> schemas.Contract:
+    return crud.get_client_contract(db=db, client_id=client.id, contract_id=contract_id)
+
+
 # TODO: Implement query parameters for pagination
 @clients.get("/clients/me/appointments")
 async def get_my_appointments(
