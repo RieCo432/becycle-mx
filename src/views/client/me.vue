@@ -7,6 +7,7 @@
         :cancel-appointment="cancelMyAppointment"
         :edit-appointment-notes="editMyAppointmentNotes"
         :reschedule-appointment="rescheduleMyAppointment"
+        :view-contract="viewContract"
     ></client-view>
   </div>
 </template>
@@ -38,6 +39,9 @@ export default {
     },
     rescheduleMyAppointment(appointmentId) {
       console.log('reschedule');
+    },
+    viewContract(contractId) {
+      this.$router.push(`/clients/me/contracts/${contractId}`);
     },
   },
   async created() {

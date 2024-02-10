@@ -63,13 +63,17 @@ const routes = [
         component: () => import('@/views/client/me.vue'),
       },
       {
+        path: '/clients/me/contracts/:contractId',
+        name: 'Me',
+        meta: {restrictTo: ['client']},
+        component: () => import('@/views/contract/clientIndex.vue'),
+      },
+      {
         path: '/contracts/:contractId',
         name: 'Contract',
         meta: {restrictTo: ['user']},
-        component: () => import('@/views/contract/viewContract.vue'),
-        children: [
+        component: () => import('@/views/contract/index.vue'),
 
-        ],
       },
       {
         path: '/contracts/new',

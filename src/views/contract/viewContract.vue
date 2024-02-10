@@ -1,40 +1,26 @@
 <script>
-import Card from '@/components/card';
-import requests from '@/requests';
+import Textinput from '@/components/Textinput/index.vue';
 import DashButton from '@/components/Button/index.vue';
-import {useToast} from 'vue-toastification';
+import Select from '@/components/Select/index.vue';
+import Card from '@/components/Card/index.vue';
+import Checkbox from '@/components/Switch/index.vue';
+import {useRoute} from 'vue-router';
 import {computed, ref} from 'vue';
+import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
-import Textinput from '@/components/Textinput/index.vue';
-import Checkbox from '@/components/Switch/index.vue';
-import Textarea from '@/components/Textarea/index.vue';
-import Select from '@/components/Select/index.vue';
-import Radio from '@/components/Radio/index.vue';
-import Button from '@/components/Button/index.vue';
-import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
-import {useRoute, useRouter} from 'vue-router';
-
-const toast = useToast();
+import requests from '@/requests';
+import {useCredentialsStore} from '@/store/credentialsStore';
 
 export default {
   name: 'viewContract',
-  components: {
-    ComboboxTextInput,
-    Button,
-    Radio,
-    Select,
-    Textarea,
-    Checkbox,
-    Textinput,
-    DashButton,
-    Card,
-  },
-
+  components: {Checkbox, Select, Card, DashButton, Textinput},
   setup() {
     const route = useRoute();
 
-    const contract = ref({});
+    const credentialsStore = useCredentialsStore();
+    const toast = useToast();
+    const contractData = ref({});
 
 
     const steps = [
@@ -52,7 +38,6 @@ export default {
       },
     ];
 
-    const toast = useToast();
     const stepNumber = ref(0);
 
 
@@ -81,7 +66,7 @@ export default {
         case 2:
           return reviewSchema;
         default:
-          return clientSchema;
+          return depositReturningSchema;
       }
     });
 
@@ -113,7 +98,7 @@ export default {
             returnAcceptingUser.value, returnAcceptingPasswordOrPin.value).then(() => {
           toast.success('Contract Returned!', {timeout: 1000});
           requests.getContract(route.params.contractId).then((response) => {
-            contract.value = response.data;
+            contractData.value = response.data;
           });
         });
       } else {
@@ -143,7 +128,9 @@ export default {
     };
 
     return {
-      contract,
+      contractData,
+      toast,
+      credentialsStore,
       depositAmountReturned,
       depositAmountReturnedError,
       depositReturningUser,
@@ -165,57 +152,65 @@ export default {
       prev,
     };
   },
-
-
-  data() {
-    return {
-      client: {},
-      bike: {},
-      depositCollectingUser: {},
-      workingUser: {},
-      checkingUser: {},
-      contractId: this.$route.params.contractId,
-      depositBearers: [],
-      activeUsers: [],
-      depositReturnedByUser: {},
-      returnAcceptedByUser: {},
-    };
-  },
   methods: {
     extendContract() {
-      requests.patchExtendContract(this.contractId).then(() => {
-        toast.success('Contract Extended!', {timeout: 1000});
-        requests.getContract(this.contractId).then((response) => {
-          this.contract = response.data;
+      requests.patchExtendContract(this.contractData.id).then(() => {
+        this.toast.success('Contract Extended!', {timeout: 1000});
+        requests.getContract(this.contractData.id).then((response) => {
+          this.contractData = response.data;
         });
       });
     },
   },
-  async created() {
-    this.contract = (await requests.getContract(this.$route.params.contractId)).data;
-    this.bike = (await requests.getBike(this.contract.bikeId)).data;
-    this.client = (await requests.getClient(this.contract.clientId)).data;
-    this.depositCollectingUser = (await requests.getUser(this.contract['depositCollectingUserId'])).data;
-    this.workingUser = (await requests.getUser(this.contract['workingUserId'])).data;
-    this.checkingUser = (await requests.getUser(this.contract['checkingUserId'])).data;
-    if (this.contract.returnedDate != null) {
-      this.returnAcceptedByUser = (await requests.getUser(this.contract['returnAcceptingUserId'])).data;
-      this.depositReturnedByUser = (await requests.getUser(this.contract['depositReturningUserId'])).data;
+  props: {
+    client: {
+      type: Object,
+      required: true,
+    },
+    bike: {
+      type: Object,
+      required: true,
+    },
+    depositCollectingUsername: {
+      type: String,
+      required: true,
+    },
+    workingUsername: {
+      type: String,
+      required: true,
+    },
+    checkingUsername: {
+      type: String,
+      required: true,
+    },
+    contract: {
+      type: Object,
+      required: true,
+    },
+    depositReturnedByUsername: {
+      type: String,
+      required: false,
+    },
+    returnAcceptedByUsername: {
+      type: String,
+      required: false,
+    },
+    depositBearers: {
+      type: Array,
+      required: true,
+    },
+    activeUsers: {
+      type: Array,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      isUserLoggedIn: this.credentialsStore.isUserLoggedIn(),
     };
   },
   mounted() {
-    requests.getDepositBearers().then((response) => (this.depositBearers = response.data.map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
-    requests.getActiveUsers().then((response) => (this.activeUsers = response.data.map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
+    this.contractData = this.contract;
   },
 };
 </script>
@@ -252,19 +247,19 @@ export default {
                 <p class="text-slate-600 dark:text-slate-300">From: {{contract.startDate}}&emsp; Until: {{contract.endDate}}</p>
                 <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
                 <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.condition}}</p>
-                <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUser.username}}</p>
-                <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUser.username}}</p>
-                <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUser.username}}</p>
+                <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}</p>
+                <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
+                <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
               </div>
-              <DashButton class="mt-5" @click="extendContract">
+              <DashButton v-if="isUserLoggedIn" class="mt-5" @click="extendContract">
                 Extend Contract
               </DashButton>
             </div>
           </Card>
         </div>
-        <div class="col-span-12 gap-5">
+        <div class="col-span-12 gap-5" v-if="((contract.returnedDate == null) && isUserLoggedIn) || (contract.returnedDate != null)">
           <Card title="Return">
-            <div v-if="contract.returnedDate == null">
+            <div v-if="(contract.returnedDate == null) && isUserLoggedIn">
               <div class="flex z-[5] items-center relative justify-center md:mx-8">
                 <div
                     class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
@@ -394,13 +389,13 @@ export default {
                       class="mt-10"
                       :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
                   >
-                    <Button
+                    <DashButton
                         @click.prevent="prev()"
                         text="prev"
                         btnClass="btn-dark"
                         v-if="this.stepNumber !== 0"
                     />
-                    <Button
+                    <DashButton
                         :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                         btnClass="btn-dark"
                     />
@@ -408,10 +403,10 @@ export default {
                 </form>
               </div>
             </div>
-            <div v-else>
+            <div v-else-if="contract.returnedDate != null">
               <p class="text-slate-600 dark:text-slate-300">Returned on {{contract.returnedDate}}</p>
-              <p class="text-slate-600 dark:text-slate-300">Deposit returned: &#163; {{contract.depositAmountReturned}} by {{depositReturnedByUser.username}}</p>
-              <p class="text-slate-600 dark:text-slate-300">Received by {{returnAcceptedByUser.username}}</p>
+              <p class="text-slate-600 dark:text-slate-300">Deposit returned: &#163; {{contract.depositAmountReturned}} by {{depositReturnedByUsername}}</p>
+              <p class="text-slate-600 dark:text-slate-300">Received by {{returnAcceptedByUsername}}</p>
             </div>
           </Card>
         </div>

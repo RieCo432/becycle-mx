@@ -25,6 +25,9 @@ export default {
     rescheduleAppointment(appointmentId) {
       console.log('reschedule');
     },
+    viewContract(contractId) {
+      this.$router.push(`/contracts/${contractId}`);
+    },
   },
   async created() {
     this.client = (await requests.getClient(this.$route.params.clientId)).data;
@@ -90,6 +93,7 @@ export default {
         :cancel-appointment="cancelAppointment"
         :edit-appointment-notes="editAppointmentNotes"
         :reschedule-appointment="rescheduleAppointment"
+        :view-contract="viewContract"
     ></client-view>
   </div>
 </template>

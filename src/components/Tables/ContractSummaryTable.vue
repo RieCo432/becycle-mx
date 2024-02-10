@@ -91,7 +91,7 @@
                 <Tooltip placement="top" arrow theme="dark" v-for="action in actions">
                   <template #button>
                     <div class="action-btn">
-                      <Icon :icon="action.icon" @click="$router.push({path:`/contracts/${props.row.id}`})"/>
+                      <Icon :icon="action.icon" @click="viewContract(props.row.id)"/>
                     </div>
                   </template>
                   <span>{{action.name}}</span>
@@ -148,6 +148,10 @@ export default {
       required: true,
     },
     title: {
+      required: true,
+    },
+    viewContract: {
+      type: Function,
       required: true,
     },
   },

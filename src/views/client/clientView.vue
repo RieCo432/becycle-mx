@@ -38,6 +38,10 @@ export default {
       type: Function,
       required: true,
     },
+    viewContract: {
+      type: Function,
+      required: true,
+    },
   },
 
   data() {
@@ -155,7 +159,7 @@ export default {
       <Card>
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <Advanced :actions="contractActions" :columns="contractColumns" :advanced-table="contractSummaries" title="Contracts"></Advanced>
+            <Advanced :actions="contractActions" :columns="contractColumns" :advanced-table="contractSummaries" title="Contracts" :view-contract="viewContract"></Advanced>
           </div>
         </div>
       </Card>

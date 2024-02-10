@@ -323,4 +323,9 @@ export default {
   getAppointmentType(typeId) {
     return axiosClient.get(`/appointments/types/${typeId}`);
   },
+  getMyContract(contractId) {
+    return axiosClient.get(`/clients/me/contracts/${contractId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

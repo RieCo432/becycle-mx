@@ -4,7 +4,7 @@ import viewContract from '@/views/contract/viewContract.vue';
 
 
 export default {
-  name: 'contractIndex',
+  name: 'clientContractIndex',
   components: {
     viewContract,
   },
@@ -25,12 +25,12 @@ export default {
   },
 
   async mounted() {
-    this.contract = (await requests.getContract(this.$route.params.contractId)).data;
+    this.contract = (await requests.getMyContract(this.$route.params.contractId)).data;
 
     requests.getBike(this.contract.bikeId).then((response) => {
       this.bike = response.data;
     });
-    requests.getClient(this.contract.clientId).then((response) => {
+    requests.getClientMe().then((response) => {
       this.client = response.data;
     });
     requests.getUser(this.contract['depositCollectingUserId']).then((response) => {
