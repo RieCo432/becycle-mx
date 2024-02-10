@@ -54,4 +54,3 @@ def delete_closed_day(
         db: Session = Depends(dep.get_db)):
 
     crud.delete_closed_day(db=db, closed_day_date=closed_day_date)
-

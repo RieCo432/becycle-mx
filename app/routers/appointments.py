@@ -105,3 +105,8 @@ async def get_maximum_concurrent_appointments(
 
     return concurrency_limits_by_date
 
+
+@appointments.get("/appointments", dependencies=[Depends(dep.get_current_active_user)])
+async def get_appointments(past: bool = True, future: bool = True, db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
+    return crud.get_appointments(db=db, past=past, future=future)
+

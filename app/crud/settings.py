@@ -120,6 +120,27 @@ def get_opening_week_days(db: Session) -> list[int]:
     )
 
 
+def get_opening_hours(db: Session) -> dict[str, time]:
+    open_time = db.scalar(
+        select(models.AppointmentConcurrencyLimit.afterTime)
+        .where(models.AppointmentConcurrencyLimit.maxConcurrent > 0)
+        .order_by(models.AppointmentConcurrencyLimit.afterTime)
+    )
+    close_time = db.scalar(
+        select(models.AppointmentConcurrencyLimit.afterTime)
+        .where(
+            (models.AppointmentConcurrencyLimit.afterTime > open_time)
+            & (models.AppointmentConcurrencyLimit.maxConcurrent == 0)
+        )
+        .order_by(models.AppointmentConcurrencyLimit.afterTime)
+    )
+
+    return {
+        "open_time": open_time,
+        "close_time": close_time,
+    }
+
+
 def get_slot_duration(db: Session) -> int:
     return db.scalar(
         select(models.AppointmentGeneralSettings.slotDuration)
