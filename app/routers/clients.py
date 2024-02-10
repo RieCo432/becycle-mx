@@ -154,8 +154,30 @@ async def get_my_contracts(
 async def get_my_contract(
         contract_id: UUID,
         client: models.Client = Depends(dep.get_current_client),
-        db: Session = Depends(dep.get_db)) -> schemas.Contract:
-    return crud.get_client_contract(db=db, client_id=client.id, contract_id=contract_id)
+        db: Session = Depends(dep.get_db)) -> schemas.ContractRestricted:
+    contract = crud.get_client_contract(db=db, client_id=client.id, contract_id=contract_id)
+
+    return schemas.ContractRestricted(
+        workingUsername=contract.workingUser.username,
+        checkingUsername=contract.checkingUser.username,
+        depositCollectingUsername=contract.depositCollectingUser.username,
+        returnAcceptingUsername=contract.returnAcceptingUser.username if contract.returnAcceptingUser else None,
+        depositReturningUsername=contract.depositReturningUser.username if contract.depositReturningUser else None,
+        id=contract.id,
+        startDate=contract.startDate,
+        endDate=contract.endDate,
+        returnedDate=contract.returnedDate,
+        depositAmountReturned=contract.depositAmountReturned,
+        detailsSent=contract.detailsSent,
+        expiryReminderSent=contract.expiryReminderSent,
+        returnDetailsSent=contract.returnDetailsSent,
+        clientId=contract.clientId,
+        bikeId=contract.bikeId,
+        depositAmountCollected=contract.depositAmountCollected,
+        conditionOfBike=contract.conditionOfBike,
+        contractType=contract.contractType,
+        notes=contract.notes
+    )
 
 
 # TODO: Implement query parameters for pagination
