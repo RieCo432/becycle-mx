@@ -101,13 +101,16 @@ export default {
   methods: {
     confirmAppointment() {
       requests.confirmAppointment(this.appointment.id);
+      this.$emit('appointmentsUpdated');
       this.close();
     },
     cancelAppointment() {
       requests.cancelAppointment(this.appointment.id);
+      this.$emit('appointmentsUpdated');
       this.close();
     },
   },
+  emits: ['appointmentsUpdated'],
   props: {
     centered: {
       type: Boolean,

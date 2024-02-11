@@ -12,8 +12,6 @@ export default {
   },
   data() {
     return {
-      appointments: [],
-      appointmentSummaries: [],
       openTime: '16:00:00',
       closeTime: '20:00:00',
       openingDays: [0, 1, 2, 3, 4, 5, 6],
@@ -21,6 +19,31 @@ export default {
       slotDurationString: '00:15:00',
       loading: true,
     };
+  },
+  methods: {
+    async getAppointments(fetchInfo) {
+      const appointments = (await requests.getAppointments(fetchInfo.start, fetchInfo.end)).data.filter((appointment) => !appointment.cancelled);
+      const appointmentSummaries = (await Promise.all(appointments.map(async (appointment, i) => {
+        const client = (await requests.getClient(appointment['clientId'])).data;
+        const clientName = `${client['firstName']} ${client['lastName']}`;
+        const appointmentType = (await requests.getAppointmentType(appointment['typeId'])).data;
+        const appointmentTypeTitle = appointmentType['title'];
+        return {
+          id: appointment['id'],
+          title: `${clientName} for ${appointmentTypeTitle}`,
+          start: appointment['startDateTime'],
+          end: appointment['endDateTime'],
+          classNames: [appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500', 'text-white'],
+          notes: appointment['notes'],
+          confirmed: appointment['confirmed'],
+          cancelled: appointment['cancelled'],
+          type: appointmentTypeTitle,
+          client: client,
+          clientName: clientName,
+        };
+      })));
+      return appointmentSummaries;
+    },
   },
   async created() {
     this.openingDays = (await requests.getOpeningDays()).data;
@@ -31,26 +54,6 @@ export default {
     const openingHours = (await requests.getOpeningHours()).data;
     this.openTime = moment(new Date().setHours(...openingHours['open_time'].split(':'))).subtract(this.slotDurationMinutes, 'minutes').format('HH:mm:ss');
     this.closeTime = moment(new Date().setHours(...openingHours['close_time'].split(':'))).add(this.slotDurationMinutes, 'minutes').format('HH:mm:ss');
-    this.appointments = (await requests.getAppointments(true, true)).data.filter((appointment) => !appointment.cancelled);
-    this.appointmentSummaries = (await Promise.all(this.appointments.map(async (appointment, i) => {
-      const client = (await requests.getClient(appointment['clientId'])).data;
-      const clientName = `${client['firstName']} ${client['lastName']}`;
-      const appointmentType = (await requests.getAppointmentType(appointment['typeId'])).data;
-      const appointmentTypeTitle = appointmentType['title'];
-      return {
-        id: appointment['id'],
-        title: `${clientName} for ${appointmentTypeTitle}`,
-        start: appointment['startDateTime'],
-        end: appointment['endDateTime'],
-        classNames: [appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500', 'text-white'],
-        notes: appointment['notes'],
-        confirmed: appointment['confirmed'],
-        cancelled: appointment['cancelled'],
-        type: appointmentTypeTitle,
-        client: client,
-        clientName: clientName,
-      };
-    })));
     this.loading = false;
   },
 };
@@ -59,7 +62,7 @@ export default {
 <template>
   <div>
     <AppointmentCalendar v-if="!loading"
-                         :appointments="appointmentSummaries"
+                         :get-appointments="getAppointments"
                          :open-time="openTime"
                          :close-time="closeTime"
                          :opening-days="openingDays"

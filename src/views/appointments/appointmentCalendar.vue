@@ -15,8 +15,8 @@ export default {
     Card,
   },
   props: {
-    appointments: {
-      type: Array,
+    getAppointments: {
+      type: Function,
       required: true,
     },
     openingDays: {
@@ -53,6 +53,10 @@ export default {
         typeTitle: eventClickInfo.event.extendedProps.typeTitle,
       };
     },
+    refreshAppointments() {
+      const calendarApi = this.$refs.fullCalendar.getApi();
+      calendarApi.getEventSourceById('main').refetch();
+    },
   },
   data() {
     return {
@@ -65,7 +69,12 @@ export default {
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
         initialView: 'timeGridWeek',
         themeSystem: 'bootstrap',
-        initialEvents: this.appointments,
+        eventSources: [
+          {
+            id: 'main',
+            events: async (fetchInfo) => await this.getAppointments(fetchInfo),
+          },
+        ],
         eventClick: this.showEventDetail,
         firstDay: 1,
         editable: true,
@@ -106,6 +115,7 @@ export default {
         :active-modal="showAppointmentModal"
         @close="showAppointmentModal = !showAppointmentModal"
         :appointment="appointmentModalInfo"
+        @appointments-updated="refreshAppointments()"
     >
     </AppointmentInfoModal>
   </div>

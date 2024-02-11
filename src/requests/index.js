@@ -304,19 +304,11 @@ export default {
   },
   getMyAppointments(past, future) {
     return axiosClient.get('/clients/me/appointments', {
-      params: {
-        past: past,
-        future: future,
-      },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
   getClientAppointments(clientId, past, future) {
     return axiosClient.get(`/clients/${clientId}/appointments`, {
-      params: {
-        past: past,
-        future: future,
-      },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
@@ -337,11 +329,11 @@ export default {
   getSlotDuration() {
     return axiosClient.get('/public/slot-duration');
   },
-  getAppointments(past, future) {
+  getAppointments(startDate, endDate) {
     return axiosClient.get('/appointments', {
       params: {
-        past: past,
-        future: future,
+        start_datetime: startDate,
+        end_datetime: endDate,
       },
       headers: credentialsStore.getApiRequestHeader(),
     });
