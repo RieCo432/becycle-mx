@@ -67,9 +67,9 @@ export const topMenu = [
     ],
   },
   {
-    title: 'Appointments',
-    icon: 'heroicons-outline:calendar',
-    link: '/appointments',
+    title: 'Deposit Accounting',
+    icon: 'heroicons-outline:book-open',
+    link: '/accounting/deposits',
     show: ['user'],
   },
 ];

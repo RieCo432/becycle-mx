@@ -348,4 +348,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getDepositBook() {
+    return axiosClient.get('/finances/deposit-book', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

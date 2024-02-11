@@ -99,6 +99,12 @@ const routes = [
         meta: {restrictTo: ['user']},
         component: () => import('@/views/appointments/index.vue'),
       },
+      {
+        path: '/accounting/deposits',
+        name: 'Deposit Book',
+        meta: {restrictTo: ['user']},
+        component:() => import('@/views/accounting/depositBook.vue'),
+      },
     ],
   },
 ];
