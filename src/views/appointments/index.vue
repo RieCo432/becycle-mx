@@ -42,7 +42,7 @@ export default {
         title: `${clientName} for ${appointmentTypeTitle}`,
         start: appointment['startDateTime'],
         end: appointment['endDateTime'],
-        class: 'bg-success-500 text-white',
+        classNames: [appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500', 'text-white'],
         notes: appointment['notes'],
         confirmed: appointment['confirmed'],
         cancelled: appointment['cancelled'],
