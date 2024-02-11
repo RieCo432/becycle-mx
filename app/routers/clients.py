@@ -183,11 +183,9 @@ async def get_my_contract(
 # TODO: Implement query parameters for pagination
 @clients.get("/clients/me/appointments")
 async def get_my_appointments(
-        past: bool = True,
-        future: bool = True,
         client: models.Client = Depends(dep.get_current_client),
         db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
-    return crud.get_appointments(db=db, client_id=client.id, past=past, future=future)
+    return crud.get_appointments(db=db, client_id=client.id)
 
 
 @clients.get("/clients/{client_id}", dependencies=[Depends(dep.get_current_active_user)])
@@ -209,12 +207,10 @@ async def get_client_contracts(
 
 # TODO: Implement query parameters for pagination
 @clients.get("/clients/{client_id}/appointments", dependencies=[Depends(dep.get_current_active_user)])
-async def get_my_appointments(
+async def get_client_appointments(
         client_id: UUID,
-        past: bool = True,
-        future: bool = True,
         db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
-    return crud.get_appointments(db=db, client_id=client_id, past=past, future=future)
+    return crud.get_appointments(db=db, client_id=client_id)
 
 
 

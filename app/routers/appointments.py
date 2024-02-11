@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from uuid import UUID
 from datetime import datetime, time, date
+from dateutil import relativedelta
 
 
 appointments = APIRouter(
@@ -107,6 +108,9 @@ async def get_maximum_concurrent_appointments(
 
 
 @appointments.get("/appointments", dependencies=[Depends(dep.get_current_active_user)])
-async def get_appointments(past: bool = True, future: bool = True, db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
-    return crud.get_appointments(db=db, past=past, future=future)
+async def get_appointments(
+        start_datetime: datetime = datetime.utcnow(),
+        end_datetime: datetime = datetime.utcnow() + relativedelta.relativedelta(weeks=1),
+        db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
+    return crud.get_appointments(db=db, start_datetime=start_datetime, end_datetime=end_datetime)
 

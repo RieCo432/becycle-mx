@@ -153,14 +153,12 @@ def get_appointment_types(db: Session, inactive: bool) -> list[models.Appointmen
     )]
 
 
-def get_appointments(db: Session, client_id: UUID = None, past: bool = True, future: bool = True) -> list[models.Appointment]:
+def get_appointments(db: Session, start_datetime: datetime = None, end_datetime: datetime = None, client_id: UUID = None) -> list[models.Appointment]:
     return [_ for _ in db.scalars(
         select(models.Appointment)
         .where(
             ((models.Appointment.clientId == client_id) | (client_id == None))
-            & (
-                    ((models.Appointment.startDateTime < datetime.utcnow()) & past)
-                    | ((models.Appointment.startDateTime > datetime.utcnow()) & future)
-            )
+            & ((models.Appointment.startDateTime >= start_datetime) | (start_datetime == None))
+            & ((models.Appointment.endDateTime <= end_datetime) | (end_datetime == None))
         )
     )]
