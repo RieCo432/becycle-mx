@@ -4,7 +4,7 @@
       <div
           class="md:flex justify-between pb-6 md:space-y-0 space-y-3 items-center"
       >
-        <h5>{{title}}</h5>
+        <h5>{{tableTitle}}</h5>
         <InputGroup
             v-model="searchTerm"
             placeholder="Search"
@@ -13,33 +13,48 @@
             merged
         />
       </div>
-      <TableSkeleton v-if="loading" :num-columns="columns.length"></TableSkeleton>
+      <TableSkeleton v-if="loading" :num-columns="5"></TableSkeleton>
       <vue-good-table v-else
-                      :columns="columns"
+                      :columns="book[currentPage - 1]['columns']"
                       styleClass=" vgt-table bordered centered"
-                      :rows="advancedTable"
+                      :rows="this.book[this.currentPage - 1]['data']"
                       :group-options="{
                         enabled: true,
                         headerPosition: 'bottom',
                       }"
                       :pagination-options="{
-          enabled: false,
-          perPage: perpage,
-        }"
+                        enabled: true,
+                        position: 'top',
+                      }"
                       :search-options="{
-          enabled: true,
-          externalQuery: searchTerm,
-        }"
+                        enabled: true,
+                        externalQuery: searchTerm,
+                      }"
                       :select-options="{
-          enabled: false,
-          selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
-          selectioninfoClass: 'custom-class',
-          selectionText: 'rows selected',
-          clearSelectionText: 'clear',
-          disableSelectinfo: true, // disable the select info-500 panel on top
-          selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
-        }"
+                        enabled: false,
+                        selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
+                        // selectioninfoClass: 'custom-class',
+                        // selectionText: 'rows selected',
+                        // clearSelectionText: 'clear',
+                        // disableSelectinfo: true, // disable the select info-500 panel on top
+                        // selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
+                      }"
       >
+        <template #pagination-top="props">
+          <div class="py-4 px-3">
+            <Pagination
+                :total="book.length"
+                :current="currentPage"
+                :per-page="perPage"
+                :pageRange="pageRange"
+                @page-changed="currentPage = $event"
+                :pageChanged="props.pageChanged"
+                :perPageChanged="props.perPageChanged"
+                enableSearch
+            >
+            </Pagination>
+          </div>
+        </template>
         <template v-slot:table-row="props">
           <span v-if="props.column.field === 'type'" class="block w-full">
             <span
@@ -78,20 +93,6 @@
             </div>
           </span>
         </template>
-        <template #pagination-bottom="props">
-          <div class="py-4 px-3">
-            <Pagination
-                :total="advancedTable.length"
-                :current="current"
-                :per-page="perpage"
-                :pageRange="pageRange"
-                @page-changed="current = $event"
-                :pageChanged="props.pageChanged"
-                :perPageChanged="props.perPageChanged"
-                enableSearch>
-            </Pagination>
-          </div>
-        </template>
       </vue-good-table>
     </Card>
   </div>
@@ -119,16 +120,11 @@ export default {
   },
 
   props: {
-    advancedTable: {
-      required: true,
-    },
-    columns: {
+    book: {
+      type: Array,
       required: true,
     },
     actions: {
-      required: true,
-    },
-    title: {
       required: true,
     },
     viewContract: {
@@ -140,10 +136,19 @@ export default {
       required: true,
     },
   },
+  computed: {
+    tableTitle() {
+      const d = new Date(this.viewDate);
+      return 'Deposits on ' + d.toDateString();
+    },
+    viewDate() {
+      return this.loading ? null : this.book[this.currentPage - 1]['date'];
+    },
+  },
   data() {
     return {
-      current: 1,
-      perpage: 10,
+      currentPage: 1,
+      perPage: 1,
       pageRange: 5,
       searchTerm: '',
     };
