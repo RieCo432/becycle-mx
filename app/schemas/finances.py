@@ -5,6 +5,7 @@ from uuid import UUID
 
 class DepositTransaction(BaseModel):
     title: str
+    type: str
     diff_by_username: dict[str, int]
 
 
