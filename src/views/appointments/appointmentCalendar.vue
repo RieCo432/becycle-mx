@@ -6,6 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import AppointmentInfoModal from '@/components/Modal/AppointmentInfoModal.vue';
+import requests from '@/requests';
 
 export default {
   name: 'appointmentCalendar',
@@ -15,10 +16,6 @@ export default {
     Card,
   },
   props: {
-    getAppointments: {
-      type: Function,
-      required: true,
-    },
     openingDays: {
       type: Array,
       required: true,
@@ -57,6 +54,31 @@ export default {
       const calendarApi = this.$refs.fullCalendar.getApi();
       calendarApi.getEventSourceById('main').refetch();
     },
+    getAppointments(fetchInfo, successCallback) {
+      requests.getAppointments(fetchInfo.start, fetchInfo.end).then((response) => {
+        Promise.all(response.data.map((appointment) => {
+          return Promise.all([requests.getClient(appointment['clientId']), requests.getAppointmentType(appointment['typeId'])]).then((values) => {
+            const client = values[0].data;
+            const clientName = `${client['firstName']} ${client['lastName']}`;
+            const appointmentType = values[1].data;
+            const appointmentTypeTitle = appointmentType['title'];
+            return {
+              id: appointment['id'],
+              title: `${clientName} for ${appointmentTypeTitle}`,
+              start: appointment['startDateTime'],
+              end: appointment['endDateTime'],
+              classNames: [appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500', 'text-white'],
+              notes: appointment['notes'],
+              confirmed: appointment['confirmed'],
+              cancelled: appointment['cancelled'],
+              type: appointmentTypeTitle,
+              client: client,
+              clientName: clientName,
+            };
+          });
+        })).then((appointmentSummaries) => successCallback(appointmentSummaries));
+      });
+    },
   },
   data() {
     return {
@@ -72,7 +94,9 @@ export default {
         eventSources: [
           {
             id: 'main',
-            events: async (fetchInfo) => await this.getAppointments(fetchInfo),
+            events: (fetchInfo, successCallback) => {
+              this.getAppointments(fetchInfo, successCallback);
+            },
           },
         ],
         eventClick: this.showEventDetail,

@@ -20,31 +20,6 @@ export default {
       loading: true,
     };
   },
-  methods: {
-    async getAppointments(fetchInfo) {
-      const appointments = (await requests.getAppointments(fetchInfo.start, fetchInfo.end)).data.filter((appointment) => !appointment.cancelled);
-      const appointmentSummaries = (await Promise.all(appointments.map(async (appointment, i) => {
-        const client = (await requests.getClient(appointment['clientId'])).data;
-        const clientName = `${client['firstName']} ${client['lastName']}`;
-        const appointmentType = (await requests.getAppointmentType(appointment['typeId'])).data;
-        const appointmentTypeTitle = appointmentType['title'];
-        return {
-          id: appointment['id'],
-          title: `${clientName} for ${appointmentTypeTitle}`,
-          start: appointment['startDateTime'],
-          end: appointment['endDateTime'],
-          classNames: [appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500', 'text-white'],
-          notes: appointment['notes'],
-          confirmed: appointment['confirmed'],
-          cancelled: appointment['cancelled'],
-          type: appointmentTypeTitle,
-          client: client,
-          clientName: clientName,
-        };
-      })));
-      return appointmentSummaries;
-    },
-  },
   async created() {
     this.openingDays = (await requests.getOpeningDays()).data;
     this.slotDurationMinutes = (await requests.getSlotDuration()).data;
@@ -62,7 +37,6 @@ export default {
 <template>
   <div>
     <AppointmentCalendar v-if="!loading"
-                         :get-appointments="getAppointments"
                          :open-time="openTime"
                          :close-time="closeTime"
                          :opening-days="openingDays"
