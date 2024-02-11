@@ -53,10 +53,10 @@ export default {
     getAppointments(fetchInfo, successCallback) {
       requests.getAppointments(fetchInfo.start, fetchInfo.end).then((response) => {
         Promise.all(response.data.filter((appointment) => !appointment['cancelled']).map((appointment) => {
-          return Promise.all([requests.getClient(appointment['clientId']), requests.getAppointmentType(appointment['typeId'])]).then((values) => {
-            const client = values[0].data;
+          return Promise.all([requests.getClient(appointment['clientId']), requests.getAppointmentType(appointment['typeId'])]).then(([getClientResponse, getAppointmentTypeResponse]) => {
+            const client = getClientResponse.data;
             const clientName = `${client['firstName']} ${client['lastName']}`;
-            const appointmentType = values[1].data;
+            const appointmentType = getAppointmentTypeResponse.data;
             const appointmentTypeTitle = appointmentType['title'];
             return {
               id: appointment['id'],
