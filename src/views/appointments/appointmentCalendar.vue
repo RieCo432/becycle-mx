@@ -50,13 +50,9 @@ export default {
         typeTitle: eventClickInfo.event.extendedProps.typeTitle,
       };
     },
-    refreshAppointments() {
-      const calendarApi = this.$refs.fullCalendar.getApi();
-      calendarApi.getEventSourceById('main').refetch();
-    },
     getAppointments(fetchInfo, successCallback) {
       requests.getAppointments(fetchInfo.start, fetchInfo.end).then((response) => {
-        Promise.all(response.data.map((appointment) => {
+        Promise.all(response.data.filter((appointment) => !appointment['cancelled']).map((appointment) => {
           return Promise.all([requests.getClient(appointment['clientId']), requests.getAppointmentType(appointment['typeId'])]).then((values) => {
             const client = values[0].data;
             const clientName = `${client['firstName']} ${client['lastName']}`;
@@ -76,12 +72,15 @@ export default {
               clientName: clientName,
             };
           });
-        })).then((appointmentSummaries) => successCallback(appointmentSummaries));
+        })).then((appointmentSummaries) => {
+          successCallback(appointmentSummaries);
+        });
       });
     },
   },
   data() {
     return {
+      calendarApi: null,
       calendarOptions: {
         headerToolbar: {
           left: 'prev,next today',
@@ -119,6 +118,9 @@ export default {
       appointmentModalInfo: {},
     };
   },
+  mounted() {
+    this.calendarApi = this.$refs.fullCalendar.getApi();
+  },
 };
 </script>
 
@@ -139,7 +141,7 @@ export default {
         :active-modal="showAppointmentModal"
         @close="showAppointmentModal = !showAppointmentModal"
         :appointment="appointmentModalInfo"
-        @appointments-updated="refreshAppointments()"
+        @appointments-updated="calendarApi.getEventSourceById('main').refetch()"
     >
     </AppointmentInfoModal>
   </div>

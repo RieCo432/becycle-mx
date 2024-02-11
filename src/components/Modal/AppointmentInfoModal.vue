@@ -100,13 +100,15 @@ export default {
   },
   methods: {
     confirmAppointment() {
-      requests.confirmAppointment(this.appointment.id);
-      this.$emit('appointmentsUpdated');
+      requests.confirmAppointment(this.appointment.id).then(() => {
+        this.$emit('appointmentsUpdated');
+      });
       this.close();
     },
     cancelAppointment() {
-      requests.cancelAppointment(this.appointment.id);
-      this.$emit('appointmentsUpdated');
+      requests.cancelAppointment(this.appointment.id).then(() => {
+        this.$emit('appointmentsUpdated');
+      });
       this.close();
     },
   },
