@@ -49,7 +49,11 @@ export default {
 
         const dayDiffByUsernameString = pageOnDate['diff'];
         depositBearers.forEach((username) => {
-          dayDiffByUsernameString[username] = `${dayDiffByUsernameString[username] > 0 ? '+' : ''}${dayDiffByUsernameString[username]}`;
+          if (dayDiffByUsernameString.hasOwnProperty(username)) {
+            dayDiffByUsernameString[username] = `${dayDiffByUsernameString[username] > 0 ? '+' : ''}${dayDiffByUsernameString[username]}`;
+          } else {
+            dayDiffByUsernameString[username] = '0';
+          }
         });
 
         return {
