@@ -72,6 +72,12 @@ export const topMenu = [
     link: '/accounting/deposits',
     show: ['user'],
   },
+  {
+    title: 'Appointments',
+    icon: 'heroicons-outline:calendar',
+    link: '/appointments',
+    show: ['user'],
+  },
 ];
 
 export const alertType = [
