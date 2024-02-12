@@ -1,6 +1,8 @@
 import datetime
 import math
 from copy import copy
+
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
@@ -154,11 +156,14 @@ def get_appointment_types(db: Session, inactive: bool) -> list[models.Appointmen
 
 
 def get_appointments(db: Session, start_datetime: datetime = None, end_datetime: datetime = None, client_id: UUID = None) -> list[models.Appointment]:
+    query_filter = []
+    if client_id is not None:
+        query_filter.append((models.Appointment.clientId == client_id))
+    if start_datetime is not None:
+        query_filter.append((models.Appointment.startDateTime >= start_datetime))
+    if end_datetime is not None:
+        query_filter.append((models.Appointment.endDateTime <= end_datetime))
     return [_ for _ in db.scalars(
         select(models.Appointment)
-        .where(
-            ((models.Appointment.clientId == client_id) | (client_id == None))
-            & ((models.Appointment.startDateTime >= start_datetime) | (start_datetime == None))
-            & ((models.Appointment.endDateTime <= end_datetime) | (end_datetime == None))
-        )
+        .where(and_(*query_filter))
     )]

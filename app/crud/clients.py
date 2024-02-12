@@ -1,7 +1,7 @@
 import datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
@@ -138,13 +138,16 @@ def get_similar_email_addresses(db: Session, email_address: str) -> list[str]:
 
 
 def get_potential_matches(db: Session, first_name: str, last_name: str, email_address: str) -> list[models.Client]:
+    query_filter = []
+    if first_name is not None:
+        query_filter.append(models.Client.firstName.startswith(first_name))
+    if last_name is not None:
+        query_filter.append(models.Client.lastName.startswith(last_name))
+    if email_address is not None:
+        query_filter.append(models.Client.emailAddress.startswith(email_address))
     potential_matches = [_ for _ in db.scalars(
         select(models.Client)
-        .where(
-            ((first_name is None) or (models.Client.firstName.startswith(first_name)))
-            | ((last_name is None) or (models.Client.lastName.startswith(last_name)))
-            | ((email_address is None) or (models.Client.emailAddress.startswith(email_address)))
-        )
+        .where(or_(*query_filter))
     )]
 
     return potential_matches
