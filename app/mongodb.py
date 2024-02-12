@@ -50,3 +50,13 @@ def get_deposit_exchanges():
 def get_workshop_days():
     workshop_days_collection = db["workshopdays"]
     return [workshop_day for workshop_day in workshop_days_collection.find()]
+
+
+def get_appointment_general():
+    appointment_general_collection = db["appointmentGeneral"]
+    return [appointment_general for appointment_general in appointment_general_collection.find()]
+
+
+def get_appointment_concurrency():
+    appointment_concurrency_collection = db["appointmentConcurrency"]
+    return [appointment_concurrency for appointment_concurrency in appointment_concurrency_collection.find()]

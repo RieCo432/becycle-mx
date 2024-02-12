@@ -87,7 +87,7 @@ client_map_email = {}
 for mongo_person in get_persons():
     mongo_first_name = mongo_person["firstName"]
     mongo_last_name = mongo_person["lastName"]
-    mongo_email_address = mongo_person["emailAddress"]
+    mongo_email_address = mongo_person["emailAddress"] if mongo_person["emailAddress"] != "NOTPROVIDED" else str(mongo_person["_id"]) + "@notprovided.com"
 
     postgres_client = models.Client(
         firstName=mongo_first_name,
@@ -325,4 +325,32 @@ for mongo_workshop_day in get_workshop_days():
     )
 
     db.add(postgres_workshop_day)
+    db.commit()
+
+for mongo_appointment_general in get_appointment_general():
+    mongo_slotunit = mongo_appointment_general["slotUnit"]
+    mongo_openingdays = mongo_appointment_general["openingDays"]
+    mongo_bookAhead = mongo_appointment_general["bookAhead"]
+
+    postgres_appointment_general = models.AppointmentGeneralSettings(
+        slotDuration=mongo_slotunit,
+        openingDays=mongo_openingdays,
+        minBookAhead=mongo_bookAhead['min'],
+        maxBookAhead = mongo_bookAhead['max'],
+    )
+
+    db.add(postgres_appointment_general)
+    db.commit()
+
+
+for mongo_appointment_concurrency in get_appointment_concurrency():
+    mongo_limit = mongo_appointment_concurrency["limit"]
+    mongo_aftertime_datetime = mongo_appointment_concurrency["afterTime"]
+
+    postgres_appointment_concurrency_limit = models.AppointmentConcurrencyLimit(
+        maxConcurrent=mongo_limit,
+        afterTime=mongo_aftertime_datetime.time(),
+    )
+
+    db.add(postgres_appointment_concurrency_limit)
     db.commit()
