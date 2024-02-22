@@ -44,7 +44,7 @@ async def get_user_me(
     return current_user
 
 
-@users.get("/users/", dependencies=[Depends(dep.get_current_admin_user)])
+@users.get("/users/", dependencies=[Depends(dep.get_current_active_user)])
 async def get_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
     return crud.get_users(db=db)
 
@@ -54,11 +54,16 @@ async def get_user(user_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.
     return crud.get_user(db=db, user_id=user_id)
 
 
-@users.patch("/users/{user_id}/", dependencies=[Depends(dep.get_current_admin_user)])
+@users.patch("/users/{user_id}/")
 async def patch_user(user_id: UUID,
                      updated_user_data: schemas.UserUpdate,
+                     current_user: models.User = Depends(dep.get_current_admin_user),
                      db: Session = Depends(dep.get_db)) -> schemas.User:
+    if current_user.id == user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "You cannot modify your own roles!"})
     user = crud.get_user(db=db, user_id=user_id)
+    if user.softDeleted and updated_user_data.softDeleted is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User is soft-deleted"})
     return crud.update_user(db=db,
                             user=user,
                             updated_user_data=updated_user_data)
