@@ -363,4 +363,18 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  postNewUser(username, password, pin, admin, depositBearer, rentalChecker, appointmentManager, treasurer) {
+    return axiosClient.post('/user', {
+      username: username,
+      password_cleartext: password,
+      pin_cleartext: pin,
+      admin: admin,
+      depositBearer: depositBearer,
+      rentalChecker: rentalChecker,
+      appointmentManager: appointmentManager,
+      treasurer: treasurer,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
