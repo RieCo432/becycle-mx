@@ -72,10 +72,6 @@ export default defineComponent({
     label: {
       type: String,
     },
-    active: {
-      type: Boolean,
-      default: false,
-    },
     disabled: {
       type: Boolean,
       default: false,
@@ -120,7 +116,7 @@ export default defineComponent({
   },
 
   setup(props, context) {
-    const ck = ref(props.active);
+    const ck = ref(props.modelValue);
 
     // on change event
     const onChange = () => {

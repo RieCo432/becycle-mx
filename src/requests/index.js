@@ -353,4 +353,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getUsers() {
+    return axiosClient.get('/users/', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchUser(userId, patchData) {
+    return axiosClient.patch(`/users/${userId}/`, patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

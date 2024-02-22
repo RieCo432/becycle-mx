@@ -78,6 +78,12 @@ export const topMenu = [
     link: '/appointments',
     show: ['user'],
   },
+  {
+    title: 'User Management',
+    icon: 'heroicons-outline:user',
+    link: '/admin/users',
+    show: ['user'],
+  },
 ];
 
 export const alertType = [
