@@ -2,6 +2,9 @@
 import UserRolesTable from '@/components/Tables/UserRolesTable.vue';
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
 
 export default {
   name: 'userRoles',
@@ -44,29 +47,47 @@ export default {
     };
   },
   methods: {
-    patchUser(userId, patchData) {
-      requests.patchUser(userId, patchData).then((response) => {
-        const indexInArray = this.userData.findIndex((user) => (user.id === response.data.id));
-        this.userData[indexInArray].admin = response.data.admin;
+    patchUser(userId, patchData, failureCallback) {
+      requests.patchUser(userId, patchData)
+          .then((response) => {
+            const indexInArray = this.userData.findIndex((user) => (user.id === userId));
+            this.userData.splice(indexInArray, 1, response.data);
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+            failureCallback();
+          });
+    },
+    getUserData() {
+      this.loadingUsers = true;
+      requests.getUsers().then((response) => {
+        this.userData = response.data.sort((a, b) => (a.softDeleted - b.softDeleted || b.username - a.username));
+        this.loadingUsers = false;
       });
     },
   },
   created() {
-    requests.getUsers().then((response) => {
-      this.userData = response.data;
-      this.loadingUsers = false;
-    });
+    this.getUserData();
   },
 };
 </script>
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-12">
+    <div class="2xl:col-span-9 col-span-12">
       <Card>
         <div class="grid grid-cols-12">
           <div class="col-span-12">
             <UserRolesTable :loading="loadingUsers" :actions="userActions" :columns="userColumns" :table-data="userData" title="Users" :patch-user="patchUser"></UserRolesTable>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="2xl:col-span-3 col-span-12">
+      <Card>
+        <div class="grid grid-cols-12">
+          <div class="col-span-12">
+            Add User
           </div>
         </div>
       </Card>

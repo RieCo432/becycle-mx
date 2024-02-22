@@ -51,42 +51,42 @@
             <Switch
                 active-class="bg-primary-500"
                 :model-value="props.row.admin"
-                @update:modelValue="(newValue) => patchUser(props.row.id, {admin: newValue})"
+                @update:modelValue="(eventObj) => patchUser(props.row.id, {admin: eventObj.newValue}, eventObj.failureCallback)"
             />
           </span>
           <span v-if="props.column.field === 'depositBearer'" class="flex">
             <Switch
                 active-class="bg-primary-500"
                 :model-value="props.row.depositBearer"
-                @update:modelValue="(newValue) => patchUser(props.row.id, {depositBearer: newValue})"
+                @update:modelValue="(eventObj) => patchUser(props.row.id, {depositBearer: eventObj.newValue}, eventObj.failureCallback)"
             />
           </span>
           <span v-if="props.column.field === 'rentalChecker'" class="flex">
             <Switch
                 active-class="bg-primary-500"
                 :model-value="props.row.rentalChecker"
-                @update:modelValue="(newValue) => patchUser(props.row.id, {rentalChecker: newValue})"
+                @update:modelValue="(eventObj) => patchUser(props.row.id, {rentalChecker: eventObj.newValue}, eventObj.failureCallback)"
             />
           </span>
           <span v-if="props.column.field === 'appointmentManager'" class="flex">
             <Switch
                 active-class="bg-primary-500"
                 :model-value="props.row.appointmentManager"
-                @update:modelValue="(newValue) => patchUser(props.row.id, {appointmentManager: newValue})"
+                @update:modelValue="(eventObj) => patchUser(props.row.id, {appointmentManager: eventObj.newValue}, eventObj.failureCallback)"
             />
           </span>
           <span v-if="props.column.field === 'treasurer'" class="flex">
             <Switch
                 active-class="bg-primary-500"
                 :model-value="props.row.treasurer"
-                @update:modelValue="(newValue) => patchUser(props.row.id, {treasurer: newValue})"
+                @update:modelValue="(eventObj) => patchUser(props.row.id, {treasurer: eventObj.newValue}, eventObj.failureCallback)"
             />
           </span>
           <span v-if="props.column.field === 'softDeleted'" class="flex">
             <Switch
                 active-class="bg-primary-500"
                 :model-value="props.row.softDeleted"
-                @update:modelValue="(newValue) => patchUser(props.row.id, {softDeleted: newValue})"
+                @update:modelValue="(eventObj) => patchUser(props.row.id, {softDeleted: eventObj.newValue}, eventObj.failureCallback)"
             />
           </span>
           <span v-if="props.column.field == 'action'">
