@@ -103,3 +103,33 @@ def get_active_users(db: Session) -> list[models.User]:
     )]
 
     return active_users
+
+
+def update_user(db: Session, user: models.User,
+                updated_user_data: schemas.UserUpdate) -> models.User:
+    if updated_user_data.passwordCleartext is not None:
+        user.password = bcrypt.hashpw(updated_user_data.passwordCleartext, bcrypt.gensalt())
+    if updated_user_data.pinCleartext is not None:
+        user.pin = bcrypt.hashpw(updated_user_data.pinCleartext, bcrypt.gensalt())
+    if updated_user_data.admin is not None:
+        user.admin = updated_user_data.admin
+    if updated_user_data.depositBearer is not None:
+        user.depositBearer = updated_user_data.depositBearer
+    if updated_user_data.rentalChecker is not None:
+        user.rentalChecker = updated_user_data.rentalChecker
+    if updated_user_data.appointmentManager is not None:
+        user.appointmentManager = updated_user_data.appointmentManager
+    if updated_user_data.treasurer is not None:
+        user.treasurer = updated_user_data.treasurer
+    if updated_user_data.softDeleted is not None:
+        user.soft_deleted = updated_user_data.softDeleted
+
+    db.commit()
+
+    return user
+
+
+def get_users(db: Session) -> list[models.User]:
+    return [_ for _ in db.scalars(
+        select(models.User)
+    )]

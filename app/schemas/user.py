@@ -23,3 +23,14 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+
+class UserUpdate(BaseModel):
+    passwordCleartext: str | None = None
+    pinCleartext: str | None = None
+    admin: bool | None = None
+    depositBearer: bool | None = None
+    rentalChecker: bool | None = None
+    appointmentManager: bool | None = None
+    treasurer: bool | None = None
+    softDeleted: bool | None = None

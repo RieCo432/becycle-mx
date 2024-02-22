@@ -44,9 +44,24 @@ async def get_user_me(
     return current_user
 
 
+@users.get("/users/", dependencies=[Depends(dep.get_current_admin_user)])
+async def get_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
+    return crud.get_users(db=db)
+
+
 @users.get("/users/{user_id}/", dependencies=[Depends(dep.get_current_active_user)])
 async def get_user(user_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.User:
     return crud.get_user(db=db, user_id=user_id)
+
+
+@users.patch("/users/{user_id}/", dependencies=[Depends(dep.get_current_admin_user)])
+async def patch_user(user_id: UUID,
+                     updated_user_data: schemas.UserUpdate,
+                     db: Session = Depends(dep.get_db)) -> schemas.User:
+    user = crud.get_user(db=db, user_id=user_id)
+    return crud.update_user(db=db,
+                            user=user,
+                            updated_user_data=updated_user_data)
 
 
 @users.get("/users/me/deposit_balance")
