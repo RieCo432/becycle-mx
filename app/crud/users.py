@@ -122,7 +122,7 @@ def update_user(db: Session, user: models.User,
     if updated_user_data.treasurer is not None:
         user.treasurer = updated_user_data.treasurer
     if updated_user_data.softDeleted is not None:
-        user.soft_deleted = updated_user_data.softDeleted
+        user.softDeleted = updated_user_data.softDeleted
 
     db.commit()
 
