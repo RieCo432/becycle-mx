@@ -108,8 +108,11 @@ export default defineComponent({
     },
   },
   emits: {
-    'update:modelValue': (eventObj) => ({
+    'updateWithCallback': (eventObj) => ({
       modelValue: eventObj.newValue,
+    }),
+    'update:modelValue': (newValue) => ({
+      modelValue: newValue,
     }),
     // use newValue
     // "update:active": (newValue) => true,
@@ -125,7 +128,10 @@ export default defineComponent({
 
     const localValue = computed({
       get: () => props.modelValue,
-      set: (newValue) => context.emit('update:modelValue', {newValue: newValue, failureCallback: onChange}),
+      set: (newValue) => {
+        context.emit('updateWithCallback', {newValue: newValue, failureCallback: onChange});
+        context.emit('update:modelValue', newValue);
+      },
     });
 
     return {localValue, ck, onChange};
