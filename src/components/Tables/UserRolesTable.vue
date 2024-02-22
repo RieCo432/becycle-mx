@@ -37,6 +37,16 @@
         }"
       >
         <template v-slot:table-row="props">
+          <span v-if="props.column.field == 'username'" class="block w-full">
+            <span
+                class="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25"
+                :class="props.row.softDeleted
+                  ? 'text-danger-500 bg-danger-500'
+                  : 'text-success-500 bg-success-500'"
+            >
+              {{ props.row.username }}
+            </span>
+          </span>
           <span v-if="props.column.field === 'admin'" class="flex">
             <Switch
                 active-class="bg-primary-500"
@@ -70,6 +80,13 @@
                 active-class="bg-primary-500"
                 :model-value="props.row.treasurer"
                 @update:modelValue="(newValue) => patchUser(props.row.id, {treasurer: newValue})"
+            />
+          </span>
+          <span v-if="props.column.field === 'softDeleted'" class="flex">
+            <Switch
+                active-class="bg-primary-500"
+                :model-value="props.row.softDeleted"
+                @update:modelValue="(newValue) => patchUser(props.row.id, {softDeleted: newValue})"
             />
           </span>
           <span v-if="props.column.field == 'action'">

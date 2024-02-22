@@ -35,6 +35,10 @@ export default {
           label: 'Treasurer',
           field: 'treasurer',
         },
+        {
+          label: 'Soft Deleted',
+          field: 'softDeleted',
+        },
       ],
       userData: [],
     };
@@ -43,10 +47,7 @@ export default {
     patchUser(userId, patchData) {
       requests.patchUser(userId, patchData).then((response) => {
         const indexInArray = this.userData.findIndex((user) => (user.id === response.data.id));
-        console.log(indexInArray);
-        console.log(response.data);
         this.userData[indexInArray].admin = response.data.admin;
-        console.log(this.userData);
       });
     },
   },
