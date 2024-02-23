@@ -34,3 +34,7 @@ class UserUpdate(BaseModel):
     appointmentManager: bool | None = None
     treasurer: bool | None = None
     softDeleted: bool | None = None
+
+    def roles_change(self):
+        return (self.admin is not None or self.depositBearer is not None or self.rentalChecker is not None or
+                self.appointmentManager is not None or self.treasurer is not None or self.softDeleted is not None)

@@ -59,7 +59,7 @@ async def patch_user(user_id: UUID,
                      updated_user_data: schemas.UserUpdate,
                      current_user: models.User = Depends(dep.get_current_admin_user),
                      db: Session = Depends(dep.get_db)) -> schemas.User:
-    if current_user.id == user_id:
+    if current_user.id == user_id and updated_user_data.roles_change():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "You cannot modify your own roles!"})
     user = crud.get_user(db=db, user_id=user_id)
     if user.softDeleted and updated_user_data.softDeleted is None:
