@@ -23,6 +23,11 @@ export default {
       id: null,
       username: null,
     });
+    const showSetNewPinModal = ref(false);
+    const setNewPinModalInfo = ref({
+      id: null,
+      username: null,
+    });
 
     const newUserSchema = yup.object().shape({
       username: yup.string().required('Username is required').notOneOf(userData.value.map((user) => (user.username)), 'This username exists already!'),
@@ -75,7 +80,7 @@ export default {
           .oneOf([yup.ref('newPassword')], 'Passwords must match'),
     });
 
-    const {handleSubmit: handleNewPasswordSubmit} = useForm({
+    const {handleSubmit: handleNewPasswordSubmit, resetForm: resetNewPasswordForm} = useForm({
       validationSchema: newPasswordSchema,
       keepValuesOnUnmount: true,
     });
@@ -91,11 +96,38 @@ export default {
         userData.value.splice(indexInArray, 1, response.data);
         toast.success('Password changed!', {timeout: 2000});
       }).finally(() => {
+        resetNewPasswordForm();
         showSetNewPasswordModal.value = !showSetNewPasswordModal.value;
       });
     });
 
 
+    const newPinSchema = yup.object().shape({
+      newPin: yup.string().matches(/^[0-9]{4}$/, 'Must be exactly 4 digits'),
+      confirmNewPin: yup.string().oneOf([yup.ref('newPin')], 'PINs must match'),
+    });
+
+
+    const {handleSubmit: handleNewPinSubmit, resetForm: resetNewPinForm} = useForm({
+      validationSchema: newPinSchema,
+      keepValuesOnUnmount: true,
+    });
+
+    const {value: newPin, errorMessage: newPinError} = useField('newPin');
+    const {value: confirmNewPin, errorMessage: confirmNewPinError} = useField('confirmNewPin');
+
+
+    const patchNewPin = handleNewPinSubmit(() => {
+      const userId = setNewPinModalInfo.value.id;
+      requests.patchUser(userId, {pinCleartext: newPin.value}).then((response) => {
+        const indexInArray = userData.value.findIndex((user) => (user.id === userId));
+        userData.value.splice(indexInArray, 1, response.data);
+        toast.success('PIN changed!', {timeout: 2000});
+      }).finally(() => {
+        resetNewPinForm();
+        showSetNewPinModal.value = !showSetNewPinModal.value;
+      });
+    });
 
     return {
       username,
@@ -121,8 +153,14 @@ export default {
       confirmNewPassword,
       confirmNewPasswordError,
       patchNewPassword,
-      handleNewPasswordSubmit,
       showSetNewPasswordModal,
+      newPin,
+      newPinError,
+      setNewPinModalInfo,
+      showSetNewPinModal,
+      confirmNewPin,
+      confirmNewPinError,
+      patchNewPin,
     };
   },
   data() {
@@ -139,7 +177,7 @@ export default {
           label: 'Set New PIN',
           id: 'newPin',
           icon: 'heroicons:finger-print',
-          func: () => {},
+          func: this.openSetNewPinModal,
         },
       ],
       userColumns: [
@@ -201,6 +239,10 @@ export default {
       this.showSetNewPasswordModal = !this.showSetNewPasswordModal;
       this.setNewPasswordModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
     },
+    openSetNewPinModal(userId) {
+      this.showSetNewPinModal = !this.showSetNewPinModal;
+      this.setNewPinModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
+    },
   },
   created() {
     this.getUserData();
@@ -235,6 +277,36 @@ export default {
                       name="confirmNewPassword"
                       v-model="confirmNewPassword"
                       :error="confirmNewPasswordError"
+                      hasicon
+                      classInput="h-[48px]"
+                  />
+
+                  <Button type="submit" class="btn btn-dark block w-full text-center">
+                    Submit
+                  </Button>
+                </form>
+              </div>
+            </SetNewPasswordModal>
+            <SetNewPasswordModal :active-modal="showSetNewPinModal" :user-info="setNewPinModalInfo" title="Set new PIN" @close="showSetNewPinModal = !showSetNewPinModal">
+              <div>
+                <form @submit.prevent="patchNewPin" class="space-y-4">
+                  <Textinput
+                      label="New 4-digit PIN"
+                      type="password"
+                      placeholder="0000"
+                      name="newPin"
+                      v-model="newPin"
+                      :error="newPinError"
+                      hasicon
+                      classInput="h-[48px]"
+                  />
+                  <Textinput
+                      label="Confirm PIN"
+                      type="password"
+                      placeholder="0000"
+                      name="confirmNewPin"
+                      v-model="confirmNewPin"
+                      :error="confirmNewPinError"
                       hasicon
                       classInput="h-[48px]"
                   />
