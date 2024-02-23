@@ -167,3 +167,18 @@ def get_appointments(db: Session, start_datetime: datetime = None, end_datetime:
         select(models.Appointment)
         .where(and_(*query_filter))
     )]
+
+
+def update_appointment_type(db: Session, appointment_type: models.AppointmentType, updated_appointment_type_data: schemas.PatchAppointmentType) -> models.AppointmentType:
+    if updated_appointment_type_data.duration is not None:
+        appointment_type.duration = updated_appointment_type_data.duration
+    if updated_appointment_type_data.title is not None:
+        appointment_type.title = updated_appointment_type_data.title
+    if updated_appointment_type_data.active is not None:
+        appointment_type.active = updated_appointment_type_data.active
+    if updated_appointment_type_data.description is not None:
+        appointment_type.description = updated_appointment_type_data.description
+
+    db.commit()
+
+    return appointment_type

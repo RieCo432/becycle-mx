@@ -99,6 +99,15 @@ async def get_appointment_type(type_id: str, db: Session = Depends(dep.get_db)) 
     return crud.get_appointment_type(db=db, appointment_type_id=type_id)
 
 
+@appointments.patch("/appointments/types/{type_id}", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+async def update_appointment_type(
+        type_id: str,
+        updated_appointment_type_data: schemas.PatchAppointmentType,
+        db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
+    appointment_type = crud.get_appointment_type(db=db, appointment_type_id=type_id)
+    return crud.update_appointment_type(db=db, appointment_type=appointment_type, updated_appointment_type_data=updated_appointment_type_data)
+
+
 @appointments.get("/appointments/maximum-concurrent")
 async def get_maximum_concurrent_appointments(
         db: Session = Depends(dep.get_db)) -> dict[date, dict[time, int]]:
