@@ -48,7 +48,7 @@ export default {
     const appointmentManager = ref(false);
     const treasurer = ref(false);
 
-    const {handleSubmit: handleNewUserSubmit} = useForm({
+    const {handleSubmit: handleNewUserSubmit, resetForm: resetNewUserForm} = useForm({
       validationSchema: newUserSchema,
       keepValuesOnUnmount: true,
     });
@@ -67,6 +67,8 @@ export default {
           rentalChecker.value, appointmentManager.value, treasurer.value).then((response) => {
         toast.success('User created!', {timeout: 2000});
         userData.value.push(response.data);
+      }).finally(() => {
+        resetNewUserForm();
       });
     });
 
