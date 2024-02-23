@@ -7,16 +7,22 @@ import Textinput from '@/components/Textinput/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
-import {ref, computed} from 'vue';
+import {ref} from 'vue';
 import Button from '@/components/Button';
+import SetNewPasswordModal from '@/components/Modal/SetNewPasswordModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'userRoles',
-  components: {Checkbox, Textinput, Card, UserRolesTable, Button},
+  components: {Checkbox, Textinput, Card, UserRolesTable, Button, SetNewPasswordModal},
   setup() {
     const userData = ref([]);
+    const showSetNewPasswordModal = ref(false);
+    const setNewPasswordModalInfo = ref({
+      id: null,
+      username: null,
+    });
 
     const newUserSchema = yup.object().shape({
       username: yup.string().required('Username is required').notOneOf(userData.value.map((user) => (user.username)), 'This username exists already!'),
@@ -37,7 +43,7 @@ export default {
     const appointmentManager = ref(false);
     const treasurer = ref(false);
 
-    const {handleSubmit} = useForm({
+    const {handleSubmit: handleNewUserSubmit} = useForm({
       validationSchema: newUserSchema,
       keepValuesOnUnmount: true,
     });
@@ -49,7 +55,7 @@ export default {
     const {value: confirmPin, errorMessage: confirmPinError} = useField('confirmPin');
 
 
-    const postNewUser = handleSubmit(() => {
+    const postNewUser = handleNewUserSubmit(() => {
       console.log(username.value, password.value, pin.value, admin.value, depositBearer.value,
           rentalChecker.value, appointmentManager.value, treasurer.value);
       requests.postNewUser(username.value, password.value, pin.value, admin.value, depositBearer.value,
@@ -58,6 +64,38 @@ export default {
         userData.value.push(response.data);
       });
     });
+
+    const newPasswordSchema = yup.object().shape({
+      newPassword: yup
+          .string()
+          .required('Password is required'),
+      confirmNewPassword: yup
+          .string()
+          .required('Confirm Password is required')
+          .oneOf([yup.ref('newPassword')], 'Passwords must match'),
+    });
+
+    const {handleSubmit: handleNewPasswordSubmit} = useForm({
+      validationSchema: newPasswordSchema,
+      keepValuesOnUnmount: true,
+    });
+
+    const {value: newPassword, errorMessage: newPasswordError} = useField('newPassword');
+    const {value: confirmNewPassword, errorMessage: confirmNewPasswordError} = useField('confirmNewPassword');
+
+
+    const patchNewPassword = handleNewPasswordSubmit(() => {
+      const userId = setNewPasswordModalInfo.value.id;
+      requests.patchUser(userId, {passwordCleartext: newPassword.value}).then((response) => {
+        const indexInArray = userData.value.findIndex((user) => (user.id === userId));
+        userData.value.splice(indexInArray, 1, response.data);
+        toast.success('Password changed!', {timeout: 2000});
+      }).finally(() => {
+        showSetNewPasswordModal.value = !showSetNewPasswordModal.value;
+      });
+    });
+
+
 
     return {
       username,
@@ -77,12 +115,33 @@ export default {
       treasurer,
       userData,
       postNewUser,
+      setNewPasswordModalInfo,
+      newPassword,
+      newPasswordError,
+      confirmNewPassword,
+      confirmNewPasswordError,
+      patchNewPassword,
+      handleNewPasswordSubmit,
+      showSetNewPasswordModal,
     };
   },
   data() {
     return {
       loadingUsers: true,
-      userActions: [],
+      userActions: [
+        {
+          label: 'Set New Password',
+          id: 'newPassword',
+          icon: 'heroicons:key',
+          func: this.openSetNewPasswordModal,
+        },
+        {
+          label: 'Set New PIN',
+          id: 'newPin',
+          icon: 'heroicons:finger-print',
+          func: () => {},
+        },
+      ],
       userColumns: [
         {
           label: 'Username',
@@ -112,6 +171,10 @@ export default {
           label: 'Soft Deleted',
           field: 'softDeleted',
         },
+        {
+          label: 'Actions',
+          field: 'actions',
+        },
       ],
     };
   },
@@ -134,6 +197,10 @@ export default {
         this.loadingUsers = false;
       });
     },
+    openSetNewPasswordModal(userId) {
+      this.showSetNewPasswordModal = !this.showSetNewPasswordModal;
+      this.setNewPasswordModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
+    },
   },
   created() {
     this.getUserData();
@@ -148,6 +215,36 @@ export default {
         <div class="grid grid-cols-12">
           <div class="col-span-12">
             <UserRolesTable :loading="loadingUsers" :actions="userActions" :columns="userColumns" :table-data="userData" :patch-user="patchUser"></UserRolesTable>
+            <SetNewPasswordModal :active-modal="showSetNewPasswordModal" title="Set new password" :user-info="setNewPasswordModalInfo" @close="showSetNewPasswordModal = !showSetNewPasswordModal">
+              <div>
+                <form @submit.prevent="patchNewPassword" class="space-y-4">
+                  <Textinput
+                      label="New Password"
+                      type="password"
+                      placeholder="New Password"
+                      name="newPassword"
+                      v-model="newPassword"
+                      :error="newPasswordError"
+                      hasicon
+                      classInput="h-[48px]"
+                  />
+                  <Textinput
+                      label="Confirm New Password"
+                      type="password"
+                      placeholder="Confirm New Password"
+                      name="confirmNewPassword"
+                      v-model="confirmNewPassword"
+                      :error="confirmNewPasswordError"
+                      hasicon
+                      classInput="h-[48px]"
+                  />
+
+                  <Button type="submit" class="btn btn-dark block w-full text-center">
+                    Submit
+                  </Button>
+                </form>
+              </div>
+            </SetNewPasswordModal>
           </div>
         </div>
       </Card>

@@ -89,15 +89,15 @@
                 @updateWithCallback="(eventObj) => patchUser(props.row.id, {softDeleted: eventObj.newValue}, eventObj.failureCallback)"
             />
           </span>
-          <span v-if="props.column.field == 'action'">
+          <span v-if="props.column.field == 'actions'">
             <div class="flex space-x-3 rtl:space-x-reverse">
                 <Tooltip placement="top" arrow theme="dark" v-for="action in actions">
                   <template #button>
                     <div class="action-btn">
-                      <Icon :icon="action.icon" @click="patchUser(props.row.id)"/>
+                      <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
                     </div>
                   </template>
-                  <span>{{action.name}}</span>
+                  <span>{{action.label}}</span>
                 </Tooltip>
             </div>
           </span>
