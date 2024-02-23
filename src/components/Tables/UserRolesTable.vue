@@ -49,6 +49,7 @@
           </span>
           <span v-if="props.column.field === 'admin'" class="flex">
             <Switch
+                :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
                 :model-value="props.row.admin"
                 @updateWithCallback="(eventObj) => patchUser(props.row.id, {admin: eventObj.newValue}, eventObj.failureCallback)"
@@ -56,6 +57,7 @@
           </span>
           <span v-if="props.column.field === 'depositBearer'" class="flex">
             <Switch
+                :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
                 :model-value="props.row.depositBearer"
                 @updateWithCallback="(eventObj) => patchUser(props.row.id, {depositBearer: eventObj.newValue}, eventObj.failureCallback)"
@@ -63,6 +65,7 @@
           </span>
           <span v-if="props.column.field === 'rentalChecker'" class="flex">
             <Switch
+                :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
                 :model-value="props.row.rentalChecker"
                 @updateWithCallback="(eventObj) => patchUser(props.row.id, {rentalChecker: eventObj.newValue}, eventObj.failureCallback)"
@@ -70,6 +73,7 @@
           </span>
           <span v-if="props.column.field === 'appointmentManager'" class="flex">
             <Switch
+                :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
                 :model-value="props.row.appointmentManager"
                 @updateWithCallback="(eventObj) => patchUser(props.row.id, {appointmentManager: eventObj.newValue}, eventObj.failureCallback)"
@@ -77,6 +81,7 @@
           </span>
           <span v-if="props.column.field === 'treasurer'" class="flex">
             <Switch
+                :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
                 :model-value="props.row.treasurer"
                 @updateWithCallback="(eventObj) => patchUser(props.row.id, {treasurer: eventObj.newValue}, eventObj.failureCallback)"
@@ -84,6 +89,7 @@
           </span>
           <span v-if="props.column.field === 'softDeleted'" class="flex">
             <Switch
+                :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
                 :model-value="props.row.softDeleted"
                 @updateWithCallback="(eventObj) => patchUser(props.row.id, {softDeleted: eventObj.newValue}, eventObj.failureCallback)"
@@ -165,6 +171,10 @@ export default {
     loading: {
       type: Boolean,
       required: true,
+    },
+    userIsAdmin: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

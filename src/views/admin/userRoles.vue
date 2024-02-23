@@ -166,7 +166,9 @@ export default {
   data() {
     return {
       loadingUsers: true,
-      userActions: [
+      userMe: {},
+      userActions: [],
+      userActionsIfAdmin: [
         {
           label: 'Set New Password',
           id: 'newPassword',
@@ -246,6 +248,12 @@ export default {
   },
   created() {
     this.getUserData();
+    requests.getUserMe().then((response) => {
+      this.userMe = response.data;
+      if (this.userMe.admin) {
+        this.userActions = this.userActionsIfAdmin;
+      }
+    });
   },
 };
 </script>
@@ -256,7 +264,7 @@ export default {
       <Card title="Users">
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <UserRolesTable :loading="loadingUsers" :actions="userActions" :columns="userColumns" :table-data="userData" :patch-user="patchUser"></UserRolesTable>
+            <UserRolesTable :loading="loadingUsers" :actions="userActions" :columns="userColumns" :table-data="userData" :patch-user="patchUser" :userIsAdmin="userMe.admin"></UserRolesTable>
             <SetNewPasswordModal :active-modal="showSetNewPasswordModal" title="Set new password" :user-info="setNewPasswordModalInfo" @close="showSetNewPasswordModal = !showSetNewPasswordModal">
               <div>
                 <form @submit.prevent="patchNewPassword" class="space-y-4">
