@@ -2,12 +2,10 @@
 import AppointmentCalendar from '@/views/appointments/appointmentCalendar.vue';
 import requests from '@/requests';
 import moment from 'moment';
-import Modal from '@/components/Modal/Modal.vue';
 
 export default {
   name: 'appointmentsIndex',
   components: {
-    Modal,
     AppointmentCalendar,
   },
   data() {
