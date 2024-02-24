@@ -397,12 +397,17 @@ export default {
     });
   },
   getAppointmentGeneralSettings() {
-    return axiosClient.get("/settings/appointments/general", {
+    return axiosClient.get('/settings/appointments/general', {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
   deleteClosedDay(closedDayDate) {
     return axiosClient.delete(`/settings/closed-day/${closedDayDate}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  postClosedDay(closedDay) {
+    return axiosClient.post('/settings/closed-day', closedDay, {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },

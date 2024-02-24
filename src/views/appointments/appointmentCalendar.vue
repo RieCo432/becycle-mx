@@ -7,13 +7,22 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import AppointmentInfoModal from '@/components/Modal/AppointmentInfoModal.vue';
 import requests from '@/requests';
+import Textinput from '@/components/Textinput/index.vue';
+import Button from '@/components/Button/index.vue';
+import Modal from '@/components/Modal/Modal.vue';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
 
 export default {
   name: 'AppointmentCalendar',
   components: {
+    Button,
+    Textinput,
     AppointmentInfoModal,
     FullCalendar,
     Card,
+    Modal,
   },
   props: {
     openingDays: {
@@ -49,6 +58,25 @@ export default {
         clientName: eventClickInfo.event.extendedProps.clientName,
         typeTitle: eventClickInfo.event.extendedProps.typeTitle,
       };
+    },
+    openAddClosedDayModal(info) {
+      this.addClosedDayDate = info.dateStr;
+      this.showAddClosedDayModal = !this.showAddClosedDayModal;
+    },
+    submitAddClosedDay() {
+      requests.postClosedDay({
+        date: this.addClosedDayDate,
+        note: this.addClosedDayNotes,
+      }).then((response) => {
+        toast.success('Closed Day added!', {timeout: 2000});
+        this.calendarApi.getEventSourceById('main').refetch();
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      }).finally(() => {
+        this.showAddClosedDayModal = !this.showAddClosedDayModal;
+        this.addClosedDayDate = null;
+        this.addClosedDayNotes = null;
+      });
     },
     getAppointments(fetchInfo, successCallback) {
       requests.getAppointments(fetchInfo.start, fetchInfo.end).then((response) => {
@@ -126,9 +154,17 @@ export default {
         nowIndicator: true,
         eventMaxStack: 6,
         slotEventOverlap: false,
+        dateClick: (info) => {
+          if (info.allDay) {
+            this.openAddClosedDayModal(info);
+          }
+        },
       },
       showAppointmentModal: false,
       appointmentModalInfo: {},
+      addClosedDayNotes: null,
+      showAddClosedDayModal: false,
+      addClosedDayDate: null,
     };
   },
   mounted() {
@@ -157,6 +193,26 @@ export default {
         @appointments-updated="calendarApi.getEventSourceById('main').refetch()"
     >
     </AppointmentInfoModal>
+    <Modal :active-modal="showAddClosedDayModal" @close="showAddClosedDayModal = !showAddClosedDayModal" :title="`Add Closed Day on ${addClosedDayDate}`">
+      <form @submit.prevent="submitAddClosedDay">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-12">
+            <Textinput
+                label="Notes"
+                type="text"
+                placeholder="Any notes?"
+                name="addClosedDayNotes"
+                v-model="addClosedDayNotes"
+                />
+          </div>
+          <div class="col-span-12">
+            <Button type="submit" class="btn btn-dark block w-full text-center">
+              Submit
+            </Button>
+          </div>
+        </div>
+      </form>
+    </Modal>
   </div>
 </template>
 
