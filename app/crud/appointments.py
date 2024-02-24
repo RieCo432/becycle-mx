@@ -193,7 +193,10 @@ def create_appointment_type(db: Session, appointment_type_data: schemas.Appointm
         active=appointment_type_data.active
     )
 
-    db.add(new_appointment_type)
-    db.commit()
+    try:
+        db.add(new_appointment_type)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This appointment type ID already exists!"})
 
     return new_appointment_type
