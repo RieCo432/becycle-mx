@@ -24,6 +24,13 @@ class AppointmentGeneralSettings(BaseModel):
     slotDuration: int
 
 
+class PatchAppointmentGeneralSettings(BaseModel):
+    openingDays: list[int] | None = None
+    minBookAhead: int | None = None
+    maxBookAhead: int | None = None
+    slotDuration: int | None = None
+
+
 class AppointmentConcurrencyLimit(BaseModel):
     afterTime: time
     maxConcurrent: int

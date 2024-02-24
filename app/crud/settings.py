@@ -20,6 +20,22 @@ def get_appointment_general_settings(db: Session) -> models.AppointmentGeneralSe
     return appointment_general_settings
 
 
+def update_appointment_general_settings(db: Session, updated_appointment_settings: schemas.PatchAppointmentGeneralSettings) -> models.AppointmentGeneralSettings:
+    appointment_general_settings = get_appointment_general_settings(db=db)
+
+    if updated_appointment_settings.openingDays is not None:
+        appointment_general_settings.openingDays = updated_appointment_settings.openingDays
+    if updated_appointment_settings.minBookAhead is not None:
+        appointment_general_settings.minBookAhead = updated_appointment_settings.minBookAhead
+    if updated_appointment_settings.maxBookAhead is not None:
+        appointment_general_settings.maxBookAhead = updated_appointment_settings.maxBookAhead
+    if updated_appointment_settings.slotDuration is not None:
+        appointment_general_settings.slotDuration = updated_appointment_settings.slotDuration
+
+    db.commit()
+    return appointment_general_settings
+
+
 def get_appointment_concurrency_limits(db: Session) -> list[models.AppointmentConcurrencyLimit]:
     appointment_concurrency_limits = [_ for _ in db.scalars(
         select(models.AppointmentConcurrencyLimit)
