@@ -11,12 +11,22 @@ import Textinput from '@/components/Textinput/index.vue';
 import Select from '@/components/Select/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import Button from '@/components/Button/index.vue';
+import CreateNewAppointmentTypeCard from '@/components/Card/CreateNewAppointmentTypeCard.vue';
 
 const toast = useToast();
 
 export default {
   name: 'appointmentTypes',
-  components: {Button, Checkbox, Select, Textinput, AppointmentTypesTable, Card, Modal},
+  components: {
+    CreateNewAppointmentTypeCard,
+    Button,
+    Checkbox,
+    Select,
+    Textinput,
+    AppointmentTypesTable,
+    Card,
+    Modal,
+  },
   setup() {
     const appointmentTypes = ref([]);
     const editAppointmentTypeModalInfo = ref({});
@@ -28,7 +38,6 @@ export default {
       editAppointmentTypeDuration: yup.number().integer('Duration must be an integer number of minutes').positive('Duration must be a positive number of minutes').required('Duration is required'),
       editAppointmentTypeActive: yup.bool(),
     });
-    // const editAppointmentTypeActive = ref(false);
 
     const {handleSubmit: handleEditAppointmentTypeSubmit, resetForm: resetEditAppointmentTypeForm} = useForm({
       validationSchema: editAppointmentTypeSchema,
@@ -49,6 +58,7 @@ export default {
       }).then((response) => {
         const indexInArray = appointmentTypes.value.findIndex((appointmentType) => (appointmentType.id === editAppointmentTypeModalInfo.value.id));
         appointmentTypes.value.splice(indexInArray, 1, response.data);
+        toast.success('Appointment Type updated', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       }).finally(() => {
@@ -105,6 +115,7 @@ export default {
           .then((response) => {
             const indexInArray = this.appointmentTypes.findIndex((appointmentType) => (appointmentType.id === appointmentTypeId));
             this.appointmentTypes.splice(indexInArray, 1, response.data);
+            toast.success('Appointment Type updated', {timeout: 2000});
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -215,6 +226,9 @@ export default {
           </div>
         </div>
       </Card>
+    </div>
+    <div class="2xl:col-span-3 col-span-12">
+      <CreateNewAppointmentTypeCard @new-appointment-type-created="(newAppointmentType) => appointmentTypes.push(newAppointmentType)"></CreateNewAppointmentTypeCard>
     </div>
   </div>
 </template>

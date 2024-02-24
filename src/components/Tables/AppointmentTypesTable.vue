@@ -111,7 +111,7 @@ export default {
       required: true,
     },
     title: {
-      required: true,
+      required: false,
     },
     loading: {
       type: Boolean,

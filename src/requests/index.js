@@ -386,4 +386,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  postNewAppointmentType(newAppointmentTypeData) {
+    return axiosClient.post('/appointments/types', newAppointmentTypeData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
