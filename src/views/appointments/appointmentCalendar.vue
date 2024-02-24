@@ -9,7 +9,7 @@ import AppointmentInfoModal from '@/components/Modal/AppointmentInfoModal.vue';
 import requests from '@/requests';
 
 export default {
-  name: 'appointmentCalendar',
+  name: 'AppointmentCalendar',
   components: {
     AppointmentInfoModal,
     FullCalendar,
@@ -53,26 +53,39 @@ export default {
     getAppointments(fetchInfo, successCallback) {
       requests.getAppointments(fetchInfo.start, fetchInfo.end).then((response) => {
         Promise.all(response.data.filter((appointment) => !appointment['cancelled']).map((appointment) => {
-          return Promise.all([requests.getClient(appointment['clientId']), requests.getAppointmentType(appointment['typeId'])]).then(([getClientResponse, getAppointmentTypeResponse]) => {
-            const client = getClientResponse.data;
-            const clientName = `${client['firstName']} ${client['lastName']}`;
-            const appointmentType = getAppointmentTypeResponse.data;
-            const appointmentTypeTitle = appointmentType['title'];
+          if (appointment['typeId'] !== 'closedDay') {
+            return Promise.all([requests.getClient(appointment['clientId']), requests.getAppointmentType(appointment['typeId'])]).then(([getClientResponse, getAppointmentTypeResponse]) => {
+              const client = getClientResponse.data;
+              const clientName = `${client['firstName']} ${client['lastName']}`;
+              const appointmentType = getAppointmentTypeResponse.data;
+              const appointmentTypeTitle = appointmentType['title'];
+              return {
+                id: appointment['id'],
+                title: `${clientName} for ${appointmentTypeTitle}`,
+                start: appointment['startDateTime'],
+                end: appointment['endDateTime'],
+                classNames: [appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500', 'text-white'],
+                notes: appointment['notes'],
+                confirmed: appointment['confirmed'],
+                cancelled: appointment['cancelled'],
+                typeTitle: appointmentTypeTitle,
+                client: client,
+                clientName: clientName,
+              };
+            });
+          } else {
             return {
-              id: appointment['id'],
-              title: `${clientName} for ${appointmentTypeTitle}`,
+              id: appointment['startDateTime'],
+              typeTitle: 'Closed Day',
+              title: 'Closed Day',
               start: appointment['startDateTime'],
               end: appointment['endDateTime'],
-              classNames: [appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500', 'text-white'],
+              classNames: 'bg-success-500 dark:bg-success-500',
               notes: appointment['notes'],
-              confirmed: appointment['confirmed'],
-              cancelled: appointment['cancelled'],
-              type: appointmentTypeTitle,
-              client: client,
-              clientName: clientName,
             };
-          });
+          }
         })).then((appointmentSummaries) => {
+          console.log(appointmentSummaries);
           successCallback(appointmentSummaries);
         });
       });

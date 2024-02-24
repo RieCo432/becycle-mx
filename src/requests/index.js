@@ -334,7 +334,7 @@ export default {
     return axiosClient.get('/public/slot-duration');
   },
   getAppointments(startDate, endDate) {
-    return axiosClient.get('/appointments', {
+    return axiosClient.get('/appointments/calendar', {
       params: {
         start_datetime: startDate,
         end_datetime: endDate,
@@ -398,6 +398,11 @@ export default {
   },
   getAppointmentGeneralSettings() {
     return axiosClient.get("/settings/appointments/general", {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  deleteClosedDay(closedDayDate) {
+    return axiosClient.delete(`/settings/closed-day/${closedDayDate}`, {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
