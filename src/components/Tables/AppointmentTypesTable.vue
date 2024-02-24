@@ -41,7 +41,7 @@
             <Switch
                 active-class="bg-primary-500"
                 :model-value="props.row.active"
-                @updateWithCallback="(eventObj) => patchAppointmentType(props.row.id, {softDeleted: eventObj.newValue}, eventObj.failureCallback)"
+                @updateWithCallback="(eventObj) => patchAppointmentType(props.row.id, {active: eventObj.newValue}, eventObj.failureCallback)"
             />
           </span>
           <span v-if="props.column.field == 'actions'">
