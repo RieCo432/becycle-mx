@@ -391,4 +391,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  patchAppointmentGeneralSettings(changedAppointmentGeneralSettings) {
+    return axiosClient.patch('/settings/appointments/general', changedAppointmentGeneralSettings, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getAppointmentGeneralSettings() {
+    return axiosClient.get("/settings/appointments/general", {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

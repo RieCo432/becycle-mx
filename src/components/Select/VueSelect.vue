@@ -23,6 +23,8 @@
           :validate="validate"
           :multiple="multiple"
           :options="options"
+          :model-value="modelValue"
+          @update:model-value="(evt) => $emit('update:modelValue', evt)"
         >
         </vSelect>
       </div>
@@ -74,6 +76,9 @@ export default {
     vSelect,
     Icon,
   },
+  emits: [
+    'update:modelValue',
+  ],
   props: {
     placeholder: {
       type: String,
