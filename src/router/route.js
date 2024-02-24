@@ -117,6 +117,12 @@ const routes = [
         meta: {restrictTo: ['user']},
         component: () => import('@/views/admin/appointmentTypes.vue'),
       },
+      {
+        path: '/admin/appointment-settings',
+        name: 'Appointment Settings',
+        meta: {restrictTo: ['user']},
+        component: () => import('@/views/admin/appointmentSettings.vue'),
+      },
     ],
   },
 ];

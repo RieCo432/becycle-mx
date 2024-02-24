@@ -90,6 +90,12 @@ export const topMenu = [
     link: '/admin/appointment-types',
     show: ['user'],
   },
+  {
+    title: 'Appointment Settings',
+    icon: 'heroicons-outline:adjustments-horizontal',
+    link: '/admin/appointment-settings',
+    show: ['user'],
+  },
 ];
 
 export const alertType = [
