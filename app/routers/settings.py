@@ -48,6 +48,11 @@ async def create_appointment_concurrency_limit(
         appointment_concurrency_limit_data=appointment_concurrency_limit_data)
 
 
+@settings.get("/settings/closed-days", dependencies=[Depends(dep.get_current_active_user)])
+async def get_closed_days(start_date: date | None = None, end_date: date | None = None, db: Session = Depends(dep.get_db)) -> list[schemas.ClosedDay]:
+    return crud.get_closed_days(db=db, start_date=start_date, end_date=end_date)
+
+
 @settings.post("/settings/closed-day", dependencies=[Depends(dep.get_current_appointment_manager_user)])
 async def create_closed_day(
         closed_day_data: schemas.ClosedDay,
@@ -56,9 +61,9 @@ async def create_closed_day(
     return crud.create_closed_day(db=db, closed_day_data=closed_day_data)
 
 
-@settings.delete("/settings/closed-day", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+@settings.delete("/settings/closed-day/{closed_day_date}", dependencies=[Depends(dep.get_current_appointment_manager_user)])
 async def delete_closed_day(
-        closed_day_date: Annotated[date, Body(embed=True)],
+        closed_day_date: date,
         db: Session = Depends(dep.get_db)):
 
     crud.delete_closed_day(db=db, closed_day_date=closed_day_date)

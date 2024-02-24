@@ -4,7 +4,7 @@ from datetime import date, datetime, time
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, DAILY
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 import app.models as models
@@ -84,10 +84,17 @@ def get_closed_day(db: Session, closed_day_date: date) -> models.ClosedDay:
     return closed_day
 
 
-def get_closed_dates_after_date(db: Session, after_date: date) -> list[date]:
+def get_closed_days(db: Session, start_date: date | None = None, end_date: date | None = None) -> list[models.ClosedDay]:
+    query_filter = []
+    if start_date is not None:
+        query_filter.append(models.ClosedDay.date >= start_date)
+    if end_date is not None:
+        query_filter.append(models.ClosedDay.date <= end_date)
     return [_ for _ in db.scalars(
-        select(models.ClosedDay.date)
-        .where(models.ClosedDay.date >= after_date)
+        select(models.ClosedDay)
+        .where(
+            and_(*query_filter)
+        )
     )]
 
 
@@ -167,7 +174,7 @@ def get_open_days(db: Session) -> list[date]:
     period_start = datetime.utcnow().date() + relativedelta(days=get_min_book_ahead(db=db))
     period_end = datetime.utcnow().date() + relativedelta(days=get_max_book_ahead(db=db))
 
-    closed_dates = get_closed_dates_after_date(db=db, after_date=period_start)
+    closed_dates = [closed_day.date for closed_day in get_closed_days(db=db, start_date=period_start)]
 
     opening_weekdays = get_opening_week_days(db=db)
 
