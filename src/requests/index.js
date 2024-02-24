@@ -283,8 +283,12 @@ export default {
       },
     });
   },
-  getAppointmentTypes() {
-    return axiosClient.get('/appointments/types');
+  getAppointmentTypes(inactive=false) {
+    return axiosClient.get('/appointments/types', {
+      params: {
+        inactive: inactive,
+      },
+    });
   },
   getAvailableAppointmentSlots(appointmentTypeId) {
     return axiosClient.get('/appointments/available', {
@@ -374,6 +378,11 @@ export default {
       appointmentManager: appointmentManager,
       treasurer: treasurer,
     }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchAppointmentType(appointmentTypeId, patchData) {
+    return axiosClient.patch(`/appointments/types/${appointmentTypeId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },

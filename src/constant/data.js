@@ -84,6 +84,12 @@ export const topMenu = [
     link: '/admin/users',
     show: ['user'],
   },
+  {
+    title: 'Appointment Types',
+    icon: 'heroicons-outline:calendar',
+    link: '/admin/appointment-types',
+    show: ['user'],
+  },
 ];
 
 export const alertType = [
