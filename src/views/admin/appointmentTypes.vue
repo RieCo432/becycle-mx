@@ -3,6 +3,7 @@ import Card from '@/components/Card/index.vue';
 import {ref} from 'vue';
 import AppointmentTypesTable from '@/components/Tables/AppointmentTypesTable.vue';
 import requests from '@/requests';
+import Modal from '@/components/Modal/Modal.vue';
 
 export default {
   name: 'appointmentTypes',

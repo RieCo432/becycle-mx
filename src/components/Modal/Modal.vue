@@ -78,6 +78,7 @@ import {
 } from '@headlessui/vue';
 
 export default {
+  name: 'Modal',
   components: {
     Icon,
     TransitionRoot,
