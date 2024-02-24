@@ -182,3 +182,18 @@ def update_appointment_type(db: Session, appointment_type: models.AppointmentTyp
     db.commit()
 
     return appointment_type
+
+
+def create_appointment_type(db: Session, appointment_type_data: schemas.AppointmentType) -> models.AppointmentType:
+    new_appointment_type = models.AppointmentType(
+        id=appointment_type_data.id,
+        title=appointment_type_data.title,
+        description=appointment_type_data.description,
+        duration=appointment_type_data.duration,
+        active=appointment_type_data.active
+    )
+
+    db.add(new_appointment_type)
+    db.commit()
+
+    return new_appointment_type

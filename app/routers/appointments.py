@@ -94,6 +94,11 @@ async def get_appointment_types(inactive: bool = False, db: Session = Depends(de
     return crud.get_appointment_types(db=db, inactive=inactive)
 
 
+@appointments.post("/appointments/types", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+async def create_appointment_type(new_appointment_type: schemas.AppointmentType, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
+    return crud.create_appointment_type(db=db, appointment_type_data=new_appointment_type)
+
+
 @appointments.get("/appointments/types/{type_id}")
 async def get_appointment_type(type_id: str, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
     return crud.get_appointment_type(db=db, appointment_type_id=type_id)
