@@ -75,7 +75,7 @@ def add_appointment_concurrency_limit(
 def patch_appointment_concurrency_limit(
         db: Session,
         after_time: time,
-        new_limit: int) -> models.AppointmentConcurrencyLimit:
+        new_appointment_concurrency_limit_data: schemas.PatchAppointmentConcurrencyLimit) -> models.AppointmentConcurrencyLimit:
 
     appointment_concurrency_limit = db.scalar(
         select(models.AppointmentConcurrencyLimit)
@@ -85,8 +85,15 @@ def patch_appointment_concurrency_limit(
     if appointment_concurrency_limit is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no limit for this time!"})
 
-    appointment_concurrency_limit.maxConcurrent = new_limit
-    db.commit()
+    if new_appointment_concurrency_limit_data.afterTime is not None:
+        appointment_concurrency_limit.afterTime = new_appointment_concurrency_limit_data.afterTime
+    if new_appointment_concurrency_limit_data.maxConcurrent is not None:
+        appointment_concurrency_limit.maxConcurrent = new_appointment_concurrency_limit_data.maxConcurrent
+
+    try:
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Is there already a limit for this time?"})
 
     return appointment_concurrency_limit
 

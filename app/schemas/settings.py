@@ -36,6 +36,11 @@ class AppointmentConcurrencyLimit(BaseModel):
     maxConcurrent: int
 
 
+class PatchAppointmentConcurrencyLimit(BaseModel):
+    afterTime: time | None = None
+    maxConcurrent: int | None = None
+
+
 class ClosedDay(BaseModel):
     date: date
     note: str
