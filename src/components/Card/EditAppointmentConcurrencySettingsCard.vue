@@ -6,6 +6,7 @@ import {useToast} from 'vue-toastification';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 import Button from '@/components/Button/index.vue';
+import ConcurrencyLimitsSkeleton from '@/components/Skeleton/ConcurrencyLimitsSkeleton.vue';
 
 const toast = useToast();
 
@@ -16,6 +17,7 @@ export default {
     AppointmentConcurrencySlider,
     Card,
     VueSlider,
+    ConcurrencyLimitsSkeleton,
   },
   data() {
     return {
@@ -118,6 +120,7 @@ export default {
         </form>
       </div>
     </div>
+    <ConcurrencyLimitsSkeleton v-else :count="6"></ConcurrencyLimitsSkeleton>
   </Card>
 </template>
 
