@@ -6,8 +6,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 import app.models as models
 from typing import Annotated
-from datetime import date
-
+from datetime import date, time
 
 settings = APIRouter(
     tags=["settings"],
@@ -46,6 +45,14 @@ async def create_appointment_concurrency_limit(
     return crud.add_appointment_concurrency_limit(
         db=db,
         appointment_concurrency_limit_data=appointment_concurrency_limit_data)
+
+
+@settings.patch("/settings/appointments/concurrency/{after_time}", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+async def update_appointment_concurrency_limit(
+        after_time: time,
+        new_limit: Annotated[int, Body(embed=True)],
+        db: Session = Depends(dep.get_db)) -> schemas.AppointmentConcurrencyLimit:
+    return crud.patch_appointment_concurrency_limit(db=db, after_time=after_time, new_limit=new_limit)
 
 
 @settings.get("/settings/closed-days", dependencies=[Depends(dep.get_current_active_user)])

@@ -72,6 +72,25 @@ def add_appointment_concurrency_limit(
     return new_appointment_concurrency_limit
 
 
+def patch_appointment_concurrency_limit(
+        db: Session,
+        after_time: time,
+        new_limit: int) -> models.AppointmentConcurrencyLimit:
+
+    appointment_concurrency_limit = db.scalar(
+        select(models.AppointmentConcurrencyLimit)
+        .where(models.AppointmentConcurrencyLimit.afterTime == after_time)
+    )
+
+    if appointment_concurrency_limit is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no limit for this time!"})
+
+    appointment_concurrency_limit.maxConcurrent = new_limit
+    db.commit()
+
+    return appointment_concurrency_limit
+
+
 def get_closed_day(db: Session, closed_day_date: date) -> models.ClosedDay:
     closed_day = db.scalar(
         select(models.ClosedDay)
