@@ -426,4 +426,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  deleteAppointmentConcurrencyLimit(afterTime) {
+    return axiosClient.delete(`/settings/appointments/concurrency/${afterTime}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

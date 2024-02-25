@@ -43,6 +43,11 @@ export default {
 
       return 60 * (aH - bH) + (aM - bM);
     },
+    removeConcurrencyLimit(afterTime) {
+      const indexInArray = this.concurrencyLimits.findIndex((concurrencyLimit) => concurrencyLimit.afterTime === afterTime);
+      this.concurrencyLimits.splice(indexInArray, 1);
+      this.concurrencyLimits.sort(this.sortConcurrencyLimits);
+    },
     postNewConcurrencyLimit() {
       if (this.newAfterTime == null) {
         toast.error('You must choose a time!', {timeout: 2000});
@@ -74,6 +79,7 @@ export default {
             :concurrency-limit="concurrencyLimit"
             :key="concurrencyLimit.afterTime"
             @concurrency-limit-adjusted="(updatedConcurrencyLimit) => handleConcurrencyLimitAdjusted(concurrencyLimit.afterTime, updatedConcurrencyLimit)"
+            @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.afterTime)"
             class="h-full"
         ></AppointmentConcurrencySlider>
       <div class="col-span-1 h-full col-end-13">
