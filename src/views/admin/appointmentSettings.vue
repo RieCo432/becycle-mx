@@ -12,10 +12,10 @@ export default {
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-6">
+    <div class="col-span-4">
       <EditAppointmentGeneralSettingsCard></EditAppointmentGeneralSettingsCard>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-8">
       <EditAppointmentConcurrencySettingsCard></EditAppointmentConcurrencySettingsCard>
     </div>
   </div>

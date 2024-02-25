@@ -44,7 +44,7 @@ export default {
     loadConcurrencyLimit() {
       this.maxConcurrent = this.concurrencyLimit.maxConcurrent;
       this.afterTime = this.concurrencyLimit.afterTime;
-    }
+    },
   },
   props: {
     concurrencyLimit: {
@@ -59,8 +59,8 @@ export default {
 </script>
 
 <template>
-  <div  class="col-span-1 h-full">
-    <div class="h-full grid grid-cols-1 gap-y-3">
+  <div  class="col-span-1">
+    <div class="h-full grid grid-cols-1 gap-y-4">
       <div class="col-span-1 h-72">
         <vue-slider
             v-model="maxConcurrent"
@@ -74,13 +74,13 @@ export default {
             class="mx-auto h-full"
         ></vue-slider>
       </div>
-      <div class="col-span-1 h-7 mt-auto">
+      <div class="col-span-1 h-8">
         <flat-pickr
             class="form-control"
             id="d3"
             placeholder="Time picker"
             v-model="afterTime"
-            :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true, onClose: setNewAfterTime }"
+            :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true, onClose: setNewAfterTime, minuteIncrement: 15 }"
         />
       </div>
     </div>
