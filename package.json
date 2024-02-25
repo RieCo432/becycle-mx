@@ -53,6 +53,7 @@
     "vue-moment": "^4.1.0",
     "vue-router": "^4.0.3",
     "vue-select": "^4.0.0-beta.5",
+    "vue-slider-component": "^4.1.0-beta.7",
     "vue-sweetalert2": "^5.0.5",
     "vue-tailwind-datepicker": "^1.1.2",
     "vue-tippy": "^6.0.0-alpha.62",

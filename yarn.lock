@@ -3824,6 +3824,11 @@ vue-select@^4.0.0-beta.5:
   resolved "https://registry.npmjs.org/vue-select/-/vue-select-4.0.0-beta.5.tgz"
   integrity sha512-W9alTe9NwVn2GR9QFW5CbrX47yghEaJCpUVs9JTv9Q7CWmsNPp5kIlETdke4aFHphZvyjDUlyvH/7/8XzfVZkw==
 
+vue-slider-component@^4.1.0-beta.7:
+  version "4.1.0-beta.7"
+  resolved "https://registry.yarnpkg.com/vue-slider-component/-/vue-slider-component-4.1.0-beta.7.tgz#f6aaac2557df8b9d5460482e2576a009d0ed2dae"
+  integrity sha512-Qb7K920ZG7PoQswoF6Ias+i3W2rd3k4fpk04JUl82kEUcN86Yg6et7bVSKWt/7VpQe8a5IT3BqCKSCOZ7AJgCA==
+
 vue-sweetalert2@^5.0.5:
   version "5.0.5"
   resolved "https://registry.npmjs.org/vue-sweetalert2/-/vue-sweetalert2-5.0.5.tgz"

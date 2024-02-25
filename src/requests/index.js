@@ -411,4 +411,19 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getAppointmentConcurrencyLimits() {
+    return axiosClient.get('/settings/appointments/concurrency', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchAppointmentConcurrencyLimit(afterTime, patchData) {
+    return axiosClient.patch(`/settings/appointments/concurrency/${afterTime}`, patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  postNewAppointmentConcurrencyLimit(newConcurrencyLimitData) {
+    return axiosClient.post('/settings/appointments/concurrency', newConcurrencyLimitData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
