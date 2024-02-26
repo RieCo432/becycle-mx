@@ -431,4 +431,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  cancelMyAppointment(appointmentId) {
+    return axiosClient.patch(`/clients/me/appointments/${appointmentId}/cancel`, null, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

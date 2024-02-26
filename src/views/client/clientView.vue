@@ -108,18 +108,18 @@ export default {
       ],
 
       appointmentActions: [
-        {
+        /*{
           label: 'Edit Notes',
           id: 'edit',
           icon: 'heroicons:pencil-square',
-        },
-        {
+        },*/
+        /*{
           label: 'Reschedule',
           id: 'reschedule',
           icon: 'heroicons:clock',
-        },
+        },*/
         {
-          name: 'Cancel',
+          label: 'Cancel Appointment',
           id: 'cancel',
           icon: 'heroicons-outline:x-circle',
         },

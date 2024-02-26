@@ -18,6 +18,9 @@
 
 import requests from '@/requests';
 import clientView from '@/views/client/clientView.vue';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
 
 export default {
   components: {
@@ -36,7 +39,32 @@ export default {
   },
   methods: {
     cancelMyAppointment(appointmentId) {
-      console.log('cancel');
+      requests.cancelMyAppointment(appointmentId).then(async (response) => {
+        const appointment = response.data;
+        const appointmentType = (await requests.getAppointmentType(appointment.typeId)).data;
+        let status = 'past';
+        if (appointment.cancelled) {
+          status = 'cancelled';
+        } else if (new Date(Date.parse(appointment.startDateTime)) > new Date()) {
+          if (appointment['confirmed']) {
+            status = 'confirmed';
+          } else {
+            status = 'pending';
+          }
+        }
+        const indexInArray = this.appointmentSummaries.findIndex((appointment) => appointment.id === appointmentId);
+        this.appointmentSummaries.splice(indexInArray, 1, {
+          id: appointment.id,
+          status: status,
+          startDateTime: appointment.startDateTime,
+          type: appointmentType['title'],
+          duration: appointmentType['duration'],
+          notes: appointment.notes,
+        });
+        toast.success('Appointment cancelled', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     },
     editMyAppointmentNotes(appointmentId) {
       console.log('edit notes');

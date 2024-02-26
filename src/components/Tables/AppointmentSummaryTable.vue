@@ -75,9 +75,9 @@
                 <Tooltip placement="top" arrow theme="dark"  v-if="new Date(Date.parse(props.row.startDateTime)) > new Date()">
                   <template #button >
                     <div class="action-btn">
-                      <Icon v-if="(action.id === 'cancel') && props.row.status !== 'cancelled'" :icon="action.icon" @click="cancelAppointment(appointmentId)"/>
-                      <Icon v-else-if="(action.id === 'edit') && props.row.status !== 'cancelled'" :icon="action.icon" @click="editAppointmentNotes(appointmentId)"/>
-                      <Icon v-else-if="(action.id === 'reschedule')" :icon="action.icon" @click="rescheduleAppointment(appointmentId)"/>
+                      <Icon v-if="(action.id === 'cancel') && props.row.status !== 'cancelled'" :icon="action.icon" @click="cancelAppointment(props.row.id)"/>
+                      <Icon v-else-if="(action.id === 'edit') && props.row.status !== 'cancelled'" :icon="action.icon" @click="editAppointmentNotes(props.row.id)"/>
+                      <Icon v-else-if="(action.id === 'reschedule')" :icon="action.icon" @click="rescheduleAppointment(props.row.id)"/>
                     </div>
                   </template>
                   <span>{{action.label}}</span>
