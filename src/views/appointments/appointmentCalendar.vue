@@ -11,12 +11,14 @@ import Textinput from '@/components/Textinput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import {useToast} from 'vue-toastification';
+import BounceLoader from 'vue-spinner/src/BounceLoader.vue';
 
 const toast = useToast();
 
 export default {
   name: 'AppointmentCalendar',
   components: {
+    BounceLoader,
     Button,
     Textinput,
     AppointmentInfoModal,
@@ -44,7 +46,6 @@ export default {
   },
   methods: {
     showEventDetail(eventClickInfo) {
-      console.log(eventClickInfo.event);
       this.showAppointmentModal = !this.showAppointmentModal;
       this.appointmentModalInfo = {
         title: eventClickInfo.event.title,
@@ -113,7 +114,6 @@ export default {
             };
           }
         })).then((appointmentSummaries) => {
-          console.log(appointmentSummaries);
           successCallback(appointmentSummaries);
         });
       });
@@ -122,6 +122,7 @@ export default {
   data() {
     return {
       calendarApi: null,
+      isLoading: true,
       calendarOptions: {
         headerToolbar: {
           left: 'prev,next today',
@@ -139,6 +140,7 @@ export default {
             },
           },
         ],
+        loading: (isLoading) => this.isLoading = isLoading,
         eventClick: this.showEventDetail,
         firstDay: 1,
         editable: true,
@@ -165,10 +167,13 @@ export default {
       addClosedDayNotes: null,
       showAddClosedDayModal: false,
       addClosedDayDate: null,
+      loaderBoxSize: null,
+      loaderColor: '#7E96FC',
     };
   },
   mounted() {
     this.calendarApi = this.$refs.fullCalendar.getApi();
+    this.loaderBoxSize = this.$refs.loaderBox.clientHeight.toString() + 'px';
   },
 };
 </script>
@@ -176,14 +181,19 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
-      Test
       <Card>
-        <div class="dashcode-calender">
-          <FullCalendar
-              ref="fullCalendar"
-              :options="calendarOptions"
-          ></FullCalendar>
+        <div class="h-full w-full">
+          <div class="dashcode-calender">
+            <FullCalendar
+                ref="fullCalendar"
+                :options="calendarOptions"
+            ></FullCalendar>
+          </div>
+          <div class="absolute z-50 top-1/2 left-1/2 translate-x-28 w-20 h-20 p-0" ref="loaderBox">
+            <bounce-loader v-if="loaderBoxSize != null" class="z-50 h-100 w-100" :loading="isLoading" :size="loaderBoxSize" :color="loaderColor"></bounce-loader>
+          </div>
         </div>
+
       </Card>
     </div>
     <AppointmentInfoModal
