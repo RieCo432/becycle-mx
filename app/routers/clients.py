@@ -188,6 +188,14 @@ async def get_my_appointments(
     return crud.get_appointments(db=db, client_id=client.id)
 
 
+@clients.patch("/clients/me/appointments/{appointment_id}/cancel")
+async def cancel_my_appointment(
+        appointment_id: UUID,
+        client: models.Client = Depends(dep.get_current_client),
+        db: Session = Depends(dep.get_db)) -> schemas.Appointment:
+    return crud.cancel_my_appointment(db=db, client=client, appointment_id=appointment_id)
+
+
 @clients.get("/clients/{client_id}", dependencies=[Depends(dep.get_current_active_user)])
 async def get_client(client_id: UUID,
                      db: Session = Depends(dep.get_db)) -> schemas.Client:

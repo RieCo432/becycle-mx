@@ -67,6 +67,23 @@ def cancel_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
     return appointment
 
 
+def cancel_my_appointment(db: Session, client: models.Client, appointment_id: UUID) -> models.Appointment:
+    appointment = db.scalar(
+        select(models.Appointment)
+        .where(
+            (models.Appointment.id == appointment_id)
+            & (models.Appointment.clientId == client.id)
+        )
+    )
+
+    if appointment is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Appointment Not Found"})
+
+    appointment.cancelled = True
+    db.commit()
+    return appointment
+
+
 def get_appointments_by_datetime(db: Session, dt: datetime) -> list[models.Appointment]:
     return [_ for _ in db.scalars(
         select(models.Appointment)
