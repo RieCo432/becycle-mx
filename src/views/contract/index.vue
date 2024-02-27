@@ -47,15 +47,6 @@ export default {
         this.client = response.data;
         this.loadingClient = false;
       });
-      requests.getUser(this.contract['depositCollectingUserId']).then((response) => {
-        this.depositCollectingUser = response.data;
-      });
-      requests.getUser(this.contract['workingUserId']).then((response) => {
-        this.workingUser = response.data;
-      });
-      requests.getUser(this.contract['checkingUserId']).then((response) => {
-        this.checkingUser = response.data;
-      });
       if (this.contract.returnedDate != null) {
         requests.getUser(this.contract['returnAcceptingUserId']).then((response) => {
           this.returnAcceptedByUser = response.data;
@@ -64,7 +55,20 @@ export default {
           this.depositReturnedByUser = response.data;
         });
       }
-      this.loadingContract = false;
+      Promise.all([
+        requests.getUser(this.contract['depositCollectingUserId']),
+        requests.getUser(this.contract['workingUserId']),
+        requests.getUser(this.contract['checkingUserId'])
+      ]).then(([
+          depositCollectingUserResponse,
+          workingUserResponse,
+          checkingUserResponse,
+      ]) => {
+        this.depositCollectingUser = depositCollectingUserResponse.data;
+        this.workingUser = workingUserResponse.data;
+        this.checkingUser = checkingUserResponse.data;
+        this.loadingContract = false;
+      });
     });
     requests.getDepositBearers().then((response) => {
       this.depositBearers = response.data.map((user) => ({
@@ -84,20 +88,19 @@ export default {
 
 <template>
   <view-contract
-      v-if="!loadingContract"
       :client="client"
-                 :bike="bike"
-                 :deposit-collecting-username="depositCollectingUser.username"
-                 :working-username="workingUser.username"
-                 :checking-username="checkingUser.username"
-                 :contract="contract"
-                 :deposit-returned-by-username="depositReturnedByUser ? depositReturnedByUser.username : null"
-                 :return-accepted-by-username="returnAcceptedByUser ? returnAcceptedByUser.username : null"
-                 :deposit-bearers="depositBearers"
-                 :active-users="activeUsers"
-                 :loading-client="loadingClient"
-                 :loading-bike="loadingBike"
-                 :loading-contract="loadingContract"
+      :bike="bike"
+      :deposit-collecting-username="depositCollectingUser.username"
+      :working-username="workingUser.username"
+      :checking-username="checkingUser.username"
+      :contract="contract"
+      :deposit-returned-by-username="depositReturnedByUser ? depositReturnedByUser.username : null"
+      :return-accepted-by-username="returnAcceptedByUser ? returnAcceptedByUser.username : null"
+      :deposit-bearers="depositBearers"
+      :active-users="activeUsers"
+      :loading-client="loadingClient"
+      :loading-bike="loadingBike"
+      :loading-contract="loadingContract"
   ></view-contract>
 </template>
 
