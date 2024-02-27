@@ -8,12 +8,12 @@ from datetime import date
 
 def create_deposit_exchange(
         db: Session,
-        deposit_exchange_data: schemas.DepositExchangeCreate,
+        amount: int,
         from_user_id: UUID,
         to_user_id: UUID) -> models.DepositExchange:
 
     deposit_exchange = models.DepositExchange(
-        amount=deposit_exchange_data.amount,
+        amount=amount,
         fromUserId=from_user_id,
         toUserId=to_user_id
     )
