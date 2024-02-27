@@ -73,10 +73,6 @@ export default {
                   field: username,
                 }
             )),
-            {
-              label: 'Action',
-              field: 'action',
-            },
           ],
           data: [
             {

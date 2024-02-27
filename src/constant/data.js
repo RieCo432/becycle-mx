@@ -47,24 +47,16 @@ export const topMenu = [
     show: ['client'],
   },
   {
-    title: 'Contracts',
-    icon: 'heroicons-outline:clipboard-document-list',
-    link: '/contracts',
+    title: 'New Contract',
+    icon: 'heroicons-outline:document-plus',
+    link: '/contracts/new',
     show: ['user'],
-    child: [
-      {
-        childtitle: 'New Contract',
-        childicon: 'heroicons-outline:document-plus',
-        childlink: '/contracts/new',
-        show: ['user'],
-      },
-      {
-        childtitle: 'Find Contract',
-        childicon: 'heroicons-outline:document-magnifying-glass',
-        childlink: '/clients/find',
-        show: ['user'],
-      },
-    ],
+  },
+  {
+    title: 'Find Client',
+    icon: 'heroicons-outline:document-magnifying-glass',
+    link: '/clients/find',
+    show: ['user'],
   },
   {
     title: 'Deposit Accounting',

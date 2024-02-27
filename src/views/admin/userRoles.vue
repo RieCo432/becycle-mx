@@ -226,6 +226,7 @@ export default {
           .then((response) => {
             const indexInArray = this.userData.findIndex((user) => (user.id === userId));
             this.userData.splice(indexInArray, 1, response.data);
+            toast.success('User Role updated', {timeout: 1000});
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});

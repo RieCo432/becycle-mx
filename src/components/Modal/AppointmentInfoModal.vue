@@ -116,14 +116,14 @@ export default {
     },
     cancelAppointment() {
       requests.cancelAppointment(this.appointment.id).then(() => {
-        toast.warning('Appointment Denied/Cancelled')
+        toast.warning('Appointment Denied/Cancelled', {timeout: 2000});
         this.$emit('appointmentsUpdated');
       });
       this.close();
     },
     deleteClosedDay() {
       requests.deleteClosedDay(`${this.appointment.startDateTime.getFullYear()}-${(this.appointment.startDateTime.getMonth() + 1).toString().padStart(2, '0')}-${this.appointment.startDateTime.getDate().toString().padStart(2, '0')}`).then(() => {
-        toast.warning('Closed Day Removed');
+        toast.warning('Closed Day Removed', {timeout: 2000});
         this.$emit('appointmentsUpdated');
       });
       this.close();

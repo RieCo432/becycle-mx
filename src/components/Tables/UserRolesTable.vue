@@ -162,7 +162,7 @@ export default {
       required: true,
     },
     title: {
-      required: true,
+      required: false,
     },
     patchUser: {
       type: Function,
