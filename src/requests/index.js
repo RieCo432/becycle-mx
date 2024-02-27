@@ -436,4 +436,17 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  postDepositExchange(amount, fromUsername, fromPassword, toUsername, toPassword) {
+    const headers = credentialsStore.getApiRequestHeader();
+    console.log(headers);
+    return axiosClient.post('/deposit-exchanges', {
+      amount: amount,
+      deposit_returning_username: fromUsername,
+      deposit_returning_user_password: fromPassword,
+      deposit_receiving_username: toUsername,
+      deposit_receiving_user_password: toPassword,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

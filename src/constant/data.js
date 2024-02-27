@@ -68,7 +68,7 @@ export const topMenu = [
   },
   {
     title: 'Deposit Accounting',
-    icon: 'heroicons-outline:book-open',
+    icon: 'heroicons-outline:banknotes',
     link: '/accounting/deposits',
     show: ['user'],
   },
@@ -94,6 +94,12 @@ export const topMenu = [
     title: 'Appointment Settings',
     icon: 'heroicons-outline:adjustments-horizontal',
     link: '/admin/appointment-settings',
+    show: ['user'],
+  },
+  {
+    title: 'Submit Deposit Exchange',
+    icon: 'heroicons-outline:arrows-right-left',
+    link: '/admin/deposit-exchanges',
     show: ['user'],
   },
 ];

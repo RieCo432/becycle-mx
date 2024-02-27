@@ -123,6 +123,12 @@ const routes = [
         meta: {restrictTo: ['user']},
         component: () => import('@/views/admin/appointmentSettings.vue'),
       },
+      {
+        path: '/admin/deposit-exchanges',
+        name: 'Deposit Exchanges',
+        meta: {restrictTo: ['user']},
+        component: () => import('@/views/admin/DepositExchanges.vue'),
+      },
     ],
   },
 ];
