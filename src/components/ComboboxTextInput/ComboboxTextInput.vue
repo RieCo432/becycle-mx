@@ -74,7 +74,7 @@ export default {
       type: String,
     },
     allowNew: {
-      type: bool,
+      type: Boolean,
       default: true,
     },
   },

@@ -10,7 +10,7 @@ import Button from '@/components/Button/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
 import Select from '@/components/Select/index.vue';
-
+import Icon from '@/components/Icon';
 
 const toast = useToast();
 export default {
@@ -22,6 +22,7 @@ export default {
     Button,
     Card,
     ErrorMessage,
+    Icon,
   },
   setup() {
     const steps = [

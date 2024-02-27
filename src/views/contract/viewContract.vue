@@ -8,12 +8,13 @@ import {useRoute} from 'vue-router';
 import {computed, ref} from 'vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
-import {useField, useForm} from 'vee-validate';
+import {useField, useForm, ErrorMessage} from 'vee-validate';
 import requests from '@/requests';
 import {useCredentialsStore} from '@/store/credentialsStore';
 import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
 import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkeleton.vue';
 import ContractCardSkeleton from '@/components/Skeleton/ContractCardSkeleton.vue';
+import Icon from '@/components/Icon';
 
 export default {
   name: 'viewContract',
@@ -26,6 +27,8 @@ export default {
     ContractClientCardSkeleton,
     ContractBikeCardSkeleton,
     ContractCardSkeleton,
+    ErrorMessage,
+    Icon,
   },
   setup() {
     const route = useRoute();

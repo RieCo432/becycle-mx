@@ -13,14 +13,24 @@ export default {
       client: {},
       bike: {},
       contract: {},
-      depositCollectingUser: {},
-      workingUser: {},
-      checkingUser: {},
+      depositCollectingUser: {
+        username: 'null',
+      },
+      workingUser: {
+        username: 'null',
+      },
+      checkingUser: {
+        username: 'null',
+      },
       contractId: this.$route.params.contractId,
       depositBearers: [],
       activeUsers: [],
-      depositReturnedByUser: {},
-      returnAcceptedByUser: {},
+      depositReturnedByUser: {
+        username: 'null',
+      },
+      returnAcceptedByUser: {
+        username: 'null',
+      },
       loadingBike: true,
       loadingClient: true,
       loadingContract: true,
@@ -73,14 +83,16 @@ export default {
 </script>
 
 <template>
-  <view-contract :client="client"
+  <view-contract
+      v-if="!loadingContract"
+      :client="client"
                  :bike="bike"
-                 :depositCollectingUsername="depositCollectingUser.username"
-                 :workingUsername="workingUser.username"
-                 :checkingUsername="checkingUser.username"
+                 :deposit-collecting-username="depositCollectingUser.username"
+                 :working-username="workingUser.username"
+                 :checking-username="checkingUser.username"
                  :contract="contract"
-                 :depositReturnedByUsername="depositReturnedByUser ? depositReturnedByUser.username : null"
-                 :returnAcceptedByUsername="returnAcceptedByUser ? returnAcceptedByUser.username : null"
+                 :deposit-returned-by-username="depositReturnedByUser ? depositReturnedByUser.username : null"
+                 :return-accepted-by-username="returnAcceptedByUser ? returnAcceptedByUser.username : null"
                  :deposit-bearers="depositBearers"
                  :active-users="activeUsers"
                  :loading-client="loadingClient"
