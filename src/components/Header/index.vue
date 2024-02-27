@@ -22,11 +22,11 @@
             @click="this.$store.themeSettingsStore.sidebarCollasp = false"
           >
             <Icon
-              icon="akar-icons:arrow-right"
+              icon="heroicons-outline:arrow-right"
               v-if="!this.$store.themeSettingsStore.direction"
             />
             <Icon
-              icon="akar-icons:arrow-left"
+              icon="heroicons-outline:arrow-left"
               v-if="this.$store.themeSettingsStore.direction"
             />
           </button>

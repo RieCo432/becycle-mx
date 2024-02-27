@@ -79,28 +79,24 @@
             "
           />
         </router-link>
-        <span
-          class="cursor-pointer text-slate-900 dark:text-white text-2xl"
-          v-if="
-            !this.$store.themeSettingsStore.sidebarCollasp ||
-            this.$store.themeSettingsStore.isMouseHovered
-          "
-          @click="
+        <div
+            v-if="!this.$store.themeSettingsStore.sidebarCollasp"
+            @click="
             this.$store.themeSettingsStore.sidebarCollasp =
               !this.$store.themeSettingsStore.sidebarCollasp
           "
+            class="ml-auto h-full text-slate-900 dark:text-white text-xl flex items-center"
         >
-          <!-- <Icon icon="heroicons-outline:menu-alt-3"
-        /> -->
-          <div
-            class="h-4 w-4 border-[1.5px] border-slate-900 dark:border-slate-700 rounded-full transition-all duration-150"
-            :class="
-              this.$store.themeSettingsStore.sidebarCollasp
-                ? ''
-                : 'ring-2 ring-inset ring-offset-4 ring-black-900 dark:ring-slate-400 bg-slate-900 dark:bg-slate-400 dark:ring-offset-slate-700'
-            "
-          ></div>
-        </span>
+          <Icon
+              icon="heroicons-outline:arrow-left"
+              v-if="!this.$store.themeSettingsStore.direction"
+          />
+          <Icon
+              icon="heroicons-outline:arrow-right"
+              v-if="this.$store.themeSettingsStore.direction"
+          />
+        </div>
+
       </div>
       <div
         class="h-[60px] absolute top-[80px] nav-shadow z-[1] w-full transition-all duration-200 pointer-events-none"
@@ -121,17 +117,17 @@
   </div>
 </template>
 <script>
+import Icon from '../Icon';
 // import { Icon } from "@iconify/vue";
 import {defineComponent} from 'vue';
 import {topMenu} from '../../constant/data';
 import Navmenu from './Navmenu';
-import {gsap} from 'gsap';
 import {SimpleBar} from 'simplebar-vue3';
 import {ref, onMounted} from 'vue';
 
 export default defineComponent({
   components: {
-    // Icon,
+    Icon,
     Navmenu,
     SimpleBar,
   },

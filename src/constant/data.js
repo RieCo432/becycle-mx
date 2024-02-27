@@ -4,11 +4,6 @@ export const ProfileMenu = [
     icon: 'heroicons-outline:user',
     link: '/me',
   },
-  {
-    label: 'Settings',
-    icon: 'heroicons-outline:cog',
-    link: '#',
-  },
 ];
 
 export const topMenu = [
@@ -93,29 +88,5 @@ export const topMenu = [
     icon: 'heroicons-outline:arrows-right-left',
     link: '/admin/deposit-exchanges',
     show: ['user'],
-  },
-];
-
-export const alertType = [
-  {
-    type: 'dark',
-  },
-  {
-    type: 'primary',
-  },
-  {
-    type: 'secondary',
-  },
-  {
-    type: 'success',
-  },
-  {
-    type: 'info',
-  },
-  {
-    type: 'danger',
-  },
-  {
-    type: 'warning',
   },
 ];
