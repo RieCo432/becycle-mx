@@ -16,7 +16,6 @@ const router = createRouter({
   },
 });
 router.beforeEach((to, from, next) => {
-  console.log('to:', to);
   const credentialsStore = useCredentialsStore();
   const titleText = to.name;
   const words = titleText.split(' ');

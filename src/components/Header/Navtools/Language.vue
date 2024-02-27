@@ -76,7 +76,7 @@ import {
 } from '@headlessui/vue';
 
 const months = [
-  {name: 'en-gb', image: engbImg},
+  {name: 'English', image: engbImg},
 ];
 const selectLanguage = ref(months[0]);
 </script>

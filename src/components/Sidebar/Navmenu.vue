@@ -7,7 +7,7 @@
           :class="`
       ${item.child ? 'item-has-children' : ''}
       ${activeSubmenu === i ? 'open' : ''}
-      ${this.$route.name === item.link ? 'menu-item-active' : ''}
+      ${this.$route.meta.selectNavPath === item.link ? 'menu-item-active' : ''}
 
       `"
           class="single-sidebar-menu"
