@@ -17,7 +17,7 @@
       @mouseleave="this.$store.themeSettingsStore.isMouseHovered = false"
     >
       <div
-        :class="`logo-segment flex justify-between items-center bg-white dark:bg-slate-800 z-[9] py-6  sticky top-0   px-4  ${
+        :class="` logo-segment flex justify-between items-center bg-white dark:bg-slate-800 z-[9] py-6  sticky top-0   px-4  ${
           this.$store.themeSettingsStore.sidebarCollasp
             ? this.closeClass
             : this.openClass
@@ -38,7 +38,7 @@
           "
         >
           <img
-            src="@/assets/images/logo/logo.svg"
+            src="@/assets/images/logo/becycle-full.svg"
             alt=""
             v-if="
               !this.$store.themeSettingsStore.isDark &&
@@ -47,7 +47,7 @@
           />
 
           <img
-            src="@/assets/images/logo/logo-white.svg"
+            src="@/assets/images/logo/becycle-full-white.svg"
             alt=""
             v-if="
               this.$store.themeSettingsStore.isDark ||
@@ -63,7 +63,7 @@
           "
         >
           <img
-            src="@/assets/images/logo/logo-c.svg"
+            src="@/assets/images/logo/becycle.svg"
             alt=""
             v-if="
               !this.$store.themeSettingsStore.isDark &&
@@ -71,7 +71,7 @@
             "
           />
           <img
-            src="@/assets/images/logo/logo-c-white.svg"
+            src="@/assets/images/logo/becycle-white.svg"
             alt=""
             v-if="
               this.$store.themeSettingsStore.isDark ||

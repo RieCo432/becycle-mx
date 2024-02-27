@@ -9,13 +9,13 @@
     <div class="logo-segment flex justify-between items-center px-4 py-6">
       <router-link :to="{ name: 'home' }">
         <img
-          src="@/assets/images/logo/logo.svg"
+          src="@/assets/images/logo/becycle.svg"
           alt=""
           v-if="!this.$store.themeSettingsStore.isDark"
         />
 
         <img
-          src="@/assets/images/logo/logo-white.svg"
+          src="@/assets/images/logo/becycle-white.svg"
           alt=""
           v-if="this.$store.themeSettingsStore.isDark"
         />
