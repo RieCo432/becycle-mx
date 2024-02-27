@@ -1,7 +1,9 @@
 <script>
 import requests from '@/requests';
 import viewContract from '@/views/contract/viewContract.vue';
+import {useToast} from 'vue-toastification';
 
+const toast = useToast();
 
 export default {
   name: 'contractIndex',
@@ -36,6 +38,33 @@ export default {
       loadingContract: true,
     };
   },
+  methods: {
+    patchContractReturn(depositAmountReturned, depositReturningUser, depositReturningPassword, returnAcceptingUser, returnAcceptingPasswordOrPin) {
+      requests.patchReturnContract(this.contract.id, depositAmountReturned,
+          depositReturningUser, depositReturningPassword,
+          returnAcceptingUser, returnAcceptingPasswordOrPin).then((response) => {
+        toast.success('Contract Returned!', {timeout: 1000});
+        this.contract = response.data;
+        this.loadReturnUserDetails();
+      });
+    },
+    patchContractExtend() {
+      requests.patchExtendContract(this.contract.id).then((response) => {
+        toast.success('Contract Extended!', {timeout: 1000});
+        this.contract = response.data;
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+    },
+    loadReturnUserDetails() {
+      requests.getUser(this.contract['returnAcceptingUserId']).then((response) => {
+        this.returnAcceptedByUser = response.data;
+      });
+      requests.getUser(this.contract['depositReturningUserId']).then((response) => {
+        this.depositReturnedByUser = response.data;
+      });
+    },
+  },
   mounted() {
     requests.getContract(this.$route.params.contractId).then((response) => {
       this.contract = response.data;
@@ -48,17 +77,12 @@ export default {
         this.loadingClient = false;
       });
       if (this.contract.returnedDate != null) {
-        requests.getUser(this.contract['returnAcceptingUserId']).then((response) => {
-          this.returnAcceptedByUser = response.data;
-        });
-        requests.getUser(this.contract['depositReturningUserId']).then((response) => {
-          this.depositReturnedByUser = response.data;
-        });
+       this.loadReturnUserDetails();
       }
       Promise.all([
         requests.getUser(this.contract['depositCollectingUserId']),
         requests.getUser(this.contract['workingUserId']),
-        requests.getUser(this.contract['checkingUserId'])
+        requests.getUser(this.contract['checkingUserId']),
       ]).then(([
           depositCollectingUserResponse,
           workingUserResponse,
@@ -101,6 +125,8 @@ export default {
       :loading-client="loadingClient"
       :loading-bike="loadingBike"
       :loading-contract="loadingContract"
+      :patch-contract-extend="patchContractExtend"
+      :patch-contract-return="patchContractReturn"
   ></view-contract>
 </template>
 

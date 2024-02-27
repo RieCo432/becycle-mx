@@ -5,7 +5,7 @@ import Select from '@/components/Select/index.vue';
 import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import {useRoute} from 'vue-router';
-import {computed, ref} from 'vue';
+import {computed, ref, toRef} from 'vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import {useField, useForm, ErrorMessage} from 'vee-validate';
@@ -15,6 +15,8 @@ import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCard
 import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkeleton.vue';
 import ContractCardSkeleton from '@/components/Skeleton/ContractCardSkeleton.vue';
 import Icon from '@/components/Icon';
+
+const toast = useToast();
 
 export default {
   name: 'viewContract',
@@ -30,12 +32,13 @@ export default {
     ErrorMessage,
     Icon,
   },
-  setup() {
+  setup(props) {
     const route = useRoute();
 
     const credentialsStore = useCredentialsStore();
     const toast = useToast();
-    const contractData = ref({});
+    const contractData = toRef(props, 'contract');
+    const patchContractReturn = toRef(props, 'patchContractReturn');
 
 
     const steps = [
@@ -108,14 +111,7 @@ export default {
       if (isLastStep) {
         stepNumber.value = totalSteps - 1;
         // handle submit
-        requests.patchReturnContract(route.params.contractId, depositAmountReturned.value,
-            depositReturningUser.value, depositReturningPassword.value,
-            returnAcceptingUser.value, returnAcceptingPasswordOrPin.value).then(() => {
-          toast.success('Contract Returned!', {timeout: 1000});
-          requests.getContract(route.params.contractId).then((response) => {
-            contractData.value = response.data;
-          });
-        });
+        patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value, returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
       } else {
         if (stepNumber.value === 0) {
           requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
@@ -144,7 +140,6 @@ export default {
 
     return {
       contractData,
-      toast,
       credentialsStore,
       depositAmountReturned,
       depositAmountReturnedError,
@@ -168,14 +163,6 @@ export default {
     };
   },
   methods: {
-    extendContract() {
-      requests.patchExtendContract(this.contractData.id).then(() => {
-        this.toast.success('Contract Extended!', {timeout: 1000});
-        requests.getContract(this.contractData.id).then((response) => {
-          this.contractData = response.data;
-        });
-      });
-    },
     goToClient() {
       if (this.isUserLoggedIn) {
         this.$router.push({path: `/clients/${this.client.id}`});
@@ -239,14 +226,19 @@ export default {
       type: Boolean,
       required: true,
     },
+    patchContractReturn: {
+      type: Function,
+      default: () => {},
+    },
+    patchContractExtend: {
+      type: Function,
+      default: () => {},
+    }
   },
   data() {
     return {
       isUserLoggedIn: this.credentialsStore.isUserLoggedIn(),
     };
-  },
-  mounted() {
-    this.contractData = this.contract;
   },
 };
 </script>
@@ -294,7 +286,7 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
                 </div>
-                <DashButton v-if="isUserLoggedIn" class="mt-5" @click="extendContract">
+                <DashButton v-if="isUserLoggedIn" class="mt-5" @click="patchContractExtend">
                   Extend Contract
                 </DashButton>
               </div>
