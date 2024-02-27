@@ -3,7 +3,7 @@ const routes = [
     path: '/',
     name: 'Layout',
     redirect: '/home',
-    meta: {restrictTo: null},
+    meta: {restrictTo: null, hide: true},
     component: () => import('@/Layout/index.vue'),
     children: [
       {
@@ -78,13 +78,13 @@ const routes = [
       {
         path: '/contracts/new',
         name: 'New Contract',
-        meta: {restrictTo: ['user']},
+        meta: {restrictTo: ['user'], hide: true},
         component: () => import('@/views/contract/newContract.vue'),
       },
       {
-        path: '/clients/find',
+        path: '/clients',
         name: 'Find Client',
-        meta: {restrictTo: ['user']},
+        meta: {restrictTo: ['user'], hide: true},
         component: () => import('@/views/client/findClient.vue'),
       },
       {

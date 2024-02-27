@@ -28,14 +28,11 @@ router.beforeEach((to, from, next) => {
   document.title = 'beCyCle  - ' + words;
 
   if (to.meta.restrictTo == null) {
-    console.log('no access restriction');
     next();
   } else {
     if (to.meta.restrictTo.includes(credentialsStore.getTokenType())) {
-      console.log('access granted');
       next();
     } else {
-      console.log('access denied, redirecting');
       next({path: '/home'});
     }
   }

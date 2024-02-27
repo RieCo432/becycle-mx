@@ -55,7 +55,7 @@ export const topMenu = [
   {
     title: 'Find Client',
     icon: 'heroicons-outline:document-magnifying-glass',
-    link: '/clients/find',
+    link: '/clients',
     show: ['user'],
   },
   {
