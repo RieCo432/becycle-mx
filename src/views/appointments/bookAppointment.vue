@@ -10,6 +10,8 @@ import DashButton from '@/components/Button/index.vue';
 import {useToast} from 'vue-toastification';
 import {useRouter} from 'vue-router';
 import AppointmentTypeCardSkeleton from '@/components/Skeleton/AppointmentTypeCardSkeleton.vue';
+import AppointmentDateCardSkeleton from '@/components/Skeleton/AppointmentDateCardSkeleton.vue';
+import Icon from '@/components/Icon';
 
 export default {
   name: 'bookAppointment',
@@ -21,6 +23,8 @@ export default {
     Checkbox,
     Textinput,
     AppointmentTypeCardSkeleton,
+    AppointmentDateCardSkeleton,
+    Icon,
   },
   setup() {
     const steps = [
@@ -62,6 +66,7 @@ export default {
       } else {
         if (stepNumber.value === 0) {
           stepNumber.value++;
+          availableSlots.value = null;
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
@@ -192,12 +197,23 @@ export default {
 
                   <!-- TODO: This needs loading indicator and probably a different interface-->
 
+                  <template v-if="availableSlots == null">
+                    <div class="col-span-1 bg-slate" v-for="i in 10" :key="i">
+                      <AppointmentDateCardSkeleton/>
+                    </div>
+                  </template>
+
+
                   <div class="col-span-1 bg-slate" v-for="(times, date) in availableSlots" :key="date">
-                    <Card :title="date" class-name="dark:bg-slate-600">
-                      <div class="grid grid-cols-4">
-                        <div v-for="(time, j) in times" :key="j">
-                          <DashButton class="mt-3" @click="() => {appointmentDatetime = new Date(Date.parse(`${date}T${time}+00:00`))}">
-                            {{ time }}
+                    <Card :title="new Date(date).toLocaleDateString(undefined, {weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    })" class-name="dark:bg-slate-600">
+                      <div class="grid grid-cols-6">
+                        <div v-for="(datetime, j) in times.map((time) => (new Date(Date.parse(`${date}T${time}+00:00`))))" :key="j">
+                          <DashButton class="mt-3" @click="() => {appointmentDatetime = datetime}">
+                            {{ datetime.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false}) }}
                           </DashButton>
                         </div>
 
