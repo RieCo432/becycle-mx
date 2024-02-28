@@ -9,10 +9,19 @@ import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import {useToast} from 'vue-toastification';
 import {useRouter} from 'vue-router';
+import AppointmentTypeCardSkeleton from '@/components/Skeleton/AppointmentTypeCardSkeleton.vue';
 
 export default {
   name: 'bookAppointment',
-  components: {DashButton, Card, Button, Select, Checkbox, Textinput},
+  components: {
+    DashButton,
+    Card,
+    Button,
+    Select,
+    Checkbox,
+    Textinput,
+    AppointmentTypeCardSkeleton,
+  },
   setup() {
     const steps = [
       {
@@ -82,7 +91,7 @@ export default {
   },
   data() {
     return {
-      appointmentTypes: [],
+      appointmentTypes: null,
     };
   },
   created() {
@@ -150,6 +159,13 @@ export default {
                       Select Appointment Type
                     </h4>
                   </div>
+
+                  <template v-if="appointmentTypes == null">
+                    <div class="col-span-1 bg-slate" v-for="i in 6" :key="i">
+                      <AppointmentTypeCardSkeleton/>
+                    </div>
+                  </template>
+
                   <div class="col-span-1 bg-slate" v-for="(type, i) in appointmentTypes" :key="i">
                     <Card :title="type.title" class-name="dark:bg-slate-600">
                       <div class="flex flex-col h-full">
@@ -173,6 +189,8 @@ export default {
                       Select Date and Time
                     </h4>
                   </div>
+
+                  <!-- TODO: This needs loading indicator and probably a different interface-->
 
                   <div class="col-span-1 bg-slate" v-for="(times, date) in availableSlots" :key="date">
                     <Card :title="date" class-name="dark:bg-slate-600">

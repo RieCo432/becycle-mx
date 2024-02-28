@@ -10,11 +10,9 @@
   </div>
 </template>
 <script>
-import DashButton from '@/components/Button/index.vue';
 
 export default {
   name: 'ContractClientCardSkeleton',
-  components: {DashButton},
 };
 </script>
 <style lang=""></style>
