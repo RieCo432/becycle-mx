@@ -130,7 +130,7 @@ export default {
           right: 'timeGridWeek,timeGridDay,listWeek',
         },
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
-        initialView: 'timeGridWeek',
+        initialView: window.width > 768 ? 'timeGridWeek' : 'timeGridDay',
         themeSystem: 'bootstrap',
         eventSources: [
           {
