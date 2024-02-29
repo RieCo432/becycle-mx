@@ -63,7 +63,7 @@ export default {
     <div class="col-span-12 lg:col-span-8">
       <Card title="Find Client">
         <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-6">
+          <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedClient.firstName"
                 :suggestions="filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))"
@@ -81,7 +81,7 @@ export default {
             </ComboboxTextInput>
           </div>
 
-          <div class="col-span-6">
+          <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedClient.lastName"
                 :suggestions="filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))"
