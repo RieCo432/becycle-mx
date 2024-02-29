@@ -17,9 +17,9 @@ export default {
     return {
       clientSuggestions: [],
       selectedClient: {
-        firstName: null,
-        lastName: null,
-        emailAddress: null,
+        firstName: '',
+        lastName: '',
+        emailAddress: '',
         id: null,
       },
     };
@@ -29,7 +29,7 @@ export default {
   },
   methods: {
     fetchClients() {
-      requests.findClient(this.selectedClient.firstName, this.selectedClient.lastName, this.selectedClient.emailAddress).then((response) => {
+      requests.findClient(this.selectedClient.firstName.toLowerCase(), this.selectedClient.lastName.toLowerCase(), this.selectedClient.emailAddress.toLowerCase()).then((response) => {
         this.clientSuggestions = response.data;
       });
     },
@@ -40,9 +40,9 @@ export default {
   computed: {
     filtered_client_suggestions() {
       return this.clientSuggestions.filter((client) => (
-        (client.firstName.startsWith(this.selectedClient.firstName) && (this.selectedClient.firstName)) ||
-          (client.lastName.startsWith(this.selectedClient.lastName) && (this.selectedClient.lastName)) ||
-          (client.emailAddress.startsWith(this.selectedClient.emailAddress) && (this.selectedClient.emailAddress))
+        (client.firstName.startsWith(this.selectedClient.firstName.toLowerCase()) && (this.selectedClient.firstName.toLowerCase())) ||
+          (client.lastName.startsWith(this.selectedClient.lastName.toLowerCase()) && (this.selectedClient.lastName.toLowerCase())) ||
+          (client.emailAddress.startsWith(this.selectedClient.emailAddress.toLowerCase()) && (this.selectedClient.emailAddress.toLowerCase()))
       ));
     },
     filtered_first_name_suggestions() {
@@ -60,7 +60,7 @@ export default {
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-8">
+    <div class="col-span-12 lg:col-span-8">
       <Card title="Find Client">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-6">
