@@ -144,7 +144,7 @@ import {useField, useForm} from 'vee-validate';
 import Checkbox from '@/components/Switch/index.vue';
 import Select from '@/components/Select/index.vue';
 import Button from '@/components/Button/index.vue';
-import {useRouter} from 'vue-router';
+import {useRouter, useRoute} from 'vue-router';
 
 const credentialsStore = useCredentialsStore();
 
@@ -170,6 +170,7 @@ export default {
     const clientId = ref('');
     const exisitingClient = ref(false);
     const router = useRouter();
+    const route = useRoute();
 
     const emailSchema = yup.object().shape({
       emailAddress: yup.string().email().required(' Email is required. '),
@@ -203,6 +204,14 @@ export default {
       keepValuesOnUnmount: true,
     });
 
+    const handleContinue = () => {
+      if (route.query.hasOwnProperty('nextUrl')) {
+        router.push(route.query.nextUrl);
+      } else {
+        router.push('/me');
+      }
+    };
+
     const {value: emailAddress, errorMessage: emailAddressError} = useField('emailAddress');
 
     const {value: firstName, errorMessage: firstNameError} = useField('firstName');
@@ -222,13 +231,13 @@ export default {
           requests.getClientToken(clientId.value, code.value).then((response) => {
             credentialsStore.login(response.data['access_token'], 'client');
             requests.getClientMe().then((response) => (credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName'])));
-            router.push('/me');
+            handleContinue();
           });
         } else {
           requests.postTempClientVerificationCode(clientId.value, code.value).then((response) => {
             credentialsStore.login(response.data['access_token'], 'client');
             requests.getClientMe().then((response) => (credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName'])));
-            router.push('/me');
+            handleContinue();
           });
         }
       } else {

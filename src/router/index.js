@@ -31,6 +31,8 @@ router.beforeEach((to, from, next) => {
   } else {
     if (to.meta.restrictTo.includes(credentialsStore.getTokenType())) {
       next();
+    } else if (to.meta.restrictTo.includes('client')) {
+      next({path: '/clients/login', query: {nextUrl: '/appointments/book'}});
     } else {
       next({path: '/home'});
     }
