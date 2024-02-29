@@ -12,7 +12,9 @@ app = FastAPI(dependencies=[Depends(get_db)])
 
 origins = [
         "http://localhost:5173",
-        "https://localhost:5173"
+        "https://localhost:5173",
+    "http://192.168.1.5:5173",
+    "https://192.168.1.5:5173"
 ]
 
 app.add_middleware(
