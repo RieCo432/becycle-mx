@@ -4,10 +4,12 @@ import 'vue-slider-component/theme/antd.css';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import Button from '@/components/Button/index.vue';
+import window from '@/mixins/window';
 
 const toast = useToast();
 export default {
   name: 'AppointmentConcurrencySlider',
+  mixins: [window],
   components: {
     Button,
     VueSlider,
@@ -70,32 +72,33 @@ export default {
 </script>
 
 <template>
-  <div  class="col-span-1">
-    <div class="h-full grid grid-cols-1 gap-y-4">
-      <div class="col-span-1 h-64">
+  <div  class="col-span-12 2xl:col-span-1">
+    <div class="h-full grid grid-cols-12 2xl:grid-cols-1 gap-4">
+      <div class="col-span-6 2xl:col-span-1 2xl:h-64 items-center my-auto">
         <vue-slider
             v-model="maxConcurrent"
-            direction="btt"
+            :direction="window.width > 1536 ? 'btt' : 'ltr'"
             :drag-on-click="true"
             :clickable="false"
-            height="100%"
+            :height="window.width > 1536 ? '100%' : ''"
+            :width="window.width > 1536 ? '' : '100%'"
             :max="10"
             :min="0"
             @drag-end="setNewLimit"
-            class="mx-auto h-full"
+            class="m-auto 2xl:h-full"
         ></vue-slider>
       </div>
-      <div class="col-span-1 h-8">
+      <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
         <flat-pickr
-            class="form-control"
+            class="form-control m-auto"
             id="d3"
             placeholder="Time picker"
             v-model="afterTime"
             :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true, onClose: setNewAfterTime, minuteIncrement: 15 }"
         />
       </div>
-      <div class="col-span-1 h-8">
-        <Button @click="deleteConcurrencyLimit" type="submit" class="btn btn-sm btn-dark block w-full text-center">
+      <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
+        <Button @click="deleteConcurrencyLimit" type="submit" class="btn btn-sm btn-dark block w-full text-center m-auto">
           Delete
         </Button>
       </div>

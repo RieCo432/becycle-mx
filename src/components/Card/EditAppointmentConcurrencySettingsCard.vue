@@ -7,11 +7,13 @@ import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 import Button from '@/components/Button/index.vue';
 import ConcurrencyLimitsSkeleton from '@/components/Skeleton/ConcurrencyLimitsSkeleton.vue';
+import window from '@/mixins/window';
 
 const toast = useToast();
 
 export default {
   name: 'EditAppointmentConcurrencySettingsCard',
+  mixins: [window],
   components: {
     Button,
     AppointmentConcurrencySlider,
@@ -84,25 +86,26 @@ export default {
             @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.afterTime)"
             class="h-full"
         ></AppointmentConcurrencySlider>
-      <div class="col-span-1 h-full col-end-13">
+      <div class="col-span-12 mt-20 2xl:mt-auto 2xl:col-span-1 h-full 2xl:col-end-13">
         <form @submit.prevent="postNewConcurrencyLimit">
-          <div class="h-full grid grid-cols-1 gap-y-4">
-            <div class="col-span-1 h-64">
+          <div class="h-full grid grid-cols-12 2xl:grid-cols-1 gap-4">
+            <div class="col-span-6 2xl:col-span-1 2xl:h-64 items-center my-auto">
               <vue-slider
                   name="newLimit"
                   v-model="newLimit"
-                  direction="btt"
+                  :direction="window.width > 1536 ? 'btt' : 'ltr'"
                   :drag-on-click="true"
                   :clickable="false"
-                  height="100%"
+                  :height="window.width > 1536 ? '100%' : ''"
+                  :width="window.width > 1536 ? '' : '100%'"
                   :max="10"
                   :min="0"
-                  class="mx-auto h-full"
+                  class="m-auto 2xl:h-full"
               ></vue-slider>
             </div>
-            <div class="col-span-1 h-8">
+            <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
               <flat-pickr
-                  class="form-control"
+                  class="form-control m-auto"
                   name="newAfterTime"
                   id="d3"
                   placeholder="hh:mm"
@@ -111,8 +114,8 @@ export default {
               >
               </flat-pickr>
             </div>
-            <div class="col-span-1 h-8">
-              <Button type="submit" class="btn btn-sm btn-dark block w-full text-center">
+            <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
+              <Button type="submit" class="btn btn-sm btn-dark block w-full text-center m-auto">
                 Add
               </Button>
             </div>
