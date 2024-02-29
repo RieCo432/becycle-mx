@@ -113,6 +113,8 @@ export default {
       requests.confirmAppointment(this.appointment.id).then(() => {
         toast.success('Appointment Confirmed', {timeout: 2000});
         this.$emit('appointmentsUpdated');
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
       });
       this.close();
     },
@@ -120,6 +122,8 @@ export default {
       requests.cancelAppointment(this.appointment.id).then(() => {
         toast.warning('Appointment Denied/Cancelled', {timeout: 2000});
         this.$emit('appointmentsUpdated');
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
       });
       this.close();
     },
