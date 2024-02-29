@@ -247,7 +247,7 @@ export default {
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
       <div class="grid grid-cols-12 gap-5">
-        <div class="col-span-4 gap-5">
+        <div class="col-span-12 lg:col-span-4 gap-5">
           <Card title="Lendee">
             <ContractClientCardSkeleton v-if="loadingClient" count="1"></ContractClientCardSkeleton>
             <template v-else>
@@ -263,7 +263,7 @@ export default {
             </template>
           </Card>
         </div>
-        <div class="col-span-4 gap-5">
+        <div class="col-span-12 lg:col-span-4 gap-5">
           <Card title="Bike">
             <ContractBikeCardSkeleton v-if="loadingBike"></ContractBikeCardSkeleton>
             <template v-else>
@@ -273,7 +273,7 @@ export default {
             </template>
           </Card>
         </div>
-        <div class="col-span-4 gap-5">
+        <div class="col-span-12 lg:col-span-4 gap-5">
           <Card title="Contract">
             <ContractCardSkeleton v-if="loadingContract"></ContractCardSkeleton>
             <template v-else>
