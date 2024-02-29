@@ -57,16 +57,18 @@
                     class="mr-auto"
                     @click="$router.push({path: `/clients/${appointment.client.id}`})"
                 >View Client</DashButton>
-                <DashButton
-                    class="bg-success-500 dark:bg-success-500"
-                    v-if="!appointment.confirmed && !appointment.cancelled"
-                    @click="confirmAppointment"
-                >Accept</DashButton>
-                <DashButton
-                    class="bg-danger-500 dark:bg-danger-500"
-                    v-if="!appointment.cancelled"
-                    @click="cancelAppointment"
-                >{{ appointment.confirmed ? 'Cancel' : 'Deny'}} Appointment</DashButton>
+                <template v-if="appointment.startDateTime > new Date()">
+                  <DashButton
+                      class="bg-success-500 dark:bg-success-500"
+                      v-if="!appointment.confirmed && !appointment.cancelled"
+                      @click="confirmAppointment"
+                  >Accept</DashButton>
+                  <DashButton
+                      class="bg-danger-500 dark:bg-danger-500"
+                      v-if="!appointment.cancelled"
+                      @click="cancelAppointment"
+                  >{{ appointment.confirmed ? 'Cancel' : 'Deny'}} Appointment</DashButton>
+                </template>
               </div>
               <div v-else class="px-4 justify-end py-3 flex space-x-3 border-t border-slate-100 dark:border-slate-700">
                 <DashButton
