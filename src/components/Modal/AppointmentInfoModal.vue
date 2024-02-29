@@ -57,7 +57,7 @@
                     class="mr-auto"
                     @click="$router.push({path: `/clients/${appointment.client.id}`})"
                 >View Client</DashButton>
-                <template v-if="appointment.startDateTime > new Date()">
+                <template v-if="appointment.startDateTime > new Date() && userIsAppointmentManager">
                   <DashButton
                       class="bg-success-500 dark:bg-success-500"
                       v-if="!appointment.confirmed && !appointment.cancelled"
@@ -176,6 +176,10 @@ export default {
     },
     appointment: {
       type: Object,
+      required: true,
+    },
+    userIsAppointmentManager: {
+      type: Boolean,
       required: true,
     },
   },

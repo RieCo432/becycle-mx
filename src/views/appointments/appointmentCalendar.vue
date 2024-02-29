@@ -123,6 +123,7 @@ export default {
   },
   data() {
     return {
+      userIsAppointmentManager: false,
       calendarApi: null,
       isLoading: true,
       calendarOptions: {
@@ -176,6 +177,9 @@ export default {
   mounted() {
     this.calendarApi = this.$refs.fullCalendar.getApi();
     this.loaderBoxSize = this.$refs.loaderBox.clientHeight.toString() + 'px';
+    requests.getUserMe().then((response) => {
+      this.userIsAppointmentManager = response.data.appointmentManager;
+    });
   },
 };
 </script>
@@ -203,6 +207,7 @@ export default {
         @close="showAppointmentModal = !showAppointmentModal"
         :appointment="appointmentModalInfo"
         @appointments-updated="calendarApi.getEventSourceById('main').refetch()"
+        :user-is-appointment-manager="userIsAppointmentManager"
     >
     </AppointmentInfoModal>
     <Modal :active-modal="showAddClosedDayModal" @close="showAddClosedDayModal = !showAddClosedDayModal" :title="`Add Closed Day on ${addClosedDayDate}`">
