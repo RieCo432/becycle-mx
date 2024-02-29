@@ -3,7 +3,7 @@
     class="cursor-pointer text-slate-900 dark:text-white text-2xl"
     @click="toggleMsidebar"
   >
-    <Icon icon="heroicons-outline:menu-alt-3" />
+    <Icon icon="heroicons-outline:bars-3" />
   </div>
 </template>
 <script setup>

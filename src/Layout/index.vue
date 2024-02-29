@@ -50,8 +50,6 @@
         </div>
       </div>
     </div>
-    <!-- end page content -->
-    <FooterMenu v-if="window.width < 768" />
     <Footer
       :class="window.width > 1280 ? switchHeaderClass() : ''"
       v-if="window.width > 768"
@@ -66,7 +64,6 @@ import Settings from '../components/Settings';
 import Sidebar from '../components/Sidebar/';
 import window from '@/mixins/window';
 import MobileSidebar from '@/components/Sidebar/MobileSidebar.vue';
-import FooterMenu from '@/components/Footer/FooterMenu.vue';
 
 export default {
   mixins: [window],
@@ -76,7 +73,6 @@ export default {
     Sidebar,
     Settings,
     Breadcrumbs,
-    FooterMenu,
     MobileSidebar,
   },
   methods: {

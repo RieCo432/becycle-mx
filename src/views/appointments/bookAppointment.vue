@@ -195,7 +195,7 @@ export default {
                     </h4>
                   </div>
 
-                  <!-- TODO: This needs loading indicator and probably a different interface-->
+                  <!-- TODO: This probably needs a different interface-->
 
                   <template v-if="availableSlots == null">
                     <div class="col-span-1 bg-slate" v-for="i in 10" :key="i">
@@ -210,7 +210,7 @@ export default {
                     month: 'long',
                     day: 'numeric',
                     })" class-name="dark:bg-slate-600">
-                      <div class="grid grid-cols-6">
+                      <div class="grid lg:grid-cols-6 grid-cols-3">
                         <div v-for="(datetime, j) in times.map((time) => (new Date(Date.parse(`${date}T${time}+00:00`))))" :key="j">
                           <DashButton class="mt-3" @click="() => {appointmentDatetime = datetime}">
                             {{ datetime.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false}) }}

@@ -30,9 +30,9 @@
               v-if="this.$store.themeSettingsStore.direction"
             />
           </button>
-          <MobileLogo v-if="window.width < 1280" />
+          <!--<MobileLogo v-if="window.width < 1280" />-->
           <handle-mobile-menu
-            v-if="window.width < 1280 && window.width > 768"
+            v-if="window.width < 1280"
           />
         </div>
         <div
@@ -54,7 +54,6 @@
           <LanguageVue />
           <SwitchDark />
           <Profile v-if="showProfileDropdown" :name="profileName" />
-          <handle-mobile-menu v-if="window.width < 768" />
         </div>
       </div>
     </div>
