@@ -48,7 +48,16 @@ def get_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
 
 
 def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
-    appointment = get_appointment(db=db, appointment_id=appointment_id)
+    appointment = db.scalar(
+        select(models.Appointment)
+        .where(
+            (models.Appointment.id == appointment_id)
+            & (models.Appointment.startDateTime > datetime.utcnow())
+        )
+    )
+
+    if appointment is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This appointment does not exist or is in the past."})
 
     appointment.confirmed = True
 
@@ -58,7 +67,17 @@ def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment
 
 
 def cancel_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
-    appointment = get_appointment(db=db, appointment_id=appointment_id)
+    appointment = db.scalar(
+        select(models.Appointment)
+        .where(
+            (models.Appointment.id == appointment_id)
+            & (models.Appointment.startDateTime > datetime.utcnow())
+        )
+    )
+
+    if appointment is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail={"description": "This appointment does not exist or is in the past."})
 
     appointment.cancelled = True
 
