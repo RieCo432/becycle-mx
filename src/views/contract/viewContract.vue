@@ -416,7 +416,7 @@ export default {
                             name="everythingCorrect"
                             v-model="everythingCorrect"
                             :error="everythingCorrectError"/>
-                        <ErrorMessage name="everythingCorrect" :error="everythingCorrectError"></ErrorMessage>
+                        <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
                       </div>
                     </div>
                   </div>

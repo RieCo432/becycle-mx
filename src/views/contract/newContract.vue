@@ -192,7 +192,7 @@
                         v-model="type"
                         :value="contractType"
                     />
-                    <ErrorMessage name="type" :error="typeError"/>
+                    <ErrorMessage name="type" :error="typeError" class="text-danger-500"/>
                   </div>
 
                   <div class="col-span-1">
@@ -206,7 +206,7 @@
                         v-model="condition"
                         :value="bikeCondition"
                     />
-                    <ErrorMessage name="condition" :error="conditionError"/>
+                    <ErrorMessage name="condition" :error="conditionError" class="text-danger-500"/>
                   </div>
 
                   <div class="md:col-span-4 col-span-2">
@@ -327,7 +327,7 @@
                         name="everythingCorrect"
                         v-model="everythingCorrect"
                         :error="everythingCorrectError"/>
-                    <ErrorMessage name="everythingCorrect" :error="everythingCorrectError"></ErrorMessage>
+                    <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
                   </div>
                 </div>
               </div>

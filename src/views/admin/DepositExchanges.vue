@@ -295,7 +295,7 @@ export default {
                         name="reviewed"
                         v-model="reviewed"
                         :error="reviewedError"/>
-                    <ErrorMessage name="reviewed" :error="reviewedError"></ErrorMessage>
+                    <ErrorMessage name="reviewed" :error="reviewedError" class="text-danger-500"/>
                   </div>
                 </div>
               </div>
