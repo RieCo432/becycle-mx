@@ -10,6 +10,7 @@
         :view-contract="viewContract"
         :loading-contracts="loadingContracts"
         :loading-appointments="loadingAppointments"
+        :is-client="true"
     ></client-view>
   </div>
 </template>
@@ -61,7 +62,7 @@ export default {
           duration: appointmentType['duration'],
           notes: appointment.notes,
         });
-        toast.success('Appointment cancelled', {timeout: 2000});
+        toast.warning('Appointment cancelled', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });

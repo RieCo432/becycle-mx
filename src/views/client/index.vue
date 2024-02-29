@@ -1,6 +1,10 @@
 <script>
 import clientView from '@/views/client/clientView.vue';
 import requests from '@/requests';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
+
 export default {
   name: 'clientIndex',
   components: {
@@ -18,8 +22,43 @@ export default {
     };
   },
   methods: {
+    async updateAppointmentInSummaries(appointment) {
+      const indexInArray = this.appointmentSummaries.findIndex((originalAppointment) => originalAppointment.id === appointment.id);
+      const appointmentType = (await requests.getAppointmentType(appointment.typeId)).data;
+      let status = 'past';
+      if (appointment.cancelled) {
+        status = 'cancelled';
+      } else if (new Date(Date.parse(appointment.startDateTime)) > new Date()) {
+        if (appointment['confirmed']) {
+          status = 'confirmed';
+        } else {
+          status = 'pending';
+        }
+      }
+      this.appointmentSummaries.splice(indexInArray, 1, {
+        id: appointment.id,
+        status: status,
+        startDateTime: appointment.startDateTime,
+        type: appointmentType['title'],
+        duration: appointmentType['duration'],
+        notes: appointment.notes,
+      });
+    },
+    acceptAppointment(appointmentId) {
+      requests.confirmAppointment(appointmentId).then((response) => {
+        toast.success('Appointment confirmed!', {timeout: 2000});
+        this.updateAppointmentInSummaries(response.data);
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+    },
     cancelAppointment(appointmentId) {
-      console.log('cancel');
+      requests.cancelAppointment(appointmentId).then((response) => {
+        toast.warning('Appointment cancelled!', {timeout: 2000});
+        this.updateAppointmentInSummaries(response.data);
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     },
     editAppointmentNotes(appointmentId) {
       console.log('edit notes');
@@ -100,6 +139,8 @@ export default {
         :view-contract="viewContract"
         :loading-contracts="loadingContracts"
         :loading-appointments="loadingAppointments"
+        :accept-appointment="acceptAppointment"
+        :is-client="false"
     ></client-view>
   </div>
 </template>

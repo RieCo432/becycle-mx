@@ -66,18 +66,16 @@
               {{ props.row.status }}
             </span>
           </span>
-          <span v-if="props.column.field == 'startDateTime'">
+          <span v-if="props.column.field === 'startDateTime'">
             {{ new Date(Date.parse(props.row.startDateTime)).toLocaleString() }}
           </span>
-          <span v-if="props.column.field == 'action'">
+          <span v-if="props.column.field === 'action'">
             <div class="flex space-x-3 rtl:space-x-reverse">
               <template v-for="action in actions">
-                <Tooltip placement="top" arrow theme="dark"  v-if="new Date(Date.parse(props.row.startDateTime)) > new Date()">
+                <Tooltip placement="top" arrow theme="dark"  v-if="new Date(Date.parse(props.row.startDateTime)) > new Date() && (isClient || userIsAppointmentManager)">
                   <template #button >
                     <div class="action-btn">
-                      <Icon v-if="(action.id === 'cancel') && props.row.status !== 'cancelled'" :icon="action.icon" @click="cancelAppointment(props.row.id)"/>
-                      <Icon v-else-if="(action.id === 'edit') && props.row.status !== 'cancelled'" :icon="action.icon" @click="editAppointmentNotes(props.row.id)"/>
-                      <Icon v-else-if="(action.id === 'reschedule')" :icon="action.icon" @click="rescheduleAppointment(props.row.id)"/>
+                      <Icon v-if="props.row.status !== 'cancelled' && !(props.row.status === 'confirmed' && action.id === 'confirm')" :icon="action.icon" @click="action.func(props.row.id)"/>
                     </div>
                   </template>
                   <span>{{action.label}}</span>
@@ -153,6 +151,14 @@ export default {
       required: true,
     },
     loading: {
+      type: Boolean,
+      required: true,
+    },
+    userIsAppointmentManager: {
+      type: Boolean,
+      required: true,
+    },
+    isClient: {
       type: Boolean,
       required: true,
     },

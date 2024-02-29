@@ -4,6 +4,7 @@ import ContractSummaryTable from '@/components/Tables/ContractSummaryTable.vue';
 import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
+import requests from '@/requests';
 
 const credentialsStore = useCredentialsStore();
 
@@ -32,6 +33,10 @@ export default {
       type: Function,
       required: true,
     },
+    acceptAppointment: {
+      type: Function,
+      default: () => {},
+    },
     editAppointmentNotes: {
       type: Function,
       required: true,
@@ -52,10 +57,15 @@ export default {
       type: Boolean,
       required: true,
     },
+    isClient: {
+      type: Boolean,
+      required: true,
+    },
   },
 
   data() {
     return {
+      userIsAppointmentManager: false,
       contractActions: [
         {
           name: 'View',
@@ -118,10 +128,17 @@ export default {
           id: 'reschedule',
           icon: 'heroicons:clock',
         },*/
+          ...!this.isClient ? [{
+          label: 'Confirm Appointment',
+          id: 'confirm',
+          icon: 'heroicons-outline:check',
+          func: (appointmentId) => this.acceptAppointment(appointmentId),
+        }] : [],
         {
           label: 'Cancel Appointment',
           id: 'cancel',
-          icon: 'heroicons-outline:x-circle',
+          icon: 'heroicons-outline:x-mark',
+          func: (appointmentId) => this.cancelAppointment(appointmentId),
         },
       ],
       appointmentColumns: [
@@ -154,6 +171,13 @@ export default {
 
     };
   },
+  created() {
+    if (credentialsStore.getTokenType() === 'user') {
+      requests.getUserMe().then((response) => {
+        this.userIsAppointmentManager = response.data.appointmentManager;
+      });
+    }
+  },
   computed: {
     name() {
       return this.client.firstName + ' ' + this.client.lastName;
@@ -168,7 +192,14 @@ export default {
       <Card>
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <Advanced :loading="loadingContracts" :actions="contractActions" :columns="contractColumns" :advanced-table="contractSummaries" title="Contracts" :view-contract="viewContract"></Advanced>
+            <Advanced
+                :loading="loadingContracts"
+                :actions="contractActions"
+                :columns="contractColumns"
+                :advanced-table="contractSummaries"
+                title="Contracts"
+                :view-contract="viewContract">
+            </Advanced>
           </div>
         </div>
       </Card>
@@ -178,7 +209,18 @@ export default {
 
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <AppointmentSummaryTable :loading="loadingAppointments" :cancel-appointment="cancelAppointment" :edit-appointment-notes="editAppointmentNotes" :reschedule-appointment="rescheduleAppointment" :actions="appointmentActions" :columns="appointmentColumns" :advanced-table="appointmentSummaries" title="Appointments"></AppointmentSummaryTable>
+            <AppointmentSummaryTable
+                :loading="loadingAppointments"
+                :cancel-appointment="cancelAppointment"
+                :edit-appointment-notes="editAppointmentNotes"
+                :reschedule-appointment="rescheduleAppointment"
+                :actions="appointmentActions"
+                :columns="appointmentColumns"
+                :advanced-table="appointmentSummaries"
+                :user-is-appointment-manager="userIsAppointmentManager"
+                :is-client="isClient"
+                title="Appointments">
+            </AppointmentSummaryTable>
           </div>
         </div>
       </Card>
