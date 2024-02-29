@@ -23,7 +23,13 @@ async def find_bike(
         serial_number: str,
         decals: str = None,
         db: Session = Depends(dep.get_db)) -> schemas.Bike:
-    return crud.get_bikes(make=make, model=model, colour=colour, decals=decals, serialNumber=serial_number, db=db)[0]
+    return crud.get_bikes(
+        make=make.lower() if make is not None else None,
+        model=model.lower() if model is not None else None,
+        colour=colour.lower() if colour is not None else None,
+        decals=decals.lower() if decals is not None else None,
+        serialNumber=serial_number.lower() if serial_number is not None else None,
+        db=db)[0]
 
 
 @bikes.get("/bike", dependencies=[Depends(dep.get_current_active_user)])

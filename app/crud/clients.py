@@ -9,17 +9,13 @@ from uuid import UUID
 
 
 def get_clients(db: Session, first_name: str, last_name: str, email_address: str) -> list[models.Client]:
-    query_filters = []
-    if first_name is not None:
-        query_filters.append((models.Client.firstName == first_name.lower()))
-    if last_name is not None:
-        query_filters.append((models.Client.lastName == last_name.lower()))
-    if email_address is not None:
-        query_filters.append(models.Client.emailAddress == email_address.lower())
-
     clients = [_ for _ in db.scalars(
         select(models.Client)
-        .where(or_(*query_filters))
+        .where(
+            (models.Client.firstName == first_name)
+            | (models.Client.lastName == last_name)
+            | (models.Client.emailAddress == email_address)
+        )
     )]
 
     if len(clients) == 0:

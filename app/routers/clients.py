@@ -36,7 +36,7 @@ async def get_client_id_by_email(
         email_address: str,
         db: Session = Depends(dep.get_db)) -> dict[str, UUID]:
 
-    client = crud.get_client_by_email(db=db, email_address=email_address.lower())
+    client = crud.get_client_by_email(db=db, email_address=email_address)
     return {"id": client.id}
 
 
@@ -44,7 +44,7 @@ async def get_client_id_by_email(
 async def get_client_email_address_suggestions(
         email_address: str,
         db: Session = Depends(dep.get_db)) -> list[str]:
-    return crud.get_similar_email_addresses(email_address=email_address.lower(), db=db)
+    return crud.get_similar_email_addresses(email_address=email_address, db=db)
 
 
 @clients.post("/client", dependencies=[Depends(dep.get_current_active_user)])
@@ -94,7 +94,7 @@ async def get_client_login_code(
         email_address: str,
         db: Session = Depends(dep.get_db)) -> schemas.ClientPreAuth:
 
-    client = crud.get_client_by_email(db=db, email_address=email_address.lower())
+    client = crud.get_client_by_email(db=db, email_address=email_address)
 
     if client is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no client associated with this email address."})
@@ -126,15 +126,11 @@ async def get_token(
 
 @clients.get("/clients/find", dependencies=[Depends(dep.get_current_active_user)])
 async def find_client(
-        first_name: str | None = None,
-        last_name: str | None = None,
-        email_address: str | None = None,
+        first_name: str = None,
+        last_name: str = None,
+        email_address: str = None,
         db: Session = Depends(dep.get_db)) -> list[schemas.Client]:
-    return crud.get_potential_matches(
-        db=db,
-        first_name=first_name.lower() if first_name is not None else None,
-        last_name=last_name.lower() if last_name is not None else None,
-        email_address=email_address.lower() if email_address is not None else None)
+    return crud.get_potential_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
 
 
 @clients.get("/clients/me")
