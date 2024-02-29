@@ -707,27 +707,27 @@ export default {
   },
   methods: {
     fetchEmailSuggestions() {
-      requests.getEmailAddressSuggestions(this.emailAddress).then((response) => {
+      requests.getEmailAddressSuggestions(this.emailAddress.toLowerCase()).then((response) => {
         this.email_suggestions = response.data;
       });
     },
     fetchBikeMakeSuggestions() {
-      requests.getBikeMakeSuggestions(this.make).then((response) => {
+      requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {
         this.make_suggestions = response.data;
       });
     },
     fetchBikeModelSuggestions() {
-      requests.getBikeModelSuggestions(this.model).then((response) => {
+      requests.getBikeModelSuggestions(this.model.toLowerCase()).then((response) => {
         this.model_suggestions = response.data;
       });
     },
     fetchSerialNumberSuggestions() {
-      requests.getBikeSerialNumberSuggestions(this.serialNumber).then((response) => {
+      requests.getBikeSerialNumberSuggestions(this.serialNumber.toLowerCase()).then((response) => {
         this.serial_number_suggestions = response.data;
       });
     },
     fetchColourSuggestions() {
-      requests.getBikeColourSuggestions(this.colour).then((response) => {
+      requests.getBikeColourSuggestions(this.colour.toLowerCase()).then((response) => {
         this.colour_suggestions = response.data;
       });
     },
@@ -755,19 +755,19 @@ export default {
   },
   computed: {
     filtered_email_suggestions() {
-      return this.email_suggestions.filter((suggestion) => (suggestion.startsWith(this.emailAddress))).slice(0, 4);
+      return this.email_suggestions.filter((suggestion) => (suggestion.startsWith(this.emailAddress.toLowerCase()))).slice(0, 4);
     },
     filtered_make_suggestions() {
-      return this.make_suggestions.filter((suggestion) => (suggestion.startsWith(this.make))).slice(0, 4);
+      return this.make_suggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
     },
     filtered_model_suggestions() {
-      return this.model_suggestions.filter((suggestion) => (suggestion.startsWith(this.model))).slice(0, 4);
+      return this.model_suggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
     },
     filtered_serial_number_suggestions() {
-      return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber))).slice(0, 4);
+      return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber.toLowerCase()))).slice(0, 4);
     },
     filtered_colour_suggestions() {
-      return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour))).slice(0, 4);
+      return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour.toLowerCase()))).slice(0, 4);
     },
   },
   mounted() {
