@@ -39,7 +39,7 @@ export const topMenu = [
     title: 'Book Appointment',
     icon: 'heroicons-outline:calendar',
     link: '/appointments/book',
-    show: ['always'],
+    show: ['client', 'loggedout'],
   },
   {
     title: 'New Contract',
