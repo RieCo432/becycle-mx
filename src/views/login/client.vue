@@ -46,7 +46,7 @@
         <div
             class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
         >
-          <form @submit.prevent="submit">
+          <form @submit.prevent="submit" @keydown.enter="submit">
             <div v-if="stepNumber === 0">
               <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
                 <div class="lg:col-span-3 md:col-span-2 col-span-1">
@@ -65,7 +65,7 @@
               </div>
             </div>
 
-            <div v-if="stepNumber === 1">
+            <div v-if="stepNumber === 1 && !exisitingClient">
               <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
                 <div class="md:col-span-2 col-span-1">
                   <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -89,7 +89,7 @@
                     :error="lastNameError"/>
               </div>
             </div>
-            <div v-if="stepNumber === 2">
+            <div v-if="stepNumber === 2 || (stepNumber === 1 && exisitingClient)">
               <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
                 <div class="lg:col-span-3 md:col-span-2 col-span-1">
                   <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -141,10 +141,9 @@ import {useToast} from 'vue-toastification';
 import {computed, ref} from 'vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
-import Checkbox from '@/components/Switch/index.vue';
-import Select from '@/components/Select/index.vue';
 import Button from '@/components/Button/index.vue';
 import {useRouter, useRoute} from 'vue-router';
+import Icon from '@/components/Icon';
 
 const credentialsStore = useCredentialsStore();
 
@@ -191,7 +190,7 @@ export default {
         case 0:
           return emailSchema;
         case 1:
-          return detailsSchema;
+          return exisitingClient.value ? codeSchema : detailsSchema;
         case 2:
           return codeSchema;
         default:
@@ -232,12 +231,16 @@ export default {
             credentialsStore.login(response.data['access_token'], 'client');
             requests.getClientMe().then((response) => (credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName'])));
             handleContinue();
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
           });
         } else {
           requests.postTempClientVerificationCode(clientId.value, code.value).then((response) => {
             credentialsStore.login(response.data['access_token'], 'client');
             requests.getClientMe().then((response) => (credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName'])));
             handleContinue();
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
           });
         }
       } else {
@@ -246,19 +249,32 @@ export default {
         // if error 404, go to step 1 to enter first and last name
         if (stepNumber.value === 0) {
           requests.getClientLoginCode(emailAddress.value).then((response) => {
-            stepNumber.value += 2;
+            // remove details step
+            if (steps.length === 3) steps.splice(1, 1);
             exisitingClient.value = true;
             clientId.value = response.data.id;
           }).catch((error) => {
             if (error.response.status === 404) {
-              stepNumber.value++;
+              // reset any previously set flags and make sure details step is present
+              exisitingClient.value = false;
+              clientId.value = null;
+              if (steps.length === 2) {
+                steps.splice(1, 0, {
+                  id: 2,
+                  title: 'Details',
+                });
+              }
             }
+          }).finally(() => {
+            stepNumber.value++;
           });
-        } else if (stepNumber.value === 1) {
+        } else if (stepNumber.value === 1 && !exisitingClient.value) {
           // create the new client using supplied first and last name
           requests.postNewTempClient(firstName.value, lastName.value, emailAddress.value).then((response) => {
             clientId.value = response.data.id;
             stepNumber.value++;
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
           });
         }
       }
@@ -281,6 +297,7 @@ export default {
       codeError,
       setCodeError,
 
+      exisitingClient,
       submit,
       steps,
       stepNumber,
@@ -293,9 +310,10 @@ export default {
     };
   },
   components: {
-    Button, Select, Checkbox,
+    Button,
     Card,
     Textinput,
+    Icon,
   },
 };
 
