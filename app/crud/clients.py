@@ -2,6 +2,7 @@ import datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select, or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
@@ -45,13 +46,28 @@ def post_client(db: Session, client_data: schemas.ClientCreate) -> models.Client
 
 
 def post_client_temp(db: Session, client_data: schemas.ClientCreate) -> models.ClientTemp:
-    client_temp = models.ClientTemp(
-        firstName=client_data.firstName.lower(),
-        lastName=client_data.lastName.lower(),
-        emailAddress=client_data.emailAddress.lower()
+    client_temp = db.scalar(
+        select(models.ClientTemp)
+        .where(models.ClientTemp.emailAddress == client_data.emailAddress.lower())
     )
-    db.add(client_temp)
+
+    if client_temp is None:
+        client_temp = models.ClientTemp(
+            firstName=client_data.firstName.lower(),
+            lastName=client_data.lastName.lower(),
+            emailAddress=client_data.emailAddress.lower()
+        )
+        try:
+            db.add(client_temp)
+        except IntegrityError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={
+                "description": "Something went wrong"})
+
+    client_temp.firstName = client_data.firstName.lower()
+    client_temp.lastName = client_data.lastName.lower()
+
     db.commit()
+
     return client_temp
 
 
