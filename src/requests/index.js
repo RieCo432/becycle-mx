@@ -6,10 +6,10 @@ const credentialsStore = useCredentialsStore();
 const API_PROTOCOL = import.meta.env.VITE_API_PROTOCOL;
 const API_HOST = import.meta.env.VITE_API_HOST;
 const API_PORT = import.meta.env.VITE_API_PORT;
-const ENV = import.meta.env;
+const API_SUBDIR = import.meta.env.VITE_API_SUBDIR;
 
 const axiosClient = axios.create({
-  baseURL: `${API_PROTOCOL}://${API_HOST}:${API_PORT}`,
+  baseURL: `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}`,
 });
 
 export default {
