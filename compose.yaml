@@ -1,4 +1,11 @@
 services:
+    web:
+        build: vuejs/.
+        ports:
+            - "4173:4173"
+        volumes:
+            - ./vuejs:/app
+            - /app/node_modules
     api:
         build: fastapi/.
         ports:
