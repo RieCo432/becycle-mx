@@ -103,16 +103,10 @@
         :class="[shadowbase ? ' opacity-100' : ' opacity-0']"
       ></div>
 
-      <SimpleBar
-        class="sidebar-menu px-4 h-[calc(100%-80px)]"
-        @created="
-          (instance) => {
-            simplebarInstance = instance;
-          }
-        "
-      >
+      <simplebar
+        class="sidebar-menu px-4 h-[calc(100%-80px)]">
         <Navmenu :items="topMenu" />
-      </SimpleBar>
+      </simplebar>
     </div>
   </div>
 </template>
@@ -122,14 +116,15 @@ import Icon from '../Icon';
 import {defineComponent} from 'vue';
 import {topMenu} from '../../constant/data';
 import Navmenu from './Navmenu';
-import {SimpleBar} from 'simplebar-vue3';
+import simplebar from 'simplebar-vue';
+import 'simplebar/dist/simplebar.min.css';
 import {ref, onMounted} from 'vue';
 
 export default defineComponent({
   components: {
     Icon,
     Navmenu,
-    SimpleBar,
+    simplebar,
   },
   data() {
     return {
@@ -142,7 +137,7 @@ export default defineComponent({
   setup() {
     const shadowbase = ref(false);
     const simplebarInstance = ref(null);
-    onMounted(() => {
+    /*onMounted(() => {
       simplebarInstance.value
           .getScrollElement()
           .addEventListener('scroll', () => {
@@ -156,7 +151,7 @@ export default defineComponent({
               shadowbase.value = false;
             }
           });
-    });
+    });*/
 
     return {
       simplebarInstance,
