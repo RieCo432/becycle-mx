@@ -1,15 +1,20 @@
 import axios from 'axios';
 import {useCredentialsStore} from '@/store/credentialsStore';
 
-const credentialsStore = useCredentialsStore();
 
+const credentialsStore = useCredentialsStore();
+const API_PROTOCOL = import.meta.env.VITE_API_PROTOCOL;
+const API_HOST = import.meta.env.VITE_API_HOST;
+const API_PORT = import.meta.env.VITE_API_PORT;
+const ENV = import.meta.env;
 
 const axiosClient = axios.create({
-  baseURL: 'http://192.168.1.5:8000',
+  baseURL: `${API_PROTOCOL}://${API_HOST}:${API_PORT}`,
 });
 
 export default {
   getOpeningTimes() {
+    console.log(ENV);
     return axiosClient.get('/public/opening-times');
   },
   getUserToken(username, password) {
