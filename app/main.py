@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import app.routers as routers
@@ -11,10 +12,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(dependencies=[Depends(get_db)])
 
 origins = [
-        "http://localhost:5173",
-        "https://localhost:5173",
-    "http://192.168.1.5:5173",
-    "https://192.168.1.5:5173"
+    os.environ['CORS_ALLOW_ORIGIN']
 ]
 
 app.add_middleware(
