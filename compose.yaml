@@ -2,7 +2,7 @@ services:
     web:
         build: vuejs/.
         ports:
-            - "4173:4173"
+            - "8080:80"
         volumes:
             - ./vuejs:/app
             - /app/node_modules
