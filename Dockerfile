@@ -1,13 +1,16 @@
-FROM node:21-alpine AS development
+FROM node:21-alpine AS build
+RUN mkdir /app
+WORKDIR /app
 
-RUN mkdir /project
-WORKDIR /project
-
-COPY . .
-
+COPY package*.json ./
 RUN yarn global add @vue/cli
 RUN yarn install
 
+COPY . .
 RUN yarn run build
-CMD ["yarn", "preview", "--host"]
-EXPOSE 4173
+
+
+FROM nginx:stable-alpine as production
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
