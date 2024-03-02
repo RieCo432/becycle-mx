@@ -46,14 +46,14 @@ import {useThemeSettingsStore} from '@/store/themeSettings';
 const themeSettingsStore = useThemeSettingsStore();
 
 // check localStorage theme for dark light bordered
-if (localStorage.theme === 'dark') {
-  document.body.classList.add('dark');
-  themeSettingsStore.theme = 'dark';
-  themeSettingsStore.isDark = true;
-} else {
+if (localStorage.theme === 'light') {
   document.body.classList.add('light');
   themeSettingsStore.theme = 'light';
   themeSettingsStore.isDark = false;
+} else {
+  document.body.classList.add('dark');
+  themeSettingsStore.theme = 'dark';
+  themeSettingsStore.isDark = true;
 }
 if (localStorage.semiDark === 'true') {
   document.body.classList.add('semi-dark');
