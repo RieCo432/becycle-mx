@@ -23,7 +23,7 @@
         @click="this.$store.themeSettingsStore.mobielSidebar = false"
       ></div>
     </Transition>
-    <Settings></Settings>
+    <!--<Settings></Settings>-->
     <!-- mobile sidebar -->
 
     <div

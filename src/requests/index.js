@@ -14,7 +14,6 @@ const axiosClient = axios.create({
 
 export default {
   getOpeningTimes() {
-    console.log(ENV);
     return axiosClient.get('/public/opening-times');
   },
   getUserToken(username, password) {
