@@ -98,3 +98,17 @@ async def extend_contract(
 @contracts.get("/contract/types", dependencies=[Depends(dep.get_current_active_user)])
 async def get_contract_types() -> list[str]:
     return ["standard", "refugee", "child", "premium"]
+
+
+@contracts.get("/contracts/paper", dependencies=[Depends(dep.get_current_admin_user)])
+async def get_paper_contract(paper_id: str, db: Session = Depends(dep.get_db)) -> UUID:
+    return crud.get_paper_contract(db=db, paper_id=paper_id)
+
+
+@contracts.get("/contracts/paper/suggestions", dependencies=[Depends(dep.get_current_active_user)])
+async def get_paper_contract_suggestions(old_id: str | None = None, db: Session = Depends(dep.get_db)) -> list[str]:
+    if old_id is not None:
+        return crud.get_paper_contract_suggestions(db=db, old_id=old_id)
+    else:
+        return []
+

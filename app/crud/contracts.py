@@ -138,3 +138,17 @@ def get_client_contract(db: Session, client_id: UUID, contract_id: UUID) -> mode
             & (models.Contract.clientId == client_id)
         )
     )
+
+
+def get_paper_contract_suggestions(db: Session, old_id: str) -> list[str]:
+    return [_ for _ in db.scalars(
+        select(models.PaperContract.id)
+        .where(models.PaperContract.id.startswith(old_id))
+    )]
+
+
+def get_paper_contract(db: Session, paper_id: str) -> UUID:
+    return db.scalar(
+        select(models.PaperContract.contractId)
+        .where(models.PaperContract.id == paper_id)
+    )
