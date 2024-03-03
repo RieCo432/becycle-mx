@@ -33,7 +33,6 @@ export default {
       const allDates = Object.keys(response.data['dayBalances']).sort((dateString) => (new Date(dateString)).getTime()).reverse();
       const book = allDates.map((viewDate) => {
         const pageOnDate = response.data['dayBalances'][viewDate];
-        console.log(pageOnDate);
         const depositBearers = Object.keys(pageOnDate['balances']);
         const transactionsOnDate = pageOnDate['transactions'].map((transaction) => {
           const diffByUsernameString = transaction['diff_by_username'];

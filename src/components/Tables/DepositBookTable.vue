@@ -25,6 +25,7 @@
                       :pagination-options="{
                         enabled: true,
                         position: 'top',
+                        perPage: 100,
                       }"
                       :search-options="{
                         enabled: true,
