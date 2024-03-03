@@ -453,4 +453,20 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getPaperIdSuggestions(paperId) {
+    return axiosClient.get('/contracts/paper/suggestions', {
+      params: {
+        old_id: paperId,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getContractIdFromPaperId(paperId) {
+    return axiosClient.get('/contracts/paper', {
+      params: {
+        paper_id: paperId,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

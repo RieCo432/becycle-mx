@@ -89,4 +89,10 @@ export const topMenu = [
     link: '/admin/deposit-exchanges',
     show: ['user'],
   },
+  {
+    title: 'Find Paper Contract',
+    icon: 'heroicons-outline:clipboard-document-list',
+    link: '/contracts/find-paper-contract',
+    show: ['user'],
+  },
 ];

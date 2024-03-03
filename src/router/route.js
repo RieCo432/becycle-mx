@@ -192,6 +192,15 @@ const routes = [
         },
         component: () => import('@/views/admin/DepositExchanges.vue'),
       },
+      {
+        path: '/contracts/find-paper-contract',
+        name: 'Find Paper Contract',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/contracts/find-paper-contract',
+        },
+        component: () => import('@/views/contract/findPaperContract.vue'),
+      },
     ],
   },
 ];
