@@ -90,7 +90,6 @@ export default {
           ],
         };
       });
-      console.log(book);
       this.loadingBook = false;
       this.book = book;
     });
