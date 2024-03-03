@@ -6,8 +6,6 @@ services:
         volumes:
             - ./vuejs:/app
             - /app/node_modules
-        depends_on:
-            - api
     api:
         build: fastapi/.
         ports:
