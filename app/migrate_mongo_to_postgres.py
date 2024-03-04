@@ -153,19 +153,20 @@ for mongo_appointment in get_appointments():
 
         client_map_email[mongo_email_address] = postgres_client_id
 
-    postgres_appointment = models.Appointment(
-        clientId=postgres_client_id,
-        typeId=mongo_type,
-        startDateTime=mongo_start_datetime,
-        endDateTime=mongo_end_datetime,
-        notes=mongo_additional_information,
-        confirmed=mongo_appointment_confirmed,
-        cancelled=mongo_cancelled,
-        reminderSent=mongo_appointment_reminder_email_sent
-    )
+    if mongo_email_verified:
+        postgres_appointment = models.Appointment(
+            clientId=postgres_client_id,
+            typeId=mongo_type,
+            startDateTime=mongo_start_datetime,
+            endDateTime=mongo_end_datetime,
+            notes=mongo_additional_information,
+            confirmed=mongo_appointment_confirmed,
+            cancelled=mongo_cancelled,
+            reminderSent=mongo_appointment_reminder_email_sent
+        )
 
-    db.add(postgres_appointment)
-    db.commit()
+        db.add(postgres_appointment)
+        db.commit()
 
 try:
     with open("loosely_typed_names_map.json", "r") as fin:
