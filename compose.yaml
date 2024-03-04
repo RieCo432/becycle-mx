@@ -21,6 +21,7 @@ services:
         volumes:
             - becycle_db_volume:/var/lib/postgresql/data
             - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
         ports:
             - "5432:5432"
         env_file:
