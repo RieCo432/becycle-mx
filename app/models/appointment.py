@@ -57,3 +57,11 @@ class Appointment(Base):
             subject="Your Appointment has been cancelled",
             content=email_html_content
         )
+
+    def send_client_cancellation_email(self):
+        email_html_content = services.email_helpers.build_appointment_cancellation_by_client_email(self.type.title, self.startDateTime)
+        services.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Appointment has been cancelled as requested",
+            content=email_html_content
+        )

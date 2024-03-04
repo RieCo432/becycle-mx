@@ -99,6 +99,7 @@ def cancel_my_appointment(db: Session, client: models.Client, appointment_id: UU
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Appointment Not Found"})
 
     appointment.cancelled = True
+    appointment.send_client_cancellation_email()
     db.commit()
     return appointment
 

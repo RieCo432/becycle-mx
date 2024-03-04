@@ -125,6 +125,8 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
 
     contract.endDate = (datetime.utcnow() + relativedelta(months=6)).date()
 
+    contract.send_creation_email()
+
     db.commit()
 
     return contract
