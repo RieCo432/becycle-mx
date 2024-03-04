@@ -233,6 +233,7 @@ export default {
             handleContinue();
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
+            setCodeError('Wrong code!');
           });
         } else {
           requests.postTempClientVerificationCode(clientId.value, code.value).then((response) => {
@@ -241,6 +242,7 @@ export default {
             handleContinue();
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
+            setCodeError('Wrong code!');
           });
         }
       } else {

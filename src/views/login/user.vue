@@ -39,15 +39,17 @@ import requests from '@/requests';
 import Textinput from '@/components/Textinput/index.vue';
 import Card from '@/components/Card/index.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import {useToast} from 'vue-toastification';
 
 const credentialsStore = useCredentialsStore();
-
+const toast = useToast();
 
 export default {
   data: () => {
     return {
       username: '',
       password: '',
+      passwordError: null,
     };
   },
   methods: {
@@ -57,7 +59,10 @@ export default {
             credentialsStore.login(response.data['access_token'], 'user');
             requests.getUserMe().then((response) => (credentialsStore.setName(response.data['username'])));
             this.$router.push('/me');
-          });
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+            this.passwordError = 'Wrong password or username';
+      });
     },
   },
   components: {
