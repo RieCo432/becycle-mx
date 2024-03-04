@@ -152,7 +152,7 @@ def are_consecutive_slots_available_on_datetime(db: Session, n_slots: int, dt: d
         # missing entries
         if (remaining_concurrent_appointments_for_each_slot
                 .get(i_slot_datetime.date(), {})
-                .get(i_slot_datetime.time(), 0) == 0):
+                .get(i_slot_datetime.time(), 0) <= 0):
             return False
 
     # this point can only be reached if enough consecutive slots have availability
