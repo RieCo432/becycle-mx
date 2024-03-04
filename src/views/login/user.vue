@@ -9,7 +9,6 @@
             placeholder="username"
             name="username"
             v-model="username"
-            :error="usernameError"
             classInput="h-[48px]"
           />
           <Textinput
@@ -57,8 +56,10 @@ export default {
       requests.getUserToken(this.username, this.password)
           .then((response) => {
             credentialsStore.login(response.data['access_token'], 'user');
-            requests.getUserMe().then((response) => (credentialsStore.setName(response.data['username'])));
-            this.$router.push('/me');
+            requests.getUserMe().then((response) => {
+              credentialsStore.setName(response.data['username']);
+              this.$router.push('/me');
+            });
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
             this.passwordError = 'Wrong password or username';

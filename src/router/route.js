@@ -26,15 +26,7 @@ const routes = [
           restrictTo: ['client', 'user'],
           selectNavPath: '/me',
         },
-        component: () => {
-          if (localStorage.getItem('tokenType') === 'user') {
-            return import('@/views/user/me.vue');
-          } else if (localStorage.getItem('tokenType') === 'client') {
-            return import('@/views/client/me.vue');
-          } else {
-            return import('@/views/home.vue');
-          }
-        },
+        component: () => import('@/views/me.vue'),
       },
       {
         path: '/template',

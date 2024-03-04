@@ -229,8 +229,10 @@ export default {
         if (exisitingClient.value) {
           requests.getClientToken(clientId.value, code.value).then((response) => {
             credentialsStore.login(response.data['access_token'], 'client');
-            requests.getClientMe().then((response) => (credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName'])));
-            handleContinue();
+            requests.getClientMe().then((response) => {
+              credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName']);
+              handleContinue();
+            });
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
             setCodeError('Wrong code!');
@@ -238,8 +240,10 @@ export default {
         } else {
           requests.postTempClientVerificationCode(clientId.value, code.value).then((response) => {
             credentialsStore.login(response.data['access_token'], 'client');
-            requests.getClientMe().then((response) => (credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName'])));
-            handleContinue();
+            requests.getClientMe().then((response) => {
+              credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName']);
+              handleContinue();
+            });
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
             setCodeError('Wrong code!');

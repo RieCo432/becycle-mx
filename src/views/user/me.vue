@@ -6,7 +6,6 @@
       </Card>
     </div>
   </div>
-
 </template>
 
 <script>
@@ -15,6 +14,7 @@ import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 
 export default {
+  name: 'UserMe',
   components: {
     Card,
   },
@@ -25,7 +25,6 @@ export default {
   },
   mounted() {
     requests.getUserMe().then((response) => {
-      console.log(response.data);
       this.username = response.data.username;
     });
   },
