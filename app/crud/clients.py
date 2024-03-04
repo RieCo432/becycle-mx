@@ -81,7 +81,7 @@ def verify_client_temp(db: Session, client_temp_id: UUID, verification_code: str
     )
 
     if client_temp is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This action has expired, or this client does not exist."})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This code is invalid."})
 
     if datetime.datetime.utcnow() > client_temp.expirationDateTime:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This action has expired."})
