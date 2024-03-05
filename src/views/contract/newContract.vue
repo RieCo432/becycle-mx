@@ -568,8 +568,8 @@ export default {
       colour: yup.string().required(' Colour is required'),
       decals: yup.string(),
       serialNumber: yup.string().required(' Serial Number is required '),
-      bikePhotoTaken: yup.bool().required('Must take a photo of the bike'),
-      stickerOnBike: yup.bool().required('Must put a Becycle sticker on bike'),
+      bikePhotoTaken: yup.boolean().oneOf([true], 'Must take a photo of the bike').required('Must take a photo of the bike'),
+      stickerOnBike: yup.boolean().oneOf([true], 'Must put a Becycle sticker on bike').required('Must put a Becycle sticker on bike'),
     });
 
     const contractSchema = yup.object().shape({
@@ -595,7 +595,7 @@ export default {
     });
 
     const reviewSchema = yup.object().shape({
-      everythingCorrect: yup.bool().required('This check is required!'),
+      everythingCorrect: yup.boolean().oneOf([true], 'This check is required').required('This check is required!'),
     });
 
 

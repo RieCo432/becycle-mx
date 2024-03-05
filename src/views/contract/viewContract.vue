@@ -71,7 +71,7 @@ export default {
     });
 
     const reviewSchema = yup.object().shape({
-      everythingCorrect: yup.bool().required('This check is required!'),
+      everythingCorrect: yup.boolean().oneOf([true], 'This check is required').required('This check is required!'),
     });
 
 
