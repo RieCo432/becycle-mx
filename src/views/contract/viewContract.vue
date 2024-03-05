@@ -60,7 +60,9 @@ export default {
 
 
     const depositReturningSchema = yup.object().shape({
-      depositAmountReturned: yup.number().positive().integer().required(' Deposit Amount is required '),
+      depositAmountReturned: yup.number().positive().integer()
+          .max(contractData.value.depositAmountCollected, 'Must not be larger than the deposit collected!')
+          .required(' Deposit Amount is required '),
       depositReturningUser: yup.string().required(' Deposit Returner Username is required '),
       depositReturningPassword: yup.string().required(),
     });
