@@ -62,6 +62,12 @@ export default {
         requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(), appointmentNotes.value).then((response) => {
           toast.success('Appointment Request submitted! Kindly wait for us to accept or deny your request.', {timeout: 2000});
           router.push('/clients/me');
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+          requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
+            availableSlots.value = response.data;
+          });
+          stepNumber.value--;
         });
       } else {
         if (stepNumber.value === 0) {
