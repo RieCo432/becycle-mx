@@ -48,20 +48,22 @@
         >
           <form @submit.prevent="submit" @keydown.enter="submit">
             <div v-if="stepNumber === 0">
-              <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+              <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
                 <div class="lg:col-span-3 md:col-span-2 col-span-1">
                   <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                     Email Address
                   </h4>
                 </div>
-                <Textinput
-                    label="Email Address"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    name="emailAddress"
-                    v-model="emailAddress"
-                    :error="emailAddressError"
-                />
+                <div class="col-span-full">
+                  <Textinput
+                      label="Email Address"
+                      type="text"
+                      placeholder="your.email@example.com"
+                      name="emailAddress"
+                      v-model="emailAddress"
+                      :error="emailAddressError"
+                  />
+                </div>
               </div>
             </div>
 
@@ -72,21 +74,24 @@
                     Your Details
                   </h4>
                 </div>
-                <Textinput
-                    label="First Name"
-                    type="text"
-                    placeholder="John"
-                    name="firstName"
-                    v-model="firstName"
-                    :error="firstNameError"/>
-
-                <Textinput
-                    label="Last Name"
-                    type="text"
-                    placeholder="Smith"
-                    name="lastName"
-                    v-model="lastName"
-                    :error="lastNameError"/>
+                <div class="col-span-1">
+                  <Textinput
+                      label="First Name"
+                      type="text"
+                      placeholder="John"
+                      name="firstName"
+                      v-model="firstName"
+                      :error="firstNameError"/>
+                </div>
+                <div class="col-span-1">
+                  <Textinput
+                      label="Last Name"
+                      type="text"
+                      placeholder="Smith"
+                      name="lastName"
+                      v-model="lastName"
+                      :error="lastNameError"/>
+                </div>
               </div>
             </div>
             <div v-if="stepNumber === 2 || (stepNumber === 1 && exisitingClient)">
@@ -96,7 +101,7 @@
                     One Time Code
                   </h4>
                 </div>
-                <div class="col-span-1">
+                <div class="col-span-full">
                   <Textinput
                       :label="`Enter the 6-digit code sent to ${emailAddress}`"
                       type="integer"
