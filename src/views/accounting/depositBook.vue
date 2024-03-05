@@ -30,7 +30,7 @@ export default {
   },
   created() {
     requests.getDepositBook().then((response) => {
-      const allDates = Object.keys(response.data['dayBalances']).sort((dateString) => (new Date(dateString)).getTime()).reverse();
+      const allDates = Object.keys(response.data['dayBalances']).sort((dateStringA, dateStringB) => (new Date(dateStringA)).getTime() - new Date(dateStringB).getTime()).reverse();
       const book = allDates.map((viewDate) => {
         const pageOnDate = response.data['dayBalances'][viewDate];
         const depositBearers = Object.keys(pageOnDate['balances']);
