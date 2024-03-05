@@ -19,7 +19,7 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
     if not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots, dt=appointment_data.startDateTime):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "There are not enough free slots for this appointment"},
+            detail={"description": "Someone just requested this slot. Refreshing list... Please choose a new slot."},
             headers={"WWW-Authenticate": "Bearer"}
         )
 
