@@ -314,16 +314,43 @@
               </div>
 
               <div v-if="stepNumber === 6">
-                <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="lg:col-span-3 md:col-span-2 col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Final Check
-                    </h4>
+                <div class="grid lg:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h4>
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Lendee Details</h5>
+                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Name: {{firstName}} {{lastName}}<br>
+                      Email Address: {{emailAddress}}
+                    </p>
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Bike Details</h5>
+                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Make: {{make}} Model: {{model}}<br>
+                      Colour: {{colour}} Decals: {{decals}}<br>
+                      Serial Number: {{serialNumber}}
+                    </p>
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Contract Details</h5>
+                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Contract Type: {{type}}<br>
+                      Bike Condition: {{condition}}<br>
+                      Notes: {{notes}}
+                    </p>
                   </div>
                   <div class="col-span-1">
-                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h5>
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Terms of Loan</h4>
+                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Bicycle (Bike) Release Form: Terms of Loan) The agreed deposit is made and kept as a retainer against the value
+                      of the bike and released back to You (Keeper) upon the return of the borrowed bike – in satisfactory condition.
+                      BeCYCLE Workshop reserves the right to deduct money from the deposit if and when any damage or excessive
+                      wear and tear occurs to the bike – and/or the bike was kept by You over the agreed rental period. The bike, when
+                      loaned is the full and sole responsibility of You (Keeper) therefore You are entrusted with the burden of
+                      ownership, maintenance, and upkeep. It is completely at your own risk that the bike is maintained and operated
+                      within reasonable use – to ensure Your personal safety.
+                    </p>
+                  </div>
+                  <div class="col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Agreement</h4>
                     <Checkbox
-                        label="I confirm this information is correct!"
+                        label="I confirm all details are correct and I agree to the terms of the lease!"
                         name="everythingCorrect"
                         v-model="everythingCorrect"
                         :error="everythingCorrectError"/>
