@@ -181,6 +181,16 @@ def build_contract_created_email(contract: schemas.Contract):
             "In the case of returning the bike, we will assess the condition of the bike to determine if the full"
             "deposit can be paid back. In the case of extending the contract, we will check the bike for safety-related"
             "problems.</p>"
+            "       <h4>Terms of Loan</h4>"
+            "       <p>"
+            "Bicycle (Bike) Release Form: Terms of Loan) The agreed deposit is made and kept as a retainer against the value"
+            "of the bike and released back to You (Keeper) upon the return of the borrowed bike – in satisfactory condition."
+            "BeCYCLE Workshop reserves the right to deduct money from the deposit if and when any damage or excessive"
+            "wear and tear occurs to the bike – and/or the bike was kept by You over the agreed rental period. The bike, when"
+            "loaned is the full and sole responsibility of You (Keeper) therefore You are entrusted with the burden of"
+            "ownership, maintenance, and upkeep. It is completely at your own risk that the bike is maintained and operated"
+            "within reasonable use – to ensure Your personal safety."
+            "       </p>"
             "   </body>"
             "</html>".format(contract.client.firstName, contract.client.lastName,
                              contract.bike.make, contract.bike.model,
