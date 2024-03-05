@@ -55,42 +55,52 @@
                       Enter the Lendee's Information
                     </h4>
                   </div>
-                  <ComboboxTextInput
-                      :field-model-value="emailAddress"
-                      :suggestions="filtered_email_suggestions"
-                      :selected-callback="selectEmail">
-                    <Textinput label="Email" type="email" placeholder="Type your email"
-                               name="emailAddress"
-                               v-model="emailAddress"
-                               :error="emailAddressError"
-                               @input="fetchEmailSuggestions"
-                    />
-                  </ComboboxTextInput>
+                  <div class="col-span-1">
+                    <ComboboxTextInput
+                        :field-model-value="emailAddress"
+                        :suggestions="filtered_email_suggestions"
+                        :selected-callback="selectEmail">
+                      <Textinput label="Email" type="email" placeholder="Type your email"
+                                 name="emailAddress"
+                                 v-model="emailAddress"
+                                 :error="emailAddressError"
+                                 @input="fetchEmailSuggestions"
+                      />
+                    </ComboboxTextInput>
+                  </div>
 
-                  <Textinput
-                      label="Confirm Email"
-                      type="email"
-                      placeholder="Confirm your email"
-                      name="confirmEmailAddress"
-                      v-model="confirmEmailAddress"
-                      :error="confirmEmailAddressError"
-                  />
-                  <Textinput
-                      label="First name"
-                      type="text"
-                      placeholder="First name"
-                      name="firstname"
-                      v-model="firstName"
-                      :error="firstNameError"
-                  />
-                  <Textinput
-                      label="Last name"
-                      type="text"
-                      placeholder="Last name"
-                      name="lastname"
-                      v-model="lastName"
-                      :error="lastNameError"
-                  />
+                  <div class="col-span-1">
+                    <Textinput
+                        label="Confirm Email"
+                        type="email"
+                        placeholder="Confirm your email"
+                        name="confirmEmailAddress"
+                        v-model="confirmEmailAddress"
+                        :error="confirmEmailAddressError"
+                    />
+                  </div>
+
+                  <div class="col-span-1">
+                    <Textinput
+                        label="First name"
+                        type="text"
+                        placeholder="First name"
+                        name="firstname"
+                        v-model="firstName"
+                        :error="firstNameError"
+                    />
+                  </div>
+
+                  <div class="col-span-1">
+                    <Textinput
+                        label="Last name"
+                        type="text"
+                        placeholder="Last name"
+                        name="lastname"
+                        v-model="lastName"
+                        :error="lastNameError"
+                    />
+                  </div>
                 </div>
               </div>
               <div v-if="stepNumber === 1">
@@ -100,84 +110,109 @@
                       Enter the bike's details
                     </h4>
                   </div>
+                  <div class="col-span-1">
+                    <ComboboxTextInput
+                        :field-model-value="make"
+                        :suggestions="filtered_make_suggestions"
+                        :selected-callback="selectMake">
+                      <Textinput
+                          label="Make"
+                          type="text"
+                          placeholder="Make"
+                          name="make"
+                          v-model="make"
+                          :error="makeError"
+                          @input="fetchBikeMakeSuggestions"
+                      />
+                    </ComboboxTextInput>
+                  </div>
 
-                  <ComboboxTextInput
-                      :field-model-value="make"
-                      :suggestions="filtered_make_suggestions"
-                      :selected-callback="selectMake">
+                  <div class="col-span-1">
+                    <ComboboxTextInput
+                        :field-model-value="model"
+                        :suggestions="filtered_model_suggestions"
+                        :selected-callback="selectModel">
+                      <Textinput
+                          label="Model"
+                          type="text"
+                          placeholder="Model"
+                          name="model"
+                          v-model="model"
+                          :error="modelError"
+                          @input="fetchBikeModelSuggestions"
+                      />
+                    </ComboboxTextInput>
+                  </div>
+
+                  <div class="col-span-1">
+                    <ComboboxTextInput
+                        :field-model-value="colour"
+                        :suggestions="filtered_colour_suggestions"
+                        :selected-callback="selectColour">
+                      <Textinput
+                          label="Colour"
+                          type="text"
+                          placeholder="Colour"
+                          name="colour"
+                          v-model="colour"
+                          :error="colourError"
+                          @input="fetchColourSuggestions"
+                      />
+                    </ComboboxTextInput>
+                  </div>
+
+                  <div class="col-span-1">
                     <Textinput
-                        label="Make"
+                        label="Decals"
                         type="text"
-                        placeholder="Make"
-                        name="make"
-                        v-model="make"
-                        :error="makeError"
-                        @input="fetchBikeMakeSuggestions"
+                        placeholder="Decals"
+                        name="decals"
+                        v-model="decals"
+                        :error="decalsError"
                     />
-                  </ComboboxTextInput>
+                  </div>
 
-                  <ComboboxTextInput
-                      :field-model-value="model"
-                      :suggestions="filtered_model_suggestions"
-                      :selected-callback="selectModel">
-                    <Textinput
-                        label="Model"
-                        type="text"
-                        placeholder="Model"
-                        name="model"
-                        v-model="model"
-                        :error="modelError"
-                        @input="fetchBikeModelSuggestions"
-                    />
-                  </ComboboxTextInput>
+                  <div class="col-span-1">
+                    <ComboboxTextInput
+                        :field-model-value="serialNumber"
+                        :suggestions="filtered_serial_number_suggestions"
+                        :selected-callback="selectSerialNumber">
+                      <Textinput
+                          label="Serial Number"
+                          type="text"
+                          placeholder="Serial Number"
+                          name="serialnumber"
+                          v-model="serialNumber"
+                          :error="serialNumberError"
+                          @input="fetchSerialNumberSuggestions"
+                      />
+                    </ComboboxTextInput>
+                  </div>
 
-                  <ComboboxTextInput
-                      :field-model-value="colour"
-                      :suggestions="filtered_colour_suggestions"
-                      :selected-callback="selectColour">
-                    <Textinput
-                        label="Colour"
-                        type="text"
-                        placeholder="Colour"
-                        name="colour"
-                        v-model="colour"
-                        :error="colourError"
-                        @input="fetchColourSuggestions"
-                    />
-                  </ComboboxTextInput>
+                  <div class="col-start-1">
+                    <Checkbox
+                        label="Photo of bike taken?"
+                        name="bikePhotoTaken"
+                        v-model="bikePhotoTaken"
+                        :error="bikePhotoTakenError"/>
+                    <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
+                  </div>
 
-
-                  <Textinput
-                      label="Decals"
-                      type="text"
-                      placeholder="Decals"
-                      name="decals"
-                      v-model="decals"
-                      :error="decalsError"
-                  />
-
-                  <ComboboxTextInput
-                      :field-model-value="serialNumber"
-                      :suggestions="filtered_serial_number_suggestions"
-                      :selected-callback="selectSerialNumber">
-                    <Textinput
-                        label="Serial Number"
-                        type="text"
-                        placeholder="Serial Number"
-                        name="serialnumber"
-                        v-model="serialNumber"
-                        :error="serialNumberError"
-                        @input="fetchSerialNumberSuggestions"
-                    />
-                  </ComboboxTextInput>
-
+                  <div class="col-span-1">
+                    <Checkbox
+                        label="Sticker on bike?"
+                        name="stickerOnBike"
+                        v-model="stickerOnBike"
+                        :error="stickerOnBikeError"/>
+                    <ErrorMessage name="stickerOnBike" :error="stickerOnBikeError" class="text-danger-500"/>
+                  </div>
                 </div>
               </div>
               <div v-if="stepNumber === 2">
                 <div class="grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-5">
                   <div class="lg:col-span-6 md:col-span-4 col-span-2">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Enter the Lendee's Information
+                      Additional Contract Information
                     </h4>
                   </div>
 
@@ -533,6 +568,8 @@ export default {
       colour: yup.string().required(' Colour is required'),
       decals: yup.string(),
       serialNumber: yup.string().required(' Serial Number is required '),
+      bikePhotoTaken: yup.bool().required('Must take a photo of the bike'),
+      stickerOnBike: yup.bool().required('Must put a Becycle sticker on bike'),
     });
 
     const contractSchema = yup.object().shape({
@@ -599,6 +636,8 @@ export default {
     const {value: colour, errorMessage: colourError} = useField('colour');
     const {value: decals, errorMessage: decalsError} = useField('decals');
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
+    const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
+    const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
 
     const {value: type, errorMessage: typeError} = useField('type');
     const {value: condition, errorMessage: conditionError} = useField('condition');
@@ -720,6 +759,10 @@ export default {
       decalsError,
       serialNumber,
       serialNumberError,
+      bikePhotoTaken,
+      bikePhotoTakenError,
+      stickerOnBike,
+      stickerOnBikeError,
 
       type,
       typeError,
