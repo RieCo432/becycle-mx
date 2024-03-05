@@ -58,10 +58,8 @@ export default {
 
     const stepNumber = ref(0);
 
-
     const depositReturningSchema = yup.object().shape({
       depositAmountReturned: yup.number().positive().integer()
-          .max(contractData.value.depositAmountCollected, 'Must not be larger than the deposit collected!')
           .required(' Deposit Amount is required '),
       depositReturningUser: yup.string().required(' Deposit Returner Username is required '),
       depositReturningPassword: yup.string().required(),
@@ -95,7 +93,7 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: depositAmountReturned, errorMessage: depositAmountReturnedError} = useField('depositAmountReturned');
+    const {value: depositAmountReturned, errorMessage: depositAmountReturnedError, setErrors: depositAmountReturnedSetErrors} = useField('depositAmountReturned');
     const {value: depositReturningUser, errorMessage: depositReturningUserError} = useField('depositReturningUser');
     const {value: depositReturningPassword, errorMessage: depositReturningPasswordError, setErrors: depositReturningPasswordSetErrors} = useField('depositReturningPassword');
 
@@ -116,6 +114,10 @@ export default {
         patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value, returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
       } else {
         if (stepNumber.value === 0) {
+          if (depositAmountReturned.value > contractData.value.depositAmountCollected) {
+            depositAmountReturnedSetErrors('Must not be larger than the deposit collected!');
+            return;
+          }
           requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
             if (response.data) {
               stepNumber.value++;
