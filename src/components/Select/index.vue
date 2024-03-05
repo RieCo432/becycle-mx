@@ -155,12 +155,14 @@ select {
 [dir="rtl"] select {
   background-position-x: 2%;
 }
-option {
-  @apply capitalize;
-}
 .dark {
   select {
     @apply bg-[url('https://api.iconify.design/heroicons/chevron-down-solid.svg?color=white')];
+  }
+}
+@-moz-document url-prefix() {
+  select {
+    padding: 0.6em;
   }
 }
 </style>
