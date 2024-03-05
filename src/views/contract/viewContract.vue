@@ -285,7 +285,7 @@ export default {
                 <div class="flex-1">
                   <p class="text-slate-600 dark:text-slate-300">From: {{contract.startDate}}&emsp; Until: {{contract.endDate}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.condition}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.conditionOfBike}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
