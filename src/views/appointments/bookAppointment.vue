@@ -172,7 +172,7 @@ export default {
                   </template>
 
                   <div class="col-span-1 bg-slate" v-for="(type, i) in appointmentTypes" :key="i">
-                    <Card :title="type.title" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300">
+                    <Card :title="type.title" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300 h-full">
                       <div class="flex flex-col h-full">
                         <div class="flex-1">
                           <p class="text-slate-600 dark:text-slate-300">{{type.description}}</p>
@@ -188,8 +188,8 @@ export default {
               </div>
 
               <div v-if="stepNumber === 1">
-                <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="md:col-span-2 col-span-1">
+                <div class="grid lg:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Select Date and Time
                     </h4>
@@ -209,10 +209,10 @@ export default {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
-                    })" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300">
-                      <div class="grid lg:grid-cols-6 grid-cols-3">
+                    })" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300 h-full">
+                      <div class="grid xl:grid-cols-6 sm:grid-cols-5 grid-cols-4 gap-3">
                         <div v-for="(datetime, j) in times.map((time) => (new Date(Date.parse(`${date}T${time}+00:00`))))" :key="j">
-                          <DashButton class="mt-3" @click="() => {appointmentDatetime = datetime}">
+                          <DashButton class="w-full" @click="() => {appointmentDatetime = datetime}">
                             {{ datetime.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false}) }}
                           </DashButton>
                         </div>
@@ -224,14 +224,30 @@ export default {
                 </div>
               </div>
               <div v-if="stepNumber === 2">
-                <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="lg:col-span-3 md:col-span-2 col-span-1">
+                <div class="grid lg:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Notes
+                      Finalise Appointment
                     </h4>
                   </div>
                   <div class="col-span-1">
-                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h5>
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-3">Please check all the details!</h5>
+                    <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
+                      <thead>
+                      <th colspan="2" class="border border-slate-500">Appointment Details</th>
+                      </thead>
+                      <tr>
+                        <td class="border border-slate-500">Appointment Type</td>
+                        <td class="border border-slate-500">{{appointmentTypes.find((type) => type.id === appointmentType).title}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Date and Time</td>
+                        <td class="border border-slate-500">{{appointmentDatetime.toLocaleString()}}</td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="col-span-1">
+
                     <Textinput
                         label="Notes"
                         type="text"
