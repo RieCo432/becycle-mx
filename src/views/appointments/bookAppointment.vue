@@ -172,7 +172,7 @@ export default {
                   </template>
 
                   <div class="col-span-1 bg-slate" v-for="(type, i) in appointmentTypes" :key="i">
-                    <Card :title="type.title" class-name="dark:bg-slate-600">
+                    <Card :title="type.title" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300">
                       <div class="flex flex-col h-full">
                         <div class="flex-1">
                           <p class="text-slate-600 dark:text-slate-300">{{type.description}}</p>
@@ -209,7 +209,7 @@ export default {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
-                    })" class-name="dark:bg-slate-600">
+                    })" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300">
                       <div class="grid lg:grid-cols-6 grid-cols-3">
                         <div v-for="(datetime, j) in times.map((time) => (new Date(Date.parse(`${date}T${time}+00:00`))))" :key="j">
                           <DashButton class="mt-3" @click="() => {appointmentDatetime = datetime}">
