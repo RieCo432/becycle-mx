@@ -340,7 +340,7 @@ export default {
               <div
                   class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
               >
-                <form @submit.prevent="submit">
+                <form @submit.prevent="submit"  @keydown.enter="submit">
                   <div v-if="stepNumber === 0">
                     <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
                       <div class="lg:col-span-3 md:col-span-2 col-span-1">
@@ -408,11 +408,24 @@ export default {
                         <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                           Final Check
                         </h4>
+                        <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
+                          <thead>
+                          <th colspan="2" class="border border-slate-500">Return Details</th>
+                          </thead>
+                          <tr>
+                            <td class="border border-slate-500">Return Date</td>
+                            <td class="border border-slate-500">{{new Date().toDateString()}}</td>
+                          </tr>
+                          <tr>
+                            <td class="border border-slate-500">Deposit Returned</td>
+                            <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
+                          </tr>
+                        </table>
                       </div>
                       <div class="col-span-1">
                         <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h5>
                         <Checkbox
-                            label="I confirm this information is correct!"
+                            label="I confirm that this information is correct and the deposit was returned to the lendee!"
                             name="everythingCorrect"
                             v-model="everythingCorrect"
                             :error="everythingCorrectError"/>
