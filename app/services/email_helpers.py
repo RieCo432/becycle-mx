@@ -199,7 +199,7 @@ def build_contract_created_email(contract: schemas.Contract):
                              contract.depositAmountCollected,
                              contract.startDate.day, months[contract.startDate.month], contract.startDate.year,
                              contract.endDate.day, months[contract.endDate.month], contract.endDate.year,
-                             contract.notes))
+                             contract.notes if contract.notes is not None else ""))
 
 
 def build_contract_returned_email(contract: schemas.Contract):
@@ -232,6 +232,6 @@ def build_contract_returned_email(contract: schemas.Contract):
                              contract.depositAmountCollected,
                              contract.startDate.day, months[contract.startDate.month], contract.startDate.year,
                              contract.endDate.day, months[contract.endDate.month], contract.endDate.year,
-                             contract.notes,
+                             contract.notes if contract.notes is not None else "",
                              contract.depositAmountReturned,
                              contract.returnedDate.day, months[contract.returnedDate.month], contract.returnedDate.year))
