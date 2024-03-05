@@ -51,7 +51,6 @@ export default {
   },
   data() {
     return {
-      isNotUser: credentialsStore.getTokenType() !== 'user',
       loading: true,
       openingTimes: null,
       columns: [
@@ -69,6 +68,11 @@ export default {
         },
       ],
     };
+  },
+  computed: {
+    isNotUser() {
+      return credentialsStore.getTokenType() !== 'user';
+    },
   },
   methods: {
     goToBookAppointment() {
