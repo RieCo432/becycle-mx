@@ -47,7 +47,7 @@
           <div
               class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
           >
-            <form @submit.prevent="submit">
+            <form @submit.prevent="submit" @keydown.enter="submit">
               <div v-if="stepNumber === 0">
                 <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
                   <div class="lg:col-span-2 md:col-span-2 col-span-1">
@@ -317,23 +317,69 @@
                 <div class="grid lg:grid-cols-2 grid-cols-1 gap-5">
                   <div class="col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h4>
-                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Lendee Details</h5>
-                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Name: {{firstName}} {{lastName}}<br>
-                      Email Address: {{emailAddress}}
-                    </p>
-                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Bike Details</h5>
-                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Make: {{make}} Model: {{model}}<br>
-                      Colour: {{colour}} Decals: {{decals}}<br>
-                      Serial Number: {{serialNumber}}
-                    </p>
-                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Contract Details</h5>
-                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Contract Type: {{type}}<br>
-                      Bike Condition: {{condition}}<br>
-                      Notes: {{notes}}
-                    </p>
+                    <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
+                      <thead>
+                        <th colspan="2" class="border border-slate-500">Lendee Details</th>
+                      </thead>
+                      <tr>
+                        <td class="border border-slate-500">Name</td>
+                        <td class="border border-slate-500">{{firstName}} {{lastName}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Email Address</td>
+                        <td class="border border-slate-500">{{emailAddress}}</td>
+                      </tr>
+                      <thead>
+                        <th colspan="2" class="border border-slate-500">Bike Details</th>
+                      </thead>
+                      <tr>
+                        <td class="border border-slate-500">Make</td>
+                        <td class="border border-slate-500">{{make}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Model</td>
+                        <td class="border border-slate-500">{{model}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Colour</td>
+                        <td class="border border-slate-500">{{colour}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Decals</td>
+                        <td class="border border-slate-500">{{decals}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Serial Number</td>
+                        <td class="border border-slate-500">{{serialNumber}}</td>
+                      </tr>
+                      <thead>
+                      <th colspan="2" class="border border-slate-500">Additional Details</th>
+                      </thead>
+                      <tr>
+                        <td class="border border-slate-500">Lease Start</td>
+                        <td class="border border-slate-500">{{new Date().toDateString()}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Lease End</td>
+                        <td class="border border-slate-500">{{datePlusSixMonths().toDateString()}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Deposit</td>
+                        <td class="border border-slate-500">&#163;{{depositAmountCollected}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Contract Type</td>
+                        <td class="border border-slate-500">{{type}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Bike Condition</td>
+                        <td class="border border-slate-500">{{condition}}</td>
+                      </tr>
+                      <tr>
+                        <td class="border border-slate-500">Notes</td>
+                        <td class="border border-slate-500">{{notes}}</td>
+                      </tr>
+                    </table>
                   </div>
                   <div class="col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Terms of Loan</h4>
@@ -350,7 +396,7 @@
                   <div class="col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Agreement</h4>
                     <Checkbox
-                        label="I confirm all details are correct and I agree to the terms of the lease!"
+                        label="I confirm all details are correct and I agree to the terms of the loan!"
                         name="everythingCorrect"
                         v-model="everythingCorrect"
                         :error="everythingCorrectError"/>
@@ -733,6 +779,10 @@ export default {
     this.fetchColourSuggestions = debounce(this.fetchColourSuggestions, 500, {leading: true, trailing: true});
   },
   methods: {
+    datePlusSixMonths() {
+      const date = new Date();
+      return new Date(date.setMonth(date.getMonth() + 6));
+    },
     fetchEmailSuggestions() {
       requests.getEmailAddressSuggestions(this.emailAddress.toLowerCase()).then((response) => {
         this.email_suggestions = response.data;
