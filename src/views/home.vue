@@ -2,20 +2,20 @@
     <div class="grid grid-cols-12 gap-5">
         <div class="lg:col-span-8 col-span-12">
             <Card title="Welcome to beCyCle">
-                <div class="grid grid-cols-12 h-full">
+                <div class="grid grid-cols-12 h-full gap-5">
                   <div class="col-span-12">
                     <p class="text-base text-slate-700 dark:text-slate-300">This is the official website for beCyCle, the community bicycle library and workshop in Aberdeen</p>
                   </div>
-                  <div v-if="isNotUser" class="col-span-4 mt-auto">
+                  <div v-if="isNotUser" class="md:col-span-4 col-span-6 mt-auto">
                     <DashButton  @click="goToBookAppointment" class="mt-auto">Book Appointment</DashButton>
                   </div>
-                  <div v-if="isNotUser" class="col-span-4 mt-auto">
+                  <div v-if="isNotUser" class="md:col-span-4 col-span-6 mt-auto">
                     <DashButton  @click="goToClientLogin" class="mt-auto">Client Login</DashButton>
                   </div>
-                  <div v-if="!isNotUser" class="col-span-4 mt-auto">
+                  <div v-if="!isNotUser" class="md:col-span-4 col-span-6 mt-auto">
                     <DashButton  @click="goToNewContract" class="mt-auto">New Contract</DashButton>
                   </div>
-                  <div v-if="!isNotUser" class="col-span-4 mt-auto">
+                  <div v-if="!isNotUser" class="md:col-span-4 col-span-6 mt-auto">
                     <DashButton  @click="goToFindClient" class="mt-auto">Find Client</DashButton>
                   </div>
                 </div>
