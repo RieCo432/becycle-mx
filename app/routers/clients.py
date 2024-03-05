@@ -96,7 +96,7 @@ async def get_client_login_code(
         email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)) -> schemas.ClientPreAuth:
 
-    client = crud.get_client_by_email(db=db, email_address=email_address)
+    client = crud.get_client_by_email(db=db, email_address=email_address.lower())
 
     if client is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no client associated with this email address."})
