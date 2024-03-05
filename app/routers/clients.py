@@ -1,5 +1,5 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status, Form
+from fastapi import APIRouter, Depends, HTTPException, status, Form, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 import app.models as models
 import app.crud as crud
@@ -58,11 +58,12 @@ async def create_client(
 @clients.post("/client/temp")
 async def create_client_temp(
         client_data: schemas.ClientCreate,
+        email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)) -> schemas.ClientTemp:
 
     client_temp = crud.post_client_temp(db=db, client_data=client_data)
 
-    client_temp.send_email_verification_link()
+    email_tasks.add_task(client_temp.send_email_verification_link)
 
     return client_temp
 
@@ -92,6 +93,7 @@ async def verify_client_temp(
 @clients.get("/client/login-code")
 async def get_client_login_code(
         email_address: str,
+        email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)) -> schemas.ClientPreAuth:
 
     client = crud.get_client_by_email(db=db, email_address=email_address)
@@ -101,7 +103,7 @@ async def get_client_login_code(
 
     client_login = crud.create_client_login_code(db=db, client=client)
 
-    client_login.send_login_code()
+    email_tasks.add_task(client_login.send_login_code)
 
     return schemas.ClientPreAuth(
         id=client.id
