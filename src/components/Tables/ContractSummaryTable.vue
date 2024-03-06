@@ -54,13 +54,13 @@
             v-if="props.column.field == 'startDate'"
             class="text-slate-500 dark:text-slate-300"
           >
-            {{ new Date(Date.parse(props.row.startDate)).toLocaleDateString() }}
+            {{ new Date(Date.parse(props.row.startDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span
               v-if="props.column.field == 'endDate'"
               class="text-slate-500 dark:text-slate-300"
           >
-            {{ new Date(Date.parse(props.row.endDate)).toLocaleDateString() }}
+            {{ new Date(Date.parse(props.row.endDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span v-if="props.column.field == 'status'" class="block w-full">
             <span
