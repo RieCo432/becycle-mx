@@ -219,7 +219,7 @@ export default {
                       <div class="grid xl:grid-cols-6 sm:grid-cols-5 grid-cols-4 gap-3">
                         <div v-for="(datetime, j) in times.map((time) => (new Date(Date.parse(`${date}T${time}+00:00`))))" :key="j">
                           <DashButton class="w-full" @click="() => {appointmentDatetime = datetime}">
-                            {{ datetime.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false}) }}
+                            {{ datetime.toLocaleTimeString(undefined, { timeZone: 'UTC', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
                           </DashButton>
                         </div>
 
