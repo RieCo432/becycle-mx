@@ -59,7 +59,7 @@ export default {
     const stepNumber = ref(0);
 
     const depositReturningSchema = yup.object().shape({
-      depositAmountReturned: yup.number().positive().integer()
+      depositAmountReturned: yup.number().min(0, 'Must be positive').integer()
           .required(' Deposit Amount is required '),
       depositReturningUser: yup.string().required(' Deposit Returner Username is required '),
       depositReturningPassword: yup.string().required(),

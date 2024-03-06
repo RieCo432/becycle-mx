@@ -579,7 +579,7 @@ export default {
     });
 
     const depositCollectionSchema = yup.object().shape({
-      depositAmountCollected: yup.number().positive().integer().required(' Deposit Amount is required '),
+      depositAmountCollected: yup.number().min(0, 'Must not be negative').integer().required(' Deposit Amount is required '),
       depositCollectingUser: yup.string().required(' Deposit Collector Username is required '),
       depositCollectingPassword: yup.string().required(),
     });
