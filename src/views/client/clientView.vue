@@ -147,7 +147,7 @@ export default {
           field: 'status',
         },
         {
-          label: 'Time',
+          label: 'Date and Time',
           field: 'startDateTime',
         },
         {

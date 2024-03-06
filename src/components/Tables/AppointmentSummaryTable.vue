@@ -67,7 +67,7 @@
             </span>
           </span>
           <span v-if="props.column.field === 'startDateTime'">
-            {{ new Date(Date.parse(props.row.startDateTime)).toLocaleString() }}
+            {{ new Date(Date.parse(props.row.startDateTime)).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
           </span>
           <span v-if="props.column.field === 'action'">
             <div class="flex space-x-3 rtl:space-x-reverse">
