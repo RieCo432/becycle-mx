@@ -9,7 +9,7 @@
                   <div v-if="isNotUser" class="md:col-span-4 col-span-6 mt-auto">
                     <DashButton  @click="goToBookAppointment" class="mt-auto">Book Appointment</DashButton>
                   </div>
-                  <div v-if="isNotUser" class="md:col-span-4 col-span-6 mt-auto">
+                  <div v-if="isNotUser && isNotClient" class="md:col-span-4 col-span-6 mt-auto">
                     <DashButton  @click="goToClientLogin" class="mt-auto">Client Login</DashButton>
                   </div>
                   <div v-if="!isNotUser" class="md:col-span-4 col-span-6 mt-auto">
@@ -72,6 +72,9 @@ export default {
   computed: {
     isNotUser() {
       return credentialsStore.getTokenType() !== 'user';
+    },
+    isNotClient() {
+      return credentialsStore.getTokenType() !== 'client';
     },
   },
   methods: {
