@@ -9,7 +9,10 @@ from app.database.db import engine, Base
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(dependencies=[Depends(get_db)])
+if os.environ["PRODUCTION"] == "true":
+    app = FastAPI(dependencies=[Depends(get_db)], docs_url=None, redoc_url=None)
+else:
+    app = FastAPI(dependencies=[Depends(get_db)])
 
 origins = [
     os.environ['CORS_ALLOW_ORIGIN']
