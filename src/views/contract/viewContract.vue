@@ -283,7 +283,8 @@ export default {
             <template v-else>
               <div class="flex flex-col h-full">
                 <div class="flex-1">
-                  <p class="text-slate-600 dark:text-slate-300">From: {{contract.startDate}}&emsp; Until: {{contract.endDate}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">From: {{new Date(Date.parse(contract.startDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Until: {{new Date(Date.parse(contract.endDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.conditionOfBike}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}</p>
@@ -457,7 +458,7 @@ export default {
               </div>
             </div>
             <div v-else-if="contract.returnedDate != null">
-              <p class="text-slate-600 dark:text-slate-300">Returned on {{contract.returnedDate}}</p>
+              <p class="text-slate-600 dark:text-slate-300">Returned on {{new Date(Date.parse(contract.returnedDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}</p>
               <p class="text-slate-600 dark:text-slate-300">Deposit returned: &#163; {{contract.depositAmountReturned}} by {{depositReturnedByUsername}}</p>
               <p class="text-slate-600 dark:text-slate-300">Received by {{returnAcceptedByUsername}}</p>
             </div>
