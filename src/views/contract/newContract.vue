@@ -550,7 +550,7 @@ export default {
     // step by step yup schema
     const clientSchema = yup.object().shape({
       firstName: yup.string().required('First name is required'),
-      lastName: yup.string().required('First name is required'),
+      lastName: yup.string().required('Last name is required'),
       emailAddress: yup
           .string()
           .email('Email is not valid')

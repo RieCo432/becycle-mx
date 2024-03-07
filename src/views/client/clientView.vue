@@ -5,12 +5,14 @@ import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable
 import {useCredentialsStore} from '@/store/credentialsStore';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 import requests from '@/requests';
+import DashButton from '@/components/Button/index.vue';
 
 const credentialsStore = useCredentialsStore();
 
 export default {
   name: 'clientView',
   components: {
+    DashButton,
     TableSkeleton,
     AppointmentSummaryTable,
     Card,
@@ -59,6 +61,10 @@ export default {
     },
     isClient: {
       type: Boolean,
+      required: true,
+    },
+    openEditDetailsModal: {
+      type: Function,
       required: true,
     },
   },
@@ -190,8 +196,17 @@ export default {
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
       <Card title="Details">
-        <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ client.firstName }} {{ client.lastName }}</p>
-        <p class="text-base text-slate-700 dark:text-slate-300">{{ client.emailAddress }}</p>
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ client.firstName }} {{ client.lastName }}</p>
+          </div>
+          <div class="col-span-full">
+            <p class="text-base text-slate-700 dark:text-slate-300">{{ client.emailAddress }}</p>
+          </div>
+          <div class="col-span-full">
+            <DashButton @click="openEditDetailsModal">Edit Details</DashButton>
+          </div>
+        </div>
       </Card>
     </div>
     <div class="col-span-12">

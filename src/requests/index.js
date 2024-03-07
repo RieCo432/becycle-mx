@@ -474,4 +474,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  patchChangeNames(patchData) {
+    return axiosClient.patch('/clients/me', patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
