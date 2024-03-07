@@ -101,7 +101,7 @@ async def get_contract_types() -> list[str]:
     return ["standard", "refugee", "child", "premium"]
 
 
-@contracts.get("/contracts/paper", dependencies=[Depends(dep.get_current_admin_user)])
+@contracts.get("/contracts/paper", dependencies=[Depends(dep.get_current_active_user)])
 async def get_paper_contract(paper_id: str, db: Session = Depends(dep.get_db)) -> UUID:
     return crud.get_paper_contract(db=db, paper_id=paper_id)
 
