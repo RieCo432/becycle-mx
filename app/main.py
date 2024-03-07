@@ -18,6 +18,8 @@ origins = [
     os.environ['CORS_ALLOW_ORIGIN']
 ]
 
+print(origins)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -35,7 +37,8 @@ app.include_router(routers.appointments)
 app.include_router(routers.deposit_exchanges)
 app.include_router(routers.finances)
 app.include_router(routers.public)
+app.include_router(routers.statistics)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
