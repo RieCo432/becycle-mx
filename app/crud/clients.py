@@ -167,3 +167,16 @@ def get_potential_matches(db: Session, first_name: str, last_name: str, email_ad
     )]
 
     return potential_matches
+
+
+def update_client(db: Session, client_id: UUID, new_first_name: str, new_last_name: str, new_email_address: str | None = None):
+    client = get_client(db=db, client_id=client_id)
+    client.firstName = new_first_name.lower()
+    client.lastName = new_last_name.lower()
+
+    if new_email_address is not None:
+        client.emailAddress = new_email_address.lower()
+
+    db.commit()
+
+    return client

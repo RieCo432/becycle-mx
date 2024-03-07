@@ -141,6 +141,17 @@ async def get_client_me(client: Annotated[models.Client, Depends(dep.get_current
     return client
 
 
+@clients.patch("/clients/me")
+async def update_client_me(
+        new_names: schemas.ClientChangeName,
+        client: Annotated[models.Client, Depends(dep.get_current_client)],
+        db: Session = Depends(dep.get_db)) -> schemas.Client:
+
+    client = crud.update_client(db=db, client_id=client.id, new_first_name=new_names.firstName, new_last_name=new_names.lastName)
+
+    return client
+
+
 # TODO: Implement query parameters for pagination
 @clients.get("/clients/me/contracts")
 async def get_my_contracts(

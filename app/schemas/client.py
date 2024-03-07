@@ -27,3 +27,8 @@ class Client(ClientBase):
 
     class Config:
         orm_mode = True
+
+
+class ClientChangeName(BaseModel):
+    firstName: str
+    lastName: str
