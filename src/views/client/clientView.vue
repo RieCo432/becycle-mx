@@ -189,6 +189,12 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
+      <Card title="Details">
+        <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ client.firstName }} {{ client.lastName }}</p>
+        <p class="text-base text-slate-700 dark:text-slate-300">{{ client.emailAddress }}</p>
+      </Card>
+    </div>
+    <div class="col-span-12">
       <Card>
         <div class="grid grid-cols-12">
           <div class="col-span-12">
