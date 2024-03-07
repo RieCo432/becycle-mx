@@ -469,4 +469,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getUserLeaderboard() {
+    return axiosClient.get('/statistics/users/leaderboard', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

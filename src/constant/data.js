@@ -95,4 +95,10 @@ export const topMenu = [
     link: '/contracts/find-paper-contract',
     show: ['user'],
   },
+  {
+    title: 'Volunteer Leaderboard',
+    icon: 'heroicons-outline:chart-bar',
+    link: '/statistics/users/leaderboard',
+    show: ['user'],
+  },
 ];

@@ -193,6 +193,15 @@ const routes = [
         },
         component: () => import('@/views/contract/findPaperContract.vue'),
       },
+      {
+        path: '/statistics/users/leaderboard',
+        name: 'Volunteer Leaderboard',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/statistics/users/leaderboard',
+        },
+        component: () => import('@/views/statistics/userLeaderboard.vue'),
+      },
     ],
   },
 ];
