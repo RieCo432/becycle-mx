@@ -211,6 +211,15 @@ const routes = [
         },
         component: () => import('@/views/statistics/clientLeaderboard.vue'),
       },
+      {
+        path: '/statistics/bikes/leaderboard',
+        name: 'Bike Leaderboard',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/statistics/bikes/leaderboard',
+        },
+        component: () => import('@/views/statistics/bikeLeaderboard.vue'),
+      },
     ],
   },
 ];

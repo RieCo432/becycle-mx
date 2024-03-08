@@ -102,6 +102,12 @@ export const topMenu = [
     show: ['user'],
   },
   {
+    title: 'Bike Leaderboard',
+    icon: 'heroicons-outline:chart-bar',
+    link: '/statistics/bikes/leaderboard',
+    show: ['user'],
+  },
+  {
     title: 'Client Leaderboard',
     icon: 'heroicons-outline:chart-bar',
     link: '/statistics/clients/leaderboard',
