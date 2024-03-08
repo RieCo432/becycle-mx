@@ -6,12 +6,14 @@ import {useCredentialsStore} from '@/store/credentialsStore';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
+import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
 
 const credentialsStore = useCredentialsStore();
 
 export default {
   name: 'clientView',
   components: {
+    ContractClientCardSkeleton,
     DashButton,
     TableSkeleton,
     AppointmentSummaryTable,
@@ -49,6 +51,10 @@ export default {
     },
     viewContract: {
       type: Function,
+      required: true,
+    },
+    loadingClientDetails: {
+      type: Boolean,
       required: true,
     },
     loadingContracts: {
@@ -195,18 +201,22 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
+
       <Card title="Details">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ client.firstName }} {{ client.lastName }}</p>
+        <ContractClientCardSkeleton v-if="loadingClientDetails"></ContractClientCardSkeleton>
+        <template v-else>
+          <div class="grid grid-cols-12 gap-5">
+            <div class="col-span-full">
+              <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ client.firstName }} {{ client.lastName }}</p>
+            </div>
+            <div class="col-span-full">
+              <p class="text-base text-slate-700 dark:text-slate-300">{{ client.emailAddress }}</p>
+            </div>
+            <div class="col-span-full">
+              <DashButton @click="openEditDetailsModal">Edit Details</DashButton>
+            </div>
           </div>
-          <div class="col-span-full">
-            <p class="text-base text-slate-700 dark:text-slate-300">{{ client.emailAddress }}</p>
-          </div>
-          <div class="col-span-full">
-            <DashButton @click="openEditDetailsModal">Edit Details</DashButton>
-          </div>
-        </div>
+        </template>
       </Card>
     </div>
     <div class="col-span-12">

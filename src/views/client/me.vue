@@ -12,6 +12,7 @@
         :loading-appointments="loadingAppointments"
         :is-client="true"
         :open-edit-details-modal="openEditDetailsModal"
+        :loading-client-details="loadingClientDetails"
     ></client-view>
     <Modal :active-modal="showEditDetailsModal" @close="showEditDetailsModal = !showEditDetailsModal" title="Edit Details">
       <form @submit.prevent="submitChangeNames">
@@ -23,6 +24,7 @@
                 placeholder="First Name"
                 name="firstName"
                 v-model="firstName"
+                :error="firstNameError"
             />
           </div>
           <div class="md:col-span-6 col-span-12">
@@ -32,6 +34,7 @@
                 placeholder="Last Name"
                 name="lastName"
                 v-model="lastName"
+                :error="lastNameError"
             />
           </div>
           <div class="col-span-12">
@@ -105,6 +108,7 @@ export default {
   },
   data() {
     return {
+      loadingClientDetails: true,
       contracts: [],
       contractSummaries: [],
       appointments: [],
@@ -159,6 +163,7 @@ export default {
   },
   async created() {
     this.client = (await requests.getClientMe()).data;
+    this.loadingClientDetails = false;
     this.contracts = (await requests.getMyContracts(true, true, true)).data;
     this.appointments = (await requests.getMyAppointments(true, true)).data;
 
