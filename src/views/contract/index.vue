@@ -2,12 +2,14 @@
 import requests from '@/requests';
 import viewContract from '@/views/contract/viewContract.vue';
 import {useToast} from 'vue-toastification';
+import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'contractIndex',
   components: {
+    EditClientDetailsModal,
     viewContract,
   },
   data() {
@@ -36,6 +38,7 @@ export default {
       loadingBike: true,
       loadingClient: true,
       loadingContract: true,
+      showEditClientDetailsModal: false,
     };
   },
   methods: {
@@ -77,16 +80,16 @@ export default {
         this.loadingClient = false;
       });
       if (this.contract.returnedDate != null) {
-       this.loadReturnUserDetails();
+        this.loadReturnUserDetails();
       }
       Promise.all([
         requests.getUser(this.contract['depositCollectingUserId']),
         requests.getUser(this.contract['workingUserId']),
         requests.getUser(this.contract['checkingUserId']),
       ]).then(([
-          depositCollectingUserResponse,
-          workingUserResponse,
-          checkingUserResponse,
+        depositCollectingUserResponse,
+        workingUserResponse,
+        checkingUserResponse,
       ]) => {
         this.depositCollectingUser = depositCollectingUserResponse.data;
         this.workingUser = workingUserResponse.data;
@@ -111,23 +114,33 @@ export default {
 </script>
 
 <template>
-  <view-contract
-      :client="client"
-      :bike="bike"
-      :deposit-collecting-username="depositCollectingUser.username"
-      :working-username="workingUser.username"
-      :checking-username="checkingUser.username"
-      :contract="contract"
-      :deposit-returned-by-username="depositReturnedByUser ? depositReturnedByUser.username : null"
-      :return-accepted-by-username="returnAcceptedByUser ? returnAcceptedByUser.username : null"
-      :deposit-bearers="depositBearers"
-      :active-users="activeUsers"
-      :loading-client="loadingClient"
-      :loading-bike="loadingBike"
-      :loading-contract="loadingContract"
-      :patch-contract-extend="patchContractExtend"
-      :patch-contract-return="patchContractReturn"
-  ></view-contract>
+  <div>
+    <view-contract
+        :client="client"
+        :bike="bike"
+        :deposit-collecting-username="depositCollectingUser.username"
+        :working-username="workingUser.username"
+        :checking-username="checkingUser.username"
+        :contract="contract"
+        :deposit-returned-by-username="depositReturnedByUser ? depositReturnedByUser.username : null"
+        :return-accepted-by-username="returnAcceptedByUser ? returnAcceptedByUser.username : null"
+        :deposit-bearers="depositBearers"
+        :active-users="activeUsers"
+        :loading-client="loadingClient"
+        :loading-bike="loadingBike"
+        :loading-contract="loadingContract"
+        :patch-contract-extend="patchContractExtend"
+        :patch-contract-return="patchContractReturn"
+        :open-edit-client-details-modal="() => showEditClientDetailsModal = true"
+        :is-user="true"
+    ></view-contract>
+    <EditClientDetailsModal v-if="!loadingClient"
+                            :close-modal="() => showEditClientDetailsModal = false"
+                            :show-modal="showEditClientDetailsModal"
+                            :client="client"
+                            @client-details-updated="(updatedDetails) => client = updatedDetails"
+    ></EditClientDetailsModal>
+  </div>
 </template>
 
 <style scoped lang="scss">
