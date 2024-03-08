@@ -45,14 +45,8 @@ export default {
           (client.emailAddress.startsWith(this.selectedClient.emailAddress.toLowerCase()) && (this.selectedClient.emailAddress.toLowerCase()))
       ));
     },
-    filtered_first_name_suggestions() {
-      return this.filtered_client_suggestions.map((client) => (client.firstName));
-    },
-    filtered_last_name_suggestions() {
-      return this.filtered_client_suggestions.map((client) => (client.lastName));
-    },
-    filtered_email_address_suggestions() {
-      return this.filtered_client_suggestions.map((client) => (client.emailAddress));
+    filteredClientSuggestionsLegible() {
+      return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
   },
 };
@@ -66,7 +60,7 @@ export default {
           <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedClient.firstName"
-                :suggestions="filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))"
+                :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
             >
@@ -84,7 +78,7 @@ export default {
           <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedClient.lastName"
-                :suggestions="filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))"
+                :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
             >
@@ -102,7 +96,7 @@ export default {
           <div class="col-span-12">
             <ComboboxTextInput
                 :field-model-value="selectedClient.emailAddress"
-                :suggestions="filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))"
+                :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
             >
