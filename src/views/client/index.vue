@@ -5,85 +5,28 @@ import {useToast} from 'vue-toastification';
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
-import * as yup from 'yup';
-import {useField, useForm} from 'vee-validate';
-import {ref} from 'vue';
+import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'clientIndex',
   components: {
+    EditClientDetailsModal,
     Textinput, Button, Modal,
     clientView,
-  },
-  setup() {
-    const client = ref({});
-    const showEditDetailsModal = ref(false);
-
-    const newDetailsSchema = yup.object().shape({
-      firstName: yup.string().required('First name is required'),
-      lastName: yup.string().required('Last name is required'),
-      emailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Email is required'),
-      confirmEmailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Confirm Email is required')
-          .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
-    });
-
-    const {handleSubmit} = useForm({
-      validationSchema: newDetailsSchema,
-      keepValuesOnUnmount: true,
-    });
-
-    const {value: emailAddress, errorMessage: emailAddressError} = useField('emailAddress');
-    const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError} = useField('confirmEmailAddress');
-    const {value: firstName, errorMessage: firstNameError} = useField('firstName');
-    const {value: lastName, errorMessage: lastNameError} = useField('lastName');
-
-    const submitChangeDetails = handleSubmit(() => {
-      requests.patchChangeDetails(client.value.id, {
-        firstName: firstName.value,
-        lastName: lastName.value,
-        emailAddress: emailAddress.value,
-      }).then((response) => {
-        toast.success('Client Details updated', {timeout: 2000});
-        client.value = response.data;
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      }).finally(() => {
-        showEditDetailsModal.value = false;
-      });
-    });
-
-    return {
-      client,
-      showEditDetailsModal,
-      firstName,
-      firstNameError,
-      lastName,
-      lastNameError,
-      emailAddress,
-      emailAddressError,
-      confirmEmailAddress,
-      confirmEmailAddressError,
-      submitChangeDetails,
-    };
   },
   data() {
     return {
       contracts: [],
-
+      client: {},
       contractSummaries: [],
       appointments: [],
       appointmentSummaries: [],
       loadingClientDetails: true,
       loadingContracts: true,
       loadingAppointments: true,
+      showEditDetailsModal: false,
     };
   },
   methods: {
@@ -134,13 +77,8 @@ export default {
     viewContract(contractId) {
       this.$router.push(`/contracts/${contractId}`);
     },
-    openEditDetailsModal() {
-      this.firstName = this.client.firstName;
-      this.lastName = this.client.lastName;
-      this.emailAddress = this.client.emailAddress;
-      this.confirmEmailAddress = this.client.emailAddress;
-
-      this.showEditDetailsModal = true;
+    clientDetailsUpdated(updatedDetails) {
+      this.client = updatedDetails;
     },
   },
   async created() {
@@ -218,60 +156,17 @@ export default {
         :loading-appointments="loadingAppointments"
         :accept-appointment="acceptAppointment"
         :is-client="false"
-        :open-edit-details-modal="openEditDetailsModal"
+        :open-edit-details-modal="() => showEditDetailsModal = true"
         :loading-client-details="loadingClientDetails"
     ></client-view>
-    <Modal :active-modal="showEditDetailsModal" @close="showEditDetailsModal = !showEditDetailsModal" title="Edit Details">
-      <form @submit.prevent="submitChangeDetails">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="md:col-span-6 col-span-12">
-            <Textinput
-                label="First Name"
-                type="text"
-                placeholder="First Name"
-                name="firstName"
-                v-model="firstName"
-                :error="firstNameError"
-            />
-          </div>
-          <div class="md:col-span-6 col-span-12">
-            <Textinput
-                label="Last Name"
-                type="text"
-                placeholder="Last Name"
-                name="lastName"
-                v-model="lastName"
-                :error="lastNameError"
-            />
-          </div>
-          <div class="col-span-full">
-            <Textinput
-                label="Email Address"
-                type="text"
-                placeholder="email@exmaple.com"
-                name="emailAddress"
-                v-model="emailAddress"
-                :error="emailAddressError"
-            />
-          </div>
-          <div class="col-span-full">
-            <Textinput
-                label="Confirm Email Address"
-                type="text"
-                placeholder="email@exmaple.com"
-                name="confirmEmailAddress"
-                v-model="confirmEmailAddress"
-                :error="confirmEmailAddressError"
-            />
-          </div>
-          <div class="col-span-12">
-            <Button type="submit" class="btn btn-dark block w-full text-center">
-              Submit
-            </Button>
-          </div>
-        </div>
-      </form>
-    </Modal>
+    <EditClientDetailsModal v-if="!loadingClientDetails"
+                            :close-modal="() => showEditDetailsModal = false"
+                            :show-modal="showEditDetailsModal"
+                            :client="client"
+                            @client-details-updated="clientDetailsUpdated"
+    >
+
+    </EditClientDetailsModal>
   </div>
 </template>
 
