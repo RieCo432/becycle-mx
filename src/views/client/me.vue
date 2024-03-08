@@ -19,7 +19,6 @@
                         :show-modal="showEditDetailsModal"
                         :close-modal="() => showEditDetailsModal = false"
                         @client-details-updated="clientDetailsUpdated"
-                        @client-details-update-failed="showEditDetailsModal = false"
     >
     </EditMyDetailsModal>
   </div>
@@ -34,7 +33,6 @@ import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
 import EditMyDetailsModal from '@/components/Modal/EditMyDetailsModal.vue';
-
 
 const toast = useToast();
 

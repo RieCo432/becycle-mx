@@ -6,6 +6,7 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
+import {toRef} from 'vue';
 
 const toast = useToast();
 
@@ -13,6 +14,7 @@ export default {
   name: 'EditMyDetailsModal',
   components: {Textinput, Button, Modal},
   setup(props, context) {
+    const closeModal = toRef(props, 'closeModal');
     const nameChangeSchema = yup.object().shape({
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
@@ -32,7 +34,8 @@ export default {
         context.emit('clientDetailsUpdated', response.data);
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
-        context.emit('clientDetailsUpdateFailed');
+      }).finally(() => {
+        closeModal.value();
       });
     });
     return {
@@ -45,7 +48,6 @@ export default {
   },
   emits: [
       'clientDetailsUpdated',
-      'clientDetailsUpdateFailed',
   ],
   props: {
     client: {
