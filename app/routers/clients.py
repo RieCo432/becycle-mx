@@ -215,6 +215,19 @@ async def get_client(client_id: UUID,
     return crud.get_client(db=db, client_id=client_id)
 
 
+@clients.patch("/clients/{client_id}", dependencies=[Depends(dep.get_current_active_user)])
+async def update_client_full(
+        client_id: UUID,
+        updated_client_data: schemas.ClientBase,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Client:
+    return crud.update_client(db=db,
+                              client_id=client_id,
+                              new_first_name=updated_client_data.firstName,
+                              new_last_name=updated_client_data.lastName,
+                              new_email_address=updated_client_data.emailAddress)
+
+
 # TODO: Implement query parameters for pagination
 @clients.get("/clients/{client_id}/contracts", dependencies=[Depends(dep.get_current_active_user)])
 async def get_client_contracts(
