@@ -258,18 +258,18 @@ export default {
           <Card title="Lendee">
             <ContractClientCardSkeleton v-if="loadingClient" count="1"></ContractClientCardSkeleton>
             <template v-else>
-              <div class="grid grid-cols-12 h-full">
+              <div class="grid grid-cols-12 h-full gap-5">
                 <div class="col-span-12" >
                   <p class="text-slate-600 dark:text-slate-300">{{client.firstName}} {{client.lastName}}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{client.emailAddress}}</p>
                 </div>
                 <div class="col-span-6 mt-auto">
-                  <DashButton @click="goToClient">
+                  <DashButton class="w-full" @click="goToClient">
                     View Client
                   </DashButton>
                 </div>
                 <div class="col-span-6 mt-auto">
-                  <DashButton @click="openEditClientDetailsModal">
+                  <DashButton class="w-full" @click="openEditClientDetailsModal">
                     Edit Details
                   </DashButton>
                 </div>
