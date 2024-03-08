@@ -9,6 +9,12 @@ import app.schemas as schemas
 from uuid import UUID
 
 
+def get_all_clients(db: Session) -> list[schemas.Client]:
+    return [_ for _ in db.scalars(
+        select(models.Client)
+    )]
+
+
 def get_clients(db: Session, first_name: str, last_name: str, email_address: str) -> list[models.Client]:
     clients = [_ for _ in db.scalars(
         select(models.Client)

@@ -18,8 +18,6 @@ origins = [
     os.environ['CORS_ALLOW_ORIGIN']
 ]
 
-print(origins)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

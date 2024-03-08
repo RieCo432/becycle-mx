@@ -17,9 +17,18 @@ statistics = APIRouter(
 
 
 @statistics.get("/statistics/users/leaderboard", dependencies=[Depends(dep.get_current_active_user)])
-async def get_leaderboard(
+async def get_user_leaderboard(
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.UserLeaderboard]:
-    leaderboard = crud.get_leaderboard(db=db)
+    leaderboard = crud.get_user_leaderboard(db=db)
+
+    return leaderboard
+
+
+@statistics.get("/statistics/clients/leaderboard", dependencies=[Depends(dep.get_current_active_user)])
+async def get_client_leaderboard(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.ClientLeaderboard]:
+    leaderboard = crud.get_client_leaderboard(db=db)
 
     return leaderboard

@@ -11,3 +11,13 @@ class UserLeaderboard(BaseModel):
     depositAmountCollected: int
     depositsReturned: int
     depositAmountReturned: int
+
+
+class ClientLeaderboard(BaseModel):
+    fullName: str
+    contracts: int
+    appointments: int
+    appointmentsPending: int
+    appointmentsConfirmed: int
+    appointmentsDenied: int
+    appointmentsCancelled: int
