@@ -78,7 +78,6 @@ export default {
               decals: undefined,
               serialNumber: undefined,
               contracts: sum(bikesOfMake.map((bike) => bike.contracts)),
-              children: bikesOfMake,
             };
           } else if (this.selectedGroupBy === 'model') {
             return models.map((model) => {
@@ -91,7 +90,6 @@ export default {
                 decals: undefined,
                 serialNumber: undefined,
                 contracts: sum(bikesOfModel.map((bike) => bike.contracts)),
-                children: bikesOfModel,
               };
             });
           } else {
@@ -117,7 +115,6 @@ export default {
           </div>
           <div class="col-span-12">
             <AdvancedTable
-                :grouped-table="selectedGroupBy !== 'none'"
                 :loading="loading"
                 :columns="columns"
                 :data="leaderboard"
