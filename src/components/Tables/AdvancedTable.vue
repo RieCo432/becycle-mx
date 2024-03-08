@@ -19,6 +19,8 @@
                       styleClass=" vgt-table bordered centered"
                       :rows="data"
                       :line-numbers="true"
+                      row-style-class="bg-slate-800"
+                      expanded-row-classes="bg-slate-800"
                       :pagination-options="{
                         enabled: false,
                         perPage: perpage,
@@ -35,11 +37,17 @@
                         // clearSelectionText: 'clear',
                         // disableSelectinfo: true, // disable the select info-500 panel on top
                         // selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
-                        }">
+                        }"
+                      :group-options="{
+                        enabled: groupedTable,
+                        headerPosition: 'top',
+                        collapsable: groupedTable,
+                      }"
+      >
         <template #pagination-bottom="props">
           <div class="py-4 px-3">
             <Pagination
-              :total="advancedTable.length"
+              :total="data.length"
               :current="current"
               :per-page="perpage"
               :pageRange="pageRange"
@@ -94,6 +102,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    groupedTable: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -105,4 +117,5 @@ export default {
   },
 };
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+</style>

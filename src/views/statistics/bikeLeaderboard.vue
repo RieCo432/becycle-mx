@@ -2,14 +2,22 @@
 import AdvancedTable from '@/components/Tables/AdvancedTable.vue';
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
+import VueSelect from '@/components/Select/VueSelect.vue';
+import {sum} from 'lodash-es';
 
 export default {
   name: 'bikeLeaderboard',
-  components: {Card, AdvancedTable},
+  components: {VueSelect, Card, AdvancedTable},
   data() {
     return {
       loading: true,
-      leaderboard: [],
+      groupByOptions: [
+        'none',
+        'make',
+        'model',
+      ],
+      selectedGroupBy: null,
+      rawLeaderboard: [],
       columns: [
         {
           field: 'make',
@@ -40,10 +48,58 @@ export default {
     };
   },
   created() {
-    requests.getBikeLeaderboard().then((response) => {
-      this.leaderboard = response.data;
-      this.loading = false;
-    });
+    this.selectedGroupBy = this.groupByOptions[0];
+    this.fetchBikeLeaderboard();
+  },
+  methods: {
+    fetchBikeLeaderboard() {
+      this.loading = true;
+      requests.getBikeLeaderboard(this.selectedGroupBy).then((response) => {
+        this.rawLeaderboard = response.data;
+        this.loading = false;
+      });
+    },
+  },
+  computed: {
+    leaderboard() {
+      if (this.selectedGroupBy === 'none') {
+        return this.rawLeaderboard;
+      } else {
+        const makes = [...new Set(this.rawLeaderboard.map((bike) => bike.make))];
+        return makes.map((make) => {
+          const bikesOfMake = this.rawLeaderboard.filter((bike) => bike.make === make);
+          const models = [...new Set(bikesOfMake.map((bike) => bike.model))];
+          if (this.selectedGroupBy === 'make') {
+            const colours = [...new Set(bikesOfMake.map((bike) => bike.colour))];
+            return {
+              make: `${make} (${bikesOfMake.length})`,
+              model: `${models.length} models`,
+              colour: `${colours.length} colours`,
+              decals: undefined,
+              serialNumber: undefined,
+              contracts: sum(bikesOfMake.map((bike) => bike.contracts)),
+              children: bikesOfMake,
+            };
+          } else if (this.selectedGroupBy === 'model') {
+            return models.map((model) => {
+              const bikesOfModel = this.rawLeaderboard.filter((bike) => bike.make === make && bike.model === model);
+              const colours = [...new Set(bikesOfModel.map((bike) => bike.colour))];
+              return {
+                make: make,
+                model: `${model} (${bikesOfModel.length})`,
+                colour: `${colours.length} colours`,
+                decals: undefined,
+                serialNumber: undefined,
+                contracts: sum(bikesOfModel.map((bike) => bike.contracts)),
+                children: bikesOfModel,
+              };
+            });
+          } else {
+            return [];
+          }
+        }).flat();
+      }
+    },
   },
 };
 </script>
@@ -54,7 +110,14 @@ export default {
       <Card>
         <div class="grid grid-cols-12">
           <div class="col-span-12">
+            <VueSelect
+                :options="groupByOptions"
+                v-model="selectedGroupBy"
+            ></VueSelect>
+          </div>
+          <div class="col-span-12">
             <AdvancedTable
+                :grouped-table="selectedGroupBy !== 'none'"
                 :loading="loading"
                 :columns="columns"
                 :data="leaderboard"
