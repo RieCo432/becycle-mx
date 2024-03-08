@@ -202,6 +202,15 @@ const routes = [
         },
         component: () => import('@/views/statistics/userLeaderboard.vue'),
       },
+      {
+        path: '/statistics/clients/leaderboard',
+        name: 'Client Leaderboard',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/statistics/clients/leaderboard',
+        },
+        component: () => import('@/views/statistics/clientLeaderboard.vue'),
+      },
     ],
   },
 ];

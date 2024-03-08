@@ -101,4 +101,10 @@ export const topMenu = [
     link: '/statistics/users/leaderboard',
     show: ['user'],
   },
+  {
+    title: 'Client Leaderboard',
+    icon: 'heroicons-outline:chart-bar',
+    link: '/statistics/clients/leaderboard',
+    show: ['user'],
+  },
 ];
