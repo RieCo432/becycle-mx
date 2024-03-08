@@ -1,6 +1,6 @@
 from uuid import UUID
 from pydantic import BaseModel
-
+from app.schemas import BikeBase
 
 class UserLeaderboard(BaseModel):
     username: str
@@ -21,3 +21,7 @@ class ClientLeaderboard(BaseModel):
     appointmentsConfirmed: int
     appointmentsDenied: int
     appointmentsCancelled: int
+
+
+class BikeLeaderboard(BikeBase):
+    contracts: int

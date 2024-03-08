@@ -4,6 +4,7 @@ import app.models as models
 import app.schemas as schemas
 from app.crud.users import get_users
 from app.crud.clients import get_all_clients
+from app.crud.bikes import get_all_bikes
 import bcrypt
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
@@ -62,6 +63,28 @@ def get_client_leaderboard(db: Session) -> list[schemas.ClientLeaderboard]:
             appointmentsCancelled=appointments_cancelled,
             appointmentsDenied=appointments_denied,
             appointmentsPending=appointments_pending,
+        )
+
+        leaderboard.append(leaderboard_entry)
+
+    return leaderboard
+
+
+def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
+    bikes = get_all_bikes(db=db)
+
+    leaderboard = []
+
+    for bike in bikes:
+        contracts = len(bike.contracts)
+
+        leaderboard_entry = schemas.BikeLeaderboard(
+            make=bike.make,
+            model=bike.model,
+            colour=bike.colour,
+            decals=bike.decals,
+            serialNumber=bike.serialNumber,
+            contracts=contracts
         )
 
         leaderboard.append(leaderboard_entry)

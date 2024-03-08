@@ -32,3 +32,12 @@ async def get_client_leaderboard(
     leaderboard = crud.get_client_leaderboard(db=db)
 
     return leaderboard
+
+
+@statistics.get("/statistics/bikes/leaderboard", dependencies=[Depends(dep.get_current_active_user)])
+async def get_bike_leaderboard(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.BikeLeaderboard]:
+    leaderboard = crud.get_bike_leaderboard(db=db)
+
+    return leaderboard
