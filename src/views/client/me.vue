@@ -11,40 +11,17 @@
         :loading-contracts="loadingContracts"
         :loading-appointments="loadingAppointments"
         :is-client="true"
-        :open-edit-details-modal="openEditDetailsModal"
+        :open-edit-details-modal="() => showEditDetailsModal = true"
         :loading-client-details="loadingClientDetails"
     ></client-view>
-    <Modal :active-modal="showEditDetailsModal" @close="showEditDetailsModal = !showEditDetailsModal" title="Edit Details">
-      <form @submit.prevent="submitChangeNames">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="md:col-span-6 col-span-12">
-            <Textinput
-                label="First Name"
-                type="text"
-                placeholder="First Name"
-                name="firstName"
-                v-model="firstName"
-                :error="firstNameError"
-            />
-          </div>
-          <div class="md:col-span-6 col-span-12">
-            <Textinput
-                label="Last Name"
-                type="text"
-                placeholder="Last Name"
-                name="lastName"
-                v-model="lastName"
-                :error="lastNameError"
-            />
-          </div>
-          <div class="col-span-12">
-            <Button type="submit" class="btn btn-dark block w-full text-center">
-              Submit
-            </Button>
-          </div>
-        </div>
-      </form>
-    </Modal>
+    <EditMyDetailsModal v-if="!loadingClientDetails"
+                        :client="client"
+                        :show-modal="showEditDetailsModal"
+                        :close-modal="() => showEditDetailsModal = false"
+                        @client-details-updated="clientDetailsUpdated"
+                        @client-details-update-failed="showEditDetailsModal = false"
+    >
+    </EditMyDetailsModal>
   </div>
 </template>
 
@@ -56,65 +33,29 @@ import {useToast} from 'vue-toastification';
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
-import * as yup from 'yup';
-import {useField, useForm} from 'vee-validate';
-import {ref} from 'vue';
+import EditMyDetailsModal from '@/components/Modal/EditMyDetailsModal.vue';
+
 
 const toast = useToast();
 
 export default {
   name: 'ClientMe',
   components: {
+    EditMyDetailsModal,
     Textinput, Button, Modal,
     clientView,
   },
-  setup() {
-    const client = ref({});
-    const showEditDetailsModal = ref(false);
-
-    const nameChangeSchema = yup.object().shape({
-      firstName: yup.string().required('First name is required'),
-      lastName: yup.string().required('Last name is required'),
-    });
-
-    const {handleSubmit} = useForm({
-      validationSchema: nameChangeSchema,
-      keepValuesOnUnmount: true,
-    });
-
-    const {value: firstName, errorMessage: firstNameError} = useField('firstName');
-    const {value: lastName, errorMessage: lastNameError} = useField('lastName');
-
-    const submitChangeNames = handleSubmit(() => {
-      requests.patchChangeNames({firstName: firstName.value, lastName: lastName.value}).then((response) => {
-        client.value = response.data;
-        toast.success('Details Updated!', {timeout: 2000});
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      }).finally(() => {
-        showEditDetailsModal.value = false;
-      });
-    });
-
-    return {
-      showEditDetailsModal,
-      client,
-      firstName,
-      firstNameError,
-      lastName,
-      lastNameError,
-      submitChangeNames,
-    };
-  },
   data() {
     return {
+      client: {},
       loadingClientDetails: true,
       contracts: [],
       contractSummaries: [],
       appointments: [],
       appointmentSummaries: [],
       loadingContracts: true,
-      loadingAppointments: true
+      loadingAppointments: true,
+      showEditDetailsModal: false,
     };
   },
   methods: {
@@ -155,10 +96,9 @@ export default {
     viewContract(contractId) {
       this.$router.push(`/clients/me/contracts/${contractId}`);
     },
-    openEditDetailsModal() {
-      this.firstName = this.client.firstName;
-      this.lastName = this.client.lastName;
-      this.showEditDetailsModal = true;
+    clientDetailsUpdated(updatedClient) {
+      this.client = updatedClient;
+      this.showEditDetailsModal = false;
     },
   },
   async created() {
