@@ -14,7 +14,7 @@ def get_bike(db: Session, bike_id: UUID) -> models.Bike:
     )
 
 
-def get_bikes(make: str, model: str, colour: str, decals: str, serialNumber: str, db: Session) -> list[schemas.Bike]:
+def find_similar_bikes(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None) -> list[schemas.Bike]:
     bikes = [bike for bike in db.scalars(
         select(models.Bike)
         .where(
@@ -30,6 +30,12 @@ def get_bikes(make: str, model: str, colour: str, decals: str, serialNumber: str
         raise HTTPException(status_code=404, detail={"description": "No bikes found"})
 
     return bikes
+
+
+def get_all_bikes(db: Session) -> list[schemas.Bike]:
+    return [_ for _ in db.scalars(
+        select(models.Bike)
+    )]
 
 
 def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:

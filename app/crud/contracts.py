@@ -2,17 +2,24 @@ from datetime import date, datetime
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from uuid import UUID
 from fastapi import HTTPException, status
 from dateutil.relativedelta import relativedelta
 
 
-def get_contracts(db: Session, client_id: UUID = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:
+def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:
+    primary_query_filter = []
+
+    if client_id is not None:
+        primary_query_filter.append((models.Contract.clientId == client_id))
+    if bike_id is not None:
+        primary_query_filter.append((models.Contract.bikeId == bike_id))
+
     contracts = [_ for _ in db.scalars(
         select(models.Contract)
         .where(
-            ((models.Contract.clientId == client_id) | (client_id == None))
+            and_(*primary_query_filter)
             & (
                 ((models.Contract.returnedDate != None) & closed)
                 | ((models.Contract.returnedDate == None) & (models.Contract.endDate < datetime.utcnow().date()) & expired)
