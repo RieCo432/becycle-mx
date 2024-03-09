@@ -33,4 +33,4 @@ class BikeLeaderboard(Bike):
 
 class DateSeries(BaseModel):
     name: str
-    data: list[dict[date, int]]
+    data: list[list]

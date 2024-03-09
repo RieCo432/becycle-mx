@@ -101,13 +101,24 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
 def get_total_contracts_statistics(db: Session, interval: int, breakdown: str) -> list[schemas.DateSeries]:
     oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
 
+    if breakdown == 'contractType':
+        col = models.Contract.contractType
+    elif breakdown == 'bikeMake':
+        col = models.Bike.make
+
     all_series = []
     data_series_by_breakdown = {}
     cutoff_date = oldest_contract.startDate
 
     while cutoff_date <= datetime.utcnow().date():
-        counts_by_breakdown = [_ for _ in db.query(models.Contract.contractType, func.count(models.Contract.contractType)).where(models.Contract.startDate <= cutoff_date).group_by(
-            models.Contract.contractType)]
+        query = db.query(col, func.count(col))
+        if breakdown == 'bikeMake':
+            query = query.join(models.Contract)
+
+        counts_by_breakdown = [_ for _ in
+                               query.where(models.Contract.startDate <= cutoff_date)
+                               .group_by(col)
+                               ]
         for breakdown, count in counts_by_breakdown:
             if breakdown not in data_series_by_breakdown:
                 data_series_by_breakdown[breakdown] = [[cutoff_date, count]]
