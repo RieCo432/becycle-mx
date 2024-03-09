@@ -28,7 +28,7 @@ export const topMenu = [
         show: ['loggedout'],
       },
       {
-        childtitle: 'Client Login',
+        childtitle: 'Client Register/Login',
         childlink: '/clients/login',
         childicon: 'heroicons-outline:login',
         show: ['loggedout'],

@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="lg:col-span-6 col-span-12">
-      <Card title="Client Login">
+      <Card title="Client Register/Login">
         <div class="flex z-[5] items-center relative justify-center md:mx-8">
           <div
               class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
