@@ -101,6 +101,10 @@ export default {
           field: 'endDate',
         },
         {
+          label: 'Returned Date',
+          field: 'returnedDate',
+        },
+        {
           label: 'Make',
           field: 'bikeMake',
         },

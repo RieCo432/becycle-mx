@@ -50,6 +50,10 @@ export default {
           field: 'endDate',
         },
         {
+          label: 'Returned Date',
+          field: 'returnedDate',
+        },
+        {
           label: 'First Name',
           field: 'firstName',
         },
@@ -90,6 +94,7 @@ export default {
             status: status,
             startDate: contract.startDate,
             endDate: contract.endDate,
+            returnedDate: contract.returnedDate,
             firstName: clientResponse.data.firstName,
             lastName: clientResponse.data.lastName,
             emailAddress: clientResponse.data.emailAddress,
