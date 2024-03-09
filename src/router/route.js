@@ -221,6 +221,15 @@ const routes = [
         component: () => import('@/views/statistics/bikeLeaderboard.vue'),
       },
       {
+        path: '/bikes/:bikeId',
+        name: 'Bike',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/bikes',
+        },
+        component: () => import('@/views/bike/index.vue'),
+      },
+      {
         path: '/bikes',
         name: 'Find Bike',
         meta: {

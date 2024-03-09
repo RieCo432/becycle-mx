@@ -126,15 +126,14 @@ export default {
       },
     });
   },
-  findBikes(make, model, colour, decals, serialNumber) {
+  findBikes(make, model, colour, serialNumber) {
     return axiosClient.get('/bikes/find', {
       headers: credentialsStore.getApiRequestHeader(),
       params: {
-        ...(make && {make: make}),
-        ...(model && {model: model}),
-        ...(colour && {colour: colour}),
-        ...(decals && {decals: decals}),
-        ...(serialNumber && {serial_number: serialNumber}),
+        ...(make && {make: make.toLowerCase()}),
+        ...(model && {model: model.toLowerCase()}),
+        ...(colour && {colour: colour.toLowerCase()}),
+        ...(serialNumber && {serial_number: serialNumber.toLowerCase()}),
       },
     });
   },
@@ -237,6 +236,16 @@ export default {
   },
   getClientContracts(clientId, open, closed, expired) {
     return axiosClient.get(`/clients/${clientId}/contracts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        open: open,
+        closed: closed,
+        expired: expired,
+      },
+    });
+  },
+  getBikeContracts(bikeId, open, closed, expired) {
+    return axiosClient.get(`/bikes/${bikeId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
       params: {
         open: open,
@@ -501,8 +510,13 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  patchChangeDetails(clientId, patchData) {
+  patchClientChangeDetails(clientId, patchData) {
     return axiosClient.patch(`/clients/${clientId}`, patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchBikeChangeDetails(bikeId, patchData) {
+    return axiosClient.patch(`/bikes/${bikeId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },

@@ -41,7 +41,7 @@ export default {
     const {value: lastName, errorMessage: lastNameError} = useField('lastName');
 
     const submitChangeDetails = handleSubmit(() => {
-      requests.patchChangeDetails(client.value.id, {
+      requests.patchClientChangeDetails(client.value.id, {
         firstName: firstName.value,
         lastName: lastName.value,
         emailAddress: emailAddress.value,

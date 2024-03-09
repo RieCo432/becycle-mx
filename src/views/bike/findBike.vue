@@ -7,7 +7,7 @@ import {debounce} from 'lodash-es';
 import Button from '@/components/Button/index.vue';
 
 export default {
-  name: 'findClient',
+  name: 'findBike',
   components: {
     Button,
     ComboboxTextInput, Textinput,
@@ -17,12 +17,12 @@ export default {
     return {
       bikeSuggestions: [],
       selectedBike: {
-        make: '',
-        model: '',
-        colour: '',
-        serialNumber: '',
-        decals: '',
-        id: undefined,
+        make: null,
+        model: null,
+        colour: null,
+        serialNumber: null,
+        decals: null,
+        id: null,
       },
     };
   },
@@ -32,10 +32,10 @@ export default {
   methods: {
     fetchBikes() {
       requests.findBikes(
-          this.selectedBike.make.toLowerCase(),
-          this.selectedBike.model.toLowerCase(),
-          this.selectedBike.colour.toLowerCase(),
-          this.selectedBike.serialNumber.toLowerCase()).then((response) => {
+          this.selectedBike.make,
+          this.selectedBike.model,
+          this.selectedBike.colour,
+          this.selectedBike.serialNumber).then((response) => {
         this.bikeSuggestions = response.data;
       });
     },
@@ -46,10 +46,10 @@ export default {
   computed: {
     filtered_bike_suggestions() {
       return this.bikeSuggestions.filter((bike) => (
-          (bike.make.startsWith(this.selectedBike.make.toLowerCase())) ||
-          (bike.model.startsWith(this.selectedClient.model.toLowerCase())) ||
-          (bike.colour.startsWith(this.selectedClient.colour.toLowerCase())) ||
-          (bike.serialNumber.startsWith(this.selectedClient.serialNumber.toLowerCase()))
+        (!this.selectedBike.make || bike.make.startsWith(this.selectedBike.make.toLowerCase())) &&
+        (!this.selectedBike.model || bike.model.startsWith(this.selectedBike.model.toLowerCase())) &&
+        (!this.selectedBike.colour || bike.colour.startsWith(this.selectedBike.colour.toLowerCase())) &&
+        (!this.selectedBike.serialNumber || bike.serialNumber.startsWith(this.selectedBike.serialNumber.toLowerCase()))
       ));
     },
     filteredBikeSuggestionsLegible() {
@@ -62,7 +62,7 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12 lg:col-span-8">
-      <Card title="Find Client">
+      <Card title="Find Bike">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
