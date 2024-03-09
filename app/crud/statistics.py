@@ -26,6 +26,7 @@ def get_user_leaderboard(db: Session) -> list[schemas.UserLeaderboard]:
         deposit_amount_returned = sum([contract.depositAmountReturned for contract in user.depositReturnedContracts])
 
         leaderboard_entry = schemas.UserLeaderboard(
+            id=user.id,
             username=user.username,
             contractsDone=contracts_done,
             contractsChecked=contracts_checked,
@@ -56,6 +57,7 @@ def get_client_leaderboard(db: Session) -> list[schemas.ClientLeaderboard]:
         appointments_denied = sum([1 if not appointment.confirmed and appointment.cancelled else 0 for appointment in client.appointments])
 
         leaderboard_entry = schemas.ClientLeaderboard(
+            id=client.id,
             fullName=full_name,
             contracts=contracts,
             appointments=appointments,
@@ -79,6 +81,7 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
         contracts = len(bike.contracts)
 
         leaderboard_entry = schemas.BikeLeaderboard(
+            id=bike.id,
             make=bike.make,
             model=bike.model,
             colour=bike.colour,

@@ -1,8 +1,10 @@
 from uuid import UUID
 from pydantic import BaseModel
-from app.schemas import BikeBase
+from app.schemas import Bike
+
 
 class UserLeaderboard(BaseModel):
+    id: UUID
     username: str
     contractsDone: int
     contractsChecked: int
@@ -14,6 +16,7 @@ class UserLeaderboard(BaseModel):
 
 
 class ClientLeaderboard(BaseModel):
+    id: UUID
     fullName: str
     contracts: int
     appointments: int
@@ -23,5 +26,5 @@ class ClientLeaderboard(BaseModel):
     appointmentsCancelled: int
 
 
-class BikeLeaderboard(BikeBase):
+class BikeLeaderboard(Bike):
     contracts: int
