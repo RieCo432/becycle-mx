@@ -45,6 +45,17 @@ export default {
           label: 'Pending Appointments',
           type: 'number',
         },
+        {
+          field: 'actions',
+          label: 'Actions',
+        },
+      ],
+      actions: [
+        {
+          label: 'View Client',
+          icon: 'heroicons-outline:eye',
+          func: (clientId) => this.$router.push({path: `/clients/${clientId}`}),
+        },
       ],
     };
   },
@@ -67,7 +78,9 @@ export default {
                 :loading="loading"
                 :columns="columns"
                 :data="leaderboard"
-                title="Leaderboard">
+                title="Leaderboard"
+                :actions="actions"
+            >
             </AdvancedTable>
           </div>
         </div>

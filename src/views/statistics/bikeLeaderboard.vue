@@ -45,8 +45,8 @@ export default {
           type: 'number',
         },
         {
-          field: 'action',
-          label: 'Action',
+          field: 'actions',
+          label: 'Actions',
         },
       ],
       actions: [
