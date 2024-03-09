@@ -48,9 +48,6 @@ def get_potential_bike_matches(db: Session, make: str | None = None, model: str 
         .where(and_(*query_filter))
     )]
 
-    if len(bikes) == 0:
-        raise HTTPException(status_code=404, detail={"description": "No bikes found"})
-
     return bikes
 
 
@@ -111,3 +108,21 @@ def get_similar_colours(db: Session, colour: str) -> list[str]:
     )]
 
     return similar_colours
+
+
+def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase) -> models.Bike:
+    bike = get_bike(db=db, bike_id=bike_id)
+    if updated_bike_data.make is not None:
+        bike.make = updated_bike_data.make
+    if updated_bike_data.model is not None:
+        bike.model = updated_bike_data.model
+    if updated_bike_data.colour is not None:
+        bike.color = updated_bike_data.colour
+    if updated_bike_data.decals is not None:
+        bike.decals = updated_bike_data.decals
+    if updated_bike_data.serialNumber is not None:
+        bike.serialNumber = updated_bike_data.serialNumber
+
+    db.commit()
+
+    return bike
