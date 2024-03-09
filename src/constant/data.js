@@ -54,6 +54,12 @@ export const topMenu = [
     show: ['user'],
   },
   {
+    title: 'Find Bike',
+    icon: 'heroicons-outline:magnifying-glass',
+    link: '/bikes',
+    show: ['user'],
+  },
+  {
     title: 'Deposit Accounting',
     icon: 'heroicons-outline:banknotes',
     link: '/accounting/deposits',

@@ -126,6 +126,18 @@ export default {
       },
     });
   },
+  findBikes(make, model, colour, decals, serialNumber) {
+    return axiosClient.get('/bikes/find', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        ...(make && {make: make}),
+        ...(model && {model: model}),
+        ...(colour && {colour: colour}),
+        ...(decals && {decals: decals}),
+        ...(serialNumber && {serial_number: serialNumber}),
+      },
+    });
+  },
   getBike(bikeId) {
     return axiosClient.get(`/bikes/${bikeId}`, {
       headers: credentialsStore.getApiRequestHeader(),

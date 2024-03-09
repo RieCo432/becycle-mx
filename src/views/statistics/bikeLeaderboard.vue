@@ -106,9 +106,10 @@ export default {
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
       <Card>
-        <div class="grid grid-cols-12">
+        <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12">
             <VueSelect
+                label="Group By"
                 :options="groupByOptions"
                 v-model="selectedGroupBy"
             ></VueSelect>
