@@ -44,6 +44,20 @@
                         collapsable: groupedTable,
                       }"
       >
+        <template v-slot:table-row="props">
+          <span v-if="props.column.field === 'action'">
+            <div class="flex space-x-3 rtl:space-x-reverse">
+                <Tooltip placement="top" arrow theme="dark" v-for="action in actions">
+                  <template #button>
+                    <div class="action-btn">
+                      <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
+                    </div>
+                  </template>
+                  <span>{{action.label}}</span>
+                </Tooltip>
+            </div>
+          </span>
+        </template>
         <template #pagination-bottom="props">
           <div class="py-4 px-3">
             <Pagination
@@ -93,6 +107,7 @@ export default {
       required: true,
     },
     actions: {
+      type: Array,
       required: false,
     },
     title: {

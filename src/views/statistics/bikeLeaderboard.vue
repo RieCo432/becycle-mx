@@ -44,6 +44,17 @@ export default {
           label: 'Contracts',
           type: 'number',
         },
+        {
+          field: 'action',
+          label: 'Action',
+        },
+      ],
+      actions: [
+        {
+          label: 'View Bike',
+          icon: 'heroicons-outline:eye',
+          func: (bikeId) => this.$router.push({path: `/bikes/${bikeId}`}),
+        },
       ],
     };
   },
@@ -119,7 +130,9 @@ export default {
                 :loading="loading"
                 :columns="columns"
                 :data="leaderboard"
-                title="Leaderboard">
+                title="Leaderboard"
+                :actions="actions"
+            >
             </AdvancedTable>
           </div>
         </div>
