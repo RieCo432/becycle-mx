@@ -1,3 +1,4 @@
+from datetime import datetime, date
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 import app.crud as crud
@@ -41,3 +42,12 @@ async def get_bike_leaderboard(
     leaderboard = crud.get_bike_leaderboard(db=db)
 
     return leaderboard
+
+
+@statistics.get("/statistics/contracts/total", dependencies=[Depends(dep.get_current_active_user)])
+async def get_contracts_statistics(
+        interval: int,
+        breakdown: str,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DateSeries]:
+    return crud.get_total_contracts_statistics(db=db, interval=interval, breakdown=breakdown)

@@ -1,3 +1,6 @@
+from datetime import date, datetime
+
+from dateutil.relativedelta import relativedelta
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 import app.models as models
@@ -93,3 +96,30 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
         leaderboard.append(leaderboard_entry)
 
     return leaderboard
+
+
+def get_total_contracts_statistics(db: Session, interval: int, breakdown: str) -> list[schemas.DateSeries]:
+    oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+
+    all_series = []
+    data_series_by_breakdown = {}
+    cutoff_date = oldest_contract.startDate
+
+    while cutoff_date <= datetime.utcnow().date():
+        counts_by_breakdown = [_ for _ in db.query(models.Contract.contractType, func.count(models.Contract.contractType)).where(models.Contract.startDate <= cutoff_date).group_by(
+            models.Contract.contractType)]
+        for breakdown, count in counts_by_breakdown:
+            if breakdown not in data_series_by_breakdown:
+                data_series_by_breakdown[breakdown] = [[cutoff_date, count]]
+            else:
+                data_series_by_breakdown[breakdown].append([cutoff_date, count])
+
+        cutoff_date += relativedelta(days=interval)
+
+    for breakdown in data_series_by_breakdown:
+        all_series.append(schemas.DateSeries(
+            name=breakdown,
+            data=data_series_by_breakdown[breakdown]
+        ))
+
+    return all_series

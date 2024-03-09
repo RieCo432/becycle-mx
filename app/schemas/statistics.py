@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 from pydantic import BaseModel
 from app.schemas import Bike
@@ -28,3 +29,8 @@ class ClientLeaderboard(BaseModel):
 
 class BikeLeaderboard(Bike):
     contracts: int
+
+
+class DateSeries(BaseModel):
+    name: str
+    data: list[dict[date, int]]
