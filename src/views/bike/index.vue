@@ -76,15 +76,25 @@ export default {
     });
     requests.getBikeContracts(this.$route.params.bikeId, true, true, true).then((response) => {
       Promise.all(response.data.map((contract) => {
-        return requests.getClient(contract.clientId).then((clientResponse) => ({
-          id: contract.id,
-          status: 'open',
-          startDate: contract.startDate,
-          endDate: contract.endDate,
-          firstName: clientResponse.data.firstName,
-          lastName: clientResponse.data.lastName,
-          emailAddress: clientResponse.data.emailAddress,
-        }));
+        return requests.getClient(contract.clientId).then((clientResponse) => {
+          let status = 'open';
+          if (contract.returnedDate != null) {
+            status = 'closed';
+          } else {
+            if (new Date(contract.endDate).getTime() < new Date().getTime()) {
+              status = 'expired';
+            }
+          }
+          return {
+            id: contract.id,
+            status: status,
+            startDate: contract.startDate,
+            endDate: contract.endDate,
+            firstName: clientResponse.data.firstName,
+            lastName: clientResponse.data.lastName,
+            emailAddress: clientResponse.data.emailAddress,
+          };
+        });
       })).then((contractSummaries) => {
         this.contractSummaries = contractSummaries;
         this.loadingContracts = false;
