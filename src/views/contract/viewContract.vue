@@ -246,6 +246,14 @@ export default {
       type: Function,
       required: true,
     },
+    goToBike: {
+      type: Function,
+      default: () => {},
+    },
+    openEditBikeDetailsModal: {
+      type: Function,
+      default: () => {},
+    },
   },
 };
 </script>
@@ -281,9 +289,23 @@ export default {
           <Card title="Bike">
             <ContractBikeCardSkeleton v-if="loadingBike"></ContractBikeCardSkeleton>
             <template v-else>
-              <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
-              <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
-              <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+              <div class="grid grid-cols-12 h-full gap-5">
+                <div class="col-span-12" >
+                  <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+                </div>
+                <div v-if="isUser" class="col-span-6 mt-auto">
+                  <DashButton class="w-full" @click="goToBike">
+                    View Bike
+                  </DashButton>
+                </div>
+                <div v-if="isUser" class="col-span-6 mt-auto">
+                  <DashButton class="w-full" @click="openEditBikeDetailsModal">
+                    Edit Details
+                  </DashButton>
+                </div>
+              </div>
             </template>
           </Card>
         </div>

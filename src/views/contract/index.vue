@@ -3,12 +3,14 @@ import requests from '@/requests';
 import viewContract from '@/views/contract/viewContract.vue';
 import {useToast} from 'vue-toastification';
 import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vue';
+import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'contractIndex',
   components: {
+    EditBikeDetailsModal,
     EditClientDetailsModal,
     viewContract,
   },
@@ -39,6 +41,7 @@ export default {
       loadingClient: true,
       loadingContract: true,
       showEditClientDetailsModal: false,
+      showEditBikeDetailsModal: false,
     };
   },
   methods: {
@@ -132,6 +135,8 @@ export default {
         :patch-contract-extend="patchContractExtend"
         :patch-contract-return="patchContractReturn"
         :open-edit-client-details-modal="() => showEditClientDetailsModal = true"
+        :open-edit-bike-details-modal="() => showEditBikeDetailsModal = true"
+        :go-to-bike="() => this.$router.push({path: `/bikes/${bike.id}`})"
         :is-user="true"
     ></view-contract>
     <EditClientDetailsModal v-if="!loadingClient"
@@ -140,6 +145,13 @@ export default {
                             :client="client"
                             @client-details-updated="(updatedDetails) => client = updatedDetails"
     ></EditClientDetailsModal>
+    <EditBikeDetailsModal v-if="!loadingBike"
+                          :close-modal="() => showEditBikeDetailsModal = false"
+                          :show-modal="showEditBikeDetailsModal"
+                          :bike="bike"
+                          @bike-details-updated="(updatedBike) => bike = updatedBike">
+    </EditBikeDetailsModal>
+
   </div>
 </template>
 
