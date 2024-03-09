@@ -32,6 +32,23 @@ async def find_bike(
         db=db)[0]
 
 
+@bikes.get("/bikes/find", dependencies=[Depends(dep.get_current_active_user)])
+async def find_bike(
+        make: str | None = None,
+        model: str | None = None,
+        colour: str | None = None,
+        serial_number: str | None = None,
+        decals: str | None = None,
+        db: Session = Depends(dep.get_db)) -> list[schemas.Bike]:
+    return crud.get_potential_bike_matches(
+        make=make,
+        model=model,
+        colour=colour,
+        decals=decals,
+        serialNumber=serial_number,
+        db=db)
+
+
 @bikes.get("/bikes", dependencies=[Depends(dep.get_current_active_user)])
 async def get_all_bikes(db: Session = Depends(dep.get_db)) -> list[schemas.Bike]:
     return crud.get_all_bikes(db=db)

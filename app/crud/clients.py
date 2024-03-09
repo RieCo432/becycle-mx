@@ -159,7 +159,7 @@ def get_similar_email_addresses(db: Session, email_address: str) -> list[str]:
     return similar_email_addresses
 
 
-def get_potential_matches(db: Session, first_name: str, last_name: str, email_address: str) -> list[models.Client]:
+def get_potential_client_matches(db: Session, first_name: str, last_name: str, email_address: str) -> list[models.Client]:
     query_filter = []
     if first_name is not None:
         query_filter.append(models.Client.firstName.startswith(first_name))

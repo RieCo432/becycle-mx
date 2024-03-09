@@ -132,7 +132,7 @@ async def find_client(
         last_name: str = None,
         email_address: str = None,
         db: Session = Depends(dep.get_db)) -> list[schemas.Client]:
-    return crud.get_potential_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
+    return crud.get_potential_client_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
 
 
 @clients.get("/clients/me")

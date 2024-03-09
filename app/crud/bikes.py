@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_, or_
 
 
 def get_bike(db: Session, bike_id: UUID) -> models.Bike:
@@ -24,6 +24,28 @@ def find_similar_bikes(db: Session, make: str | None = None, model: str | None =
             & (func.levenshtein(models.Bike.serialNumber, serialNumber) <= 2)
         )
         .order_by(func.levenshtein(models.Bike.serialNumber, serialNumber))
+    )]
+
+    if len(bikes) == 0:
+        raise HTTPException(status_code=404, detail={"description": "No bikes found"})
+
+    return bikes
+
+
+def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None) -> list[schemas.Bike]:
+    query_filter = []
+    if make is not None:
+        query_filter.append(models.Bike.make.startswith(make.lower()))
+    if model is not None:
+        query_filter.append(models.Bike.model.startswith(model.lower()))
+    if colour is not None:
+        query_filter.append(models.Bike.colour.startswith(colour.lower()))
+    if serialNumber is not None:
+        query_filter.append(models.Bike.serialNumber.startswith(serialNumber.lower()))
+
+    bikes = [bike for bike in db.scalars(
+        select(models.Bike)
+        .where(and_(*query_filter))
     )]
 
     if len(bikes) == 0:
