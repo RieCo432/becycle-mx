@@ -180,3 +180,44 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
         ))
 
     return all_series
+
+
+def get_new_contracts_statistics(db: Session, interval: int) -> list[schemas.DateSeries]:
+    oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+
+    all_categories = [_ for _ in db.scalars(
+        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(models.Contract.contractType)
+    )]
+
+    all_series = []
+    data_series_by_breakdown = {}
+    period_start_date = oldest_contract.startDate
+    period_end_date = oldest_contract.startDate + relativedelta(days=interval)
+
+    while period_start_date <= datetime.utcnow().date():
+
+        counts_by_breakdown = {cat: count for cat, count in [_ for _ in
+                                                             db.query(models.Contract.contractType, func.count(models.Contract.contractType))
+                                                             .where(
+                                                                 (models.Contract.startDate >= period_start_date)
+                                                                 & (models.Contract.startDate < period_end_date)
+                                                             )
+                                                             .group_by(models.Contract.contractType)
+                                                             ]}
+        for breakdown in all_categories:
+            count = counts_by_breakdown.get(breakdown, 0)
+            if breakdown not in data_series_by_breakdown:
+                data_series_by_breakdown[breakdown] = [[period_start_date, count]]
+            else:
+                data_series_by_breakdown[breakdown].append([period_start_date, count])
+
+        period_start_date = period_end_date
+        period_end_date = period_start_date + relativedelta(days=interval)
+
+    for breakdown in data_series_by_breakdown:
+        all_series.append(schemas.DateSeries(
+            name=breakdown,
+            data=data_series_by_breakdown[breakdown]
+        ))
+
+    return all_series

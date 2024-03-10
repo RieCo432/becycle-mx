@@ -60,3 +60,11 @@ async def get_contracts_statistics(
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.DateSeries]:
     return crud.get_active_contracts_statistics(db=db, interval=interval, grace_period=grace_period)
+
+
+@statistics.get("/statistics/contracts/new", dependencies=[Depends(dep.get_current_active_user)])
+async def get_contracts_statistics(
+        interval: int,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DateSeries]:
+    return crud.get_new_contracts_statistics(db=db, interval=interval)
