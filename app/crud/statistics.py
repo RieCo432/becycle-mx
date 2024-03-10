@@ -98,10 +98,14 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
     return leaderboard
 
 
-def get_total_contracts_statistics(db: Session, interval: int, breakdown: str) -> list[schemas.DateSeries]:
+def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
     if interval == 0:
         interval = 1
-    oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+    if start_date is None:
+        oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+        start_date = oldest_contract.startDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
 
     if breakdown == 'contractType':
         col = models.Contract.contractType
@@ -116,25 +120,24 @@ def get_total_contracts_statistics(db: Session, interval: int, breakdown: str) -
 
     all_series = []
     data_series_by_breakdown = {}
-    cutoff_date = oldest_contract.startDate
 
-    while cutoff_date <= datetime.utcnow().date():
+    while start_date <= end_date:
         query = db.query(col, func.count(col))
         if breakdown == 'bikeMake':
             query = query.join(models.Contract)
 
         counts_by_breakdown = {cat: count for cat, count in[_ for _ in
-                               query.where(models.Contract.startDate <= cutoff_date)
+                               query.where(models.Contract.startDate <= start_date)
                                .group_by(col)
                                ]}
         for breakdown in all_categories:
             count = counts_by_breakdown.get(breakdown, 0)
             if breakdown not in data_series_by_breakdown:
-                data_series_by_breakdown[breakdown] = [[cutoff_date, count]]
+                data_series_by_breakdown[breakdown] = [[start_date, count]]
             else:
-                data_series_by_breakdown[breakdown].append([cutoff_date, count])
+                data_series_by_breakdown[breakdown].append([start_date, count])
 
-        cutoff_date += relativedelta(days=interval)
+        start_date += relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
         all_series.append(schemas.DateSeries(
