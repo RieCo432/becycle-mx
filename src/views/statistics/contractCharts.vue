@@ -8,12 +8,15 @@ export default {
   },
   data() {
     return {
+      interval: 28,
       loadingContractsTotal: true,
       loadingContractsActive: true,
       loadingContractsNew: true,
+      loadingContractsReturned: true,
       contractsTotalSeries: [],
       contractsActiveSeries: [],
       contractsNewSeries: [],
+      contractsReturnedSeries: [],
       stackedAreaChartOptions: {
         chart: {
           type: 'area',
@@ -32,7 +35,7 @@ export default {
           enabled: false,
         },
         stroke: {
-          curve: 'smooth',
+          curve: 'stepline',
         },
         fill: {
           type: 'gradient',
@@ -66,24 +69,31 @@ export default {
     this.fetchTotalContractsTimeSeries();
     this.fetchActiveContractsTimeSeries();
     this.fetchNewContractsTimeSeries();
+    this.fetchReturnedContractsTimeSeries();
   },
   methods: {
     fetchTotalContractsTimeSeries() {
-      requests.getTotalContractsDateSeries(28, 'contractType').then((response) => {
+      requests.getTotalContractsDateSeries(this.interval, 'contractType').then((response) => {
         this.contractsTotalSeries = response.data;
         this.loadingContractsTotal = false;
       });
     },
     fetchActiveContractsTimeSeries() {
-      requests.getActiveContractsDateSeries(28, 0).then((response) => {
+      requests.getActiveContractsDateSeries(this.interval, 0).then((response) => {
         this.contractsActiveSeries = response.data;
         this.loadingContractsActive = false;
       });
     },
     fetchNewContractsTimeSeries() {
-      requests.getNewContractsDateSeries(28).then((response) => {
+      requests.getNewContractsDateSeries(this.interval).then((response) => {
         this.contractsNewSeries = response.data;
         this.loadingContractsNew = false;
+      });
+    },
+    fetchReturnedContractsTimeSeries() {
+      requests.getReturnedContractsDateSeries(this.interval).then((response) => {
+        this.contractsReturnedSeries = response.data;
+        this.loadingContractsReturned = false;
       });
     },
 
@@ -110,7 +120,7 @@ export default {
     </div>
     <div class="col-span-6">
       <Card title="Returned Contracts">
-
+        <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="stackedAreaChartOptions" :series="contractsReturnedSeries"></apexchart>
       </Card>
     </div>
   </div>
