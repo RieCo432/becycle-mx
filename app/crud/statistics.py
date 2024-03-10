@@ -244,10 +244,14 @@ def get_new_contracts_statistics(db: Session, interval: int, start_date: date | 
     return all_series
 
 
-def get_returned_contracts_statistics(db: Session, interval: int) -> list[schemas.DateSeries]:
+def get_returned_contracts_statistics(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
     if interval == 0:
         interval = 1
-    oldest_returned_contract = db.query(models.Contract).where(models.Contract.returnedDate != None).order_by(models.Contract.returnedDate).first()
+    if start_date is None:
+        oldest_returned_contract = db.query(models.Contract).where(models.Contract.returnedDate != None).order_by(models.Contract.returnedDate).first()
+        start_date = oldest_returned_contract.returnedDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
 
     all_categories = [_ for _ in db.scalars(
         db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(models.Contract.contractType)
@@ -255,10 +259,10 @@ def get_returned_contracts_statistics(db: Session, interval: int) -> list[schema
 
     all_series = []
     data_series_by_breakdown = {}
-    period_start_date = oldest_returned_contract.returnedDate
-    period_end_date = oldest_returned_contract.returnedDate + relativedelta(days=interval)
+    period_start_date = start_date
+    period_end_date = start_date + relativedelta(days=interval)
 
-    while period_start_date <= datetime.utcnow().date():
+    while period_start_date <= end_date:
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
                                                              db.query(models.Contract.contractType, func.count(models.Contract.contractType))
