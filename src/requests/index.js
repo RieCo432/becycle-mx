@@ -538,4 +538,12 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getNewContractsDateSeries(interval) {
+    return axiosClient.get('/statistics/contracts/new', {
+      params: {
+        interval: interval,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

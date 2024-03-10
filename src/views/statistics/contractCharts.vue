@@ -10,8 +10,10 @@ export default {
     return {
       loadingContractsTotal: true,
       loadingContractsActive: true,
+      loadingContractsNew: true,
       contractsTotalSeries: [],
       contractsActiveSeries: [],
+      contractsNewSeries: [],
       stackedAreaChartOptions: {
         chart: {
           type: 'area',
@@ -63,18 +65,25 @@ export default {
   created() {
     this.fetchTotalContractsTimeSeries();
     this.fetchActiveContractsTimeSeries();
+    this.fetchNewContractsTimeSeries();
   },
   methods: {
     fetchTotalContractsTimeSeries() {
-      requests.getTotalContractsDateSeries(7, 'contractType').then((response) => {
+      requests.getTotalContractsDateSeries(28, 'contractType').then((response) => {
         this.contractsTotalSeries = response.data;
         this.loadingContractsTotal = false;
       });
     },
     fetchActiveContractsTimeSeries() {
-      requests.getActiveContractsDateSeries(7, 0).then((response) => {
+      requests.getActiveContractsDateSeries(28, 0).then((response) => {
         this.contractsActiveSeries = response.data;
         this.loadingContractsActive = false;
+      });
+    },
+    fetchNewContractsTimeSeries() {
+      requests.getNewContractsDateSeries(28).then((response) => {
+        this.contractsNewSeries = response.data;
+        this.loadingContractsNew = false;
       });
     },
 
@@ -96,7 +105,7 @@ export default {
     </div>
     <div class="col-span-6">
       <Card title="New Contracts">
-
+        <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="stackedAreaChartOptions" :series="contractsNewSeries"></apexchart>
       </Card>
     </div>
     <div class="col-span-6">
