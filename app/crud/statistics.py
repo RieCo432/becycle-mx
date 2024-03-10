@@ -99,6 +99,8 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
 
 
 def get_total_contracts_statistics(db: Session, interval: int, breakdown: str) -> list[schemas.DateSeries]:
+    if interval == 0:
+        interval = 1
     oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
 
     if breakdown == 'contractType':
@@ -144,6 +146,8 @@ def get_total_contracts_statistics(db: Session, interval: int, breakdown: str) -
 
 
 def get_active_contracts_statistics(db: Session, interval: int, grace_period: int) -> list[schemas.DateSeries]:
+    if interval == 0:
+        interval = 1
     oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
 
     all_categories = [_ for _ in db.scalars(
@@ -187,6 +191,8 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
 
 
 def get_new_contracts_statistics(db: Session, interval: int) -> list[schemas.DateSeries]:
+    if interval == 0:
+        interval = 1
     oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
 
     all_categories = [_ for _ in db.scalars(
@@ -228,6 +234,8 @@ def get_new_contracts_statistics(db: Session, interval: int) -> list[schemas.Dat
 
 
 def get_returned_contracts_statistics(db: Session, interval: int) -> list[schemas.DateSeries]:
+    if interval == 0:
+        interval = 1
     oldest_returned_contract = db.query(models.Contract).where(models.Contract.returnedDate != None).order_by(models.Contract.returnedDate).first()
 
     all_categories = [_ for _ in db.scalars(
