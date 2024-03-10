@@ -102,21 +102,35 @@ export const topMenu = [
     show: ['user'],
   },
   {
-    title: 'Volunteer Leaderboard',
+    title: 'Leaderboards',
     icon: 'heroicons-outline:chart-bar',
-    link: '/statistics/users/leaderboard',
+    link: '/statistics/',
     show: ['user'],
+    child: [
+      {
+        childtitle: 'Volunteer Leaderboard',
+        childicon: 'heroicons-outline:chart-bar',
+        childlink: '/statistics/users/leaderboard',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Bike Leaderboard',
+        childicon: 'heroicons-outline:chart-bar',
+        childlink: '/statistics/bikes/leaderboard',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Client Leaderboard',
+        childicon: 'heroicons-outline:chart-bar',
+        childlink: '/statistics/clients/leaderboard',
+        show: ['user'],
+      },
+    ],
   },
   {
-    title: 'Bike Leaderboard',
-    icon: 'heroicons-outline:chart-bar',
-    link: '/statistics/bikes/leaderboard',
-    show: ['user'],
-  },
-  {
-    title: 'Client Leaderboard',
-    icon: 'heroicons-outline:chart-bar',
-    link: '/statistics/clients/leaderboard',
+    title: 'Contract Charts',
+    icon: 'heroicons-outline:presentation-chart-line',
+    link: '/statistics/contracts',
     show: ['user'],
   },
 ];

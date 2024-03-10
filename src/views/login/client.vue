@@ -145,7 +145,7 @@
                   Once you have logged in, your login will stay valid for a week. After this, you will have to log in again.
                 </div>
               </Tooltip>
-              
+
               <Button
                   :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                   btnClass="btn-dark"

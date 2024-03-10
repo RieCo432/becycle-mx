@@ -238,6 +238,15 @@ const routes = [
         },
         component: () => import('@/views/bike/findBike.vue'),
       },
+      {
+        path: '/statistics/contracts',
+        name: 'Contract Charts',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/statistics/contracts',
+        },
+        component: () => import('@/views/statistics/contractCharts.vue'),
+      },
     ],
   },
 ];

@@ -520,4 +520,22 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getTotalContractsDateSeries(interval, breakdown) {
+    return axiosClient.get('/statistics/contracts/total', {
+      params: {
+        interval: interval,
+        breakdown: breakdown,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getActiveContractsDateSeries(interval, gracePeriod) {
+    return axiosClient.get('/statistics/contracts/active', {
+      params: {
+        interval: interval,
+        grace_period: gracePeriod,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
