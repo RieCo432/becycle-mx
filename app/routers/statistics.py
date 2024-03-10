@@ -68,3 +68,11 @@ async def get_contracts_statistics(
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.DateSeries]:
     return crud.get_new_contracts_statistics(db=db, interval=interval)
+
+
+@statistics.get("/statistics/contracts/returned", dependencies=[Depends(dep.get_current_active_user)])
+async def get_contracts_statistics(
+        interval: int,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DateSeries]:
+    return crud.get_returned_contracts_statistics(db=db, interval=interval)
