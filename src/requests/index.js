@@ -520,36 +520,44 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getTotalContractsDateSeries(interval, breakdown) {
+  getTotalContractsDateSeries(interval, breakdown, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/total', {
       params: {
         interval: interval,
         breakdown: breakdown,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getActiveContractsDateSeries(interval, gracePeriod) {
+  getActiveContractsDateSeries(interval, gracePeriod, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/active', {
       params: {
         interval: interval,
         grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getNewContractsDateSeries(interval) {
+  getNewContractsDateSeries(interval, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/new', {
       params: {
         interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getReturnedContractsDateSeries(interval) {
+  getReturnedContractsDateSeries(interval, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/returned', {
       params: {
         interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
     });

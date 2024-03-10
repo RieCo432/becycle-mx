@@ -3,11 +3,6 @@ export default {
     type: 'area',
     height: 300,
     stacked: true,
-    events: {
-      selection: function(chart, e) {
-        console.log(new Date(e.xaxis.min));
-      },
-    },
   },
   theme: {
     mode: 'light',

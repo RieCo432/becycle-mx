@@ -11,6 +11,8 @@ export default {
   data() {
     return {
       series: [],
+      startDate: null,
+      endDate: null,
       interval: 7,
       gracePeriod: 28,
       chartOptions: chartOptions,
@@ -18,8 +20,14 @@ export default {
   },
   methods: {
     fetchDateSeries() {
-      requests.getActiveContractsDateSeries(this.interval, this.gracePeriod).then((response) => {
+      requests.getActiveContractsDateSeries(this.interval, this.gracePeriod, this.startDate, this.endDate).then((response) => {
         this.series = response.data;
+        if (!this.startDate) {
+          this.startDate = new Date(Date.parse(this.series[0].data[0][0]));
+        }
+        if (!this.endDate) {
+          this.endDate = new Date(Date.parse(this.series[0].data[this.series[0].data.length - 1][0]));
+        }
       });
     },
   },
@@ -66,6 +74,32 @@ export default {
             class="m-auto"
             @update:modelValue="fetchDateSeries"
         ></vue-slider>
+      </div>
+      <div class="col-span-4 content-center">
+        <label class="text-slate-700 dark:text-slate-300">Period Start</label>
+        <flat-pickr
+            class="form-control m-auto"
+            name="startDate"
+            id="d3"
+            placeholder="dd-mm-yyyy"
+            v-model="startDate"
+            :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+            @change="fetchDateSeries"
+        >
+        </flat-pickr>
+      </div>
+      <div class="col-span-4 content-center">
+        <label class="text-slate-700 dark:text-slate-300">Period End</label>
+        <flat-pickr
+            class="form-control m-auto"
+            name="endDate"
+            id="d3"
+            placeholder="dd-mm-yyyy"
+            v-model="endDate"
+            :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+            @change="fetchDateSeries"
+        >
+        </flat-pickr>
       </div>
     </div>
   </Card>
