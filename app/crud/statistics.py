@@ -159,7 +159,11 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
                                                              db.query(models.Contract.contractType, func.count(models.Contract.contractType))
                                                              .where(
-                                                                 (models.Contract.startDate <= probe_date)
+                                                                 (
+                                                                     (models.Contract.returnedDate == None)
+                                                                     | (models.Contract.returnedDate >= probe_date)
+                                                                 )
+                                                                 & (models.Contract.startDate <= probe_date)
                                                                  & (models.Contract.endDate >= probe_date - relativedelta(days=grace_period))
                                                              )
                                                              .group_by(models.Contract.contractType)
