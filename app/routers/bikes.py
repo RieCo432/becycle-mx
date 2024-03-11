@@ -23,7 +23,7 @@ async def find_bike(
         serial_number: str,
         decals: str = None,
         db: Session = Depends(dep.get_db)) -> schemas.Bike:
-    return crud.get_bikes(
+    return crud.find_similar_bikes(
         make=make.lower() if make is not None else None,
         model=model.lower() if model is not None else None,
         colour=colour.lower() if colour is not None else None,
@@ -32,13 +32,26 @@ async def find_bike(
         db=db)[0]
 
 
-@bikes.get("/bike", dependencies=[Depends(dep.get_current_active_user)])
-async def get_bike(
-        bike_id: UUID,
-        db: Session = Depends(dep.get_db)
-) -> schemas.Bike:
-    print("/bike IS DEPRECIATED")
-    return crud.get_bike(db=db, bike_id=bike_id)
+@bikes.get("/bikes/find", dependencies=[Depends(dep.get_current_active_user)])
+async def find_bike(
+        make: str | None = None,
+        model: str | None = None,
+        colour: str | None = None,
+        serial_number: str | None = None,
+        decals: str | None = None,
+        db: Session = Depends(dep.get_db)) -> list[schemas.Bike]:
+    return crud.get_potential_bike_matches(
+        make=make,
+        model=model,
+        colour=colour,
+        decals=decals,
+        serialNumber=serial_number,
+        db=db)
+
+
+@bikes.get("/bikes", dependencies=[Depends(dep.get_current_active_user)])
+async def get_all_bikes(db: Session = Depends(dep.get_db)) -> list[schemas.Bike]:
+    return crud.get_all_bikes(db=db)
 
 
 @bikes.get("/bikes/{bike_id}")
@@ -47,6 +60,23 @@ async def get_bike(
         db: Session = Depends(dep.get_db)
 ) -> schemas.Bike:
     return crud.get_bike(db=db, bike_id=bike_id)
+
+
+@bikes.patch("/bikes/{bike_id}")
+async def get_bike(
+        bike_id: UUID,
+        updated_bike_data: schemas.BikeBase,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Bike:
+    return crud.update_bike(db=db, bike_id=bike_id, updated_bike_data=updated_bike_data)
+
+
+@bikes.get("/bikes/{bike_id}/contracts", dependencies=[Depends(dep.get_current_active_user)])
+async def get_bike_contracts(
+        bike_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.Contract]:
+    return crud.get_contracts(db=db, bike_id=bike_id)
 
 
 @bikes.post("/bike", dependencies=[Depends(dep.get_current_active_user)])

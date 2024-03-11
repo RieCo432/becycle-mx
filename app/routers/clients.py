@@ -132,11 +132,22 @@ async def find_client(
         last_name: str = None,
         email_address: str = None,
         db: Session = Depends(dep.get_db)) -> list[schemas.Client]:
-    return crud.get_potential_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
+    return crud.get_potential_client_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
 
 
 @clients.get("/clients/me")
 async def get_client_me(client: Annotated[models.Client, Depends(dep.get_current_client)]) -> schemas.Client:
+
+    return client
+
+
+@clients.patch("/clients/me")
+async def update_client_me(
+        new_names: schemas.ClientChangeName,
+        client: Annotated[models.Client, Depends(dep.get_current_client)],
+        db: Session = Depends(dep.get_db)) -> schemas.Client:
+
+    client = crud.update_client(db=db, client_id=client.id, new_first_name=new_names.firstName, new_last_name=new_names.lastName)
 
     return client
 
@@ -202,6 +213,19 @@ async def cancel_my_appointment(
 async def get_client(client_id: UUID,
                      db: Session = Depends(dep.get_db)) -> schemas.Client:
     return crud.get_client(db=db, client_id=client_id)
+
+
+@clients.patch("/clients/{client_id}", dependencies=[Depends(dep.get_current_active_user)])
+async def update_client_full(
+        client_id: UUID,
+        updated_client_data: schemas.ClientBase,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Client:
+    return crud.update_client(db=db,
+                              client_id=client_id,
+                              new_first_name=updated_client_data.firstName,
+                              new_last_name=updated_client_data.lastName,
+                              new_email_address=updated_client_data.emailAddress)
 
 
 # TODO: Implement query parameters for pagination

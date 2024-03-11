@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_, or_
 
 
 def get_bike(db: Session, bike_id: UUID) -> models.Bike:
@@ -14,7 +14,7 @@ def get_bike(db: Session, bike_id: UUID) -> models.Bike:
     )
 
 
-def get_bikes(make: str, model: str, colour: str, decals: str, serialNumber: str, db: Session) -> list[schemas.Bike]:
+def find_similar_bikes(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None) -> list[schemas.Bike]:
     bikes = [bike for bike in db.scalars(
         select(models.Bike)
         .where(
@@ -30,6 +30,31 @@ def get_bikes(make: str, model: str, colour: str, decals: str, serialNumber: str
         raise HTTPException(status_code=404, detail={"description": "No bikes found"})
 
     return bikes
+
+
+def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None) -> list[schemas.Bike]:
+    query_filter = []
+    if make is not None:
+        query_filter.append(models.Bike.make.startswith(make.lower()))
+    if model is not None:
+        query_filter.append(models.Bike.model.startswith(model.lower()))
+    if colour is not None:
+        query_filter.append(models.Bike.colour.startswith(colour.lower()))
+    if serialNumber is not None:
+        query_filter.append(models.Bike.serialNumber.startswith(serialNumber.lower()))
+
+    bikes = [bike for bike in db.scalars(
+        select(models.Bike)
+        .where(and_(*query_filter))
+    )]
+
+    return bikes
+
+
+def get_all_bikes(db: Session) -> list[schemas.Bike]:
+    return [_ for _ in db.scalars(
+        select(models.Bike)
+    )]
 
 
 def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
@@ -83,3 +108,21 @@ def get_similar_colours(db: Session, colour: str) -> list[str]:
     )]
 
     return similar_colours
+
+
+def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase) -> models.Bike:
+    bike = get_bike(db=db, bike_id=bike_id)
+    if updated_bike_data.make is not None:
+        bike.make = updated_bike_data.make
+    if updated_bike_data.model is not None:
+        bike.model = updated_bike_data.model
+    if updated_bike_data.colour is not None:
+        bike.color = updated_bike_data.colour
+    if updated_bike_data.decals is not None:
+        bike.decals = updated_bike_data.decals
+    if updated_bike_data.serialNumber is not None:
+        bike.serialNumber = updated_bike_data.serialNumber
+
+    db.commit()
+
+    return bike
