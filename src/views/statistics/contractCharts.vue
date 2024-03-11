@@ -144,9 +144,6 @@ export default {
       }
       this.fetchAllSeries();
     },
-    handleStartDateSelection(evt, evt2) {
-      console.log(evt, evt2);
-    },
   },
   watch: {
     startDate(newStartDate, oldStartDate) {
@@ -243,7 +240,7 @@ export default {
       </Card>
     </div>
     <div class="col-span-6">
-      <Card title="Total Contracts">
+      <Card title="Active Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="activeContractSeries"></apexchart>
@@ -252,7 +249,7 @@ export default {
       </Card>
     </div>
     <div class="col-span-6">
-      <Card title="Total Contracts">
+      <Card title="New Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="newContractSeries"></apexchart>
@@ -261,7 +258,7 @@ export default {
       </Card>
     </div>
     <div class="col-span-6">
-      <Card title="Total Contracts">
+      <Card title="Returned Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="returnedContractSeries"></apexchart>
