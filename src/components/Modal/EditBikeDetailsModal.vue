@@ -20,7 +20,7 @@ export default {
       make: yup.string().required('Make is required'),
       model: yup.string().required('Modal is required'),
       colour: yup.string().required('Colour is required'),
-      decals: yup.string().email('Email is not valid'),
+      decals: yup.string().nullable(),
       serialNumber: yup.string().required('Serial Number is required'),
     });
 
