@@ -1,11 +1,13 @@
 <script>
 import requests from '@/requests';
 import viewContract from '@/views/contract/viewContract.vue';
+import EditMyDetailsModal from '@/components/Modal/EditMyDetailsModal.vue';
 
 
 export default {
   name: 'clientContractIndex',
   components: {
+    EditMyDetailsModal,
     viewContract,
   },
   data() {
@@ -22,6 +24,7 @@ export default {
       loadingBike: true,
       loadingClient: true,
       loadingContract: true,
+      showEditClientDetailsModal: false,
     };
   },
   mounted() {
@@ -47,18 +50,29 @@ export default {
 </script>
 
 <template>
-  <view-contract :client="client"
-                 :bike="bike"
-                 :depositCollectingUsername="depositCollectingUsername"
-                 :workingUsername="workingUsername"
-                 :checkingUsername="checkingUsername"
-                 :contract="contract"
-                 :depositReturnedByUsername="depositReturnedByUsername"
-                 :returnAcceptedByUsername="returnAcceptedByUsername"
-                 :loading-client="loadingClient"
-                 :loading-bike="loadingBike"
-                 :loading-contract="loadingContract"
-  ></view-contract>
+  <div>
+    <view-contract :client="client"
+                   :bike="bike"
+                   :depositCollectingUsername="depositCollectingUsername"
+                   :workingUsername="workingUsername"
+                   :checkingUsername="checkingUsername"
+                   :contract="contract"
+                   :depositReturnedByUsername="depositReturnedByUsername"
+                   :returnAcceptedByUsername="returnAcceptedByUsername"
+                   :loading-client="loadingClient"
+                   :loading-bike="loadingBike"
+                   :loading-contract="loadingContract"
+                   :open-edit-client-details-modal="() => showEditClientDetailsModal = true"
+                   :is-user="false"
+    ></view-contract>
+    <EditMyDetailsModal v-if="!loadingClient"
+                        :show-modal="showEditClientDetailsModal"
+                        :client="client"
+                        :close-modal="() => showEditClientDetailsModal = false"
+                        @client-details-updated="(updatedDetails) => client = updatedDetails">
+    </EditMyDetailsModal>
+  </div>
+
 </template>
 
 <style scoped lang="scss">

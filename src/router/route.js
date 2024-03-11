@@ -193,6 +193,60 @@ const routes = [
         },
         component: () => import('@/views/contract/findPaperContract.vue'),
       },
+      {
+        path: '/statistics/users/leaderboard',
+        name: 'Volunteer Leaderboard',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/statistics/users/leaderboard',
+        },
+        component: () => import('@/views/statistics/userLeaderboard.vue'),
+      },
+      {
+        path: '/statistics/clients/leaderboard',
+        name: 'Client Leaderboard',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/statistics/clients/leaderboard',
+        },
+        component: () => import('@/views/statistics/clientLeaderboard.vue'),
+      },
+      {
+        path: '/statistics/bikes/leaderboard',
+        name: 'Bike Leaderboard',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/statistics/bikes/leaderboard',
+        },
+        component: () => import('@/views/statistics/bikeLeaderboard.vue'),
+      },
+      {
+        path: '/bikes/:bikeId',
+        name: 'Bike',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/bikes',
+        },
+        component: () => import('@/views/bike/index.vue'),
+      },
+      {
+        path: '/bikes',
+        name: 'Find Bike',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/bikes',
+        },
+        component: () => import('@/views/bike/findBike.vue'),
+      },
+      {
+        path: '/statistics/contracts',
+        name: 'Contract Charts',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/statistics/contracts',
+        },
+        component: () => import('@/views/statistics/contractCharts.vue'),
+      },
     ],
   },
 ];

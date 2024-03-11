@@ -1,7 +1,9 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import {useToast} from 'vue-toastification';
 
 import routes from './route';
+const toast = useToast();
 
 const router = createRouter({
   history: createWebHistory(import.meta.BASE_URL),
@@ -32,6 +34,7 @@ router.beforeEach((to, from, next) => {
     if (to.meta.restrictTo.includes(credentialsStore.getTokenType())) {
       next();
     } else if (to.meta.restrictTo.includes('client')) {
+      toast.warning('You need to register/login to access Appointment Booking', {timeout: 4000});
       next({path: '/clients/login', query: {nextUrl: to.path}});
     } else {
       next({path: '/home'});

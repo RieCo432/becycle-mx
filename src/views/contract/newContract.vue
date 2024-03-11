@@ -58,13 +58,13 @@
                   <div class="col-span-1">
                     <ComboboxTextInput
                         :field-model-value="emailAddress"
-                        :suggestions="filtered_email_suggestions"
-                        :selected-callback="selectEmail">
+                        :suggestions="filteredClientSuggestionsLegible"
+                        :selected-callback="selectClient">
                       <Textinput label="Email" type="email" placeholder="Type your email"
                                  name="emailAddress"
                                  v-model="emailAddress"
                                  :error="emailAddressError"
-                                 @input="fetchEmailSuggestions"
+                                 @input="fetchClientSuggestions"
                       />
                     </ComboboxTextInput>
                   </div>
@@ -81,25 +81,37 @@
                   </div>
 
                   <div class="col-span-1">
-                    <Textinput
-                        label="First name"
-                        type="text"
-                        placeholder="First name"
-                        name="firstname"
-                        v-model="firstName"
-                        :error="firstNameError"
-                    />
+                    <ComboboxTextInput
+                        :field-model-value="emailAddress"
+                        :suggestions="filteredClientSuggestionsLegible"
+                        :selected-callback="selectClient">
+                      <Textinput
+                          label="First name"
+                          type="text"
+                          placeholder="First name"
+                          name="firstname"
+                          v-model="firstName"
+                          :error="firstNameError"
+                          @input="fetchClientSuggestions"
+                      />
+                    </ComboboxTextInput>
                   </div>
 
                   <div class="col-span-1">
-                    <Textinput
-                        label="Last name"
-                        type="text"
-                        placeholder="Last name"
-                        name="lastname"
-                        v-model="lastName"
-                        :error="lastNameError"
-                    />
+                    <ComboboxTextInput
+                        :field-model-value="emailAddress"
+                        :suggestions="filteredClientSuggestionsLegible"
+                        :selected-callback="selectClient">
+                      <Textinput
+                          label="Last name"
+                          type="text"
+                          placeholder="Last name"
+                          name="lastname"
+                          v-model="lastName"
+                          :error="lastNameError"
+                          @input="fetchClientSuggestions"
+                      />
+                    </ComboboxTextInput>
                   </div>
                 </div>
               </div>
@@ -550,7 +562,7 @@ export default {
     // step by step yup schema
     const clientSchema = yup.object().shape({
       firstName: yup.string().required('First name is required'),
-      lastName: yup.string().required('First name is required'),
+      lastName: yup.string().required('Last name is required'),
       emailAddress: yup
           .string()
           .email('Email is not valid')
@@ -804,7 +816,7 @@ export default {
   data() {
     return {
       emailTyped: '',
-      email_suggestions: [],
+      clientSuggestions: [],
       make_suggestions: [],
       model_suggestions: [],
       colour_suggestions: [],
@@ -815,7 +827,7 @@ export default {
     };
   },
   created() {
-    this.fetchEmailSuggestions = debounce(this.fetchEmailSuggestions, 500, {leading: true, trailing: true});
+    this.fetchClientSuggestions = debounce(this.fetchClientSuggestions, 500, {leading: true, trailing: true});
     this.fetchBikeMakeSuggestions = debounce(this.fetchBikeMakeSuggestions, 500, {leading: true, trailing: true});
     this.fetchBikeModelSuggestions = debounce(this.fetchBikeModelSuggestions, 500, {leading: true, trailing: true});
     this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500, {leading: true, trailing: true});
@@ -826,10 +838,14 @@ export default {
       const date = new Date();
       return new Date(date.setMonth(date.getMonth() + 6));
     },
-    fetchEmailSuggestions() {
-      requests.getEmailAddressSuggestions(this.emailAddress.toLowerCase()).then((response) => {
-        this.email_suggestions = response.data;
-      });
+    fetchClientSuggestions() {
+      requests.findClient(
+          this.firstName ? this.firstName.toLowerCase() : '',
+          this.lastName ? this.lastName.toLowerCase() : '',
+          this.emailAddress ? this.emailAddress.toLowerCase() :'')
+          .then((response) => {
+            this.clientSuggestions = response.data;
+          });
     },
     fetchBikeMakeSuggestions() {
       requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {
@@ -851,14 +867,13 @@ export default {
         this.colour_suggestions = response.data;
       });
     },
-    selectEmail(event) {
-      this.emailAddress = event.target.innerText;
-      requests.getClientByEmail(this.emailAddress).then((response) => {
-        this.clientId = response.data[0]['id'];
-        this.confirmEmailAddress = response.data[0]['emailAddress'];
-        this.firstName = response.data[0]['firstName'];
-        this.lastName = response.data[0]['lastName'];
-      });
+    selectClient(event, i) {
+      const selectedClient = this.filtered_client_suggestions[i];
+      this.clientId = selectedClient.id;
+      this.emailAddress = selectedClient.emailAddress;
+      this.confirmEmailAddress = selectedClient.emailAddress;
+      this.firstName = selectedClient.firstName;
+      this.lastName = selectedClient.lastName;
     },
     selectMake(event) {
       this.make = event.target.innerText;
@@ -874,8 +889,15 @@ export default {
     },
   },
   computed: {
-    filtered_email_suggestions() {
-      return this.email_suggestions.filter((suggestion) => (suggestion.startsWith(this.emailAddress.toLowerCase()))).slice(0, 4);
+    filtered_client_suggestions() {
+      return this.clientSuggestions.filter((client) => (
+          (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
+          (this.lastName && client.lastName.startsWith(this.lastName.toLowerCase())) ||
+          (this.emailAddress && client.emailAddress.startsWith(this.emailAddress.toLowerCase()))
+      ));
+    },
+    filteredClientSuggestionsLegible() {
+      return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))
     },
     filtered_make_suggestions() {
       return this.make_suggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);

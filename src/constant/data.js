@@ -28,7 +28,7 @@ export const topMenu = [
         show: ['loggedout'],
       },
       {
-        childtitle: 'Client Login',
+        childtitle: 'Client Register/Login',
         childlink: '/clients/login',
         childicon: 'heroicons-outline:login',
         show: ['loggedout'],
@@ -51,6 +51,12 @@ export const topMenu = [
     title: 'Find Client',
     icon: 'heroicons-outline:document-magnifying-glass',
     link: '/clients',
+    show: ['user'],
+  },
+  {
+    title: 'Find Bike',
+    icon: 'heroicons-outline:magnifying-glass',
+    link: '/bikes',
     show: ['user'],
   },
   {
@@ -93,6 +99,38 @@ export const topMenu = [
     title: 'Find Paper Contract',
     icon: 'heroicons-outline:clipboard-document-list',
     link: '/contracts/find-paper-contract',
+    show: ['user'],
+  },
+  {
+    title: 'Leaderboards',
+    icon: 'heroicons-outline:chart-bar',
+    link: '/statistics/',
+    show: ['user'],
+    child: [
+      {
+        childtitle: 'Volunteer Leaderboard',
+        childicon: 'heroicons-outline:chart-bar',
+        childlink: '/statistics/users/leaderboard',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Bike Leaderboard',
+        childicon: 'heroicons-outline:chart-bar',
+        childlink: '/statistics/bikes/leaderboard',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Client Leaderboard',
+        childicon: 'heroicons-outline:chart-bar',
+        childlink: '/statistics/clients/leaderboard',
+        show: ['user'],
+      },
+    ],
+  },
+  {
+    title: 'Contract Charts',
+    icon: 'heroicons-outline:presentation-chart-line',
+    link: '/statistics/contracts',
     show: ['user'],
   },
 ];

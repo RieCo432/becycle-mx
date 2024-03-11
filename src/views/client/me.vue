@@ -11,7 +11,16 @@
         :loading-contracts="loadingContracts"
         :loading-appointments="loadingAppointments"
         :is-client="true"
+        :open-edit-details-modal="() => showEditDetailsModal = true"
+        :loading-client-details="loadingClientDetails"
     ></client-view>
+    <EditMyDetailsModal v-if="!loadingClientDetails"
+                        :client="client"
+                        :show-modal="showEditDetailsModal"
+                        :close-modal="() => showEditDetailsModal = false"
+                        @client-details-updated="clientDetailsUpdated"
+    >
+    </EditMyDetailsModal>
   </div>
 </template>
 
@@ -20,23 +29,31 @@
 import requests from '@/requests';
 import clientView from '@/views/client/clientView.vue';
 import {useToast} from 'vue-toastification';
+import Modal from '@/components/Modal/Modal.vue';
+import Button from '@/components/Button/index.vue';
+import Textinput from '@/components/Textinput/index.vue';
+import EditMyDetailsModal from '@/components/Modal/EditMyDetailsModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'ClientMe',
   components: {
+    EditMyDetailsModal,
+    Textinput, Button, Modal,
     clientView,
   },
   data() {
     return {
       client: {},
+      loadingClientDetails: true,
       contracts: [],
       contractSummaries: [],
       appointments: [],
       appointmentSummaries: [],
       loadingContracts: true,
       loadingAppointments: true,
+      showEditDetailsModal: false,
     };
   },
   methods: {
@@ -77,9 +94,14 @@ export default {
     viewContract(contractId) {
       this.$router.push(`/clients/me/contracts/${contractId}`);
     },
+    clientDetailsUpdated(updatedClient) {
+      this.client = updatedClient;
+      this.showEditDetailsModal = false;
+    },
   },
   async created() {
     this.client = (await requests.getClientMe()).data;
+    this.loadingClientDetails = false;
     this.contracts = (await requests.getMyContracts(true, true, true)).data;
     this.appointments = (await requests.getMyAppointments(true, true)).data;
 

@@ -126,6 +126,17 @@ export default {
       },
     });
   },
+  findBikes(make, model, colour, serialNumber) {
+    return axiosClient.get('/bikes/find', {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        ...(make && {make: make.toLowerCase()}),
+        ...(model && {model: model.toLowerCase()}),
+        ...(colour && {colour: colour.toLowerCase()}),
+        ...(serialNumber && {serial_number: serialNumber.toLowerCase()}),
+      },
+    });
+  },
   getBike(bikeId) {
     return axiosClient.get(`/bikes/${bikeId}`, {
       headers: credentialsStore.getApiRequestHeader(),
@@ -225,6 +236,16 @@ export default {
   },
   getClientContracts(clientId, open, closed, expired) {
     return axiosClient.get(`/clients/${clientId}/contracts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        open: open,
+        closed: closed,
+        expired: expired,
+      },
+    });
+  },
+  getBikeContracts(bikeId, open, closed, expired) {
+    return axiosClient.get(`/bikes/${bikeId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
       params: {
         open: open,
@@ -465,6 +486,78 @@ export default {
     return axiosClient.get('/contracts/paper', {
       params: {
         paper_id: paperId,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getUserLeaderboard() {
+    return axiosClient.get('/statistics/users/leaderboard', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getClientLeaderboard() {
+    return axiosClient.get('/statistics/clients/leaderboard', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getBikeLeaderboard() {
+    return axiosClient.get('/statistics/bikes/leaderboard', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchChangeNames(patchData) {
+    return axiosClient.patch('/clients/me', patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchClientChangeDetails(clientId, patchData) {
+    return axiosClient.patch(`/clients/${clientId}`, patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchBikeChangeDetails(bikeId, patchData) {
+    return axiosClient.patch(`/bikes/${bikeId}`, patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getTotalContractsDateSeries(interval, breakdown, startDate=null, endDate=null) {
+    return axiosClient.get('/statistics/contracts/total', {
+      params: {
+        interval: interval,
+        breakdown: breakdown,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getActiveContractsDateSeries(interval, gracePeriod, startDate=null, endDate=null) {
+    return axiosClient.get('/statistics/contracts/active', {
+      params: {
+        interval: interval,
+        grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getNewContractsDateSeries(interval, startDate=null, endDate=null) {
+    return axiosClient.get('/statistics/contracts/new', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getReturnedContractsDateSeries(interval, startDate=null, endDate=null) {
+    return axiosClient.get('/statistics/contracts/returned', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
     });

@@ -10,7 +10,7 @@
                     <DashButton  @click="goToBookAppointment" class="mt-auto">Book Appointment</DashButton>
                   </div>
                   <div v-if="isNotUser && isNotClient" class="md:col-span-4 col-span-6 mt-auto">
-                    <DashButton  @click="goToClientLogin" class="mt-auto">Client Login</DashButton>
+                    <DashButton  @click="goToClientLogin" class="mt-auto">Client Register/Login</DashButton>
                   </div>
                   <div v-if="!isNotUser" class="md:col-span-4 col-span-6 mt-auto">
                     <DashButton  @click="goToNewContract" class="mt-auto">New Contract</DashButton>

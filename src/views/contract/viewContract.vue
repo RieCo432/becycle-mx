@@ -168,7 +168,7 @@ export default {
   },
   methods: {
     goToClient() {
-      if (this.isUserLoggedIn) {
+      if (this.isUser) {
         this.$router.push({path: `/clients/${this.client.id}`});
       } else {
         this.$router.push({path: '/me'});
@@ -237,12 +237,23 @@ export default {
     patchContractExtend: {
       type: Function,
       default: () => {},
-    }
-  },
-  data() {
-    return {
-      isUserLoggedIn: this.credentialsStore.isUserLoggedIn(),
-    };
+    },
+    isUser: {
+      type: Boolean,
+      required: true,
+    },
+    openEditClientDetailsModal: {
+      type: Function,
+      required: true,
+    },
+    goToBike: {
+      type: Function,
+      default: () => {},
+    },
+    openEditBikeDetailsModal: {
+      type: Function,
+      default: () => {},
+    },
   },
 };
 </script>
@@ -255,14 +266,21 @@ export default {
           <Card title="Lendee">
             <ContractClientCardSkeleton v-if="loadingClient" count="1"></ContractClientCardSkeleton>
             <template v-else>
-              <div class="flex flex-col h-full">
-                <div class="flex-1" >
+              <div class="grid grid-cols-12 h-full gap-5">
+                <div class="col-span-12" >
                   <p class="text-slate-600 dark:text-slate-300">{{client.firstName}} {{client.lastName}}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{client.emailAddress}}</p>
                 </div>
-                <DashButton @click="goToClient()">
-                  View Client
-                </DashButton>
+                <div class="col-span-6 mt-auto">
+                  <DashButton class="w-full" @click="goToClient">
+                    View Client
+                  </DashButton>
+                </div>
+                <div class="col-span-6 mt-auto">
+                  <DashButton class="w-full" @click="openEditClientDetailsModal">
+                    Edit Details
+                  </DashButton>
+                </div>
               </div>
             </template>
           </Card>
@@ -271,9 +289,23 @@ export default {
           <Card title="Bike">
             <ContractBikeCardSkeleton v-if="loadingBike"></ContractBikeCardSkeleton>
             <template v-else>
-              <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
-              <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
-              <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+              <div class="grid grid-cols-12 h-full gap-5">
+                <div class="col-span-12" >
+                  <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+                </div>
+                <div v-if="isUser" class="col-span-6 mt-auto">
+                  <DashButton class="w-full" @click="goToBike">
+                    View Bike
+                  </DashButton>
+                </div>
+                <div v-if="isUser" class="col-span-6 mt-auto">
+                  <DashButton class="w-full" @click="openEditBikeDetailsModal">
+                    Edit Details
+                  </DashButton>
+                </div>
+              </div>
             </template>
           </Card>
         </div>
@@ -291,16 +323,16 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
                 </div>
-                <DashButton v-if="isUserLoggedIn" class="mt-5" @click="patchContractExtend">
+                <DashButton v-if="isUser" class="mt-5" @click="patchContractExtend">
                   Extend Contract
                 </DashButton>
               </div>
             </template>
           </Card>
         </div>
-        <div class="col-span-12 gap-5" v-if="((contract.returnedDate == null) && isUserLoggedIn) || (contract.returnedDate != null)">
+        <div class="col-span-12 gap-5" v-if="((contract.returnedDate == null) && isUser) || (contract.returnedDate != null)">
           <Card title="Return">
-            <div v-if="(contract.returnedDate == null) && isUserLoggedIn">
+            <div v-if="(contract.returnedDate == null) && isUser">
               <div class="flex z-[5] items-center relative justify-center md:mx-8">
                 <div
                     class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"

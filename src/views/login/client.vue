@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="lg:col-span-6 col-span-12">
-      <Card title="Client Login">
+      <Card title="Client Register/Login">
         <div class="flex z-[5] items-center relative justify-center md:mx-8">
           <div
               class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
@@ -18,8 +18,8 @@
             >
               <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
               <span v-else class="text-3xl">
-            <Icon icon="bx:check-double" />
-          </span>
+                <Icon icon="bx:check-double" />
+              </span>
             </div>
 
             <div
@@ -114,16 +114,38 @@
               </div>
             </div>
 
-            <div
-                class="mt-10"
-                :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
-            >
+            <div class="mt-10 flex justify-between">
               <Button
                   @click.prevent="prev()"
                   text="prev"
                   btnClass="btn-dark"
                   v-if="this.stepNumber !== 0"
               />
+
+              <Tooltip
+                  title="Why No Passwords?"
+                  placement="top"
+                  btnClass="btn-outline-dark"
+                  arrow
+                  allowHTML
+                  interactive
+                  theme="custom-light"
+                  maxWidth="320px"
+              >
+                <div class="dark:text-slate-300 text-slate-600 text-sm">
+                  <h1
+                      class="text-base bg-slate-900 dark:bg-slate-600 dark:bg-opacity-70 text-white rounded-t px-[9px] mt-[-5px] mx-[-9px] mb-3 py-2"
+                  >
+                    Why we do not use passwords
+                  </h1>
+                  While passwords can be stored securely (and we do so for volunteer account), the most secure form of
+                  password storage is to not store passwords at all.<br>
+                  Every time you log in, you will be sent a 6-digit code to your email address. This code is valid for 60 minutes
+                  and will be deleted as soon as you log in.<br>
+                  Once you have logged in, your login will stay valid for a week. After this, you will have to log in again.
+                </div>
+              </Tooltip>
+
               <Button
                   :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                   btnClass="btn-dark"
@@ -149,6 +171,7 @@ import {useField, useForm} from 'vee-validate';
 import Button from '@/components/Button/index.vue';
 import {useRouter, useRoute} from 'vue-router';
 import Icon from '@/components/Icon';
+import Tooltip from '@/components/Tooltip';
 
 const credentialsStore = useCredentialsStore();
 
@@ -321,6 +344,7 @@ export default {
     };
   },
   components: {
+    Tooltip,
     Button,
     Card,
     Textinput,
