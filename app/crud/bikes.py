@@ -113,15 +113,15 @@ def get_similar_colours(db: Session, colour: str) -> list[str]:
 def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase) -> models.Bike:
     bike = get_bike(db=db, bike_id=bike_id)
     if updated_bike_data.make is not None:
-        bike.make = updated_bike_data.make
+        bike.make = updated_bike_data.make.lower()
     if updated_bike_data.model is not None:
-        bike.model = updated_bike_data.model
+        bike.model = updated_bike_data.model.lower()
     if updated_bike_data.colour is not None:
-        bike.color = updated_bike_data.colour
+        bike.colour = updated_bike_data.colour.lower()
     if updated_bike_data.decals is not None:
-        bike.decals = updated_bike_data.decals
+        bike.decals = updated_bike_data.decals.lower()
     if updated_bike_data.serialNumber is not None:
-        bike.serialNumber = updated_bike_data.serialNumber
+        bike.serialNumber = updated_bike_data.serialNumber.lower()
 
     db.commit()
 
