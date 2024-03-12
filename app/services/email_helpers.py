@@ -2,6 +2,7 @@ import smtplib
 import ssl
 from uuid import UUID
 import os
+from email.utils import formataddr
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
@@ -24,7 +25,7 @@ months = ["", "January", "February", "March", "April", "May", "June", "July", "A
 def send_email(destination: str, subject: str, content: str) -> None:
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
-    message["From"] = EMAIL_FROM
+    message["From"] = formataddr(("BECYCLE", EMAIL_FROM))
     message["To"] = destination
 
     message.attach(MIMEText(content, "html"))
