@@ -10,6 +10,7 @@ import app.schemas as schemas
 
 GOOGLE_APP_PASSWORD = os.environ['GOOGLE_APP_PASSWORD']
 GOOGLE_ACCOUNT = os.environ['GOOGLE_ACCOUNT']
+EMAIL_FROM = os.environ['EMAIL_FROM']
 SMTP_PORT = os.environ['SMTP_PORT']
 SMTP_SERVER = os.environ['SMTP_SERVER']
 API_HOST_ADDRESS = os.environ['API_HOST_ADDRESS']
@@ -23,7 +24,7 @@ months = ["", "January", "February", "March", "April", "May", "June", "July", "A
 def send_email(destination: str, subject: str, content: str) -> None:
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
-    message["From"] = GOOGLE_ACCOUNT
+    message["From"] = EMAIL_FROM
     message["To"] = destination
 
     message.attach(MIMEText(content, "html"))
