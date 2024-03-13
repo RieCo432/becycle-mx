@@ -3,10 +3,10 @@ import Card from '@/components/Card/index.vue';
 import ContractSummaryTable from '@/components/Tables/ContractSummaryTable.vue';
 import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
-import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
 import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
+import Modal from '@/components/Modal/Modal.vue';
 
 const credentialsStore = useCredentialsStore();
 
@@ -15,10 +15,10 @@ export default {
   components: {
     ContractClientCardSkeleton,
     DashButton,
-    TableSkeleton,
     AppointmentSummaryTable,
     Card,
     Advanced: ContractSummaryTable,
+    Modal,
   },
   props: {
     client: {
@@ -77,6 +77,9 @@ export default {
 
   data() {
     return {
+      showCancelAppointmentModal: false,
+      cancelAppointmentModalId: null,
+      cancelAppointmentModalInfo: {},
       userIsAppointmentManager: false,
       contractActions: [
         {
@@ -154,7 +157,11 @@ export default {
           label: 'Cancel Appointment',
           id: 'cancel',
           icon: 'heroicons-outline:x-mark',
-          func: (appointmentId) => this.cancelAppointment(appointmentId),
+          func: (appointmentId) => {
+            this.cancelAppointmentModalId = appointmentId;
+            this.cancelAppointmentModalInfo = this.appointmentSummaries.find((appointment) => appointment.id === appointmentId);
+            this.showCancelAppointmentModal = true;
+          },
         },
       ],
       appointmentColumns: [
@@ -203,64 +210,87 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-12">
+  <div>
+    <div class="grid grid-cols-12 gap-5">
+      <div class="col-span-12">
 
-      <Card title="Details">
-        <ContractClientCardSkeleton v-if="loadingClientDetails"></ContractClientCardSkeleton>
-        <template v-else>
-          <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-full">
-              <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ client.firstName }} {{ client.lastName }}</p>
+        <Card title="Details">
+          <ContractClientCardSkeleton v-if="loadingClientDetails"></ContractClientCardSkeleton>
+          <template v-else>
+            <div class="grid grid-cols-12 gap-5">
+              <div class="col-span-full">
+                <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ client.firstName }} {{ client.lastName }}</p>
+              </div>
+              <div class="col-span-full">
+                <p class="text-base text-slate-700 dark:text-slate-300">{{ client.emailAddress }}</p>
+              </div>
+              <div class="col-span-full">
+                <DashButton @click="openEditDetailsModal">Edit Details</DashButton>
+              </div>
             </div>
-            <div class="col-span-full">
-              <p class="text-base text-slate-700 dark:text-slate-300">{{ client.emailAddress }}</p>
-            </div>
-            <div class="col-span-full">
-              <DashButton @click="openEditDetailsModal">Edit Details</DashButton>
+          </template>
+        </Card>
+      </div>
+      <div class="col-span-12">
+        <Card>
+          <div class="grid grid-cols-12">
+            <div class="col-span-12">
+              <Advanced
+                  :loading="loadingContracts"
+                  :actions="contractActions"
+                  :columns="contractColumns"
+                  :advanced-table="contractSummaries"
+                  title="Contracts"
+                  :view-contract="viewContract">
+              </Advanced>
             </div>
           </div>
-        </template>
-      </Card>
-    </div>
-    <div class="col-span-12">
-      <Card>
-        <div class="grid grid-cols-12">
-          <div class="col-span-12">
-            <Advanced
-                :loading="loadingContracts"
-                :actions="contractActions"
-                :columns="contractColumns"
-                :advanced-table="contractSummaries"
-                title="Contracts"
-                :view-contract="viewContract">
-            </Advanced>
-          </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-12">
-      <Card>
+        </Card>
+      </div>
+      <div class="col-span-12">
+        <Card>
 
-        <div class="grid grid-cols-12">
-          <div class="col-span-12">
-            <AppointmentSummaryTable
-                :loading="loadingAppointments"
-                :cancel-appointment="cancelAppointment"
-                :edit-appointment-notes="editAppointmentNotes"
-                :reschedule-appointment="rescheduleAppointment"
-                :actions="appointmentActions"
-                :columns="appointmentColumns"
-                :advanced-table="appointmentSummaries"
-                :user-is-appointment-manager="userIsAppointmentManager"
-                :is-client="isClient"
-                title="Appointments">
-            </AppointmentSummaryTable>
+          <div class="grid grid-cols-12">
+            <div class="col-span-12">
+              <AppointmentSummaryTable
+                  :loading="loadingAppointments"
+                  :cancel-appointment="cancelAppointment"
+                  :edit-appointment-notes="editAppointmentNotes"
+                  :reschedule-appointment="rescheduleAppointment"
+                  :actions="appointmentActions"
+                  :columns="appointmentColumns"
+                  :advanced-table="appointmentSummaries"
+                  :user-is-appointment-manager="userIsAppointmentManager"
+                  :is-client="isClient"
+                  title="Appointments">
+              </AppointmentSummaryTable>
+              <Modal
+                  :active-modal="showCancelAppointmentModal"
+                  title="Are you sure you want to cancel this appointment?"
+                  @close="showCancelAppointmentModal = false">
+                <p class="text-slate-700 dark:text-slate-300">Date and Time: {{ new Date(Date.parse(cancelAppointmentModalInfo.startDateTime)).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: "2-digit", minute: "2-digit", hour12: false, }) }}</p>
+                <p class="text-slate-700 dark:text-slate-300">Type: {{ cancelAppointmentModalInfo.type }}</p>
+                <p class="text-slate-700 dark:text-slate-300">Notes: {{ cancelAppointmentModalInfo.notes }}</p>
+
+                <template #footer>
+                  <DashButton
+                      class="btn-danger"
+                      @click="() => {
+                        cancelAppointment(cancelAppointmentModalId);
+                        showCancelAppointmentModal = false;
+                        cancelAppointmentModalId = null;
+                      }"
+                  >Cancel Appointment</DashButton>
+                </template>
+
+              </Modal>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   </div>
+
 
 </template>
 
