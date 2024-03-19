@@ -57,22 +57,22 @@ def post_client_temp(db: Session, client_data: schemas.ClientCreate) -> models.C
         .where(models.ClientTemp.emailAddress == client_data.emailAddress.lower())
     )
 
-    if client_temp is None:
-        client_temp = models.ClientTemp(
-            firstName=client_data.firstName.lower(),
-            lastName=client_data.lastName.lower(),
-            emailAddress=client_data.emailAddress.lower()
-        )
-        try:
-            db.add(client_temp)
-        except IntegrityError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={
-                "description": "Something went wrong"})
+    # if the temp client already exists, delete it
+    if client_temp is not None:
+        db.delete(client_temp)
+        db.commit()
 
-    client_temp.firstName = client_data.firstName.lower()
-    client_temp.lastName = client_data.lastName.lower()
-
-    db.commit()
+    client_temp = models.ClientTemp(
+        firstName=client_data.firstName.lower(),
+        lastName=client_data.lastName.lower(),
+        emailAddress=client_data.emailAddress.lower()
+    )
+    try:
+        db.add(client_temp)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={
+            "description": "Something went wrong"})
 
     return client_temp
 
