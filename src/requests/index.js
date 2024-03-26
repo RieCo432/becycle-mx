@@ -562,4 +562,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  postPreBecycleSurvey(surveyAnswers) {
+    return axiosClient.post('/surveys/pre-becycle', surveyAnswers, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

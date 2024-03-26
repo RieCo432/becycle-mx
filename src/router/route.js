@@ -247,6 +247,15 @@ const routes = [
         },
         component: () => import('@/views/statistics/contractCharts.vue'),
       },
+      {
+        path: '/surveys/pre-becycle',
+        name: 'Pre-Becycle Survey',
+        meta: {
+          restrictTo: ['client'],
+          selectNavPath: '/surveys/pre-becycle',
+        },
+        component: () => import('@/views/surveys/preBecycle.vue'),
+      },
     ],
   },
 ];
