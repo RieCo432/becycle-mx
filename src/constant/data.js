@@ -133,7 +133,7 @@ export const topMenu = [
     link: '/statistics/contracts',
     show: ['user'],
   },
-  {
+  /* {
     title: 'Surveys',
     icon: 'heroicons-outline:chart-bar',
     link: '/surveys/',
@@ -146,5 +146,5 @@ export const topMenu = [
         show: ['client'],
       },
     ],
-  },
+  },*/
 ];
