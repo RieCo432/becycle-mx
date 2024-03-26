@@ -133,4 +133,18 @@ export const topMenu = [
     link: '/statistics/contracts',
     show: ['user'],
   },
+  {
+    title: 'Surveys',
+    icon: 'heroicons-outline:chart-bar',
+    link: '/surveys/',
+    show: ['client'],
+    child: [
+      {
+        childtitle: 'Pre-Becycle Survey',
+        childicon: 'heroicons-outline:chart-bar',
+        childlink: '/surveys/pre-becycle',
+        show: ['client'],
+      },
+    ],
+  },
 ];
