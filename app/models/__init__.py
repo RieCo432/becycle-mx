@@ -5,3 +5,4 @@ from .contract import *
 from .settings import *
 from .appointment import *
 from .depositExchange import *
+from .preBecycleSurvey import *

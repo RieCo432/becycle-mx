@@ -1,4 +1,4 @@
-from sqlalchemy import String, UUID, text, DateTime, ForeignKey
+from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import os
@@ -32,6 +32,10 @@ class Client(Base):
                                               quote=False)  # , unique=True)
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="client")
     appointments: Mapped[List["Appointment"]] = relationship("Appointment", back_populates="client")
+
+    preBecycleSurveyCompleted: Mapped[bool] = mapped_column("preBecycleSurveyCompleted", Boolean, default=False, server_default=text("FALSE"),
+                                                nullable=False,
+                                                quote=False)
 
 
 class ClientTemp(Base):
