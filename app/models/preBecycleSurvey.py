@@ -1,4 +1,5 @@
-from sqlalchemy import text, Boolean, Text, Integer, UUID
+from sqlalchemy import text, Boolean, Text, Integer, UUID, DateTime
+from datetime import datetime
 from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.db import Base
@@ -8,7 +9,7 @@ class PreBecycleSurvey(Base):
     __tablename__ = "prebecyclesurvey"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
-
+    datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
     # hurdles
     hurdleSafety: Mapped[bool] = mapped_column("hurdleSafety", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
     hurdleMoney: Mapped[bool] = mapped_column("hurdleMoney", Boolean, default=False, server_default=text("FALSE"),

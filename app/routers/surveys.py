@@ -21,5 +21,5 @@ async def post_pre_becycle_survey(survey_answers: schemas.PreBecycleSurvey,
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "You have already completed this survey"})
 
     crud.create_pre_becycle_survey_entry(db=db, survey_answers=survey_answers)
-    # client.preBecycleSurveyCompleted = True
+    client.preBecycleSurveyCompleted = True
     db.commit()
