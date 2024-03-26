@@ -33,7 +33,7 @@ export default {
       },
       {
         id: 3,
-        title: 'Training',
+        title: 'Training and Experience',
       },
       {
         id: 3,
@@ -341,50 +341,60 @@ export default {
                   What are the biggest hurdles that prevented you from cycling? Tick all that apply.
                 </h4>
               </div>
-              <Checkbox
-                  label="Road Safety"
-                  name="hurdleSafety"
-                  v-model="hurdleSafety"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="I don't have money for a bike"
-                  name="hurdleMoney"
-                  v-model="hurdleMoney"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="It takes too much time"
-                  name="hurdleTime"
-                  v-model="hurdleTime"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="I don't want to arrive sweaty"
-                  name="hurdleSweating"
-                  v-model="hurdleSweating"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="It's not comfortable"
-                  name="hurdleComfort"
-                  v-model="hurdleComfort"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="It's too far"
-                  name="hurdleDistance"
-                  v-model="hurdleDistance"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Textinput
-                  label="Other"
-                  type="text"
-                  placeholder="Other reasons"
-                  name="hurdleOther"
-                  v-model="hurdleOther"
-              />
-
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Checkbox
+                      label="Road Safety"
+                      name="hurdleSafety"
+                      v-model="hurdleSafety"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="I don't have money for a bike"
+                      name="hurdleMoney"
+                      v-model="hurdleMoney"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="It takes too much time"
+                      name="hurdleTime"
+                      v-model="hurdleTime"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="I don't want to arrive sweaty"
+                      name="hurdleSweating"
+                      v-model="hurdleSweating"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="It's not comfortable"
+                      name="hurdleComfort"
+                      v-model="hurdleComfort"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="It's too far"
+                      name="hurdleDistance"
+                      v-model="hurdleDistance"
+                      activeClass="ring-info-500 bg-info-500"
+                  />
+                </div>
+                <div class="col-span-1">
+                  <Textinput
+                      label="Other"
+                      type="text"
+                      placeholder="Other reasons"
+                      name="hurdleOther"
+                      v-model="hurdleOther"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -395,32 +405,38 @@ export default {
                   What were your motivations for getting a bike? Tick all that apply.
                 </h4>
               </div>
-              <Checkbox
-                  label="It's a cheap means of transportation"
-                  name="motivationMoney"
-                  v-model="motivationMoney"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="It's a healthy means of transportation"
-                  name="motivationHealth"
-                  v-model="motivationHealth"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="It's a sustainable means of transportation"
-                  name="motivationEnvironmental"
-                  v-model="motivationEnvironmental"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Textinput
-                  label="Other"
-                  type="text"
-                  placeholder="Other reasons"
-                  name="motivationOther"
-                  v-model="motivationOther"
-              />
-
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Checkbox
+                      label="It's a cheap means of transportation"
+                      name="motivationMoney"
+                      v-model="motivationMoney"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="It's a healthy means of transportation"
+                      name="motivationHealth"
+                      v-model="motivationHealth"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="It's a sustainable means of transportation"
+                      name="motivationEnvironmental"
+                      v-model="motivationEnvironmental"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Textinput
+                      label="Other"
+                      type="text"
+                      placeholder="Other reasons"
+                      name="motivationOther"
+                      v-model="motivationOther"
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <div v-if="stepNumber === 2">
@@ -430,43 +446,52 @@ export default {
                   What options did you consider for getting a bike? Tick all that apply.
                 </h4>
               </div>
-              <Checkbox
-                  label="Buying new online"
-                  name="consideredNewOnline"
-                  v-model="consideredNewOnline"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="Buying new from  a shop"
-                  name="consideredNewShop"
-                  v-model="consideredNewShop"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="Buying Used (e.g. Facebook Marketplace, e-Bay, ...)"
-                  name="consideredUsed"
-                  v-model="consideredUsed"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="Lending from a friend, or family"
-                  name="consideredLendingPrivate"
-                  v-model="consideredLendingPrivate"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="Lending from Becycle"
-                  name="consideredLendingBecycle"
-                  v-model="consideredLendingBecycle"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Textinput
-                  label="Other"
-                  type="text"
-                  placeholder="Other options"
-                  name="consideredOther"
-                  v-model="consideredOther"
-              />
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Checkbox
+                      label="Buying new online"
+                      name="consideredNewOnline"
+                      v-model="consideredNewOnline"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="Buying new from  a shop"
+                      name="consideredNewShop"
+                      v-model="consideredNewShop"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="Buying Used (e.g. Facebook Marketplace, e-Bay, ...)"
+                      name="consideredUsed"
+                      v-model="consideredUsed"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="Lending from a friend, or family"
+                      name="consideredLendingPrivate"
+                      v-model="consideredLendingPrivate"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="Lending from Becycle"
+                      name="consideredLendingBecycle"
+                      v-model="consideredLendingBecycle"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Textinput
+                      label="Other"
+                      type="text"
+                      placeholder="Other options"
+                      name="consideredOther"
+                      v-model="consideredOther"
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <div v-if="stepNumber === 3">
@@ -476,41 +501,49 @@ export default {
                   Training and Experience
                 </h4>
               </div>
-              <Textinput
-                  label="Roughly, how many MONTHS of cycling experience, particularly on the road, do you have?"
-                  type="text"
-                  placeholder="6"
-                  name="trainingExperienceMonths"
-                  v-model="trainingExperienceMonths"
-                  :error="trainingExperienceMonthsError"
-              />
-              <Textinput
-                  label="On a scale from 0 (not confident at all) to 10 (completely confident) are you about your ability to cycle on the road in Aberdeen?"
-                  type="text"
-                  placeholder="5"
-                  name="trainingConfidence"
-                  v-model="trainingConfidence"
-                  :error="trainingConfidenceError"
-              />
-              <Checkbox
-                  label="I have received some form of training for cycling on the road"
-                  name="trainingFormal"
-                  v-model="trainingFormal"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="I know the rules of the highway code and how they apply to me as a cyclist"
-                  name="trainingRules"
-                  v-model="trainingRules"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-              <Checkbox
-                  label="I am a driver (car, motorcycle, van, etc...)"
-                  name="trainingDriver"
-                  v-model="trainingDriver"
-                  activeClass="ring-info-500 bg-info-500"
-              ></Checkbox>
-
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Textinput
+                      label="Roughly, how many MONTHS of cycling experience, particularly on the road, do you have?"
+                      type="text"
+                      placeholder="6"
+                      name="trainingExperienceMonths"
+                      v-model="trainingExperienceMonths"
+                      :error="trainingExperienceMonthsError"
+                  />
+                </div>
+                <div class="col-span-1">
+                  <Textinput
+                      label="On a scale from 0 (not confident at all) to 10 (completely confident) are you about your ability to cycle on the road in Aberdeen?"
+                      type="text"
+                      placeholder="5"
+                      name="trainingConfidence"
+                      v-model="trainingConfidence"
+                      :error="trainingConfidenceError"
+                  />
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="I have received some form of training for cycling on the road"
+                      name="trainingFormal"
+                      v-model="trainingFormal"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="I know the rules of the highway code and how they apply to me as a cyclist"
+                      name="trainingRules"
+                      v-model="trainingRules"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1">
+                  <Checkbox
+                      label="I am a driver (car, motorcycle, van, etc...)"
+                      name="trainingDriver"
+                      v-model="trainingDriver"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+              </div>
             </div>
           </div>
           <div v-if="stepNumber === 4">
@@ -520,20 +553,26 @@ export default {
                   Interest in Bicycle Maintenance
                 </h4>
               </div>
-              <Select
-                  :options="interestMaintenanceCurrentOptions"
-                  label="How would you describe your level knowledge of bicycle maintenance?"
-                  v-model="interestMaintenanceCurrent"
-                  name="interestMaintenance"
-                  :error="interestMaintenanceCurrentError"
-              />
-              <Select
-                  :options="interestMaintenanceDesiredOptions"
-                  label="How much would you like to know about bicycle maintenance"
-                  v-model="interestMaintenanceDesired"
-                  name="interestMaintenance"
-                  :error="interestMaintenanceDesiredError"
-              />
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Select
+                      :options="interestMaintenanceCurrentOptions"
+                      label="How would you describe your level knowledge of bicycle maintenance?"
+                      v-model="interestMaintenanceCurrent"
+                      name="interestMaintenance"
+                      :error="interestMaintenanceCurrentError"
+                  />
+                </div>
+                <div class="col-span-1">
+                  <Select
+                      :options="interestMaintenanceDesiredOptions"
+                      label="How much would you like to know about bicycle maintenance"
+                      v-model="interestMaintenanceDesired"
+                      name="interestMaintenance"
+                      :error="interestMaintenanceDesiredError"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
