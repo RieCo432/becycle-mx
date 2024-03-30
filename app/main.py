@@ -36,6 +36,7 @@ app.include_router(routers.deposit_exchanges)
 app.include_router(routers.finances)
 app.include_router(routers.public)
 app.include_router(routers.statistics)
+app.include_router(routers.maps)
 app.include_router(routers.surveys)
 
 
