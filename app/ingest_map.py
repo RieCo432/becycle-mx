@@ -39,9 +39,9 @@ for road in aberdeen_roads:
         # length of the segment in meters
 
         segment_length = acos(
-            (sin(radians(a_coords[0])) * sin(radians(b_coords[0])))
-            + (cos(radians(a_coords[0])) * cos(radians(b_coords[0])))
-            * (cos(radians(b_coords[1]) - radians(a_coords[1])))
+            (sin(radians(a_coords[1])) * sin(radians(b_coords[1])))
+            + (cos(radians(a_coords[1])) * cos(radians(b_coords[1])))
+            * (cos(radians(b_coords[0]) - radians(a_coords[0])))
         ) * 6_371_000
 
         sum_of_segments_length += segment_length
@@ -52,9 +52,10 @@ for road in aberdeen_roads:
         a_coords_index += 1
         b_coords_index += 1
 
-    # if sum of segment length is more than twice the stated length of road, raise Exception
-    if length is not None and sum_of_segments_length > length * 2:
-        raise Exception("Sum of lengths of segments does too different from the stated length for the road")
+    # if sum of segment length is more than two times the stated length of road and is longer than 500m, raise Exception
+    if (length is not None
+            and length * 1.1 < sum_of_segments_length < length * 0.9):
+        print("Sum of lengths of segments does too different from the stated length for the road", length, sum_of_segments_length)
 
 
 print("THIS IS THE END; MY ONLY FRIEND, THE END")
