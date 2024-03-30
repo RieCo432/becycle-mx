@@ -6,3 +6,4 @@ from .settings import *
 from .appointment import *
 from .depositExchange import *
 from .preBecycleSurvey import *
+from .roadSegment import *
