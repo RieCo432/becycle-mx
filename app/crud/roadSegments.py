@@ -29,11 +29,12 @@ def create_road_segment(db: Session,
     elif a_coords_sum == b_coords_sum:
         raise Exception("Road Segment Error: A SUM == B SUM")
 
-    from_latitude = from_coords[0]
-    from_longitude = from_coords[1]
+    from_latitude = from_coords[1]
+    from_longitude = from_coords[0]
 
-    to_latitude = to_coords[0]
-    to_longitude = to_coords[1]
+    to_latitude = to_coords[1]
+    to_longitude = to_coords[0]
+
 
     existing_segment = [_ for _ in db.scalars(
         select(models.RoadSegment)
