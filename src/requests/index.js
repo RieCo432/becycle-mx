@@ -567,4 +567,7 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getGeoJson() {
+    return axiosClient.get('/maps/geojson');
+  },
 };
