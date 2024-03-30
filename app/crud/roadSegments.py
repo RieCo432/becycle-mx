@@ -46,22 +46,24 @@ def create_road_segment(db: Session,
         )
     )]
 
-    if len(existing_segment) > 0:
-        raise IntegrityError("This Road Segment already exists")
+    if len(existing_segment) == 0:
+        new_road_segment = models.RoadSegment(
+            fromLatitude=from_latitude,
+            fromLongitude=from_longitude,
+            toLatitude=to_latitude,
+            toLongitude=to_longitude,
+            roadClassification=road_classification,
+            roadFunction=road_function,
+            formOfWay=form_of_way,
+            name=name,
+            length=length
+        )
 
-    new_road_segment = models.RoadSegment(
-        fromLatitude=from_latitude,
-        fromLongitude=from_longitude,
-        toLatitude=to_latitude,
-        toLongitude=to_longitude,
-        roadClassification=road_classification,
-        roadFunction=road_function,
-        formOfWay=form_of_way,
-        name=name,
-        length=length
-    )
+        db.add(new_road_segment)
+        db.commit()
 
-    db.add(new_road_segment)
-    db.commit()
+    else:
+        print("This Road Segment already exists")
+        new_road_segment = None
 
     return new_road_segment
