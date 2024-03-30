@@ -28,7 +28,7 @@ class RoadSegment(Base):
                                                     quote=False)
     length: Mapped[int] = mapped_column("length", Integer, default=None,
                                                     server_default=text("NULL"), nullable=True,
-                                                    quote=False)
+                                                    quote=False, index=True)
 
 
 
