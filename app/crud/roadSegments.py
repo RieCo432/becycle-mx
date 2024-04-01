@@ -1,3 +1,5 @@
+import json
+
 import app.models as models
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -67,3 +69,50 @@ def create_road_segment(db: Session,
         new_road_segment = None
 
     return new_road_segment
+
+
+def get_bbox_geojson(db: Session, north_bound: float, east_bound: float, south_bound: float, west_bound: float):
+    road_segments = [_ for _ in db.scalars(
+        select(models.RoadSegment)
+        .where(
+            (
+                    (models.RoadSegment.fromLatitude < north_bound)
+                    & (models.RoadSegment.fromLatitude > south_bound)
+                    & (models.RoadSegment.fromLongitude < east_bound)
+                    & (models.RoadSegment.fromLongitude > west_bound)
+            )
+            | (
+                (models.RoadSegment.toLatitude < north_bound)
+                & (models.RoadSegment.toLatitude > south_bound)
+                & (models.RoadSegment.toLongitude < east_bound)
+                & (models.RoadSegment.toLongitude > west_bound)
+            )
+        )
+    )]
+
+    geojson_dict = {
+        "type": "FeatureCollection",
+        "name": "aberdeenroads",
+        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+        "bbox": [west_bound, south_bound, east_bound, north_bound],
+        "features": []
+    }
+
+    for road_segment in road_segments:
+        geojson_dict["features"].append(
+            {"type": "Feature",
+             "properties": {"gml_id": "idF6E82E53-B91A-4079-9990-A5C691E4967F", "beginLifespanVersion": None,
+                            "inNetwork": None, "fictitious": "false", "endNode": None, "startNode": None,
+                            "validFrom": None, "roadClassification": "A Road", "roadFunction": "A Road",
+                            "formOfWay": "Collapsed Dual Carriageway", "name1": None, "length": 4992, "loop": "false",
+                            "primaryRoute": "true", "trunkRoad": "true", "roadNameTOID": None,
+                            "roadClassificationNumber": "A90", "roadNumberTOID": None, "roadStructure": None,
+                            "layer": "RoadLink",
+                            "path": "C:/Users/colin/GitHub/becycle-mx/fastapi/maps/OSOpenRoads_NJ.gml|layername=RoadLink|geometrytype=LineString|uniqueGeometryType=yes"},
+             "geometry": {"type": "LineString", "coordinates": [
+                 [road_segment.fromLongitude, road_segment.fromLatitude],
+                 [road_segment.toLongitude, road_segment.toLatitude]
+             ]}},
+        )
+
+    return json.dumps(geojson_dict)
