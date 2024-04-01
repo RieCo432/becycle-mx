@@ -2,12 +2,13 @@
   <div class="h-[750px] w-full">
     <l-map
         :center="center"
-        v-model="zoom"
+        v-model:center="center"
         v-model:zoom="zoom"
         :zoom="zoom"
         :minZoom="3"
         :maxZoom="18"
         :zoomAnimation="true"
+        @update:bounds="boundsUpdated"
     >
       <l-tile-layer :url="url" :attribution=attribution></l-tile-layer>
       <l-geo-json v-if="!loadingGeoJson" :geojson="geojson"></l-geo-json>
@@ -40,12 +41,26 @@ export default {
           '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
     };
   },
-  created() {
+  methods: {
+    boundsUpdated(bounds) {
+      console.log(bounds);
+      const northBound = bounds._northEast.lat;
+      const eastBound = bounds._northEast.lng;
+      const southBound = bounds._southWest.lat;
+      const westBound = bounds._southWest.lng;
+      this.loadingGeoJson = true;
+      requests.getBboxGeojson(northBound, eastBound, southBound, westBound).then((response) => {
+        this.geojson = JSON.parse(response.data);
+        this.loadingGeoJson = false;
+      });
+    },
+  },
+/* created() {
     requests.getGeoJson().then((response) => {
       this.geojson = JSON.parse(response.data);
       this.loadingGeoJson = false;
     });
-  },
+  },*/
 };
 </script>
 
