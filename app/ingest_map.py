@@ -3,6 +3,7 @@ import app.crud as crud
 import json
 from math import acos, sin, cos, radians
 from app.database.db import SessionLocal
+from app.services import distance
 
 
 db = SessionLocal()
@@ -38,11 +39,7 @@ for road in aberdeen_roads:
 
         # length of the segment in meters
 
-        segment_length = acos(
-            (sin(radians(a_coords[1])) * sin(radians(b_coords[1])))
-            + (cos(radians(a_coords[1])) * cos(radians(b_coords[1])))
-            * (cos(radians(b_coords[0]) - radians(a_coords[0])))
-        ) * 6_371_000
+        segment_length = distance(a_coords[1], a_coords[0], b_coords[1], b_coords[0])
 
         sum_of_segments_length += segment_length
 
