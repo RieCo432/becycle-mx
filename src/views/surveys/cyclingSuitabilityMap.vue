@@ -11,7 +11,12 @@
         @update:bounds="boundsUpdated"
     >
       <l-tile-layer :url="url" :attribution=attribution></l-tile-layer>
-      <l-geo-json v-if="!loadingGeoJson" :geojson="geojson"></l-geo-json>
+      <l-geo-json
+          v-if="!loadingGeoJson"
+          :geojson="geojson"
+          @click="geojsonClick"
+          :options="options"
+      ></l-geo-json>
     </l-map>
   </div>
 </template>
@@ -22,6 +27,7 @@
 import 'leaflet/dist/leaflet.css';
 import {LMap, LTileLayer, LGeoJson} from '@vue-leaflet/vue-leaflet';
 import requests from '@/requests';
+import {min, round} from 'lodash-es';
 
 export default {
   name: 'Map',
@@ -35,7 +41,7 @@ export default {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       geojson: null,
       center: [57.15, -2.09],
-      zoom: 15,
+      zoom: 16,
       loadingGeoJson: true,
       attribution:
           '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -43,7 +49,6 @@ export default {
   },
   methods: {
     boundsUpdated(bounds) {
-      console.log(bounds);
       const northBound = bounds._northEast.lat;
       const eastBound = bounds._northEast.lng;
       const southBound = bounds._southWest.lat;
@@ -54,13 +59,24 @@ export default {
         this.loadingGeoJson = false;
       });
     },
+    geojsonClick(evt) {
+      console.log(evt);
+    },
   },
-/* created() {
-    requests.getGeoJson().then((response) => {
-      this.geojson = JSON.parse(response.data);
-      this.loadingGeoJson = false;
-    });
-  },*/
+  computed: {
+    options() {
+      return {
+        style: (feature) => {
+          const r = round(255 * min([10 - feature.properties.score, 5]) / 5, 0);
+          const g = round(255 * min([feature.properties.score, 5]) / 5, 0);
+          return {
+            color: `#${r.toString(16)}${g.toString(16)}00`,
+            weight: 5,
+          };
+        },
+      };
+    },
+  },
 };
 </script>
 
