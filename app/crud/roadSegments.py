@@ -71,22 +71,25 @@ def create_road_segment(db: Session,
     return new_road_segment
 
 
-def get_bbox_geojson(db: Session, north_bound: float, east_bound: float, south_bound: float, west_bound: float):
+def get_bbox_geojson(db: Session, north_bound: float, east_bound: float, south_bound: float, west_bound: float, min_length: int = 0):
     road_segments = [_ for _ in db.scalars(
         select(models.RoadSegment)
         .where(
             (
-                    (models.RoadSegment.fromLatitude < north_bound)
-                    & (models.RoadSegment.fromLatitude > south_bound)
-                    & (models.RoadSegment.fromLongitude < east_bound)
-                    & (models.RoadSegment.fromLongitude > west_bound)
+                    (
+                            (models.RoadSegment.fromLatitude < north_bound)
+                            & (models.RoadSegment.fromLatitude > south_bound)
+                            & (models.RoadSegment.fromLongitude < east_bound)
+                            & (models.RoadSegment.fromLongitude > west_bound)
+                    )
+                    | (
+                            (models.RoadSegment.toLatitude < north_bound)
+                            & (models.RoadSegment.toLatitude > south_bound)
+                            & (models.RoadSegment.toLongitude < east_bound)
+                            & (models.RoadSegment.toLongitude > west_bound)
+                    )
             )
-            | (
-                (models.RoadSegment.toLatitude < north_bound)
-                & (models.RoadSegment.toLatitude > south_bound)
-                & (models.RoadSegment.toLongitude < east_bound)
-                & (models.RoadSegment.toLongitude > west_bound)
-            )
+            & (models.RoadSegment.length > min_length)
         )
     )]
 
