@@ -1,7 +1,8 @@
-from sqlalchemy import text, Text, Integer, UUID, Float
+from sqlalchemy import text, Text, Integer, UUID, Float, ForeignKey, String, DateTime
 from uuid import uuid4
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
+from datetime import datetime
 
 
 class RoadSegment(Base):
@@ -29,6 +30,28 @@ class RoadSegment(Base):
     length: Mapped[int] = mapped_column("length", Integer, default=None,
                                                     server_default=text("NULL"), nullable=True,
                                                     quote=False, index=True)
+
+
+class RoadSegmentReportTypes(Base):
+    __tablename__ = "roadsegmentreporttypes"
+    id: Mapped[str] = mapped_column("id", String(5), primary_key=True, nullable=False, index=True, quote=False)
+    title: Mapped[str] = mapped_column("title", String(40), nullable=False, quote=False)
+    description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
+    scoreModifier: Mapped[int] = mapped_column("scoreModifier", Integer, nullable=False, quote=False)
+
+
+class RoadSegmentReport(Base):
+    __tablename__ = "roadsegmentreports"
+
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4,
+                                     server_default=text("uuid_generate_v4()"), index=True, quote=False)
+    datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
+
+    roadSegmentId: Mapped[UUID] = mapped_column("roadSegmentId", ForeignKey(RoadSegment.id), nullable=False, quote=False)
+    roadSegment: Mapped[RoadSegment] = relationship(RoadSegment)
+
+    typeId: Mapped[str] = mapped_column("typeId", ForeignKey(RoadSegmentReportTypes.id), nullable=False, quote=False)
+    type: Mapped[RoadSegmentReportTypes] = relationship(RoadSegmentReportTypes)
 
 
 

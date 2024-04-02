@@ -1,6 +1,6 @@
 import json
 import random
-
+import app.schemas as schemas
 import app.models as models
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -103,12 +103,22 @@ def get_bbox_geojson(db: Session, north_bound: float, east_bound: float, south_b
     }
 
     for road_segment in road_segments:
+        road_segment_reports = [_ for _ in db.scalars(
+            select(models.RoadSegmentReport)
+            .where(models.RoadSegmentReport.roadSegmentId == road_segment.id)
+            .distinct(models.RoadSegmentReport.typeId)
+        )]
         geojson_dict["features"].append(
             {"type": "Feature",
              "properties": {
                  "layer": "Roads",
                  "id": str(road_segment.id),
-                 "score": int(random.random() * 10),
+                 "reports": [{
+                     'id': road_segment_report.type.id,
+                     'title': road_segment_report.type.title,
+                     'description': road_segment_report.type.description,
+                     'scoreModifier': road_segment_report.type.scoreModifier
+                 } for road_segment_report in road_segment_reports],
              },
              "geometry": {"type": "LineString", "coordinates": [
                  [road_segment.fromLongitude, road_segment.fromLatitude],
