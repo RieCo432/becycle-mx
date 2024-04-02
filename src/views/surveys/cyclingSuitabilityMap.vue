@@ -4,13 +4,19 @@
         :center="center"
         v-model:center="center"
         v-model:zoom="zoom"
+        v-model:bounds="bounds"
         :zoom="zoom"
         :minZoom="3"
         :maxZoom="18"
         :zoomAnimation="true"
         @update:bounds="boundsUpdated"
+        ref="mapView"
+        @ready="boundsUpdated(this.$refs.mapView.leafletObject.getBounds())"
     >
-      <l-tile-layer :url="url" :attribution=attribution></l-tile-layer>
+      <l-tile-layer
+          :url="url"
+          :attribution=attribution
+      ></l-tile-layer>
       <l-geo-json
           v-if="!loadingGeoJson"
           :geojson="geojson"
@@ -27,7 +33,6 @@
 import 'leaflet/dist/leaflet.css';
 import {LMap, LTileLayer, LGeoJson} from '@vue-leaflet/vue-leaflet';
 import requests from '@/requests';
-import {min, round} from 'lodash-es';
 
 export default {
   name: 'Map',
@@ -43,6 +48,7 @@ export default {
       center: [57.15, -2.09],
       zoom: 16,
       loadingGeoJson: true,
+      bounds: null,
       attribution:
           '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
     };
@@ -67,8 +73,9 @@ export default {
     options() {
       return {
         style: (feature) => {
-          const r = round(255 * min([10 - feature.properties.score, 5]) / 5, 0);
-          const g = round(255 * min([feature.properties.score, 5]) / 5, 0);
+          const score = feature.properties.reports.map((report) => (report.scoreModifier)).reduce((a, b) => a+b, 0);
+          const r = Math.round(255 * Math.max(Math.min(-score + 5, 5), 0) / 5);
+          const g = Math.round(255 * Math.max(Math.min(score + 5, 5), 0) / 5);
           return {
             color: `#${r.toString(16)}${g.toString(16)}00`,
             weight: 5,
