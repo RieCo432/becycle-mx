@@ -1,4 +1,5 @@
 import json
+import random
 
 import app.models as models
 from sqlalchemy.orm import Session
@@ -107,7 +108,7 @@ def get_bbox_geojson(db: Session, north_bound: float, east_bound: float, south_b
              "properties": {
                  "layer": "Roads",
                  "id": str(road_segment.id),
-                 "score": 5,
+                 "score": int(random.random() * 10),
              },
              "geometry": {"type": "LineString", "coordinates": [
                  [road_segment.fromLongitude, road_segment.fromLatitude],
