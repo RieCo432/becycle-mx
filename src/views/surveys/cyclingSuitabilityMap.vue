@@ -11,18 +11,23 @@
         :zoomAnimation="true"
         @update:bounds="boundsUpdated"
         ref="mapView"
-        @ready="boundsUpdated(this.$refs.mapView.leafletObject.getBounds())"
-    >
+        @ready="boundsUpdated(this.$refs.mapView.leafletObject.getBounds())">
       <l-tile-layer
           :url="url"
-          :attribution=attribution
+          attribution="attribution"
       ></l-tile-layer>
+
+      <l-marker :lat-lng="markerLatLng">
+        <l-popup>Test</l-popup>
+      </l-marker>
       <l-geo-json
           v-if="!loadingGeoJson"
           :geojson="geojson"
           @click="geojsonClick"
-          :options="options"
       ></l-geo-json>
+
+
+
     </l-map>
   </div>
 </template>
@@ -30,8 +35,9 @@
 <script>
 // DON'T load Leaflet components here!
 // Its CSS is needed though, if not imported elsewhere in your application.
+import {LMap, LTileLayer, LGeoJson, LTooltip, LMarker, LPopup, LLayerGroup} from '@vue-leaflet/vue-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import {LMap, LTileLayer, LGeoJson} from '@vue-leaflet/vue-leaflet';
 import requests from '@/requests';
 
 export default {
@@ -40,17 +46,21 @@ export default {
     LMap,
     LTileLayer,
     LGeoJson,
+    LTooltip,
+    LMarker,
+    LPopup,
+    LLayerGroup,
   },
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       geojson: null,
-      center: [57.15, -2.09],
-      zoom: 16,
+      center: [57.147, -2.095],
+      zoom: 17,
+      markerLatLng: null,
       loadingGeoJson: true,
       bounds: null,
-      attribution:
-          '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      attribution: 'OpenStreetMap, Ordnance Survey Maps',
     };
   },
   methods: {
@@ -67,6 +77,10 @@ export default {
     },
     geojsonClick(evt) {
       console.log(evt);
+      this.markerLatLng = [
+        (evt.layer.feature.geometry.coordinates[0][1] + evt.layer.feature.geometry.coordinates[1][1]) / 2,
+        (evt.layer.feature.geometry.coordinates[0][0] + evt.layer.feature.geometry.coordinates[1][0]) / 2,
+      ];
     },
   },
   computed: {
@@ -95,4 +109,5 @@ export default {
   z-index: 555 !important;
   position: relative;
 }
+
 </style>
