@@ -32,7 +32,7 @@ class RoadSegment(Base):
                                                     quote=False, index=True)
 
 
-class RoadSegmentReportTypes(Base):
+class RoadSegmentReportType(Base):
     __tablename__ = "roadsegmentreporttypes"
     id: Mapped[str] = mapped_column("id", String(5), primary_key=True, nullable=False, index=True, quote=False)
     title: Mapped[str] = mapped_column("title", String(40), nullable=False, quote=False)
@@ -50,8 +50,8 @@ class RoadSegmentReport(Base):
     roadSegmentId: Mapped[UUID] = mapped_column("roadSegmentId", ForeignKey(RoadSegment.id), nullable=False, quote=False)
     roadSegment: Mapped[RoadSegment] = relationship(RoadSegment)
 
-    typeId: Mapped[str] = mapped_column("typeId", ForeignKey(RoadSegmentReportTypes.id), nullable=False, quote=False)
-    type: Mapped[RoadSegmentReportTypes] = relationship(RoadSegmentReportTypes)
+    typeId: Mapped[str] = mapped_column("typeId", ForeignKey(RoadSegmentReportType.id), nullable=False, quote=False)
+    type: Mapped[RoadSegmentReportType] = relationship(RoadSegmentReportType)
 
 
 

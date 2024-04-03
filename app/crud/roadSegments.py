@@ -127,3 +127,11 @@ def get_bbox_geojson(db: Session, north_bound: float, east_bound: float, south_b
         )
 
     return json.dumps(geojson_dict)
+
+
+
+def get_road_segment_report_types(db: Session) -> list[models.RoadSegmentReportType]:
+    return [_ for _ in db.scalars(
+        select(models.RoadSegmentReportType)
+    )]
+

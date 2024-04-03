@@ -28,3 +28,8 @@ async def get_bbox_geojson(north_bound: float, east_bound: float, south_bound: f
     diagonal_distance = distance(south_bound, west_bound, north_bound, east_bound)
     min_length = diagonal_distance // 1200
     return crud.get_bbox_geojson(db=db, north_bound=north_bound, east_bound=east_bound, south_bound=south_bound, west_bound=west_bound, min_length=min_length)
+
+
+@maps.get("/maps/report-types")
+async def get_report_types(db: Session = Depends(dep.get_db)) -> list[schemas.RoadSegmentReportType]:
+    return crud.get_road_segment_report_types(db=db)
