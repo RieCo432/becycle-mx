@@ -580,4 +580,7 @@ export default {
       },
     });
   },
+  getRoadSegmentReportTypes() {
+    return axiosClient.get('/maps/report-types');
+  },
 };

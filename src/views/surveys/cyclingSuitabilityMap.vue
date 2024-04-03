@@ -70,6 +70,7 @@ export default {
           weight: 5,
         };
       },
+      roadSegmentReportTypes: [],
     };
   },
   methods: {
@@ -91,6 +92,11 @@ export default {
         (evt.layer.feature.geometry.coordinates[0][0] + evt.layer.feature.geometry.coordinates[1][0]) / 2,
       ];
     },
+  },
+  created() {
+    requests.getRoadSegmentReportTypes().then((response) => {
+      this.roadSegmentReportTypes = response.data;
+    });
   },
 };
 </script>
