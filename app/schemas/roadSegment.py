@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+from uuid import UUID
 
 
 class RoadSegmentReportType(BaseModel):
@@ -8,3 +9,8 @@ class RoadSegmentReportType(BaseModel):
     title: str
     description: str
     scoreModifier: int
+
+
+class NewRoadSegmentReport(BaseModel):
+    roadSegmentId: UUID
+    roadSegmentReportTypeId: str

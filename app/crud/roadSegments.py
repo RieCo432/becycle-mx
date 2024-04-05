@@ -5,6 +5,7 @@ import app.models as models
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from uuid import UUID
 
 
 def create_road_segment(db: Session,
@@ -128,6 +129,44 @@ def get_bbox_geojson(db: Session, north_bound: float, east_bound: float, south_b
 
     return json.dumps(geojson_dict)
 
+
+def create_road_segment_report(db: Session, road_segment_id: UUID, road_segment_report_type_id: str):
+    road_segment_report = models.RoadSegmentReport(
+        roadSegmentId=road_segment_id,
+        typeId=road_segment_report_type_id
+    )
+
+    db.add(road_segment_report)
+    db.commit()
+
+    road_segment_reports = [_ for _ in db.scalars(
+        select(models.RoadSegmentReport)
+        .where(models.RoadSegmentReport.roadSegmentId == road_segment_id)
+        .distinct(models.RoadSegmentReport.typeId)
+    )]
+
+    road_segment = db.scalar(
+        select(models.RoadSegment)
+        .where(models.RoadSegment.id == road_segment_id)
+    )
+
+    road_segment_geojson_feature = {"type": "Feature",
+     "properties": {
+         "layer": "Roads",
+         "id": str(road_segment.id),
+         "reports": [{
+             'id': road_segment_report.type.id,
+             'title': road_segment_report.type.title,
+             'description': road_segment_report.type.description,
+             'scoreModifier': road_segment_report.type.scoreModifier
+         } for road_segment_report in road_segment_reports],
+     },
+     "geometry": {"type": "LineString", "coordinates": [
+         [road_segment.fromLongitude, road_segment.fromLatitude],
+         [road_segment.toLongitude, road_segment.toLatitude]
+     ]}}
+
+    return json.dumps(road_segment_geojson_feature)
 
 
 def get_road_segment_report_types(db: Session) -> list[models.RoadSegmentReportType]:

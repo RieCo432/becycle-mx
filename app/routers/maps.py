@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends
 import json
 from os import path
 from app.services import distance
+from uuid import UUID
 
 
 maps = APIRouter(
@@ -33,3 +34,8 @@ async def get_bbox_geojson(north_bound: float, east_bound: float, south_bound: f
 @maps.get("/maps/report-types")
 async def get_report_types(db: Session = Depends(dep.get_db)) -> list[schemas.RoadSegmentReportType]:
     return crud.get_road_segment_report_types(db=db)
+
+
+@maps.post("/maps/road-segment/report")
+async def get_road_reports(report_data: schemas.NewRoadSegmentReport, db: Session = Depends(dep.get_db)):
+    return crud.create_road_segment_report(db=db, road_segment_id=report_data.roadSegmentId, road_segment_report_type_id=report_data.roadSegmentReportTypeId)
