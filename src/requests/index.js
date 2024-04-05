@@ -583,4 +583,10 @@ export default {
   getRoadSegmentReportTypes() {
     return axiosClient.get('/maps/report-types');
   },
+  postNewRoadSegmentReport(roadSegmentId, roadSegmentReportTypeId) {
+    return axiosClient.post('/maps/road-segment/report', {
+      roadSegmentId: roadSegmentId,
+      roadSegmentReportTypeId: roadSegmentReportTypeId,
+    });
+  },
 };
