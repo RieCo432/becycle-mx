@@ -256,6 +256,15 @@ const routes = [
         },
         component: () => import('@/views/surveys/preBecycle.vue'),
       },
+      {
+        path: '/surveys/map',
+        name: 'Cycling Suitability Map',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/surveys/map',
+        },
+        component: () => import('@/views/surveys/cyclingSuitabilityMap.vue'),
+      },
     ],
   },
 ];

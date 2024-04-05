@@ -567,4 +567,26 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getGeoJson() {
+    return axiosClient.get('/maps/geojson');
+  },
+  getBboxGeojson(northBound, eastBound, southBound, westBound) {
+    return axiosClient.get('/maps/bbox-road-map', {
+      params: {
+        north_bound: northBound,
+        east_bound: eastBound,
+        south_bound: southBound,
+        west_bound: westBound,
+      },
+    });
+  },
+  getRoadSegmentReportTypes() {
+    return axiosClient.get('/maps/report-types');
+  },
+  postNewRoadSegmentReport(roadSegmentId, roadSegmentReportTypeId) {
+    return axiosClient.post('/maps/road-segment/report', {
+      roadSegmentId: roadSegmentId,
+      roadSegmentReportTypeId: roadSegmentReportTypeId,
+    });
+  },
 };
