@@ -64,5 +64,50 @@ class PreBecycleSurvey(Base):
     interestMaintenanceCurrent: Mapped[int] = mapped_column("interestMaintenanceCurrent", Integer, nullable=False, quote=False)
 
 
+class PeriBecycleSurvey(Base):
+    __tablename__ = "peribecyclesurvey"
 
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
+    datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
+    # roads opinion
+    roadsGreat: Mapped[bool] = mapped_column("roadsGreat", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsLight: Mapped[bool] = mapped_column("roadsLight", Boolean, default=False, server_default=text("FALSE"),
+                                             nullable=False, quote=False)
+    roadsPotholes: Mapped[bool] = mapped_column("roadsPotholes", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsRubbish: Mapped[bool] = mapped_column("roadsRubbish", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsParking: Mapped[bool] = mapped_column("roadsParking", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsDark: Mapped[bool] = mapped_column("roadsDark", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
+    # road users
+    usersSafe: Mapped[bool] = mapped_column("usersSafe", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    usersBusesUnsafe: Mapped[bool] = mapped_column("usersBusesUnsafe", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    usersCarsUnsafe: Mapped[bool] = mapped_column("usersCarsUnsafe", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+                                             quote=False)
+    usersTrucksUnsafe: Mapped[bool] = mapped_column("usersTrucksUnsafe", Boolean, default=None, server_default=text("FALSE"),
+                                            nullable=True,
+                                            quote=False)
+    usersTaxisUnsafe: Mapped[bool] = mapped_column("usersTaxisUnsafe", Boolean, default=None, server_default=text("FALSE"), nullable=True,
+                                             quote=False)
+    usersCyclistsUnsafe: Mapped[bool] = mapped_column("usersCyclistsUnsafe", Boolean, default=None, server_default=text("FALSE"),
+                                                  nullable=True, quote=False)
+    usersPedestriansUnsafe: Mapped[bool] = mapped_column("usersPedestriansUnsafe", Boolean, default=None,
+                                                     server_default=text("FALSE"), nullable=True, quote=False)
+
+    # routes used
+    routesRoads: Mapped[bool] = mapped_column("routesRoads", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+                                          quote=False)
+    routesPavements: Mapped[bool] = mapped_column("routesPavements", Boolean, default=False,
+                                                      server_default=text("FALSE"), nullable=False,
+                                                      quote=False)
+    routesOffroad: Mapped[bool] = mapped_column("routesOffroad", Boolean, default=False,
+                                                      server_default=text("FALSE"), nullable=False,
+                                                      quote=False)
+
+    # accidents
+    accidentsNearMisses: Mapped[int] = mapped_column("accidentsNearMisses", Integer, nullable=False, quote=False, default=0, server_default=text('0'))
+    accidentsContact: Mapped[int] = mapped_column("accidentsContact", Integer, nullable=False, quote=False, default=0, server_default=text('0'))
+
+    # harassment
+    harassmentExperienced: Mapped[bool] = mapped_column("harassmentExperienced", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+                                          quote=False)
+    harassmentSuggestions: Mapped[str] = mapped_column("harassmentSuggestions", Text, nullable=True, quote=False)

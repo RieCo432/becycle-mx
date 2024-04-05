@@ -34,3 +34,34 @@ class PreBecycleSurvey(BaseModel):
     # interest
     interestMaintenanceDesired: int
     interestMaintenanceCurrent: int
+
+
+class PeriBecycleSurvey(BaseModel):
+    roadsGreat: bool
+    roadsLight: bool
+    roadsPotholes: bool
+    roadsRubbish: bool
+    roadsParking: bool
+    roadsDark: bool
+
+    # road users
+    usersSafe: bool
+    usersBusesUnsafe: bool
+    usersCarsUnsafe: bool
+    usersTrucksUnsafe: bool
+    usersTaxisUnsafe: bool
+    usersCyclistsUnsafe: bool
+    usersPedestriansUnsafe: bool
+
+    # routes used
+    routesRoads: bool
+    routesPavements: bool
+    routesOffroad: bool
+
+    # accidents
+    accidentsNearMisses: int
+    accidentsContact: int
+
+    # harassment
+    harassmentExperienced: bool
+    harassmentSuggestions: str | None = None

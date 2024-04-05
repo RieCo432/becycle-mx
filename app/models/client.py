@@ -36,6 +36,10 @@ class Client(Base):
     preBecycleSurveyCompleted: Mapped[bool] = mapped_column("preBecycleSurveyCompleted", Boolean, default=False, server_default=text("FALSE"),
                                                 nullable=False,
                                                 quote=False)
+    periBecycleSurveyCompleted: Mapped[bool] = mapped_column("periBecycleSurveyCompleted", Boolean, default=False,
+                                                            server_default=text("FALSE"),
+                                                            nullable=False,
+                                                            quote=False)
 
 
 class ClientTemp(Base):

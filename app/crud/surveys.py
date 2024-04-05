@@ -12,3 +12,13 @@ def create_pre_becycle_survey_entry(db: Session, survey_answers: schemas.PreBecy
         db.commit()
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Something went wrong"})
+
+
+def create_peri_becycle_survey_entry(db: Session, survey_answers: schemas.PeriBecycleSurvey) -> None:
+    survey_entry = models.PeriBecycleSurvey(**survey_answers.model_dump())
+
+    try:
+        db.add(survey_entry)
+        db.commit()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Something went wrong"})
