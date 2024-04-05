@@ -9,3 +9,4 @@ from .finances import finances
 from .public import public
 from .statistics import statistics
 from .surveys import surveys
+from .maps import maps
