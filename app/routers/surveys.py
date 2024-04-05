@@ -35,3 +35,15 @@ async def post_peri_becycle_survey(survey_answers: schemas.PeriBecycleSurvey,
     crud.create_peri_becycle_survey_entry(db=db, survey_answers=survey_answers)
     client.periBecycleSurveyCompleted = True
     db.commit()
+
+
+@surveys.post("/surveys/post-becycle")
+async def post_post_becycle_survey(survey_answers: schemas.PostBecycleSurvey,
+                                   client: models.Client = Depends(dep.get_current_client),
+                                   db: Session = Depends(dep.get_db)):
+    if client.postBecycleSurveyCompleted:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "You have already completed this survey"})
+
+    crud.create_post_becycle_survey_entry(db=db, survey_answers=survey_answers)
+    client.postBecycleSurveyCompleted = True
+    db.commit()

@@ -111,3 +111,58 @@ class PeriBecycleSurvey(Base):
     harassmentExperienced: Mapped[bool] = mapped_column("harassmentExperienced", Boolean, default=False, server_default=text("FALSE"), nullable=False,
                                           quote=False)
     harassmentSuggestions: Mapped[str] = mapped_column("harassmentSuggestions", Text, nullable=True, quote=False)
+
+
+class PostBecycleSurvey(Base):
+    __tablename__ = "postbecyclesurvey"
+
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
+    datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
+
+    # stopped cycling
+    stoppedCycling: Mapped[bool] = mapped_column("stoppedCycling", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+
+    # if stopped, why
+    issueSafety: Mapped[bool] = mapped_column("issueSafety", Boolean, default=False, server_default=text("FALSE"),
+                                               nullable=False, quote=False)
+    issueMoney: Mapped[bool] = mapped_column("issueMoney", Boolean, default=False, server_default=text("FALSE"),
+                                              nullable=False, quote=False)
+    issueTime: Mapped[bool] = mapped_column("issueTime", Boolean, default=False, server_default=text("FALSE"),
+                                             nullable=False, quote=False)
+    issueSweating: Mapped[bool] = mapped_column("issueSweating", Boolean, default=False, server_default=text("FALSE"),
+                                                 nullable=False, quote=False)
+    issueComfort: Mapped[bool] = mapped_column("issueComfort", Boolean, default=False, server_default=text("FALSE"),
+                                                nullable=False, quote=False)
+    issueDistance: Mapped[bool] = mapped_column("issueDistance", Boolean, default=False, server_default=text("FALSE"),
+                                                 nullable=False, quote=False)
+    issueOther: Mapped[str] = mapped_column("issueOther", Text, default=None, server_default=text("NULL"),
+                                             nullable=True, quote=False)
+
+    # these improvements would make me more likely to cycle again
+    improvementNone: Mapped[bool] = mapped_column("improvementNone", Boolean, default=False,
+                                                  server_default=text("FALSE"),
+                                                  nullable=False, quote=False)
+    improvementCyclingPaths: Mapped[bool] = mapped_column("improvementCyclingPaths", Boolean, default=False, server_default=text("FALSE"),
+                                                nullable=False, quote=False)
+    improvementLights: Mapped[bool] = mapped_column("improvementLights", Boolean, default=False,
+                                                          server_default=text("FALSE"),
+                                                          nullable=False, quote=False)
+    improvementSurface: Mapped[bool] = mapped_column("improvementSurface", Boolean, default=False,
+                                                          server_default=text("FALSE"),
+                                                          nullable=False, quote=False)
+    improvementCleaner: Mapped[bool] = mapped_column("improvementCleaner", Boolean, default=False,
+                                                          server_default=text("FALSE"),
+                                                          nullable=False, quote=False)
+    improvementOther: Mapped[str] = mapped_column("improvementOther", Text, default=False,
+                                                          server_default=text("FALSE"),
+                                                          nullable=False, quote=False)
+
+    # if not stopped cycling, what is the alternative
+    alternativeOwnBike: Mapped[bool] = mapped_column("alternativeOwnBike", Boolean, default=False, server_default=text("FALSE"),
+                                               nullable=False, quote=False)
+    alternativeShareFriendsFamily: Mapped[bool] = mapped_column("alternativeShareFriendsFamily", Boolean, default=False,
+                                                     server_default=text("FALSE"),
+                                                     nullable=False, quote=False)
+    alternativeOtherRental: Mapped[bool] = mapped_column("alternativeOtherRental", Boolean, default=False,
+                                                     server_default=text("FALSE"),
+                                                     nullable=False, quote=False)

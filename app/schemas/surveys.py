@@ -65,3 +65,26 @@ class PeriBecycleSurvey(BaseModel):
     # harassment
     harassmentExperienced: bool
     harassmentSuggestions: str | None = None
+
+
+class PostBecycleSurvey(BaseModel):
+    stoppedCycling: bool
+
+    issueSafety: bool
+    issueMoney: bool
+    issueTime: bool
+    issueSweating: bool
+    issueComfort: bool
+    issueDistance: bool
+    issueOther: str
+
+    improvementNone: bool
+    improvementCyclingPaths: bool
+    improvementLights: bool
+    improvementSurface: bool
+    improvementCleaner: bool
+    improvementOther: str
+
+    alternativeOwnBike: bool
+    alternativeShareFriendsFamily: bool
+    alternativeOtherRental: bool

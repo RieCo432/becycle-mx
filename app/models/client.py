@@ -40,6 +40,10 @@ class Client(Base):
                                                             server_default=text("FALSE"),
                                                             nullable=False,
                                                             quote=False)
+    postBecycleSurveyCompleted: Mapped[bool] = mapped_column("postBecycleSurveyCompleted", Boolean, default=False,
+                                                             server_default=text("FALSE"),
+                                                             nullable=False,
+                                                             quote=False)
 
 
 class ClientTemp(Base):
