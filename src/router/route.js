@@ -257,6 +257,15 @@ const routes = [
         component: () => import('@/views/surveys/preBecycle.vue'),
       },
       {
+        path: '/surveys/peri-becycle',
+        name: 'Peri-Becycle Survey',
+        meta: {
+          restrictTo: ['client'],
+          selectNavPath: '/surveys/peri-becycle',
+        },
+        component: () => import('@/views/surveys/periBecycle.vue'),
+      },
+      {
         path: '/surveys/map',
         name: 'Cycling Suitability Map',
         meta: {

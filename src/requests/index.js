@@ -567,6 +567,11 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  postPeriBecycleSurvey(surveyAnswers) {
+    return axiosClient.post('/surveys/peri-becycle', surveyAnswers, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
   getGeoJson() {
     return axiosClient.get('/maps/geojson');
   },
