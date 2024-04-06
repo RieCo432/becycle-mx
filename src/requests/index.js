@@ -572,6 +572,11 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  postPostBecycleSurvey(surveyAnswers) {
+    return axiosClient.post('/surveys/post-becycle', surveyAnswers, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
   getGeoJson() {
     return axiosClient.get('/maps/geojson');
   },
