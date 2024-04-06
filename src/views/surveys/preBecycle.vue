@@ -32,11 +32,11 @@ export default {
         title: 'Options Considered',
       },
       {
-        id: 3,
+        id: 4,
         title: 'Training and Experience',
       },
       {
-        id: 3,
+        id: 5,
         title: 'Interest',
       },
     ];
