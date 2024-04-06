@@ -31,4 +31,5 @@ def create_post_becycle_survey_entry(db: Session, survey_answers: schemas.PostBe
         db.add(survey_entry)
         db.commit()
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Something went wrong"})

@@ -120,9 +120,13 @@ class PostBecycleSurvey(Base):
     datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
 
     # stopped cycling
-    stoppedCycling: Mapped[bool] = mapped_column("stoppedCycling", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    reasonStoppedCycling: Mapped[bool] = mapped_column("reasonStoppedCycling", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    reasonLeavingAberdeen: Mapped[bool] = mapped_column("reasonLeavingAberdeen", Boolean, default=False,
+                                                       server_default=text("FALSE"),
+                                                       nullable=False, quote=False)
 
     # if stopped, why
+
     issueSafety: Mapped[bool] = mapped_column("issueSafety", Boolean, default=False, server_default=text("FALSE"),
                                                nullable=False, quote=False)
     issueMoney: Mapped[bool] = mapped_column("issueMoney", Boolean, default=False, server_default=text("FALSE"),
@@ -153,9 +157,9 @@ class PostBecycleSurvey(Base):
     improvementCleaner: Mapped[bool] = mapped_column("improvementCleaner", Boolean, default=False,
                                                           server_default=text("FALSE"),
                                                           nullable=False, quote=False)
-    improvementOther: Mapped[str] = mapped_column("improvementOther", Text, default=False,
-                                                          server_default=text("FALSE"),
-                                                          nullable=False, quote=False)
+    improvementOther: Mapped[str] = mapped_column("improvementOther", Text, default=None,
+                                                          server_default=text("NULL"),
+                                                          nullable=True, quote=False)
 
     # if not stopped cycling, what is the alternative
     alternativeOwnBike: Mapped[bool] = mapped_column("alternativeOwnBike", Boolean, default=False, server_default=text("FALSE"),
@@ -163,6 +167,9 @@ class PostBecycleSurvey(Base):
     alternativeShareFriendsFamily: Mapped[bool] = mapped_column("alternativeShareFriendsFamily", Boolean, default=False,
                                                      server_default=text("FALSE"),
                                                      nullable=False, quote=False)
+    alternativeAnotherBecycle: Mapped[bool] = mapped_column("alternativeAnotherBecycle", Boolean, default=False,
+                                                         server_default=text("FALSE"),
+                                                         nullable=False, quote=False)
     alternativeOtherRental: Mapped[bool] = mapped_column("alternativeOtherRental", Boolean, default=False,
                                                      server_default=text("FALSE"),
                                                      nullable=False, quote=False)

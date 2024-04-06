@@ -68,7 +68,8 @@ class PeriBecycleSurvey(BaseModel):
 
 
 class PostBecycleSurvey(BaseModel):
-    stoppedCycling: bool
+    reasonStoppedCycling: bool
+    reasonLeavingAberdeen: bool
 
     issueSafety: bool
     issueMoney: bool
@@ -76,15 +77,16 @@ class PostBecycleSurvey(BaseModel):
     issueSweating: bool
     issueComfort: bool
     issueDistance: bool
-    issueOther: str
+    issueOther: str | None = None
 
     improvementNone: bool
     improvementCyclingPaths: bool
     improvementLights: bool
     improvementSurface: bool
     improvementCleaner: bool
-    improvementOther: str
+    improvementOther: str | None = None
 
     alternativeOwnBike: bool
     alternativeShareFriendsFamily: bool
+    alternativeAnotherBecycle: bool
     alternativeOtherRental: bool
