@@ -37,6 +37,8 @@ class PreBecycleSurvey(BaseModel):
 
 
 class PeriBecycleSurvey(BaseModel):
+    serviceSatisfaction: int
+
     roadsGreat: bool
     roadsLight: bool
     roadsPotholes: bool
@@ -68,6 +70,8 @@ class PeriBecycleSurvey(BaseModel):
 
 
 class PostBecycleSurvey(BaseModel):
+    serviceSatisfaction: int
+
     reasonStoppedCycling: bool
     reasonLeavingAberdeen: bool
 

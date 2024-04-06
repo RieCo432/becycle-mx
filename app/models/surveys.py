@@ -69,6 +69,10 @@ class PeriBecycleSurvey(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
     datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
+    # service satisfaction
+    serviceSatisfaction: Mapped[int] = mapped_column("serviceSatisfaction", Integer, nullable=False, quote=False,
+                                                     default=0, server_default=text('0'))
+
     # roads opinion
     roadsGreat: Mapped[bool] = mapped_column("roadsGreat", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
     roadsLight: Mapped[bool] = mapped_column("roadsLight", Boolean, default=False, server_default=text("FALSE"),
@@ -118,6 +122,10 @@ class PostBecycleSurvey(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
     datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
+
+    # service satisfaction
+    serviceSatisfaction: Mapped[int] = mapped_column("serviceSatisfaction", Integer, nullable=False, quote=False,
+                                                     default=0, server_default=text('0'))
 
     # stopped cycling
     reasonStoppedCycling: Mapped[bool] = mapped_column("reasonStoppedCycling", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
