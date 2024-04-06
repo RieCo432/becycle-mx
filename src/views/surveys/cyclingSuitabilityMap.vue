@@ -6,8 +6,8 @@
         v-model:zoom="zoom"
         v-model:bounds="bounds"
         :zoom="zoom"
-        :minZoom="3"
-        :maxZoom="21"
+        :minZoom="14"
+        :maxZoom="18"
         :zoomAnimation="true"
         @update:bounds="boundsUpdated"
         ref="mapView"
@@ -94,7 +94,7 @@ export default {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       geojson: null,
       center: [57.148, -2.094],
-      zoom: 20,
+      zoom: 18,
       markerLatLng: null,
       markerReports: [],
       loadingGeoJson: true,
