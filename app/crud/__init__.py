@@ -8,5 +8,5 @@ from .depositExchanges import *
 from .finances import *
 from .public import *
 from .statistics import *
-from .preBecycleSurvey import *
+from .surveys import *
 from .roadSegments import *
