@@ -21,19 +21,27 @@ export default {
     const steps = [
       {
         id: 1,
-        title: 'Returning your bike',
+        title: 'Satisfaction',
       },
       {
         id: 2,
-        title: 'Your Journey',
+        title: 'Returning your bike',
       },
       {
         id: 3,
+        title: 'Your Journey',
+      },
+      {
+        id: 4,
         title: 'Suggestions',
       },
     ];
 
     const stepNumber = ref(0);
+
+    const satisfactionSchema = yup.object().shape({
+      serviceSatisfaction: yup.number().integer().min(0).max(5).required(),
+    });
 
     const reasonSchema = yup.object().shape({
       reasonStoppedCycling: yup.boolean(),
@@ -67,13 +75,15 @@ export default {
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
         case 0:
-          return reasonSchema;
+          return satisfactionSchema;
         case 1:
-          return issueAlternativeSchema;
+          return reasonSchema;
         case 2:
+          return issueAlternativeSchema;
+        case 3:
           return improvementSchema;
         default:
-          return reasonSchema;
+          return satisfactionSchema;
       }
     });
 
@@ -81,6 +91,8 @@ export default {
       validationSchema: currentSchema,
       keepValuesOnUnmount: true,
     });
+
+    const {value: serviceSatisfaction, errorMessage: serviceSatisfactionError} = useField('serviceSatisfaction');
 
     const {value: reasonStoppedCycling} = useField('reasonStoppedCycling');
     const {value: reasonLeavingAberdeen} = useField('reasonLeavingAberdeen');
@@ -134,6 +146,7 @@ export default {
         stepNumber.value = totalSteps - 1;
         // handle submit
         requests.postPostBecycleSurvey({
+          serviceSatisfaction: serviceSatisfaction.value,
           reasonStoppedCycling: reasonStoppedCycling.value,
           reasonLeavingAberdeen: reasonLeavingAberdeen.value,
           issueSafety: issueSafety.value,
@@ -171,6 +184,8 @@ export default {
     return {
       steps,
       stepNumber,
+      serviceSatisfaction,
+      serviceSatisfactionError,
       reasonStoppedCycling,
       reasonLeavingAberdeen,
       issueSafety,
@@ -250,6 +265,27 @@ export default {
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                  On a scale from 0 (do not agree at all) to 5 (agree fully), how much do you agree with the following statement?
+                </h4>
+              </div>
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Textinput
+                      label="Becycle has helped me get a bike, fix it, and learn about bike maintenance."
+                      type="text"
+                      placeholder="4"
+                      name="serviceSatisfaction"
+                      v-model="serviceSatisfaction"
+                      :error="serviceSatisfactionError"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="stepNumber === 1">
+            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   Why are you returning your bike? Tick all that apply.
                 </h4>
               </div>
@@ -272,7 +308,7 @@ export default {
             </div>
           </div>
 
-          <div v-if="stepNumber === 1 && reasonStoppedCycling">
+          <div v-if="stepNumber === 2 && reasonStoppedCycling">
             <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
               <div class="md:col-span-2 col-span-1">
                 <h4  class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -334,7 +370,7 @@ export default {
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 1 && !reasonStoppedCycling">
+          <div v-if="stepNumber === 2 && !reasonStoppedCycling">
             <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
               <div class="md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -373,7 +409,7 @@ export default {
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 2">
+          <div v-if="stepNumber === 3">
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 v-if="reasonStoppedCycling" class="text-base text-slate-800 dark:text-slate-300 mb-6">

@@ -21,27 +21,35 @@ export default {
     const steps = [
       {
         id: 1,
-        title: 'Road Quality',
+        title: 'Satisfaction',
       },
       {
         id: 2,
-        title: 'Road Users',
+        title: 'Road Quality',
       },
       {
         id: 3,
-        title: 'Routes',
+        title: 'Road Users',
       },
       {
         id: 4,
-        title: 'Accidents',
+        title: 'Routes',
       },
       {
         id: 5,
+        title: 'Accidents',
+      },
+      {
+        id: 6,
         title: 'Harassment',
       },
     ];
 
     const stepNumber = ref(0);
+
+    const satisfactionSchema = yup.object().shape({
+      serviceSatisfaction: yup.number().integer().min(0).max(5).required(),
+    });
 
     const roadsSchema = yup.object().shape({
       roadsGreat: yup.boolean(),
@@ -81,17 +89,19 @@ export default {
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
         case 0:
-          return roadsSchema;
+          return satisfactionSchema;
         case 1:
-          return usersSchema;
+          return roadsSchema;
         case 2:
-          return routesSchema;
+          return usersSchema;
         case 3:
-          return accidentsSchema;
+          return routesSchema;
         case 4:
+          return accidentsSchema;
+        case 5:
           return harassmentSchema;
         default:
-          return roadsSchema;
+          return satisfactionSchema;
       }
     });
 
@@ -99,6 +109,8 @@ export default {
       validationSchema: currentSchema,
       keepValuesOnUnmount: true,
     });
+
+    const {value: serviceSatisfaction, errorMessage: serviceSatisfactionError} = useField('serviceSatisfaction');
 
     const {value: roadsGreat} = useField('roadsGreat');
     const {value: roadsLight} = useField('roadsLight');
@@ -156,6 +168,7 @@ export default {
         stepNumber.value = totalSteps - 1;
         // handle submit
         requests.postPeriBecycleSurvey({
+          serviceSatisfaction: serviceSatisfaction.value,
           roadsGreat: roadsGreat.value,
           roadsLight: roadsLight.value,
           roadsPotholes: roadsPotholes.value,
@@ -194,6 +207,8 @@ export default {
     return {
       steps,
       stepNumber,
+      serviceSatisfaction,
+      serviceSatisfactionError,
       roadsGreat,
       roadsLight,
       roadsPotholes,
@@ -276,6 +291,27 @@ export default {
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                  On a scale from 0 (do not agree at all) to 5 (agree fully), how much do you agree with the following statement?
+                </h4>
+              </div>
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Textinput
+                      label="Becycle has helped me get a bike, fix it, and learn about bike maintenance."
+                      type="text"
+                      placeholder="4"
+                      name="serviceSatisfaction"
+                      v-model="serviceSatisfaction"
+                      :error="serviceSatisfactionError"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="stepNumber === 1">
+            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   How do you feel about the quality of the roads in Aberdeen? Tick all that apply.
                 </h4>
               </div>
@@ -327,7 +363,7 @@ export default {
             </div>
           </div>
 
-          <div v-if="stepNumber === 1">
+          <div v-if="stepNumber === 2">
             <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
               <div class="md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -387,7 +423,7 @@ export default {
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 2">
+          <div v-if="stepNumber === 3">
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -419,7 +455,7 @@ export default {
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 3">
+          <div v-if="stepNumber === 4">
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -450,7 +486,7 @@ export default {
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 4">
+          <div v-if="stepNumber === 5">
             <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
               <div class="lg:col-span-3 md:col-span-2 col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
