@@ -599,4 +599,27 @@ export default {
       roadSegmentReportTypeId: roadSegmentReportTypeId,
     });
   },
+  refreshPotentialDuplicateClients() {
+    return axiosClient.get('/admin/duplicates/clients/refresh', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getPotentialDuplicateClients() {
+    return axiosClient.get('/admin/duplicates/clients', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchIgnorePotentialClientDuplicate(clientDuplicateId) {
+    return axiosClient.patch(`/admin/duplicates/clients/${clientDuplicateId}/ignore`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  putResolvePotentialClientDuplicate(clientDuplicateId, keepClientId, discardClientId) {
+    return axiosClient.put(`/admin/duplicates/clients/${clientDuplicateId}/resolve`, {
+      discard_client_id: discardClientId,
+      keep_client_id: keepClientId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

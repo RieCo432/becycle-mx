@@ -147,4 +147,18 @@ export const topMenu = [
       },
     ],
   },*/
+  {
+    title: 'Admin',
+    icon: 'heroicons-outline:building-library',
+    link: '/admin/',
+    show: ['user'],
+    child: [
+      {
+        childtitle: 'Duplicate Clients',
+        childicon: 'heroicons-outline:users',
+        childlink: '/admin/duplicates/clients',
+        show: ['user'],
+      },
+    ],
+  },
 ];

@@ -283,6 +283,15 @@ const routes = [
         },
         component: () => import('@/views/surveys/cyclingSuitabilityMap.vue'),
       },
+      {
+        path: '/admin/duplicates/clients',
+        name: 'Manage Potential Duplicate Clients',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/admin/duplicates/clients',
+        },
+        component: () => import('@/views/admin/duplicates/clients.vue'),
+      },
     ],
   },
 ];
