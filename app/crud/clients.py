@@ -186,3 +186,10 @@ def update_client(db: Session, client_id: UUID, new_first_name: str, new_last_na
     db.commit()
 
     return client
+
+
+def get_client_logins(db: Session, client_id: UUID) -> list[models.ClientLogin]:
+    return [_ for _ in db.scalars(
+        select(models.ClientLogin)
+        .where(models.ClientLogin.clientId == client_id)
+    )]
