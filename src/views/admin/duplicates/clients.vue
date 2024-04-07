@@ -3,6 +3,7 @@ import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import Card from '@/components/Card';
 import PotentialClientDuplicatesAccordion from '@/components/Accordion/ClientDuplicates.vue';
+import Button from '@/components/Button/index.vue';
 
 const toast = useToast();
 
@@ -11,6 +12,7 @@ export default {
   components: {
     Card,
     PotentialClientDuplicatesAccordion,
+    Button,
   },
   data() {
     return {
@@ -58,6 +60,9 @@ export default {
   <div class="grid grid-cols-1 gap-5">
     <div class="col-span-1">
       <Card title="Potential Duplicates To Be Checked">
+        <template #header>
+          <Button @click="refreshPotentialDuplicateClients">Search For Duplicates</Button>
+        </template>
         <PotentialClientDuplicatesAccordion
             v-if="potentialDuplicateClients !== null"
             :items="potentialDuplicateClientsNotIgnored.slice(0, 20)"
