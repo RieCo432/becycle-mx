@@ -97,53 +97,62 @@ def find_potential_client_duplicates(db: Session) -> None:
                 db.commit()
 
 
-def resolve_client_duplicate(db: Session, obsolete_client_id: UUID, valid_client_id: UUID) -> None:
-    obsolete_client = get_client(db=db, client_id=obsolete_client_id)
-    valid_client = get_client(db=db, client_id=valid_client_id)
+def get_potential_client_duplicate(db: Session, potential_client_duplicate_id: UUID) -> models.DetectedPotentialClientDuplicates:
+    return db.scalar(
+        select(models.DetectedPotentialClientDuplicates)
+        .where(models.DetectedPotentialClientDuplicates.id == potential_client_duplicate_id)
+    )
 
-    if obsolete_client is None or valid_client is None:
+
+def resolve_client_duplicate(db: Session, potential_client_duplicate_id: UUID, discard_client_id: UUID, keep_client_id: UUID) -> None:
+    potential_client_duplicate = get_potential_client_duplicate(db=db, potential_client_duplicate_id=potential_client_duplicate_id)
+
+    if potential_client_duplicate is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Potential client duplicate not found"})
+
+    if (
+            (potential_client_duplicate.client1Id != discard_client_id and potential_client_duplicate.client1Id != keep_client_id)
+            or (potential_client_duplicate.client2Id != discard_client_id and potential_client_duplicate.client2Id != keep_client_id)):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "One of the clients is not part of this potential duplicate"})
+
+    discard_client = get_client(db=db, client_id=discard_client_id)
+    keep_client = get_client(db=db, client_id=keep_client_id)
+
+    if discard_client is None or keep_client is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "One or more clients not found!"})
 
-    if not is_potential_client_duplicate_detected_before(db=db, client1=obsolete_client, client2=valid_client):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "These clients are not potential duplicates"})
-
-    obsolete_client_contracts = get_contracts(db=db, client_id=obsolete_client_id)
+    obsolete_client_contracts = get_contracts(db=db, client_id=discard_client_id)
 
     for contract in obsolete_client_contracts:
-        contract.clientId = valid_client_id
+        contract.clientId = keep_client_id
 
-    obsolete_client_appointments = get_appointments(db=db, client_id=obsolete_client_id)
+    obsolete_client_appointments = get_appointments(db=db, client_id=discard_client_id)
 
     for appointment in obsolete_client_appointments:
-        appointment.clientId = valid_client_id
+        appointment.clientId = keep_client_id
 
-    obsolete_client_logins = get_client_logins(db=db, client_id=obsolete_client_id)
+    obsolete_client_logins = get_client_logins(db=db, client_id=discard_client_id)
 
     for login in obsolete_client_logins:
         db.delete(login)
 
-    valid_client.preBecycleSurveyCompleted |= obsolete_client.preBecycleSurveyCompleted
-    valid_client.periBecycleSurveyCompleted |= obsolete_client.periBecycleSurveyCompleted
-    valid_client.postBecycleSurveyCompleted |= obsolete_client.postBecycleSurveyCompleted
+    keep_client.preBecycleSurveyCompleted |= discard_client.preBecycleSurveyCompleted
+    keep_client.periBecycleSurveyCompleted |= discard_client.periBecycleSurveyCompleted
+    keep_client.postBecycleSurveyCompleted |= discard_client.postBecycleSurveyCompleted
 
-    c1_id = str(obsolete_client_id)
-    c2_id = str(valid_client_id)
-
-    if c2_id < c1_id:
-        temp = c1_id
-        c1_id = c2_id
-        c2_id = temp
-
-    detected_client_duplicate = db.scalar(
-        select(models.DetectedPotentialClientDuplicates)
-        .where(
-            (models.DetectedPotentialClientDuplicates.client1Id == c1_id)
-            & (models.DetectedPotentialClientDuplicates.client2Id == c2_id)
-        )
-    )
-
-    db.delete(detected_client_duplicate)
-
-    db.delete(obsolete_client)
+    db.delete(potential_client_duplicate)
+    db.delete(discard_client)
 
     db.commit()
+
+
+def ignore_potential_client_duplicate(db: Session, potential_client_duplicate_id: UUID) -> models.DetectedPotentialClientDuplicates:
+    potential_client_duplicate = get_potential_client_duplicate(db=db, potential_client_duplicate_id=potential_client_duplicate_id)
+    if potential_client_duplicate is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Potential client duplicate not found"})
+
+    potential_client_duplicate.ignore = True
+
+    db.commit()
+
+    return potential_client_duplicate

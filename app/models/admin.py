@@ -19,6 +19,6 @@ class DetectedPotentialClientDuplicates(Base):
     similarityScore: Mapped[int] = mapped_column("similarityScore", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
 
-    checked: Mapped[bool] = mapped_column("checked", Boolean, default=False, server_default=text("FALSE"),
+    ignore: Mapped[bool] = mapped_column("ignore", Boolean, default=False, server_default=text("FALSE"),
                                               nullable=False, quote=False)
 
