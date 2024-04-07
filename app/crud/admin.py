@@ -104,6 +104,16 @@ def get_potential_client_duplicate(db: Session, potential_client_duplicate_id: U
     )
 
 
+def get_potential_client_duplicates_for_client(db: Session, client_id: UUID) -> list[models.DetectedPotentialClientDuplicates]:
+    return [_ for _ in db.scalars(
+        select(models.DetectedPotentialClientDuplicates)
+        .where(
+            (models.DetectedPotentialClientDuplicates.client1Id == client_id)
+            | (models.DetectedPotentialClientDuplicates.client2Id == client_id)
+        )
+    )]
+
+
 def resolve_client_duplicate(db: Session, potential_client_duplicate_id: UUID, discard_client_id: UUID, keep_client_id: UUID) -> None:
     potential_client_duplicate = get_potential_client_duplicate(db=db, potential_client_duplicate_id=potential_client_duplicate_id)
 
@@ -136,11 +146,19 @@ def resolve_client_duplicate(db: Session, potential_client_duplicate_id: UUID, d
     for login in obsolete_client_logins:
         db.delete(login)
 
+    db.commit()
+
     keep_client.preBecycleSurveyCompleted |= discard_client.preBecycleSurveyCompleted
     keep_client.periBecycleSurveyCompleted |= discard_client.periBecycleSurveyCompleted
     keep_client.postBecycleSurveyCompleted |= discard_client.postBecycleSurveyCompleted
 
     db.delete(potential_client_duplicate)
+    db.commit()
+
+    for potential_client_duplicate_other in get_potential_client_duplicates_for_client(db=db, client_id=discard_client_id):
+        db.delete(potential_client_duplicate_other)
+    db.commit()
+
     db.delete(discard_client)
 
     db.commit()
