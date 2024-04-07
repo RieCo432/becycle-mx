@@ -8,10 +8,11 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 
-# TODO: PUT ADMIN AS DEPENDENCY
 admin = APIRouter(
     tags=["admin"],
-    responses={404: {"description": "Not Found"}})
+    responses={404: {"description": "Not Found"}},
+    dependencies=[Depends(dep.get_current_admin_user)]
+)
 
 
 @admin.get("/admin/duplicates/clients")
@@ -26,7 +27,7 @@ async def admin_duplicates_clients_refresh(
     refresh_tasks.add_task(crud.find_potential_client_duplicates, db)
 
 
-@admin.put("/admin/duplicates/clients/resolve/{potential_client_duplicate_id}")
+@admin.put("/admin/duplicates/clients/{potential_client_duplicate_id}/resolve")
 async def admin_duplicates_client_resolve(
         potential_client_duplicate_id: UUID,
         discard_client_id: Annotated[UUID, Body(embed=True)],
@@ -37,8 +38,8 @@ async def admin_duplicates_client_resolve(
     crud.resolve_client_duplicate(db=db, potential_client_duplicate_id=potential_client_duplicate_id, discard_client_id=discard_client_id, keep_client_id=keep_client_id)
 
 
-@admin.patch("/admin/duplicates/clients/ignore/{potential_client_duplicate_id}")
+@admin.patch("/admin/duplicates/clients/{potential_client_duplicate_id}/ignore")
 async def admin_duplicates_client_ignore(
         potential_client_duplicate_id: UUID,
-        db: Session = Depends(dep.get_db)) -> None:
-    crud.ignore_potential_client_duplicate(db=db, potential_client_duplicate_id=potential_client_duplicate_id)
+        db: Session = Depends(dep.get_db)) -> schemas.DetectedPotentialClientDuplicates:
+    return crud.ignore_potential_client_duplicate(db=db, potential_client_duplicate_id=potential_client_duplicate_id)
