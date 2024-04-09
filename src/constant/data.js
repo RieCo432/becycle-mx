@@ -72,24 +72,6 @@ export const topMenu = [
     show: ['user'],
   },
   {
-    title: 'User Management',
-    icon: 'heroicons-outline:user',
-    link: '/admin/users',
-    show: ['user'],
-  },
-  {
-    title: 'Appointment Types',
-    icon: 'heroicons-outline:calendar',
-    link: '/admin/appointment-types',
-    show: ['user'],
-  },
-  {
-    title: 'Appointment Settings',
-    icon: 'heroicons-outline:adjustments-horizontal',
-    link: '/admin/appointment-settings',
-    show: ['user'],
-  },
-  {
     title: 'Submit Deposit Exchange',
     icon: 'heroicons-outline:arrows-right-left',
     link: '/admin/deposit-exchanges',
@@ -153,6 +135,24 @@ export const topMenu = [
     link: '/admin/',
     show: ['user'],
     child: [
+      {
+        childtitle: 'User Management',
+        childicon: 'heroicons-outline:user',
+        childlink: '/admin/users',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Appointment Types',
+        childicon: 'heroicons-outline:calendar',
+        childlink: '/admin/appointment-types',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Appointment Settings',
+        childicon: 'heroicons-outline:adjustments-horizontal',
+        childlink: '/admin/appointment-settings',
+        show: ['user'],
+      },
       {
         childtitle: 'Duplicate Clients',
         childicon: 'heroicons-outline:users',
