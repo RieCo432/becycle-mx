@@ -1,11 +1,5 @@
 import datetime
 import math
-from copy import copy
-
-from sqlalchemy import and_
-from sqlalchemy.orm import Session
-import app.models as models
-import app.schemas as schemas
 from .settings import *
 from uuid import UUID
 
@@ -22,6 +16,10 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
             detail={"description": "Someone just requested this slot. Refreshing list... Please choose a new slot."},
             headers={"WWW-Authenticate": "Bearer"}
         )
+
+    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.utcnow(), client_id=appointment_data.clientId, cancelled=False, confirmed=False)
+    if len(pending_appointment_requests) >= 2:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "You cannot have more than 2 pending appointment requests. Please wait for pending requests to get denied or accepted!"})
 
     appointment = models.Appointment(
         clientId=appointment_data.clientId,
@@ -192,7 +190,12 @@ def get_appointment_types(db: Session, inactive: bool) -> list[models.Appointmen
     )]
 
 
-def get_appointments(db: Session, start_datetime: datetime = None, end_datetime: datetime = None, client_id: UUID = None) -> list[models.Appointment]:
+def get_appointments(db: Session,
+                     start_datetime: datetime = None,
+                     end_datetime: datetime = None,
+                     client_id: UUID = None,
+                     confirmed: bool | None = None,
+                     cancelled: bool | None = None) -> list[models.Appointment]:
     query_filter = []
     if client_id is not None:
         query_filter.append((models.Appointment.clientId == client_id))
@@ -200,6 +203,10 @@ def get_appointments(db: Session, start_datetime: datetime = None, end_datetime:
         query_filter.append((models.Appointment.startDateTime >= start_datetime))
     if end_datetime is not None:
         query_filter.append((models.Appointment.endDateTime <= end_datetime))
+    if confirmed is not None:
+        query_filter.append((models.Appointment.confirmed == confirmed))
+    if cancelled is not None:
+        query_filter.append((models.Appointment.cancelled == cancelled))
     return [_ for _ in db.scalars(
         select(models.Appointment)
         .where(and_(*query_filter))
