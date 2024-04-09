@@ -243,11 +243,17 @@ def find_potential_bike_duplicates(db: Session) -> None:
             bike_1_all_design = [n.strip().lower() for n in bike1.colour.split(" ") + (bike1.decals.split(" ") if bike1.decals is not None else [])]
             bike_2_all_design = [n.strip().lower() for n in bike2.colour.split(" ") + (bike2.decals.split(" ") if bike2.decals is not None else [])]
 
+            except_tokens = ["and", "with"]
+
             for bike_1_design in bike_1_all_design:
                 if len(bike_1_design) < 3:
                     continue
+                if bike_1_design in except_tokens:
+                    continue
                 for bike_2_design in bike_2_all_design:
                     if len(bike_2_design) < 3:
+                        continue
+                    if bike_2_design in except_tokens:
                         continue
                     if bike_1_design == bike_2_design:
                         similarity_score += 2
@@ -262,7 +268,7 @@ def find_potential_bike_duplicates(db: Session) -> None:
             elif levenshtein_distance(bike_1_serial_number, bike_2_serial_number) < 4:
                 similarity_score += 1
 
-            if similarity_score >= 2:
+            if similarity_score >= 4:
                 b1_id = bike1.id
                 b2_id = bike2.id
                 if str(b2_id) < str(b1_id):
