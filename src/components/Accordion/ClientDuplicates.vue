@@ -45,24 +45,42 @@
             <div class="grid grid-cols-2 gap-5">
               <div class="col-span-1">
                 <Card title="Client 1">
+                  <template #header>
+                      <Button @click="resolvePotentialDuplicate(item.id, item.client1.id, item.client2.id)">Keep</Button>
+                  </template>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.client1.firstName }} {{ item.client1.lastName }}</p>
                   </div>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300">{{ item.client1.emailAddress }}</p>
                   </div>
-                  <Button @click="resolvePotentialDuplicate(item.id, item.client1.id, item.client2.id)">Keep</Button>
+                  <div class="col-span-full">
+                    <p class="text-base text-slate-700 dark:text-slate-300">Contracts: {{item.client1.contracts.length}}</p>
+                  </div>
+                  <div class="col-span-full">
+                    <p class="text-base text-slate-700 dark:text-slate-300">Appointments: {{item.client1.appointments.length}}</p>
+                  </div>
+
                 </Card>
               </div>
               <div class="col-span-1">
                 <Card title="Client 2">
+                  <template #header>
+                    <Button @click="resolvePotentialDuplicate(item.id, item.client2.id, item.client1.id)">Keep</Button>
+                  </template>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.client2.firstName }} {{ item.client2.lastName }}</p>
                   </div>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300">{{ item.client2.emailAddress }}</p>
                   </div>
-                  <Button @click="resolvePotentialDuplicate(item.id, item.client2.id, item.client1.id)">Keep</Button>
+                  <div class="col-span-full">
+                    <p class="text-base text-slate-700 dark:text-slate-300">Contracts: {{item.client2.contracts.length}}</p>
+                  </div>
+                  <div class="col-span-full">
+                    <p class="text-base text-slate-700 dark:text-slate-300">Appointments: {{item.client2.appointments.length}}</p>
+                  </div>
+
                 </Card>
               </div>
               <div class="col-span-full">
