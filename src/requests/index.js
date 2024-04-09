@@ -622,4 +622,27 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  refreshPotentialDuplicateBikes() {
+    return axiosClient.get('/admin/duplicates/bikes/refresh', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getPotentialDuplicateBikes() {
+    return axiosClient.get('/admin/duplicates/bikes', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchIgnorePotentialBikeDuplicate(bikeDuplicateId) {
+    return axiosClient.patch(`/admin/duplicates/bikes/${bikeDuplicateId}/ignore`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  putResolvePotentialBikeDuplicate(bikeDuplicateId, keepBikeId, discardBikeId) {
+    return axiosClient.put(`/admin/duplicates/bikes/${bikeDuplicateId}/resolve`, {
+      discard_bike_id: discardBikeId,
+      keep_bike_id: keepBikeId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

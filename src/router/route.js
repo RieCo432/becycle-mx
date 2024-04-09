@@ -292,6 +292,15 @@ const routes = [
         },
         component: () => import('@/views/admin/duplicates/clients.vue'),
       },
+      {
+        path: '/admin/duplicates/bikes',
+        name: 'Manage Potential Duplicate Bikes',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/admin/duplicates/bikes',
+        },
+        component: () => import('@/views/admin/duplicates/bikes.vue'),
+      },
     ],
   },
 ];

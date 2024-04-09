@@ -14,7 +14,7 @@
           class="flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start text-base text-slate-600 dark:text-slate-300 px-8 py-4"
           @click="activeIndex = activeIndex === i ? null : i"
       >
-        {{ item.client1.firstName }} {{ item.client1.lastName }} &lt;----&gt; {{ item.client2.firstName }} {{ item.client2.lastName }}
+        {{ item.bike1.make }} {{ item.bike1.model }} &lt;----&gt; {{ item.bike2.make }} {{ item.bike2.model }}
 
         <span
             class="text-slate-900 dark:text-white text-[22px] transition-all duration-300 h-5"
@@ -44,43 +44,49 @@
           <div class="px-8 py-4">
             <div class="grid grid-cols-2 gap-5">
               <div class="col-span-1">
-                <Card title="Client 1">
+                <Card title="Bike 1">
                   <template #header>
-                    <Button @click="viewClient(item.client1.id)">View</Button>
-                    <Button @click="resolvePotentialDuplicate(item.id, item.client1.id, item.client2.id)" class="ml-5">Keep</Button>
+                    <Button @click="viewBike(item.bike1.id)">View</Button>
+                    <Button @click="resolvePotentialDuplicate(item.id, item.bike1.id, item.bike2.id)" class="ml-5">Keep</Button>
                   </template>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.client1.firstName }} {{ item.client1.lastName }}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.bike1.make }} {{ item.bike1.model }}</p>
                   </div>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300">{{ item.client1.emailAddress }}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">Colour: {{ item.bike1.colour }}</p>
                   </div>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300">Contracts: {{item.client1.contracts.length}}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">Decals: {{ item.bike1.decals }}</p>
                   </div>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300">Appointments: {{item.client1.appointments.length}}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300">Serial Number: {{ item.bike1.serialNumber }}</p>
+                  </div>
+                  <div class="col-span-full">
+                    <p class="text-base text-slate-700 dark:text-slate-300">Contracts: {{item.bike1.contracts.length}}</p>
                   </div>
 
                 </Card>
               </div>
               <div class="col-span-1">
-                <Card title="Client 2">
+                <Card title="Bike 2">
                   <template #header>
-                    <Button @click="viewClient(item.client2.id)">View</Button>
-                    <Button @click="resolvePotentialDuplicate(item.id, item.client2.id, item.client1.id)" class="ml-5">Keep</Button>
+                    <Button @click="viewBike(item.bike2.id)">View</Button>
+                    <Button @click="resolvePotentialDuplicate(item.id, item.bike2.id, item.bike1.id)" class="ml-5">Keep</Button>
                   </template>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.client2.firstName }} {{ item.client2.lastName }}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.bike2.make }} {{ item.bike2.model }}</p>
                   </div>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300">{{ item.client2.emailAddress }}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">Colour: {{ item.bike2.colour }}</p>
                   </div>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300">Contracts: {{item.client2.contracts.length}}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">Decals: {{ item.bike2.decals }}</p>
                   </div>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300">Appointments: {{item.client2.appointments.length}}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300">Serial Number: {{ item.bike2.serialNumber }}</p>
+                  </div>
+                  <div class="col-span-full">
+                    <p class="text-base text-slate-700 dark:text-slate-300">Contracts: {{item.bike2.contracts.length}}</p>
                   </div>
 
                 </Card>
@@ -106,15 +112,15 @@ import {useToast} from 'vue-toastification';
 const toast = useToast();
 
 export default {
-  name: 'PotentialClientDuplicatesAccordion',
+  name: 'PotentialBikeDuplicatesAccordion',
   components: {
     Card,
     Icon,
     Button,
   },
   emits: [
-      'potentialClientDuplicateIgnored',
-      'potentialClientDuplicateResolved',
+      'potentialBikeDuplicateIgnored',
+      'potentialBikeDuplicateResolved',
   ],
   props: {
     parentClass: {
@@ -132,24 +138,24 @@ export default {
     };
   },
   methods: {
-    ignorePotentialDuplicate(clientDuplicateId) {
-      requests.patchIgnorePotentialClientDuplicate(clientDuplicateId).then((response) => {
-        this.$emit('potentialClientDuplicateIgnored', response.data);
+    ignorePotentialDuplicate(bikeDuplicateId) {
+      requests.patchIgnorePotentialBikeDuplicate(bikeDuplicateId).then((response) => {
+        this.$emit('potentialBikeDuplicateIgnored', response.data);
         this.activeIndex = null;
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
     },
-    resolvePotentialDuplicate(clientDuplicateId, keepClientId, discardClientId) {
-      requests.putResolvePotentialClientDuplicate(clientDuplicateId, keepClientId, discardClientId).then(() => {
-        this.$emit('potentialClientDuplicateResolved', clientDuplicateId);
+    resolvePotentialDuplicate(bikeDuplicateId, keepBikeId, discardBikeId) {
+      requests.putResolvePotentialBikeDuplicate(bikeDuplicateId, keepBikeId, discardBikeId).then(() => {
+        this.$emit('potentialBikeDuplicateResolved', bikeDuplicateId);
         this.activeIndex = null;
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
     },
-    viewClient(clientId) {
-      const routeData = this.$router.resolve({path: `/clients/${clientId}`});
+    viewBike(bikeId) {
+      const routeData = this.$router.resolve({path: `/bikes/${bikeId}`});
       window.open(routeData.href, '_blank');
     },
     beforeEnter(element) {

@@ -159,6 +159,12 @@ export const topMenu = [
         childlink: '/admin/duplicates/clients',
         show: ['user'],
       },
+      {
+        childtitle: 'Duplicate Bikes',
+        childicon: 'heroicons-outline:truck',
+        childlink: '/admin/duplicates/bikes',
+        show: ['user'],
+      },
     ],
   },
 ];
