@@ -16,7 +16,7 @@ admin = APIRouter(
 
 
 @admin.get("/admin/duplicates/clients")
-async def admin_duplicates_clients(db: Session = Depends(dep.get_db)) -> list[schemas.DetectedPotentialClientDuplicates]:
+async def get_admin_duplicates_clients(db: Session = Depends(dep.get_db)) -> list[schemas.DetectedPotentialClientDuplicates]:
     return crud.get_potential_client_duplicates_detected(db=db)
 
 
@@ -43,3 +43,33 @@ async def admin_duplicates_client_ignore(
         potential_client_duplicate_id: UUID,
         db: Session = Depends(dep.get_db)) -> schemas.DetectedPotentialClientDuplicates:
     return crud.ignore_potential_client_duplicate(db=db, potential_client_duplicate_id=potential_client_duplicate_id)
+
+
+@admin.get("/admin/duplicates/bikes")
+async def get_admin_duplicates_bikes(db: Session = Depends(dep.get_db)) -> list[schemas.DetectedPotentialBikeDuplicates]:
+    return crud.get_potential_bike_duplicates_detected(db=db)
+
+
+@admin.get("/admin/duplicates/bikes/refresh")
+async def admin_duplicates_bikes_refresh(
+        refresh_tasks: BackgroundTasks,
+        db: Session = Depends(dep.get_db)) -> None:
+    refresh_tasks.add_task(crud.find_potential_bike_duplicates, db)
+
+
+@admin.put("/admin/duplicates/bikes/{potential_bike_duplicate_id}/resolve")
+async def admin_duplicates_bike_resolve(
+        potential_bike_duplicate_id: UUID,
+        discard_bike_id: Annotated[UUID, Body(embed=True)],
+        keep_bike_id: Annotated[UUID, Body(embed=True)],
+        db: Session = Depends(dep.get_db)) -> None:
+    if keep_bike_id == discard_bike_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Both IDs are identical"})
+    crud.resolve_bike_duplicate(db=db, potential_bike_duplicate_id=potential_bike_duplicate_id, discard_bike_id=discard_bike_id, keep_bike_id=keep_bike_id)
+
+
+@admin.patch("/admin/duplicates/bikes/{potential_bike_duplicate_id}/ignore")
+async def admin_duplicates_client_ignore(
+        potential_bike_duplicate_id: UUID,
+        db: Session = Depends(dep.get_db)) -> schemas.DetectedPotentialBikeDuplicates:
+    return crud.ignore_potential_bike_duplicate(db=db, potential_bike_duplicate_id=potential_bike_duplicate_id)
