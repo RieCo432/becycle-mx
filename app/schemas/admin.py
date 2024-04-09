@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from .client import Client
+from .client import ClientExtended
 from uuid import UUID
 
 
@@ -8,5 +8,5 @@ class DetectedPotentialClientDuplicates(BaseModel):
     id: UUID
     similarityScore: int
     ignore: bool
-    client1: Client
-    client2: Client
+    client1: ClientExtended
+    client2: ClientExtended
