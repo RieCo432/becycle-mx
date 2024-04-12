@@ -8,6 +8,7 @@ from app.services import distance
 
 db = SessionLocal()
 
+db.query(models.RoadSegmentReport).delete()
 db.query(models.RoadSegment).delete()
 
 with open("data/aberdeenroads.geojson", "r") as fin:
