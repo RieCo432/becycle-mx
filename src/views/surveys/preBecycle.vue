@@ -84,6 +84,7 @@ export default {
       trainingConfidence: yup.number().integer().min(0).max(10).required(),
       trainingRules: yup.boolean(),
       trainingDriver: yup.boolean(),
+      trainingNone: yup.boolean(),
     });
 
     const trainingExperienceMonthsOptions = ref([
@@ -203,6 +204,7 @@ export default {
     const {value: trainingConfidence, errorMessage: trainingConfidenceError} = useField('trainingConfidence');
     const {value: trainingRules} = useField('trainingRules');
     const {value: trainingDriver} = useField('trainingDriver');
+    const {value: trainingNone} = useField('trainingNone');
 
     const {value: interestMaintenanceCurrent, errorMessage: interestMaintenanceCurrentError} = useField('interestMaintenanceCurrent');
     const {value: interestMaintenanceDesired, errorMessage: interestMaintenanceDesiredError} = useField('interestMaintenanceDesired');
@@ -313,6 +315,7 @@ export default {
       trainingConfidenceError,
       trainingRules,
       trainingDriver,
+      trainingNone,
 
       interestMaintenanceCurrentOptions,
       interestMaintenanceDesiredOptions,
@@ -466,7 +469,6 @@ export default {
               </div>
             </div>
           </div>
-
           <div v-if="stepNumber === 2">
             <div class="grid grid-cols-1 gap-5">
               <div class="col-span-1">
@@ -605,13 +607,21 @@ export default {
                 </div>
                 <div class="col-span-1">
                   <Checkbox
+                      label="I have not received any training on how to behave as a road user, whether as a cyclist or motorist."
+                      name="trainingNone"
+                      v-model="trainingNone"
+                      :checked="trainingNone"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1" v-if="!trainingNone">
+                  <Checkbox
                       label="I have received some form of training on how to cycle on the road."
                       name="trainingFormal"
                       v-model="trainingFormal"
                       :checked="trainingFormal"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
-                <div class="col-span-1">
+                <div class="col-span-1" v-if="!trainingNone">
                   <Checkbox
                       label="I know the rules of the highway code and how they apply to me as a cyclist."
                       name="trainingRules"
@@ -619,7 +629,7 @@ export default {
                       :checked="trainingRules"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
-                <div class="col-span-1">
+                <div class="col-span-1" v-if="trainingNone">
                   <Checkbox
                       label="I am a driver (car, motorcycle, van, etc), so I know how to behave as a road user."
                       name="trainingDriver"
