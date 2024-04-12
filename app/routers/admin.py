@@ -1,5 +1,5 @@
 from uuid import UUID
-
+from fastapi.responses import FileResponse
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
 import app.crud as crud
 import app.schemas as schemas
@@ -73,3 +73,8 @@ async def admin_duplicates_client_ignore(
         potential_bike_duplicate_id: UUID,
         db: Session = Depends(dep.get_db)) -> schemas.DetectedPotentialBikeDuplicates:
     return crud.ignore_potential_bike_duplicate(db=db, potential_bike_duplicate_id=potential_bike_duplicate_id)
+
+
+@admin.get("/admin/takeout/contracts/excel")
+async def get_contracts_takeout_excel(db: Session = Depends(dep.get_db)):
+    return FileResponse(crud.get_contracts_takeout_excel(db=db))

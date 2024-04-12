@@ -1,5 +1,6 @@
+import os
 from uuid import UUID
-
+import pandas as pd
 from fastapi import HTTPException, status
 
 import app.schemas as schemas
@@ -11,6 +12,7 @@ from .clients import get_all_clients, get_client, get_client_logins
 from .bikes import get_all_bikes, get_bike
 from .contracts import get_contracts
 from .appointments import get_appointments
+from .finances import get_deposit_balances_book
 
 
 def get_potential_client_duplicates_detected(db: Session) -> list[models.DetectedPotentialClientDuplicates]:
@@ -347,3 +349,75 @@ def ignore_potential_bike_duplicate(db: Session, potential_bike_duplicate_id: UU
     db.commit()
 
     return potential_bike_duplicate
+
+
+def get_contracts_takeout_excel(db: Session) -> str:
+    contracts = get_contracts(db=db)
+
+    contracts_df = pd.DataFrame(columns=["Name", "Email Address",
+                                         "Start Date", "End Date",
+                                         "Make", "Model", "Colour", "Decals", "Serial Number", "Condition", "Notes",
+                                         "Contract Type",
+                                         "Working Volunteer", "Checking Volunteer",
+                                         "Deposit Amount Collected", "Deposit Collected By",
+                                         "Returned Date", "Return Received By",
+                                         "Deposit Amount Returned", "Deposit Returned By"])
+
+    for contract in contracts:
+        contract_row = contract.to_raw_dict()
+        contracts_df.loc[len(contracts_df)] = contract_row
+
+    deposit_book = get_deposit_balances_book(db=db)
+
+    deposit_holders = []
+    for date in deposit_book.dayBalances:
+        deposit_holders_on_date = deposit_book.dayBalances[date].balances.keys()
+        for deposit_holder in deposit_holders_on_date:
+            if deposit_holder not in deposit_holders:
+                deposit_holders.append(deposit_holder)
+
+    columns = ["Name", "Type"] + deposit_holders
+
+
+    deposit_book_df = pd.concat([
+        pd.DataFrame([{
+            "Name": t.title,
+            "Type": t.type,
+            **t.diff_by_username
+        } for t in deposit_book.dayBalances[date].transactions] + [{
+            "Name": None,
+            "Type": None,
+        }] + [{
+            "Name": "DAILY DIFF",
+            "Type": None,
+            **deposit_book.dayBalances[date].diff
+        }] + [{
+            "Name": None,
+            "Type": None,
+        }] + [{
+            "Name": "DAILY BALANCE",
+            "Type": None,
+            **deposit_book.dayBalances[date].balances
+        }] + [{
+            "Name": None,
+            "Type": None,
+        }] + [{
+            "Name": None,
+            "Type": None,
+        }], columns=columns, index=None) for date in deposit_book.dayBalances.keys()
+    ], keys=deposit_book.dayBalances.keys(), names=["Date", "Row ID"])
+
+    deposit_book_df.reset_index(level="Date", inplace=True)
+
+
+    current_dir = os.path.dirname(__file__)
+    data_dir = os.path.join(os.path.dirname(current_dir), "data")
+    output_file_path = os.path.join(data_dir, "contracts.xlsx")
+
+    with pd.ExcelWriter(output_file_path, engine="openpyxl") as writer:
+        contracts_df.to_excel(writer, sheet_name="contracts", index=False)
+        deposit_book_df.to_excel(writer, sheet_name="deposits", index=False)
+
+    return output_file_path
+
+
