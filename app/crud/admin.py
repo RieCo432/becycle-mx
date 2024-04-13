@@ -376,15 +376,16 @@ def get_contracts_takeout_excel(db: Session) -> str:
             if deposit_holder not in deposit_holders:
                 deposit_holders.append(deposit_holder)
 
-    columns = ["Name", "Type"] + deposit_holders
+    columns = ["Date", "Name", "Type"] + deposit_holders
 
 
     deposit_book_df = pd.concat([
         pd.DataFrame([{
+            "Date": date if i == 0 else None,
             "Name": t.title,
             "Type": t.type,
             **t.diff_by_username
-        } for t in deposit_book.dayBalances[date].transactions] + [{
+        } for i, t in enumerate(deposit_book.dayBalances[date].transactions)] + [{
             "Name": None,
             "Type": None,
         }] + [{
@@ -405,10 +406,7 @@ def get_contracts_takeout_excel(db: Session) -> str:
             "Name": None,
             "Type": None,
         }], columns=columns, index=None) for date in deposit_book.dayBalances.keys()
-    ], keys=deposit_book.dayBalances.keys(), names=["Date", "Row ID"])
-
-    deposit_book_df.reset_index(level="Date", inplace=True)
-
+    ])
 
     current_dir = os.path.dirname(__file__)
     data_dir = os.path.join(os.path.dirname(current_dir), "data")
