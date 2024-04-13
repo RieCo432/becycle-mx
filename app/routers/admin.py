@@ -75,6 +75,6 @@ async def admin_duplicates_client_ignore(
     return crud.ignore_potential_bike_duplicate(db=db, potential_bike_duplicate_id=potential_bike_duplicate_id)
 
 
-@admin.get("/admin/takeout/contracts/excel")
+@admin.get("/admin/takeout/contracts.xlsx")
 async def get_contracts_takeout_excel(db: Session = Depends(dep.get_db)):
     return FileResponse(crud.get_contracts_takeout_excel(db=db))
