@@ -645,4 +645,10 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  downloadRawDataExcel() {
+    return axiosClient.get('/admin/takeout/contracts.xlsx', {
+      headers: credentialsStore.getApiRequestHeader(),
+      responseType: 'blob',
+    });
+  },
 };

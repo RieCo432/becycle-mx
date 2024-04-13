@@ -185,6 +185,15 @@ const routes = [
         component: () => import('@/views/admin/DepositExchanges.vue'),
       },
       {
+        path: '/admin/raw-data',
+        name: 'Raw Data Access',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/raw-data',
+        },
+        component: () => import('@/views/admin/rawData.vue'),
+      },
+      {
         path: '/contracts/find-paper-contract',
         name: 'Find Paper Contract',
         meta: {

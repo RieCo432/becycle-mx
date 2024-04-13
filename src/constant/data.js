@@ -165,6 +165,12 @@ export const topMenu = [
         childlink: '/admin/duplicates/bikes',
         show: ['user'],
       },
+      {
+        childtitle: 'Raw Data Access',
+        childicon: 'heroicons-outline:circle-stack',
+        childlink: '/admin/raw-data',
+        show: ['user'],
+      },
     ],
   },
 ];
