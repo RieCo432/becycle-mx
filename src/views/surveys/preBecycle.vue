@@ -3,45 +3,54 @@ import Textinput from '@/components/Textinput/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import Select from '@/components/Select/index.vue';
 import Card from '@/components/Card/index.vue';
-import Checkbox from '@/components/Checkbox';
+import Checkbox from '@/components/Checkbox/index.vue';
 import {computed, ref} from 'vue';
 import * as yup from 'yup';
-import {useField, useForm} from 'vee-validate';
+import {ErrorMessage, useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import Icon from '@/components/Icon';
 import {useRouter} from 'vue-router';
 import {useToast} from 'vue-toastification';
+import surveyInfo from '@/components/SurveyInfo/index.vue';
 
 export default {
   name: 'preBecycle',
-  components: {Checkbox, Card, DashButton, Textinput, Select, Icon},
+  components: {ErrorMessage, Checkbox, Card, DashButton, Textinput, Select, Icon, surveyInfo},
   setup() {
     const router = useRouter();
     const toast = useToast();
     const steps = [
       {
         id: 1,
-        title: 'Hurdles',
+        title: 'Information and Consent',
       },
       {
         id: 2,
-        title: 'Motivation',
+        title: 'Hurdles',
       },
       {
         id: 3,
-        title: 'Options Considered',
+        title: 'Motivation',
       },
       {
         id: 4,
-        title: 'Training and Experience',
+        title: 'Options Considered',
       },
       {
         id: 5,
+        title: 'Training and Experience',
+      },
+      {
+        id: 6,
         title: 'Interest',
       },
     ];
 
     const stepNumber = ref(0);
+
+    const consentSchema = yup.object().shape({
+      consent: yup.boolean().oneOf([true], 'This check is required to take part in the survey.'),
+    });
 
     const hurdleSchema = yup.object().shape({
       hurdleSafety: yup.boolean(),
@@ -75,7 +84,31 @@ export default {
       trainingConfidence: yup.number().integer().min(0).max(10).required(),
       trainingRules: yup.boolean(),
       trainingDriver: yup.boolean(),
+      trainingNone: yup.boolean(),
     });
+
+    const trainingExperienceMonthsOptions = ref([
+      {
+        label: 'None at all',
+        value: 0,
+      },
+      {
+        label: 'Less than 3 months',
+        value: 3,
+      },
+      {
+        label: 'Between 3 and 6 months',
+        value: 6,
+      },
+      {
+        label: 'Between 6 and 18 months',
+        value: 18,
+      },
+      {
+        label: 'Over 18 months',
+        value: 24,
+      },
+    ]);
 
     const interestMaintenanceDesiredOptions = ref([
       {
@@ -123,17 +156,19 @@ export default {
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
         case 0:
-          return hurdleSchema;
+          return consentSchema;
         case 1:
-          return motivationSchema;
+          return hurdleSchema;
         case 2:
-          return consideredSchema;
+          return motivationSchema;
         case 3:
-          return trainingSchema;
+          return consideredSchema;
         case 4:
+          return trainingSchema;
+        case 5:
           return interestSchema;
         default:
-          return hurdleSchema;
+          return consentSchema;
       }
     });
 
@@ -141,6 +176,8 @@ export default {
       validationSchema: currentSchema,
       keepValuesOnUnmount: true,
     });
+
+    const {value: consent, errorMessage: consentError} = useField('consent');
 
     const {value: hurdleSafety} = useField('hurdleSafety');
     const {value: hurdleMoney} = useField('hurdleMoney');
@@ -167,11 +204,14 @@ export default {
     const {value: trainingConfidence, errorMessage: trainingConfidenceError} = useField('trainingConfidence');
     const {value: trainingRules} = useField('trainingRules');
     const {value: trainingDriver} = useField('trainingDriver');
+    const {value: trainingNone} = useField('trainingNone');
 
     const {value: interestMaintenanceCurrent, errorMessage: interestMaintenanceCurrentError} = useField('interestMaintenanceCurrent');
     const {value: interestMaintenanceDesired, errorMessage: interestMaintenanceDesiredError} = useField('interestMaintenanceDesired');
 
     // set defaults
+    consent.value = false;
+
     hurdleSafety.value = false;
     hurdleMoney.value = false;
     hurdleTime.value = false;
@@ -243,6 +283,10 @@ export default {
     return {
       steps,
       stepNumber,
+
+      consent,
+      consentError,
+
       hurdleSafety,
       hurdleMoney,
       hurdleTime,
@@ -265,11 +309,13 @@ export default {
 
       trainingExperienceMonths,
       trainingExperienceMonthsError,
+      trainingExperienceMonthsOptions,
       trainingFormal,
       trainingConfidence,
       trainingConfidenceError,
       trainingRules,
       trainingDriver,
+      trainingNone,
 
       interestMaintenanceCurrentOptions,
       interestMaintenanceDesiredOptions,
@@ -335,10 +381,30 @@ export default {
       >
         <form @submit.prevent="submit"  @keydown.enter="submit">
           <div v-if="stepNumber === 0">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
+                <survey-info/>
+              </div>
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Checkbox
+                      label="I am taking part voluntarily and I consent to my answers being used in the stated manner."
+                      name="consent"
+                      v-model="consent"
+                      :checked="consent"
+                      activeClass="ring-info-500 bg-info-500"
+                      :error="consentError"
+                  />
+                  <ErrorMessage name="consent" :error="consentError" class="text-danger-500"/>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="stepNumber === 1">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  What are the biggest hurdles that prevented you from cycling? Tick all that apply.
+                  According to you, what are the biggest hurdles that have prevented, or still prevent you, from cycling? Tick all that apply.
                 </h4>
               </div>
               <div class="grid grid-cols-1 gap-5">
@@ -347,6 +413,7 @@ export default {
                       label="Road Safety"
                       name="hurdleSafety"
                       v-model="hurdleSafety"
+                      :checked="hurdleSafety"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -354,34 +421,39 @@ export default {
                       label="I don't have money for a bike"
                       name="hurdleMoney"
                       v-model="hurdleMoney"
+                      :checked="hurdleMoney"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="It takes too much time"
+                      label="It takes too long getting from A to B on a bike"
                       name="hurdleTime"
                       v-model="hurdleTime"
+                      :checked="hurdleTime"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="I don't want to arrive sweaty"
+                      label="The idea of exercising (and potentially sweating) during my daily commute is unappealing to me"
                       name="hurdleSweating"
                       v-model="hurdleSweating"
+                      :checked="hurdleSweating"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="It's not comfortable"
+                      label="It is not a comfortable mode of transportation"
                       name="hurdleComfort"
                       v-model="hurdleComfort"
+                      :checked="hurdleComfort"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="It's too far"
+                      label="I would like cycle more, but my commute to work, school, grocery stores, or others is too long"
                       name="hurdleDistance"
                       v-model="hurdleDistance"
+                      :checked="hurdleDistance"
                       activeClass="ring-info-500 bg-info-500"
                   />
                 </div>
@@ -397,34 +469,36 @@ export default {
               </div>
             </div>
           </div>
-
-          <div v-if="stepNumber === 1">
-            <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="md:col-span-2 col-span-1">
+          <div v-if="stepNumber === 2">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  What were your motivations for getting a bike? Tick all that apply.
+                  What motivated you to get a bike? Tick all that apply.
                 </h4>
               </div>
               <div class="grid grid-cols-1 gap-5">
                 <div class="col-span-1">
                   <Checkbox
-                      label="It's a cheap means of transportation"
+                      label="It is a cheap mode of transportation"
                       name="motivationMoney"
                       v-model="motivationMoney"
+                      :checked="motivationMoney"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="It's a healthy means of transportation"
+                      label="It is a healthy mode of transportation"
                       name="motivationHealth"
                       v-model="motivationHealth"
+                      :checked="motivationHealth"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="It's a sustainable means of transportation"
+                      label="It is a sustainable mode of transportation"
                       name="motivationEnvironmental"
                       v-model="motivationEnvironmental"
+                      :checked="motivationEnvironmental"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -439,47 +513,52 @@ export default {
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 2">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+          <div v-if="stepNumber === 3">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  What options did you consider for getting a bike? Tick all that apply.
+                  When you decided to get a bike, which of the following options did you consider? Tick all that apply.
                 </h4>
               </div>
               <div class="grid grid-cols-1 gap-5">
                 <div class="col-span-1">
                   <Checkbox
-                      label="Buying new online"
+                      label="I considered buying a new bike online"
                       name="consideredNewOnline"
+                      :checked="consideredNewOnline"
                       v-model="consideredNewOnline"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="Buying new from  a shop"
+                      label="I considered buying a new bike in physical bike shop"
                       name="consideredNewShop"
                       v-model="consideredNewShop"
+                      :checked="consideredNewShop"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="Buying Used (e.g. Facebook Marketplace, e-Bay, ...)"
+                      label="I considered buying a bike second hand (e.g. Facebook Marketplace, e-Bay, ...)"
                       name="consideredUsed"
                       v-model="consideredUsed"
+                      :checked="consideredUsed"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="Lending from a friend, or family"
+                      label="I considered borrowing a bike from friends or family"
                       name="consideredLendingPrivate"
                       v-model="consideredLendingPrivate"
+                      :checked="consideredLendingPrivate"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
                   <Checkbox
-                      label="Lending from Becycle"
+                      label="I considered lending a bike from Becycle"
                       name="consideredLendingBecycle"
                       v-model="consideredLendingBecycle"
+                      :checked="consideredLendingBecycle"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -494,19 +573,18 @@ export default {
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 3">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+          <div v-if="stepNumber === 4">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   Training and Experience
                 </h4>
               </div>
               <div class="grid grid-cols-1 gap-5">
                 <div class="col-span-1">
-                  <Textinput
+                  <Select
                       label="Roughly, how many MONTHS of cycling experience, particularly on the road, do you have?"
-                      type="text"
-                      placeholder="6"
+                      :options="trainingExperienceMonthsOptions"
                       name="trainingExperienceMonths"
                       v-model="trainingExperienceMonths"
                       :error="trainingExperienceMonthsError"
@@ -514,7 +592,7 @@ export default {
                 </div>
                 <div class="col-span-1">
                   <Textinput
-                      label="On a scale from 0 (not confident at all) to 10 (completely confident) are you about your ability to cycle on the road in Aberdeen?"
+                      label="On a scale from 0 (not confident at all) to 10 (completely confident), how confident are in your ability to cycle on the roads in Aberdeen?"
                       type="text"
                       placeholder="5"
                       name="trainingConfidence"
@@ -523,32 +601,48 @@ export default {
                   />
                 </div>
                 <div class="col-span-1">
+                  <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                    Additional statements about being a cyclist in town. Tick all that apply.
+                  </h4>
+                </div>
+                <div class="col-span-1">
                   <Checkbox
-                      label="I have received some form of training for cycling on the road"
+                      label="I have not received any training on how to behave as a road user, whether as a cyclist or motorist."
+                      name="trainingNone"
+                      v-model="trainingNone"
+                      :checked="trainingNone"
+                      activeClass="ring-info-500 bg-info-500"/>
+                </div>
+                <div class="col-span-1" v-if="!trainingNone">
+                  <Checkbox
+                      label="I have received some form of training on how to cycle on the road."
                       name="trainingFormal"
                       v-model="trainingFormal"
+                      :checked="trainingFormal"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
-                <div class="col-span-1">
+                <div class="col-span-1" v-if="!trainingNone">
                   <Checkbox
-                      label="I know the rules of the highway code and how they apply to me as a cyclist"
+                      label="I know the rules of the highway code and how they apply to me as a cyclist."
                       name="trainingRules"
                       v-model="trainingRules"
+                      :checked="trainingRules"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
-                <div class="col-span-1">
+                <div class="col-span-1" v-if="trainingNone">
                   <Checkbox
-                      label="I am a driver (car, motorcycle, van, etc...)"
+                      label="I am a driver (car, motorcycle, van, etc), so I know how to behave as a road user."
                       name="trainingDriver"
                       v-model="trainingDriver"
+                      :checked="trainingDriver"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 4">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+          <div v-if="stepNumber === 5">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   Interest in Bicycle Maintenance
                 </h4>
@@ -557,7 +651,7 @@ export default {
                 <div class="col-span-1">
                   <Select
                       :options="interestMaintenanceCurrentOptions"
-                      label="How would you describe your level knowledge of bicycle maintenance?"
+                      label="How would you describe your level of knowledge on bicycle maintenance?"
                       v-model="interestMaintenanceCurrent"
                       name="interestMaintenance"
                       :error="interestMaintenanceCurrentError"
@@ -575,7 +669,6 @@ export default {
               </div>
             </div>
           </div>
-
           <div
               class="mt-10"
               :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"

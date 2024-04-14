@@ -520,6 +520,11 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  patchContractChangeDetails(contractId, patchData) {
+    return axiosClient.patch(`/contracts/${contractId}`, patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
   getTotalContractsDateSeries(interval, breakdown, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/total', {
       params: {
@@ -597,6 +602,74 @@ export default {
     return axiosClient.post('/maps/road-segment/report', {
       roadSegmentId: roadSegmentId,
       roadSegmentReportTypeId: roadSegmentReportTypeId,
+    });
+  },
+  refreshPotentialDuplicateClients() {
+    return axiosClient.get('/admin/duplicates/clients/refresh', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getPotentialDuplicateClients() {
+    return axiosClient.get('/admin/duplicates/clients', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchIgnorePotentialClientDuplicate(clientDuplicateId) {
+    return axiosClient.patch(`/admin/duplicates/clients/${clientDuplicateId}/ignore`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  putResolvePotentialClientDuplicate(clientDuplicateId, keepClientId, discardClientId) {
+    return axiosClient.put(`/admin/duplicates/clients/${clientDuplicateId}/resolve`, {
+      discard_client_id: discardClientId,
+      keep_client_id: keepClientId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  refreshPotentialDuplicateBikes() {
+    return axiosClient.get('/admin/duplicates/bikes/refresh', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getPotentialDuplicateBikes() {
+    return axiosClient.get('/admin/duplicates/bikes', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchIgnorePotentialBikeDuplicate(bikeDuplicateId) {
+    return axiosClient.patch(`/admin/duplicates/bikes/${bikeDuplicateId}/ignore`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  putResolvePotentialBikeDuplicate(bikeDuplicateId, keepBikeId, discardBikeId) {
+    return axiosClient.put(`/admin/duplicates/bikes/${bikeDuplicateId}/resolve`, {
+      discard_bike_id: discardBikeId,
+      keep_bike_id: keepBikeId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  downloadRawDataExcel() {
+    return axiosClient.get('/admin/takeout/contracts.xlsx', {
+      headers: credentialsStore.getApiRequestHeader(),
+      responseType: 'blob',
+    });
+  },
+  downloadRawDataPdf() {
+    return axiosClient.get('/admin/takeout/contracts.pdf', {
+      headers: credentialsStore.getApiRequestHeader(),
+      responseType: 'blob',
+    });
+  },
+  getContracts() {
+    return axiosClient.get('/contracts', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  deleteContract(contractId) {
+    return axiosClient.delete(`/contracts/${contractId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
     });
   },
 };

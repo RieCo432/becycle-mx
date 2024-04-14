@@ -185,6 +185,15 @@ const routes = [
         component: () => import('@/views/admin/DepositExchanges.vue'),
       },
       {
+        path: '/admin/raw-data',
+        name: 'Raw Data Access',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/raw-data',
+        },
+        component: () => import('@/views/admin/rawData.vue'),
+      },
+      {
         path: '/contracts/find-paper-contract',
         name: 'Find Paper Contract',
         meta: {
@@ -282,6 +291,24 @@ const routes = [
           selectNavPath: '/surveys/map',
         },
         component: () => import('@/views/surveys/cyclingSuitabilityMap.vue'),
+      },
+      {
+        path: '/admin/duplicates/clients',
+        name: 'Manage Potential Duplicate Clients',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/admin/duplicates/clients',
+        },
+        component: () => import('@/views/admin/duplicates/clients.vue'),
+      },
+      {
+        path: '/admin/duplicates/bikes',
+        name: 'Manage Potential Duplicate Bikes',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/admin/duplicates/bikes',
+        },
+        component: () => import('@/views/admin/duplicates/bikes.vue'),
       },
     ],
   },

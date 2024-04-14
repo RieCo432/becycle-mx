@@ -68,7 +68,7 @@
             @after-leave="afterLeave"
         >
           <!-- !! SubMenu !! -->
-          <ul calss="sub-menu " v-if="i === activeSubmenu">
+          <ul class="sub-menu " v-if="i === activeSubmenu">
             <li
                 v-for="(ci, index) in item.child"
                 :key="index"
@@ -83,17 +83,10 @@
                     : 'text-slate-600 dark:text-slate-300'
                 "
               >
-                <span
-                    class="h-2 w-2 rounded-full border border-slate-600 dark:border-slate-300 inline-block flex-none"
-                    :class="
-                    isActive
-                      ? ' bg-slate-900 dark:bg-slate-300 ring-4 ring-opacity-[15%] ring-black-500 dark:ring-slate-300 dark:ring-opacity-20'
-                      : ''
-                  "
-                ></span>
-                <span class="flex-1">
-                  {{ ci.childtitle }}
+                <span class="menu-icon" v-if="ci.childicon">
+                  <Icon :icon="ci.childicon"/>
                 </span>
+                <div class="text-box" v-if="ci.childtitle">{{ ci.childtitle }}</div>
               </span>
               </router-link>
             </li>

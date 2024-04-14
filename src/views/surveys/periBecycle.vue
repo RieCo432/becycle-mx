@@ -6,49 +6,60 @@ import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Checkbox';
 import {computed, ref} from 'vue';
 import * as yup from 'yup';
-import {useField, useForm} from 'vee-validate';
+import {ErrorMessage, useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import Icon from '@/components/Icon';
 import {useRouter} from 'vue-router';
 import {useToast} from 'vue-toastification';
+import SurveyInfo from '@/components/SurveyInfo/index.vue';
 
 export default {
   name: 'periBecycle',
-  components: {Checkbox, Card, DashButton, Textinput, Select, Icon},
+  components: {ErrorMessage, Checkbox, Card, DashButton, Textinput, Select, Icon, SurveyInfo},
   setup() {
     const router = useRouter();
     const toast = useToast();
     const steps = [
       {
         id: 1,
-        title: 'Satisfaction',
+        title: 'Information and Consent',
       },
       {
         id: 2,
-        title: 'Road Quality',
+        title: 'Satisfaction',
       },
       {
         id: 3,
-        title: 'Road Users',
+        title: 'Road Quality',
       },
       {
         id: 4,
-        title: 'Routes',
+        title: 'Road Users',
       },
       {
         id: 5,
-        title: 'Accidents',
+        title: 'Routes',
       },
       {
         id: 6,
+        title: 'Accidents',
+      },
+      {
+        id: 7,
         title: 'Harassment',
       },
     ];
 
     const stepNumber = ref(0);
 
+    const consentSchema = yup.object().shape({
+      consent: yup.boolean().oneOf([true], 'This check is required to take part in the survey.'),
+    });
+
     const satisfactionSchema = yup.object().shape({
-      serviceSatisfaction: yup.number().integer().min(0).max(5).required(),
+      serviceSatisfactionGetBike: yup.number().integer().min(0).max(10).required(),
+      serviceSatisfactionFixBike: yup.number().integer().min(0).max(10).required(),
+      serviceSatisfactionLearn: yup.number().integer().min(0).max(10).required(),
     });
 
     const roadsSchema = yup.object().shape({
@@ -89,19 +100,21 @@ export default {
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
         case 0:
-          return satisfactionSchema;
+          return consentSchema;
         case 1:
-          return roadsSchema;
+          return satisfactionSchema;
         case 2:
-          return usersSchema;
+          return roadsSchema;
         case 3:
-          return routesSchema;
+          return usersSchema;
         case 4:
-          return accidentsSchema;
+          return routesSchema;
         case 5:
+          return accidentsSchema;
+        case 6:
           return harassmentSchema;
         default:
-          return satisfactionSchema;
+          return consentSchema;
       }
     });
 
@@ -110,7 +123,12 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: serviceSatisfaction, errorMessage: serviceSatisfactionError} = useField('serviceSatisfaction');
+    const {value: consent, errorMessage: consentError} = useField('consent');
+
+    const {value: serviceSatisfactionGetBike, errorMessage: serviceSatisfactionGetBikeError} = useField('serviceSatisfactionGetBike');
+    const {value: serviceSatisfactionFixBike, errorMessage: serviceSatisfactionFixBikeError} = useField('serviceSatisfactionFixBike');
+    const {value: serviceSatisfactionLearn, errorMessage: serviceSatisfactionLearnError} = useField('serviceSatisfactionLearn');
+
 
     const {value: roadsGreat} = useField('roadsGreat');
     const {value: roadsLight} = useField('roadsLight');
@@ -138,6 +156,8 @@ export default {
     const {value: harassmentSuggestions} = useField('harassmentSuggestions');
 
     // set defaults
+    consent.value = false;
+
     roadsGreat.value = false;
     roadsLight.value = false;
     roadsPotholes.value = false;
@@ -168,7 +188,9 @@ export default {
         stepNumber.value = totalSteps - 1;
         // handle submit
         requests.postPeriBecycleSurvey({
-          serviceSatisfaction: serviceSatisfaction.value,
+          serviceSatisfactionGetBike: serviceSatisfactionGetBike.value,
+          serviceSatisfactionFixBike: serviceSatisfactionFixBike.value,
+          serviceSatisfactionLearn: serviceSatisfactionLearn.value,
           roadsGreat: roadsGreat.value,
           roadsLight: roadsLight.value,
           roadsPotholes: roadsPotholes.value,
@@ -207,8 +229,14 @@ export default {
     return {
       steps,
       stepNumber,
-      serviceSatisfaction,
-      serviceSatisfactionError,
+      consent,
+      consentError,
+      serviceSatisfactionGetBike,
+      serviceSatisfactionGetBikeError,
+      serviceSatisfactionFixBike,
+      serviceSatisfactionFixBikeError,
+      serviceSatisfactionLearn,
+      serviceSatisfactionLearnError,
       roadsGreat,
       roadsLight,
       roadsPotholes,
@@ -288,29 +316,69 @@ export default {
       >
         <form @submit.prevent="submit"  @keydown.enter="submit">
           <div v-if="stepNumber === 0">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
-                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  On a scale from 0 (do not agree at all) to 5 (agree fully), how much do you agree with the following statement?
-                </h4>
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
+                <survey-info/>
               </div>
               <div class="grid grid-cols-1 gap-5">
                 <div class="col-span-1">
-                  <Textinput
-                      label="Becycle has helped me get a bike, fix it, and learn about bike maintenance."
-                      type="text"
-                      placeholder="4"
-                      name="serviceSatisfaction"
-                      v-model="serviceSatisfaction"
-                      :error="serviceSatisfactionError"
+                  <Checkbox
+                      label="I am taking part voluntarily and I consent to my answers being used in the stated manner."
+                      name="consent"
+                      v-model="consent"
+                      :checked="consent"
+                      activeClass="ring-info-500 bg-info-500"
+                      :error="consentError"
                   />
+                  <ErrorMessage name="consent" :error="consentError" class="text-danger-500"/>
                 </div>
               </div>
             </div>
           </div>
           <div v-if="stepNumber === 1">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
+                <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                  On a scale from 0 (do not agree at all) to 10 (agree fully), how much do you agree with the following statements?
+                </h4>
+              </div>
+              <div class="grid grid-cols-1 gap-5">
+                <div class="col-span-1">
+                  <Textinput
+                      label="Becycle has helped me get a bike."
+                      type="text"
+                      placeholder="4"
+                      name="serviceSatisfactionGetBike"
+                      v-model="serviceSatisfactionGetBike"
+                      :error="serviceSatisfactionGetBikeError"
+                  />
+                </div>
+                <div class="col-span-1">
+                  <Textinput
+                      label="Becycle has helped me fix a bike."
+                      type="text"
+                      placeholder="4"
+                      name="serviceSatisfactionFixBike"
+                      v-model="serviceSatisfactionFixBike"
+                      :error="serviceSatisfactionFixBikeError"
+                  />
+                </div>
+                <div class="col-span-1">
+                  <Textinput
+                      label="Becycle has helped me learn about bike maintenance."
+                      type="text"
+                      placeholder="4"
+                      name="serviceSatisfactionLearn"
+                      v-model="serviceSatisfactionLearn"
+                      :error="serviceSatisfactionLearnError"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="stepNumber === 2">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   How do you feel about the quality of the roads in Aberdeen? Tick all that apply.
                 </h4>
@@ -321,6 +389,7 @@ export default {
                       label="The road surfaces are great!"
                       name="roadsGreat"
                       v-model="roadsGreat"
+                      :checked="roadsGreat"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -328,6 +397,7 @@ export default {
                       label="The roads are lit well enough for me to feel safe."
                       name="roadsLight"
                       v-model="roadsLight"
+                      :checked="roadsLight"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -335,6 +405,7 @@ export default {
                       label="There are too many potholes."
                       name="roadsPotholes"
                       v-model="roadsPotholes"
+                      :checked="roadsPotholes"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -342,6 +413,7 @@ export default {
                       label="There is a lot of rubbish on the roads, such as glass, metal and leaves, posing a danger."
                       name="roadsRubbish"
                       v-model="roadsRubbish"
+                      :checked="roadsRubbish"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -349,6 +421,7 @@ export default {
                       label="There are too many cars parked on the pavement and/or in cycle lanes."
                       name="roadsParking"
                       v-model="roadsParking"
+                      :checked="roadsParking"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -356,6 +429,7 @@ export default {
                       label="The roads are often too dark to cycle safely."
                       name="roadsDark"
                       v-model="roadsDark"
+                      :checked="roadsDark"
                       activeClass="ring-info-500 bg-info-500"
                   />
                 </div>
@@ -363,9 +437,9 @@ export default {
             </div>
           </div>
 
-          <div v-if="stepNumber === 2">
-            <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="md:col-span-2 col-span-1">
+          <div v-if="stepNumber === 3">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   Do you feel safe while cycling on the road? If not, what other road users make you feel unsafe?
                 </h4>
@@ -376,6 +450,7 @@ export default {
                       label="I feel safe on the road."
                       name="usersSafe"
                       v-model="usersSafe"
+                      :checked="usersSafe"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="!usersSafe">
@@ -383,6 +458,7 @@ export default {
                       label="Buses"
                       name="usersBusesUnsafe"
                       v-model="usersBusesUnsafe"
+                      :checked="usersBusesUnsafe"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="!usersSafe">
@@ -390,6 +466,7 @@ export default {
                       label="Cars"
                       name="usersCarsUnsafe"
                       v-model="usersCarsUnsafe"
+                      :checked="usersCarsUnsafe"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="!usersSafe">
@@ -397,6 +474,7 @@ export default {
                       label="Trucks"
                       name="usersTrucksUnsafe"
                       v-model="usersTrucksUnsafe"
+                      :checked="usersTrucksUnsafe"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="!usersSafe">
@@ -404,6 +482,7 @@ export default {
                       label="Taxis"
                       name="usersTaxisUnsafe"
                       v-model="usersTaxisUnsafe"
+                      :checked="usersTaxisUnsafe"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="!usersSafe">
@@ -411,6 +490,7 @@ export default {
                       label="Cyclists"
                       name="usersCyclistsUnsafe"
                       v-model="usersCyclistsUnsafe"
+                      :checked="usersCyclistsUnsafe"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="!usersSafe">
@@ -418,14 +498,15 @@ export default {
                       label="Pedestrians"
                       name="usersPedestriansUnsafe"
                       v-model="usersPedestriansUnsafe"
+                      :checked="usersPedestriansUnsafe"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 3">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+          <div v-if="stepNumber === 4">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   Where do you mostly cycle?
                 </h4>
@@ -436,6 +517,7 @@ export default {
                       label="On the road, with cars, etc..."
                       name="routesRoads"
                       v-model="routesRoads"
+                      :checked="routesRoads"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -443,6 +525,7 @@ export default {
                       label="On the pavement, with pedestrians"
                       name="routesPavements"
                       v-model="routesPavements"
+                      :checked="routesPavements"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
@@ -450,14 +533,15 @@ export default {
                       label="Off-road, away from cars and pedestrians (e.g. forests)"
                       name="routesOffroad"
                       v-model="routesOffroad"
+                      :checked="routesOffroad"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 4">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+          <div v-if="stepNumber === 5">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   Accidents and Near Misses
                 </h4>
@@ -486,9 +570,9 @@ export default {
               </div>
             </div>
           </div>
-          <div v-if="stepNumber === 5">
-            <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-              <div class="lg:col-span-3 md:col-span-2 col-span-1">
+          <div v-if="stepNumber === 6">
+            <div class="grid grid-cols-1 gap-5">
+              <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                   Harassment and discrimination due to your identity, such as gender, race, sexual orientation, disability, etc...
                 </h4>
@@ -499,6 +583,7 @@ export default {
                       label="I have been harassed or discriminated against due to my identity."
                       name="harassmentExperienced"
                       v-model="harassmentExperienced"
+                      :checked="harassmentExperienced"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="harassmentExperienced">
