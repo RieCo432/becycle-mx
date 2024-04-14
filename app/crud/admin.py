@@ -1,9 +1,9 @@
 import os
+from copy import copy
 from uuid import UUID
 import pandas as pd
 from fastapi import HTTPException, status
 
-import app.schemas as schemas
 import app.models as models
 from Levenshtein import distance as levenshtein_distance
 from sqlalchemy import select
@@ -13,6 +13,10 @@ from .bikes import get_all_bikes, get_bike
 from .contracts import get_contracts
 from .appointments import get_appointments
 from .finances import get_deposit_balances_book
+from pypdf import PdfReader, PdfWriter
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 
 
 def get_potential_client_duplicates_detected(db: Session) -> list[models.DetectedPotentialClientDuplicates]:
@@ -419,3 +423,87 @@ def get_contracts_takeout_excel(db: Session) -> str:
     return output_file_path
 
 
+def get_contracts_takeout_pdf(db: Session) -> str:
+    contracts_raw = [c.to_raw_dict() for c in get_contracts(db=db)]
+
+    contract_field_coords = {
+        "SHORT": (450, 698),
+        "Name": (126, 540),
+        "Email Address": (145, 518),
+        "Start Date-day": (190, 414),
+        "Start Date-month": (230, 414),
+        "Start Date-year": (266, 414),
+        "End Date-day": (416, 414),
+        "End Date-month": (456, 414),
+        "End Date-year": (492, 414),
+        "Make": (234, 388),
+        "Model": (234, 362),
+        "Colour": (234, 336),
+        "Decals": (358, 336),
+        "Serial Number": (288, 310),
+        "Condition": (356, 282),
+        "Notes": (114, 282),
+        "Contract Type": (100, 242),
+        "Working Volunteer": (188, 230),
+        "Checking Volunteer": (414, 230),
+        "Deposit Amount Collected": (184, 258),
+        "Deposit Collected By": (200, 258),
+        "Returned Date-day": (172, 177),
+        "Returned Date-month": (214, 177),
+        "Returned Date-year": (248, 177),
+        "Return Received By": (432, 150),
+        "Deposit Amount Returned": (454, 177),
+        "Deposit Returned By": (470, 177)
+    }
+
+    current_dir = os.path.dirname(__file__)
+    data_dir = os.path.join(os.path.dirname(current_dir), "data")
+    input_file_path = os.path.join(data_dir, "contract_form.pdf")
+
+    output = PdfWriter()
+
+    for contract_raw in contracts_raw:
+        packet = io.BytesIO()
+        can = canvas.Canvas(packet, pagesize=A4)
+
+        for key in contract_field_coords.keys():
+            if contract_raw[key] is not None:
+                value = str(contract_raw[key])
+                if key in ["Contract Type", "Deposit Collected By", "Deposit Returned By"]:
+                    value = "(" + value + ")"
+                if key == "Contract Type":
+                    value = "Contract Type: " + value
+                font_size = 10
+                if key == "SHORT":
+                    font_size = 40
+
+                text_object = can.beginText(*contract_field_coords[key])
+                text_object.setFont("Courier", font_size)
+                text_object.textLine(value)
+
+                can.drawText(text_object)
+
+        if contract_raw["Returned Date"] is not None:
+            text_object = can.beginText(165, 50)
+            text_object.setFont("Courier", 146)
+            text_object.textLine("RETURNED")
+
+            can.rotate(45)
+            can.drawText(text_object)
+            can.rotate(-45)
+
+        can.save()
+        packet.seek(0)
+        new_pdf = PdfReader(packet)
+
+        existing_pdf = PdfReader(open(input_file_path, "rb"))
+        page = existing_pdf.pages[0]
+        page.merge_page(new_pdf.pages[0])
+        output.add_page(page)
+
+    output_file_path = os.path.join(data_dir, "contracts.pdf")
+    output_stream = open(output_file_path, "wb")
+    output.write(output_stream)
+    output_stream.close()
+
+    return output_file_path
