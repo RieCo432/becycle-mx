@@ -56,6 +56,21 @@ async def create_contract(
     return contract
 
 
+@contracts.delete("/contracts/{contract_id}", dependencies=[Depends(dep.get_current_admin_user)])
+async def delete_contract(
+        contract_id: UUID,
+        db: Session = Depends(dep.get_db)):
+    crud.delete_contract(db=db, contract_id=contract_id)
+
+
+@contracts.patch("/contracts/{contract_id}", dependencies=[Depends(dep.get_current_admin_user)])
+async def patch_contract(
+        contract_id: UUID,
+        contract_patch_data: schemas.ContractPatch,
+        db: Session = Depends(dep.get_db)) -> schemas.Contract:
+    return crud.patch_contract_details(db=db, contract_id=contract_id, contract_patch_data=contract_patch_data)
+
+
 @contracts.patch("/contracts/{contract_id}/return")
 async def return_bike(
         contract_id: UUID,

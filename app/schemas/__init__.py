@@ -11,3 +11,4 @@ from .public import *
 from .statistics import *
 from .surveys import *
 from .roadSegment import *
+from .admin import *

@@ -1,5 +1,6 @@
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from .contract import Contract
 
 
 class BikeBase(BaseModel):
@@ -19,3 +20,9 @@ class Bike(BikeBase):
 
     class Config:
         orm_mode = True
+
+
+class BikeExtended(Bike):
+    model_config = ConfigDict(from_attributes=True)
+
+    contracts: list[Contract]

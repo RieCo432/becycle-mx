@@ -37,7 +37,9 @@ class PreBecycleSurvey(BaseModel):
 
 
 class PeriBecycleSurvey(BaseModel):
-    serviceSatisfaction: int
+    serviceSatisfactionGetBike: int
+    serviceSatisfactionFixBike: int
+    serviceSatisfactionLearn: int
 
     roadsGreat: bool
     roadsLight: bool
@@ -70,7 +72,9 @@ class PeriBecycleSurvey(BaseModel):
 
 
 class PostBecycleSurvey(BaseModel):
-    serviceSatisfaction: int
+    serviceSatisfactionGetBike: int
+    serviceSatisfactionFixBike: int
+    serviceSatisfactionLearn: int
 
     reasonStoppedCycling: bool
     reasonLeavingAberdeen: bool

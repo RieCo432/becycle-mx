@@ -10,3 +10,4 @@ from .public import *
 from .statistics import *
 from .surveys import *
 from .roadSegments import *
+from .admin import *

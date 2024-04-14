@@ -7,3 +7,4 @@ from .appointment import *
 from .depositExchange import *
 from .surveys import *
 from .roadSegment import *
+from .admin import *

@@ -69,8 +69,13 @@ class PeriBecycleSurvey(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
     datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
+
     # service satisfaction
-    serviceSatisfaction: Mapped[int] = mapped_column("serviceSatisfaction", Integer, nullable=False, quote=False,
+    serviceSatisfactionGetBike: Mapped[int] = mapped_column("serviceSatisfactionGetBike", Integer, nullable=False, quote=False,
+                                                     default=0, server_default=text('0'))
+    serviceSatisfactionFixBike: Mapped[int] = mapped_column("serviceSatisfactionFixBike", Integer, nullable=False, quote=False,
+                                                     default=0, server_default=text('0'))
+    serviceSatisfactionLearn: Mapped[int] = mapped_column("serviceSatisfactionLearn", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
 
     # roads opinion
@@ -124,7 +129,11 @@ class PostBecycleSurvey(Base):
     datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
 
     # service satisfaction
-    serviceSatisfaction: Mapped[int] = mapped_column("serviceSatisfaction", Integer, nullable=False, quote=False,
+    serviceSatisfactionGetBike: Mapped[int] = mapped_column("serviceSatisfactionGetBike", Integer, nullable=False, quote=False,
+                                                     default=0, server_default=text('0'))
+    serviceSatisfactionFixBike: Mapped[int] = mapped_column("serviceSatisfactionFixBike", Integer, nullable=False, quote=False,
+                                                     default=0, server_default=text('0'))
+    serviceSatisfactionLearn: Mapped[int] = mapped_column("serviceSatisfactionLearn", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
 
     # stopped cycling

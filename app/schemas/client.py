@@ -1,6 +1,8 @@
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+from .appointments import Appointment
+from .contract import Contract
 
 
 class ClientBase(BaseModel):
@@ -27,6 +29,13 @@ class Client(ClientBase):
 
     class Config:
         orm_mode = True
+
+
+class ClientExtended(Client):
+    model_config = ConfigDict(from_attributes=True)
+
+    appointments: list[Appointment]
+    contracts: list[Contract]
 
 
 class ClientChangeName(BaseModel):

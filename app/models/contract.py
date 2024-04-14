@@ -70,6 +70,40 @@ class Contract(Base):
             content=email_html_content
         )
 
+    def to_raw_dict(self):
+        return {
+            "SHORT": self.client.lastName[:2].upper() if self.client is not None else 'XX',
+            "Name": "{:s} {:s}".format(self.client.firstName, self.client.lastName) if self.client is not None else "UNKNOWN",
+            "Email Address": self.client.emailAddress if self.client is not None else "UNKNOWN",
+            "Start Date": self.startDate,
+            "Start Date-day": "{:02d}".format(self.startDate.day),
+            "Start Date-month": "{:02d}".format(self.startDate.month),
+            "Start Date-year": "{:04d}".format(self.startDate.year),
+            "End Date": self.endDate,
+            "End Date-day": "{:02d}".format(self.endDate.day),
+            "End Date-month": "{:02d}".format(self.endDate.month),
+            "End Date-year": "{:04d}".format(self.endDate.year),
+            "Make": self.bike.make if self.bike is not None else "UNKNOWN",
+            "Model": self.bike.model if self.bike is not None else "UNKNOWN",
+            "Colour": self.bike.colour if self.bike is not None else "UNKNOWN",
+            "Decals": self.bike.decals if self.bike is not None else "UNKNOWN",
+            "Serial Number": self.bike.serialNumber if self.bike is not None else "UNKNOWN",
+            "Condition": self.conditionOfBike,
+            "Notes": self.notes,
+            "Contract Type": self.contractType,
+            "Working Volunteer": self.workingUser.username if self.workingUser is not None else "UNKNOWN",
+            "Checking Volunteer": self.checkingUser.username if self.checkingUser is not None else "UNKNOWN",
+            "Deposit Amount Collected": self.depositAmountCollected,
+            "Deposit Collected By": self.depositCollectingUser.username if self.depositCollectingUser is not None else "UNKNOWN",
+            "Returned Date": self.returnedDate,
+            "Returned Date-day": "{:02d}".format(self.returnedDate.day) if self.returnedDate is not None else None,
+            "Returned Date-month": "{:02d}".format(self.returnedDate.month) if self.returnedDate is not None else None,
+            "Returned Date-year": "{:04d}".format(self.returnedDate.year) if self.returnedDate is not None else None,
+            "Return Received By": self.returnAcceptingUser.username if self.returnAcceptingUser is not None else None,
+            "Deposit Amount Returned": self.depositAmountReturned,
+            "Deposit Returned By": self.depositReturningUser.username if self.depositReturningUser is not None else None
+        }
+
 
 class PaperContract(Base):
     __tablename__ = "papercontracts"

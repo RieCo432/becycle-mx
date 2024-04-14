@@ -38,6 +38,7 @@ app.include_router(routers.public)
 app.include_router(routers.statistics)
 app.include_router(routers.maps)
 app.include_router(routers.surveys)
+app.include_router(routers.admin)
 
 
 if __name__ == "__main__":

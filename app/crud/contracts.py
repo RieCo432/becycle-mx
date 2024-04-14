@@ -159,3 +159,72 @@ def get_paper_contract(db: Session, paper_id: str) -> UUID:
         select(models.PaperContract.contractId)
         .where(models.PaperContract.id == paper_id)
     )
+
+
+def delete_contract(db: Session, contract_id: UUID) -> None:
+    contract = get_contract(db=db, contract_id=contract_id)
+    paper_contract = db.scalar(
+        select(models.PaperContract)
+        .where(models.PaperContract.contractId == contract_id)
+    )
+    if paper_contract is not None:
+        db.delete(paper_contract)
+        db.commit()
+    db.delete(contract)
+    db.commit()
+
+
+def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: schemas.ContractPatch) -> models.Contract:
+    contract = get_contract(db=db, contract_id=contract_id)
+
+    if contract_patch_data.depositAmountCollected is not None:
+        contract.depositAmountCollected = contract_patch_data.depositAmountCollected
+
+    if contract_patch_data.conditionOfBike is not None:
+        contract.conditionOfBike = contract_patch_data.conditionOfBike
+
+    if contract_patch_data.contractType is not None:
+        contract.contractType = contract_patch_data.contractType
+
+    if contract_patch_data.notes is not None:
+        contract.notes = contract_patch_data.notes
+
+    if contract_patch_data.startDate is not None:
+        contract.startDate = contract_patch_data.startDate
+
+    if contract_patch_data.endDate is not None:
+        contract.endDate = contract_patch_data.endDate
+
+    if contract_patch_data.workingUserId is not None:
+        contract.workingUserId = contract_patch_data.workingUserId
+
+    if contract_patch_data.checkingUserId is not None:
+        contract.checkingUserId = contract_patch_data.checkingUserId
+
+    if contract_patch_data.depositCollectingUserId is not None:
+        contract.depositCollectingUserId = contract_patch_data.depositCollectingUserId
+
+    if contract_patch_data.returned:
+        if contract_patch_data.depositAmountReturned is not None:
+            contract.depositAmountReturned = contract_patch_data.depositAmountReturned
+
+        if contract_patch_data.returnAcceptingUserId is not None:
+            contract.returnAcceptingUserId = contract_patch_data.returnAcceptingUserId
+
+        if contract_patch_data.depositReturningUserId is not None:
+            contract.depositReturningUserId = contract_patch_data.depositReturningUserId
+
+        if contract_patch_data.returnedDate is not None:
+            contract.returnedDate = contract_patch_data.returnedDate
+    else:
+        contract.depositAmountReturned = None
+
+        contract.returnAcceptingUserId = None
+
+        contract.depositReturningUser = None
+
+        contract.returnedDate = None
+
+    db.commit()
+
+    return contract

@@ -46,7 +46,7 @@ async def get_user_me(
     return current_user
 
 
-@users.get("/users/", dependencies=[Depends(dep.get_current_active_user)])
+@users.get("/users", dependencies=[Depends(dep.get_current_active_user)])
 async def get_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
     return crud.get_users(db=db)
 
