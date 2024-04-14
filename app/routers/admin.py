@@ -82,5 +82,4 @@ async def get_contracts_takeout_excel(db: Session = Depends(dep.get_db)):
 
 @admin.get("/admin/takeout/contracts.pdf")
 async def get_contracts_takeout_pdf(db: Session = Depends(dep.get_db)):
-    crud.get_contracts_takeout_pdf(db=db)
-    return "BLA"
+    return FileResponse(crud.get_contracts_takeout_pdf(db=db))
