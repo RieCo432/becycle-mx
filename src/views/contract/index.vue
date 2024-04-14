@@ -4,12 +4,14 @@ import viewContract from '@/views/contract/viewContract.vue';
 import {useToast} from 'vue-toastification';
 import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vue';
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
+import EditContractDetailsModal from '@/components/Modal/EditContractDetailsModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'contractIndex',
   components: {
+    EditContractDetailsModal,
     EditBikeDetailsModal,
     EditClientDetailsModal,
     viewContract,
@@ -42,9 +44,43 @@ export default {
       loadingContract: true,
       showEditClientDetailsModal: false,
       showEditBikeDetailsModal: false,
+      showEditContractDetailsModal: false,
+      isUserAdmin: false,
     };
   },
   methods: {
+    getContract() {
+      this.loadingContract = true;
+      this.loadingBike = true;
+      this.loadingClient = true;
+      requests.getContract(this.$route.params.contractId).then((response) => {
+        this.contract = response.data;
+        requests.getBike(this.contract.bikeId).then((response) => {
+          this.bike = response.data;
+          this.loadingBike = false;
+        });
+        requests.getClient(this.contract.clientId).then((response) => {
+          this.client = response.data;
+          this.loadingClient = false;
+        });
+        if (this.contract.returnedDate != null) {
+          this.loadReturnUserDetails();
+        }
+        Promise.all([
+          requests.getUser(this.contract['depositCollectingUserId']),
+          requests.getUser(this.contract['workingUserId']),
+          requests.getUser(this.contract['checkingUserId']),
+        ]).then(([depositCollectingUserResponse,
+          workingUserResponse,
+          checkingUserResponse,
+        ]) => {
+          this.depositCollectingUser = depositCollectingUserResponse.data;
+          this.workingUser = workingUserResponse.data;
+          this.checkingUser = checkingUserResponse.data;
+          this.loadingContract = false;
+        });
+      });
+    },
     patchContractReturn(depositAmountReturned, depositReturningUser, depositReturningPassword, returnAcceptingUser, returnAcceptingPasswordOrPin) {
       requests.patchReturnContract(this.contract.id, depositAmountReturned,
           depositReturningUser, depositReturningPassword,
@@ -72,34 +108,7 @@ export default {
     },
   },
   mounted() {
-    requests.getContract(this.$route.params.contractId).then((response) => {
-      this.contract = response.data;
-      requests.getBike(this.contract.bikeId).then((response) => {
-        this.bike = response.data;
-        this.loadingBike = false;
-      });
-      requests.getClient(this.contract.clientId).then((response) => {
-        this.client = response.data;
-        this.loadingClient = false;
-      });
-      if (this.contract.returnedDate != null) {
-        this.loadReturnUserDetails();
-      }
-      Promise.all([
-        requests.getUser(this.contract['depositCollectingUserId']),
-        requests.getUser(this.contract['workingUserId']),
-        requests.getUser(this.contract['checkingUserId']),
-      ]).then(([
-        depositCollectingUserResponse,
-        workingUserResponse,
-        checkingUserResponse,
-      ]) => {
-        this.depositCollectingUser = depositCollectingUserResponse.data;
-        this.workingUser = workingUserResponse.data;
-        this.checkingUser = checkingUserResponse.data;
-        this.loadingContract = false;
-      });
-    });
+    this.getContract();
     requests.getDepositBearers().then((response) => {
       this.depositBearers = response.data.map((user) => ({
         label: user.username,
@@ -111,6 +120,9 @@ export default {
         label: user.username,
         value: user.username,
       }));
+    });
+    requests.getUserMe().then((response) => {
+      this.isUserAdmin = response.data.admin;
     });
   },
 };
@@ -138,6 +150,8 @@ export default {
         :open-edit-bike-details-modal="() => showEditBikeDetailsModal = true"
         :go-to-bike="() => this.$router.push({path: `/bikes/${bike.id}`})"
         :is-user="true"
+        :is-user-admin="isUserAdmin"
+        :open-edit-contract-details-modal="() => showEditContractDetailsModal = true"
     ></view-contract>
     <EditClientDetailsModal v-if="!loadingClient"
                             :close-modal="() => showEditClientDetailsModal = false"
@@ -151,6 +165,12 @@ export default {
                           :bike="bike"
                           @bike-details-updated="(updatedBike) => bike = updatedBike">
     </EditBikeDetailsModal>
+    <EditContractDetailsModal v-if="!loadingContract"
+                          :close-modal="() => showEditContractDetailsModal = false"
+                          :show-modal="showEditContractDetailsModal"
+                          :contract="contract"
+                          @contract-details-updated="getContract">
+    </EditContractDetailsModal>
 
   </div>
 </template>

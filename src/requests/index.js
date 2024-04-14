@@ -520,6 +520,11 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  patchContractChangeDetails(contractId, patchData) {
+    return axiosClient.patch(`/contracts/${contractId}`, patchData, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
   getTotalContractsDateSeries(interval, breakdown, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/total', {
       params: {
@@ -655,6 +660,16 @@ export default {
     return axiosClient.get('/admin/takeout/contracts.pdf', {
       headers: credentialsStore.getApiRequestHeader(),
       responseType: 'blob',
+    });
+  },
+  getContracts() {
+    return axiosClient.get('/contracts', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  deleteContract(contractId) {
+    return axiosClient.delete(`/contracts/${contractId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
     });
   },
 };

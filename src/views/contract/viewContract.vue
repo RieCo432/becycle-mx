@@ -242,6 +242,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    isUserAdmin: {
+      type: Boolean,
+      required: true,
+    },
     openEditClientDetailsModal: {
       type: Function,
       required: true,
@@ -251,6 +255,10 @@ export default {
       default: () => {},
     },
     openEditBikeDetailsModal: {
+      type: Function,
+      default: () => {},
+    },
+    openEditContractDetailsModal: {
       type: Function,
       default: () => {},
     },
@@ -311,13 +319,23 @@ export default {
         </div>
         <div class="col-span-12 lg:col-span-4 gap-5">
           <Card title="Contract">
-            <ContractCardSkeleton v-if="loadingContract"></ContractCardSkeleton>
+            <template #header v-if="isUserAdmin && !loadingContract">
+              <div  class="col-span-6 mt-auto">
+                <DashButton class="w-full btn-sm" @click="openEditContractDetailsModal">
+                  Edit Details
+                </DashButton>
+              </div>
+            </template>
+            <template v-if="loadingContract">
+              <ContractCardSkeleton v-if="loadingContract"></ContractCardSkeleton>
+            </template>
             <template v-else>
               <div class="flex flex-col h-full">
                 <div class="flex-1">
                   <p class="text-slate-600 dark:text-slate-300">From: {{new Date(Date.parse(contract.startDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Until: {{new Date(Date.parse(contract.endDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Contract Type: {{contract.contractType}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.conditionOfBike}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
