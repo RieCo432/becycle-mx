@@ -64,6 +64,7 @@ class ContractPatch(BaseModel):
     startDate: date
     endDate: date
     returnedDate: date | None = None
+    returned: bool
     depositAmountReturned: int | None = None
     workingUserId: UUID
     checkingUserId: UUID

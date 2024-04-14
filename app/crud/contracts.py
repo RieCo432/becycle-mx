@@ -195,12 +195,6 @@ def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: 
     if contract_patch_data.endDate is not None:
         contract.endDate = contract_patch_data.endDate
 
-    if contract_patch_data.returnedDate is not None:
-        contract.returnedDate = contract_patch_data.returnedDate
-
-    if contract_patch_data.depositAmountReturned is not None:
-        contract.depositAmountReturned = contract_patch_data.depositAmountReturned
-
     if contract_patch_data.workingUserId is not None:
         contract.workingUserId = contract_patch_data.workingUserId
 
@@ -210,11 +204,26 @@ def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: 
     if contract_patch_data.depositCollectingUserId is not None:
         contract.depositCollectingUserId = contract_patch_data.depositCollectingUserId
 
-    if contract_patch_data.returnAcceptingUserId is not None:
-        contract.returnAcceptingUserid = contract_patch_data.returnAcceptingUserId
+    if contract_patch_data.returned:
+        if contract_patch_data.depositAmountReturned is not None:
+            contract.depositAmountReturned = contract_patch_data.depositAmountReturned
 
-    if contract_patch_data.depositReturningUserId is not None:
-        contract.depositReturningUser = contract_patch_data.depositReturningUserId
+        if contract_patch_data.returnAcceptingUserId is not None:
+            contract.returnAcceptingUserId = contract_patch_data.returnAcceptingUserId
+
+        if contract_patch_data.depositReturningUserId is not None:
+            contract.depositReturningUserId = contract_patch_data.depositReturningUserId
+
+        if contract_patch_data.returnedDate is not None:
+            contract.returnedDate = contract_patch_data.returnedDate
+    else:
+        contract.depositAmountReturned = None
+
+        contract.returnAcceptingUserId = None
+
+        contract.depositReturningUser = None
+
+        contract.returnedDate = None
 
     db.commit()
 
