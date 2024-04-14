@@ -54,3 +54,19 @@ class ContractRestricted(ContractPublic):
 
     class Config:
         orm_mode = True
+
+
+class ContractPatch(BaseModel):
+    depositAmountCollected: int
+    conditionOfBike: str
+    notes: str | None = None
+    contractType: str
+    startDate: date
+    endDate: date
+    returnedDate: date | None = None
+    depositAmountReturned: int | None = None
+    workingUserId: UUID
+    checkingUserId: UUID
+    depositCollectingUserId: UUID
+    returnAcceptingUserId: UUID | None = None
+    depositReturningUserId: UUID | None = None
