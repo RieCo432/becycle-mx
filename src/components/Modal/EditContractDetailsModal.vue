@@ -9,12 +9,13 @@ import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import Textarea from '@/components/Textarea/index.vue';
 import Select from '@/components/Select/index.vue';
+import Checkbox from '@/components/Switch/index.vue';
 
 const toast = useToast();
 
 export default {
   name: 'EditContractDetailsModal',
-  components: {ErrorMessage, Select, Textarea, Textinput, Button, Modal},
+  components: {Checkbox, ErrorMessage, Select, Textarea, Textinput, Button, Modal},
   setup(props, context) {
     const closeModal = toRef(props, 'closeModal');
     const contract = toRef(props, 'contract');
@@ -28,6 +29,11 @@ export default {
       depositCollectingUserId: yup.string().required('Deposit Collecting Volunteer is required'),
       workingUserId: yup.string().required('Working Volunteer is required'),
       checkingUserId: yup.string().required('Checking Volunteer is required'),
+      returned: yup.boolean(),
+      returnedDate: yup.date().nullable(),
+      returnAcceptingUserId: yup.string().nullable(),
+      depositAmountReturned: yup.number().integer().min(0).nullable(),
+      depositReturningUserId: yup.string().nullable(),
     });
 
     const {handleSubmit} = useForm({
@@ -44,6 +50,11 @@ export default {
     const {value: depositCollectingUserId, errorMessage: depositCollectingUserIdError} = useField('depositCollectingUserId');
     const {value: workingUserId, errorMessage: workingUserIdError} = useField('workingUserId');
     const {value: checkingUserId, errorMessage: checkingUserIdError} = useField('checkingUserId');
+    const {value: returned} = useField('returned');
+    const {value: returnedDate, errorMessage: returnedDateError} = useField('returnedDate');
+    const {value: returnAcceptingUserId, errorMessage: returnAcceptingUserIdError} = useField('returnAcceptingUserId');
+    const {value: depositAmountReturned, errorMessage: depositAmountReturnedError} = useField('depositAmountReturned');
+    const {value: depositReturningUserId, errorMessage: depositReturningUserIdError} = useField('depositReturningUserId');
 
 
     const submitChangeDetails = handleSubmit(() => {
@@ -57,6 +68,11 @@ export default {
         depositCollectingUserId: depositCollectingUserId.value,
         workingUserId: workingUserId.value,
         checkingUserId: checkingUserId.value,
+        returned: returned.value,
+        returnedDate: returnedDate.value,
+        returnAcceptingUserId: returnAcceptingUserId.value,
+        depositAmountReturned: depositAmountReturned.value,
+        depositReturningUserId: depositReturningUserId.value,
       }).then((response) => {
         toast.success('Contract Details updated', {timeout: 2000});
         context.emit('contractDetailsUpdated');
@@ -86,6 +102,15 @@ export default {
       workingUserIdError,
       checkingUserId,
       checkingUserIdError,
+      returned,
+      returnedDate,
+      returnedDateError,
+      returnAcceptingUserId,
+      returnAcceptingUserIdError,
+      depositAmountReturned,
+      depositAmountReturnedError,
+      depositReturningUserId,
+      depositReturningUserIdError,
 
       submitChangeDetails,
     };
@@ -124,24 +149,29 @@ export default {
     this.depositCollectingUserId = this.contract.depositCollectingUserId;
     this.workingUserId = this.contract.workingUserId;
     this.checkingUserId = this.contract.checkingUserId;
+    this.returned = this.contract.returnedDate !== null;
+    this.returnedDate = this.contract.returnedDate;
+    this.returnAcceptingUserId = this.contract.returnAcceptingUserId;
+    this.depositAmountReturned = this.contract.depositAmountReturned;
+    this.depositReturningUserId = this.contract.depositReturningUserId;
 
     requests.getBikeConditions().then((response) => (this.bikeConditions = response.data.map((cond) =>
-        ({
-          label: cond,
-          value: cond,
-        }),
+      ({
+        label: cond,
+        value: cond,
+      }),
     )));
     requests.getContractTypes().then((response) => (this.contractTypes = response.data.map((t) =>
-        ({
-          label: t,
-          value: t,
-        }),
+      ({
+        label: t,
+        value: t,
+      }),
     )));
     requests.getUsers().then((response) => (this.allUsers = response.data.map((user) =>
-        ({
-          label: user.username,
-          value: user.id,
-        }),
+      ({
+        label: user.username,
+        value: user.id,
+      }),
     )));
   },
 };
@@ -151,8 +181,10 @@ export default {
   <Modal :active-modal="showModal" @close="closeModal" title="Edit Details">
     <form @submit.prevent="submitChangeDetails">
       <div class="grid grid-cols-12 gap-5">
-        <div class="col-span-6">
-          <div class="col-span-4 content-center">
+        <div class="col-span-full">
+          <h3 class="text-danger-500 dark:text-danger-600">BE CAREFUL! NO VALIDATION IS DONE ON THESE INPUTS</h3>
+        </div>
+        <div class="col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">Start Date</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -164,10 +196,8 @@ export default {
             >
             </flat-pickr>
             <ErrorMessage name="startDate" :error="startDateError" class="text-danger-500"/>
-          </div>
         </div>
-        <div class="col-span-6">
-          <div class="col-span-4 content-center">
+        <div class="col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">End Date</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -179,7 +209,6 @@ export default {
             >
             </flat-pickr>
             <ErrorMessage name="endDate" :error="endDateError" class="text-danger-500"/>
-          </div>
         </div>
         <div class="col-span-6">
           <Select
@@ -229,7 +258,7 @@ export default {
         </div>
         <div class="col-span-6">
           <Textinput
-              label="Deposit Amount (&pound;)"
+              label="Deposit Amount Collected (&pound;)"
               type="number"
               placeholder="40"
               name="depositAmountCollected"
@@ -246,6 +275,55 @@ export default {
               :error="depositCollectingUserIdError"
           />
         </div>
+        <div class="col-span-full">
+          <Checkbox
+              label="Has this bike been returned?"
+              name="returned"
+              v-model="returned"/>
+        </div>
+        <template v-if="returned">
+          <div class="col-span-6 content-center">
+            <label class="text-slate-700 dark:text-slate-300">Returned Date</label>
+            <flat-pickr
+                class="form-control m-auto"
+                name="returnedDate"
+                id="d3"
+                placeholder="dd-mm-yyyy"
+                v-model="returnedDate"
+                :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+            >
+            </flat-pickr>
+            <ErrorMessage name="returnedDate" :error="returnedDateError" class="text-danger-500"/>
+          </div>
+          <div class="col-span-6">
+            <Select
+                :options="allUsers"
+                label="Received By"
+                v-model="returnAcceptingUserId"
+                name="returnAcceptingUserId"
+                :error="returnAcceptingUserIdError"
+            />
+          </div>
+          <div class="col-span-6">
+            <Textinput
+                label="Deposit Amount returned (&pound;)"
+                type="number"
+                placeholder="40"
+                name="depositAmountReturned"
+                v-model="depositAmountReturned"
+                :error="depositAmountReturnedError"
+            />
+          </div>
+          <div class="col-span-6">
+            <Select
+                :options="allUsers"
+                label="Deposit Returned By"
+                v-model="depositReturningUserId"
+                name="depositReturningUserId"
+                :error="depositReturningUserIdError"
+            />
+          </div>
+        </template>
         <div class="col-span-12">
           <Button type="submit" class="btn btn-dark block w-full text-center">
             Submit

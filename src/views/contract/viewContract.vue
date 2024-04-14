@@ -321,7 +321,7 @@ export default {
           <Card title="Contract">
             <template #header v-if="isUserAdmin && !loadingContract">
               <div  class="col-span-6 mt-auto">
-                <DashButton class="w-full btn-sm" @click="openEditContractDetailsModal">
+                <DashButton class="w-full btn-sm bg-danger-600" @click="openEditContractDetailsModal">
                   Edit Details
                 </DashButton>
               </div>
