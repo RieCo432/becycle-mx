@@ -651,4 +651,10 @@ export default {
       responseType: 'blob',
     });
   },
+  downloadRawDataPdf() {
+    return axiosClient.get('/admin/takeout/contracts.pdf', {
+      headers: credentialsStore.getApiRequestHeader(),
+      responseType: 'blob',
+    });
+  },
 };

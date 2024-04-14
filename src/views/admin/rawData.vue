@@ -19,6 +19,18 @@ export default {
         window.URL.revokeObjectURL(url);
       });
     },
+    downloadRawDataPdf() {
+      requests.downloadRawDataPdf().then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'contracts.pdf');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      });
+    },
   },
 };
 </script>
@@ -28,7 +40,8 @@ export default {
     <div class="col-span-1">
       <Card title="Raw Data Access">
         <template #header>
-          <DashButton @click="downloadRawDataExcel">Download Excel</DashButton>
+          <DashButton @click="downloadRawDataPdf">Download PDF</DashButton>
+          <DashButton @click="downloadRawDataExcel" class="ml-5">Download Excel</DashButton>
         </template>
         Test
       </Card>
