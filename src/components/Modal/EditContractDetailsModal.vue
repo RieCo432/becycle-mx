@@ -325,7 +325,7 @@ export default {
           </div>
         </template>
         <div class="col-span-12">
-          <Button type="submit" class="btn btn-dark block w-full text-center">
+          <Button type="submit" class="btn dark:bg-danger-600 bg-danger-500 block w-full text-center">
             Submit
           </Button>
         </div>
