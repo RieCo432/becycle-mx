@@ -383,7 +383,7 @@ export default {
     });
   },
   getUsers() {
-    return axiosClient.get('/users/', {
+    return axiosClient.get('/users', {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },

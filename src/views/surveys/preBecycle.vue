@@ -629,7 +629,7 @@ export default {
                       :checked="trainingRules"
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
-                <div class="col-span-1" v-if="trainingNone">
+                <div class="col-span-1" v-if="!trainingNone">
                   <Checkbox
                       label="I am a driver (car, motorcycle, van, etc), so I know how to behave as a road user."
                       name="trainingDriver"

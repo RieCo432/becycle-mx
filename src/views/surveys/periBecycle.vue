@@ -187,6 +187,7 @@ export default {
       if (isLastStep) {
         stepNumber.value = totalSteps - 1;
         // handle submit
+        // TODO: Something went wrong, solve bad request
         requests.postPeriBecycleSurvey({
           serviceSatisfactionGetBike: serviceSatisfactionGetBike.value,
           serviceSatisfactionFixBike: serviceSatisfactionFixBike.value,
