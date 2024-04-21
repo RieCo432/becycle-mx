@@ -136,6 +136,12 @@ export const topMenu = [
     show: ['user'],
     child: [
       {
+        childtitle: 'Basic Settings',
+        childicon: 'heroicons-outline:cog-6-tooth',
+        childlink: '/admin/basic-settings',
+        show: ['user'],
+      },
+      {
         childtitle: 'User Management',
         childicon: 'heroicons-outline:user',
         childlink: '/admin/users',

@@ -194,6 +194,15 @@ const routes = [
         component: () => import('@/views/admin/rawData.vue'),
       },
       {
+        path: '/admin/basic-settings',
+        name: 'Basic Settings',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/basic-settings',
+        },
+        component: () => import('@/views/admin/basicSettings.vue'),
+      },
+      {
         path: '/contracts/find-paper-contract',
         name: 'Find Paper Contract',
         meta: {

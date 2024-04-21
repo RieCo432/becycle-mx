@@ -678,4 +678,9 @@ export default {
   getAddress() {
     return axiosClient.get('/public/address');
   },
+  putAddress(newAddress) {
+    return axiosClient.put('/settings/address', newAddress, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
