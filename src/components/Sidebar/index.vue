@@ -107,6 +107,7 @@
         class="sidebar-menu px-4 h-[calc(100%-80px)]">
         <Navmenu :items="topMenu" />
       </simplebar>
+      <img src="/src/assets/images/registration/blue/small-blue-landscape.png" alt="Charity Registration Logo" class="bottom-0 absolute"/>
     </div>
   </div>
 </template>
