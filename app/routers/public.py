@@ -38,3 +38,8 @@ def get_slot_duration(db: Session = Depends(dep.get_db)) -> int:
 @public.get("/public/next-closed-day")
 def get_next_closed_day(db: Session = Depends(dep.get_db)) -> schemas.ClosedDay:
     return crud.get_closed_days(db=db, start_date=datetime.datetime.utcnow())[0]
+
+
+@public.get("/public/address")
+def get_address(db: Session = Depends(dep.get_db)) -> schemas.Address:
+    return crud.get_address(db=db)

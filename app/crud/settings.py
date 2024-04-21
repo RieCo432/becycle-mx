@@ -270,3 +270,10 @@ def get_maximum_concurrent_appointments_for_each_slot(db: Session) -> dict[date,
     }
 
     return maximum_concurrent_appointments_for_each_slot
+
+
+def get_address(db: Session) -> models.Address:
+    return db.scalar(
+        select(models.Address)
+        .where(models.Address.id == 1)
+    )

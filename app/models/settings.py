@@ -38,3 +38,13 @@ class ClosedDay(Base):
 
     date: Mapped[date] = mapped_column("date", Date, primary_key=True, nullable=False, index=True, quote=False)
     note: Mapped[str] = mapped_column("note", Text, nullable=False, quote=False)
+
+
+class Address(Base):
+    __tablename__ = "address"
+
+    id: Mapped[int] = mapped_column("id", Integer, primary_key=True, nullable=False, default=1, server_default=text("1"), index=True, quote=False)
+    number: Mapped[str] = mapped_column("number", Text, nullable=False, quote=False)
+    street: Mapped[str] = mapped_column("street", Text, nullable=False, quote=False)
+    postcode: Mapped[str] = mapped_column("postcode", Text, nullable=False, quote=False)
+    city: Mapped[str] = mapped_column("city", Text, nullable=False, quote=False)
