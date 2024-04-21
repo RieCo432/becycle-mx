@@ -672,4 +672,10 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getNextClosedDay() {
+    return axiosClient.get('/public/next-closed-day');
+  },
+  getAddress() {
+    return axiosClient.get('/public/address');
+  },
 };
