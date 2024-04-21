@@ -81,3 +81,8 @@ async def delete_closed_day(
         db: Session = Depends(dep.get_db)):
 
     crud.delete_closed_day(db=db, closed_day_date=closed_day_date)
+
+
+@settings.put("/settings/address", dependencies=[Depends(dep.get_current_admin_user)])
+async def update_address(new_address: schemas.Address, db: Session = Depends(dep.get_db)) -> schemas.Address:
+    return crud.update_address(db=db, new_address=new_address)

@@ -277,3 +277,16 @@ def get_address(db: Session) -> models.Address:
         select(models.Address)
         .where(models.Address.id == 1)
     )
+
+
+def update_address(db: Session, new_address: schemas.Address) -> models.Address:
+    current_address = get_address(db=db)
+
+    current_address.number = new_address.number
+    current_address.street = new_address.street
+    current_address.postcode = new_address.postcode
+    current_address.city = new_address.city
+
+    db.commit()
+
+    return current_address
