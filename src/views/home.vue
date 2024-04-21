@@ -5,7 +5,11 @@
                 <div class="grid grid-cols-12 h-full gap-5">
                   <div class="col-span-12">
                     <p class="text-base text-slate-700 dark:text-slate-300">This is the official website for BECYCLE Workshop SCIO, the community bicycle library and workshop in Aberdeen.</p><br>
-                    <p class="text-base text-slate-700 dark:text-slate-300" v-if="address">We are located at:<br>{{ address.number }} {{ address.street }}<br>{{ address.postcode }}, {{ address.city }}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300" v-if="address">We are located at:<br>{{ address.number }} {{ address.street }}<br>{{ address.postcode }}, {{ address.city }}</p><br>
+                    <p class="text-base text-slate-700 dark:text-slate-300">You can contact us on social media:<br>
+                      <a href="https://facebook.com/beCyCleWorkshop/"><img src="/src/assets/images/social/Facebook_Logo_Primary.png" class="w-[32px] h-[32px] m-[16px] inline" alt="Facebook"/></a>
+                      <a href="https://instagram.com/becycleworkshop/"><img src="/src/assets/images/social/Instagram_Glyph_Gradient.png" class="w-[32px] h-[32px] m-[16px] inline" alt="Instagram"/></a>
+                    </p>
                   </div>
                   <div v-if="isNotUser" class="md:col-span-4 col-span-6 mt-auto">
                     <DashButton  @click="goToBookAppointment" class="mt-auto">Book Appointment</DashButton>
