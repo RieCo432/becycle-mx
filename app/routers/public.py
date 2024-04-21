@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 import app.crud as crud
@@ -32,3 +34,8 @@ def get_opening_hours(db: Session = Depends(dep.get_db)) -> dict[str, time]:
 @public.get("/public/slot-duration")
 def get_slot_duration(db: Session = Depends(dep.get_db)) -> int:
     return crud.get_slot_duration(db=db)
+
+
+@public.get("/public/next-closed-day")
+def get_next_closed_day(db: Session = Depends(dep.get_db)) -> schemas.ClosedDay:
+    return crud.get_closed_days(db=db, start_date=datetime.datetime.utcnow())[0]
