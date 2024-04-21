@@ -1,9 +1,10 @@
-from sqlalchemy.orm import Session
-import app.models as models
-import app.schemas as schemas
-from uuid import UUID
-from sqlalchemy import select
 from datetime import date
+from uuid import UUID
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+import app.models as models
 
 
 def create_deposit_exchange(

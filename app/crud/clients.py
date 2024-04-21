@@ -1,12 +1,13 @@
 import datetime
+from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+
 import app.models as models
 import app.schemas as schemas
-from uuid import UUID
 
 
 def get_all_clients(db: Session) -> list[schemas.Client]:

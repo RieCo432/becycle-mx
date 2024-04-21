@@ -1,10 +1,9 @@
-import app.models as models
-import app.crud as crud
 import json
-from math import acos, sin, cos, radians
+
+import app.crud as crud
+import app.models as models
 from app.database.db import SessionLocal
 from app.services import distance
-
 
 db = SessionLocal()
 

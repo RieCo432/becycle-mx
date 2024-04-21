@@ -1,11 +1,12 @@
 import os
+
+import uvicorn
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-import app.routers as routers
-import uvicorn
-from app.dependencies import get_db
-from app.database.db import engine, Base
 
+import app.routers as routers
+from app.database.db import engine, Base
+from app.dependencies import get_db
 
 Base.metadata.create_all(bind=engine)
 

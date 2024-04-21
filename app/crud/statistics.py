@@ -1,17 +1,14 @@
 from datetime import date, datetime
 
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import select, func
+from sqlalchemy import func
 from sqlalchemy.orm import Session
+
 import app.models as models
 import app.schemas as schemas
-from app.crud.users import get_users
-from app.crud.clients import get_all_clients
 from app.crud.bikes import get_all_bikes
-import bcrypt
-from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException, status
-from uuid import UUID
+from app.crud.clients import get_all_clients
+from app.crud.users import get_users
 
 
 def get_user_leaderboard(db: Session) -> list[schemas.UserLeaderboard]:

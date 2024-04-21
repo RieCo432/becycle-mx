@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body
-import app.crud as crud
-import app.schemas as schemas
-import app.dependencies as dep
-from sqlalchemy.orm import Session
-import app.models as models
 from typing import Annotated
 
+from fastapi import APIRouter, Depends, HTTPException, status, Body
+from sqlalchemy.orm import Session
+
+import app.crud as crud
+import app.dependencies as dep
+import app.models as models
+import app.schemas as schemas
 
 deposit_exchanges = APIRouter(
     tags=["deposit exchanges"],

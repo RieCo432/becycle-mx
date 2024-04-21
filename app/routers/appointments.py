@@ -1,15 +1,16 @@
 import uuid
-from fastapi import APIRouter, Depends, BackgroundTasks
-import app.models as models
-import app.crud as crud
-import app.schemas as schemas
-import app.dependencies as dep
-from sqlalchemy.orm import Session
+from datetime import datetime, time, date
 from typing import Annotated
 from uuid import UUID
-from datetime import datetime, time, date
-from dateutil import relativedelta
 
+from dateutil import relativedelta
+from fastapi import APIRouter, Depends, BackgroundTasks
+from sqlalchemy.orm import Session
+
+import app.crud as crud
+import app.dependencies as dep
+import app.models as models
+import app.schemas as schemas
 
 appointments = APIRouter(
     tags=["appointments"],

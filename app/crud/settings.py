@@ -5,8 +5,9 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, DAILY
 from fastapi import HTTPException, status
 from sqlalchemy import select, and_
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
 import app.models as models
 import app.schemas as schemas
 

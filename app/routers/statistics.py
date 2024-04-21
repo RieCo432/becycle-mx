@@ -1,12 +1,12 @@
-from datetime import datetime, date
-from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
-import app.crud as crud
-import app.schemas as schemas
-import app.dependencies as dep
-from sqlalchemy.orm import Session
 import os
+from datetime import date
 
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+import app.crud as crud
+import app.dependencies as dep
+import app.schemas as schemas
 
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ['ACCESS_TOKEN_EXPIRE_MINUTES'])
 

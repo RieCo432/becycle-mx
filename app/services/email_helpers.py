@@ -1,13 +1,13 @@
+import os
 import smtplib
 import ssl
-from uuid import UUID
-import os
-from email.utils import formataddr
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from datetime import datetime
-import app.schemas as schemas
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import formataddr
+from uuid import UUID
 
+import app.schemas as schemas
 
 GOOGLE_APP_PASSWORD = os.environ['GOOGLE_APP_PASSWORD']
 GOOGLE_ACCOUNT = os.environ['GOOGLE_ACCOUNT']

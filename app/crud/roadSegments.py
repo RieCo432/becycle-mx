@@ -1,11 +1,10 @@
 import json
-import random
-import app.schemas as schemas
-import app.models as models
-from sqlalchemy.orm import Session
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from uuid import UUID
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+import app.models as models
 
 
 def create_road_segment(db: Session,

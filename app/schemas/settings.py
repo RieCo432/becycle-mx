@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from datetime import time, date
+
+from pydantic import BaseModel
 
 
 class AppointmentType(BaseModel):

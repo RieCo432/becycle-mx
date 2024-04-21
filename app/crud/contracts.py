@@ -1,11 +1,13 @@
 from datetime import date, datetime
+from uuid import UUID
+
+from dateutil.relativedelta import relativedelta
+from fastapi import HTTPException, status
+from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
+
 import app.models as models
 import app.schemas as schemas
-from sqlalchemy import select, and_
-from uuid import UUID
-from fastapi import HTTPException, status
-from dateutil.relativedelta import relativedelta
 
 
 def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:

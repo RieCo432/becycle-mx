@@ -1,8 +1,10 @@
+from uuid import uuid4
+
 from sqlalchemy import UUID, text, ForeignKey, Boolean, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database.db import Base
 from app.models import Client, Bike
-from uuid import uuid4
 
 
 class DetectedPotentialClientDuplicates(Base):

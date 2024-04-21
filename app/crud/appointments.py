@@ -1,7 +1,8 @@
 import datetime
 import math
-from .settings import *
 from uuid import UUID
+
+from .settings import *
 
 
 def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate, auto_confirm: bool = False) -> models.Appointment:

@@ -1,9 +1,9 @@
-import app.crud as crud
-import app.schemas as schemas
-import app.dependencies as dep
-from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
+import app.crud as crud
+import app.dependencies as dep
+import app.schemas as schemas
 
 finances = APIRouter(
     tags=["finances"],

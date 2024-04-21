@@ -1,8 +1,9 @@
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
 import app.schemas as schemas
 from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date
 from .depositExchanges import get_deposit_exchanges_grouped_by_date
-from fastapi import HTTPException, status
 
 
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:

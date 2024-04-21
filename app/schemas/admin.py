@@ -1,7 +1,9 @@
-from pydantic import BaseModel, ConfigDict
-from .client import ClientExtended
-from .bike import BikeExtended
 from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict
+
+from .bike import BikeExtended
+from .client import ClientExtended
 
 
 class DetectedPotentialClientDuplicates(BaseModel):

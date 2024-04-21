@@ -1,8 +1,9 @@
-from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date
-from uuid import uuid4
-from sqlalchemy.orm import Mapped, mapped_column
-from app.database.db import Base
 from datetime import time, date
+
+from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.database.db import Base
 
 
 class AppointmentGeneralSettings(Base):

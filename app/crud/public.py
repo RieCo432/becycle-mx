@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 import app.schemas as schemas
 from .settings import get_appointment_general_settings, get_appointment_concurrency_limits
 

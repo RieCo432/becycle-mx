@@ -1,7 +1,7 @@
-from uuid import UUID
-from pydantic import BaseModel
 from datetime import date
-import app.schemas as schemas
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict
 
 
 class ContractBase(BaseModel):
@@ -40,8 +40,7 @@ class Contract(ContractPublic):
     returnAcceptingUserId: UUID | None = None
     depositReturningUserId: UUID | None = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ContractRestricted(ContractPublic):
@@ -52,8 +51,7 @@ class ContractRestricted(ContractPublic):
     returnAcceptingUsername: str | None = None
     depositReturningUsername: str | None = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ContractPatch(BaseModel):

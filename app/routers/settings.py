@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, Body
-import app.schemas as schemas
+from datetime import date, time
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
 import app.crud as crud
 import app.dependencies as dep
-from uuid import UUID
-from sqlalchemy.orm import Session
-import app.models as models
-from typing import Annotated
-from datetime import date, time
+import app.schemas as schemas
 
 settings = APIRouter(
     tags=["settings"],

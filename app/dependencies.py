@@ -1,15 +1,16 @@
-from jose import jwt, JWTError
-from app.database.db import SessionLocal
-from fastapi.security import OAuth2PasswordBearer
-from typing import Annotated
-from fastapi import Depends, HTTPException, status, Body
-import app.models as models
-import app.crud as crud
-from sqlalchemy.orm import Session
 import os
-import app.schemas as schemas
+from typing import Annotated
 from uuid import UUID
 
+from fastapi import Depends, HTTPException, status, Body
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
+from sqlalchemy.orm import Session
+
+import app.crud as crud
+import app.models as models
+import app.schemas as schemas
+from app.database.db import SessionLocal
 
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']

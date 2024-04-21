@@ -1,9 +1,11 @@
 from datetime import datetime
-from sqlalchemy import UUID, text, ForeignKey, Text, Boolean, DateTime
 from uuid import uuid4
+
+from sqlalchemy import UUID, text, ForeignKey, Text, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.database.db import Base
+
 import app.services as services
+from app.database.db import Base
 
 
 class Appointment(Base):

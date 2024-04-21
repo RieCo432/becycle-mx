@@ -1,22 +1,22 @@
+import io
 import os
-from copy import copy
 from uuid import UUID
-import pandas as pd
-from fastapi import HTTPException, status
 
-import app.models as models
+import pandas as pd
 from Levenshtein import distance as levenshtein_distance
+from fastapi import HTTPException, status
+from pypdf import PdfReader, PdfWriter
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from .clients import get_all_clients, get_client, get_client_logins
-from .bikes import get_all_bikes, get_bike
-from .contracts import get_contracts
+
+import app.models as models
 from .appointments import get_appointments
+from .bikes import get_all_bikes, get_bike
+from .clients import get_all_clients, get_client, get_client_logins
+from .contracts import get_contracts
 from .finances import get_deposit_balances_book
-from pypdf import PdfReader, PdfWriter
-import io
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
 
 
 def get_potential_client_duplicates_detected(db: Session) -> list[models.DetectedPotentialClientDuplicates]:
