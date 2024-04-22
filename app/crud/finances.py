@@ -70,4 +70,8 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
 
         previous_balances = deposit_balances_book[deposit_transaction_date].balances
 
+    for date in deposit_balances_book.keys():
+        if "BANK" not in deposit_balances_book[date].diff and "BANK" in deposit_balances_book[date].balances:
+            deposit_balances_book[date].balances.pop("BANK")
+
     return schemas.DepositBalancesBook(dayBalances=deposit_balances_book)
