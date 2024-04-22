@@ -187,3 +187,43 @@ async def get_deposit_returning_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
     return deposit_giving_user
+
+
+async def get_deposit_exchange_to_user(
+        deposit_receiving_username: Annotated[str, Body()],
+        deposit_receiving_user_password: Annotated[str, Body()],
+        db: Session = Depends(get_db)) -> models.User:
+    deposit_receiving_user = crud.authenticate_user(username=deposit_receiving_username, password_cleartext=deposit_receiving_user_password, db=db)
+    if deposit_receiving_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Deposit receiving user wrong password"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if not deposit_receiving_user.depositBearer and not deposit_receiving_user.treasurer and deposit_receiving_user.username != "BANK":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Not a deposit bearer, treasurer or BANK!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return deposit_receiving_user
+
+
+async def get_deposit_exchange_from_user(
+        deposit_returning_username: Annotated[str, Body()],
+        deposit_returning_user_password: Annotated[str, Body()],
+        db: Session = Depends(get_db)) -> models.User:
+    deposit_giving_user = crud.authenticate_user(username=deposit_returning_username, password_cleartext=deposit_returning_user_password, db=db)
+    if deposit_giving_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Deposit returning user wrong password"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if not deposit_giving_user.depositBearer and not deposit_giving_user.treasurer and deposit_giving_user.username != "BANK":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Not a deposit bearer, treasurer or BANK!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return deposit_giving_user

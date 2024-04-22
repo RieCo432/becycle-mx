@@ -53,3 +53,13 @@ def get_deposit_exchanges_grouped_by_date(db: Session) -> dict[date, list[models
     return deposit_exchanges_by_date
 
 
+def get_deposit_exchange_users(db: Session) -> list[models.User]:
+    return [_ for _ in db.scalars(
+        select(models.User)
+        .where(
+            (models.User.depositBearer == True)
+            | (models.User.treasurer == True)
+            | (models.User.username == "BANK")
+        )
+    )]
+
