@@ -698,4 +698,15 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getClaimableDepositsDateSeries(interval, gracePeriod, startDate=null, endDate=null) {
+    return axiosClient.get('/finances/deposits/claimable', {
+      params: {
+        interval: interval,
+        grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

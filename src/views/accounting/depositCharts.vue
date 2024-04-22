@@ -73,6 +73,7 @@ export default {
         },
       },
       totalDepositsCollectedSeries: [],
+      claimableDepositsSeries: [],
     };
   },
   methods: {
@@ -99,8 +100,16 @@ export default {
         this.updateEndDate(this.totalDepositsCollectedSeries[0].data[this.totalDepositsCollectedSeries[0].data.length -1][0]);
       });
     },
+    fetchClaimableDepositsSeries() {
+      requests.getClaimableDepositsDateSeries(this.interval, this.gracePeriod, this.startDate, this.endDate).then((response) => {
+        this.claimableDepositsSeries = response.data;
+        this.updateStartDate(this.claimableDepositsSeries[0].data[0][0]);
+        this.updateEndDate(this.claimableDepositsSeries[0].data[this.claimableDepositsSeries[0].data.length -1][0]);
+      });
+    },
     fetchAllSeries() {
       this.fetchTotalDepositsCollectedSeries();
+      this.fetchClaimableDepositsSeries();
     },
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
@@ -172,7 +181,7 @@ export default {
                 :min="0"
                 :interval="7"
                 class="m-auto"
-                @drag-end="fetchActiveContractsSeries"
+                @drag-end="fetchClaimableDepositsSeries"
             ></vue-slider>
           </div>
           <div class="col-span-4 content-center">
@@ -208,6 +217,15 @@ export default {
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="totalDepositsCollectedSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-6">
+      <Card title="Claimable Deposits">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="claimableDepositsSeries"></apexchart>
           </div>
         </div>
       </Card>
