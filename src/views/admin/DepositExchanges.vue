@@ -47,7 +47,7 @@ export default {
     const stepNumber = ref(0);
     const router = useRouter();
 
-    requests.getDepositBearers().then((response) => depositBearers.value = response.data.map((user) => ({
+    requests.getDepositExchangeUsers().then((response) => depositBearers.value = response.data.map((user) => ({
       label: user.username,
       value: user.username,
     })));

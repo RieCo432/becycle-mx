@@ -683,4 +683,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getDepositExchangeUsers() {
+    return axiosClient.get('/deposit-exchanges/users', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
