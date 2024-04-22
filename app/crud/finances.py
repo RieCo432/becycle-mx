@@ -1,9 +1,13 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
+import app.models as models
 import app.schemas as schemas
 from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date
 from .depositExchanges import get_deposit_exchanges_grouped_by_date
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
 
 
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
@@ -75,3 +79,53 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
             deposit_balances_book[date].balances.pop("BANK")
 
     return schemas.DepositBalancesBook(dayBalances=deposit_balances_book)
+
+
+def get_deposits_collected(
+        db: Session,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        interval: int | None = None) -> list[schemas.DateSeries]:
+    if interval == 0:
+        interval = 1
+    if start_date is None:
+        oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+        start_date = oldest_contract.startDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
+
+    all_categories = [_ for _ in db.scalars(
+        db.query(models.Contract.contractType, func.sum(models.Contract.depositAmountCollected)).group_by(models.Contract.contractType)
+    )]
+
+    all_series = []
+    data_series_by_breakdown = {}
+    period_start_date = start_date
+    period_end_date = start_date + relativedelta(days=interval)
+
+    while period_start_date <= end_date:
+
+        deposit_sum_by_breakdown = {cat: deposit_sum for cat, deposit_sum in [_ for _ in
+                                                             db.query(models.Contract.contractType, func.sum(models.Contract.depositAmountCollected))
+                                                             .where(
+                                                                 (models.Contract.startDate <= period_start_date)
+                                                             )
+                                                             .group_by(models.Contract.contractType)
+                                                             ]}
+        for breakdown in all_categories:
+            deposit_sum = deposit_sum_by_breakdown.get(breakdown, 0)
+            if breakdown not in data_series_by_breakdown:
+                data_series_by_breakdown[breakdown] = [[period_start_date, deposit_sum]]
+            else:
+                data_series_by_breakdown[breakdown].append([period_start_date, deposit_sum])
+
+        period_start_date = period_end_date
+        period_end_date = period_start_date + relativedelta(days=interval)
+
+    for breakdown in data_series_by_breakdown:
+        all_series.append(schemas.DateSeries(
+            name=breakdown,
+            data=data_series_by_breakdown[breakdown]
+        ))
+
+    return all_series
