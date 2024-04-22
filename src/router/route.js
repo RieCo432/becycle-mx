@@ -149,6 +149,15 @@ const routes = [
         component: () => import('@/views/accounting/depositBook.vue'),
       },
       {
+        path: '/accounting/deposit-charts',
+        name: 'Deposit Charts',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/accounting/deposit-charts',
+        },
+        component: () => import('@/views/accounting/depositCharts.vue'),
+      },
+      {
         path: '/admin/users',
         name: 'User Management',
         meta: {

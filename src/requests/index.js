@@ -688,4 +688,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getTotalDepositsCollectedDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/collected', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

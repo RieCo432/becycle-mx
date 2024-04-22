@@ -66,6 +66,12 @@ export const topMenu = [
     show: ['user'],
   },
   {
+    title: 'Deposit Charts',
+    icon: 'heroicons-outline:presentation-chart-line',
+    link: '/accounting/deposit-charts',
+    show: ['user'],
+  },
+  {
     title: 'Appointments',
     icon: 'heroicons-outline:calendar',
     link: '/appointments',
