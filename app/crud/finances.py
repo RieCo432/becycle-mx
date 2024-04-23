@@ -81,7 +81,7 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
     return schemas.DepositBalancesBook(dayBalances=deposit_balances_book)
 
 
-def get_collected_deposits(
+def get_total_deposits(
         db: Session,
         start_date: date | None = None,
         end_date: date | None = None,
@@ -169,6 +169,102 @@ def get_claimable_deposits(db: Session, interval: int, grace_period: int, start_
                 data_series_by_breakdown[breakdown].append([start_date, count])
 
         start_date += relativedelta(days=interval)
+
+    for breakdown in data_series_by_breakdown:
+        all_series.append(schemas.DateSeries(
+            name=breakdown,
+            data=data_series_by_breakdown[breakdown]
+        ))
+
+    return all_series
+
+
+def get_collected_deposits(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+    if interval == 0:
+        interval = 1
+
+    if start_date is None:
+        oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+        start_date = oldest_contract.startDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
+
+    all_categories = [_ for _ in db.scalars(
+        db.query(models.Contract.contractType, func.sum(models.Contract.depositAmountCollected)).group_by(models.Contract.contractType)
+    )]
+
+    all_series = []
+    data_series_by_breakdown = {}
+    period_start_date = start_date
+    period_end_date = period_start_date + relativedelta(days=interval)
+
+    while period_start_date <= end_date:
+
+        deposits_collected_by_breakdown = {cat: count for cat, count in [_ for _ in
+                                                             db.query(models.Contract.contractType, func.sum(models.Contract.depositAmountCollected))
+                                                             .where(
+                                                                 (models.Contract.startDate >= period_start_date)
+                                                                 & (models.Contract.startDate < period_end_date)
+                                                             )
+                                                             .group_by(models.Contract.contractType)
+                                                             ]}
+        for breakdown in all_categories:
+            count = deposits_collected_by_breakdown.get(breakdown, 0)
+            if breakdown not in data_series_by_breakdown:
+                data_series_by_breakdown[breakdown] = [[period_start_date, count]]
+            else:
+                data_series_by_breakdown[breakdown].append([period_start_date, count])
+
+        period_start_date = period_end_date
+        period_end_date = period_start_date + relativedelta(days=interval)
+
+    for breakdown in data_series_by_breakdown:
+        all_series.append(schemas.DateSeries(
+            name=breakdown,
+            data=data_series_by_breakdown[breakdown]
+        ))
+
+    return all_series
+
+
+def get_returned_deposits(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+    if interval == 0:
+        interval = 1
+    if start_date is None:
+        oldest_returned_contract = db.query(models.Contract).where(models.Contract.returnedDate != None).order_by(models.Contract.returnedDate).first()
+        start_date = oldest_returned_contract.returnedDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
+
+    all_categories = [_ for _ in db.scalars(
+        db.query(models.Contract.contractType, func.sum(models.Contract.depositAmountReturned)).group_by(models.Contract.contractType)
+    )]
+
+    all_series = []
+    data_series_by_breakdown = {}
+    period_start_date = start_date
+    period_end_date = start_date + relativedelta(days=interval)
+
+    while period_start_date <= end_date:
+
+        deposits_returned_by_breakdown = {cat: count for cat, count in [_ for _ in
+                                                             db.query(models.Contract.contractType, func.sum(models.Contract.depositAmountReturned))
+                                                             .where(
+                                                                 (models.Contract.returnedDate != None)
+                                                                 & (models.Contract.returnedDate >= period_start_date)
+                                                                 & (models.Contract.returnedDate < period_end_date)
+                                                             )
+                                                             .group_by(models.Contract.contractType)
+                                                             ]}
+        for breakdown in all_categories:
+            count = deposits_returned_by_breakdown.get(breakdown, 0)
+            if breakdown not in data_series_by_breakdown:
+                data_series_by_breakdown[breakdown] = [[period_start_date, count]]
+            else:
+                data_series_by_breakdown[breakdown].append([period_start_date, count])
+
+        period_start_date = period_end_date
+        period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
         all_series.append(schemas.DateSeries(
