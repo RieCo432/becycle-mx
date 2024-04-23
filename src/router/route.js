@@ -158,6 +158,15 @@ const routes = [
         component: () => import('@/views/finances/depositCharts.vue'),
       },
       {
+        path: '/finances/cash-flow',
+        name: 'Cash Flow',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/cash-flow',
+        },
+        component: () => import('@/views/finances/cashFlow.vue'),
+      },
+      {
         path: '/admin/users',
         name: 'User Management',
         meta: {

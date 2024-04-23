@@ -141,6 +141,12 @@ export const topMenu = [
         childlink: '/finances/deposit-charts',
         show: ['user'],
       },
+      {
+        childtitle: 'Cash Flow',
+        childicon: 'heroicons-outline:currency-pound',
+        childlink: '/finances/cash-flow',
+        show: ['user'],
+      },
     ],
   },
   {

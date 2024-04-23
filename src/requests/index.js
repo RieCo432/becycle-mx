@@ -729,4 +729,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getDepositFlowDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/flow', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
