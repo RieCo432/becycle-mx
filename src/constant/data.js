@@ -60,18 +60,6 @@ export const topMenu = [
     show: ['user'],
   },
   {
-    title: 'Deposit Accounting',
-    icon: 'heroicons-outline:banknotes',
-    link: '/accounting/deposits',
-    show: ['user'],
-  },
-  {
-    title: 'Deposit Charts',
-    icon: 'heroicons-outline:presentation-chart-line',
-    link: '/accounting/deposit-charts',
-    show: ['user'],
-  },
-  {
     title: 'Appointments',
     icon: 'heroicons-outline:calendar',
     link: '/appointments',
@@ -135,6 +123,26 @@ export const topMenu = [
       },
     ],
   },*/
+  {
+    title: 'Finances',
+    icon: 'heroicons-outline:banknotes',
+    link: '/finances/',
+    show: ['user'],
+    child: [
+      {
+        childtitle: 'Deposit Accounting',
+        childicon: 'heroicons-outline:banknotes',
+        childlink: '/finances/deposits',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Deposit Charts',
+        childicon: 'heroicons-outline:presentation-chart-line',
+        childlink: '/finances/deposit-charts',
+        show: ['user'],
+      },
+    ],
+  },
   {
     title: 'Admin',
     icon: 'heroicons-outline:building-library',

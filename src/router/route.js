@@ -140,22 +140,22 @@ const routes = [
         component: () => import('@/views/appointments/index.vue'),
       },
       {
-        path: '/accounting/deposits',
+        path: '/finances/deposits',
         name: 'Deposit Book',
         meta: {
           restrictTo: ['user'],
-          selectNavPath: '/accounting/deposits',
+          selectNavPath: '/finances/deposits',
         },
-        component: () => import('@/views/accounting/depositBook.vue'),
+        component: () => import('@/views/finances/depositBook.vue'),
       },
       {
-        path: '/accounting/deposit-charts',
+        path: '/finances/deposit-charts',
         name: 'Deposit Charts',
         meta: {
           restrictTo: ['user'],
-          selectNavPath: '/accounting/deposit-charts',
+          selectNavPath: '/finances/deposit-charts',
         },
-        component: () => import('@/views/accounting/depositCharts.vue'),
+        component: () => import('@/views/finances/depositCharts.vue'),
       },
       {
         path: '/admin/users',
