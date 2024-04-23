@@ -688,8 +688,8 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getTotalDepositsCollectedDateSeries(interval, startDate, endDate) {
-    return axiosClient.get('/finances/deposits/collected', {
+  getTotalDepositsDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/total', {
       params: {
         interval: interval,
         ...(startDate && {start: startDate}),
@@ -703,6 +703,26 @@ export default {
       params: {
         interval: interval,
         grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getDepositsCollectedDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/collected', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getDepositsReturnedDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/returned', {
+      params: {
+        interval: interval,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
       },

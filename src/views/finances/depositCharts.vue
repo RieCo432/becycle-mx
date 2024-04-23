@@ -72,8 +72,10 @@ export default {
           },
         },
       },
-      totalDepositsCollectedSeries: [],
+      totalDepositsSeries: [],
       claimableDepositsSeries: [],
+      depositsCollectedSeries: [],
+      depositsReturnedSeries: [],
     };
   },
   methods: {
@@ -93,11 +95,11 @@ export default {
         this.endDate = newEndDate;
       }
     },
-    fetchTotalDepositsCollectedSeries() {
-      requests.getTotalDepositsCollectedDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
-        this.totalDepositsCollectedSeries = response.data;
-        this.updateStartDate(this.totalDepositsCollectedSeries[0].data[0][0]);
-        this.updateEndDate(this.totalDepositsCollectedSeries[0].data[this.totalDepositsCollectedSeries[0].data.length -1][0]);
+    fetchTotalDepositsSeries() {
+      requests.getTotalDepositsDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
+        this.totalDepositsSeries = response.data;
+        this.updateStartDate(this.totalDepositsSeries[0].data[0][0]);
+        this.updateEndDate(this.totalDepositsSeries[0].data[this.totalDepositsSeries[0].data.length -1][0]);
       });
     },
     fetchClaimableDepositsSeries() {
@@ -107,9 +109,25 @@ export default {
         this.updateEndDate(this.claimableDepositsSeries[0].data[this.claimableDepositsSeries[0].data.length -1][0]);
       });
     },
+    fetchDepositsCollectedSeries() {
+      requests.getDepositsCollectedDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
+        this.depositsCollectedSeries = response.data;
+        this.updateStartDate(this.depositsCollectedSeries[0].data[0][0]);
+        this.updateEndDate(this.depositsCollectedSeries[0].data[this.depositsCollectedSeries[0].data.length -1][0]);
+      });
+    },
+    fetchDepositsReturnedSeries() {
+      requests.getDepositsReturnedDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
+        this.depositsReturnedSeries = response.data;
+        this.updateStartDate(this.depositsReturnedSeries[0].data[0][0]);
+        this.updateEndDate(this.depositsReturnedSeries[0].data[this.depositsReturnedSeries[0].data.length -1][0]);
+      });
+    },
     fetchAllSeries() {
-      this.fetchTotalDepositsCollectedSeries();
+      this.fetchTotalDepositsSeries();
       this.fetchClaimableDepositsSeries();
+      this.fetchDepositsCollectedSeries();
+      this.fetchDepositsReturnedSeries();
     },
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
@@ -216,7 +234,7 @@ export default {
       <Card title="Total Deposits Collected">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="totalDepositsCollectedSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="totalDepositsSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -226,6 +244,24 @@ export default {
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="claimableDepositsSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-6">
+      <Card title="Collected Deposits">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="depositsCollectedSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-6">
+      <Card title="Returned Deposits">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="depositsReturnedSeries"></apexchart>
           </div>
         </div>
       </Card>
