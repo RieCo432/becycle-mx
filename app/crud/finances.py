@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, select
 
 import app.models as models
 import app.schemas as schemas
@@ -262,6 +262,60 @@ def get_returned_deposits(db: Session, interval: int, start_date: date | None, e
                 data_series_by_breakdown[breakdown] = [[period_start_date, count]]
             else:
                 data_series_by_breakdown[breakdown].append([period_start_date, count])
+
+        period_start_date = period_end_date
+        period_end_date = period_start_date + relativedelta(days=interval)
+
+    for breakdown in data_series_by_breakdown:
+        all_series.append(schemas.DateSeries(
+            name=breakdown,
+            data=data_series_by_breakdown[breakdown]
+        ))
+
+    return all_series
+
+
+def get_deposit_flow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DateSeries]:
+    if interval == 0:
+        interval = 1
+
+    if start_date is None:
+        oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+        start_date = oldest_contract.startDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
+
+    categories = ["collected", "returned", "diff"]
+    data_series_by_breakdown = {cat: [] for cat in categories}
+
+    all_series = []
+    period_start_date = start_date
+    period_end_date = start_date + relativedelta(days=interval)
+
+    while period_start_date <= end_date:
+
+        deposit_flow_collected = db.scalar(
+            select(func.coalesce(func.sum(models.Contract.depositAmountCollected), 0))
+            .where(
+                (models.Contract.startDate >= period_start_date)
+                & (models.Contract.startDate < period_end_date)
+            )
+        )
+        data_series_by_breakdown["collected"].append([period_start_date, deposit_flow_collected])
+
+        deposit_flow_returned = db.scalar(
+            select(func.coalesce(func.sum(models.Contract.depositAmountReturned), 0))
+            .where(
+                (models.Contract.returnedDate != None)
+                & (models.Contract.returnedDate >= period_start_date)
+                & (models.Contract.returnedDate < period_end_date)
+            )
+        )
+        data_series_by_breakdown["returned"].append([period_start_date, -deposit_flow_returned])
+
+        deposit_flow_diff = deposit_flow_collected - deposit_flow_returned
+
+        data_series_by_breakdown["diff"].append([period_start_date, deposit_flow_diff])
 
         period_start_date = period_end_date
         period_end_date = period_start_date + relativedelta(days=interval)
