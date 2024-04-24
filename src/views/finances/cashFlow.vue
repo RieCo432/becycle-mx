@@ -16,7 +16,7 @@ export default {
       gracePeriod: 28,
       startDate: null,
       endDate: null,
-      chartOptions: {
+      areaChartOptions: {
         chart: {
           type: 'area',
           height: 300,
@@ -71,7 +71,118 @@ export default {
           },
         },
       },
+
+      contractsStatusChartOptions: {
+        labels: [],
+        colors: ['#4669FA', '#FA916B', '#50C793', '#0CE7FA'],
+        dataLabels: {
+          enabled: true,
+        },
+        legend: {
+          position: 'bottom',
+          fontSize: '16px',
+          fontFamily: 'Inter',
+          fontWeight: 400,
+          labels: {
+            colors: '#CBD5E1',
+          },
+        },
+        chart: {
+          toolbar: {
+            show: false,
+          },
+        },
+        plotOptions: {
+          pie: {
+            donut: {
+              labels: {
+                show: true,
+                name: {
+                  show: true,
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                  formatter: (s) => (s.replaceAll('_', ' ')),
+                },
+                value: {
+                  show: true,
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                },
+                total: {
+                  show: true,
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                },
+              },
+            },
+          },
+        },
+      },
+      depositsStatusChartOptions: {
+        labels: [],
+        colors: ['#4669FA', '#FA916B', '#50C793', '#0CE7FA'],
+        dataLabels: {
+          enabled: true,
+          formatter: function(value, opt) {
+            return `\u00A3${opt.w.config.series[opt.seriesIndex]}`;
+          },
+        },
+        legend: {
+          position: 'bottom',
+          fontSize: '16px',
+          fontFamily: 'Inter',
+          fontWeight: 400,
+          labels: {
+            colors: '#CBD5E1',
+          },
+        },
+        chart: {
+          toolbar: {
+            show: false,
+          },
+        },
+        plotOptions: {
+          pie: {
+            donut: {
+              labels: {
+                show: true,
+                name: {
+                  show: true,
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                  formatter: (s) => (s.replaceAll('_', ' ')),
+                },
+                value: {
+                  show: true,
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                  formatter: (s) => (s.replace('', '\u00A3')),
+                },
+                total: {
+                  show: true,
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                },
+              },
+            },
+          },
+        },
+      },
       depositFlowSeries: [],
+      contractsStatusSeries: [],
+      depositsStatusSeries: [],
     };
   },
   methods: {
@@ -98,9 +209,27 @@ export default {
         this.updateEndDate(this.depositFlowSeries[0].data[this.depositFlowSeries[0].data.length -1][0]);
       });
     },
-
+    fetchContractsStatus() {
+      requests.getContractsStatus(this.gracePeriod, this.startDate, this.endDate).then((response) => {
+        this.contractsStatusChartOptions.labels.splice(0, this.contractsStatusChartOptions.labels.length, ...Object.keys(response.data));
+        this.contractsStatusSeries = Object.values(response.data);
+      });
+    },
+    fetchDepositsStatus() {
+      requests.getDepositsStatus(this.gracePeriod, this.startDate, this.endDate).then((response) => {
+        this.depositsStatusChartOptions.labels.splice(0, this.depositsStatusChartOptions.labels.length, ...Object.keys(response.data));
+        this.depositsStatusSeries = Object.values(response.data);
+      });
+    },
     fetchAllSeries() {
       this.fetchDepositFlow();
+      this.fetchContractsStatus();
+      this.fetchDepositsStatus();
+      // this.fetchPercentageContractsReturnedWithinGracePeriod();
+    },
+    fetchGracePeriodDependants() {
+      this.fetchContractsStatus();
+      this.fetchDepositsStatus();
     },
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
@@ -168,11 +297,11 @@ export default {
                 :drag-on-click="true"
                 :clickable="false"
                 width="100%"
-                :max="182"
+                :max="371"
                 :min="0"
                 :interval="7"
                 class="m-auto"
-                @drag-end="fetchClaimableDepositsSeries"
+                @drag-end="fetchGracePeriodDependants"
             ></vue-slider>
           </div>
           <div class="col-span-4 content-center">
@@ -203,11 +332,29 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-4">
       <Card title="Deposit Flow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="depositFlowSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptions" :series="depositFlowSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Contracts Status">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="contractsStatusChartOptions" :series="contractsStatusSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Deposits Status">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="depositsStatusChartOptions" :series="depositsStatusSeries"></apexchart>
           </div>
         </div>
       </Card>

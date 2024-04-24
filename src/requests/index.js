@@ -739,4 +739,24 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getContractsStatus(gracePeriod, startDate=null, endDate=null) {
+    return axiosClient.get('/statistics/contracts/status', {
+      params: {
+        grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getDepositsStatus(gracePeriod, startDate=null, endDate=null) {
+    return axiosClient.get('/finances/deposits/status', {
+      params: {
+        grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
