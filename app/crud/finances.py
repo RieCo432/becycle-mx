@@ -327,3 +327,52 @@ def get_deposit_flow(db: Session, interval: int, start_date: date | None = None,
         ))
 
     return all_series
+
+
+def get_deposits_status(db: Session, grace_period: int, start_date: date | None,
+                                                          end_date: date | None) -> dict[str, int]:
+    if start_date is None:
+        oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+        start_date = oldest_contract.startDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
+
+    contracts_in_period = [
+        _ for _ in db.scalars(
+            select(models.Contract)
+            .where(
+                (models.Contract.endDate >= start_date)
+                & (models.Contract.startDate < end_date)
+            )
+        )
+    ]
+
+    deposits_open = 0
+    deposits_in_grace_period = 0
+    deposits_expired = 0
+    deposits_withheld = 0
+    deposits_unaccounted = 0
+
+    for contract in contracts_in_period:
+        if contract.returnedDate is not None:
+            deposits_withheld += contract.depositAmountCollected - contract.depositAmountReturned
+        elif contract.endDate >= datetime.utcnow().date():
+            deposits_open += contract.depositAmountCollected
+        elif contract.endDate + relativedelta(days=grace_period) >= datetime.utcnow().date():
+            deposits_in_grace_period += contract.depositAmountCollected
+        elif contract.endDate + relativedelta(days=grace_period) < datetime.utcnow().date():
+            deposits_expired += contract.depositAmountCollected
+        else:
+            deposits_unaccounted += contract.depositAmountCollected
+
+    deposits_status = {
+        "open": deposits_open,
+        "in_grace_period": deposits_in_grace_period,
+        "expired": deposits_expired,
+        "withheld": deposits_withheld,
+    }
+
+    if deposits_unaccounted > 0:
+        deposits_status["???"] = deposits_unaccounted
+
+    return deposits_status
