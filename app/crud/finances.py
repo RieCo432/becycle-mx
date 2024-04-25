@@ -377,3 +377,46 @@ def get_deposits_status(db: Session, grace_period: int, start_date: date | None,
         deposits_status["???"] = deposits_unaccounted
 
     return deposits_status
+
+
+def get_deposit_return_percentage(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+    if start_date is None:
+        oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+        start_date = oldest_contract.startDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
+    if interval == 0:
+        interval = 1
+
+    all_returned_contracts_in_period = [
+        _ for _ in db.scalars(
+            select(models.Contract)
+            .where(
+                (models.Contract.startDate >= start_date)
+                & (models.Contract.startDate < end_date)
+                & (models.Contract.returnedDate != None)
+            )
+        )
+    ]
+
+    percentages_of_deposit_returned_by_contract_age = {}
+
+    for contract in all_returned_contracts_in_period:
+        age_of_contract = contract.returnedDate - contract.startDate
+        rough_age_of_contract = age_of_contract.days // interval
+
+        if rough_age_of_contract not in percentages_of_deposit_returned_by_contract_age:
+            percentages_of_deposit_returned_by_contract_age[rough_age_of_contract] = []
+
+        percentages_of_deposit_returned_by_contract_age[rough_age_of_contract].append(int(100 * contract.depositAmountReturned / contract.depositAmountCollected))
+
+    return [schemas.DataSeries(
+        name="Average Percentage of Deposit Returned by Age of Contract",
+        data=[
+            [
+                int(age * interval),
+                np.mean(percentages_of_deposit_returned_by_contract_age[age])
+            ] for age in sorted(percentages_of_deposit_returned_by_contract_age.keys())]
+    )]
+
+
