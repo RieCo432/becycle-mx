@@ -101,7 +101,7 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
 
 
 def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, start_date: date | None,
-                                   end_date: date | None) -> list[schemas.DateSeries]:
+                                   end_date: date | None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -143,7 +143,7 @@ def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, s
         start_date += relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -152,7 +152,7 @@ def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, s
 
 
 def get_active_contracts_statistics(db: Session, interval: int, grace_period: int, start_date: date | None,
-                                    end_date: date | None) -> list[schemas.DateSeries]:
+                                    end_date: date | None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -196,7 +196,7 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
         start_date += relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -205,7 +205,7 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
 
 
 def get_new_contracts_statistics(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[
-    schemas.DateSeries]:
+    schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -246,7 +246,7 @@ def get_new_contracts_statistics(db: Session, interval: int, start_date: date | 
         period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -255,7 +255,7 @@ def get_new_contracts_statistics(db: Session, interval: int, start_date: date | 
 
 
 def get_returned_contracts_statistics(db: Session, interval: int, start_date: date | None, end_date: date | None) -> \
-list[schemas.DateSeries]:
+list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -298,7 +298,7 @@ list[schemas.DateSeries]:
         period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))

@@ -32,6 +32,6 @@ class BikeLeaderboard(Bike):
     contracts: int
 
 
-class DateSeries(BaseModel):
+class DataSeries(BaseModel):
     name: str
     data: list[list]

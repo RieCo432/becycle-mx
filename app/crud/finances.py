@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, select
+import numpy as np
 
 import app.models as models
 import app.schemas as schemas
@@ -85,7 +86,7 @@ def get_total_deposits(
         db: Session,
         start_date: date | None = None,
         end_date: date | None = None,
-        interval: int | None = None) -> list[schemas.DateSeries]:
+        interval: int | None = None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -123,7 +124,7 @@ def get_total_deposits(
         period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -131,7 +132,7 @@ def get_total_deposits(
     return all_series
 
 
-def get_claimable_deposits(db: Session, interval: int, grace_period: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+def get_claimable_deposits(db: Session, interval: int, grace_period: int, start_date: date | None, end_date: date | None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -171,7 +172,7 @@ def get_claimable_deposits(db: Session, interval: int, grace_period: int, start_
         start_date += relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -179,7 +180,7 @@ def get_claimable_deposits(db: Session, interval: int, grace_period: int, start_
     return all_series
 
 
-def get_collected_deposits(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+def get_collected_deposits(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
 
@@ -219,7 +220,7 @@ def get_collected_deposits(db: Session, interval: int, start_date: date | None, 
         period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -227,7 +228,7 @@ def get_collected_deposits(db: Session, interval: int, start_date: date | None, 
     return all_series
 
 
-def get_returned_deposits(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+def get_returned_deposits(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -267,7 +268,7 @@ def get_returned_deposits(db: Session, interval: int, start_date: date | None, e
         period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -275,7 +276,7 @@ def get_returned_deposits(db: Session, interval: int, start_date: date | None, e
     return all_series
 
 
-def get_deposit_flow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DateSeries]:
+def get_deposit_flow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
 
@@ -321,7 +322,7 @@ def get_deposit_flow(db: Session, interval: int, start_date: date | None = None,
         period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))

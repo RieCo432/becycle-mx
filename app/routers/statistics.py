@@ -51,7 +51,7 @@ async def get_total_contracts_statistics(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_total_contracts_statistics(db=db, interval=interval, breakdown=breakdown, start_date=start, end_date=end)
 
 
@@ -62,7 +62,7 @@ async def get_active_contracts_statistics(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_active_contracts_statistics(db=db, interval=interval, grace_period=grace_period, start_date=start, end_date=end)
 
 
@@ -72,7 +72,7 @@ async def get_new_contracts_statistics(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_new_contracts_statistics(db=db, interval=interval, start_date=start, end_date=end)
 
 
@@ -82,7 +82,7 @@ async def get_returned_contracts_statistics(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_returned_contracts_statistics(db=db, interval=interval, start_date=start, end_date=end)
 
 @statistics.get("/statistics/contracts/status", dependencies=[Depends(dep.get_current_active_user)])

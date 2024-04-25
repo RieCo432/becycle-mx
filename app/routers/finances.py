@@ -24,7 +24,7 @@ async def get_total_deposits(
         interval: int,
         start_date: date | None = None,
         end_date: date | None = None,
-        db: Session = Depends(dep.get_db)) -> list[schemas.DateSeries]:
+        db: Session = Depends(dep.get_db)) -> list[schemas.DataSeries]:
     return crud.get_total_deposits(db=db, interval=interval, start_date=start_date, end_date=end_date)
 
 
@@ -35,7 +35,7 @@ async def get_claimable_deposits(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_claimable_deposits(db=db, interval=interval, grace_period=grace_period, start_date=start, end_date=end)
 
 
@@ -45,7 +45,7 @@ async def get_collected_deposits(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_collected_deposits(db=db, interval=interval, start_date=start, end_date=end)
 
 
@@ -55,7 +55,7 @@ async def get_returned_deposits(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_returned_deposits(db=db, interval=interval, start_date=start, end_date=end)
 
 
@@ -65,7 +65,7 @@ async def get_deposit_flow(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_deposit_flow(db=db, interval=interval, start_date=start, end_date=end)
 
 
