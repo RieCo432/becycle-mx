@@ -72,10 +72,63 @@ export default {
           },
         },
       },
+      contractsStatusChartOptions: {
+        labels: [],
+        colors: ['#4669FA', '#FA916B', '#50C793', '#0CE7FA'],
+        dataLabels: {
+          enabled: true,
+        },
+        legend: {
+          position: 'bottom',
+          fontSize: '16px',
+          fontFamily: 'Inter',
+          fontWeight: 400,
+          labels: {
+            colors: '#CBD5E1',
+          },
+        },
+        chart: {
+          toolbar: {
+            show: false,
+          },
+        },
+        plotOptions: {
+          pie: {
+            donut: {
+              labels: {
+                show: true,
+                name: {
+                  show: true,
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                  formatter: (s) => (s.replaceAll('_', ' ')),
+                },
+                value: {
+                  show: true,
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                },
+                total: {
+                  show: true,
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#CBD5E1',
+                },
+              },
+            },
+          },
+        },
+      },
       totalContractSeries: [],
       activeContractSeries: [],
       newContractSeries: [],
       returnedContractSeries: [],
+      contractsStatusSeries: [],
     };
   },
   methods: {
@@ -123,11 +176,22 @@ export default {
         this.updateEndDate(this.returnedContractSeries[0].data[this.returnedContractSeries[0].data.length -1][0]);
       });
     },
+    fetchContractsStatus() {
+      requests.getContractsStatus(this.gracePeriod, this.startDate, this.endDate).then((response) => {
+        this.contractsStatusChartOptions.labels.splice(0, this.contractsStatusChartOptions.labels.length, ...Object.keys(response.data));
+        this.contractsStatusSeries = Object.values(response.data);
+      });
+    },
     fetchAllSeries() {
       this.fetchTotalContractsSeries();
       this.fetchActiveContractsSeries();
       this.fetchNewContractsSeries();
       this.fetchReturnedContractsSeries();
+      this.fetchContractsStatus();
+    },
+    fetchGracePeriodDependants() {
+      this.fetchContractsStatus();
+      this.fetchActiveContractsSeries();
     },
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
@@ -199,7 +263,7 @@ export default {
                 :min="0"
                 :interval="7"
                 class="m-auto"
-                @drag-end="fetchActiveContractsSeries"
+                @drag-end="fetchGracePeriodDependants"
             ></vue-slider>
           </div>
           <div class="col-span-4 content-center">
@@ -262,6 +326,15 @@ export default {
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="returnedContractSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Contracts Status">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="contractsStatusChartOptions" :series="contractsStatusSeries"></apexchart>
           </div>
         </div>
       </Card>

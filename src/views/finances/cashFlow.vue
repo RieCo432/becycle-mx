@@ -12,7 +12,7 @@ export default {
   },
   data() {
     return {
-      interval: 364,
+      interval: 28,
       gracePeriod: 28,
       startDate: null,
       endDate: null,
@@ -68,59 +68,6 @@ export default {
           },
           axisTicks: {
             color: '#ffffff',
-          },
-        },
-      },
-
-      contractsStatusChartOptions: {
-        labels: [],
-        colors: ['#4669FA', '#FA916B', '#50C793', '#0CE7FA'],
-        dataLabels: {
-          enabled: true,
-        },
-        legend: {
-          position: 'bottom',
-          fontSize: '16px',
-          fontFamily: 'Inter',
-          fontWeight: 400,
-          labels: {
-            colors: '#CBD5E1',
-          },
-        },
-        chart: {
-          toolbar: {
-            show: false,
-          },
-        },
-        plotOptions: {
-          pie: {
-            donut: {
-              labels: {
-                show: true,
-                name: {
-                  show: true,
-                  fontSize: '20px',
-                  fontWeight: 'bold',
-                  fontFamily: 'Inter',
-                  color: '#CBD5E1',
-                  formatter: (s) => (s.replaceAll('_', ' ')),
-                },
-                value: {
-                  show: true,
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  fontFamily: 'Inter',
-                  color: '#CBD5E1',
-                },
-                total: {
-                  show: true,
-                  fontSize: '20px',
-                  fontWeight: 'bold',
-                  fontFamily: 'Inter',
-                  color: '#CBD5E1',
-                },
-              },
-            },
           },
         },
       },
@@ -181,7 +128,6 @@ export default {
         },
       },
       depositFlowSeries: [],
-      contractsStatusSeries: [],
       depositsStatusSeries: [],
     };
   },
@@ -209,12 +155,6 @@ export default {
         this.updateEndDate(this.depositFlowSeries[0].data[this.depositFlowSeries[0].data.length -1][0]);
       });
     },
-    fetchContractsStatus() {
-      requests.getContractsStatus(this.gracePeriod, this.startDate, this.endDate).then((response) => {
-        this.contractsStatusChartOptions.labels.splice(0, this.contractsStatusChartOptions.labels.length, ...Object.keys(response.data));
-        this.contractsStatusSeries = Object.values(response.data);
-      });
-    },
     fetchDepositsStatus() {
       requests.getDepositsStatus(this.gracePeriod, this.startDate, this.endDate).then((response) => {
         this.depositsStatusChartOptions.labels.splice(0, this.depositsStatusChartOptions.labels.length, ...Object.keys(response.data));
@@ -223,12 +163,9 @@ export default {
     },
     fetchAllSeries() {
       this.fetchDepositFlow();
-      this.fetchContractsStatus();
       this.fetchDepositsStatus();
-      // this.fetchPercentageContractsReturnedWithinGracePeriod();
     },
     fetchGracePeriodDependants() {
-      this.fetchContractsStatus();
       this.fetchDepositsStatus();
     },
     handleSelection(chart, {xaxis, yaxis}) {
@@ -337,15 +274,6 @@ export default {
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptions" :series="depositFlowSeries"></apexchart>
-          </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-4">
-      <Card title="Contracts Status">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="contractsStatusChartOptions" :series="contractsStatusSeries"></apexchart>
           </div>
         </div>
       </Card>
