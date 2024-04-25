@@ -16,7 +16,7 @@ export default {
       gracePeriod: 28,
       startDate: null,
       endDate: null,
-      areaChartOptions: {
+      areaChartOptionsDateSeries: {
         chart: {
           type: 'area',
           height: 300,
@@ -52,22 +52,93 @@ export default {
           type: 'datetime',
           labels: {
             style: {
-              color: '#ffffff',
+              colors: ['#dddddd'],
             },
           },
           axisTicks: {
-            color: '#ffffff',
+            color: '#dddddd',
           },
         },
         yaxis: {
           show: true,
           labels: {
             style: {
-              color: '#ffffff',
+              colors: ['#dddddd'],
+            },
+            formatter: (val) => (`\u00A3${val}`),
+          },
+          axisTicks: {
+            color: '#dddddd',
+          },
+          title: {
+            text: 'Value of Deposits',
+            style: {
+              color: '#dddddd',
+            },
+          },
+        },
+      },
+      areaChartOptionsNumericSeries: {
+        chart: {
+          type: 'area',
+          height: 300,
+        },
+        theme: {
+          mode: 'light',
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        stroke: {
+          curve: 'smooth',
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            opacityFrom: 0.6,
+            opacityTo: 0.8,
+          },
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'left',
+          labels: {
+            colors: ['#dddddd'],
+          },
+        },
+        tooltip: {
+          theme: 'dark',
+        },
+        xaxis: {
+          show: true,
+          type: 'numeric',
+          labels: {
+            style: {
+              color: '#dddddd',
             },
           },
           axisTicks: {
-            color: '#ffffff',
+            colors: ['#dddddd'],
+          },
+          title: {
+            text: 'Days After Contract Start',
+            style: {
+              color: '#dddddd',
+            },
+          },
+        },
+        yaxis: {
+          show: true,
+          min: 0,
+          max: 100,
+          labels: {
+            style: {
+              colors: ['#dddddd'],
+            },
+            formatter: (val) => (`${val}%`),
+          },
+          axisTicks: {
+            colors: ['#dddddd'],
           },
         },
       },
@@ -86,7 +157,7 @@ export default {
           fontFamily: 'Inter',
           fontWeight: 400,
           labels: {
-            colors: '#CBD5E1',
+            colors: ['#CBD5E1'],
           },
         },
         chart: {
@@ -104,7 +175,7 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#CBD5E1',
+                  colors: ['#CBD5E1'],
                   formatter: (s) => (s.replaceAll('_', ' ')),
                 },
                 value: {
@@ -112,7 +183,7 @@ export default {
                   fontSize: '16px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#CBD5E1',
+                  colors: ['#CBD5E1'],
                   formatter: (s) => (s.replace('', '\u00A3')),
                 },
                 total: {
@@ -120,7 +191,9 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#CBD5E1',
+                  style: {
+                    colors: ['#CBD5E1'],
+                  },
                 },
               },
             },
@@ -129,6 +202,7 @@ export default {
       },
       depositFlowSeries: [],
       depositsStatusSeries: [],
+      percentageDepositReturnedAfterMonthsSeries: [],
     };
   },
   methods: {
@@ -161,9 +235,15 @@ export default {
         this.depositsStatusSeries = Object.values(response.data);
       });
     },
+    fetchPercentageDepositReturnedAfterMonths() {
+      requests.getPercentageDepositReturnedAfterMonths(this.interval, this.startDate, this.endDate).then((response) => {
+        this.percentageDepositReturnedAfterMonthsSeries = response.data;
+      });
+    },
     fetchAllSeries() {
       this.fetchDepositFlow();
       this.fetchDepositsStatus();
+      this.fetchPercentageDepositReturnedAfterMonths();
     },
     fetchGracePeriodDependants() {
       this.fetchDepositsStatus();
@@ -273,7 +353,7 @@ export default {
       <Card title="Deposit Flow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptions" :series="depositFlowSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptionsDateSeries" :series="depositFlowSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -283,6 +363,15 @@ export default {
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="depositsStatusChartOptions" :series="depositsStatusSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Average Percentage of deposit returned">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptionsNumericSeries" :series="percentageDepositReturnedAfterMonthsSeries"></apexchart>
           </div>
         </div>
       </Card>

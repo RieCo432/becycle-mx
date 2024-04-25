@@ -759,4 +759,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getPercentageDepositReturnedAfterMonths(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/return-percentage', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
