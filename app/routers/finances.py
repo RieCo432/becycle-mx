@@ -91,14 +91,16 @@ async def get_deposit_return_percentage(
 
 @finances.get("/finances/deposits/required-float/worst-case", dependencies=[Depends(dep.get_current_active_user)])
 async def get_worst_case_required_deposit_float(
+        interval: int,
         db: Session = Depends(dep.get_db)
 ) -> dict[str, int]:
-    return crud.get_worst_case_required_deposit_float(db=db)
+    return crud.get_worst_case_required_deposit_float(db=db, interval=interval)
 
 
 @finances.get("/finances/deposits/required-float/realistic", dependencies=[Depends(dep.get_current_active_user)])
 async def get_worst_case_required_deposit_float(
+        interval: int,
         grace_period: int,
         db: Session = Depends(dep.get_db)
 ) -> dict[str, int]:
-    return crud.get_realistic_required_deposit_float(db=db, grace_period=grace_period)
+    return crud.get_realistic_required_deposit_float(db=db, interval=interval, grace_period=grace_period)

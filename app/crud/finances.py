@@ -459,8 +459,10 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
     ]
 
 
-def get_worst_case_required_deposit_float(db: Session) -> dict[str: int]:
-    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db, interval=7))
+def get_worst_case_required_deposit_float(db: Session, interval: int) -> dict[str: int]:
+    if interval == 0:
+        interval = 1
+    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db, interval=interval))
 
     all_unreturned_contracts = [
         _ for _ in db.scalars(
@@ -484,7 +486,9 @@ def get_worst_case_required_deposit_float(db: Session) -> dict[str: int]:
     }
 
 
-def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict[str: int]:
+def get_realistic_required_deposit_float(db: Session, interval: int, grace_period: int) -> dict[str: int]:
+    if interval == 0:
+        interval = 1
     all_returned_contracts = [
         _ for _ in db.scalars(
             select(models.Contract)
@@ -496,7 +500,7 @@ def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict
                                         all_returned_contracts]
     mean_days_returned_after_contract_end = np.mean(days_returned_after_contract_end)
 
-    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db, interval=7))
+    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db, interval=interval))
 
     all_unreturned_contracts = [
         _ for _ in db.scalars(
@@ -524,6 +528,3 @@ def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict
         "required": estimated_return_deposits_amount,
         "excess": total_returnable_deposit_amount - estimated_return_deposits_amount
     }
-
-
-
