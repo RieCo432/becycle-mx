@@ -774,4 +774,12 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getRealisticRequiredDepositFloat(gracePeriod) {
+    return axiosClient.get('/finances/deposits/required-float/realistic', {
+      params: {
+        grace_period: gracePeriod,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

@@ -13,7 +13,7 @@ export default {
   data() {
     return {
       interval: 28,
-      gracePeriod: 28,
+      gracePeriod: 184,
       startDate: null,
       endDate: null,
       areaChartOptionsDateSeries: {
@@ -266,10 +266,73 @@ export default {
           },
         },
       },
+      realisticRequiredDepositFloatChartOptions: {
+        labels: [],
+        colors: ['#4669FA', '#FA916B'],
+        dataLabels: {
+          enabled: true,
+          formatter: function(value, opt) {
+            return `\u00A3${opt.w.config.series[opt.seriesIndex]}`;
+          },
+        },
+        legend: {
+          position: 'bottom',
+          fontSize: '16px',
+          fontFamily: 'Inter',
+          fontWeight: 400,
+          labels: {
+            colors: ['#CBD5E1'],
+          },
+        },
+        chart: {
+          toolbar: {
+            show: false,
+          },
+        },
+        plotOptions: {
+          pie: {
+            donut: {
+              labels: {
+                show: true,
+                name: {
+                  show: true,
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  colors: ['#dddddd'],
+                  formatter: (s) => (s.replaceAll('_', ' ')),
+                },
+                value: {
+                  show: true,
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#dddddd',
+                  formatter: (s) => (s.replace('', '\u00A3')),
+                },
+                total: {
+                  show: true,
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Inter',
+                  color: '#dddddd',
+                  formatter: (w) => {
+                    console.log(w);
+                    return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
+                      return a+b;
+                    })}`;
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       depositFlowSeries: [],
       depositsStatusSeries: [],
       percentageDepositReturnedAfterMonthsSeries: [],
       worstCaseRequiredDepositFloatSeries: [],
+      realisticRequiredDepositFloatSeries: [],
     };
   },
   methods: {
@@ -313,14 +376,22 @@ export default {
         this.worstCaseRequiredDepositFloatSeries = Object.values(response.data);
       });
     },
+    fetchRealisticRequiredDepositFloatSeries() {
+      requests.getRealisticRequiredDepositFloat(this.gracePeriod).then((response) => {
+        this.realisticRequiredDepositFloatChartOptions.labels.splice(0, this.realisticRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
+        this.realisticRequiredDepositFloatSeries = Object.values(response.data);
+      });
+    },
     fetchAllSeries() {
       this.fetchDepositFlow();
       this.fetchDepositsStatus();
       this.fetchPercentageDepositReturnedAfterMonths();
       this.fetchWorstCaseRequiredDepositFloatSeries();
+      this.fetchRealisticRequiredDepositFloatSeries();
     },
     fetchGracePeriodDependants() {
       this.fetchDepositsStatus();
+      this.fetchRealisticRequiredDepositFloatSeries();
     },
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
@@ -455,6 +526,15 @@ export default {
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="worstCaseRequiredDepositFloatChartOptions" :series="worstCaseRequiredDepositFloatSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Estimate: Everyone returns normally">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="realisticRequiredDepositFloatChartOptions" :series="realisticRequiredDepositFloatSeries"></apexchart>
           </div>
         </div>
       </Card>
