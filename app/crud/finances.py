@@ -392,9 +392,9 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
         _ for _ in db.scalars(
             select(models.Contract)
             .where(
-                (models.Contract.startDate >= start_date)
-                & (models.Contract.startDate < end_date)
-                & (models.Contract.returnedDate != None)
+                (models.Contract.returnedDate != None)
+                & (models.Contract.returnedDate >= start_date)
+                & (models.Contract.returnedDate <= end_date)
             )
         )
     ]
