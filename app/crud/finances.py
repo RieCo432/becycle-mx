@@ -402,21 +402,21 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
     percentages_of_deposit_returned_by_contract_age = {}
 
     for contract in all_returned_contracts_in_period:
-        age_of_contract = contract.returnedDate - contract.startDate
-        rough_age_of_contract = age_of_contract.days // interval
+        days_after_contract_end = (contract.returnedDate - contract.endDate).days
+        number_of_intervals_after_contract_end = days_after_contract_end // interval
 
-        if rough_age_of_contract not in percentages_of_deposit_returned_by_contract_age:
-            percentages_of_deposit_returned_by_contract_age[rough_age_of_contract] = []
+        if number_of_intervals_after_contract_end not in percentages_of_deposit_returned_by_contract_age:
+            percentages_of_deposit_returned_by_contract_age[number_of_intervals_after_contract_end] = []
 
-        percentages_of_deposit_returned_by_contract_age[rough_age_of_contract].append(int(100 * contract.depositAmountReturned / contract.depositAmountCollected))
+        percentages_of_deposit_returned_by_contract_age[number_of_intervals_after_contract_end].append(int(100 * contract.depositAmountReturned / contract.depositAmountCollected))
 
     return [schemas.DataSeries(
         name="Average Percentage of Deposit Returned by Age of Contract",
         data=[
             [
-                int(age * interval),
-                np.mean(percentages_of_deposit_returned_by_contract_age[age])
-            ] for age in sorted(percentages_of_deposit_returned_by_contract_age.keys())]
+                int(number_of_intervals_after_contract_end * interval),
+                np.mean(percentages_of_deposit_returned_by_contract_age[number_of_intervals_after_contract_end])
+            ] for number_of_intervals_after_contract_end in sorted(percentages_of_deposit_returned_by_contract_age.keys())]
     )]
 
 
