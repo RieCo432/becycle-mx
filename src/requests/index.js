@@ -769,14 +769,18 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getWorstCaseRequiredDepositFloat() {
+  getWorstCaseRequiredDepositFloat(interval) {
     return axiosClient.get('/finances/deposits/required-float/worst-case', {
+      params: {
+        interval: interval,
+      },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getRealisticRequiredDepositFloat(gracePeriod) {
+  getRealisticRequiredDepositFloat(interval, gracePeriod) {
     return axiosClient.get('/finances/deposits/required-float/realistic', {
       params: {
+        interval: interval,
         grace_period: gracePeriod,
       },
       headers: credentialsStore.getApiRequestHeader(),

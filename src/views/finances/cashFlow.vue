@@ -12,7 +12,7 @@ export default {
   },
   data() {
     return {
-      interval: 28,
+      interval: 63,
       gracePeriod: 184,
       startDate: null,
       endDate: null,
@@ -371,13 +371,13 @@ export default {
       });
     },
     fetchWorstCaseRequiredDepositFloatSeries() {
-      requests.getWorstCaseRequiredDepositFloat().then((response) => {
+      requests.getWorstCaseRequiredDepositFloat(this.interval).then((response) => {
         this.worstCaseRequiredDepositFloatChartOptions.labels.splice(0, this.worstCaseRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
         this.worstCaseRequiredDepositFloatSeries = Object.values(response.data);
       });
     },
     fetchRealisticRequiredDepositFloatSeries() {
-      requests.getRealisticRequiredDepositFloat(this.gracePeriod).then((response) => {
+      requests.getRealisticRequiredDepositFloat(this.interval, this.gracePeriod).then((response) => {
         this.realisticRequiredDepositFloatChartOptions.labels.splice(0, this.realisticRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
         this.realisticRequiredDepositFloatSeries = Object.values(response.data);
       });
