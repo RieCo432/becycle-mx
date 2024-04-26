@@ -78,10 +78,9 @@ export default {
           },
         },
       },
-      areaChartOptionsNumericSeries: {
+      depositReturnPercentageMixedChart: {
         chart: {
-          type: 'area',
-          height: 300,
+          type: 'line',
         },
         theme: {
           mode: 'light',
@@ -93,11 +92,10 @@ export default {
           curve: 'smooth',
         },
         fill: {
-          type: 'gradient',
-          gradient: {
-            opacityFrom: 0.6,
-            opacityTo: 0.8,
-          },
+          type: 'solid',
+        },
+        markers: {
+          size: [6, 0],
         },
         legend: {
           position: 'top',
@@ -108,6 +106,8 @@ export default {
         },
         tooltip: {
           theme: 'dark',
+          shared: false,
+          intersect: true,
         },
         xaxis: {
           show: true,
@@ -375,7 +375,7 @@ export default {
       <Card title="Average Percentage of deposit returned">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptionsNumericSeries" :series="percentageDepositReturnedAfterMonthsSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="line" :options="depositReturnPercentageMixedChart" :series="percentageDepositReturnedAfterMonthsSeries"></apexchart>
           </div>
         </div>
       </Card>
