@@ -1,3 +1,5 @@
+from math import ceil
+
 import numpy as np
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -380,7 +382,7 @@ def get_deposits_status(db: Session, grace_period: int, start_date: date | None,
     return deposits_status
 
 
-def get_deposit_return_percentage(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeriesWithType]:
+def get_percentages_of_deposit_returned_by_contract_age(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[list[int]]:
     if start_date is None:
         oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
         start_date = oldest_contract.startDate
@@ -406,8 +408,13 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
         days_after_contract_end = (contract.returnedDate - contract.endDate).days
         number_of_intervals_after_contract_end = days_after_contract_end // interval
 
-        percentages_of_deposit_returned_by_contract_age.append([number_of_intervals_after_contract_end * interval, int(100 * contract.depositAmountReturned / contract.depositAmountCollected)])
+        percentages_of_deposit_returned_by_contract_age.append([int(number_of_intervals_after_contract_end * interval),
+                                                                int(100 * contract.depositAmountReturned / contract.depositAmountCollected)])
 
+    return percentages_of_deposit_returned_by_contract_age
+
+
+def get_deposit_return_percentage_trendline(percentages_of_deposit_returned_by_contract_age: list[list[int]]) -> dict[str, float]:
     x_raw = np.array([xy[0] for xy in percentages_of_deposit_returned_by_contract_age])
     y_raw = np.array([xy[1] for xy in percentages_of_deposit_returned_by_contract_age])
 
@@ -420,7 +427,23 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
     a = reg.coef_[0, 0]
     c = reg.intercept_[0]
 
-    trendline = [[int(x), min([int(a*x+c), 100])] for x in sorted(list(set(x_raw)))]
+    return {"a": a, "c": c}
+
+
+def get_deposit_return_percentage(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeriesWithType]:
+    if start_date is None:
+        oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+        start_date = oldest_contract.startDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
+    if interval == 0:
+        interval = 1
+
+    percentages_of_deposit_returned_by_contract_age = get_percentages_of_deposit_returned_by_contract_age(db=db, interval=interval, start_date=start_date, end_date=end_date)
+
+    trendline = get_deposit_return_percentage_trendline(percentages_of_deposit_returned_by_contract_age)
+
+    trendline_samples = [[int(x), min([int(trendline["a"]*x+trendline["c"]), 100])] for x in sorted(list(set([xy[0] for xy in percentages_of_deposit_returned_by_contract_age])))]
 
     return [
         schemas.DataSeriesWithType(
@@ -431,8 +454,34 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
         schemas.DataSeriesWithType(
             name="Trendline",
             type='line',
-            data=trendline
+            data=trendline_samples
         )
     ]
+
+
+def get_worst_case_required_deposit_float(db: Session) -> dict[str: int]:
+    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db, interval=7))
+
+    all_unreturned_contracts = [
+        _ for _ in db.scalars(
+            select(models.Contract)
+            .where(models.Contract.returnedDate == None)
+        )
+    ]
+
+    total_returnable_deposit_amount = 0
+    estimated_return_deposits_amount = 0
+
+    for contract in all_unreturned_contracts:
+        total_returnable_deposit_amount += contract.depositAmountCollected
+        days_after_end_date = (datetime.utcnow().date() - contract.endDate).days
+        percentage = (trendline["a"] * days_after_end_date + trendline["c"]) / 100.0
+        estimated_return_deposits_amount += int(ceil(contract.depositAmountCollected * percentage))
+
+    return {
+        "required": estimated_return_deposits_amount,
+        "excess": total_returnable_deposit_amount - estimated_return_deposits_amount
+    }
+
 
 
