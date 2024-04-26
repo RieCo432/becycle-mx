@@ -484,4 +484,46 @@ def get_worst_case_required_deposit_float(db: Session) -> dict[str: int]:
     }
 
 
+def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict[str: int]:
+    all_returned_contracts = [
+        _ for _ in db.scalars(
+            select(models.Contract)
+            .where(models.Contract.returnedDate != None)
+        )
+    ]
+
+    days_returned_after_contract_end = [(contract.returnedDate - contract.endDate).days for contract in
+                                        all_returned_contracts]
+    mean_days_returned_after_contract_end = np.mean(days_returned_after_contract_end)
+
+    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db, interval=7))
+
+    all_unreturned_contracts = [
+        _ for _ in db.scalars(
+            select(models.Contract)
+            .where(models.Contract.returnedDate == None)
+        )
+    ]
+
+    total_returnable_deposit_amount = 0
+    estimated_return_deposits_amount = 0
+
+    for contract in all_unreturned_contracts:
+        days_after_contract_end = (datetime.utcnow().date() - contract.endDate).days
+        if days_after_contract_end > grace_period:
+            continue
+        total_returnable_deposit_amount += contract.depositAmountCollected
+        returned_days_after_end = max([
+            mean_days_returned_after_contract_end,
+            days_after_contract_end
+        ])
+        percentage = (trendline["a"] * returned_days_after_end + trendline["c"]) / 100.0
+        estimated_return_deposits_amount += int(ceil(contract.depositAmountCollected * percentage))
+
+    return {
+        "required": estimated_return_deposits_amount,
+        "excess": total_returnable_deposit_amount - estimated_return_deposits_amount
+    }
+
+
 
