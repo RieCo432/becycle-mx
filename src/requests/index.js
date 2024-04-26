@@ -769,4 +769,9 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getWorstCaseRequiredDepositFloat() {
+    return axiosClient.get('/finances/deposits/required-float/worst-case', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
