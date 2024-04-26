@@ -63,6 +63,14 @@ class Contract(Base):
             content=email_html_content
         )
 
+    def send_expiry_reminder_email(self):
+        email_html_content = services.email_helpers.build_contract_expiry_reminder_email(self)
+        services.email_helpers.send_email(
+            destination=self.client.emailAddress,
+            subject="BECYCLE Contract Expiry Reminder",
+            content=email_html_content
+        )
+
     def send_return_email(self):
         email_html_content = services.email_helpers.build_contract_returned_email(self)
         services.email_helpers.send_email(
