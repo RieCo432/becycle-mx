@@ -53,22 +53,28 @@ export default {
           type: 'datetime',
           labels: {
             style: {
-              color: '#ffffff',
+              colors: '#dddddd',
             },
           },
           axisTicks: {
-            color: '#ffffff',
+            color: '#dddddd',
           },
         },
         yaxis: {
           show: true,
           labels: {
             style: {
-              color: '#ffffff',
+              colors: '#dddddd',
             },
           },
           axisTicks: {
-            color: '#ffffff',
+            color: '#dddddd',
+          },
+          title: {
+            text: 'Number of Contracts',
+            style: {
+              color: '#dddddd',
+            },
           },
         },
       },

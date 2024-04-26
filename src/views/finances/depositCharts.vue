@@ -53,22 +53,29 @@ export default {
           type: 'datetime',
           labels: {
             style: {
-              color: '#ffffff',
+              colors: '#dddddd',
             },
           },
           axisTicks: {
-            color: '#ffffff',
+            color: '#dddddd',
           },
         },
         yaxis: {
           show: true,
           labels: {
             style: {
-              color: '#ffffff',
+              colors: ['#dddddd'],
             },
+            formatter: (val) => (`\u00A3${val}`),
           },
           axisTicks: {
-            color: '#ffffff',
+            color: '#dddddd',
+          },
+          title: {
+            text: 'Value of Deposits',
+            style: {
+              color: '#dddddd',
+            },
           },
         },
       },
