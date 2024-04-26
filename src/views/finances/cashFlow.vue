@@ -52,7 +52,7 @@ export default {
           type: 'datetime',
           labels: {
             style: {
-              colors: ['#dddddd'],
+              colors: '#dddddd',
             },
           },
           axisTicks: {
@@ -114,14 +114,14 @@ export default {
           type: 'numeric',
           labels: {
             style: {
-              color: '#dddddd',
+              colors: '#dddddd',
             },
           },
           axisTicks: {
             colors: ['#dddddd'],
           },
           title: {
-            text: 'Days After Contract Start',
+            text: 'Days Before/After Contract End',
             style: {
               color: '#dddddd',
             },
@@ -175,7 +175,7 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  colors: ['#CBD5E1'],
+                  colors: ['#dddddd'],
                   formatter: (s) => (s.replaceAll('_', ' ')),
                 },
                 value: {
@@ -183,7 +183,7 @@ export default {
                   fontSize: '16px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  colors: ['#CBD5E1'],
+                  color: '#dddddd',
                   formatter: (s) => (s.replace('', '\u00A3')),
                 },
                 total: {
@@ -191,8 +191,12 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  style: {
-                    colors: ['#CBD5E1'],
+                  color: '#dddddd',
+                  formatter: (w) => {
+                    console.log(w);
+                    return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
+                      return a+b;
+                    })}`;
                   },
                 },
               },
