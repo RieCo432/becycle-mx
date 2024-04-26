@@ -35,3 +35,7 @@ class BikeLeaderboard(Bike):
 class DataSeries(BaseModel):
     name: str
     data: list[list]
+
+
+class DataSeriesWithType(DataSeries):
+    type: str

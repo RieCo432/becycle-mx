@@ -1,7 +1,8 @@
+import numpy as np
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, select
-import numpy as np
+from sklearn import linear_model
 
 import app.models as models
 import app.schemas as schemas
@@ -379,7 +380,7 @@ def get_deposits_status(db: Session, grace_period: int, start_date: date | None,
     return deposits_status
 
 
-def get_deposit_return_percentage(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+def get_deposit_return_percentage(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeriesWithType]:
     if start_date is None:
         oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
         start_date = oldest_contract.startDate
@@ -399,24 +400,39 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
         )
     ]
 
-    percentages_of_deposit_returned_by_contract_age = {}
+    percentages_of_deposit_returned_by_contract_age = []
 
     for contract in all_returned_contracts_in_period:
         days_after_contract_end = (contract.returnedDate - contract.endDate).days
         number_of_intervals_after_contract_end = days_after_contract_end // interval
 
-        if number_of_intervals_after_contract_end not in percentages_of_deposit_returned_by_contract_age:
-            percentages_of_deposit_returned_by_contract_age[number_of_intervals_after_contract_end] = []
+        percentages_of_deposit_returned_by_contract_age.append([number_of_intervals_after_contract_end * interval, int(100 * contract.depositAmountReturned / contract.depositAmountCollected)])
 
-        percentages_of_deposit_returned_by_contract_age[number_of_intervals_after_contract_end].append(int(100 * contract.depositAmountReturned / contract.depositAmountCollected))
+    x_raw = np.array([xy[0] for xy in percentages_of_deposit_returned_by_contract_age])
+    y_raw = np.array([xy[1] for xy in percentages_of_deposit_returned_by_contract_age])
 
-    return [schemas.DataSeries(
-        name="Average Percentage of Deposit Returned by Age of Contract",
-        data=[
-            [
-                int(number_of_intervals_after_contract_end * interval),
-                np.mean(percentages_of_deposit_returned_by_contract_age[number_of_intervals_after_contract_end])
-            ] for number_of_intervals_after_contract_end in sorted(percentages_of_deposit_returned_by_contract_age.keys())]
-    )]
+    X = x_raw[:, np.newaxis]
+    y = y_raw[:, np.newaxis]
+
+    reg = linear_model.LinearRegression()
+
+    reg.fit(X, y)
+    a = reg.coef_[0, 0]
+    c = reg.intercept_[0]
+
+    trendline = [[int(x), min([int(a*x+c), 100])] for x in sorted(list(set(x_raw)))]
+
+    return [
+        schemas.DataSeriesWithType(
+            name="Percentage of Deposit Returned by Age of Contract",
+            type='scatter',
+            data=percentages_of_deposit_returned_by_contract_age
+        ),
+        schemas.DataSeriesWithType(
+            name="Trendline",
+            type='line',
+            data=trendline
+        )
+    ]
 
 

@@ -85,5 +85,5 @@ async def get_deposit_return_percentage(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DataSeries]:
+) -> list[schemas.DataSeriesWithType]:
     return crud.get_deposit_return_percentage(db=db, interval=interval, start_date=start, end_date=end)
