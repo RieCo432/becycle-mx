@@ -67,3 +67,11 @@ class Appointment(Base):
             subject="Your Appointment has been cancelled as requested",
             content=email_html_content
         )
+
+    def send_reminder_email(self):
+        email_html_content = services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime)
+        services.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Appointment Reminder",
+            content=email_html_content
+        )

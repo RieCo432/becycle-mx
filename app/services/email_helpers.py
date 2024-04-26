@@ -79,6 +79,25 @@ def build_appointment_confirmation_email(appointment_title: str, appointment_sta
             ))
 
 
+def build_appointment_reminder_email(appointment_title: str, appointment_start_datetime: datetime):
+    return ("<html>"
+            "   <body>"
+            "       <h2>Please do not forget to attend your BECYCLE Appointment</h2>"
+            "       <p>We are looking forward to seeing on {:s}, the {:d} {:s} {:d} at {:02d}:{:02d} for your appointment: {}!</p>"
+            "       <p>If you wish to cancel your appointment, "
+            "please head to <a href='https://becycle.uk/'>becycle.uk</a>, login as a client and go to your profile.</p>"
+            "   </body>"
+            "</html>".format(
+                weekdays[appointment_start_datetime.weekday()],
+                appointment_start_datetime.day,
+                months[appointment_start_datetime.month],
+                appointment_start_datetime.year,
+                appointment_start_datetime.hour,
+                appointment_start_datetime.minute,
+                appointment_title
+            ))
+
+
 def build_appointment_request_received_email(appointment_title: str, appointment_start_datetime: datetime):
     return ("<html>"
             "   <body>"
