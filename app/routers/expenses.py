@@ -23,7 +23,7 @@ expenses = APIRouter(
 @expenses.post("/expenses")
 async def post_expense(
         expense_type: Annotated[str, Body(embed=True)],
-        amount: Annotated[int, Body(embed=True)],
+        amount: Annotated[float, Body(embed=True)],
         notes: Annotated[str, Body(embed=True)],
         expense_date: Annotated[date, Body(embed=True)],
         receipt_file: UploadFile,
