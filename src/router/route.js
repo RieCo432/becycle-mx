@@ -176,6 +176,15 @@ const routes = [
         component: () => import('@/views/finances/newExpense.vue'),
       },
       {
+        path: '/finances/expenses/manage',
+        name: 'Manage Expenses',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/expenses/manage',
+        },
+        component: () => import('@/views/finances/manageExpenses.vue'),
+      },
+      {
         path: '/admin/users',
         name: 'User Management',
         meta: {

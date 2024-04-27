@@ -142,6 +142,12 @@ export const topMenu = [
         show: ['user'],
       },
       {
+        childtitle: 'Manage Expenses',
+        childicon: 'heroicons-outline:arrows-right-left',
+        childlink: '/finances/expenses/manage',
+        show: ['user'],
+      },
+      {
         childtitle: 'Deposit Charts',
         childicon: 'heroicons-outline:presentation-chart-line',
         childlink: '/finances/deposit-charts',

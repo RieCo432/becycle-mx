@@ -805,4 +805,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getExpenses() {
+    return axiosClient.get('/expenses', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchExpenseTransferred(expenseId) {
+    return axiosClient.patch(`/expenses/${expenseId}/transfer`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
