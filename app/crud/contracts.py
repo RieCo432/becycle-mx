@@ -230,3 +230,24 @@ def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: 
     db.commit()
 
     return contract
+
+
+def get_contracts_for_expiry_email(db: Session) -> list[models.Contract]:
+    ending_before = datetime.utcnow().date() + relativedelta(days=14)
+    return [
+        _ for _ in db.scalars(
+            select(models.Contract)
+            .where(
+                (models.Contract.returnedDate == None)
+                & (models.Contract.expiryReminderSent == False)
+                & (models.Contract.endDate < ending_before)
+            )
+        )
+    ]
+
+
+def send_expiry_emails(db: Session):
+    for contract in get_contracts_for_expiry_email(db=db):
+        contract.send_expiry_reminder_email()
+        contract.expiryReminderSent = True
+    db.commit()

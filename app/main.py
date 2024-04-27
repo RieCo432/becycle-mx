@@ -5,8 +5,9 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 import app.routers as routers
-from app.database.db import engine, Base
+from app.database.db import engine, Base, SessionLocal
 from app.dependencies import get_db
+import app.crud as crud
 
 Base.metadata.create_all(bind=engine)
 
@@ -41,6 +42,10 @@ app.include_router(routers.maps)
 app.include_router(routers.surveys)
 app.include_router(routers.admin)
 
+db = SessionLocal()
+crud.send_expiry_emails(db=db)
+crud.send_appointment_reminders(db=db)
+db.close()
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
