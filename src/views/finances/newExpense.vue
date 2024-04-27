@@ -104,7 +104,7 @@ export default {
             <div class="col-span-6">
               <Textinput
                   label="Amount (&pound;)"
-                  type="number"
+                  type="text"
                   placeholder="12.34"
                   name="amount"
                   v-model="amount"
