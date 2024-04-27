@@ -3,7 +3,7 @@ from datetime import datetime, date
 from uuid import uuid4
 
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean, LargeBinary
+from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean, LargeBinary, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import app.services as services
@@ -24,7 +24,7 @@ class Expense(Base):
     expenseDate: Mapped[date] = mapped_column("expenseDate", Date, nullable=False, quote=False)
     transferDate: Mapped[date] = mapped_column("transferDate", Date, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
-    amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)
+    amount: Mapped[float] = mapped_column("amount", Float, nullable=False, quote=False)
 
     type: Mapped[str] = mapped_column("type", Text, nullable=False, quote=False)
 

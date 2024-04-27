@@ -43,3 +43,8 @@ async def get_expense_receipt(
         db: Session = Depends(dep.get_db)
 ) -> FileResponse:
     return FileResponse(**crud.get_expense_receipt_file(db=db, expense_id=expense_id))
+
+
+@expenses.get("/expenses/types")
+async def get_expense_types() -> list[str]:
+    return ["consumables", "equipment", "merchandise", "cash", "mixed", "other"]

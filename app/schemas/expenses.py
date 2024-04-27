@@ -5,7 +5,7 @@ from uuid import UUID
 
 
 class ExpenseCreate(BaseModel):
-    amount: int
+    amount: float
     type: str
     notes: str
     expenseDate: date
