@@ -6,6 +6,7 @@ from uuid import UUID
 
 class ExpenseCreate(BaseModel):
     amount: int
+    type: str
     notes: str
     expenseDate: date
 

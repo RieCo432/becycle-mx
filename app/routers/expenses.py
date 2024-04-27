@@ -21,6 +21,7 @@ expenses = APIRouter(
 
 @expenses.post("/expenses")
 async def post_expense(
+        expense_type: Annotated[str, Body(embed=True)],
         amount: Annotated[int, Body(embed=True)],
         notes: Annotated[str, Body(embed=True)],
         expense_date: Annotated[date, Body(embed=True)],
@@ -29,6 +30,7 @@ async def post_expense(
         db: Session = Depends(dep.get_db)
 ) -> schemas.Expense:
     return await crud.create_expense(db=db, expense_user=expense_user, expense_data=schemas.ExpenseCreate(
+        type=expense_type,
         amount=amount,
         notes=notes,
         expenseDate=expense_date

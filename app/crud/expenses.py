@@ -11,6 +11,7 @@ from fastapi import UploadFile
 
 async def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseCreate, receipt_file: UploadFile) -> models.Expense:
     new_expense = models.Expense(
+        type=expense_data.type,
         notes=expense_data.notes,
         expenseUserId=expense_user.id,
         expenseDate=expense_data.expenseDate,

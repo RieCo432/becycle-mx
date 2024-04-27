@@ -26,6 +26,8 @@ class Expense(Base):
 
     amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)
 
+    type: Mapped[str] = mapped_column("type", Text, nullable=False, quote=False)
+
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
 
     receiptFile: Mapped[bytes] = mapped_column("receiptFile", LargeBinary, nullable=False, quote=False)
