@@ -115,6 +115,16 @@ async def get_current_admin_user(current_user: Annotated[models.User, Depends(ge
     return current_user
 
 
+async def get_current_treasurer_user(current_user: Annotated[models.User, Depends(get_current_active_user)]) -> models.User:
+    if not current_user.treasurer:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"description": "Treasurer privileges are required for this action!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return current_user
+
+
 async def get_working_user(
         working_username: str = Body("working_username"),
         working_user_password_or_pin: str = Body("working_user_password_or_pin"),

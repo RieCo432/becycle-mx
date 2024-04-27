@@ -9,6 +9,7 @@ from typing import Annotated
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
+import app.models as models
 
 from uuid import UUID
 
@@ -48,3 +49,19 @@ async def get_expense_receipt(
 @expenses.get("/expenses/types")
 async def get_expense_types() -> list[str]:
     return ["consumables", "equipment", "merchandise", "cash", "mixed", "other"]
+
+
+@expenses.get("/expenses")
+async def get_expenses(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.Expense]:
+    return crud.get_expenses(db=db)
+
+
+@expenses.patch("/expenses/{expense_id}/transfer")
+async def patch_expense_transferred(
+        expense_id: UUID,
+        db: Session = Depends(dep.get_db),
+        treasurer_user: models.User = Depends(dep.get_current_treasurer_user)
+) -> schemas.Expense:
+    return crud.patch_expense_transferred(db=db, expense_id=expense_id, treasurer_user=treasurer_user)
