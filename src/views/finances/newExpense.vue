@@ -36,6 +36,7 @@ export default {
     const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: false});
 
     const newExpenseSchemas = yup.object().shape({
+      inOrOut: yup.string().required().oneOf(['in', 'out']),
       type: yup.string().required(),
       notes: yup.string().required(),
       amount: yup.number().required(),
@@ -47,14 +48,21 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: type, errorMessage: typeError} = useField('type');
-    const {value: notes, errorMessage: notesError} = useField('notes');
-    const {value: amount, errorMessage: amountError} = useField('amount');
-    const {value: expenseDate, errorMessage: expenseDateError} = useField('expenseDate');
+    const {value: inOrOut, errorMessage: inOrOutError, resetField: resetInOrOut} = useField('inOrOut');
+    const {value: type, errorMessage: typeError, resetField: resetType} = useField('type');
+    const {value: notes, errorMessage: notesError, resetField: resetNotes} = useField('notes');
+    const {value: amount, errorMessage: amountError, resetField: resetAmount} = useField('amount');
+    const {value: expenseDate, errorMessage: expenseDateError, resetField: resetExpenseDate} = useField('expenseDate');
 
     const submitNewExpense = handleSubmit(() => {
-      requests.postNewExpense(amount.value, type.value, notes.value, expenseDate.value, files.value[0]).then((response) => {
+      requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value, type.value, notes.value, expenseDate.value, files.value[0]).then((response) => {
         toast.success('Expense Submitted', {timeout: 2000});
+        resetInOrOut();
+        resetType();
+        resetNotes();
+        resetAmount();
+        resetExpenseDate();
+        files.value = [];
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
@@ -65,6 +73,8 @@ export default {
       getInputProps,
       ...rest,
       files,
+      inOrOut,
+      inOrOutError,
       type,
       typeError,
       notes,
@@ -79,6 +89,16 @@ export default {
   data() {
     return {
       expenseTypes: [],
+      inOrOutOptions: [
+        {
+          label: 'OUT of the bank account',
+          value: 'out',
+        },
+        {
+          label: 'INTO the bank account',
+          value: 'in',
+        },
+      ],
     };
   },
   created() {
@@ -109,6 +129,15 @@ export default {
                   name="amount"
                   v-model="amount"
                   :error="amountError"
+              />
+            </div>
+            <div class="col-span-6">
+              <Select
+                  :options="inOrOutOptions"
+                  label="Is Money going INTO or OUT OF the bank account?"
+                  v-model="inOrOut"
+                  name="inOrOut"
+                  :error="inOrOutError"
               />
             </div>
             <div class="col-span-6">
