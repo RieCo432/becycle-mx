@@ -1,6 +1,7 @@
 from datetime import date
 
 from fastapi import APIRouter, Depends, UploadFile, Body
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from typing import Annotated
@@ -8,6 +9,8 @@ from typing import Annotated
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
+
+from uuid import UUID
 
 expenses = APIRouter(
     tags=["expenses"],
@@ -30,3 +33,11 @@ async def post_expense(
         notes=notes,
         expenseDate=expense_date
     ), receipt_file=receipt_file)
+
+
+@expenses.get("/expenses/{expense_id}/receipt")
+async def get_expense_receipt(
+        expense_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> FileResponse:
+    return FileResponse(**crud.get_expense_receipt_file(db=db, expense_id=expense_id))

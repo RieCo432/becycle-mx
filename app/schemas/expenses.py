@@ -16,6 +16,7 @@ class Expense(ExpenseCreate):
     treasurerUser: User | None
     transferDate: date | None
     id: UUID
+    receiptContentType: str
 
 
 
