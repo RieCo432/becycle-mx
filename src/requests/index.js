@@ -786,4 +786,23 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  postNewExpense(amount, type, notes, expenseDate, receiptFile) {
+    return axiosClient.post('/expenses', {
+      amount: amount,
+      expense_type: type,
+      notes: notes,
+      receipt_file: receiptFile,
+      expense_date: expenseDate,
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  getExpenseTypes() {
+    return axiosClient.get('/expenses/types', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

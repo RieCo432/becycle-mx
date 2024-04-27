@@ -136,6 +136,12 @@ export const topMenu = [
         show: ['user'],
       },
       {
+        childtitle: 'Submit Expense',
+        childicon: 'heroicons-outline:document-plus',
+        childlink: '/finances/expenses/submit',
+        show: ['user'],
+      },
+      {
         childtitle: 'Deposit Charts',
         childicon: 'heroicons-outline:presentation-chart-line',
         childlink: '/finances/deposit-charts',
