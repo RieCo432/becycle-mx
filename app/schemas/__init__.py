@@ -12,3 +12,4 @@ from .statistics import *
 from .surveys import *
 from .tokens import *
 from .user import *
+from .expenses import *

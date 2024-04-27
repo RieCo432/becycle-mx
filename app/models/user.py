@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
 from .contract import Contract
 from .depositExchange import DepositExchange
+from .expense import Expense
 
 
 class User(Base):
@@ -31,6 +32,10 @@ class User(Base):
 
     depositExchangesReceived: Mapped[List[DepositExchange]] = relationship("DepositExchange", foreign_keys=[DepositExchange.toUserId], back_populates="toUser")
     depositExchangesGiven: Mapped[List[DepositExchange]] = relationship("DepositExchange", foreign_keys=[DepositExchange.fromUserId], back_populates="fromUser")
+
+    expenses: Mapped[List["Expense"]] = relationship("Expense", foreign_keys=[Expense.expenseUserId], back_populates="expenseUser")
+    transfers: Mapped[List["Expense"]] = relationship("Expense", foreign_keys=[Expense.treasurerUserId],
+                                                     back_populates="treasurerUser")
 
     def get_deposit_bearer_balance(self):
         contract_balance = sum([contract.depositAmountCollected for contract in self.depositCollectedContracts]) - sum(

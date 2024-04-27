@@ -41,6 +41,8 @@ app.include_router(routers.statistics)
 app.include_router(routers.maps)
 app.include_router(routers.surveys)
 app.include_router(routers.admin)
+app.include_router(routers.expenses)
+
 
 db = SessionLocal()
 crud.send_expiry_emails(db=db)

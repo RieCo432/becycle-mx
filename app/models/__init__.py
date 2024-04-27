@@ -8,3 +8,4 @@ from .depositExchange import *
 from .surveys import *
 from .roadSegment import *
 from .admin import *
+from .expense import *
