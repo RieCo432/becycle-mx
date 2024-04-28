@@ -815,4 +815,10 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getExpenseReceipt(expenseId) {
+    return axiosClient.get(`/expenses/${expenseId}/receipt`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      responseType: 'blob',
+    });
+  },
 };
