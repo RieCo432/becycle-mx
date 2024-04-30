@@ -528,3 +528,124 @@ def get_realistic_required_deposit_float(db: Session, interval: int, grace_perio
         "required": estimated_return_deposits_amount,
         "excess": total_returnable_deposit_amount - estimated_return_deposits_amount
     }
+
+
+def get_actual_cashflow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+    if start_date is None:
+        oldest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate).first()
+        start_date = oldest_expense.transferDate
+    if end_date is None:
+        newest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate.desc()).first()
+        end_date = newest_expense.transferDate
+    if interval == 0:
+        interval = 1
+
+    interval_start_date = start_date
+    interval_end_date = start_date + relativedelta(days=interval)
+
+    expense_series = []
+    income_series = []
+    diff_series = []
+
+    while interval_start_date <= end_date:
+        expenses_in_interval = db.scalar(
+            select(func.coalesce(func.sum(models.Expense.amount), 0))
+            .where(
+                (models.Expense.transferDate >= interval_start_date)
+                & (models.Expense.transferDate < interval_end_date)
+                & (models.Expense.amount < 0)
+            )
+        )
+
+        income_in_interval = db.scalar(
+            select(func.coalesce(func.sum(models.Expense.amount), 0))
+            .where(
+                (models.Expense.transferDate >= interval_start_date)
+                & (models.Expense.transferDate < interval_end_date)
+                & (models.Expense.amount > 0)
+            )
+        )
+
+        expense_series.append([interval_start_date, expenses_in_interval])
+        income_series.append([interval_start_date, income_in_interval])
+        diff_series.append([interval_start_date, income_in_interval + expenses_in_interval])
+
+        interval_start_date = interval_end_date
+        interval_end_date += relativedelta(days=interval)
+
+    return [
+        schemas.DataSeries(
+            name="Expenses",
+            data=expense_series
+        ),
+        schemas.DataSeries(
+            name="Incomes",
+            data=income_series
+        ),
+        schemas.DataSeries(
+            name="Differences",
+            data=diff_series
+        )
+    ]
+
+
+def get_provisional_cashflow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+    if start_date is None:
+        oldest_expense = db.query(models.Expense).order_by(models.Expense.expenseDate).first()
+        start_date = oldest_expense.expenseDate
+    if end_date is None:
+        newest_expense = db.query(models.Expense).order_by(models.Expense.expenseDate.desc()).first()
+        end_date = newest_expense.expenseDate
+    if interval == 0:
+        interval = 1
+
+    interval_start_date = start_date
+    interval_end_date = start_date + relativedelta(days=interval)
+
+    expense_series = []
+    income_series = []
+    diff_series = []
+
+    while interval_start_date <= end_date:
+        expenses_in_interval = db.scalar(
+            select(func.coalesce(func.sum(models.Expense.amount), 0))
+            .where(
+                (models.Expense.expenseDate >= interval_start_date)
+                & (models.Expense.expenseDate < interval_end_date)
+                & (models.Expense.amount < 0)
+            )
+        )
+
+        income_in_interval = db.scalar(
+            select(func.coalesce(func.sum(models.Expense.amount), 0))
+            .where(
+                (models.Expense.expenseDate >= interval_start_date)
+                & (models.Expense.expenseDate < interval_end_date)
+                & (models.Expense.amount > 0)
+            )
+        )
+
+        expense_series.append([interval_start_date, expenses_in_interval])
+        income_series.append([interval_start_date, income_in_interval])
+        diff_series.append([interval_start_date, income_in_interval + expenses_in_interval])
+
+        interval_start_date = interval_end_date
+        interval_end_date += relativedelta(days=interval)
+
+    return [
+        schemas.DataSeries(
+            name="Expenses",
+            data=expense_series
+        ),
+        schemas.DataSeries(
+            name="Incomes",
+            data=income_series
+        ),
+        schemas.DataSeries(
+            name="Differences",
+            data=diff_series
+        )
+    ]
+
+
+
