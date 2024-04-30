@@ -648,4 +648,59 @@ def get_provisional_cashflow(db: Session, interval: int, start_date: date | None
     ]
 
 
+def get_total_cashflow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+    if start_date is None:
+        oldest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate).first()
+        start_date = oldest_expense.transferDate
+    if end_date is None:
+        newest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate.desc()).first()
+        end_date = newest_expense.transferDate
+    if interval == 0:
+        interval = 1
+
+    period_start_date = start_date
+
+    expense_series = []
+    income_series = []
+    diff_series = []
+
+    while period_start_date <= end_date:
+        expenses_in_interval = db.scalar(
+            select(func.coalesce(func.sum(models.Expense.amount), 0))
+            .where(
+                (models.Expense.transferDate <= period_start_date)
+                & (models.Expense.amount < 0)
+            )
+        )
+
+        income_in_interval = db.scalar(
+            select(func.coalesce(func.sum(models.Expense.amount), 0))
+            .where(
+                (models.Expense.transferDate <= period_start_date)
+                & (models.Expense.amount > 0)
+            )
+        )
+
+        expense_series.append([period_start_date, expenses_in_interval])
+        income_series.append([period_start_date, income_in_interval])
+        diff_series.append([period_start_date, income_in_interval + expenses_in_interval])
+
+        period_start_date += relativedelta(days=interval)
+
+    return [
+        schemas.DataSeries(
+            name="Expenses",
+            data=expense_series
+        ),
+        schemas.DataSeries(
+            name="Incomes",
+            data=income_series
+        ),
+        schemas.DataSeries(
+            name="Differences",
+            data=diff_series
+        )
+    ]
+
+
 

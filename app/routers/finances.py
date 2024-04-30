@@ -124,3 +124,13 @@ async def get_cashflow_provisional(
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.DataSeries]:
     return crud.get_provisional_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date)
+
+
+@finances.get("/finances/cashflow/total", dependencies=[Depends(dep.get_current_active_user)])
+async def get_cashflow_total(
+        interval: int,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeries]:
+    return crud.get_total_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date)
