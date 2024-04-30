@@ -841,4 +841,14 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getTotalCashflow(interval, startDate, endDate) {
+    return axiosClient.get('/finances/cashflow/total', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

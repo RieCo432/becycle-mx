@@ -391,6 +391,7 @@ export default {
       realisticRequiredDepositFloatSeries: [],
       actualCashflowSeries: [],
       provisionalCashflowSeries: [],
+      totalCashflowSeries: [],
     };
   },
   methods: {
@@ -454,6 +455,13 @@ export default {
         this.updateEndDate(this.provisionalCashflowSeries[0].data[this.provisionalCashflowSeries[0].data.length -1][0]);
       });
     },
+    fetchTotalCashflowSeries() {
+      requests.getTotalCashflow(this.interval, this.startDate, this.endDate).then((response) => {
+        this.totalCashflowSeries = response.data;
+        this.updateStartDate(this.totalCashflowSeries[0].data[0][0]);
+        this.updateEndDate(this.totalCashflowSeries[0].data[this.totalCashflowSeries[0].data.length -1][0]);
+      });
+    },
     fetchAllSeries() {
       this.fetchDepositFlow();
       this.fetchDepositsStatus();
@@ -462,6 +470,7 @@ export default {
       this.fetchRealisticRequiredDepositFloatSeries();
       this.fetchActualCashflowSeries();
       this.fetchProvisionalCashflowSeries();
+      this.fetchTotalCashflowSeries();
     },
     fetchGracePeriodDependants() {
       this.fetchDepositsStatus();
@@ -627,6 +636,15 @@ export default {
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="provisionalCashflowSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Total Expenses and Income">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="totalCashflowSeries"></apexchart>
           </div>
         </div>
       </Card>
