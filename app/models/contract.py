@@ -1,12 +1,13 @@
+import os
 from datetime import datetime, date
+from uuid import uuid4
+
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean
-from uuid import uuid4
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-import os
-from app.database.db import Base
-import app.services as services
 
+import app.services as services
+from app.database.db import Base
 
 CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
@@ -31,19 +32,19 @@ class Contract(Base):
     depositCollectingUserId: Mapped[UUID] = mapped_column("depositCollectingUserId", ForeignKey("users.id"), nullable=False)
     depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")
 
-    returnAcceptingUserId: Mapped[UUID] = mapped_column("returnAcceptingUserId", ForeignKey("users.id"), nullable=True)
+    returnAcceptingUserId: Mapped[UUID] = mapped_column("returnAcceptingUserId", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None)
     returnAcceptingUser: Mapped["User"] = relationship("User", foreign_keys=[returnAcceptingUserId], back_populates="returnedContracts")
 
-    depositReturningUserId: Mapped[UUID] = mapped_column("depositReturningUserId", ForeignKey("users.id"), nullable=True)
+    depositReturningUserId: Mapped[UUID] = mapped_column("depositReturningUserId", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None)
     depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")
 
     startDate: Mapped[date] = mapped_column("startDate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, quote=False)
     endDate: Mapped[date] = mapped_column("endDate", Date, default=datetime.utcnow().date() + relativedelta(months=CONTRACT_EXPIRE_MONTHS), server_default=text("(current_date at time zone 'utc' + make_interval(months => {:d}))".format(CONTRACT_EXPIRE_MONTHS)), nullable=False, quote=False)
 
-    returnedDate: Mapped[date] = mapped_column("returnedDate", Date, nullable=True, quote=False)
+    returnedDate: Mapped[date] = mapped_column("returnedDate", Date, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
     depositAmountCollected: Mapped[int] = mapped_column("depositAmountCollected", Integer, nullable=False, quote=False)
-    depositAmountReturned: Mapped[int] = mapped_column("depositAmountReturned", Integer, nullable=True, quote=False)
+    depositAmountReturned: Mapped[int] = mapped_column("depositAmountReturned", Integer, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
     conditionOfBike: Mapped[str] = mapped_column("conditionOfBike", String(20), nullable=False, quote=False)
     contractType: Mapped[str] = mapped_column("contractType", String(20), nullable=False, quote=False)
@@ -59,6 +60,14 @@ class Contract(Base):
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your lending agreement",
+            content=email_html_content
+        )
+
+    def send_expiry_reminder_email(self):
+        email_html_content = services.email_helpers.build_contract_expiry_reminder_email(self)
+        services.email_helpers.send_email(
+            destination=self.client.emailAddress,
+            subject="BECYCLE Contract Expiry Reminder",
             content=email_html_content
         )
 

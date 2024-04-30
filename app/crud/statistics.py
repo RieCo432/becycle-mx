@@ -1,17 +1,14 @@
 from datetime import date, datetime
 
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import select, func
+from sqlalchemy import func, text, select
 from sqlalchemy.orm import Session
+
 import app.models as models
 import app.schemas as schemas
-from app.crud.users import get_users
-from app.crud.clients import get_all_clients
 from app.crud.bikes import get_all_bikes
-import bcrypt
-from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException, status
-from uuid import UUID
+from app.crud.clients import get_all_clients
+from app.crud.users import get_users
 
 
 def get_user_leaderboard(db: Session) -> list[schemas.UserLeaderboard]:
@@ -54,10 +51,15 @@ def get_client_leaderboard(db: Session) -> list[schemas.ClientLeaderboard]:
         full_name = "{:s} {:s}".format(client.firstName, client.lastName)
         contracts = len(client.contracts)
         appointments = len(client.appointments)
-        appointments_pending = sum([1 if not appointment.confirmed and not appointment.cancelled else 0 for appointment in client.appointments])
-        appointments_confirmed = sum([1 if appointment.confirmed and not appointment.cancelled else 0 for appointment in client.appointments])
-        appointments_cancelled = sum([1 if appointment.confirmed and appointment.cancelled else 0 for appointment in client.appointments])
-        appointments_denied = sum([1 if not appointment.confirmed and appointment.cancelled else 0 for appointment in client.appointments])
+        appointments_pending = sum(
+            [1 if not appointment.confirmed and not appointment.cancelled else 0 for appointment in
+             client.appointments])
+        appointments_confirmed = sum(
+            [1 if appointment.confirmed and not appointment.cancelled else 0 for appointment in client.appointments])
+        appointments_cancelled = sum(
+            [1 if appointment.confirmed and appointment.cancelled else 0 for appointment in client.appointments])
+        appointments_denied = sum(
+            [1 if not appointment.confirmed and appointment.cancelled else 0 for appointment in client.appointments])
 
         leaderboard_entry = schemas.ClientLeaderboard(
             id=client.id,
@@ -98,7 +100,8 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
     return leaderboard
 
 
-def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, start_date: date | None,
+                                   end_date: date | None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -126,10 +129,10 @@ def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, s
         if breakdown == 'bikeMake':
             query = query.join(models.Contract)
 
-        counts_by_breakdown = {cat: count for cat, count in[_ for _ in
-                               query.where(models.Contract.startDate <= start_date)
-                               .group_by(col)
-                               ]}
+        counts_by_breakdown = {cat: count for cat, count in [_ for _ in
+                                                             query.where(models.Contract.startDate <= start_date)
+                                                             .group_by(col)
+                                                             ]}
         for breakdown in all_categories:
             count = counts_by_breakdown.get(breakdown, 0)
             if breakdown not in data_series_by_breakdown:
@@ -140,7 +143,7 @@ def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, s
         start_date += relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -148,7 +151,8 @@ def get_total_contracts_statistics(db: Session, interval: int, breakdown: str, s
     return all_series
 
 
-def get_active_contracts_statistics(db: Session, interval: int, grace_period: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+def get_active_contracts_statistics(db: Session, interval: int, grace_period: int, start_date: date | None,
+                                    end_date: date | None) -> list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
@@ -158,7 +162,8 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
         end_date = datetime.utcnow().date()
 
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(models.Contract.contractType)
+        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
+            models.Contract.contractType)
     )]
 
     all_series = []
@@ -167,14 +172,17 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
     while start_date <= end_date:
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
-                                                             db.query(models.Contract.contractType, func.count(models.Contract.contractType))
+                                                             db.query(models.Contract.contractType,
+                                                                      func.count(models.Contract.contractType))
                                                              .where(
                                                                  (
-                                                                     (models.Contract.returnedDate == None)
-                                                                     | (models.Contract.returnedDate >= start_date)
+                                                                         (models.Contract.returnedDate == None)
+                                                                         | (models.Contract.returnedDate >= start_date)
                                                                  )
                                                                  & (models.Contract.startDate <= start_date)
-                                                                 & (models.Contract.endDate >= start_date - relativedelta(days=grace_period))
+                                                                 & (
+                                                                             models.Contract.endDate >= start_date - relativedelta(
+                                                                         days=grace_period))
                                                              )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
@@ -188,7 +196,7 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
         start_date += relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -196,10 +204,10 @@ def get_active_contracts_statistics(db: Session, interval: int, grace_period: in
     return all_series
 
 
-def get_new_contracts_statistics(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+def get_new_contracts_statistics(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[
+    schemas.DataSeries]:
     if interval == 0:
         interval = 1
-
     if start_date is None:
         oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
         start_date = oldest_contract.startDate
@@ -207,7 +215,8 @@ def get_new_contracts_statistics(db: Session, interval: int, start_date: date | 
         end_date = datetime.utcnow().date()
 
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(models.Contract.contractType)
+        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
+            models.Contract.contractType)
     )]
 
     all_series = []
@@ -218,7 +227,8 @@ def get_new_contracts_statistics(db: Session, interval: int, start_date: date | 
     while period_start_date <= end_date:
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
-                                                             db.query(models.Contract.contractType, func.count(models.Contract.contractType))
+                                                             db.query(models.Contract.contractType,
+                                                                      func.count(models.Contract.contractType))
                                                              .where(
                                                                  (models.Contract.startDate >= period_start_date)
                                                                  & (models.Contract.startDate < period_end_date)
@@ -236,7 +246,7 @@ def get_new_contracts_statistics(db: Session, interval: int, start_date: date | 
         period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
@@ -244,17 +254,20 @@ def get_new_contracts_statistics(db: Session, interval: int, start_date: date | 
     return all_series
 
 
-def get_returned_contracts_statistics(db: Session, interval: int, start_date: date | None, end_date: date | None) -> list[schemas.DateSeries]:
+def get_returned_contracts_statistics(db: Session, interval: int, start_date: date | None, end_date: date | None) -> \
+list[schemas.DataSeries]:
     if interval == 0:
         interval = 1
     if start_date is None:
-        oldest_returned_contract = db.query(models.Contract).where(models.Contract.returnedDate != None).order_by(models.Contract.returnedDate).first()
+        oldest_returned_contract = db.query(models.Contract).where(models.Contract.returnedDate != None).order_by(
+            models.Contract.returnedDate).first()
         start_date = oldest_returned_contract.returnedDate
     if end_date is None:
         end_date = datetime.utcnow().date()
 
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(models.Contract.contractType)
+        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
+            models.Contract.contractType)
     )]
 
     all_series = []
@@ -265,7 +278,8 @@ def get_returned_contracts_statistics(db: Session, interval: int, start_date: da
     while period_start_date <= end_date:
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
-                                                             db.query(models.Contract.contractType, func.count(models.Contract.contractType))
+                                                             db.query(models.Contract.contractType,
+                                                                      func.count(models.Contract.contractType))
                                                              .where(
                                                                  (models.Contract.returnedDate != None)
                                                                  & (models.Contract.returnedDate >= period_start_date)
@@ -284,9 +298,58 @@ def get_returned_contracts_statistics(db: Session, interval: int, start_date: da
         period_end_date = period_start_date + relativedelta(days=interval)
 
     for breakdown in data_series_by_breakdown:
-        all_series.append(schemas.DateSeries(
+        all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
         ))
 
     return all_series
+
+
+def get_contracts_status(db: Session, grace_period: int, start_date: date | None,
+                                                          end_date: date | None) -> dict[str, int]:
+    if start_date is None:
+        oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
+        start_date = oldest_contract.startDate
+    if end_date is None:
+        end_date = datetime.utcnow().date()
+
+    contracts_in_period = [
+        _ for _ in db.scalars(
+            select(models.Contract)
+            .where(
+                (models.Contract.endDate >= start_date)
+                & (models.Contract.startDate < end_date)
+            )
+        )
+    ]
+
+    count_open = 0
+    count_in_grace_period = 0
+    count_expired = 0
+    count_returned = 0
+    count_unaccounted = 0
+
+    for contract in contracts_in_period:
+        if contract.returnedDate is not None:
+            count_returned += 1
+        elif contract.endDate >= datetime.utcnow().date():
+            count_open += 1
+        elif contract.endDate + relativedelta(days=grace_period) >= datetime.utcnow().date():
+            count_in_grace_period += 1
+        elif contract.endDate + relativedelta(days=grace_period) < datetime.utcnow().date():
+            count_expired += 1
+        else:
+            count_unaccounted += 1
+
+    contracts_status = {
+        "open": count_open,
+        "in_grace_period": count_in_grace_period,
+        "expired": count_expired,
+        "returned": count_returned,
+    }
+
+    if count_unaccounted > 0:
+        contracts_status["???"] = count_unaccounted
+
+    return contracts_status

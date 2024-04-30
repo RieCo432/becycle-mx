@@ -1,8 +1,10 @@
-from sqlalchemy import text, Text, Integer, UUID, Float, ForeignKey, String, DateTime
-from uuid import uuid4
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.database.db import Base
 from datetime import datetime
+from uuid import uuid4
+
+from sqlalchemy import text, Text, Integer, UUID, Float, ForeignKey, String, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database.db import Base
 
 
 class RoadSegment(Base):

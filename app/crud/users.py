@@ -1,11 +1,13 @@
+from uuid import UUID
+
+import bcrypt
+from fastapi import HTTPException, status
 from sqlalchemy import select, func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+
 import app.models as models
 import app.schemas as schemas
-import bcrypt
-from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException, status
-from uuid import UUID
 
 
 def get_user_by_username(username: str, db: Session) -> models.User | None:

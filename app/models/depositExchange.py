@@ -1,8 +1,9 @@
 from datetime import datetime, date
-from dateutil.relativedelta import relativedelta
-from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean, DateTime
 from uuid import uuid4
+
+from sqlalchemy import UUID, text, ForeignKey, Date, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database.db import Base
 
 

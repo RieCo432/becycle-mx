@@ -1,12 +1,11 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-import app.crud as crud
-import app.schemas as schemas
-import app.models as models
-import app.dependencies as dep
 
+import app.crud as crud
+import app.dependencies as dep
+import app.schemas as schemas
 
 bikes = APIRouter(
     tags=["bikes"],

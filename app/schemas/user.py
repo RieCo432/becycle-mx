@@ -1,5 +1,6 @@
 from uuid import UUID
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict
 
 
 class UserBase(BaseModel):
@@ -21,8 +22,7 @@ class User(UserBase):
     id: UUID
     softDeleted: bool
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserUpdate(BaseModel):

@@ -1,5 +1,7 @@
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
+
 from .contract import Contract
 
 
@@ -18,8 +20,7 @@ class BikeCreate(BikeBase):
 class Bike(BikeBase):
     id: UUID
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BikeExtended(Bike):

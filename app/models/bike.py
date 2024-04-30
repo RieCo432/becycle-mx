@@ -1,8 +1,10 @@
-from sqlalchemy import String, UUID, text
-from uuid import uuid4
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.database.db import Base
 from typing import List
+from uuid import uuid4
+
+from sqlalchemy import String, UUID, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database.db import Base
 
 
 class Bike(Base):

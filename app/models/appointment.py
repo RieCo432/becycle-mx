@@ -1,9 +1,11 @@
 from datetime import datetime
-from sqlalchemy import UUID, text, ForeignKey, Text, Boolean, DateTime
 from uuid import uuid4
+
+from sqlalchemy import UUID, text, ForeignKey, Text, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.database.db import Base
+
 import app.services as services
+from app.database.db import Base
 
 
 class Appointment(Base):
@@ -63,5 +65,13 @@ class Appointment(Base):
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment has been cancelled as requested",
+            content=email_html_content
+        )
+
+    def send_reminder_email(self):
+        email_html_content = services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime)
+        services.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Appointment Reminder",
             content=email_html_content
         )

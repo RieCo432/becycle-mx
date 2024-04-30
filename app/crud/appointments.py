@@ -1,7 +1,8 @@
 import datetime
 import math
-from .settings import *
 from uuid import UUID
+
+from .settings import *
 
 
 def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate, auto_confirm: bool = False) -> models.Appointment:
@@ -244,3 +245,25 @@ def create_appointment_type(db: Session, appointment_type_data: schemas.Appointm
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This appointment type ID already exists!"})
 
     return new_appointment_type
+
+
+def get_appointments_for_reminder_email(db: Session) -> list[models.Appointment]:
+    before_day = datetime.utcnow().date() + relativedelta(days=3)
+    return [
+        _ for _ in db.scalars(
+            select(models.Appointment)
+            .where(
+                (models.Appointment.startDateTime < before_day)
+                & (models.Appointment.confirmed == True)
+                & (models.Appointment.cancelled == False)
+                & (models.Appointment.reminderSent == False)
+            )
+        )
+    ]
+
+
+def send_appointment_reminders(db: Session):
+    for appointment in get_appointments_for_reminder_email(db=db):
+        appointment.send_reminder_email()
+        appointment.reminderSent = True
+    db.commit()

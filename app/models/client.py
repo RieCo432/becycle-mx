@@ -1,13 +1,15 @@
-from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean
-from uuid import uuid4
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 import os
-from app.database.db import Base
-from typing import List
-from random import random
 from datetime import datetime
+from random import random
+from typing import List
+from uuid import uuid4
+
 from dateutil.relativedelta import relativedelta
+from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 import app.services as services
+from app.database.db import Base
 
 CLIENT_LOGIN_CODE_EXPIRE_MINUTES = int(os.environ['CLIENT_LOGIN_CODE_EXPIRE_MINUTES'])
 CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES = int(os.environ['CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES'])

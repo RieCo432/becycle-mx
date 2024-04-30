@@ -1,9 +1,11 @@
-import app.crud as crud
-import app.schemas as schemas
-import app.dependencies as dep
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends
+from datetime import date
 
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+import app.crud as crud
+import app.dependencies as dep
+import app.schemas as schemas
 
 finances = APIRouter(
     tags=["finances"],
@@ -15,3 +17,120 @@ finances = APIRouter(
 @finances.get("/finances/deposit-book")
 async def get_deposit_book(db: Session = Depends(dep.get_db)) -> schemas.DepositBalancesBook:
     return crud.get_deposit_balances_book(db=db)
+
+
+@finances.get("/finances/deposits/total")
+async def get_total_deposits(
+        interval: int,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        db: Session = Depends(dep.get_db)) -> list[schemas.DataSeries]:
+    return crud.get_total_deposits(db=db, interval=interval, start_date=start_date, end_date=end_date)
+
+
+@finances.get("/finances/deposits/claimable", dependencies=[Depends(dep.get_current_active_user)])
+async def get_claimable_deposits(
+        interval: int,
+        grace_period: int,
+        start: date | None = None,
+        end: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeries]:
+    return crud.get_claimable_deposits(db=db, interval=interval, grace_period=grace_period, start_date=start, end_date=end)
+
+
+@finances.get("/finances/deposits/collected", dependencies=[Depends(dep.get_current_active_user)])
+async def get_collected_deposits(
+        interval: int,
+        start: date | None = None,
+        end: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeries]:
+    return crud.get_collected_deposits(db=db, interval=interval, start_date=start, end_date=end)
+
+
+@finances.get("/finances/deposits/returned", dependencies=[Depends(dep.get_current_active_user)])
+async def get_returned_deposits(
+        interval: int,
+        start: date | None = None,
+        end: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeries]:
+    return crud.get_returned_deposits(db=db, interval=interval, start_date=start, end_date=end)
+
+
+@finances.get("/finances/deposits/flow", dependencies=[Depends(dep.get_current_active_user)])
+async def get_deposit_flow(
+        interval: int,
+        start: date | None = None,
+        end: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeries]:
+    return crud.get_deposit_flow(db=db, interval=interval, start_date=start, end_date=end)
+
+
+@finances.get("/finances/deposits/status", dependencies=[Depends(dep.get_current_active_user)])
+async def get_contracts_percentage_returned_within_grace_period(
+        grace_period: int,
+        start: date | None = None,
+        end: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> dict[str, int]:
+    return crud.get_deposits_status(db=db, grace_period=grace_period, start_date=start, end_date=end)
+
+
+@finances.get("/finances/deposits/return-percentage", dependencies=[Depends(dep.get_current_active_user)])
+async def get_deposit_return_percentage(
+        interval: int,
+        start: date | None = None,
+        end: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeriesWithType]:
+    return crud.get_deposit_return_percentage(db=db, interval=interval, start_date=start, end_date=end)
+
+
+@finances.get("/finances/deposits/required-float/worst-case", dependencies=[Depends(dep.get_current_active_user)])
+async def get_worst_case_required_deposit_float(
+        interval: int,
+        db: Session = Depends(dep.get_db)
+) -> dict[str, int]:
+    return crud.get_worst_case_required_deposit_float(db=db, interval=interval)
+
+
+@finances.get("/finances/deposits/required-float/realistic", dependencies=[Depends(dep.get_current_active_user)])
+async def get_worst_case_required_deposit_float(
+        interval: int,
+        grace_period: int,
+        db: Session = Depends(dep.get_db)
+) -> dict[str, int]:
+    return crud.get_realistic_required_deposit_float(db=db, interval=interval, grace_period=grace_period)
+
+
+@finances.get("/finances/cashflow/actual", dependencies=[Depends(dep.get_current_active_user)])
+async def get_cashflow_actual(
+        interval: int,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeries]:
+    return crud.get_actual_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date)
+
+
+@finances.get("/finances/cashflow/provisional", dependencies=[Depends(dep.get_current_active_user)])
+async def get_cashflow_provisional(
+        interval: int,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeries]:
+    return crud.get_provisional_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date)
+
+
+@finances.get("/finances/cashflow/total", dependencies=[Depends(dep.get_current_active_user)])
+async def get_cashflow_total(
+        interval: int,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.DataSeries]:
+    return crud.get_total_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date)

@@ -1,11 +1,10 @@
 import datetime
 
+import bcrypt
 from dateutil.relativedelta import relativedelta
 
 import app.models as models
 from app.database.db import SessionLocal
-import bcrypt
-
 
 db = SessionLocal()
 

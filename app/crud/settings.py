@@ -5,8 +5,9 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, DAILY
 from fastapi import HTTPException, status
 from sqlalchemy import select, and_
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
 import app.models as models
 import app.schemas as schemas
 
@@ -269,3 +270,23 @@ def get_maximum_concurrent_appointments_for_each_slot(db: Session) -> dict[date,
     }
 
     return maximum_concurrent_appointments_for_each_slot
+
+
+def get_address(db: Session) -> models.Address:
+    return db.scalar(
+        select(models.Address)
+        .where(models.Address.id == 1)
+    )
+
+
+def update_address(db: Session, new_address: schemas.Address) -> models.Address:
+    current_address = get_address(db=db)
+
+    current_address.number = new_address.number
+    current_address.street = new_address.street
+    current_address.postcode = new_address.postcode
+    current_address.city = new_address.city
+
+    db.commit()
+
+    return current_address

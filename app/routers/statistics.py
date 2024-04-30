@@ -1,12 +1,12 @@
-from datetime import datetime, date
-from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
-import app.crud as crud
-import app.schemas as schemas
-import app.dependencies as dep
-from sqlalchemy.orm import Session
 import os
+from datetime import date
 
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+import app.crud as crud
+import app.dependencies as dep
+import app.schemas as schemas
 
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ['ACCESS_TOKEN_EXPIRE_MINUTES'])
 
@@ -51,7 +51,7 @@ async def get_total_contracts_statistics(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_total_contracts_statistics(db=db, interval=interval, breakdown=breakdown, start_date=start, end_date=end)
 
 
@@ -62,7 +62,7 @@ async def get_active_contracts_statistics(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_active_contracts_statistics(db=db, interval=interval, grace_period=grace_period, start_date=start, end_date=end)
 
 
@@ -72,7 +72,7 @@ async def get_new_contracts_statistics(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_new_contracts_statistics(db=db, interval=interval, start_date=start, end_date=end)
 
 
@@ -82,5 +82,14 @@ async def get_returned_contracts_statistics(
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
-) -> list[schemas.DateSeries]:
+) -> list[schemas.DataSeries]:
     return crud.get_returned_contracts_statistics(db=db, interval=interval, start_date=start, end_date=end)
+
+@statistics.get("/statistics/contracts/status", dependencies=[Depends(dep.get_current_active_user)])
+async def get_contracts_percentage_returned_within_grace_period(
+        grace_period: int,
+        start: date | None = None,
+        end: date | None = None,
+        db: Session = Depends(dep.get_db)
+) -> dict[str, int]:
+    return crud.get_contracts_status(db=db, grace_period=grace_period, start_date=start, end_date=end)

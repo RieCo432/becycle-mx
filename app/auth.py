@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
 import os
-from jose import jwt
+from datetime import datetime, timedelta
 
+from jose import jwt
 
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']

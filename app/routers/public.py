@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
-import app.crud as crud
-import app.schemas as schemas
-import app.models as models
-import app.dependencies as dep
+import datetime
 from datetime import time
 
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+import app.crud as crud
+import app.dependencies as dep
+import app.schemas as schemas
 
 public = APIRouter(
     tags=["public"],
@@ -32,3 +33,13 @@ def get_opening_hours(db: Session = Depends(dep.get_db)) -> dict[str, time]:
 @public.get("/public/slot-duration")
 def get_slot_duration(db: Session = Depends(dep.get_db)) -> int:
     return crud.get_slot_duration(db=db)
+
+
+@public.get("/public/next-closed-day")
+def get_next_closed_day(db: Session = Depends(dep.get_db)) -> schemas.ClosedDay:
+    return crud.get_closed_days(db=db, start_date=datetime.datetime.utcnow())[0]
+
+
+@public.get("/public/address")
+def get_address(db: Session = Depends(dep.get_db)) -> schemas.Address:
+    return crud.get_address(db=db)

@@ -1,10 +1,11 @@
 from uuid import UUID
 
 from fastapi import HTTPException
+from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session
+
 import app.models as models
 import app.schemas as schemas
-from sqlalchemy import select, func, and_, or_
 
 
 def get_bike(db: Session, bike_id: UUID) -> models.Bike:

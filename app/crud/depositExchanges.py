@@ -1,9 +1,10 @@
-from sqlalchemy.orm import Session
-import app.models as models
-import app.schemas as schemas
-from uuid import UUID
-from sqlalchemy import select
 from datetime import date
+from uuid import UUID
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+import app.models as models
 
 
 def create_deposit_exchange(
@@ -51,4 +52,14 @@ def get_deposit_exchanges_grouped_by_date(db: Session) -> dict[date, list[models
     deposit_exchanges_by_date = {date_of_exchange: get_deposit_exchanges_by_date(db=db, date_of_exchange=date_of_exchange) for date_of_exchange in get_deposit_exchange_dates(db=db)}
     return deposit_exchanges_by_date
 
+
+def get_deposit_exchange_users(db: Session) -> list[models.User]:
+    return [_ for _ in db.scalars(
+        select(models.User)
+        .where(
+            (models.User.depositBearer == True)
+            | (models.User.treasurer == True)
+            | (models.User.username == "BANK")
+        )
+    )]
 

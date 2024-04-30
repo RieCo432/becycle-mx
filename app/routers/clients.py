@@ -1,16 +1,17 @@
+import os
 from datetime import timedelta
+from typing import Annotated
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status, Form, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
-import app.models as models
-import app.crud as crud
-import app.schemas as schemas
-import app.dependencies as dep
 from sqlalchemy.orm import Session
-from uuid import UUID
-from typing import Annotated
-from app import auth
-import os
 
+import app.crud as crud
+import app.dependencies as dep
+import app.models as models
+import app.schemas as schemas
+from app import auth
 
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ['ACCESS_TOKEN_EXPIRE_MINUTES'])
 

@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from datetime import time, date
+
+from pydantic import BaseModel, ConfigDict
 
 
 class AppointmentType(BaseModel):
@@ -44,3 +45,11 @@ class PatchAppointmentConcurrencyLimit(BaseModel):
 class ClosedDay(BaseModel):
     date: date
     note: str
+
+
+class Address(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    number: str
+    street: str
+    postcode: str
+    city: str

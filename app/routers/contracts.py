@@ -1,12 +1,13 @@
+from typing import Annotated
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
-import app.schemas as schemas
+from sqlalchemy.orm import Session
+
 import app.crud as crud
 import app.dependencies as dep
-from uuid import UUID
-from sqlalchemy.orm import Session
 import app.models as models
-from typing import Annotated
-
+import app.schemas as schemas
 
 contracts = APIRouter(
     tags=["contracts"],

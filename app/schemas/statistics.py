@@ -1,6 +1,7 @@
-from datetime import date
 from uuid import UUID
+
 from pydantic import BaseModel
+
 from app.schemas import Bike
 
 
@@ -31,6 +32,10 @@ class BikeLeaderboard(Bike):
     contracts: int
 
 
-class DateSeries(BaseModel):
+class DataSeries(BaseModel):
     name: str
     data: list[list]
+
+
+class DataSeriesWithType(DataSeries):
+    type: str
