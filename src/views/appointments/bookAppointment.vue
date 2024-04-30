@@ -248,7 +248,7 @@ export default {
                       </tr>
                       <tr>
                         <td class="border border-slate-500">Date and Time</td>
-                        <td class="border border-slate-500">{{appointmentDatetime.toLocaleString()}}</td>
+                        <td class="border border-slate-500">{{appointmentDatetime.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: "2-digit", minute: "2-digit", hour12: false, timeZone: 'UTC'})}}</td>
                       </tr>
                     </table>
                   </div>
