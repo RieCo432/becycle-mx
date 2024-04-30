@@ -182,6 +182,12 @@ export default {
           axisTicks: {
             colors: ['#dddddd'],
           },
+          title: {
+            text: 'Days Before/After Contract End',
+            style: {
+              color: '#dddddd',
+            },
+          },
         },
         yaxis: {
           show: true,
@@ -587,19 +593,28 @@ export default {
       </Card>
     </div>
     <div class="col-span-4">
-      <Card title="Deposits Status">
+      <Card title="Actual Cashflow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="depositsStatusChartOptions" :series="depositsStatusSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="actualCashflowSeries"></apexchart>
           </div>
         </div>
       </Card>
     </div>
     <div class="col-span-4">
-      <Card title="Average Percentage of deposit returned">
+      <Card title="Provisional Cashflow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="line" :options="depositReturnPercentageMixedChart" :series="percentageDepositReturnedAfterMonthsSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="provisionalCashflowSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Total Expenses and Income">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="totalCashflowSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -623,28 +638,19 @@ export default {
       </Card>
     </div>
     <div class="col-span-4">
-      <Card title="Actual Expenses and Income">
+      <Card title="Deposits Status">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="actualCashflowSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="depositsStatusChartOptions" :series="depositsStatusSeries"></apexchart>
           </div>
         </div>
       </Card>
     </div>
     <div class="col-span-4">
-      <Card title="Provisional Expenses and Income">
+      <Card title="Average Percentage of deposit returned">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="provisionalCashflowSeries"></apexchart>
-          </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-4">
-      <Card title="Total Expenses and Income">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="totalCashflowSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="line" :options="depositReturnPercentageMixedChart" :series="percentageDepositReturnedAfterMonthsSeries"></apexchart>
           </div>
         </div>
       </Card>
