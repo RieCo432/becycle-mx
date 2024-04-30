@@ -78,6 +78,68 @@ export default {
           },
         },
       },
+      cashflowAreaChartOptionsDateSeries: {
+        chart: {
+          type: 'area',
+          height: 300,
+        },
+        theme: {
+          mode: 'light',
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        stroke: {
+          curve: 'smooth',
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            opacityFrom: 0.6,
+            opacityTo: 0.8,
+          },
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'left',
+          labels: {
+            colors: ['#fffff'],
+          },
+        },
+        tooltip: {
+          theme: 'dark',
+        },
+        xaxis: {
+          show: true,
+          type: 'datetime',
+          labels: {
+            style: {
+              colors: '#dddddd',
+            },
+          },
+          axisTicks: {
+            color: '#dddddd',
+          },
+        },
+        yaxis: {
+          show: true,
+          labels: {
+            style: {
+              colors: ['#dddddd'],
+            },
+            formatter: (val) => (`\u00A3${val}`),
+          },
+          axisTicks: {
+            color: '#dddddd',
+          },
+          title: {
+            text: 'Cashflow',
+            style: {
+              color: '#dddddd',
+            },
+          },
+        },
+      },
       depositReturnPercentageMixedChart: {
         chart: {
           type: 'line',
@@ -119,12 +181,6 @@ export default {
           },
           axisTicks: {
             colors: ['#dddddd'],
-          },
-          title: {
-            text: 'Days Before/After Contract End',
-            style: {
-              color: '#dddddd',
-            },
           },
         },
         yaxis: {
@@ -333,6 +389,8 @@ export default {
       percentageDepositReturnedAfterMonthsSeries: [],
       worstCaseRequiredDepositFloatSeries: [],
       realisticRequiredDepositFloatSeries: [],
+      actualCashflowSeries: [],
+      provisionalCashflowSeries: [],
     };
   },
   methods: {
@@ -382,12 +440,28 @@ export default {
         this.realisticRequiredDepositFloatSeries = Object.values(response.data);
       });
     },
+    fetchActualCashflowSeries() {
+      requests.getActualCashflow(this.interval, this.startDate, this.endDate).then((response) => {
+        this.actualCashflowSeries = response.data;
+        this.updateStartDate(this.actualCashflowSeries[0].data[0][0]);
+        this.updateEndDate(this.actualCashflowSeries[0].data[this.actualCashflowSeries[0].data.length -1][0]);
+      });
+    },
+    fetchProvisionalCashflowSeries() {
+      requests.getProvisionalCashflow(this.interval, this.startDate, this.endDate).then((response) => {
+        this.provisionalCashflowSeries = response.data;
+        this.updateStartDate(this.provisionalCashflowSeries[0].data[0][0]);
+        this.updateEndDate(this.provisionalCashflowSeries[0].data[this.provisionalCashflowSeries[0].data.length -1][0]);
+      });
+    },
     fetchAllSeries() {
       this.fetchDepositFlow();
       this.fetchDepositsStatus();
       this.fetchPercentageDepositReturnedAfterMonths();
       this.fetchWorstCaseRequiredDepositFloatSeries();
       this.fetchRealisticRequiredDepositFloatSeries();
+      this.fetchActualCashflowSeries();
+      this.fetchProvisionalCashflowSeries();
     },
     fetchGracePeriodDependants() {
       this.fetchDepositsStatus();
@@ -535,6 +609,24 @@ export default {
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
             <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="realisticRequiredDepositFloatChartOptions" :series="realisticRequiredDepositFloatSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Actual Expenses and Income">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="actualCashflowSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-4">
+      <Card title="Provisional Expenses and Income">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="provisionalCashflowSeries"></apexchart>
           </div>
         </div>
       </Card>

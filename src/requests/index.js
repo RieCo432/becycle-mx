@@ -821,4 +821,24 @@ export default {
       responseType: 'blob',
     });
   },
+  getActualCashflow(interval, startDate, endDate) {
+    return axiosClient.get('/finances/cashflow/actual', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getProvisionalCashflow(interval, startDate, endDate) {
+    return axiosClient.get('/finances/cashflow/provisional', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
