@@ -672,4 +672,183 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getNextClosedDay() {
+    return axiosClient.get('/public/next-closed-day');
+  },
+  getAddress() {
+    return axiosClient.get('/public/address');
+  },
+  putAddress(newAddress) {
+    return axiosClient.put('/settings/address', newAddress, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getDepositExchangeUsers() {
+    return axiosClient.get('/deposit-exchanges/users', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getTotalDepositsDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/total', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getClaimableDepositsDateSeries(interval, gracePeriod, startDate=null, endDate=null) {
+    return axiosClient.get('/finances/deposits/claimable', {
+      params: {
+        interval: interval,
+        grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getDepositsCollectedDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/collected', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getDepositsReturnedDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/returned', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getDepositFlowDateSeries(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/flow', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getContractsStatus(gracePeriod, startDate=null, endDate=null) {
+    return axiosClient.get('/statistics/contracts/status', {
+      params: {
+        grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getDepositsStatus(gracePeriod, startDate=null, endDate=null) {
+    return axiosClient.get('/finances/deposits/status', {
+      params: {
+        grace_period: gracePeriod,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getPercentageDepositReturnedAfterMonths(interval, startDate, endDate) {
+    return axiosClient.get('/finances/deposits/return-percentage', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getWorstCaseRequiredDepositFloat(interval) {
+    return axiosClient.get('/finances/deposits/required-float/worst-case', {
+      params: {
+        interval: interval,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getRealisticRequiredDepositFloat(interval, gracePeriod) {
+    return axiosClient.get('/finances/deposits/required-float/realistic', {
+      params: {
+        interval: interval,
+        grace_period: gracePeriod,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  postNewExpense(amount, type, notes, expenseDate, receiptFile) {
+    return axiosClient.post('/expenses', {
+      amount: amount,
+      expense_type: type,
+      notes: notes,
+      receipt_file: receiptFile,
+      expense_date: expenseDate,
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  getExpenseTypes() {
+    return axiosClient.get('/expenses/types', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getExpenses() {
+    return axiosClient.get('/expenses', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  patchExpenseTransferred(expenseId) {
+    return axiosClient.patch(`/expenses/${expenseId}/transfer`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getExpenseReceipt(expenseId) {
+    return axiosClient.get(`/expenses/${expenseId}/receipt`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      responseType: 'blob',
+    });
+  },
+  getActualCashflow(interval, startDate, endDate) {
+    return axiosClient.get('/finances/cashflow/actual', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getProvisionalCashflow(interval, startDate, endDate) {
+    return axiosClient.get('/finances/cashflow/provisional', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getTotalCashflow(interval, startDate, endDate) {
+    return axiosClient.get('/finances/cashflow/total', {
+      params: {
+        interval: interval,
+        ...(startDate && {start: startDate}),
+        ...(endDate && {end: endDate}),
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };

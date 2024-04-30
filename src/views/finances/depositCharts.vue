@@ -5,7 +5,7 @@ import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 import requests from '@/requests';
 export default {
-  name: 'contractCharts',
+  name: 'depositCharts',
   components: {
     Card,
     VueSlider,
@@ -64,77 +64,25 @@ export default {
           show: true,
           labels: {
             style: {
-              colors: '#dddddd',
+              colors: ['#dddddd'],
             },
+            formatter: (val) => (`\u00A3${val}`),
           },
           axisTicks: {
             color: '#dddddd',
           },
           title: {
-            text: 'Number of Contracts',
+            text: 'Value of Deposits',
             style: {
               color: '#dddddd',
             },
           },
         },
       },
-      contractsStatusChartOptions: {
-        labels: [],
-        colors: ['#4669FA', '#FA916B', '#50C793', '#0CE7FA'],
-        dataLabels: {
-          enabled: true,
-        },
-        legend: {
-          position: 'bottom',
-          fontSize: '16px',
-          fontFamily: 'Inter',
-          fontWeight: 400,
-          labels: {
-            colors: '#CBD5E1',
-          },
-        },
-        chart: {
-          toolbar: {
-            show: false,
-          },
-        },
-        plotOptions: {
-          pie: {
-            donut: {
-              labels: {
-                show: true,
-                name: {
-                  show: true,
-                  fontSize: '20px',
-                  fontWeight: 'bold',
-                  fontFamily: 'Inter',
-                  color: '#CBD5E1',
-                  formatter: (s) => (s.replaceAll('_', ' ')),
-                },
-                value: {
-                  show: true,
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  fontFamily: 'Inter',
-                  color: '#CBD5E1',
-                },
-                total: {
-                  show: true,
-                  fontSize: '20px',
-                  fontWeight: 'bold',
-                  fontFamily: 'Inter',
-                  color: '#CBD5E1',
-                },
-              },
-            },
-          },
-        },
-      },
-      totalContractSeries: [],
-      activeContractSeries: [],
-      newContractSeries: [],
-      returnedContractSeries: [],
-      contractsStatusSeries: [],
+      totalDepositsSeries: [],
+      claimableDepositsSeries: [],
+      depositsCollectedSeries: [],
+      depositsReturnedSeries: [],
     };
   },
   methods: {
@@ -154,50 +102,39 @@ export default {
         this.endDate = newEndDate;
       }
     },
-    fetchTotalContractsSeries() {
-      requests.getTotalContractsDateSeries(this.interval, 'contractType', this.startDate, this.endDate).then((response) => {
-        this.totalContractSeries = response.data;
-        this.updateStartDate(this.totalContractSeries[0].data[0][0]);
-        this.updateEndDate(this.totalContractSeries[0].data[this.totalContractSeries[0].data.length -1][0]);
+    fetchTotalDepositsSeries() {
+      requests.getTotalDepositsDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
+        this.totalDepositsSeries = response.data;
+        this.updateStartDate(this.totalDepositsSeries[0].data[0][0]);
+        this.updateEndDate(this.totalDepositsSeries[0].data[this.totalDepositsSeries[0].data.length -1][0]);
       });
     },
-    fetchActiveContractsSeries() {
-      requests.getActiveContractsDateSeries(this.interval, this.gracePeriod, this.startDate, this.endDate).then((response) => {
-        this.activeContractSeries = response.data;
-        this.updateStartDate(this.activeContractSeries[0].data[0][0]);
-        this.updateEndDate(this.activeContractSeries[0].data[this.activeContractSeries[0].data.length -1][0]);
+    fetchClaimableDepositsSeries() {
+      requests.getClaimableDepositsDateSeries(this.interval, this.gracePeriod, this.startDate, this.endDate).then((response) => {
+        this.claimableDepositsSeries = response.data;
+        this.updateStartDate(this.claimableDepositsSeries[0].data[0][0]);
+        this.updateEndDate(this.claimableDepositsSeries[0].data[this.claimableDepositsSeries[0].data.length -1][0]);
       });
     },
-    fetchNewContractsSeries() {
-      requests.getNewContractsDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
-        this.newContractSeries = response.data;
-        this.updateStartDate(this.newContractSeries[0].data[0][0]);
-        this.updateEndDate(this.newContractSeries[0].data[this.newContractSeries[0].data.length -1][0]);
+    fetchDepositsCollectedSeries() {
+      requests.getDepositsCollectedDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
+        this.depositsCollectedSeries = response.data;
+        this.updateStartDate(this.depositsCollectedSeries[0].data[0][0]);
+        this.updateEndDate(this.depositsCollectedSeries[0].data[this.depositsCollectedSeries[0].data.length -1][0]);
       });
     },
-    fetchReturnedContractsSeries() {
-      requests.getReturnedContractsDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
-        this.returnedContractSeries = response.data;
-        this.updateStartDate(this.returnedContractSeries[0].data[0][0]);
-        this.updateEndDate(this.returnedContractSeries[0].data[this.returnedContractSeries[0].data.length -1][0]);
-      });
-    },
-    fetchContractsStatus() {
-      requests.getContractsStatus(this.gracePeriod, this.startDate, this.endDate).then((response) => {
-        this.contractsStatusChartOptions.labels.splice(0, this.contractsStatusChartOptions.labels.length, ...Object.keys(response.data));
-        this.contractsStatusSeries = Object.values(response.data);
+    fetchDepositsReturnedSeries() {
+      requests.getDepositsReturnedDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
+        this.depositsReturnedSeries = response.data;
+        this.updateStartDate(this.depositsReturnedSeries[0].data[0][0]);
+        this.updateEndDate(this.depositsReturnedSeries[0].data[this.depositsReturnedSeries[0].data.length -1][0]);
       });
     },
     fetchAllSeries() {
-      this.fetchTotalContractsSeries();
-      this.fetchActiveContractsSeries();
-      this.fetchNewContractsSeries();
-      this.fetchReturnedContractsSeries();
-      this.fetchContractsStatus();
-    },
-    fetchGracePeriodDependants() {
-      this.fetchContractsStatus();
-      this.fetchActiveContractsSeries();
+      this.fetchTotalDepositsSeries();
+      this.fetchClaimableDepositsSeries();
+      this.fetchDepositsCollectedSeries();
+      this.fetchDepositsReturnedSeries();
     },
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
@@ -269,7 +206,7 @@ export default {
                 :min="0"
                 :interval="7"
                 class="m-auto"
-                @drag-end="fetchGracePeriodDependants"
+                @drag-end="fetchClaimableDepositsSeries"
             ></vue-slider>
           </div>
           <div class="col-span-4 content-center">
@@ -301,52 +238,42 @@ export default {
       </Card>
     </div>
     <div class="col-span-6">
-      <Card title="Total Contracts">
+      <Card title="Total Deposits Collected">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="totalContractSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="totalDepositsSeries"></apexchart>
           </div>
         </div>
       </Card>
     </div>
     <div class="col-span-6">
-      <Card title="Active Contracts">
+      <Card title="Claimable Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="activeContractSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="claimableDepositsSeries"></apexchart>
           </div>
         </div>
       </Card>
     </div>
     <div class="col-span-6">
-      <Card title="New Contracts">
+      <Card title="Collected Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="newContractSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="depositsCollectedSeries"></apexchart>
           </div>
         </div>
       </Card>
     </div>
     <div class="col-span-6">
-      <Card title="Returned Contracts">
+      <Card title="Returned Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="returnedContractSeries"></apexchart>
-          </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-4">
-      <Card title="Contracts Status">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="contractsStatusChartOptions" :series="contractsStatusSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="depositsReturnedSeries"></apexchart>
           </div>
         </div>
       </Card>
     </div>
   </div>
-
 </template>
 
 <style lang="scss">

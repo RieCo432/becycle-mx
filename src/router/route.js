@@ -140,13 +140,49 @@ const routes = [
         component: () => import('@/views/appointments/index.vue'),
       },
       {
-        path: '/accounting/deposits',
+        path: '/finances/deposits',
         name: 'Deposit Book',
         meta: {
           restrictTo: ['user'],
-          selectNavPath: '/accounting/deposits',
+          selectNavPath: '/finances/deposits',
         },
-        component: () => import('@/views/accounting/depositBook.vue'),
+        component: () => import('@/views/finances/depositBook.vue'),
+      },
+      {
+        path: '/finances/deposit-charts',
+        name: 'Deposit Charts',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/deposit-charts',
+        },
+        component: () => import('@/views/finances/depositCharts.vue'),
+      },
+      {
+        path: '/finances/cash-flow',
+        name: 'Cash Flow',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/cash-flow',
+        },
+        component: () => import('@/views/finances/cashFlow.vue'),
+      },
+      {
+        path: '/finances/expenses/submit',
+        name: 'Submit Expense',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/expenses/submit',
+        },
+        component: () => import('@/views/finances/newExpense.vue'),
+      },
+      {
+        path: '/finances/expenses/manage',
+        name: 'Manage Expenses',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/expenses/manage',
+        },
+        component: () => import('@/views/finances/manageExpenses.vue'),
       },
       {
         path: '/admin/users',
@@ -192,6 +228,15 @@ const routes = [
           selectNavPath: '/admin/raw-data',
         },
         component: () => import('@/views/admin/rawData.vue'),
+      },
+      {
+        path: '/admin/basic-settings',
+        name: 'Basic Settings',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/basic-settings',
+        },
+        component: () => import('@/views/admin/basicSettings.vue'),
       },
       {
         path: '/contracts/find-paper-contract',

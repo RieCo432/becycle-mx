@@ -48,7 +48,7 @@
                   :class="scrollContent ? 'overflow-y-auto max-h-[400px]' : ''">
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Name: {{appointment.clientName}}</p>
                 <p>Type: {{appointment.typeTitle}}</p>
-                <p v-if="appointment.typeTitle !== 'Closed Day'">Time: {{appointment.startDateTime.getHours()}}:{{appointment.startDateTime.getMinutes()}} - {{appointment.endDateTime.getHours()}}:{{appointment.endDateTime.getMinutes()}}</p>
+                <p v-if="appointment.typeTitle !== 'Closed Day'">Time: {{appointment.startDateTime.getHours().toString().padStart(2, '0')}}:{{appointment.startDateTime.getMinutes().toString().padStart(2, '0')}} - {{appointment.endDateTime.getHours().toString().padStart(2, '0')}}:{{appointment.endDateTime.getMinutes().toString().padStart(2, '0')}}</p>
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Confirmed: {{appointment.confirmed ? 'Yes' : 'No'}}</p>
                 <p>Notes: {{appointment.notes}}</p>
               </div>

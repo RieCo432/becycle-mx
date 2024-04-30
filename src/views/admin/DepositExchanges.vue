@@ -47,7 +47,7 @@ export default {
     const stepNumber = ref(0);
     const router = useRouter();
 
-    requests.getDepositBearers().then((response) => depositBearers.value = response.data.map((user) => ({
+    requests.getDepositExchangeUsers().then((response) => depositBearers.value = response.data.map((user) => ({
       label: user.username,
       value: user.username,
     })));
@@ -108,7 +108,7 @@ export default {
         stepNumber.value = totalSteps - 1;
         requests.postDepositExchange(amount.value, fromUsername.value, fromPassword.value, toUsername.value, toPassword.value).then((response) => {
           toast.success('Deposit Exchange Recorded', {timeout: 2000});
-          router.push({path: '/accounting/deposits'});
+          router.push({path: '/finances/deposits'});
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         });
