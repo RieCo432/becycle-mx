@@ -447,7 +447,7 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
 
     return [
         schemas.DataSeriesWithType(
-            name="Percentage of Deposit Returned by Age of Contract",
+            name="Percentage Returned",
             type='scatter',
             data=percentages_of_deposit_returned_by_contract_age
         ),
