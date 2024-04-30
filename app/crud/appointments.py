@@ -1,6 +1,6 @@
 import datetime
 import math
-from smtplib import SMTPRecipientsRefused
+from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
 from uuid import UUID
 
 from .settings import *
@@ -270,5 +270,7 @@ def send_appointment_reminders(db: Session):
             appointment.reminderSent = True
         except SMTPRecipientsRefused as e:
             print(appointment.client.emailAddress)
+            print(e)
+        except SMTPServerDisconnected as e:
             print(e)
     db.commit()
