@@ -1,5 +1,6 @@
 import datetime
 import math
+from smtplib import SMTPRecipientsRefused
 from uuid import UUID
 
 from .settings import *
@@ -264,6 +265,10 @@ def get_appointments_for_reminder_email(db: Session) -> list[models.Appointment]
 
 def send_appointment_reminders(db: Session):
     for appointment in get_appointments_for_reminder_email(db=db):
-        appointment.send_reminder_email()
-        appointment.reminderSent = True
+        try:
+            appointment.send_reminder_email()
+            appointment.reminderSent = True
+        except SMTPRecipientsRefused as e:
+            print(appointment.client.emailAddress)
+            print(e)
     db.commit()

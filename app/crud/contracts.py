@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
 
+from smtplib import SMTPRecipientsRefused
+
 
 def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:
     primary_query_filter = []
@@ -248,6 +250,11 @@ def get_contracts_for_expiry_email(db: Session) -> list[models.Contract]:
 
 def send_expiry_emails(db: Session):
     for contract in get_contracts_for_expiry_email(db=db):
-        contract.send_expiry_reminder_email()
-        contract.expiryReminderSent = True
+        try:
+            contract.send_expiry_reminder_email()
+            contract.expiryReminderSent = True
+        except SMTPRecipientsRefused as e:
+            print(contract.client.emailAddress)
+            print(e)
+
     db.commit()
