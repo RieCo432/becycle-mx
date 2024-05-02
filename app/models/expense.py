@@ -10,6 +10,15 @@ import app.services as services
 from app.database.db import Base
 
 
+class ExpenseReceipt(Base):
+    __tablename__ = "expenseReceipts"
+
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
+                                     server_default=text("uuid_generate_v4()"), index=True, quote=False)
+
+    content: Mapped[bytes] = mapped_column("content", LargeBinary, nullable=False, quote=False)
+
+
 class Expense(Base):
     __tablename__ = "expenses"
 
@@ -30,5 +39,8 @@ class Expense(Base):
 
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
 
-    receiptFile: Mapped[bytes] = mapped_column("receiptFile", LargeBinary, nullable=False, quote=False)
+    receiptFileId: Mapped[UUID] = mapped_column("receiptFileId", ForeignKey(ExpenseReceipt.id), nullable=True,
+                                                  default=None, server_default=text("NULL"), quote=False)
+    receiptFile: Mapped[ExpenseReceipt] = relationship(ExpenseReceipt, foreign_keys=[receiptFileId])
+
     receiptContentType: Mapped[str] = mapped_column("receiptContentType", Text, nullable=False, quote=False)

@@ -11,17 +11,25 @@ from fastapi import UploadFile, HTTPException, status
 
 
 async def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseCreate, receipt_file: UploadFile) -> models.Expense:
+    new_expense_receipt = models.ExpenseReceipt(
+        content = await receipt_file.read(),
+    )
+
+    db.add(new_expense_receipt)
+    db.commit()
+
     new_expense = models.Expense(
         type=expense_data.type,
         notes=expense_data.notes,
         expenseUserId=expense_user.id,
         expenseDate=expense_data.expenseDate,
-        receiptFile=await receipt_file.read(),
         receiptContentType=receipt_file.content_type,
         amount=expense_data.amount,
+        receiptFileId=new_expense_receipt.id
     )
     db.add(new_expense)
     db.commit()
+
     return new_expense
 
 
@@ -36,7 +44,7 @@ def get_expense_receipt_file(db: Session, expense_id: UUID) -> dict[str, str]:
     output_file_path = os.path.join(data_dir, "tempExpenseReceipt")
 
     with open(output_file_path, "wb") as fout:
-        fout.write(expense.receiptFile)
+        fout.write(expense.receiptFile.content)
 
     return {"path": output_file_path, "media_type": expense.receiptContentType}
 
