@@ -21,6 +21,8 @@ db.query(models.ClientLogin).delete()
 db.query(models.Client).delete()
 db.query(models.ClosedDay).delete()
 db.query(models.User).delete()
+db.query(models.Expense).delete()
+db.query(models.ExpenseReceipt).delete()
 
 demo_clients = [
     models.Client(firstName="alice", lastName="humphrey", emailAddress="alice.humphrey@example.com"),
@@ -45,7 +47,7 @@ db.commit()
 demo_users = [
     models.User(
         username="elaine",
-        password=bcrypt.hashpw("password", bcrypt.gensalt()),
+        password=bcrypt.hashpw("elaine1234", bcrypt.gensalt()),
         pin=bcrypt.hashpw("1234", bcrypt.gensalt()),
         admin=True,
         depositBearer=True,
