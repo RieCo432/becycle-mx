@@ -26,24 +26,28 @@
         ><Icon icon="heroicons:x-mark"
       /></span>
     </div>
-
-    <div class="sidebar-menu px-4 h-[calc(100%-100px)]" data-simplebar>
+    <simplebar
+        class="mobile-menu px-4 h-[calc(100%-80px)]">
       <Navmenu :items="topMenu" />
-    </div>
+    </simplebar>
   </div>
 </template>
 <script>
-import {Icon} from '@iconify/vue';
+import Icon from '../Icon';
 import {defineComponent} from 'vue';
-import {topMenu} from '@/constant/data';
+import {topMenu} from '../../constant/data';
 import Navmenu from './Navmenu';
+import simplebar from 'simplebar-vue';
+import 'simplebar/dist/simplebar.min.css';
 import {useThemeSettingsStore} from '@/store/themeSettings';
+
 const themeSettingsStore = useThemeSettingsStore();
 
 export default defineComponent({
   components: {
     Icon,
     Navmenu,
+    simplebar,
   },
   data() {
     return {
@@ -59,7 +63,7 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .mobile-sidebar {
   @apply fixed ltr:left-0 rtl:right-0 top-0   h-full   z-[9999]  w-[280px];
 }

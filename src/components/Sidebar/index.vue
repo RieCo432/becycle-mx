@@ -107,7 +107,6 @@
         class="sidebar-menu px-4 h-[calc(100%-80px)]">
         <Navmenu :items="topMenu" />
       </simplebar>
-      <img src="/src/assets/images/registration/blue/small-blue-landscape.png" alt="Charity Registration Logo" class="bottom-0 absolute"/>
     </div>
   </div>
 </template>
@@ -132,31 +131,6 @@ export default defineComponent({
       topMenu,
       openClass: 'w-[248px]',
       closeClass: 'w-[72px] close_sidebar',
-    };
-  },
-
-  setup() {
-    const shadowbase = ref(false);
-    const simplebarInstance = ref(null);
-    /*onMounted(() => {
-      simplebarInstance.value
-          .getScrollElement()
-          .addEventListener('scroll', () => {
-            if (simplebarInstance.value.getScrollElement().scrollTop > 50) {
-              simplebarInstance.value.getScrollElement().classList.add('scroll');
-              shadowbase.value = true;
-            } else {
-              simplebarInstance.value
-                  .getScrollElement()
-                  .classList.remove('scroll');
-              shadowbase.value = false;
-            }
-          });
-    });*/
-
-    return {
-      simplebarInstance,
-      shadowbase,
     };
   },
 });
