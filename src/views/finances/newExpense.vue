@@ -173,7 +173,7 @@ export default {
               <ErrorMessage name="expenseDate" :error="expenseDateError" class="text-danger-500"/>
             </div>
             <div class="col-span-full">
-              <div>
+              <div @click="files = []">
                 <div
                     v-bind="getRootProps()"
                     class="w-full text-center border-dashed border border-secondary-500 rounded-md py-[52px] flex flex-col justify-center items-center"
