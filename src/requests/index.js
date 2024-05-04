@@ -851,4 +851,12 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  getMyPresentationCard() {
+    return axiosClient.get('/users/me/presentation-card', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  getPresentationCardPhoto(presentationCardId) {
+    return axiosClient.get(`/public/users/presentation-cards/${presentationCardId}/photo`, {responseType: 'blob'});
+  },
 };
