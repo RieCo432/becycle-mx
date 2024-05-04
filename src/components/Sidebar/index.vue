@@ -102,11 +102,14 @@
         class="h-[60px] absolute top-[80px] nav-shadow z-[1] w-full transition-all duration-200 pointer-events-none"
         :class="[shadowbase ? ' opacity-100' : ' opacity-0']"
       ></div>
-
-      <simplebar
-        class="sidebar-menu px-4 h-[calc(100%-80px)]">
+      <simplebar :class="`sidebar-menu px-4 ${this.$store.themeSettingsStore.sidebarCollasp && !this.$store.themeSettingsStore.isMouseHovered
+            ? this.closeHeightClass
+            : this.openHeightClass}`">
         <Navmenu :items="topMenu" />
       </simplebar>
+      <div ref="scioLogo" class="absolute bottom-0">
+        <img  src="/src/assets/images/registration/blue/small-blue-landscape.png" alt="Charity Registration Logo"/>
+      </div>
     </div>
   </div>
 </template>
@@ -131,7 +134,14 @@ export default defineComponent({
       topMenu,
       openClass: 'w-[248px]',
       closeClass: 'w-[72px] close_sidebar',
+      openHeightClass: 'h-[calc(100%-187px)]',
+      closeHeightClass: 'h-[calc(100%-106px)]',
     };
+  },
+  computed: {
+    topAndBottomLogosHeight() {
+      return this.$store.themeSettingsStore.sidebarCollasp ? '167px' : '106px';
+    },
   },
 });
 </script>

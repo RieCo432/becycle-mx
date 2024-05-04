@@ -26,10 +26,12 @@
         ><Icon icon="heroicons:x-mark"
       /></span>
     </div>
-    <simplebar
-        class="mobile-menu px-4 h-[calc(100%-80px)]">
+    <simplebar class="mobile-menu px-4 h-[calc(100%-180px)]">
       <Navmenu :items="topMenu" />
     </simplebar>
+    <div class="absolute bottom-0">
+      <img src="/src/assets/images/registration/blue/small-blue-landscape.png" alt="Charity Registration Logo"/>
+    </div>
   </div>
 </template>
 <script>
