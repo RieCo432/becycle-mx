@@ -1,7 +1,8 @@
+import os
 from uuid import UUID
 
 import bcrypt
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -135,3 +136,86 @@ def get_users(db: Session) -> list[models.User]:
     return [_ for _ in db.scalars(
         select(models.User)
     )]
+
+
+def update_or_create_user_presentation_card(db: Session, user: models.User, name: str, bio: str, photo: UploadFile) -> models.UserPresentationCard:
+    user_presentation_card = db.scalar(
+        select(models.UserPresentationCard)
+        .where(models.UserPresentationCard.userId == user.id)
+    )
+
+    if user_presentation_card is None:
+        if photo is None:
+            current_dir = os.path.dirname(__file__)
+            data_dir = os.path.join(os.path.dirname(current_dir), "data")
+            default_profile_photo_path = os.path.join(data_dir, "defaultProfilePicture.jpg")
+
+            with open(default_profile_photo_path, "rb") as fin:
+                user_photo = models.UserPhoto(
+                    content=fin.read()
+                )
+        else:
+            user_photo = models.UserPhoto(
+                content=photo.file.read()
+            )
+        db.add(user_photo)
+        db.commit()
+
+        user_presentation_card = models.UserPresentationCard(
+            userId=user.id,
+            name=name,
+            bio=bio,
+            photoFileId=user_photo.id,
+            photoContentType=photo.content_type
+        )
+
+        db.add(user_presentation_card)
+
+    else:
+        user_presentation_card.name = name
+        user_presentation_card.bio = bio
+
+        if photo is not None:
+            old_user_photo = db.scalar(
+                select(models.UserPhoto)
+                .where(models.UserPhoto.id == user_presentation_card.photoFileId)
+            )
+
+            new_user_photo = models.UserPhoto(
+                content=photo.file.read()
+            )
+
+            db.add(new_user_photo)
+            db.commit()
+
+            user_presentation_card.photoFileId = new_user_photo.id
+            user_presentation_card.photoContentType = photo.content_type
+            db.delete(old_user_photo)
+
+    db.commit()
+
+    return user_presentation_card
+
+
+def get_user_presentation_cards(db: Session) -> list[models.UserPresentationCard]:
+    return [
+        _ for _ in db.scalars(
+            select(models.UserPresentationCard)
+        )
+    ]
+
+
+def get_user_presentation_card_photo(db: Session, card_id: UUID) -> dict[str, str]:
+    user_presentation_card = db.scalar(
+        select(models.UserPresentationCard)
+        .where(models.UserPresentationCard.id == card_id)
+    )
+
+    current_dir = os.path.dirname(__file__)
+    temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
+    output_file_path = os.path.join(temp_data_dir, str(card_id))
+
+    with open(output_file_path, "wb") as fout:
+        fout.write(user_presentation_card.photoFile.content)
+
+    return {"path": output_file_path, "media_type": user_presentation_card.photoContentType}

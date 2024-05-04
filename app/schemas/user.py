@@ -38,3 +38,12 @@ class UserUpdate(BaseModel):
     def roles_change(self):
         return (self.admin is not None or self.depositBearer is not None or self.rentalChecker is not None or
                 self.appointmentManager is not None or self.treasurer is not None or self.softDeleted is not None)
+
+
+class UserPresentationCard(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    bio: str
+    photoContentType: str

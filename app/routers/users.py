@@ -1,9 +1,10 @@
 import os
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -130,3 +131,20 @@ async def get_rental_checkers(
     rental_checkers = crud.get_rental_checkers(db=db)
     return rental_checkers
 
+
+@users.post("/users/me/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
+async def update_presentation_card(
+        name: Annotated[str, Body(embed=True)],
+        bio: Annotated[str, Body(embed=True)],
+        photo: UploadFile,
+        user: models.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)
+) -> schemas.UserPresentationCard:
+    return crud.update_or_create_user_presentation_card(db=db, user=user, name=name, bio=bio, photo=photo)
+
+
+@users.get("/users/me/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
+def get_my_presentation_card(
+        user: models.User = Depends(dep.get_current_active_user),
+) -> schemas.UserPresentationCard:
+    return user.presentationCard

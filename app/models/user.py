@@ -1,13 +1,41 @@
 from typing import List
 from uuid import uuid4
 
-from sqlalchemy import String, UUID, Boolean, text
+from sqlalchemy import String, UUID, Boolean, text, Text, ForeignKey, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
 from .contract import Contract
 from .depositExchange import DepositExchange
 from .expense import Expense
+
+
+class UserPhoto(Base):
+    __tablename__ = "userphotos"
+
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
+                                     server_default=text("uuid_generate_v4()"), index=True, quote=False)
+
+    content: Mapped[bytes] = mapped_column("content", LargeBinary, nullable=False, quote=False)
+
+
+class UserPresentationCard(Base):
+    __tablename__ = "userpresentationcards"
+
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4,
+                                     server_default=text("uuid_generate_v4()"), index=True, quote=False)
+
+    userId: Mapped[UUID] = mapped_column("userId", ForeignKey("users.id"), nullable=False, quote=False)
+    user: Mapped["User"] = relationship("User", foreign_keys=[userId], back_populates="presentationCard")
+
+    name: Mapped[str] = mapped_column("name", String(40), nullable=False, index=True, quote=False, unique=True)
+    bio: Mapped[str] = mapped_column("bio", Text, nullable=False, index=True, quote=False)
+
+    photoFileId: Mapped[UUID] = mapped_column("photoFileId", ForeignKey(UserPhoto.id), nullable=True,
+                                                default=None, server_default=text("NULL"), quote=False)
+    photoFile: Mapped["UserPhoto"] = relationship(UserPhoto, foreign_keys=[photoFileId])
+
+    photoContentType: Mapped[str] = mapped_column("photoContentType", Text, nullable=False, quote=False)
 
 
 class User(Base):
@@ -36,6 +64,9 @@ class User(Base):
     expenses: Mapped[List["Expense"]] = relationship("Expense", foreign_keys=[Expense.expenseUserId], back_populates="expenseUser")
     transfers: Mapped[List["Expense"]] = relationship("Expense", foreign_keys=[Expense.treasurerUserId],
                                                      back_populates="treasurerUser")
+
+    presentationCard: Mapped["UserPresentationCard"] = relationship("UserPresentationCard", foreign_keys=[UserPresentationCard.userId],
+                                                             back_populates="user")
 
     def get_deposit_bearer_balance(self):
         contract_balance = sum([contract.depositAmountCollected for contract in self.depositCollectedContracts]) - sum(

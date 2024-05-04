@@ -1,7 +1,9 @@
 import datetime
 from datetime import time
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 import app.crud as crud
@@ -43,3 +45,18 @@ def get_next_closed_day(db: Session = Depends(dep.get_db)) -> schemas.ClosedDay:
 @public.get("/public/address")
 def get_address(db: Session = Depends(dep.get_db)) -> schemas.Address:
     return crud.get_address(db=db)
+
+
+@public.get("/public/users/presentation-cards")
+async def get_user_presentation_cards(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.UserPresentationCard]:
+    return crud.get_user_presentation_cards(db=db)
+
+
+@public.get("/public/users/presentation-cards/{card_id}/photo")
+async def get_user_presentation_card_photo(
+        card_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> FileResponse:
+    return FileResponse(**crud.get_user_presentation_card_photo(db=db, card_id=card_id))
