@@ -414,7 +414,7 @@ def get_contracts_takeout_excel(db: Session) -> str:
 
     current_dir = os.path.dirname(__file__)
     data_dir = os.path.join(os.path.dirname(current_dir), "data")
-    output_file_path = os.path.join(data_dir, "contracts.xlsx")
+    output_file_path = os.path.join(data_dir, "temp", "contracts.xlsx")
 
     with pd.ExcelWriter(output_file_path, engine="openpyxl") as writer:
         contracts_df.to_excel(writer, sheet_name="contracts", index=False)
@@ -501,7 +501,7 @@ def get_contracts_takeout_pdf(db: Session) -> str:
         page.merge_page(new_pdf.pages[0])
         output.add_page(page)
 
-    output_file_path = os.path.join(data_dir, "contracts.pdf")
+    output_file_path = os.path.join(data_dir, "temp", "contracts.pdf")
     output_stream = open(output_file_path, "wb")
     output.write(output_stream)
     output_stream.close()
