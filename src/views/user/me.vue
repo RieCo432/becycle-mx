@@ -48,6 +48,15 @@ export default {
     });
     requests.getMyPresentationCard().then((response) => {
       this.presentationCardDetails = response.data;
+    }).catch((error) => {
+      console.log(error);
+      this.presentationCardDetails = {
+        name: 'NOT SET',
+        bio: 'NOT SET',
+        id: 'NOTSET',
+        photoContentType: 'image/jpeg',
+      };
+    }).finally(() => {
       this.loadingPresentationCard = false;
     });
   },

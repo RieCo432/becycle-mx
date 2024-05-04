@@ -37,11 +37,15 @@ export default {
       this.bio = this.presentationCardDetails.bio;
     },
     getImage() {
-      requests.getPresentationCardPhoto(this.presentationCardDetails.id).then((response) => {
-        const photoFile = new File([response.data], {type: this.presentationCardDetails.photoContentType});
-        this.photoUrl = window.URL.createObjectURL(photoFile);
-        this.files.splice(0, this.files.length, Object.assign(photoFile, {preview: this.photoUrl}));
-      });
+      if (this.presentationCardDetails.id !== 'NOTSET') {
+        requests.getPresentationCardPhoto(this.presentationCardDetails.id).then((response) => {
+          const photoFile = new File([response.data], {type: this.presentationCardDetails.photoContentType});
+          this.photoUrl = window.URL.createObjectURL(photoFile);
+          this.files.splice(0, this.files.length, Object.assign(photoFile, {preview: this.photoUrl}));
+        });
+      } else {
+        this.photoUrl = 'src/assets/images/defaultProfilePicture.jpg';
+      }
     },
   },
   created() {
