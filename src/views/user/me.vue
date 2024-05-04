@@ -1,7 +1,12 @@
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-12">
-      <UserPresentationCard v-if="!loadingPresentationCard" :presentation-card-details="presentationCardDetails"/>
+    <div class="col-span-6">
+      <UserPresentationCard
+          v-if="!loadingPresentationCard"
+          :presentation-card-details="presentationCardDetails"
+          editable
+          :update-card-details="updateMyCardDetails"
+      />
     </div>
   </div>
 </template>
@@ -11,6 +16,9 @@
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 import UserPresentationCard from '@/components/Card/UserPresentationCard.vue';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
 
 export default {
   name: 'UserMe',
@@ -25,6 +33,14 @@ export default {
       photoUrl: null,
       loadingPresentationCard: true,
     };
+  },
+  methods: {
+    updateMyCardDetails(name, bio, photo) {
+      requests.postMyPresentationCardDetails(name, bio, photo).then((response) => {
+        this.presentationCardDetails = response.data;
+        toast.success('Card Updated!', {timeout: 2000});
+      });
+    },
   },
   created() {
     requests.getUserMe().then((response) => {

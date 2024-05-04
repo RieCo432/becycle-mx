@@ -859,4 +859,16 @@ export default {
   getPresentationCardPhoto(presentationCardId) {
     return axiosClient.get(`/public/users/presentation-cards/${presentationCardId}/photo`, {responseType: 'blob'});
   },
+  postMyPresentationCardDetails(name, bio, photo) {
+    return axiosClient.post('/users/me/presentation-card', {
+      name: name,
+      bio: bio,
+      photo: photo,
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };
