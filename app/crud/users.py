@@ -219,3 +219,15 @@ def get_user_presentation_card_photo(db: Session, card_id: UUID) -> dict[str, st
         fout.write(user_presentation_card.photoFile.content)
 
     return {"path": output_file_path, "media_type": user_presentation_card.photoContentType}
+
+
+def get_user_presentation_card(db: Session, user: models.User) -> models.UserPresentationCard:
+    user_presentation_card = db.scalar(
+        select(models.UserPresentationCard)
+        .where(models.UserPresentationCard.userId == user.id)
+    )
+
+    if user_presentation_card is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User Presentation Card not found"})
+
+    return user_presentation_card

@@ -144,7 +144,8 @@ async def update_presentation_card(
 
 
 @users.get("/users/me/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
-def get_my_presentation_card(
+async def get_my_presentation_card(
         user: models.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)
 ) -> schemas.UserPresentationCard:
-    return user.presentationCard
+    return crud.get_user_presentation_card(db=db, user=user)
