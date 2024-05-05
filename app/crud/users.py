@@ -139,27 +139,43 @@ def get_users(db: Session) -> list[models.User]:
 
 
 def update_or_create_user_presentation_card(db: Session, user: models.User, name: str, bio: str, photo: UploadFile) -> models.UserPresentationCard:
+    from PIL import Image
+
+    current_dir = os.path.dirname(__file__)
+    temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
+    temp_image_path = os.path.join(temp_data_dir, photo.filename)
+
+    with Image.open(photo.file, ) as image:
+        width = image.size[0]
+        height = image.size[1]
+
+        if width != height:
+            shorter = width if width < height else height
+            image = image.crop((
+                (width - shorter) // 2,
+                (height - shorter) // 2,
+                (width + (width - shorter) // 2),
+                (height - (height - shorter) // 2)
+            ))
+
+        if image.size[0] > 1024:
+            image = image.resize((1024, 1024))
+
+        with open(temp_image_path, "wb") as fout:
+            image.save(fout)
+
     user_presentation_card = db.scalar(
         select(models.UserPresentationCard)
         .where(models.UserPresentationCard.userId == user.id)
     )
 
     if user_presentation_card is None:
-        if photo is None:
-            current_dir = os.path.dirname(__file__)
-            data_dir = os.path.join(os.path.dirname(current_dir), "data")
-            default_profile_photo_path = os.path.join(data_dir, "defaultProfilePicture.jpg")
-
-            with open(default_profile_photo_path, "rb") as fin:
-                user_photo = models.UserPhoto(
-                    content=fin.read()
-                )
-        else:
+        with open(temp_image_path, "rb") as fin:
             user_photo = models.UserPhoto(
-                content=photo.file.read()
+                content=fin.read()
             )
-        db.add(user_photo)
-        db.commit()
+            db.add(user_photo)
+            db.commit()
 
         user_presentation_card = models.UserPresentationCard(
             userId=user.id,
@@ -175,23 +191,21 @@ def update_or_create_user_presentation_card(db: Session, user: models.User, name
         user_presentation_card.name = name
         user_presentation_card.bio = bio
 
-        if photo is not None:
-            old_user_photo = db.scalar(
-                select(models.UserPhoto)
-                .where(models.UserPhoto.id == user_presentation_card.photoFileId)
-            )
+        old_user_photo = db.scalar(
+            select(models.UserPhoto)
+            .where(models.UserPhoto.id == user_presentation_card.photoFileId)
+        )
 
+        with open(temp_image_path, "rb") as fin:
             new_user_photo = models.UserPhoto(
-                content=photo.file.read()
+                content=fin.read()
             )
-
             db.add(new_user_photo)
             db.commit()
 
-            user_presentation_card.photoFileId = new_user_photo.id
-            user_presentation_card.photoContentType = photo.content_type
-            db.delete(old_user_photo)
-
+        user_presentation_card.photoFileId = new_user_photo.id
+        user_presentation_card.photoContentType = photo.content_type
+        db.delete(old_user_photo)
     db.commit()
 
     return user_presentation_card
