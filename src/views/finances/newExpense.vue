@@ -104,10 +104,10 @@ export default {
   created() {
     requests.getExpenseTypes().then((response) => {
       this.expenseTypes = response.data.map((t) => (
-          {
-            label: t,
-            value: t,
-          }
+        {
+          label: t,
+          value: t,
+        }
       ));
     });
   },
@@ -116,11 +116,11 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-12">
+  <div class="grid grid-cols-1">
     <div class="col-span-full">
       <Card title="Submit New Expense">
         <form @submit.prevent="submitNewExpense">
-          <div class="grid grid-cols-6 lg:grid-cols-12 gap-5">
+          <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
             <div class="col-span-6">
               <Textinput
                   label="Amount (&pound;)"
@@ -179,7 +179,7 @@ export default {
                     class="w-full text-center border-dashed border border-secondary-500 rounded-md py-[52px] flex flex-col justify-center items-center"
                     :class="files.length === 0 ? 'cursor-pointer' : ' pointer-events-none'"
                 >
-                  <div v-if="files.length === 0">
+                  <div v-if="files.length === 0" class="w-full">
                     <input v-bind="getInputProps()" class="hidden" />
                     <img src="@/assets/images/svg/upload.svg" alt="" class="mx-auto mb-4" />
                     <p
@@ -193,19 +193,16 @@ export default {
                     </p>
                   </div>
                   <div class="flex space-x-4">
-                    <div v-for="(file, i) in files" :key="i" class="mb-4 flex-none">
-                      <div class="h-[300px] w-[300px] mx-auto mt-6 rounded-md" key="{i}">
-                        <img
-                            :src="file.preview"
-                            class="object-cover h-full w-full block rounded-md"
-                        />
-                      </div>
-                    </div>
+                    <img
+                        v-if="files.length === 1"
+                        :src="files[0].preview"
+                        class="object-contain block rounded-md"
+                    />
                   </div>
                 </div>
               </div>
             </div>
-            <div class="col-span-12">
+            <div class="col-span-full">
               <Button type="submit" class="btn block w-full text-center">
                 Submit
               </Button>
