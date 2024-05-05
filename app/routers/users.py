@@ -132,6 +132,18 @@ async def get_rental_checkers(
     return rental_checkers
 
 
+@users.post("/users/presentation-card/{presentation_card_id}", dependencies=[Depends(dep.get_current_admin_user)])
+async def update_presentation_card(
+        presentation_card_id: UUID,
+        name: Annotated[str, Body(embed=True)],
+        bio: Annotated[str, Body(embed=True)],
+        photo: UploadFile,
+        db: Session = Depends(dep.get_db)
+) -> schemas.UserPresentationCard:
+    presentation_card = crud.get_user_presentation_card_by_id(db=db, presentation_card_id=presentation_card_id)
+    return crud.update_or_create_user_presentation_card(db=db, user=presentation_card.user, name=name, bio=bio, photo=photo)
+
+
 @users.post("/users/me/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
 async def update_presentation_card(
         name: Annotated[str, Body(embed=True)],
@@ -148,4 +160,13 @@ async def get_my_presentation_card(
         user: models.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.UserPresentationCard:
+    return crud.get_user_presentation_card(db=db, user=user)
+
+
+@users.get("/users/{user_id}/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
+async def get_my_presentation_card(
+        user_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.UserPresentationCard:
+    user = crud.get_user(db=db, user_id=user_id)
     return crud.get_user_presentation_card(db=db, user=user)

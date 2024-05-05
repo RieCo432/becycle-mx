@@ -231,3 +231,10 @@ def get_user_presentation_card(db: Session, user: models.User) -> models.UserPre
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User Presentation Card not found"})
 
     return user_presentation_card
+
+
+def get_user_presentation_card_by_id(db: Session, presentation_card_id: UUID) -> models.UserPresentationCard:
+    return db.scalar(
+        select(models.UserPresentationCard)
+        .where(models.UserPresentationCard.id == presentation_card_id)
+    )
