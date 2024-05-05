@@ -103,6 +103,12 @@ export default {
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
+    function returnAcceptingUserSelected() {
+      returnAcceptingPasswordOrPin.value = null;
+      if (returnAcceptingUser.value === depositReturningUser.value) {
+        returnAcceptingPasswordOrPin.value = depositReturningPassword.value;
+      }
+    }
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
@@ -159,6 +165,8 @@ export default {
 
       everythingCorrect,
       everythingCorrectError,
+
+      returnAcceptingUserSelected,
 
       submit,
       steps,
@@ -445,6 +453,7 @@ export default {
                           v-model="returnAcceptingUser"
                           name="returnAcceptingUser"
                           :error="returnAcceptingUserError"
+                          @change="returnAcceptingUserSelected"
                       />
 
                       <Textinput
