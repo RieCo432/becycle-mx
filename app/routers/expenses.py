@@ -30,7 +30,7 @@ async def post_expense(
         expense_user: schemas.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.Expense:
-    return await crud.create_expense(db=db, expense_user=expense_user, expense_data=schemas.ExpenseCreate(
+    return crud.create_expense(db=db, expense_user=expense_user, expense_data=schemas.ExpenseCreate(
         type=expense_type,
         amount=amount,
         notes=notes,

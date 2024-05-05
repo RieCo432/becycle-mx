@@ -145,7 +145,7 @@ def update_or_create_user_presentation_card(db: Session, user: models.User, name
     temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
     temp_image_path = os.path.join(temp_data_dir, photo.filename)
 
-    with Image.open(photo.file, ) as image:
+    with Image.open(photo.file) as image:
         width = image.size[0]
         height = image.size[1]
 
