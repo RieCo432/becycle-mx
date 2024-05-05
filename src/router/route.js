@@ -38,6 +38,15 @@ const routes = [
         component: () => import('@/views/template.vue'),
       },
       {
+        path: '/volunteers',
+        name: 'Volunteers',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/volunteers',
+        },
+        component: () => import('@/views/ourVolunteers.vue'),
+      },
+      {
         path: '/users/login',
         name: 'Volunteer Login',
         meta: {

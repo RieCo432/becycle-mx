@@ -211,4 +211,10 @@ export const topMenu = [
       },
     ],
   },
+  {
+    title: 'Our Volunteers',
+    icon: 'heroicons-outline:user-group',
+    link: '/volunteers',
+    show: ['always'],
+  },
 ];

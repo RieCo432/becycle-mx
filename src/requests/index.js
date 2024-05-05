@@ -871,4 +871,19 @@ export default {
       },
     });
   },
+  getPublicUserPresentationCards() {
+    return axiosClient.get('/public/users/presentation-cards');
+  },
+  postUserPresentationCardDetails(presentationCardId, name, bio, photo) {
+    return axiosClient.post(`/users/presentation-card/${presentationCardId}`, {
+      name: name,
+      bio: bio,
+      photo: photo,
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };
