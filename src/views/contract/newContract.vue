@@ -319,6 +319,7 @@
                       v-model="workingUser"
                       name="workingUser"
                       :error="workingUserError"
+                      @change="workingUserSelected"
                   />
 
                   <Textinput
@@ -347,6 +348,7 @@
                       v-model="checkingUser"
                       name="checkingUser"
                       :error="checkingUserError"
+                      @change="checkingUserSelected"
                   />
 
                   <Textinput
@@ -512,7 +514,6 @@ export default {
     Radio,
     Select,
   },
-
   setup() {
     const steps = [
       {
@@ -667,6 +668,21 @@ export default {
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
+    function workingUserSelected() {
+      workingPasswordOrPin.value = null;
+      if (workingUser.value === depositCollectingUser.value) {
+        workingPasswordOrPin.value = depositCollectingPassword.value;
+      }
+    }
+    function checkingUserSelected() {
+      checkingPasswordOrPin.value = null;
+      if (checkingUser.value === depositCollectingUser.value) {
+        checkingPasswordOrPin.value = depositCollectingPassword.value;
+      }
+    }
+
+
+
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
       const totalSteps = steps.length;
@@ -806,6 +822,8 @@ export default {
       everythingCorrect,
       everythingCorrectError,
 
+      workingUserSelected,
+      checkingUserSelected,
 
       submit,
       steps,
@@ -891,13 +909,13 @@ export default {
   computed: {
     filtered_client_suggestions() {
       return this.clientSuggestions.filter((client) => (
-          (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
+        (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
           (this.lastName && client.lastName.startsWith(this.lastName.toLowerCase())) ||
           (this.emailAddress && client.emailAddress.startsWith(this.emailAddress.toLowerCase()))
       ));
     },
     filteredClientSuggestionsLegible() {
-      return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`))
+      return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
     filtered_make_suggestions() {
       return this.make_suggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
