@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-12 gap-5">
+  <div class="grid lg:grid-cols-12 grid-cols-6 gap-5">
     <div class="col-span-6">
       <UserPresentationCard
           v-if="!loadingPresentationCard"

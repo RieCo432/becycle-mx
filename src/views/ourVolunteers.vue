@@ -1,6 +1,9 @@
 <script>
 import requests from '@/requests';
 import UserPresentationCard from '@/components/Card/UserPresentationCard.vue';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
 
 export default {
   name: 'ourVolunteers',
@@ -24,6 +27,7 @@ export default {
       requests.postUserPresentationCardDetails(presentationCardId, name, bio, photo).then((response) => {
         const indexInArray = this.allUserPresentationCardDetails.findIndex((c) => c.id === response.data.id);
         this.allUserPresentationCardDetails.splice(indexInArray, 1, response.data);
+        toast.success('Card Updated!', {timeout: 2000});
       });
     },
   },
@@ -31,7 +35,7 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-5">
+  <div class="grid 2xl:grid-cols-2 grid-cols-1 gap-5">
     <div v-for="userPresentationCardDetails in allUserPresentationCardDetails" class="col-span-1">
       <UserPresentationCard
           :key="userPresentationCardDetails.id"
