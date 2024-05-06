@@ -546,10 +546,10 @@ export default {
       },
     ];
 
-    const contractTypes = ref(['standard', 'child']);
-    requests.getContractTypes().then((response) => (contractTypes.value = response.data));
+    const contractTypes = ref([]);
+    requests.getContractTypes().then((response) => (contractTypes.value = response.data.map((t) => (t.id))));
 
-    const bikeConditions = ref(['fair', 'good']);
+    const bikeConditions = ref([]);
     requests.getBikeConditions().then((response) => (bikeConditions.value = response.data));
 
     const toast = useToast();
@@ -680,8 +680,6 @@ export default {
         checkingPasswordOrPin.value = depositCollectingPassword.value;
       }
     }
-
-
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form

@@ -105,8 +105,8 @@ export default {
     requests.getExpenseTypes().then((response) => {
       this.expenseTypes = response.data.map((t) => (
         {
-          label: t,
-          value: t,
+          label: `${t.id} --- ${t.description}`,
+          value: t.id,
         }
       ));
     });
