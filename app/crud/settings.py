@@ -327,3 +327,34 @@ def delete_contract_type(db: Session, contract_type_id: str) -> models.ContractT
     db.delete(contract_type)
     db.commit()
     return contract_type
+
+
+def add_expense_type(db: Session, new_expense_type: schemas.ExpenseType) -> models.ExpenseType:
+    expense_type = models.ExpenseType(
+        id=new_expense_type.id,
+        description=new_expense_type.description
+    )
+    db.add(expense_type)
+    db.commit()
+    return expense_type
+
+
+def delete_expense_type(db: Session, expense_type_id: str) -> models.ExpenseType:
+    expense_type = db.scalar(
+        select(models.ExpenseType)
+        .where(models.ExpenseType.id == expense_type_id)
+    )
+    db.delete(expense_type)
+    db.commit()
+    return expense_type
+
+
+def update_expense_type(db: Session, expense_type_id: str, description: str) -> models.ExpenseType:
+    expense_type = db.scalar(
+        select(models.ExpenseType)
+        .where(models.ExpenseType.id == expense_type_id)
+    )
+
+    expense_type.description = description
+    db.commit()
+    return expense_type
