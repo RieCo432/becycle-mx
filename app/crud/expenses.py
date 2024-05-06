@@ -24,9 +24,9 @@ def create_expense(db: Session, expense_user: models.User, expense_data: schemas
 
             if larger > 2048:
                 ratio = int(ceil(larger / 2048))
-                image_resized = image.reduce(ratio)
+                image = image.reduce(ratio)
 
-            image_resized.save(output_file_path)
+            image.save(output_file_path)
 
         with open(output_file_path, "rb") as fin:
             new_expense_receipt = models.ExpenseReceipt(
