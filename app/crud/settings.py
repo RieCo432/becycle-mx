@@ -306,3 +306,24 @@ def get_contract_types(db: Session) -> list[models.ContractType]:
             select(models.ContractType)
         )
     ]
+
+
+def add_contract_type(db: Session, new_contract_type: schemas.ContractType) -> models.ContractType:
+    contract_type = models.ContractType(
+        id=new_contract_type.id
+    )
+
+    db.add(contract_type)
+    db.commit()
+    return contract_type
+
+
+def delete_contract_type(db: Session, contract_type_id: str) -> models.ContractType:
+    contract_type = db.scalar(
+        select(models.ContractType)
+        .where(models.ContractType.id == contract_type_id)
+    )
+
+    db.delete(contract_type)
+    db.commit()
+    return contract_type

@@ -86,3 +86,19 @@ async def delete_closed_day(
 @settings.put("/settings/address", dependencies=[Depends(dep.get_current_admin_user)])
 async def update_address(new_address: schemas.Address, db: Session = Depends(dep.get_db)) -> schemas.Address:
     return crud.update_address(db=db, new_address=new_address)
+
+
+@settings.post("/settings/contract-types", dependencies=[Depends(dep.get_current_admin_user)])
+async def add_contract_type(
+        new_contract_type: schemas.ContractType,
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractType:
+    return crud.add_contract_type(db=db, new_contract_type=new_contract_type)
+
+
+@settings.delete("/settings/contract-types/{contract_type_id}", dependencies=[Depends(dep.get_current_admin_user)])
+async def delete_contract_type(
+        contract_type_id: str,
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractType:
+    return crud.delete_contract_type(db=db, contract_type_id=contract_type_id)
