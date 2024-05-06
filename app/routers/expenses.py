@@ -47,8 +47,8 @@ async def get_expense_receipt(
 
 
 @expenses.get("/expenses/types")
-async def get_expense_types() -> list[str]:
-    return ["consumables", "equipment", "merchandise", "cash", "mixed", "other"]
+async def get_expense_types(db: Session = Depends(dep.get_db)) -> list[schemas.ExpenseType]:
+    return crud.get_expense_types(db=db)
 
 
 @expenses.get("/expenses")

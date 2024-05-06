@@ -290,3 +290,19 @@ def update_address(db: Session, new_address: schemas.Address) -> models.Address:
     db.commit()
 
     return current_address
+
+
+def get_expense_types(db: Session) -> list[models.ExpenseType]:
+    return [
+        _ for _ in db.scalars(
+            select(models.ExpenseType)
+        )
+    ]
+
+
+def get_contract_types(db: Session) -> list[models.ContractType]:
+    return [
+        _ for _ in db.scalars(
+            select(models.ContractType)
+        )
+    ]

@@ -53,3 +53,14 @@ class Address(BaseModel):
     street: str
     postcode: str
     city: str
+
+
+class ExpenseType(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    description: str
+
+
+class ContractType(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str

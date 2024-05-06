@@ -48,3 +48,16 @@ class Address(Base):
     street: Mapped[str] = mapped_column("street", Text, nullable=False, quote=False)
     postcode: Mapped[str] = mapped_column("postcode", Text, nullable=False, quote=False)
     city: Mapped[str] = mapped_column("city", Text, nullable=False, quote=False)
+
+
+class ContractType(Base):
+    __tablename__ = "contracttypes"
+
+    id: Mapped[str] = mapped_column("id", String(20), nullable=False, quote=False, primary_key=True)
+
+
+class ExpenseType(Base):
+    __tablename__ = "expensetypes"
+
+    id: Mapped[str] = mapped_column("id", String(20), nullable=False, quote=False, primary_key=True)
+    description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)

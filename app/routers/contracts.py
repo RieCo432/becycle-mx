@@ -113,8 +113,8 @@ async def extend_contract(
 
 
 @contracts.get("/contract/types", dependencies=[Depends(dep.get_current_active_user)])
-async def get_contract_types() -> list[str]:
-    return ["standard", "refugee", "child", "premium"]
+async def get_contract_types(db: Session = Depends(dep.get_db)) -> list[schemas.ContractType]:
+    return crud.get_contract_types(db=db)
 
 
 @contracts.get("/contracts/paper", dependencies=[Depends(dep.get_current_active_user)])
