@@ -6,13 +6,17 @@ import requests from '@/requests';
 import Button from '@/components/Button/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
 import {useToast} from 'vue-toastification';
+import DashButton from '@/components/Button/index.vue';
+import {ref} from 'vue';
 
 const toast = useToast();
 
 export default {
   name: 'basicSettings',
-  components: {Textinput, Button, Card},
+  components: {DashButton, Textinput, Button, Card},
   setup() {
+    const contractTypes = ref([]);
+
     const newAddressSchema = yup.object().shape({
       number: yup.string().required('Street Number is required'),
       street: yup.string().required('Street Name is required'),
@@ -20,9 +24,18 @@ export default {
       city: yup.string().required('City is required'),
     });
 
-    const {handleSubmit} = useForm({
+    const newContractTypeSchema = yup.object().shape({
+      newContractTypeId: yup.string().max(20).required(),
+    });
+
+    const {handleSubmit: handleUpdateAddressSubmit} = useForm({
       validationSchema: newAddressSchema,
       keepValuesOnUnmount: true,
+    });
+
+    const {handleSubmit: handleNewContractTypeSubmit} = useForm({
+      validationSchema: newContractTypeSchema,
+      keepValuesOnDismount: true,
     });
 
     const {value: number, errorMessage: numberError} = useField('number');
@@ -30,7 +43,9 @@ export default {
     const {value: postcode, errorMessage: postcodeError} = useField('postcode');
     const {value: city, errorMessage: cityError} = useField('city');
 
-    const submitChangeDetails = handleSubmit(() => {
+    const {value: newContractTypeId, errorMessage: newContractTypeIdError, resetField: resetNewContractTypeId} = useField('newContractTypeId');
+
+    const submitChangeDetails = handleUpdateAddressSubmit(() => {
       requests.putAddress(
           {
             number: number.value,
@@ -39,6 +54,17 @@ export default {
             city: city.value,
           }).then((response) => {
         toast.success('Address updated', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+    });
+
+    const submitNewContractType = handleNewContractTypeSubmit(() => {
+      requests.postContractType(newContractTypeId.value).then((response) => {
+        console.log(response);
+        contractTypes.value.push(response.data);
+        resetNewContractTypeId();
+        toast.success('Contract Type created', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
@@ -54,6 +80,10 @@ export default {
       city,
       cityError,
       submitChangeDetails,
+      contractTypes,
+      newContractTypeId,
+      newContractTypeIdError,
+      submitNewContractType,
     };
   },
   data() {
@@ -69,63 +99,113 @@ export default {
       this.postcode = this.address.postcode;
       this.city = this.address.city;
     });
+    requests.getContractTypes().then((response) => {
+      this.contractTypes = response.data;
+    });
+  },
+  methods: {
+    deleteContractType(contractTypeId) {
+      requests.deleteContractType(contractTypeId).then((response) => {
+        const indexInArray = this.contractTypes.findIndex((t) => (t.id === response.data.id));
+        this.contractTypes.splice(indexInArray, 1);
+        toast.success('Contract Type deleted', {timeout: 2000});
+      });
+    },
   },
 };
 </script>
 
 <template>
-  <div class="grid grid-cols-3">
-    <Card title="Update Address">
-      <form @submit.prevent="submitChangeDetails">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="md:col-span-6 col-span-12">
-            <Textinput
-                label="Street Number"
-                type="text"
-                placeholder="21-23"
-                name="number"
-                v-model="number"
-                :error="numberError"
-            />
+  <div class="grid grid-cols-3 gap-5">
+    <div class="col-span-1">
+      <Card title="Update Address">
+        <form @submit.prevent="submitChangeDetails">
+          <div class="grid grid-cols-12 gap-5">
+            <div class="md:col-span-6 col-span-12">
+              <Textinput
+                  label="Street Number"
+                  type="text"
+                  placeholder="21-23"
+                  name="number"
+                  v-model="number"
+                  :error="numberError"
+              />
+            </div>
+            <div class="md:col-span-6 col-span-12">
+              <Textinput
+                  label="Street Name"
+                  type="text"
+                  placeholder="High Street"
+                  name="street"
+                  v-model="street"
+                  :error="streetError"
+              />
+            </div>
+            <div class="col-span-6">
+              <Textinput
+                  label="Post Code"
+                  type="text"
+                  placeholder="AB24 3EE"
+                  name="postcode"
+                  v-model="postcode"
+                  :error="postcodeError"
+              />
+            </div>
+            <div class="col-span-6">
+              <Textinput
+                  label="City"
+                  type="text"
+                  placeholder="Aberdeen"
+                  name="city"
+                  v-model="city"
+                  :error="cityError"
+              />
+            </div>
+            <div class="col-span-12">
+              <Button type="submit" class="btn btn-dark block w-full text-center">
+                Submit
+              </Button>
+            </div>
           </div>
-          <div class="md:col-span-6 col-span-12">
-            <Textinput
-                label="Street Name"
-                type="text"
-                placeholder="High Street"
-                name="street"
-                v-model="street"
-                :error="streetErrort"
-            />
+        </form>
+      </Card>
+    </div>
+    <div class="col-span-1">
+      <Card title="Manage Contract Types">
+        <div class="grid grid-cols-2 gap-2">
+          <div class="col-span-1">
+            <span class="text-slate-700 dark:text-slate-300 text-xl">Contract Type</span>
           </div>
-          <div class="col-span-6">
-            <Textinput
-                label="Post Code"
-                type="text"
-                placeholder="AB24 3EE"
-                name="postcode"
-                v-model="postcode"
-                :error="postcodeError"
-            />
+          <div class="col-span-1">
+            <span class="text-slate-700 dark:text-slate-300 text-xl">Action</span>
           </div>
-          <div class="col-span-6">
-            <Textinput
-                label="City"
-                type="text"
-                placeholder="Aberdeen"
-                name="city"
-                v-model="city"
-                :error="cityError"
-            />
-          </div>
-          <div class="col-span-12">
-            <Button type="submit" class="btn btn-dark block w-full text-center">
-              Submit
-            </Button>
-          </div>
+          <template v-for="contractType in contractTypes" :key="contractType.id">
+            <div class="col-span-1">
+              <span class="text-slate-700 dark:text-slate-300">{{contractType.id}}</span>
+            </div>
+            <div class="col-span-1">
+              <DashButton @click="deleteContractType(contractType.id)" class="bg-danger-600 btn-sm mx-auto">Delete</DashButton>
+            </div>
+          </template>
+          <form @submit.prevent="submitNewContractType">
+            <div class="col-span-1">
+              <Textinput
+                  type="text"
+                  placeholder="New Contract Type"
+                  name="newContractType"
+                  v-model="newContractTypeId"
+                  :error="newContractTypeIdError"
+              />
+            </div>
+            <div class="col-span-1">
+              <Button type="submit" class="btn-sm mx-auto">
+                Add
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
-    </Card>
+      </Card>
+    </div>
   </div>
 </template>
 

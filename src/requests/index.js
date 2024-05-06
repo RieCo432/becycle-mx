@@ -886,4 +886,16 @@ export default {
       },
     });
   },
+  deleteContractType(contractTypeId) {
+    return axiosClient.delete(`/settings/contract-types/${contractTypeId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  postContractType(contractTypeId) {
+    return axiosClient.post('/settings/contract-types', {
+      id: contractTypeId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
