@@ -172,38 +172,38 @@ export default {
     </div>
     <div class="col-span-1">
       <Card title="Manage Contract Types">
-        <div class="grid grid-cols-2 gap-2">
-          <div class="col-span-1">
+        <form @submit.prevent="submitNewContractType">
+        <div class="grid grid-cols-4 gap-2">
+          <div class="col-span-3">
             <span class="text-slate-700 dark:text-slate-300 text-xl">Contract Type</span>
           </div>
           <div class="col-span-1">
             <span class="text-slate-700 dark:text-slate-300 text-xl">Action</span>
           </div>
           <template v-for="contractType in contractTypes" :key="contractType.id">
-            <div class="col-span-1">
+            <div class="col-span-3">
               <span class="text-slate-700 dark:text-slate-300">{{contractType.id}}</span>
             </div>
             <div class="col-span-1">
-              <DashButton @click="deleteContractType(contractType.id)" class="bg-danger-600 btn-sm mx-auto">Delete</DashButton>
+              <DashButton @click="deleteContractType(contractType.id)" class="bg-danger-600 btn-sm mx-auto block-btn">Delete</DashButton>
             </div>
           </template>
-          <form @submit.prevent="submitNewContractType">
-            <div class="col-span-1">
-              <Textinput
-                  type="text"
-                  placeholder="New Contract Type"
-                  name="newContractType"
-                  v-model="newContractTypeId"
-                  :error="newContractTypeIdError"
-              />
-            </div>
-            <div class="col-span-1">
-              <Button type="submit" class="btn-sm mx-auto">
-                Add
-              </Button>
-            </div>
-          </form>
-        </div>
+          <div class="col-span-3">
+            <Textinput
+                type="text"
+                placeholder="New Contract Type"
+                name="newContractType"
+                v-model="newContractTypeId"
+                :error="newContractTypeIdError"
+            />
+          </div>
+          <div class="col-span-1">
+            <DashButton type="submit" class="btn-sm mx-auto block-btn">
+              Add
+            </DashButton>
+          </div>
+          </div>
+        </form>
       </Card>
     </div>
   </div>
