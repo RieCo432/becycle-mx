@@ -898,4 +898,17 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  deleteExpenseType(expenseTypeId) {
+    return axiosClient.delete(`/settings/expense-types/${expenseTypeId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  postNewExpenseType(expenseTypeId, expenseTypeDescription) {
+    return axiosClient.post('/settings/expense-types', {
+      id: expenseTypeId,
+      description: expenseTypeDescription,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
