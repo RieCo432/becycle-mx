@@ -254,3 +254,27 @@ def get_user_presentation_card_by_id(db: Session, presentation_card_id: UUID) ->
         select(models.UserPresentationCard)
         .where(models.UserPresentationCard.id == presentation_card_id)
     )
+
+
+def delete_user_presentation_card_by_id(db: Session, presentation_card_id: UUID) -> models.UserPresentationCard:
+    user_presentation_card = db.scalar(
+        select(models.UserPresentationCard)
+        .where(models.UserPresentationCard.id == presentation_card_id)
+    )
+
+    db.delete(user_presentation_card)
+    db.commit()
+
+    return user_presentation_card
+
+
+def delete_user_presentation_card(db: Session, user: models.User) -> models.UserPresentationCard:
+    user_presentation_card = db.scalar(
+        select(models.UserPresentationCard)
+        .where(models.UserPresentationCard.userId == user.id)
+    )
+
+    db.delete(user_presentation_card)
+    db.commit()
+
+    return user_presentation_card

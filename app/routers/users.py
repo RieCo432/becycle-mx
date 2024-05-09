@@ -144,6 +144,14 @@ async def update_presentation_card(
     return crud.update_or_create_user_presentation_card(db=db, user=presentation_card.user, name=name, bio=bio, photo=photo)
 
 
+@users.delete("/users/presentation-card/{presentation_card_id}", dependencies=[Depends(dep.get_current_admin_user)])
+async def update_presentation_card(
+        presentation_card_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.UserPresentationCard:
+    return crud.delete_user_presentation_card_by_id(db=db, presentation_card_id=presentation_card_id)
+
+
 @users.post("/users/me/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
 async def update_presentation_card(
         name: Annotated[str, Body(embed=True)],
@@ -161,6 +169,14 @@ async def get_my_presentation_card(
         db: Session = Depends(dep.get_db)
 ) -> schemas.UserPresentationCard:
     return crud.get_user_presentation_card(db=db, user=user)
+
+
+@users.delete("/users/me/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
+async def get_my_presentation_card(
+        user: models.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)
+) -> schemas.UserPresentationCard:
+    return crud.delete_user_presentation_card(db=db, user=user)
 
 
 @users.get("/users/{user_id}/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
