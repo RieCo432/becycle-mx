@@ -856,6 +856,11 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  deleteMyPresentationCard() {
+    return axiosClient.delete('/users/me/presentation-card', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
   getPresentationCardPhoto(presentationCardId) {
     return axiosClient.get(`/public/users/presentation-cards/${presentationCardId}/photo`, {responseType: 'blob'});
   },
@@ -884,6 +889,11 @@ export default {
         ...credentialsStore.getApiRequestHeader(),
         'Content-Type': 'multipart/form-data',
       },
+    });
+  },
+  deleteUserPresentationCardDetails(presentationCardId) {
+    return axiosClient.delete(`/users/presentation-card/${presentationCardId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
     });
   },
   deleteContractType(contractTypeId) {

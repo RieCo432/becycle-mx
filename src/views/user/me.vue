@@ -6,6 +6,7 @@
           :presentation-card-details="presentationCardDetails"
           editable
           :update-card-details="updateMyCardDetails"
+          :delete-card="deleteMyCard"
       />
     </div>
   </div>
@@ -39,6 +40,18 @@ export default {
       requests.postMyPresentationCardDetails(name, bio, photo).then((response) => {
         this.presentationCardDetails = response.data;
         toast.success('Card Updated!', {timeout: 2000});
+      });
+    },
+    deleteMyCard() {
+      requests.deleteMyPresentationCard().then((response) => {
+        this.presentationCardDetails = {
+          name: 'NOT SET',
+          bio: 'NOT SET',
+          id: 'NOTSET',
+          photoContentType: 'image/jpeg',
+        };
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
       });
     },
   },

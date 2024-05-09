@@ -30,6 +30,13 @@ export default {
         toast.success('Card Updated!', {timeout: 2000});
       });
     },
+    deleteUserPresentationCard(presentationCardId) {
+      requests.deleteUserPresentationCardDetails(presentationCardId).then((response) => {
+        const indexInArray = this.allUserPresentationCardDetails.findIndex((c) => c.id === response.data.id);
+        this.allUserPresentationCardDetails.splice(indexInArray, 1);
+        toast.success('Card Deleted!', {timeout: 2000});
+      });
+    },
   },
 };
 </script>
@@ -41,7 +48,9 @@ export default {
           :key="userPresentationCardDetails.id"
           :editable="isUserAdmin"
           :update-card-details="(name, bio, photo) => updateUserPresentationCard(userPresentationCardDetails.id, name, bio, photo)"
-          :presentation-card-details="userPresentationCardDetails"></UserPresentationCard>
+          :presentation-card-details="userPresentationCardDetails"
+          :delete-card="() => deleteUserPresentationCard(userPresentationCardDetails.id)"
+      ></UserPresentationCard>
     </div>
   </div>
 

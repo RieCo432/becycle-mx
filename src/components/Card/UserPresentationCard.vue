@@ -7,10 +7,11 @@ import {ref, toRef} from 'vue';
 import DashButton from '@/components/Button/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
 import {useDropzone} from 'vue3-dropzone';
+import {Icon} from '@iconify/vue';
 
 export default {
   name: 'UserPresentationCard',
-  components: {Textinput, DashButton, Card},
+  components: {Icon, Textinput, DashButton, Card},
   data() {
     return {
       photoUrl: null,
@@ -26,6 +27,10 @@ export default {
       required: true,
     },
     updateCardDetails: {
+      type: Function,
+      required: false,
+    },
+    deleteCard: {
       type: Function,
       required: false,
     },
@@ -143,7 +148,13 @@ export default {
             <div class="col-span-1 p-3">
               <div class="grid grid-cols-8" v-if="!inEditMode">
                 <p class="w-full col-span-6 text-slate-700 dark:text-slate-300 text-2xl truncate font-semibold">{{presentationCardDetails.name}}</p>
-                <DashButton v-if="editable" @click="openEditMode" class="col-span-2 justify-self-end rounded-full">Edit</DashButton>
+                <DashButton v-if="editable" @click="openEditMode" class="col-span-1 rounded-l-full">
+                  <Icon icon="heroicons-outline:pencil-square"></Icon>
+                </DashButton>
+                <DashButton v-if="editable" @click="deleteCard" class="col-span-1 rounded-r-full bg-danger-600">
+                  <Icon icon="heroicons-outline:trash"></Icon>
+                </DashButton>
+
               </div>
               <div class="grid grid-cols-8" v-if="inEditMode">
                 <Textinput
@@ -156,7 +167,9 @@ export default {
                     v-model="name"
                     :error="nameError"
                 />
-                <DashButton v-if="inEditMode" @click="submitCardDetails" class="col-span-2 justify-self-end my-auto rounded-full">Update</DashButton>
+                <DashButton v-if="inEditMode" @click="submitCardDetails" class="col-span-2 justify-self-end my-auto rounded-full">
+                  <Icon icon="heroicons-outline:check"></Icon>
+                </DashButton>
               </div>
             </div>
             <div class="col-span-1 p-3">
