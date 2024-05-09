@@ -215,6 +215,8 @@ def get_user_presentation_cards(db: Session) -> list[models.UserPresentationCard
     return [
         _ for _ in db.scalars(
             select(models.UserPresentationCard)
+            .join(models.User)
+            .where(models.User.softDeleted == False)
         )
     ]
 
