@@ -911,4 +911,11 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
+  patchExpenseType(expenseTypeId, expenseTypeDescription) {
+    return axiosClient.patch(`/settings/expense-types/${expenseTypeId}`, {
+      description: expenseTypeDescription,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
 };
