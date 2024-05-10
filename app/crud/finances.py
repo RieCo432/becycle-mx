@@ -12,25 +12,7 @@ from .contracts import get_contracts_grouped_by_start_date, get_contracts_groupe
 from .depositExchanges import get_deposit_exchanges_grouped_by_date
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-
-
-def get_interval_timedelta(interval: str):
-    if interval == "daily":
-        return relativedelta(days=1)
-    elif interval == "weekly":
-        return relativedelta(weeks=1)
-    elif interval == "fortnightly":
-        return relativedelta(weeks=2)
-    elif interval == "monthly":
-        return relativedelta(months=1)
-    elif interval == "quarterly":
-        return relativedelta(months=3)
-    elif interval == "semiyearly":
-        return relativedelta(months=6)
-    elif interval == "yearly":
-        return relativedelta(years=1)
-    else:
-        return relativedelta(months=1)
+from app.services import get_interval_timedelta
 
 
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
