@@ -12,7 +12,7 @@ export default {
   },
   data() {
     return {
-      interval: 7,
+      interval: 'monthly',
       gracePeriod: 28,
       startDate: null,
       endDate: null,
@@ -154,13 +154,11 @@ export default {
   },
   watch: {
     startDate(newStartDate, oldStartDate) {
-      console.log(newStartDate, oldStartDate);
       if (oldStartDate !== null && newStartDate !== oldStartDate) {
         this.fetchAllSeries();
       }
     },
     endDate(newEndDate, oldEndDate) {
-      console.log(newEndDate, oldEndDate);
       if (oldEndDate !== null && newEndDate !== oldEndDate) {
         this.fetchAllSeries();
       }
@@ -178,8 +176,9 @@ export default {
       <Card title="Controls">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-6 items-center my-auto">
-            <label class="text-slate-700 dark:text-slate-300">Granularity (Days)</label>
+            <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
+                :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
                 name="interval"
                 v-model="interval"
                 direction="ltr"

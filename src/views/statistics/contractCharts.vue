@@ -12,7 +12,7 @@ export default {
   },
   data() {
     return {
-      interval: "monthly",
+      interval: 'monthly',
       gracePeriod: 28,
       startDate: null,
       endDate: null,
@@ -217,13 +217,11 @@ export default {
   },
   watch: {
     startDate(newStartDate, oldStartDate) {
-      console.log(newStartDate, oldStartDate);
       if (oldStartDate !== null && newStartDate !== oldStartDate) {
         this.fetchAllSeries();
       }
     },
     endDate(newEndDate, oldEndDate) {
-      console.log(newEndDate, oldEndDate);
       if (oldEndDate !== null && newEndDate !== oldEndDate) {
         this.fetchAllSeries();
       }
