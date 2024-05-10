@@ -12,7 +12,7 @@ export default {
   },
   data() {
     return {
-      interval: 63,
+      interval: 'monthly',
       gracePeriod: 184,
       startDate: null,
       endDate: null,
@@ -431,18 +431,18 @@ export default {
       });
     },
     fetchPercentageDepositReturnedAfterMonths() {
-      requests.getPercentageDepositReturnedAfterMonths(this.interval, this.startDate, this.endDate).then((response) => {
+      requests.getPercentageDepositReturnedAfterMonths(this.startDate, this.endDate).then((response) => {
         this.percentageDepositReturnedAfterMonthsSeries = response.data;
       });
     },
     fetchWorstCaseRequiredDepositFloatSeries() {
-      requests.getWorstCaseRequiredDepositFloat(this.interval).then((response) => {
+      requests.getWorstCaseRequiredDepositFloat().then((response) => {
         this.worstCaseRequiredDepositFloatChartOptions.labels.splice(0, this.worstCaseRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
         this.worstCaseRequiredDepositFloatSeries = Object.values(response.data);
       });
     },
     fetchRealisticRequiredDepositFloatSeries() {
-      requests.getRealisticRequiredDepositFloat(this.interval, this.gracePeriod).then((response) => {
+      requests.getRealisticRequiredDepositFloat(this.gracePeriod).then((response) => {
         this.realisticRequiredDepositFloatChartOptions.labels.splice(0, this.realisticRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
         this.realisticRequiredDepositFloatSeries = Object.values(response.data);
       });
@@ -524,8 +524,9 @@ export default {
       <Card title="Controls">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-6 items-center my-auto">
-            <label class="text-slate-700 dark:text-slate-300">Granularity (Days)</label>
+            <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
+                :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
                 name="interval"
                 v-model="interval"
                 direction="ltr"

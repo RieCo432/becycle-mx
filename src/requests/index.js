@@ -759,28 +759,23 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getPercentageDepositReturnedAfterMonths(interval, startDate, endDate) {
+  getPercentageDepositReturnedAfterMonths(startDate, endDate) {
     return axiosClient.get('/finances/deposits/return-percentage', {
       params: {
-        interval: interval,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getWorstCaseRequiredDepositFloat(interval) {
+  getWorstCaseRequiredDepositFloat() {
     return axiosClient.get('/finances/deposits/required-float/worst-case', {
-      params: {
-        interval: interval,
-      },
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getRealisticRequiredDepositFloat(interval, gracePeriod) {
+  getRealisticRequiredDepositFloat(gracePeriod) {
     return axiosClient.get('/finances/deposits/required-float/realistic', {
       params: {
-        interval: interval,
         grace_period: gracePeriod,
       },
       headers: credentialsStore.getApiRequestHeader(),
