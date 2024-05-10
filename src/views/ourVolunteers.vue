@@ -28,6 +28,8 @@ export default {
         const indexInArray = this.allUserPresentationCardDetails.findIndex((c) => c.id === response.data.id);
         this.allUserPresentationCardDetails.splice(indexInArray, 1, response.data);
         toast.success('Card Updated!', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
       });
     },
     deleteUserPresentationCard(presentationCardId) {

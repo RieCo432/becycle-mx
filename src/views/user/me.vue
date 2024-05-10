@@ -40,6 +40,8 @@ export default {
       requests.postMyPresentationCardDetails(name, bio, photo).then((response) => {
         this.presentationCardDetails = response.data;
         toast.success('Card Updated!', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
       });
     },
     deleteMyCard() {
