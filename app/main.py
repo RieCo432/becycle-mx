@@ -44,10 +44,11 @@ app.include_router(routers.admin)
 app.include_router(routers.expenses)
 
 
-db = SessionLocal()
-crud.send_expiry_emails(db=db)
-crud.send_appointment_reminders(db=db)
-db.close()
+if os.environ["PRODUCTION"] == "true":
+    db = SessionLocal()
+    crud.send_expiry_emails(db=db)
+    crud.send_appointment_reminders(db=db)
+    db.close()
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
