@@ -137,7 +137,7 @@ async def update_presentation_card(
         presentation_card_id: UUID,
         name: Annotated[str, Body(embed=True)],
         bio: Annotated[str, Body(embed=True)],
-        photo: UploadFile,
+        photo: UploadFile | None = None,
         db: Session = Depends(dep.get_db)
 ) -> schemas.UserPresentationCard:
     presentation_card = crud.get_user_presentation_card_by_id(db=db, presentation_card_id=presentation_card_id)
@@ -145,7 +145,7 @@ async def update_presentation_card(
 
 
 @users.delete("/users/presentation-card/{presentation_card_id}", dependencies=[Depends(dep.get_current_admin_user)])
-async def update_presentation_card(
+async def delete_presentation_card(
         presentation_card_id: UUID,
         db: Session = Depends(dep.get_db)
 ) -> schemas.UserPresentationCard:
@@ -153,10 +153,10 @@ async def update_presentation_card(
 
 
 @users.post("/users/me/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
-async def update_presentation_card(
+async def update_my_presentation_card(
         name: Annotated[str, Body(embed=True)],
         bio: Annotated[str, Body(embed=True)],
-        photo: UploadFile,
+        photo: UploadFile | None = None,
         user: models.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.UserPresentationCard:
@@ -172,7 +172,7 @@ async def get_my_presentation_card(
 
 
 @users.delete("/users/me/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
-async def get_my_presentation_card(
+async def delete_my_presentation_card(
         user: models.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.UserPresentationCard:
@@ -180,7 +180,7 @@ async def get_my_presentation_card(
 
 
 @users.get("/users/{user_id}/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
-async def get_my_presentation_card(
+async def get_user_presentation_card(
         user_id: UUID,
         db: Session = Depends(dep.get_db)
 ) -> schemas.UserPresentationCard:

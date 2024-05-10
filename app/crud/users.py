@@ -138,31 +138,39 @@ def get_users(db: Session) -> list[models.User]:
     )]
 
 
-def update_or_create_user_presentation_card(db: Session, user: models.User, name: str, bio: str, photo: UploadFile) -> models.UserPresentationCard:
-    from PIL import Image
+def update_or_create_user_presentation_card(db: Session, user: models.User, name: str, bio: str, photo: UploadFile | None) -> models.UserPresentationCard:
+    user_photo = None
+    if photo is not None:
+        from PIL import Image
+        current_dir = os.path.dirname(__file__)
+        temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
+        temp_image_path = os.path.join(temp_data_dir, photo.filename)
 
-    current_dir = os.path.dirname(__file__)
-    temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
-    temp_image_path = os.path.join(temp_data_dir, photo.filename)
+        with Image.open(photo.file) as image:
+            width = image.size[0]
+            height = image.size[1]
 
-    with Image.open(photo.file) as image:
-        width = image.size[0]
-        height = image.size[1]
+            if width != height:
+                shorter = width if width < height else height
+                image = image.crop((
+                    (width - shorter) // 2,
+                    (height - shorter) // 2,
+                    (width + (width - shorter) // 2),
+                    (height - (height - shorter) // 2)
+                ))
 
-        if width != height:
-            shorter = width if width < height else height
-            image = image.crop((
-                (width - shorter) // 2,
-                (height - shorter) // 2,
-                (width + (width - shorter) // 2),
-                (height - (height - shorter) // 2)
-            ))
+            if image.size[0] > 1024:
+                image = image.resize((1024, 1024))
 
-        if image.size[0] > 1024:
-            image = image.resize((1024, 1024))
+            with open(temp_image_path, "wb") as fout:
+                image.save(fout)
 
-        with open(temp_image_path, "wb") as fout:
-            image.save(fout)
+        with open(temp_image_path, "rb") as fin:
+            user_photo = models.UserPhoto(
+                content=fin.read()
+            )
+            db.add(user_photo)
+            db.commit()
 
     user_presentation_card = db.scalar(
         select(models.UserPresentationCard)
@@ -170,12 +178,8 @@ def update_or_create_user_presentation_card(db: Session, user: models.User, name
     )
 
     if user_presentation_card is None:
-        with open(temp_image_path, "rb") as fin:
-            user_photo = models.UserPhoto(
-                content=fin.read()
-            )
-            db.add(user_photo)
-            db.commit()
+        if user_photo is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No photo provided"})
 
         user_presentation_card = models.UserPresentationCard(
             userId=user.id,
@@ -187,25 +191,22 @@ def update_or_create_user_presentation_card(db: Session, user: models.User, name
 
         db.add(user_presentation_card)
 
+
+
     else:
         user_presentation_card.name = name
         user_presentation_card.bio = bio
 
-        old_user_photo = db.scalar(
-            select(models.UserPhoto)
-            .where(models.UserPhoto.id == user_presentation_card.photoFileId)
-        )
-
-        with open(temp_image_path, "rb") as fin:
-            new_user_photo = models.UserPhoto(
-                content=fin.read()
+        if user_photo is not None:
+            old_user_photo = db.scalar(
+                select(models.UserPhoto)
+                .where(models.UserPhoto.id == user_presentation_card.photoFileId)
             )
-            db.add(new_user_photo)
-            db.commit()
 
-        user_presentation_card.photoFileId = new_user_photo.id
-        user_presentation_card.photoContentType = photo.content_type
-        db.delete(old_user_photo)
+            user_presentation_card.photoFileId = user_photo.id
+            user_presentation_card.photoContentType = photo.content_type
+            db.delete(old_user_photo)
+
     db.commit()
 
     return user_presentation_card
