@@ -14,6 +14,25 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 
+def get_interval_timedelta(interval: str):
+    if interval == "daily":
+        return relativedelta(days=1)
+    elif interval == "weekly":
+        return relativedelta(weeks=1)
+    elif interval == "fortnightly":
+        return relativedelta(weeks=2)
+    elif interval == "monthly":
+        return relativedelta(months=1)
+    elif interval == "quarterly":
+        return relativedelta(months=3)
+    elif interval == "semiyearly":
+        return relativedelta(months=6)
+    elif interval == "yearly":
+        return relativedelta(years=1)
+    else:
+        return relativedelta(months=1)
+
+
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
     contracts_grouped_by_start_date = get_contracts_grouped_by_start_date(db=db)
     contracts_grouped_by_returned_date = get_contracts_grouped_by_returned_date(db=db)
@@ -279,9 +298,8 @@ def get_returned_deposits(db: Session, interval: int, start_date: date | None, e
     return all_series
 
 
-def get_deposit_flow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
-    if interval == 0:
-        interval = 1
+def get_deposit_flow(db: Session, interval: str, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+    interval_timedelta = get_interval_timedelta(interval=interval)
 
     if start_date is None:
         oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
@@ -293,38 +311,39 @@ def get_deposit_flow(db: Session, interval: int, start_date: date | None = None,
     data_series_by_breakdown = {cat: [] for cat in categories}
 
     all_series = []
-    period_start_date = start_date
-    period_end_date = start_date + relativedelta(days=interval)
+    period_end_date = end_date
+    period_start_date = period_end_date - interval_timedelta
 
-    while period_start_date <= end_date:
+    while period_end_date >= start_date:
 
         deposit_flow_collected = db.scalar(
             select(func.coalesce(func.sum(models.Contract.depositAmountCollected), 0))
             .where(
-                (models.Contract.startDate >= period_start_date)
-                & (models.Contract.startDate < period_end_date)
+                (models.Contract.startDate > period_start_date)
+                & (models.Contract.startDate <= period_end_date)
             )
         )
-        data_series_by_breakdown["collected"].append([period_start_date, deposit_flow_collected])
+        data_series_by_breakdown["collected"].append([period_end_date, deposit_flow_collected])
 
         deposit_flow_returned = db.scalar(
             select(func.coalesce(func.sum(models.Contract.depositAmountReturned), 0))
             .where(
                 (models.Contract.returnedDate != None)
-                & (models.Contract.returnedDate >= period_start_date)
-                & (models.Contract.returnedDate < period_end_date)
+                & (models.Contract.returnedDate > period_start_date)
+                & (models.Contract.returnedDate <= period_end_date)
             )
         )
-        data_series_by_breakdown["returned"].append([period_start_date, -deposit_flow_returned])
+        data_series_by_breakdown["returned"].append([period_end_date, -deposit_flow_returned])
 
         deposit_flow_diff = deposit_flow_collected - deposit_flow_returned
 
-        data_series_by_breakdown["diff"].append([period_start_date, deposit_flow_diff])
+        data_series_by_breakdown["diff"].append([period_end_date, deposit_flow_diff])
 
-        period_start_date = period_end_date
-        period_end_date = period_start_date + relativedelta(days=interval)
+        period_end_date = period_start_date
+        period_start_date -= interval_timedelta
 
     for breakdown in data_series_by_breakdown:
+        data_series_by_breakdown[breakdown].reverse()
         all_series.append(schemas.DataSeries(
             name=breakdown,
             data=data_series_by_breakdown[breakdown]
@@ -382,14 +401,12 @@ def get_deposits_status(db: Session, grace_period: int, start_date: date | None,
     return deposits_status
 
 
-def get_percentages_of_deposit_returned_by_contract_age(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[list[int]]:
+def get_percentages_of_deposit_returned_by_contract_age(db: Session, start_date: date | None = None, end_date: date | None = None) -> list[list[int]]:
     if start_date is None:
         oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
         start_date = oldest_contract.startDate
     if end_date is None:
         end_date = datetime.utcnow().date()
-    if interval == 0:
-        interval = 1
 
     all_returned_contracts_in_period = [
         _ for _ in db.scalars(
@@ -406,9 +423,8 @@ def get_percentages_of_deposit_returned_by_contract_age(db: Session, interval: i
 
     for contract in all_returned_contracts_in_period:
         days_after_contract_end = (contract.returnedDate - contract.endDate).days
-        number_of_intervals_after_contract_end = days_after_contract_end // interval
 
-        percentages_of_deposit_returned_by_contract_age.append([int(number_of_intervals_after_contract_end * interval),
+        percentages_of_deposit_returned_by_contract_age.append([int(days_after_contract_end),
                                                                 int(100 * contract.depositAmountReturned / contract.depositAmountCollected)])
 
     return percentages_of_deposit_returned_by_contract_age
@@ -430,16 +446,14 @@ def get_deposit_return_percentage_trendline(percentages_of_deposit_returned_by_c
     return {"a": a, "c": c}
 
 
-def get_deposit_return_percentage(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeriesWithType]:
+def get_deposit_return_percentage(db: Session, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeriesWithType]:
     if start_date is None:
         oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
         start_date = oldest_contract.startDate
     if end_date is None:
         end_date = datetime.utcnow().date()
-    if interval == 0:
-        interval = 1
 
-    percentages_of_deposit_returned_by_contract_age = get_percentages_of_deposit_returned_by_contract_age(db=db, interval=interval, start_date=start_date, end_date=end_date)
+    percentages_of_deposit_returned_by_contract_age = get_percentages_of_deposit_returned_by_contract_age(db=db, start_date=start_date, end_date=end_date)
 
     trendline = get_deposit_return_percentage_trendline(percentages_of_deposit_returned_by_contract_age)
 
@@ -459,10 +473,8 @@ def get_deposit_return_percentage(db: Session, interval: int, start_date: date |
     ]
 
 
-def get_worst_case_required_deposit_float(db: Session, interval: int) -> dict[str: int]:
-    if interval == 0:
-        interval = 1
-    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db, interval=interval))
+def get_worst_case_required_deposit_float(db: Session) -> dict[str: int]:
+    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db))
 
     all_unreturned_contracts = [
         _ for _ in db.scalars(
@@ -486,9 +498,7 @@ def get_worst_case_required_deposit_float(db: Session, interval: int) -> dict[st
     }
 
 
-def get_realistic_required_deposit_float(db: Session, interval: int, grace_period: int) -> dict[str: int]:
-    if interval == 0:
-        interval = 1
+def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict[str: int]:
     all_returned_contracts = [
         _ for _ in db.scalars(
             select(models.Contract)
@@ -500,7 +510,7 @@ def get_realistic_required_deposit_float(db: Session, interval: int, grace_perio
                                         all_returned_contracts]
     mean_days_returned_after_contract_end = np.mean(days_returned_after_contract_end)
 
-    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db, interval=interval))
+    trendline = get_deposit_return_percentage_trendline(get_percentages_of_deposit_returned_by_contract_age(db=db))
 
     all_unreturned_contracts = [
         _ for _ in db.scalars(
@@ -530,29 +540,29 @@ def get_realistic_required_deposit_float(db: Session, interval: int, grace_perio
     }
 
 
-def get_actual_cashflow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+def get_actual_cashflow(db: Session, interval: str, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
     if start_date is None:
         oldest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate).first()
         start_date = oldest_expense.transferDate
     if end_date is None:
         newest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate.desc()).first()
         end_date = newest_expense.transferDate
-    if interval == 0:
-        interval = 1
 
-    interval_start_date = start_date
-    interval_end_date = start_date + relativedelta(days=interval)
+    interval_timedelta = get_interval_timedelta(interval=interval)
+
+    interval_end_date = end_date
+    interval_start_date = interval_end_date - interval_timedelta
 
     expense_series = []
     income_series = []
     diff_series = []
 
-    while interval_start_date <= end_date:
+    while interval_end_date >= start_date:
         expenses_in_interval = db.scalar(
             select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
-                (models.Expense.transferDate >= interval_start_date)
-                & (models.Expense.transferDate < interval_end_date)
+                (models.Expense.transferDate > interval_start_date)
+                & (models.Expense.transferDate <= interval_end_date)
                 & (models.Expense.amount < 0)
             )
         )
@@ -560,18 +570,22 @@ def get_actual_cashflow(db: Session, interval: int, start_date: date | None = No
         income_in_interval = db.scalar(
             select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
-                (models.Expense.transferDate >= interval_start_date)
-                & (models.Expense.transferDate < interval_end_date)
+                (models.Expense.transferDate > interval_start_date)
+                & (models.Expense.transferDate <= interval_end_date)
                 & (models.Expense.amount > 0)
             )
         )
 
-        expense_series.append([interval_start_date, expenses_in_interval])
-        income_series.append([interval_start_date, income_in_interval])
-        diff_series.append([interval_start_date, income_in_interval + expenses_in_interval])
+        expense_series.append([interval_end_date, expenses_in_interval])
+        income_series.append([interval_end_date, income_in_interval])
+        diff_series.append([interval_end_date, income_in_interval + expenses_in_interval])
 
-        interval_start_date = interval_end_date
-        interval_end_date += relativedelta(days=interval)
+        interval_end_date = interval_start_date
+        interval_start_date -= interval_timedelta
+
+    expense_series.reverse()
+    income_series.reverse()
+    diff_series.reverse()
 
     return [
         schemas.DataSeries(
@@ -589,29 +603,29 @@ def get_actual_cashflow(db: Session, interval: int, start_date: date | None = No
     ]
 
 
-def get_provisional_cashflow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+def get_provisional_cashflow(db: Session, interval: str, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
     if start_date is None:
         oldest_expense = db.query(models.Expense).order_by(models.Expense.expenseDate).first()
         start_date = oldest_expense.expenseDate
     if end_date is None:
         newest_expense = db.query(models.Expense).order_by(models.Expense.expenseDate.desc()).first()
         end_date = newest_expense.expenseDate
-    if interval == 0:
-        interval = 1
 
-    interval_start_date = start_date
-    interval_end_date = start_date + relativedelta(days=interval)
+    interval_timedelta = get_interval_timedelta(interval=interval)
+
+    interval_end_date = end_date
+    interval_start_date = interval_end_date - interval_timedelta
 
     expense_series = []
     income_series = []
     diff_series = []
 
-    while interval_start_date <= end_date:
+    while interval_end_date >= start_date:
         expenses_in_interval = db.scalar(
             select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
-                (models.Expense.expenseDate >= interval_start_date)
-                & (models.Expense.expenseDate < interval_end_date)
+                (models.Expense.expenseDate > interval_start_date)
+                & (models.Expense.expenseDate <= interval_end_date)
                 & (models.Expense.amount < 0)
             )
         )
@@ -619,18 +633,22 @@ def get_provisional_cashflow(db: Session, interval: int, start_date: date | None
         income_in_interval = db.scalar(
             select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
-                (models.Expense.expenseDate >= interval_start_date)
-                & (models.Expense.expenseDate < interval_end_date)
+                (models.Expense.expenseDate > interval_start_date)
+                & (models.Expense.expenseDate <= interval_end_date)
                 & (models.Expense.amount > 0)
             )
         )
 
-        expense_series.append([interval_start_date, expenses_in_interval])
-        income_series.append([interval_start_date, income_in_interval])
-        diff_series.append([interval_start_date, income_in_interval + expenses_in_interval])
+        expense_series.append([interval_end_date, expenses_in_interval])
+        income_series.append([interval_end_date, income_in_interval])
+        diff_series.append([interval_end_date, income_in_interval + expenses_in_interval])
 
-        interval_start_date = interval_end_date
-        interval_end_date += relativedelta(days=interval)
+        interval_end_date = interval_start_date
+        interval_start_date -= interval_timedelta
+
+    expense_series.reverse()
+    income_series.reverse()
+    diff_series.reverse()
 
     return [
         schemas.DataSeries(
@@ -648,27 +666,27 @@ def get_provisional_cashflow(db: Session, interval: int, start_date: date | None
     ]
 
 
-def get_total_cashflow(db: Session, interval: int, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+def get_total_cashflow(db: Session, interval: str, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
     if start_date is None:
         oldest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate).first()
         start_date = oldest_expense.transferDate
     if end_date is None:
         newest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate.desc()).first()
         end_date = newest_expense.transferDate
-    if interval == 0:
-        interval = 1
 
-    period_start_date = start_date
+    interval_timedelta = get_interval_timedelta(interval=interval)
+
+    period_end_date = end_date
 
     expense_series = []
     income_series = []
     diff_series = []
 
-    while period_start_date <= end_date:
+    while period_end_date >= start_date:
         expenses_in_interval = db.scalar(
             select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
-                (models.Expense.transferDate <= period_start_date)
+                (models.Expense.transferDate <= period_end_date)
                 & (models.Expense.amount < 0)
             )
         )
@@ -676,16 +694,20 @@ def get_total_cashflow(db: Session, interval: int, start_date: date | None = Non
         income_in_interval = db.scalar(
             select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
-                (models.Expense.transferDate <= period_start_date)
+                (models.Expense.transferDate <= period_end_date)
                 & (models.Expense.amount > 0)
             )
         )
 
-        expense_series.append([period_start_date, expenses_in_interval])
-        income_series.append([period_start_date, income_in_interval])
-        diff_series.append([period_start_date, income_in_interval + expenses_in_interval])
+        expense_series.append([period_end_date, expenses_in_interval])
+        income_series.append([period_end_date, income_in_interval])
+        diff_series.append([period_end_date, income_in_interval + expenses_in_interval])
 
-        period_start_date += relativedelta(days=interval)
+        period_end_date -= interval_timedelta
+
+    expense_series.reverse()
+    income_series.reverse()
+    diff_series.reverse()
 
     return [
         schemas.DataSeries(
@@ -701,6 +723,3 @@ def get_total_cashflow(db: Session, interval: int, start_date: date | None = Non
             data=diff_series
         )
     ]
-
-
-

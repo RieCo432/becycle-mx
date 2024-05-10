@@ -61,7 +61,7 @@ async def get_returned_deposits(
 
 @finances.get("/finances/deposits/flow", dependencies=[Depends(dep.get_current_active_user)])
 async def get_deposit_flow(
-        interval: int,
+        interval: str,
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
@@ -81,34 +81,31 @@ async def get_contracts_percentage_returned_within_grace_period(
 
 @finances.get("/finances/deposits/return-percentage", dependencies=[Depends(dep.get_current_active_user)])
 async def get_deposit_return_percentage(
-        interval: int,
         start: date | None = None,
         end: date | None = None,
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.DataSeriesWithType]:
-    return crud.get_deposit_return_percentage(db=db, interval=interval, start_date=start, end_date=end)
+    return crud.get_deposit_return_percentage(db=db, start_date=start, end_date=end)
 
 
 @finances.get("/finances/deposits/required-float/worst-case", dependencies=[Depends(dep.get_current_active_user)])
 async def get_worst_case_required_deposit_float(
-        interval: int,
         db: Session = Depends(dep.get_db)
 ) -> dict[str, int]:
-    return crud.get_worst_case_required_deposit_float(db=db, interval=interval)
+    return crud.get_worst_case_required_deposit_float(db=db)
 
 
 @finances.get("/finances/deposits/required-float/realistic", dependencies=[Depends(dep.get_current_active_user)])
-async def get_worst_case_required_deposit_float(
-        interval: int,
+async def get_realistic_case_required_deposit_float(
         grace_period: int,
         db: Session = Depends(dep.get_db)
 ) -> dict[str, int]:
-    return crud.get_realistic_required_deposit_float(db=db, interval=interval, grace_period=grace_period)
+    return crud.get_realistic_required_deposit_float(db=db, grace_period=grace_period)
 
 
 @finances.get("/finances/cashflow/actual", dependencies=[Depends(dep.get_current_active_user)])
 async def get_cashflow_actual(
-        interval: int,
+        interval: str,
         start_date: date | None = None,
         end_date: date | None = None,
         db: Session = Depends(dep.get_db)
@@ -118,7 +115,7 @@ async def get_cashflow_actual(
 
 @finances.get("/finances/cashflow/provisional", dependencies=[Depends(dep.get_current_active_user)])
 async def get_cashflow_provisional(
-        interval: int,
+        interval: str,
         start_date: date | None = None,
         end_date: date | None = None,
         db: Session = Depends(dep.get_db)
@@ -128,7 +125,7 @@ async def get_cashflow_provisional(
 
 @finances.get("/finances/cashflow/total", dependencies=[Depends(dep.get_current_active_user)])
 async def get_cashflow_total(
-        interval: int,
+        interval: str,
         start_date: date | None = None,
         end_date: date | None = None,
         db: Session = Depends(dep.get_db)
