@@ -868,7 +868,7 @@ export default {
     return axiosClient.post('/users/me/presentation-card', {
       name: name,
       bio: bio,
-      photo: photo,
+      ...photo ? {photo: photo} : {},
     }, {
       headers: {
         ...credentialsStore.getApiRequestHeader(),
@@ -883,7 +883,7 @@ export default {
     return axiosClient.post(`/users/presentation-card/${presentationCardId}`, {
       name: name,
       bio: bio,
-      photo: photo,
+      ...photo ? {photo: photo} : {},
     }, {
       headers: {
         ...credentialsStore.getApiRequestHeader(),

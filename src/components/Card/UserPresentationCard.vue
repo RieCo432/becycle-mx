@@ -63,6 +63,7 @@ export default {
   },
   setup(props) {
     const inEditMode = ref(false);
+    const isOldPhoto = ref(true);
     const updateCardDetails = toRef(props, 'updateCardDetails');
     const editCardSchema = yup.object().shape({
       name: yup.string().max(20).required('Name is required'),
@@ -89,8 +90,9 @@ export default {
     const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: false});
 
     const submitCardDetails = handleSubmit(() => {
-      updateCardDetails.value(name.value, bio.value, files.value[0]);
+      updateCardDetails.value(name.value, bio.value, !isOldPhoto.value ? files.value[0] : undefined);
       inEditMode.value = false;
+      isOldPhoto.value = true;
     });
 
     return {
@@ -104,6 +106,7 @@ export default {
       bio,
       bioError,
       submitCardDetails,
+      isOldPhoto,
     };
   },
 };
@@ -115,7 +118,10 @@ export default {
       <div class="grid grid-cols-5 md:grid-cols-9 lg:grid-cols-12">
         <div class="col-span-5">
           <img v-if="!inEditMode" :src="photoUrl" alt="Profile Picture" class="aspect-square rounded-3xl"/>
-          <div v-if="inEditMode" class="h-full w-full aspect-square" @click="files = []">
+          <div v-if="inEditMode" class="h-full w-full aspect-square" @click="() => {
+            files = [];
+            isOldPhoto = false;
+          }">
             <div
                 v-bind="getRootProps()"
                 class="h-full text-center border-dashed border border-secondary-500 rounded-3xl flex flex-col justify-center justify-items-center"
