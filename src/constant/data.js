@@ -66,12 +66,6 @@ export const topMenu = [
     show: ['user'],
   },
   {
-    title: 'Submit Deposit Exchange',
-    icon: 'heroicons-outline:arrows-right-left',
-    link: '/admin/deposit-exchanges',
-    show: ['user'],
-  },
-  {
     title: 'Find Paper Contract',
     icon: 'heroicons-outline:clipboard-document-list',
     link: '/contracts/find-paper-contract',
@@ -133,6 +127,12 @@ export const topMenu = [
         childtitle: 'Deposit Accounting',
         childicon: 'heroicons-outline:banknotes',
         childlink: '/finances/deposits',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Submit Deposit Exchange',
+        childicon: 'heroicons-outline:arrows-right-left',
+        childlink: '/admin/deposit-exchanges',
         show: ['user'],
       },
       {
