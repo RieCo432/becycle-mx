@@ -2,6 +2,7 @@ from math import ceil
 
 import numpy as np
 from fastapi import HTTPException, status
+from openpyxl.chart import trendline
 from sqlalchemy.orm import Session
 from sqlalchemy import func, select
 from sklearn import linear_model
@@ -442,11 +443,31 @@ def get_deposit_return_percentage(db: Session, start_date: date | None = None, e
 
     trendline_samples = [[int(x), min([int(trendline["a"]*x+trendline["c"]), 100])] for x in sorted(list(set([xy[0] for xy in percentages_of_deposit_returned_by_contract_age])))]
 
+    count_percentages_of_deposit_returned_by_contract_age = {}
+    for percentage_of_deposit_returned_by_contract_age in percentages_of_deposit_returned_by_contract_age:
+        rough_age = percentage_of_deposit_returned_by_contract_age[0] // 28 * 28
+        percentage = percentage_of_deposit_returned_by_contract_age[1]
+
+        if rough_age not in count_percentages_of_deposit_returned_by_contract_age:
+            count_percentages_of_deposit_returned_by_contract_age[rough_age] = {}
+
+        if percentage not in count_percentages_of_deposit_returned_by_contract_age[rough_age]:
+            count_percentages_of_deposit_returned_by_contract_age[rough_age][percentage] = 0
+
+        count_percentages_of_deposit_returned_by_contract_age[rough_age][percentage] += 1
+
+    percentages_of_deposit_returned_by_contract_age_bubble_data = [
+        [rough_age, percentage, count]
+        for rough_age, percentages in count_percentages_of_deposit_returned_by_contract_age.items()
+        for percentage, count in percentages.items()
+    ]
+
+
     return [
         schemas.DataSeriesWithType(
             name="Percentage Returned",
-            type='scatter',
-            data=percentages_of_deposit_returned_by_contract_age
+            type='bubble',
+            data=percentages_of_deposit_returned_by_contract_age_bubble_data
         ),
         schemas.DataSeriesWithType(
             name="Trendline",
