@@ -13,7 +13,7 @@ export default {
   data() {
     return {
       interval: 'monthly',
-      gracePeriod: 28,
+      gracePeriod: 182,
       startDate: null,
       endDate: null,
       chartOptions: {
@@ -201,7 +201,7 @@ export default {
                 :drag-on-click="true"
                 :clickable="false"
                 width="100%"
-                :max="182"
+                :max="371"
                 :min="0"
                 :interval="7"
                 class="m-auto"
