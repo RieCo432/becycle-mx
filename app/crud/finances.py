@@ -516,9 +516,26 @@ def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict
         percentage = (trendline["a"] * returned_days_after_end + trendline["c"]) / 100.0
         estimated_return_deposits_amount += int(ceil(contract.depositAmountCollected * percentage))
 
+    contracts_created_in_grace_period_up_to_today = [
+        _ for _ in db.scalars(
+            select(models.Contract)
+            .where(
+                (models.Contract.startDate >= datetime.utcnow().date() - relativedelta(days=grace_period))
+                & (models.Contract.startDate <= datetime.utcnow().date())
+            )
+        )
+    ]
+
+    deposits_collected_in_those_contracts = sum([contract.depositAmountCollected for contract in contracts_created_in_grace_period_up_to_today])
+    deposits_returned_in_those_contracts = sum([contract.depositAmountReturned if contract.depositAmountReturned is not None else 0 for contract in contracts_created_in_grace_period_up_to_today])
+
+    net_deposit_amount_gained = deposits_collected_in_those_contracts - deposits_returned_in_those_contracts
+
+    required_deposit_amount = estimated_return_deposits_amount - net_deposit_amount_gained
+
     return {
-        "required": estimated_return_deposits_amount,
-        "excess": total_returnable_deposit_amount - estimated_return_deposits_amount
+        "required": required_deposit_amount,
+        "excess": total_returnable_deposit_amount - required_deposit_amount
     }
 
 
