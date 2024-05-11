@@ -151,13 +151,13 @@ export default {
           enabled: false,
         },
         stroke: {
-          curve: 'smooth',
+          curve: 'straight',
         },
         fill: {
           type: 'solid',
         },
         markers: {
-          size: [6, 0],
+          size: [2, 0],
         },
         legend: {
           position: 'top',
@@ -201,6 +201,11 @@ export default {
           },
           axisTicks: {
             colors: ['#dddddd'],
+          },
+        },
+        plotOptions: {
+          bubble: {
+            zScaling: true,
           },
         },
       },
@@ -647,7 +652,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-8">
       <Card title="Average Percentage of deposit returned">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
