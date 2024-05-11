@@ -13,6 +13,7 @@ from .depositExchanges import get_deposit_exchanges_grouped_by_date
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from app.services import get_interval_timedelta
+from .users import get_deposit_bearers
 
 
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
@@ -474,13 +475,28 @@ def get_worst_case_required_deposit_float(db: Session) -> dict[str: int]:
         percentage = (trendline["a"] * days_after_end_date + trendline["c"]) / 100.0
         estimated_return_deposits_amount += int(ceil(contract.depositAmountCollected * percentage))
 
-    return {
-        "required": estimated_return_deposits_amount,
-        "excess": total_returnable_deposit_amount - estimated_return_deposits_amount
-    }
+    current_deposit_float = 0
+    for deposit_bearer in get_deposit_bearers(db=db):
+        current_deposit_float += deposit_bearer.get_deposit_bearer_balance()
+
+    required_deposit_float = estimated_return_deposits_amount
+    excess = current_deposit_float - required_deposit_float
+
+    if excess >= 0:
+        data = {
+            "required": estimated_return_deposits_amount,
+            "excess": excess
+        }
+    else:
+        data = {
+            "current float": current_deposit_float,
+            "deficiency": -excess
+        }
+
+    return data
 
 
-def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict[str: int]:
+def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict[str, int]:
     all_returned_contracts = [
         _ for _ in db.scalars(
             select(models.Contract)
@@ -529,14 +545,27 @@ def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict
     deposits_collected_in_those_contracts = sum([contract.depositAmountCollected for contract in contracts_created_in_grace_period_up_to_today])
     deposits_returned_in_those_contracts = sum([contract.depositAmountReturned if contract.depositAmountReturned is not None else 0 for contract in contracts_created_in_grace_period_up_to_today])
 
-    net_deposit_amount_gained = deposits_collected_in_those_contracts - deposits_returned_in_those_contracts
+    net_deposit_amount_to_be_collected = deposits_collected_in_those_contracts - deposits_returned_in_those_contracts
 
-    required_deposit_amount = estimated_return_deposits_amount - net_deposit_amount_gained
+    current_deposit_float = 0
+    for deposit_bearer in get_deposit_bearers(db=db):
+        current_deposit_float += deposit_bearer.get_deposit_bearer_balance()
 
-    return {
-        "required": required_deposit_amount,
-        "excess": total_returnable_deposit_amount - required_deposit_amount
-    }
+    required_deposit_float = estimated_return_deposits_amount - net_deposit_amount_to_be_collected
+    excess = current_deposit_float - required_deposit_float
+
+    if excess >= 0:
+        data = {
+            "ideal float": required_deposit_float,
+            "excess": excess
+        }
+    else:
+        data = {
+            "current float": current_deposit_float,
+            "deficiency": -excess
+        }
+
+    return data
 
 
 def get_actual_cashflow(db: Session, interval: str, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
