@@ -315,10 +315,11 @@ export default {
       },
     });
   },
-  getAvailableAppointmentSlots(appointmentTypeId) {
+  getAvailableAppointmentSlots(appointmentTypeId, ignoreLimits=undefined) {
     return axiosClient.get('/appointments/available', {
       params: {
         appointment_type_id: appointmentTypeId,
+        ...ignoreLimits && {ignore_limits: ignoreLimits},
       },
     });
   },
@@ -329,6 +330,17 @@ export default {
       notes: notes,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
+  postAppointment(clientId, typeId, startDateTime, notes, ignoreLimits=undefined) {
+    return axiosClient.post('/appointments/new', {
+      clientId: clientId,
+      typeId: typeId,
+      startDateTime: startDateTime,
+      notes: notes,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: ignoreLimits && {ignore_limits: ignoreLimits},
     });
   },
   getMyAppointments(past, future) {

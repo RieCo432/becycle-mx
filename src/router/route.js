@@ -137,7 +137,16 @@ const routes = [
           restrictTo: ['client'],
           selectNavPath: '/appointments/book',
         },
-        component: () => import('@/views/appointments/bookAppointment.vue'),
+        component: () => import('@/views/appointments/clientBookAppointment.vue'),
+      },
+      {
+        path: '/appointments/inperson-book',
+        name: 'Book Appointment In-Person',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/appointments/inperson-book',
+        },
+        component: () => import('@/views/appointments/userBookAppointment.vue'),
       },
       {
         path: '/appointments',

@@ -210,16 +210,16 @@ export default {
                   </template>
 
 
-                  <div class="col-span-1 bg-slate" v-for="(times, date) in availableSlots" :key="date">
+                  <div class="col-span-1 bg-slate" v-for="(slots, date) in availableSlots" :key="date">
                     <Card :title="new Date(date).toLocaleDateString(undefined, {weekday: 'long',
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     })" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300 h-full">
                       <div class="grid xl:grid-cols-6 sm:grid-cols-5 grid-cols-4 gap-3">
-                        <div v-for="(datetime, j) in times.map((time) => (new Date(Date.parse(`${date}T${time}+00:00`))))" :key="j">
-                          <DashButton class="w-full" @click="() => {appointmentDatetime = datetime}">
-                            {{ datetime.toLocaleTimeString(undefined, { timeZone: 'UTC', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
+                        <div v-for="(slot, j) in slots" :key="j">
+                          <DashButton :class="`w-full ${slot.available ? '' : 'bg-warning-500'}`" @click="() => {appointmentDatetime = (new Date(Date.parse(`${date}T${slot.time}+00:00`)))}">
+                            {{ (new Date(Date.parse(`${date}T${slot.time}+00:00`))).toLocaleTimeString(undefined, { timeZone: 'UTC', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
                           </DashButton>
                         </div>
 

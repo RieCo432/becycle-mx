@@ -42,6 +42,12 @@ export const topMenu = [
     show: ['client', 'loggedout'],
   },
   {
+    title: 'Book Appointment',
+    icon: 'heroicons-outline:calendar',
+    link: '/appointments/inperson-book',
+    show: ['user'],
+  },
+  {
     title: 'New Contract',
     icon: 'heroicons-outline:document-plus',
     link: '/contracts/new',
