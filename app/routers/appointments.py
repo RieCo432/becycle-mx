@@ -44,9 +44,10 @@ async def request_appointment(
 async def create_appointment(
         appointment_data: schemas.AppointmentCreate,
         email_tasks: BackgroundTasks,
+        ignore_limits: bool = False,
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    appointment = crud.create_appointment(db=db, appointment_data=appointment_data, auto_confirm=True)
+    appointment = crud.create_appointment(db=db, appointment_data=appointment_data, auto_confirm=True, ignore_limits=ignore_limits)
 
     email_tasks.add_task(appointment.send_confirmation_email)
 
@@ -85,8 +86,11 @@ async def cancel_appointment(
 @appointments.get("/appointments/available")
 async def get_available_appointments(
         appointment_type_id: str,
-        db: Session = Depends(dep.get_db)) -> dict[date, list[time]]:
-    available_slots = crud.get_available_start_dates_and_times_for_appointment_type(db=db, appointment_type_id=appointment_type_id)
+        ignore_limits: bool = False,
+        db: Session = Depends(dep.get_db)) -> dict[date, list[dict]]:
+    if ignore_limits:
+        Depends(dep.get_current_appointment_manager_user)
+    available_slots = crud.get_available_start_dates_and_times_for_appointment_type(db=db, appointment_type_id=appointment_type_id, ignore_limits=ignore_limits)
 
     return available_slots
 

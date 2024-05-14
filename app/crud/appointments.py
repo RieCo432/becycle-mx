@@ -6,22 +6,28 @@ from uuid import UUID
 from .settings import *
 
 
-def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate, auto_confirm: bool = False) -> models.Appointment:
+def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
+                       auto_confirm: bool = False, ignore_limits: bool = False) -> models.Appointment:
     # auto_confirm can be used if appointment is created by staff directly
     appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
 
     required_consecutive_slots = math.ceil(appointment_type.duration / get_slot_duration(db=db))
 
-    if not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots, dt=appointment_data.startDateTime):
+    if (not ignore_limits
+            and not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots,
+                                                                dt=appointment_data.startDateTime)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Someone just requested this slot. Refreshing list... Please choose a new slot."},
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.utcnow(), client_id=appointment_data.clientId, cancelled=False, confirmed=False)
+    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.utcnow(),
+                                                    client_id=appointment_data.clientId, cancelled=False,
+                                                    confirmed=False)
     if len(pending_appointment_requests) >= 2:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "You cannot have more than 2 pending appointment requests. Please wait for pending requests to get denied or accepted!"})
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={
+            "description": "You cannot have more than 2 pending appointment requests. Please wait for pending requests to get denied or accepted!"})
 
     appointment = models.Appointment(
         clientId=appointment_data.clientId,
@@ -57,7 +63,8 @@ def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment
     )
 
     if appointment is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This appointment does not exist or is in the past."})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail={"description": "This appointment does not exist or is in the past."})
 
     appointment.confirmed = True
 
@@ -132,7 +139,9 @@ def get_remaining_concurrent_appointments_for_each_slot(db: Session) -> dict[dat
     return remaining_concurrent_appointments_for_each_slot
 
 
-def are_consecutive_slots_available_on_datetime(db: Session, n_slots: int, dt: datetime, remaining_concurrent_appointments_for_each_slot: dict[date, dict[time, int]] | None = None) -> bool:
+def are_consecutive_slots_available_on_datetime(db: Session, n_slots: int, dt: datetime,
+                                                remaining_concurrent_appointments_for_each_slot: dict[date, dict[
+                                                    time, int]] | None = None) -> bool:
     # if called as part of regular availability query, this dict can be passed in order to save time on not having to compute it again
     # but at the moment that the appointment is recorded, availability should be re-checked, so in that case this method
     # has to load the availability from scratch
@@ -160,7 +169,8 @@ def are_consecutive_slots_available_on_datetime(db: Session, n_slots: int, dt: d
     return True
 
 
-def get_available_start_dates_and_times_for_appointment_type(db: Session, appointment_type_id: str) -> dict[date, list[time]]:
+def get_available_start_dates_and_times_for_appointment_type(db: Session, appointment_type_id: str,
+                                                             ignore_limits: bool) -> dict[date, list[dict]]:
     appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_type_id)
 
     required_consecutive_slots = math.ceil(appointment_type.duration / get_slot_duration(db=db))
@@ -168,19 +178,21 @@ def get_available_start_dates_and_times_for_appointment_type(db: Session, appoin
     remaining_concurrent_appointments_for_each_slot = get_remaining_concurrent_appointments_for_each_slot(db=db)
 
     # hold every time slot that the appointment could start on, grouped by date
-    available_appointment_start_dates_and_times: dict[date, list[time]] = {}
+    available_appointment_start_dates_and_times: dict[date, list[dict]] = {}
 
     # for every slot in the remaining availability, query whether enough consecutive slots are available
     for d in remaining_concurrent_appointments_for_each_slot.keys():
         for t in remaining_concurrent_appointments_for_each_slot[d].keys():
-            if are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots,
-                                                           dt=datetime.combine(d, t),
-                                                           remaining_concurrent_appointments_for_each_slot=
-                                                           remaining_concurrent_appointments_for_each_slot):
+            available = are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots,
+                                                                    dt=datetime.combine(d, t),
+                                                                    remaining_concurrent_appointments_for_each_slot=
+                                                                    remaining_concurrent_appointments_for_each_slot)
+
+            if available or ignore_limits:
                 if d not in available_appointment_start_dates_and_times:
-                    available_appointment_start_dates_and_times[d] = [t]
+                    available_appointment_start_dates_and_times[d] = [{"time": t, "available": available}]
                 else:
-                    available_appointment_start_dates_and_times[d].append(t)
+                    available_appointment_start_dates_and_times[d].append({"time": t, "available": available})
 
     return available_appointment_start_dates_and_times
 
@@ -215,7 +227,8 @@ def get_appointments(db: Session,
     )]
 
 
-def update_appointment_type(db: Session, appointment_type: models.AppointmentType, updated_appointment_type_data: schemas.PatchAppointmentType) -> models.AppointmentType:
+def update_appointment_type(db: Session, appointment_type: models.AppointmentType,
+                            updated_appointment_type_data: schemas.PatchAppointmentType) -> models.AppointmentType:
     if updated_appointment_type_data.duration is not None:
         appointment_type.duration = updated_appointment_type_data.duration
     if updated_appointment_type_data.title is not None:
@@ -243,7 +256,8 @@ def create_appointment_type(db: Session, appointment_type_data: schemas.Appointm
         db.add(new_appointment_type)
         db.commit()
     except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This appointment type ID already exists!"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail={"description": "This appointment type ID already exists!"})
 
     return new_appointment_type
 
