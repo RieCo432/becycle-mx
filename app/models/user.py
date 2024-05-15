@@ -35,7 +35,7 @@ class UserPresentationCard(Base):
                                                 default=None, server_default=text("NULL"), quote=False)
     photoFile: Mapped["UserPhoto"] = relationship(UserPhoto, foreign_keys=[photoFileId])
 
-    photoContentType: Mapped[str] = mapped_column("photoContentType", Text, nullable=False, quote=False)
+    photoContentType: Mapped[str] = mapped_column("photoContentType", Text, nullable=True, quote=False)
 
 
 class User(Base):

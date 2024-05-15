@@ -46,4 +46,4 @@ class UserPresentationCard(BaseModel):
     id: UUID
     name: str
     bio: str
-    photoContentType: str
+    photoContentType: str | None = None

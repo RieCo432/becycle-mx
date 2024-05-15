@@ -107,6 +107,32 @@ def populate_test_db(db: Session):
     db.add_all(test_users)
     db.commit()
 
+    test_user_presentation_cards = [
+        models.UserPresentationCard(
+            userId=test_users[0].id,
+            name="Elaine",
+            bio="This is Elaine's biography"
+        ),
+        models.UserPresentationCard(
+            userId=test_users[1].id,
+            name="Freddy",
+            bio="This is Freddy's biography"
+        ),
+        models.UserPresentationCard(
+            userId=test_users[2].id,
+            name="George",
+            bio="This is George's biography"
+        ),
+        models.UserPresentationCard(
+            userId=test_users[3].id,
+            name="Honey",
+            bio="This is Honey's biography"
+        )
+    ]
+
+    db.add_all(test_user_presentation_cards)
+    db.commit()
+
     test_contracts = [models.Contract(
             clientId=test_clients[0].id,
             bikeId=test_bikes[0].id,
@@ -274,3 +300,5 @@ def populate_test_db(db: Session):
 
     db.add_all(test_closed_days)
     db.commit()
+
+    return test_user_presentation_cards
