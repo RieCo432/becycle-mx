@@ -1,14 +1,16 @@
 import datetime
-
+import pytest
 import bcrypt
 from dateutil.relativedelta import relativedelta
-
 from sqlalchemy.orm import Session
 import app.models as models
-from app.database.db import SessionLocal
+from app.database.db import Base, engine, SessionLocal
+
+Base.metadata.create_all(bind=engine)
+db = SessionLocal()
 
 
-def populate_test_db(db: Session):
+def clear_database():
     db.query(models.Address).delete()
     db.query(models.ContractType).delete()
     db.query(models.DetectedPotentialBikeDuplicates).delete()
@@ -38,6 +40,9 @@ def populate_test_db(db: Session):
     db.query(models.Expense).delete()
     db.query(models.ExpenseReceipt).delete()
 
+
+@pytest.fixture
+def clients() -> list[models.Client]:
     test_clients = [
         models.Client(firstName="alice", lastName="humphrey", emailAddress="alice.humphrey@example.com"),
         models.Client(firstName="bob", lastName="frank", emailAddress="bob.frank@example.com"),
@@ -49,6 +54,15 @@ def populate_test_db(db: Session):
     db.add_all(test_clients)
     db.commit()
 
+    yield test_clients
+
+    db.query(models.Client).delete()
+    db.commit()
+
+
+@pytest.fixture
+def bikes() -> list[models.Bike]:
+
     test_bikes = [
         models.Bike(make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
         models.Bike(make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
@@ -58,6 +72,14 @@ def populate_test_db(db: Session):
     db.add_all(test_bikes)
     db.commit()
 
+    yield test_bikes
+
+    db.query(models.Bike).delete()
+    db.commit()
+
+
+@pytest.fixture
+def users() -> list[models.User]:
     test_users = [
         models.User(
             username="elaine",
@@ -107,24 +129,32 @@ def populate_test_db(db: Session):
     db.add_all(test_users)
     db.commit()
 
+    yield test_users
+
+    db.query(models.User).delete()
+    db.commit()
+
+
+@pytest.fixture
+def user_presentation_cards(users: list[models.User]) -> list[models.UserPresentationCard]:
     test_user_presentation_cards = [
         models.UserPresentationCard(
-            userId=test_users[0].id,
+            userId=users[0].id,
             name="Elaine",
             bio="This is Elaine's biography"
         ),
         models.UserPresentationCard(
-            userId=test_users[1].id,
+            userId=users[1].id,
             name="Freddy",
             bio="This is Freddy's biography"
         ),
         models.UserPresentationCard(
-            userId=test_users[2].id,
+            userId=users[2].id,
             name="George",
             bio="This is George's biography"
         ),
         models.UserPresentationCard(
-            userId=test_users[3].id,
+            userId=users[3].id,
             name="Honey",
             bio="This is Honey's biography"
         )
@@ -133,14 +163,22 @@ def populate_test_db(db: Session):
     db.add_all(test_user_presentation_cards)
     db.commit()
 
+    yield test_user_presentation_cards
+
+    db.query(models.UserPresentationCard).delete()
+    db.commit()
+
+
+@pytest.fixture
+def contracts(users: list[models.User], bikes: list[models.Bike], clients: list[models.Client]) -> list[models.Contract]:
     test_contracts = [models.Contract(
-            clientId=test_clients[0].id,
-            bikeId=test_bikes[0].id,
-            workingUserId=test_users[0].id,
-            checkingUserId=test_users[1].id,
-            depositCollectingUserId=test_users[0].id,
-            returnAcceptingUserId=test_users[0].id,
-            depositReturningUserId=test_users[0].id,
+            clientId=clients[0].id,
+            bikeId=bikes[0].id,
+            workingUserId=users[0].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[0].id,
+            returnAcceptingUserId=users[0].id,
+            depositReturningUserId=users[0].id,
             startDate=(datetime.datetime.utcnow() - relativedelta(months=15)).date(),
             endDate=(datetime.datetime.utcnow() - relativedelta(months=9)).date(),
             returnedDate=(datetime.datetime.utcnow() - relativedelta(months=10)).date(),
@@ -152,12 +190,12 @@ def populate_test_db(db: Session):
             detailsSent=True,
             expiryReminderSent=False,
             returnDetailsSent=False
-        ),models.Contract(
-            clientId=test_clients[0].id,
-            bikeId=test_bikes[1].id,
-            workingUserId=test_users[0].id,
-            checkingUserId=test_users[1].id,
-            depositCollectingUserId=test_users[0].id,
+        ), models.Contract(
+            clientId=clients[0].id,
+            bikeId=bikes[1].id,
+            workingUserId=users[0].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[0].id,
             returnAcceptingUserId=None,
             depositReturningUserId=None,
             startDate=(datetime.datetime.utcnow() - relativedelta(months=7)).date(),
@@ -171,12 +209,12 @@ def populate_test_db(db: Session):
             detailsSent=True,
             expiryReminderSent=False,
             returnDetailsSent=False
-        ),models.Contract(
-            clientId=test_clients[0].id,
-            bikeId=test_bikes[2].id,
-            workingUserId=test_users[0].id,
-            checkingUserId=test_users[1].id,
-            depositCollectingUserId=test_users[0].id,
+        ), models.Contract(
+            clientId=clients[0].id,
+            bikeId=bikes[2].id,
+            workingUserId=users[0].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[0].id,
             returnAcceptingUserId=None,
             depositReturningUserId=None,
             startDate=(datetime.datetime.utcnow() - relativedelta(months=3)).date(),
@@ -196,7 +234,14 @@ def populate_test_db(db: Session):
     db.add_all(test_contracts)
     db.commit()
 
+    yield test_contracts
 
+    db.query(models.Contract).delete()
+    db.commit()
+
+
+@pytest.fixture
+def appointment_types() -> list[models.AppointmentType]:
     test_appointment_types = [
         models.AppointmentType(
             id="lend",
@@ -217,11 +262,18 @@ def populate_test_db(db: Session):
     db.add_all(test_appointment_types)
     db.commit()
 
+    yield test_appointment_types
 
+    db.query(models.AppointmentType).delete()
+    db.commit()
+
+
+@pytest.fixture
+def appointments(appointment_types: list[models.AppointmentType], clients: list[models.Client]) -> list[models.Appointment]:
     test_appointments = [
         models.Appointment(
-            clientId=test_clients[1].id,
-            typeId=test_appointment_types[0].id,
+            clientId=clients[1].id,
+            typeId=appointment_types[0].id,
             startDateTime=datetime.datetime.combine((datetime.datetime.utcnow() - relativedelta(month=2)).date(), datetime.time(hour=16, minute=15)),
             endDateTime=datetime.datetime.combine((datetime.datetime.utcnow() - relativedelta(month=2)).date(), datetime.time(hour=18, minute=15)),
             notes=None,
@@ -230,8 +282,8 @@ def populate_test_db(db: Session):
             reminderSent=True
         ),
         models.Appointment(
-            clientId=test_clients[3].id,
-            typeId=test_appointment_types[1].id,
+            clientId=clients[3].id,
+            typeId=appointment_types[1].id,
             startDateTime=datetime.datetime.combine((datetime.datetime.utcnow() + relativedelta(days=2)).date(), datetime.time(hour=16, minute=15)),
             endDateTime=datetime.datetime.combine((datetime.datetime.utcnow() + relativedelta(days=2)).date(), datetime.time(hour=18, minute=15)),
             notes=None,
@@ -244,6 +296,14 @@ def populate_test_db(db: Session):
     db.add_all(test_appointments)
     db.commit()
 
+    yield test_appointments
+
+    db.query(models.Appointment).delete()
+    db.commit()
+
+
+@pytest.fixture
+def appointment_general_settings() -> models.AppointmentGeneralSettings:
     test_appointment_settings = models.AppointmentGeneralSettings(
             openingDays=[0, 2],
             minBookAhead=2,
@@ -254,6 +314,14 @@ def populate_test_db(db: Session):
     db.add(test_appointment_settings)
     db.commit()
 
+    yield test_appointment_settings
+
+    db.query(models.AppointmentGeneralSettings).delete()
+    db.commit()
+
+
+@pytest.fixture
+def appointment_concurrency_limits() -> list[models.AppointmentConcurrencyLimit]:
     test_concurrency_settings = [
         models.AppointmentConcurrencyLimit(
             afterTime=datetime.time(hour=0, minute=0),
@@ -276,6 +344,14 @@ def populate_test_db(db: Session):
     db.add_all(test_concurrency_settings)
     db.commit()
 
+    yield test_concurrency_settings
+
+    db.query(models.AppointmentConcurrencyLimit).delete()
+    db.commit()
+
+
+@pytest.fixture
+def address() -> models.Address:
     test_address = models.Address(
         number="21-23",
         street="High Street",
@@ -286,6 +362,14 @@ def populate_test_db(db: Session):
     db.add(test_address)
     db.commit()
 
+    yield test_address
+
+    db.query(models.Address).delete()
+    db.commit()
+
+
+@pytest.fixture
+def closed_days() -> list[models.ClosedDay]:
     test_closed_days = [
         models.ClosedDay(
             date=datetime.datetime.utcnow().date() + relativedelta(days=7),
@@ -301,4 +385,7 @@ def populate_test_db(db: Session):
     db.add_all(test_closed_days)
     db.commit()
 
-    return test_user_presentation_cards
+    yield test_closed_days
+
+    db.query(models.ClosedDay).delete()
+    db.commit()
