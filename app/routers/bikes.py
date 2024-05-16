@@ -32,7 +32,7 @@ async def find_bike(
 
 
 @bikes.get("/bikes/find", dependencies=[Depends(dep.get_current_active_user)])
-async def find_bike(
+async def find_bikes(
         make: str | None = None,
         model: str | None = None,
         colour: str | None = None,

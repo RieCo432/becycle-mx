@@ -1,9 +1,12 @@
 import datetime
+import os
 import pytest
 import bcrypt
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
 import app.models as models
+import app.schemas as schemas
+from app import auth
 from app.database.db import Base, engine, SessionLocal
 
 Base.metadata.create_all(bind=engine)
@@ -65,6 +68,7 @@ def bikes() -> list[models.Bike]:
 
     test_bikes = [
         models.Bike(make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
+        models.Bike(make="apollo", model="excelle", colour="black", decals=None, serialNumber="abcd1256"),
         models.Bike(make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
         models.Bike(make="elephantbike", model="heavy af", colour="blue", decals=None, serialNumber="ijkl9012")
     ]
@@ -84,7 +88,7 @@ def users() -> list[models.User]:
         models.User(
             username="elaine",
             password=bcrypt.hashpw("elaine1234", bcrypt.gensalt()),
-            pin=bcrypt.hashpw("1234", bcrypt.gensalt()),
+            pin=bcrypt.hashpw("0000", bcrypt.gensalt()),
             admin=True,
             depositBearer=True,
             rentalChecker=True,
@@ -94,8 +98,8 @@ def users() -> list[models.User]:
 
         models.User(
             username="freddy",
-            password=bcrypt.hashpw("freddy123", bcrypt.gensalt()),
-            pin=bcrypt.hashpw("0000", bcrypt.gensalt()),
+            password=bcrypt.hashpw("freddy1234", bcrypt.gensalt()),
+            pin=bcrypt.hashpw("1111", bcrypt.gensalt()),
             admin=False,
             depositBearer=False,
             rentalChecker=True,
@@ -105,8 +109,8 @@ def users() -> list[models.User]:
 
         models.User(
             username="george",
-            password=bcrypt.hashpw("test1234", bcrypt.gensalt()),
-            pin=bcrypt.hashpw("1111", bcrypt.gensalt()),
+            password=bcrypt.hashpw("george1234", bcrypt.gensalt()),
+            pin=bcrypt.hashpw("2222", bcrypt.gensalt()),
             admin=False,
             depositBearer=True,
             rentalChecker=False,
@@ -115,9 +119,20 @@ def users() -> list[models.User]:
             softDeleted=False),
 
         models.User(
+            username="daniel",
+            password=bcrypt.hashpw("daniel1234", bcrypt.gensalt()),
+            pin=bcrypt.hashpw("3333", bcrypt.gensalt()),
+            admin=False,
+            depositBearer=False,
+            rentalChecker=False,
+            appointmentManager=False,
+            treasurer=False,
+            softDeleted=False),
+
+        models.User(
             username="honey",
-            password=bcrypt.hashpw("honey123", bcrypt.gensalt()),
-            pin=bcrypt.hashpw("9999", bcrypt.gensalt()),
+            password=bcrypt.hashpw("honey1234", bcrypt.gensalt()),
+            pin=bcrypt.hashpw("4444", bcrypt.gensalt()),
             admin=False,
             depositBearer=False,
             rentalChecker=False,
@@ -389,3 +404,27 @@ def closed_days() -> list[models.ClosedDay]:
 
     db.query(models.ClosedDay).delete()
     db.commit()
+
+
+@pytest.fixture
+def user_auth_tokens(users) -> list[schemas.Token]:
+    tokens = []
+    for user in users:
+        access_token_expires = datetime.timedelta(minutes=int(os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"]))
+        access_token = auth.create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+
+        tokens.append(
+            schemas.Token(
+                access_token=access_token,
+                token_type= "bearer"
+            )
+        )
+
+    return tokens
+
+
+@pytest.fixture
+def normal_user_auth_header(user_auth_tokens) -> dict:
+    return {
+        "Authorization": "Bearer " + user_auth_tokens[3].access_token
+    }

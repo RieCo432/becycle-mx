@@ -55,6 +55,29 @@ class Contract(Base):
     expiryReminderSent: Mapped[bool] = mapped_column("expiryReminderSent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returnDetailsSent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.clientId) == str(other.get("clientId")),
+            str(self.bikeId) == str(other.get("bikeId")),
+            str(self.workingUserId) == str(other.get("workingUserId")),
+            str(self.checkingUserId) == str(other.get("checkingUserId")),
+            str(self.depositCollectingUserId) == str(other.get("depositCollectingUserId")),
+            str(self.returnAcceptingUserId) == str(other.get("returnAcceptingUserId")),
+            str(self.depositReturningUserId) == str(other.get("depositReturningUserId")),
+            str(self.startDate) == str(other.get("startDate")),
+            str(self.endDate) == str(other.get("endDate")),
+            str(self.returnedDate) == str(other.get("returnedDate")),
+            str(self.depositAmountCollected) == str(other.get("depositAmountCollected")),
+            str(self.depositAmountReturned) == str(other.get("depositAmountReturned")),
+            str(self.conditionOfBike) == str(other.get("conditionOfBike")),
+            str(self.contractType) == str(other.get("contractType")),
+            str(self.notes) == str(other.get("notes")),
+            str(self.detailsSent) == str(other.get("detailsSent")),
+            str(self.expiryReminderSent) == str(other.get("expiryReminderSent")),
+            str(self.returnDetailsSent) == str(other.get("returnDetailsSent")),
+        ])
+
     def send_creation_email(self):
         email_html_content = services.email_helpers.build_contract_created_email(self)
         services.email_helpers.send_email(

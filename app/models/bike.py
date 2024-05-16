@@ -18,3 +18,13 @@ class Bike(Base):
     serialNumber: Mapped[str] = mapped_column("serialNumber", String(40), nullable=False, quote=False)
 
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="bike")
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id", None)),
+            str(self.make) == str(other.get("make", None)),
+            str(self.model) == str(other.get("model", None)),
+            str(self.colour) == str(other.get("colour", None)),
+            str(self.decals) == str(other.get("decals", None)),
+            str(self.serialNumber) == str(other.get("serialNumber", None))
+        ])
