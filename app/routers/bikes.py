@@ -61,8 +61,8 @@ async def get_bike(
     return crud.get_bike(db=db, bike_id=bike_id)
 
 
-@bikes.patch("/bikes/{bike_id}")
-async def get_bike(
+@bikes.patch("/bikes/{bike_id}", dependencies=[Depends(dep.get_current_active_user)])
+async def patch_bike(
         bike_id: UUID,
         updated_bike_data: schemas.BikeBase,
         db: Session = Depends(dep.get_db)
