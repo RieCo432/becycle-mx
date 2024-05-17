@@ -22,7 +22,20 @@ def test_find_bike(bikes, normal_user_auth_header):
         assert response.json() == bike
 
 
-def test_find_bikes(bikes, normal_user_auth_header):
+def test_find_bike_no_result(bikes, normal_user_auth_header):
+    response = client.get("/bike/find", params={
+        "make": "notexisting",
+        "model": "notexisting",
+        "colour": "invisible",
+        "serial_number": "noway"
+    }, headers=normal_user_auth_header)
+
+    assert response.status_code == 404
+    response_json = response.json()
+    assert response_json.get("detail").get("description") == "No bikes found"
+
+
+def test_find_bikes_make_and_serial_number(bikes, normal_user_auth_header):
     response = client.get("/bikes/find", params={
         "make": "apol",
         "serial_number": "abcd1"
@@ -32,6 +45,18 @@ def test_find_bikes(bikes, normal_user_auth_header):
     response_json = response.json()
     assert len(response_json) == 2
     assert all([response_bike in bikes[:2] for response_bike in response_json])
+
+
+def test_find_bikes_model_and_colour(bikes, normal_user_auth_header):
+    response = client.get("/bikes/find", params={
+        "model": "e",
+        "colour": "bl"
+    }, headers=normal_user_auth_header)
+
+    assert response.status_code == 200
+    response_json = response.json()
+    assert len(response_json) == 2
+    assert all([response_bike in [bikes[1], bikes[4]] for response_bike in response_json])
 
 
 def test_get_bikes(bikes, normal_user_auth_header):
