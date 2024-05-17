@@ -5,7 +5,6 @@ import app.crud as crud
 from sqlalchemy import select
 import app.dependencies as dep
 
-
 client = TestClient(app)
 
 clear_database()
@@ -53,7 +52,8 @@ def test_get_user_token_invalid_password_default(users):
             "Content-Type": "application/x-www-form-urlencoded"
         })
         assert response.status_code == 400
-        assert response.json().get("detail").get("description") == "Cannot login with default password. Please contact an admin to set a password!"
+        assert response.json().get("detail").get(
+            "description") == "Cannot login with default password. Please contact an admin to set a password!"
 
 
 def test_get_user_me(users, user_auth_tokens):
@@ -83,6 +83,7 @@ def test_get_user(users, normal_user_auth_header):
 
         assert response.status_code == 200
         assert response.json() == user
+
 
 def test_patch_user_not_admin(users, normal_user_auth_header):
     response = client.patch("/users/{userId}".format(userId=users[1].id), json={
@@ -122,6 +123,34 @@ def test_patch_user_role_change(users, admin_user_auth_header):
     assert response.json() != users[1]
     db.refresh(users[1])
     assert response.json() == users[1]
+
+
+def test_patch_user_all_roles_change(users, admin_user_auth_header):
+    response = client.patch("/users/{userId}".format(userId=users[3].id), json={
+        "admin": True,
+        "depositBearer": True,
+        "rentalChecker": True,
+        "appointmentManager": True,
+        "treasurer": True,
+    }, headers=admin_user_auth_header)
+
+    assert response.status_code == 200
+
+    assert response.json() != users[3]
+    db.refresh(users[3])
+    assert response.json() == users[3]
+
+
+def test_patch_user_soft_delete(users, admin_user_auth_header):
+    response = client.patch("/users/{userId}".format(userId=users[3].id), json={
+        "softDeleted": True
+    }, headers=admin_user_auth_header)
+
+    assert response.status_code == 200
+
+    assert response.json() != users[3]
+    db.refresh(users[3])
+    assert response.json() == users[3]
 
 
 def test_patch_user_password_change(users, admin_user_auth_header):
@@ -187,11 +216,23 @@ def test_post_user_password_check_wrong(users):
             "username": user.username,
             "password": f"{user.username}12"
         }, headers={
-             "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded"
         })
 
         assert response.status_code == 200
         assert not response.json()
+
+
+def test_post_user_password_check_nonexistent_user(users):
+    response = client.post("/user/check/password", data={
+        "username": "doesnotexist",
+        "password": "doesntmatter"
+    }, headers={
+        "Content-Type": "application/x-www-form-urlencoded"
+    })
+
+    assert response.status_code == 200
+    assert not response.json()
 
 
 def test_post_user_password_check(users):
@@ -218,6 +259,18 @@ def test_post_user_password_or_pin_check_wrong_password(users):
 
         assert response.status_code == 200
         assert not response.json()
+
+
+def test_post_user_password_or_pin_check_nonexistent_user(users):
+    response = client.post("/user/check/password-or-pin", data={
+        "username": "doesnotexist",
+        "password": "doesntmatter"
+    }, headers={
+        "Content-Type": "application/x-www-form-urlencoded"
+    })
+
+    assert response.status_code == 200
+    assert not response.json()
 
 
 def test_post_user_password_or_pin_check_correct_password(users):
@@ -256,7 +309,11 @@ def test_post_user_password_or_pin_check_correct_pin(users):
         })
 
         assert response.status_code == 200
-        assert response.json()
+
+        if user.pin is not None:
+            assert response.json()
+        else:
+            assert not response.json()
 
 
 def test_create_user_no_pin_no_roles(users, admin_user_auth_header):
@@ -320,6 +377,18 @@ def test_create_user_with_pin_and_all_roles(users, admin_user_auth_header):
     assert crud.validate_user_signature(new_user_json["username"], new_user_json["pin_cleartext"], db=db)
 
 
+def test_create_user_already_exists(users, admin_user_auth_header):
+    new_user_json = {
+        "username": users[3].username,
+        "password_cleartext": "newPassword"
+    }
+
+    response = client.post("/user", json=new_user_json, headers=admin_user_auth_header)
+
+    assert response.status_code == 400
+    assert response.json().get("detail").get("description") == "Integrity Error: Does this user already exist?"
+
+
 def test_get_active_users(users, normal_user_auth_header):
     response = client.get("/users/active-users", headers=normal_user_auth_header)
 
@@ -367,6 +436,87 @@ def test_update_presentation_card_no_photo(user_presentation_cards, admin_user_a
     assert response_json.get("bio") == new_card_details_json.get("bio")
 
 
+def test_update_presentation_card(user_presentation_cards, admin_user_auth_header):
+    current_directory = os.path.dirname(__file__)
+    tests_directory = os.path.dirname(current_directory)
+    photos_directory = os.path.join(tests_directory, "photos")
+    photo_filepath = os.path.join(photos_directory, "new_freddy.jpg")
+    with open(photo_filepath, "rb") as photo_file:
+        new_card_details_json = {
+            "name": "New Name",
+            "bio": "This is a new bio",
+        }
+
+        response = client.post("/users/presentation-card/{cardId}".format(cardId=user_presentation_cards[1].id),
+                               data=new_card_details_json,
+                               files={"photo": ("new_freddy.jpg", photo_file, "image/jpeg")},
+                               headers=admin_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+    old_photo_file_id = user_presentation_cards[1].photoFileId
+
+    assert response_json != user_presentation_cards[1]
+    db.refresh(user_presentation_cards[1])
+    assert response_json == user_presentation_cards[1]
+    assert response_json.get("name") == new_card_details_json.get("name")
+    assert response_json.get("bio") == new_card_details_json.get("bio")
+    assert user_presentation_cards[1].photoFileId != old_photo_file_id
+
+    old_photo = db.scalar(
+        select(models.UserPhoto)
+        .where(models.UserPhoto.id == old_photo_file_id)
+    )
+
+    assert old_photo is None
+
+
+def test_update_presentation_card_big_rect_photo(user_presentation_cards, admin_user_auth_header):
+    current_directory = os.path.dirname(__file__)
+    tests_directory = os.path.dirname(current_directory)
+    photos_directory = os.path.join(tests_directory, "photos")
+    photo_filepath = os.path.join(photos_directory, "new_big_rect_freddy.jpg")
+    with open(photo_filepath, "rb") as photo_file:
+        new_card_details_json = {
+            "name": "New Name",
+            "bio": "This is a new bio",
+        }
+
+        response = client.post("/users/presentation-card/{cardId}".format(cardId=user_presentation_cards[1].id),
+                               data=new_card_details_json,
+                               files={"photo": ("new_freddy.jpg", photo_file, "image/jpeg")},
+                               headers=admin_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+    old_photo_file_id = user_presentation_cards[1].photoFileId
+
+    assert response_json != user_presentation_cards[1]
+    db.refresh(user_presentation_cards[1])
+    assert response_json == user_presentation_cards[1]
+    assert response_json.get("name") == new_card_details_json.get("name")
+    assert response_json.get("bio") == new_card_details_json.get("bio")
+    assert user_presentation_cards[1].photoFileId != old_photo_file_id
+
+    old_photo = db.scalar(
+        select(models.UserPhoto)
+        .where(models.UserPhoto.id == old_photo_file_id)
+    )
+
+    assert old_photo is None
+
+    photo_filepath_temp = os.path.join(photos_directory, "new_big_rect_freddy_temp.jpg")
+    with open(photo_filepath_temp, "wb") as photo_file:
+        photo_file.write(user_presentation_cards[1].photoFile.content)
+
+    from PIL import Image
+
+    photo = Image.open(photo_filepath_temp)
+    assert photo.size == (1024, 1024)
+
+
 def test_delete_presentation_card(user_presentation_cards, admin_user_auth_header):
     card_to_be_deleted = db.scalar(
         select(models.UserPresentationCard)
@@ -376,7 +526,7 @@ def test_delete_presentation_card(user_presentation_cards, admin_user_auth_heade
     assert card_to_be_deleted is not None
 
     response = client.delete("/users/presentation-card/{cardId}".format(cardId=user_presentation_cards[1].id),
-    headers=admin_user_auth_header)
+                             headers=admin_user_auth_header)
 
     assert response.status_code == 200
 
@@ -407,6 +557,56 @@ def test_update_my_presentation_card_no_photo(user_presentation_cards, normal_us
     assert response_json.get("bio") == new_card_details_json.get("bio")
 
 
+def test_update_my_presentation_card_new_with_photo(user_presentation_cards, users, user_auth_tokens):
+    new_card_details_json = {
+        "name": "New Name",
+        "bio": "This is a new bio",
+    }
+
+    current_directory = os.path.dirname(__file__)
+    tests_directory = os.path.dirname(current_directory)
+    photos_directory = os.path.join(tests_directory, "photos")
+    photo_filepath = os.path.join(photos_directory, "no_card_user.jpg")
+    with open(photo_filepath, "rb") as photo_file:
+        response = client.post("/users/me/presentation-card",
+                               data=new_card_details_json,
+                               files={"photo": ("no_card_user.jpg", photo_file, "image/jpeg")},
+                               headers={
+                                   "Authorization": "Bearer " + user_auth_tokens[5].access_token
+                               })
+
+    assert response.status_code == 200
+    response_json = response.json()
+
+    assert response_json.get("name") == new_card_details_json.get("name")
+    assert response_json.get("bio") == new_card_details_json.get("bio")
+
+    user_presentation_card = db.scalar(
+        select(models.UserPresentationCard)
+        .where(models.UserPresentationCard.userId == users[5].id)
+    )
+
+    assert user_presentation_card is not None
+    assert user_presentation_card.photoContentType is not None
+    assert user_presentation_card.photoFileId is not None
+
+
+def test_update_my_presentation_card_new_without_photo(user_presentation_cards, users, user_auth_tokens):
+    new_card_details_json = {
+        "name": "New Name",
+        "bio": "This is a new bio",
+    }
+
+    response = client.post("/users/me/presentation-card",
+                           data=new_card_details_json,
+                           headers={
+                               "Authorization": "Bearer " + user_auth_tokens[5].access_token
+                           })
+
+    assert response.status_code == 400
+    assert response.json().get("detail").get("description") == "No photo provided"
+
+
 def test_delete_my_presentation_card(user_presentation_cards, normal_user_auth_header):
     card_to_be_deleted = db.scalar(
         select(models.UserPresentationCard)
@@ -435,8 +635,18 @@ def test_get_my_presentation_card(user_presentation_cards, normal_user_auth_head
 
 
 def test_get_user_presentation_card(user_presentation_cards, users, normal_user_auth_header):
-    for user, user_presentation_card in zip(users, user_presentation_cards):
-        response = client.get("/users/{userId}/presentation-card".format(userId=user.id), headers=normal_user_auth_header)
+    for user, user_presentation_card in zip(users[:5], user_presentation_cards):
+        response = client.get("/users/{userId}/presentation-card".format(userId=user.id),
+                              headers=normal_user_auth_header)
 
         assert response.status_code == 200
         assert response.json() == user_presentation_card
+
+
+def test_get_user_presentation_card_for_user_who_doesnt_have_one(user_presentation_cards, users,
+                                                                 normal_user_auth_header):
+    response = client.get("/users/{userId}/presentation-card".format(userId=users[5].id),
+                          headers=normal_user_auth_header)
+
+    assert response.status_code == 404
+    assert response.json().get("detail").get("description") == "User Presentation Card not found"

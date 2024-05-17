@@ -131,7 +131,6 @@ def users() -> list[models.User]:
             appointmentManager=False,
             treasurer=False,
             softDeleted=False),
-
         models.User(
             username="honey",
             password=bcrypt.hashpw("honey1234", bcrypt.gensalt()),
@@ -142,6 +141,16 @@ def users() -> list[models.User]:
             appointmentManager=False,
             treasurer=False,
             softDeleted=True),
+        models.User(
+            username="nocarduser",
+            password=bcrypt.hashpw("nocarduser1234", bcrypt.gensalt()),
+            pin=None,
+            admin=False,
+            depositBearer=False,
+            rentalChecker=False,
+            appointmentManager=False,
+            treasurer=False,
+            softDeleted=False),
     ]
 
     db.add_all(test_users)
@@ -158,7 +167,7 @@ def user_photos(users) -> list[models.UserPhoto]:
     test_user_photos = []
     current_directory = os.path.dirname(os.path.abspath(__file__))
     photos_directory = os.path.join(current_directory, "photos")
-    for user in users:
+    for user in users[:5]:
         photo_path = os.path.join(photos_directory, user.username + ".jpg")
         with open(photo_path, "rb") as photo:
             test_user_photos.append(

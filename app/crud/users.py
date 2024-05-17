@@ -68,7 +68,7 @@ def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Integrity Error: Does this user already exist?"
+            detail={"description": "Integrity Error: Does this user already exist?"}
         )
     return user
 

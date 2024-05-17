@@ -15,7 +15,6 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password_cleartext: str
     pin_cleartext: str | None = None
-    pass
 
 
 class User(UserBase):

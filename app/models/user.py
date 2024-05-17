@@ -37,6 +37,14 @@ class UserPresentationCard(Base):
 
     photoContentType: Mapped[str] = mapped_column("photoContentType", Text, nullable=True, quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.name) == str(other.get("name")),
+            str(self.bio) == str(other.get("bio")),
+            str(self.photoContentType) == str(other.get("photoContentType")),
+        ])
+
 
 class User(Base):
     __tablename__ = "users"
@@ -67,6 +75,18 @@ class User(Base):
 
     presentationCard: Mapped["UserPresentationCard"] = relationship("UserPresentationCard", foreign_keys=[UserPresentationCard.userId],
                                                              back_populates="user")
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.username) == str(other.get("username")),
+            str(self.admin) == str(other.get("admin")),
+            str(self.depositBearer) == str(other.get("depositBearer")),
+            str(self.rentalChecker) == str(other.get("rentalChecker")),
+            str(self.appointmentManager) == str(other.get("appointmentManager")),
+            str(self.treasurer) == str(other.get("treasurer")),
+            str(self.softDeleted) == str(other.get("softDeleted")),
+        ])
 
     def get_deposit_bearer_balance(self):
         contract_balance = sum([contract.depositAmountCollected for contract in self.depositCollectedContracts]) - sum(
