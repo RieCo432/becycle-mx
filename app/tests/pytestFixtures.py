@@ -469,3 +469,17 @@ def normal_user_auth_header(user_auth_tokens) -> dict:
     return {
         "Authorization": "Bearer " + user_auth_tokens[3].access_token
     }
+
+
+@pytest.fixture
+def admin_user_auth_header(user_auth_tokens) -> dict:
+    return {
+        "Authorization": "Bearer " + user_auth_tokens[0].access_token
+    }
+
+
+@pytest.fixture
+def deposit_bearer_user_auth_header(user_auth_tokens) -> dict:
+    return {
+        "Authorization": "Bearer " + user_auth_tokens[2].access_token
+    }
