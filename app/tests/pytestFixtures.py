@@ -154,27 +154,65 @@ def users() -> list[models.User]:
 
 
 @pytest.fixture
-def user_presentation_cards(users: list[models.User]) -> list[models.UserPresentationCard]:
+def user_photos(users) -> list[models.UserPhoto]:
+    test_user_photos = []
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    photos_directory = os.path.join(current_directory, "photos")
+    for user in users:
+        photo_path = os.path.join(photos_directory, user.username + ".jpg")
+        with open(photo_path, "rb") as photo:
+            test_user_photos.append(
+                models.UserPhoto(
+                    content=photo.read()
+                )
+            )
+
+    db.add_all(test_user_photos)
+    db.commit()
+
+    yield test_user_photos
+
+    db.query(models.UserPhoto).delete()
+    db.commit()
+
+
+@pytest.fixture
+def user_presentation_cards(users: list[models.User], user_photos: list[models.UserPhoto]) -> list[models.UserPresentationCard]:
     test_user_presentation_cards = [
         models.UserPresentationCard(
             userId=users[0].id,
             name="Elaine",
-            bio="This is Elaine's biography"
+            bio="This is Elaine's biography",
+            photoContentType="image/jpeg",
+            photoFileId=user_photos[0].id
         ),
         models.UserPresentationCard(
             userId=users[1].id,
             name="Freddy",
-            bio="This is Freddy's biography"
+            bio="This is Freddy's biography",
+            photoContentType="image/jpeg",
+            photoFileId=user_photos[1].id
         ),
         models.UserPresentationCard(
             userId=users[2].id,
             name="George",
-            bio="This is George's biography"
+            bio="This is George's biography",
+            photoContentType="image/jpeg",
+            photoFileId=user_photos[2].id
         ),
         models.UserPresentationCard(
             userId=users[3].id,
+            name="Daniel",
+            bio="This is Daniel's biography",
+            photoContentType="image/jpeg",
+            photoFileId=user_photos[3].id
+        ),
+        models.UserPresentationCard(
+            userId=users[4].id,
             name="Honey",
-            bio="This is Honey's biography"
+            bio="This is Honey's biography",
+            photoContentType="image/jpeg",
+            photoFileId=user_photos[4].id
         )
     ]
 

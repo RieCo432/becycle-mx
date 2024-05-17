@@ -67,4 +67,10 @@ def test_get_user_presentation_cards(user_presentation_cards):
             )
         ])
 
-# def get_user_presentation_card_photo():
+
+def test_get_user_presentation_card_photo(user_photos, user_presentation_cards):
+    for user_presentation_card, user_photo in zip(user_presentation_cards, user_photos):
+        response = client.get("/public/users/presentation-cards/{cardId}/photo".format(cardId=user_presentation_card.id))
+
+        assert response.status_code == 200
+        assert response.content == user_photo.content
