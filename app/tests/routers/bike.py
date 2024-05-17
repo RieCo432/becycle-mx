@@ -103,3 +103,63 @@ def test_post_bike(bikes, normal_user_auth_header):
     )
 
     assert response_json == bike_in_db
+
+
+def test_get_make_suggestions(bikes, normal_user_auth_header):
+    queries = ["r", "ral", "rev", "e", "eleph", "a", "apo", "avi", "ol"]
+    all_expected_suggestions = [set([bike.make for bike in bikes if query.lower() in bike.make]) for query in queries]
+
+    for query, expected_suggestions in zip(queries, all_expected_suggestions):
+        response = client.get("/bikes/suggest/makes", params={"make": query}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json) == len(expected_suggestions)
+        assert all([suggestion in expected_suggestions for suggestion in response_json])
+
+
+def test_get_model_suggestions(bikes, normal_user_auth_header):
+    queries = ["s", "ski","spo", "e", "exc", "eni", "a", "ame", "af", "c", "chl", "cui", "h", "hea"]
+    all_expected_suggestions = [set([bike.model for bike in bikes if query.lower() in bike.model]) for query in queries]
+
+    for query, expected_suggestions in zip(queries, all_expected_suggestions):
+        response = client.get("/bikes/suggest/models", params={"model": query}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json) == len(expected_suggestions)
+        assert all([suggestion in expected_suggestions for suggestion in response_json])
+
+
+def test_get_serial_number_suggestions(bikes, normal_user_auth_header):
+    queries = ["a", "e", "i", "m", "q", "u", "ab", "ef", "ij", "mn", "qr", "uv", "abcd", "efgh", "ijkl", "mnop", "qrst", "uvwx", "1", "5", "9", "3", "7", "23", "45", "56", "89"]
+    all_expected_suggestions = [set([bike.serialNumber for bike in bikes if query.lower() in bike.serialNumber]) for query in queries]
+
+    for query, expected_suggestions in zip(queries, all_expected_suggestions):
+        response = client.get("/bikes/suggest/serial-numbers", params={"serial_number": query}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json) == len(expected_suggestions)
+        assert all([suggestion in expected_suggestions for suggestion in response_json])
+
+
+def test_get_colour_suggestions(bikes, normal_user_auth_header):
+    queries = ["b", "p", "br", "bl", "blu", "bla", "pi", "pur"]
+    all_expected_suggestions = [set([bike.colour for bike in bikes if query.lower() in bike.colour]) for query in queries]
+
+    for query, expected_suggestions in zip(queries, all_expected_suggestions):
+        response = client.get("/bikes/suggest/colours", params={"colour": query}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json) == len(expected_suggestions)
+        assert all([suggestion in expected_suggestions for suggestion in response_json])
+
+
+def test_get_bike_conditions(normal_user_auth_header):
+    expected_conditions = ["poor", "fair", "good", "excellent"]
+    response = client.get("/bike/conditions", headers=normal_user_auth_header)
+
+    assert response.status_code == 200
+    assert all([ec in response.json() for ec in expected_conditions])

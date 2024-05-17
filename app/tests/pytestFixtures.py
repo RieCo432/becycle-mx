@@ -69,7 +69,10 @@ def bikes() -> list[models.Bike]:
     test_bikes = [
         models.Bike(make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
         models.Bike(make="apollo", model="excelle", colour="black", decals=None, serialNumber="abcd1256"),
+        models.Bike(make="avigo", model="amethyst", colour="purple", decals=None, serialNumber="uvwx2345"),
         models.Bike(make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
+        models.Bike(make="raleigh", model="enigma", colour="blue", decals=None, serialNumber="mnop3456"),
+        models.Bike(make="revolution", model="cuillin sport", colour="black", decals=None, serialNumber="qrst7890"),
         models.Bike(make="elephantbike", model="heavy af", colour="blue", decals=None, serialNumber="ijkl9012")
     ]
 
