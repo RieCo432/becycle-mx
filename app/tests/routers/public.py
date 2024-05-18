@@ -5,8 +5,6 @@ from app.main import app
 
 client = TestClient(app)
 
-clear_database()
-
 
 def test_get_opening_times(appointment_concurrency_limits, appointment_general_settings):
     response = client.get("/public/opening-times")

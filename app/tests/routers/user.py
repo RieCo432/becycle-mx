@@ -7,8 +7,6 @@ import app.dependencies as dep
 
 client = TestClient(app)
 
-clear_database()
-
 
 @pytest.mark.asyncio
 async def test_get_user_token_correct_password(users):

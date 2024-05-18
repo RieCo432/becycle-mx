@@ -5,8 +5,6 @@ from sqlalchemy import select
 
 client = TestClient(app)
 
-clear_database()
-
 
 def test_find_bike(bikes, normal_user_auth_header):
     for bike in bikes:
