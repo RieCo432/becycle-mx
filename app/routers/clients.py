@@ -75,11 +75,6 @@ async def verify_client_temp(
         verification_code: Annotated[str, Form()],
         db: Session = Depends(dep.get_db)) -> schemas.Token:
 
-    if client_temp_id is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No client ID provided."})
-    if verification_code is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No verification code provided."})
-
     client = crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -246,9 +241,3 @@ async def get_client_appointments(
         client_id: UUID,
         db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
     return crud.get_appointments(db=db, client_id=client_id)
-
-
-
-
-
-

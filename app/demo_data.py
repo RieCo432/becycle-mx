@@ -74,7 +74,7 @@ def add_clients(db: Session) -> list[models.Client]:
         models.Client(
             firstName="debby",
             lastName="smith",
-            emailAddress="daurice.smith@exmaple.com",
+            emailAddress="debby.smith@exmaple.com",
             preBecycleSurveyCompleted=False,
             periBecycleSurveyCompleted=False,
             postBecycleSurveyCompleted=True
@@ -93,6 +93,27 @@ def add_clients(db: Session) -> list[models.Client]:
     db.commit()
 
     return clients
+
+
+def add_clients_temp(db: Session) -> list[models.ClientTemp]:
+    clients_temp = [
+        models.ClientTemp(
+            firstName="echo",
+            lastName="foxtrot",
+            emailAddress="echo.foxtrot@example.com"
+        ),
+        models.ClientTemp(
+            firstName="golf",
+            lastName="hotel",
+            emailAddress="golf.hotel@example.com",
+            expirationDateTime=datetime.datetime.utcnow() - relativedelta(minutes=30)
+        )
+    ]
+
+    db.add_all(clients_temp)
+    db.commit()
+
+    return clients_temp
 
 
 def add_bikes(db: Session) -> list[models.Bike]:

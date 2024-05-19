@@ -13,6 +13,16 @@ delete_all(db=db)
 
 
 @pytest.fixture
+def clients_temp() -> list[models.ClientTemp]:
+    test_clients_temp = add_clients_temp(db=db)
+
+    yield test_clients_temp
+
+    db.query(models.ClientTemp).delete()
+    db.commit()
+
+
+@pytest.fixture
 def clients() -> list[models.Client]:
     test_clients = add_clients(db=db)
 

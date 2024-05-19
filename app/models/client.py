@@ -47,6 +47,14 @@ class Client(Base):
                                                              nullable=False,
                                                              quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.firstName) == str(other.get("firstName")),
+            str(self.lastName) == str(other.get("lastName")),
+            str(self.emailAddress) == str(other.get("emailAddress"))
+        ])
+
 
 class ClientTemp(Base):
     # This table is to hold client information before email is verified.
@@ -60,7 +68,7 @@ class ClientTemp(Base):
     lastName: Mapped[str] = mapped_column("lastName", String(40), nullable=False, index=True, quote=False)
     emailAddress: Mapped[str] = mapped_column("emailAddress", String(255), nullable=False, quote=False, unique=True)
 
-    verificationCode: Mapped[DateTime] = mapped_column("verificationCode", String(6), nullable=False,
+    verificationCode: Mapped[str] = mapped_column("verificationCode", String(6), nullable=False,
                                                        default=lambda: generate_6_digit_code(),
                                                        server_default=generate_6_digit_code_sql(), quote=False)
     expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,
