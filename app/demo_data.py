@@ -95,6 +95,40 @@ def add_clients(db: Session) -> list[models.Client]:
     return clients
 
 
+def add_client_logins(db: Session, clients: list[models.Client]) -> list[models.ClientLogin]:
+    client_logins = [
+        models.ClientLogin(
+            clientId=clients[1].id
+        ),
+        models.ClientLogin(
+            clientId=clients[3].id
+        )
+    ]
+
+    db.add_all(client_logins)
+    db.commit()
+
+    return client_logins
+
+
+def add_client_logins_expired(db: Session, clients: list[models.Client]) -> list[models.ClientLogin]:
+    client_logins_expired = [
+        models.ClientLogin(
+            clientId=clients[1].id,
+            expirationDateTime=datetime.datetime.utcnow() - relativedelta(minutes=10)
+        ),
+        models.ClientLogin(
+            clientId=clients[3].id,
+            expirationDateTime=datetime.datetime.utcnow() - relativedelta(minutes=200)
+        )
+    ]
+
+    db.add_all(client_logins_expired)
+    db.commit()
+
+    return client_logins_expired
+
+
 def add_clients_temp(db: Session) -> list[models.ClientTemp]:
     clients_temp = [
         models.ClientTemp(

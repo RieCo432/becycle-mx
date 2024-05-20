@@ -138,12 +138,9 @@ def authenticate_client(db: Session, client_id: UUID, login_code: str) -> models
     if login_code != client_login.code:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This code is not valid."})
     if datetime.datetime.utcnow() > client_login.expirationDateTime:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This code is not valid."})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This code has expired."})
 
     client = get_client(db=db, client_id=client_login.clientId)
-
-    if client is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Some unknown error has occured!"})
 
     db.delete(client_login)
     db.commit()
@@ -160,7 +157,7 @@ def get_similar_email_addresses(db: Session, email_address: str) -> list[str]:
     return similar_email_addresses
 
 
-def get_potential_client_matches(db: Session, first_name: str, last_name: str, email_address: str) -> list[models.Client]:
+def get_potential_client_matches(db: Session, first_name: str | None, last_name: str | None, email_address: str | None) -> list[models.Client]:
     query_filter = []
     if first_name is not None:
         query_filter.append(models.Client.firstName.startswith(first_name))

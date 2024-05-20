@@ -1,3 +1,4 @@
+import os
 from random import random
 
 from fastapi.testclient import TestClient
@@ -7,10 +8,16 @@ from app.tests.pytestFixtures import *
 from app.main import app
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+import re
 
-CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES = int(os.environ['CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES'])
+CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES = int(os.environ["CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES"])
+CLIENT_LOGIN_CODE_EXPIRE_MINUTES = int(os.environ["CLIENT_LOGIN_CODE_EXPIRE_MINUTES"])
 
 test_client = TestClient(app)
+
+
+def get_6_random_digits():
+    return "{:06d}".format(int(random() * 1000000))
 
 
 def test_get_clients_single_result_first_name(clients: list[models.Client], normal_user_auth_header):
@@ -136,6 +143,13 @@ def test_create_client_temp_new(clients_temp):
     assert response.json().get("emailAddress") == new_client_temp["emailAddress"].lower()
     assert datetime.strptime(response.json().get("expirationDateTime"), "%Y-%m-%dT%H:%M:%S.%f") <= datetime.utcnow() + relativedelta(minutes=CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES)
 
+    client_temp = db.scalar(
+        select(models.ClientTemp)
+        .where(models.ClientTemp.id == response.json().get("id"))
+    )
+
+    assert re.fullmatch(r"[0-9]{6}", client_temp.verificationCode)
+
 
 def test_create_client_temp_overwrite(clients_temp):
     client_temp = {"firstName": clients_temp[0].firstName, "lastName": clients_temp[0].lastName, "emailAddress": clients_temp[0].emailAddress}
@@ -152,6 +166,13 @@ def test_create_client_temp_overwrite(clients_temp):
         select(models.ClientTemp)
         .where(models.ClientTemp.id == clients_temp[0].id)
     ) is None
+
+    client_temp = db.scalar(
+        select(models.ClientTemp)
+        .where(models.ClientTemp.id == response.json().get("id"))
+    )
+
+    assert re.fullmatch(r"[0-9]{6}", client_temp.verificationCode)
 
 
 def test_verify_client_temp_invalid_verification_code(clients_temp):
@@ -190,3 +211,271 @@ def test_verify_client_temp(clients_temp):
         select(models.ClientTemp)
         .where(models.ClientTemp.id == clients_temp[0].id)
     ) is None
+
+
+def test_get_client_login_code_not_exist(clients):
+    response = test_client.get("/client/login-code", params={"email_address": "doesnot.exist@example.com"})
+
+    assert response.status_code == 404
+    assert response.json().get("detail").get("description") == "There is no client associated with this email address."
+
+
+def test_get_client_login_code(clients, client_logins):
+    for client in clients:
+        response = test_client.get("/client/login-code", params={"email_address": client.emailAddress})
+
+        assert response.status_code == 200
+        assert response.json().get("id") == str(client.id)
+
+        client_login = db.scalar(
+            select(models.ClientLogin)
+            .where(models.ClientLogin.clientId == client.id)
+        )
+
+        assert re.fullmatch(r"[0-9]{6}", client_login.code)
+        assert client_login.expirationDateTime <= datetime.utcnow() + relativedelta(minutes=CLIENT_LOGIN_CODE_EXPIRE_MINUTES)
+
+
+def test_get_token_no_login_requested(clients, client_logins):
+    for client in [client for client in clients if client.id not in [client_login.clientId for client_login in client_logins]]:
+        response = test_client.post("/clients/token", data={"username": str(client.id), "password": get_6_random_digits()})
+
+        assert response.status_code == 404
+        assert response.json().get("detail").get("description") == "This ID does not correspond to any client, or this client has not requested a login!"
+
+
+def test_get_token_invalid_code(clients, client_logins):
+    for client_login in client_logins:
+        invalid_code = get_6_random_digits()
+        while invalid_code == client_login.code:
+            invalid_code = get_6_random_digits()
+        response = test_client.post("/clients/token", data={"username": str(client_login.clientId), "password": invalid_code})
+
+        assert response.status_code == 400
+        assert response.json().get("detail").get("description") == "This code is not valid."
+
+
+def test_get_token_expired_code(clients, client_logins_expired):
+    for client_login_expired in client_logins_expired:
+        response = test_client.post("/clients/token", data={"username": str(client_login_expired.clientId), "password": client_login_expired.code})
+
+        assert response.status_code == 400
+        assert response.json().get("detail").get("description") == "This code has expired."
+
+
+def test_get_token(clients, client_logins):
+    for client_login in client_logins:
+        response = test_client.post("/clients/token", data={"username": str(client_login.clientId), "password": client_login.code})
+
+        assert response.status_code == 200
+        assert response.json().get("token_type") == "bearer"
+        assert response.json().get("access_token", None) is not None
+
+
+def test_find_client(clients, normal_user_auth_header):
+    queries = [
+        {"first_name": "ali", "last_name": "humph", "email_address": "alice.hump"},
+        {"first_name": "bo", "last_name": "fran", "email_address": "bob.frank@"},
+        {"first_name": "charli", "last_name": "mauri", "email_address": "charlie.mau"},
+        {"first_name": "deb", "last_name": "smit", "email_address": "debby.sm"},
+        {"first_name": "ale", "last_name": "smi", "email_address": "alex.smith@"},
+        {"first_name": "al"},
+        {"email_address": "al"},
+        {"first_name": "al", "last_name": "sm"},
+        {"last_name": "smith"},
+        {"last_name": "frank"},
+        {"first_name": "who"},
+        {"last_name": "this"},
+        {"email_address": "who.this@ex"}
+    ]
+
+    expected_suggestions_s = [
+        [clients[0]],
+        [clients[1]],
+        [clients[2]],
+        [clients[3], clients[4]],
+        [clients[3], clients[4]],
+        [clients[0], clients[4]],
+        [clients[0], clients[4]],
+        [clients[0], clients[3], clients[4]],
+        [clients[3], clients[4]],
+        [clients[1]],
+        [],
+        [],
+        []
+    ]
+
+    for query, expected_suggestions in zip(queries, expected_suggestions_s):
+        response = test_client.get("/clients/find", params=query, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json) == len(expected_suggestions)
+        assert all([response_client in expected_suggestions for response_client in response_json])
+
+
+def test_get_client_me(clients, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        response = test_client.get("/clients/me", headers=client_auth_header)
+
+        assert response.status_code == 200
+        assert response.json() == client
+
+
+def test_update_client_me(clients, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        response = test_client.patch("/clients/me", json={"firstName": "New", "lastName": "Name"}, headers=client_auth_header)
+
+        assert response.status_code == 200
+        assert response.json() != client
+        assert response.json().get("firstName") == "new"
+        assert response.json().get("lastName") == "name"
+
+        db.refresh(client)
+
+        assert response.json() == client
+
+
+def test_get_my_contracts_all(clients, contracts, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        expected_contracts = [c for c in contracts if c.clientId == client.id]
+        response = test_client.get("/clients/me/contracts", headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(expected_contracts)
+        assert all([contract in expected_contracts for contract in response_json])
+
+
+def test_get_my_contracts_open(clients, contracts, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        expected_contracts = [c for c in contracts if c.clientId == client.id and c.endDate >= datetime.utcnow().date() and c.returnedDate is None]
+        response = test_client.get("/clients/me/contracts", params={"closed": False, "expired": False}, headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(expected_contracts)
+        assert all([contract in expected_contracts for contract in response_json])
+
+
+def test_get_my_contracts_expired(clients, contracts, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        expected_contracts = [c for c in contracts if c.clientId == client.id and c.endDate < datetime.utcnow().date() and c.returnedDate is None]
+        response = test_client.get("/clients/me/contracts", params={"closed": False, "open": False}, headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(expected_contracts)
+        assert all([contract in expected_contracts for contract in response_json])
+
+
+def test_get_my_contracts_closed(clients, contracts, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        expected_contracts = [c for c in contracts if c.clientId == client.id and c.returnedDate is not None]
+        response = test_client.get("/clients/me/contracts", params={"expired": False, "open": False}, headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(expected_contracts)
+        assert all([contract in expected_contracts for contract in response_json])
+
+
+def test_get_my_contracts_closed_and_open(clients, contracts, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        expected_contracts = [c for c in contracts if c.clientId == client.id and (c.endDate >= datetime.utcnow().date() or c.returnedDate is not None)]
+        response = test_client.get("/clients/me/contracts", params={"expired": False}, headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(expected_contracts)
+        assert all([contract in expected_contracts for contract in response_json])
+
+
+def test_get_my_contracts_closed_and_expired(clients, contracts, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        expected_contracts = [c for c in contracts if c.clientId == client.id and (c.returnedDate is not None or (c.returnedDate is None and c.endDate < datetime.utcnow().date()))]
+        response = test_client.get("/clients/me/contracts", params={"open": False}, headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(expected_contracts)
+        assert all([contract in expected_contracts for contract in response_json])
+
+
+def test_get_my_contracts_open_and_expired(clients, contracts, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        expected_contracts = [c for c in contracts if c.clientId == client.id and c.returnedDate is None]
+        response = test_client.get("/clients/me/contracts", params={"closed": False}, headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(expected_contracts)
+        assert all([contract in expected_contracts for contract in response_json])
+
+
+def test_get_my_contracts_none(clients, contracts, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        expected_contracts = []
+        response = test_client.get("/clients/me/contracts", params={"expired": False, "open": False, "closed": False}, headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(expected_contracts)
+        assert all([contract in expected_contracts for contract in response_json])
+
+
+def test_get_my_contract(contracts, clients, client_auth_headers):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        client_contracts = [c for c in contracts if c.clientId == client.id]
+        for client_contract in client_contracts:
+            response = test_client.get("/clients/me/contracts/{contractId}".format(contractId=client_contract.id), headers=client_auth_header)
+
+            assert response.status_code == 200
+            response_json = response.json()
+
+            assert response_json.get("workingUsername") == client_contract.workingUser.username
+            assert response_json.get("checkingUsername") == client_contract.checkingUser.username
+            assert response_json.get("depositCollectingUsername") == client_contract.depositCollectingUser.username
+
+            if client_contract.returnedDate is not None:
+                assert response_json.get("returnAcceptingUsername") == client_contract.returnAcceptingUser.username
+                assert response_json.get("depositReturningUsername") == client_contract.depositReturningUser.username
+                assert response_json.get("returnedDate") == str(client_contract.returnedDate)
+            else:
+                assert response_json.get("returnAcceptingUsername") is None
+                assert response_json.get("depositReturningUsername") is None
+                assert response_json.get("returnedDate") is None
+
+            assert response_json.get("id") == str(client_contract.id)
+            assert response_json.get("startDate") == str(client_contract.startDate)
+            assert response_json.get("endDate") == str(client_contract.endDate)
+
+            assert response_json.get("depositAmountReturned") == client_contract.depositAmountReturned
+            assert response_json.get("detailsSent") == client_contract.detailsSent
+            assert response_json.get("expiryReminderSent") == client_contract.expiryReminderSent
+            assert response_json.get("returnDetailsSent") == client_contract.returnDetailsSent
+            assert response_json.get("clientId") == str(client_contract.clientId)
+            assert response_json.get("bikeId") == str(client_contract.bikeId)
+            assert response_json.get("depositAmountCollected") == client_contract.depositAmountCollected
+            assert response_json.get("conditionOfBike") == client_contract.conditionOfBike
+            assert response_json.get("contractType") == client_contract.contractType
+            assert response_json.get("notes") == client_contract.notes
+
+
+def test_get_my_appointments(clients, client_auth_headers, appointments):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        client_appointments = [a for a in appointments if a.clientId == client.id]
+        response = test_client.get("/clients/me/appointments", headers=client_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json) == len(client_appointments)
+        assert all([a in client_appointments for a in response_json])

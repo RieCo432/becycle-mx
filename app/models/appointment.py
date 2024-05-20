@@ -28,6 +28,19 @@ class Appointment(Base):
 
     reminderSent: Mapped[bool] = mapped_column("reminderSent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.clientId) == str(other.get("clientId")),
+            str(self.typeId) == str(other.get("typeId")),
+            self.startDateTime == datetime.strptime(other.get("startDateTime"), "%Y-%m-%dT%H:%M:%S"),
+            self.endDateTime == datetime.strptime(other.get("endDateTime"), "%Y-%m-%dT%H:%M:%S"),
+            str(self.notes) == str(other.get("notes")),
+            str(self.confirmed) == str(other.get("confirmed")),
+            str(self.cancelled) == str(other.get("cancelled")),
+            str(self.reminderSent) == str(other.get("reminderSent")),
+        ])
+
     def send_request_received_email(self):
         email_html_content = services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime)
         services.email_helpers.send_email(

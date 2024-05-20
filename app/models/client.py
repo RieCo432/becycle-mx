@@ -98,7 +98,7 @@ class ClientLogin(Base):
     clientId: Mapped[UUID] = mapped_column("clientId", ForeignKey("clients.id"), nullable=False, quote=False)
     client: Mapped["Client"] = relationship("Client")
 
-    code: Mapped[DateTime] = mapped_column("code", String(6), nullable=False,
+    code: Mapped[str] = mapped_column("code", String(6), nullable=False,
                                            default=lambda: generate_6_digit_code(),
                                            server_default=generate_6_digit_code_sql(), quote=False)
     expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,

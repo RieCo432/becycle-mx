@@ -23,6 +23,26 @@ def clients_temp() -> list[models.ClientTemp]:
 
 
 @pytest.fixture
+def client_logins(clients) -> list[models.ClientLogin]:
+    test_client_logins = add_client_logins(db=db, clients=clients)
+
+    yield test_client_logins
+
+    db.query(models.ClientLogin).delete()
+    db.commit()
+
+
+@pytest.fixture
+def client_logins_expired(clients) -> list[models.ClientLogin]:
+    test_client_logins_expired = add_client_logins_expired(db=db, clients=clients)
+
+    yield test_client_logins_expired
+
+    db.query(models.ClientLogin).delete()
+    db.commit()
+
+
+@pytest.fixture
 def clients() -> list[models.Client]:
     test_clients = add_clients(db=db)
 
