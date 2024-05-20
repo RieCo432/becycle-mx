@@ -479,3 +479,161 @@ def test_get_my_appointments(clients, client_auth_headers, appointments):
         response_json = response.json()
         assert len(response_json) == len(client_appointments)
         assert all([a in client_appointments for a in response_json])
+
+
+def test_cancel_my_appointment(clients, client_auth_headers, appointments):
+    for client, client_auth_header in zip(clients, client_auth_headers):
+        client_appointments = [a for a in appointments if a.clientId == client.id]
+        for appointment in client_appointments:
+            response = test_client.patch("/clients/me/appointments/{appointmentId}/cancel".format(appointmentId=appointment.id), headers=client_auth_header)
+
+            assert response.status_code == 200
+
+            db.refresh(appointment)
+            assert response.json() == appointment
+            assert response.json().get("cancelled")
+
+
+def test_get_client(clients, normal_user_auth_header):
+    for client in clients:
+        response = test_client.get("/clients/{clientId}".format(clientId=client.id), headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        assert response.json() == client
+
+
+def test_update_client_full(clients, normal_user_auth_header):
+    for client in clients:
+        new_details = {
+            "firstName": client.firstName + "thisIsNew",
+            "lastName": client.lastName + "thisAlso",
+            "emailAddress": "New.Email.Address@example.com"
+        }
+        response = test_client.patch("/clients/{clientId}".format(clientId=client.id), json=new_details, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        assert response.json() != client
+        assert response.json().get("firstName") == new_details["firstName"].lower()
+        assert response.json().get("lastName") == new_details["lastName"].lower()
+        assert response.json().get("emailAddress") == new_details["emailAddress"].lower()
+
+        db.refresh(client)
+
+        assert response.json() == client
+
+
+def test_get_client_contracts_all(clients, normal_user_auth_header, contracts):
+    for client in clients:
+        client_contracts = [c for c in contracts if c.clientId == client.id]
+
+        response = test_client.get("/clients/{clientId}/contracts".format(clientId=client.id), headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_contracts)
+        assert all([c in client_contracts for c in response_json])
+
+
+def test_get_client_contracts_open(clients, normal_user_auth_header, contracts):
+    for client in clients:
+        client_contracts = [c for c in contracts if c.clientId == client.id and c.endDate >= datetime.utcnow().date() and c.returnedDate is None]
+
+        response = test_client.get("/clients/{clientId}/contracts".format(clientId=client.id), params={"expired": False, "closed": False}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_contracts)
+        assert all([c in client_contracts for c in response_json])
+
+
+def test_get_client_contracts_closed(clients, normal_user_auth_header, contracts):
+    for client in clients:
+        client_contracts = [c for c in contracts if c.clientId == client.id and c.returnedDate is not None]
+
+        response = test_client.get("/clients/{clientId}/contracts".format(clientId=client.id), params={"open": False, "expired": False}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_contracts)
+        assert all([c in client_contracts for c in response_json])
+
+
+def test_get_client_contracts_expired(clients, normal_user_auth_header, contracts):
+    for client in clients:
+        client_contracts = [c for c in contracts if c.clientId == client.id and c.endDate < datetime.utcnow().date() and c.returnedDate is None]
+
+        response = test_client.get("/clients/{clientId}/contracts".format(clientId=client.id), params={"open": False, "closed": False}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_contracts)
+        assert all([c in client_contracts for c in response_json])
+
+
+def test_get_client_contracts_open_and_closed(clients, normal_user_auth_header, contracts):
+    for client in clients:
+        client_contracts = [c for c in contracts if c.clientId == client.id and (c.endDate >= datetime.utcnow().date() or c.returnedDate is not None)]
+
+        response = test_client.get("/clients/{clientId}/contracts".format(clientId=client.id), params={"expired": False}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_contracts)
+        assert all([c in client_contracts for c in response_json])
+
+
+def test_get_client_contracts_open_and_expired(clients, normal_user_auth_header, contracts):
+    for client in clients:
+        client_contracts = [c for c in contracts if c.clientId == client.id and c.returnedDate is None]
+
+        response = test_client.get("/clients/{clientId}/contracts".format(clientId=client.id), params={"closed": False}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_contracts)
+        assert all([c in client_contracts for c in response_json])
+
+
+def test_get_client_contracts_closed_and_expired(clients, normal_user_auth_header, contracts):
+    for client in clients:
+        client_contracts = [c for c in contracts if c.clientId == client.id and (c.returnedDate is not None or (c.returnedDate is None and c.endDate < datetime.utcnow().date()))]
+
+        response = test_client.get("/clients/{clientId}/contracts".format(clientId=client.id), params={"open": False}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_contracts)
+        assert all([c in client_contracts for c in response_json])
+
+
+def test_get_client_contracts_none(clients, normal_user_auth_header, contracts):
+    for client in clients:
+        client_contracts = []
+
+        response = test_client.get("/clients/{clientId}/contracts".format(clientId=client.id), params={"open": False, "expired": False, "closed": False}, headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_contracts)
+        assert all([c in client_contracts for c in response_json])
+
+
+def test_get_client_appointments(clients, normal_user_auth_header, appointments):
+    for client in clients:
+        client_appointments = [a for a in appointments if a.clientId == client.id]
+
+        response = test_client.get("/clients/{clientId}/appointments".format(clientId=client.id), headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json) == len(client_appointments)
+        assert all([a in client_appointments for a in response_json])

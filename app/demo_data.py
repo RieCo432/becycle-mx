@@ -472,13 +472,69 @@ def add_appointment_types(db: Session) -> list[models.AppointmentType]:
     return appointment_types
 
 
-def add_appointments(db: Session, clients: list[models.Client], appointment_types: list[models.AppointmentType]) -> list[models.Appointment]:
+def add_appointments(db: Session, clients: list[models.Client], appointment_types: list[models.AppointmentType], appointment_general_settings: models.AppointmentGeneralSettings) -> list[models.Appointment]:
+    past_date_1 = datetime.datetime.utcnow().date() - relativedelta(days=1)
+    while past_date_1.weekday() not in appointment_general_settings.openingDays:
+        past_date_1 -= relativedelta(days=1)
+
+    past_date_2 = past_date_1 - relativedelta(days=1)
+    while past_date_2.weekday() not in appointment_general_settings.openingDays:
+        past_date_2 -= relativedelta(days=1)
+
+    future_date_1 = datetime.datetime.utcnow().date() + relativedelta(days=1)
+    while future_date_1.weekday() not in appointment_general_settings.openingDays:
+        future_date_1 += relativedelta(days=1)
+
+    future_date_2 = future_date_1 + relativedelta(days=1)
+    while future_date_2.weekday() not in appointment_general_settings.openingDays:
+        future_date_2 += relativedelta(days=1)
+
     appointments = [
+        models.Appointment(
+            clientId=clients[0].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=False,
+            cancelled=False,
+            reminderSent=True
+        ),
         models.Appointment(
             clientId=clients[1].id,
             typeId=appointment_types[0].id,
-            startDateTime=datetime.datetime.combine((datetime.datetime.utcnow() - relativedelta(month=2)).date(), datetime.time(hour=16, minute=15)),
-            endDateTime=datetime.datetime.combine((datetime.datetime.utcnow() - relativedelta(month=2)).date(), datetime.time(hour=18, minute=15)),
+            startDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=False,
+            cancelled=False,
+            reminderSent=True
+        ),
+        models.Appointment(
+            clientId=clients[2].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(past_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(past_date_1, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=True,
+            cancelled=False,
+            reminderSent=True
+        ),
+        models.Appointment(
+            clientId=clients[2].id,
+            typeId=appointment_types[1].id,
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=17, minute=15)),
+            notes=None,
+            confirmed=False,
+            cancelled=False,
+            reminderSent=True
+        ),
+        models.Appointment(
+            clientId=clients[3].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(past_date_2, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(past_date_2, datetime.time(hour=18, minute=15)),
             notes=None,
             confirmed=True,
             cancelled=False,
@@ -487,13 +543,33 @@ def add_appointments(db: Session, clients: list[models.Client], appointment_type
         models.Appointment(
             clientId=clients[3].id,
             typeId=appointment_types[1].id,
-            startDateTime=datetime.datetime.combine((datetime.datetime.utcnow() + relativedelta(days=2)).date(), datetime.time(hour=16, minute=15)),
-            endDateTime=datetime.datetime.combine((datetime.datetime.utcnow() + relativedelta(days=2)).date(), datetime.time(hour=18, minute=15)),
+            startDateTime=datetime.datetime.combine(past_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(past_date_1, datetime.time(hour=18, minute=15)),
             notes=None,
             confirmed=True,
+            cancelled=True,
+            reminderSent=True
+        ),
+        models.Appointment(
+            clientId=clients[3].id,
+            typeId=appointment_types[1].id,
+            startDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=17, minute=15)),
+            notes=None,
+            confirmed=False,
             cancelled=False,
             reminderSent=True
-        )
+        ),
+        models.Appointment(
+            clientId=clients[4].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=False,
+            cancelled=False,
+            reminderSent=True
+        ),
     ]
 
     db.add_all(appointments)
@@ -653,9 +729,9 @@ if __name__ == "__main__":
     demo_contract_types = add_contract_types(db=demo_db)
     demo_contracts = add_contracts(db=demo_db, users=demo_users, clients=demo_clients, bikes=demo_bikes, contract_types=demo_contract_types)
     demo_appointment_types = add_appointment_types(db=demo_db)
-    demo_appointments = add_appointments(db=demo_db, appointment_types=demo_appointment_types, clients=demo_clients)
     demo_appointment_general_settings = add_appointment_settings(db=demo_db)
     demo_appointment_concurrency_limits = add_appointment_concurrency_limits(db=demo_db)
+    demo_appointments = add_appointments(db=demo_db, appointment_types=demo_appointment_types, clients=demo_clients, appointment_general_settings=demo_appointment_general_settings)
     demo_address = add_address(db=demo_db)
     demo_closed_days = add_closed_days(db=demo_db)
     demo_deposit_exchanges = add_deposit_exchanges(db=demo_db, users=demo_users)

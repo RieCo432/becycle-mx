@@ -123,8 +123,8 @@ def appointment_types() -> list[models.AppointmentType]:
 
 
 @pytest.fixture
-def appointments(appointment_types: list[models.AppointmentType], clients: list[models.Client]) -> list[models.Appointment]:
-    test_appointments = add_appointments(db=db, clients=clients, appointment_types=appointment_types)
+def appointments(appointment_types: list[models.AppointmentType], clients: list[models.Client], appointment_general_settings: models.AppointmentGeneralSettings) -> list[models.Appointment]:
+    test_appointments = add_appointments(db=db, clients=clients, appointment_types=appointment_types, appointment_general_settings=appointment_general_settings)
 
     yield test_appointments
 
