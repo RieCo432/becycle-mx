@@ -119,14 +119,6 @@ async def update_appointment_type(
     return crud.update_appointment_type(db=db, appointment_type=appointment_type, updated_appointment_type_data=updated_appointment_type_data)
 
 
-@appointments.get("/appointments/maximum-concurrent")
-async def get_maximum_concurrent_appointments(
-        db: Session = Depends(dep.get_db)) -> dict[date, dict[time, int]]:
-    concurrency_limits_by_date = crud.get_maximum_concurrent_appointments_for_each_slot(db=db)
-
-    return concurrency_limits_by_date
-
-
 @appointments.get("/appointments/calendar", dependencies=[Depends(dep.get_current_active_user)])
 async def get_appointments(
         start_datetime: datetime = datetime.utcnow(),
@@ -146,4 +138,3 @@ async def get_appointments(
         ))
 
     return booked_appointments
-
