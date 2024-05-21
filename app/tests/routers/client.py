@@ -486,11 +486,20 @@ def test_cancel_my_appointment(clients, client_auth_headers, appointments):
         for appointment in client_appointments:
             response = test_client.patch("/clients/me/appointments/{appointmentId}/cancel".format(appointmentId=appointment.id), headers=client_auth_header)
 
-            assert response.status_code == 200
+            if appointment.startDateTime > datetime.now():
+                assert response.status_code == 200
 
-            db.refresh(appointment)
-            assert response.json() == appointment
-            assert response.json().get("cancelled")
+                db.refresh(appointment)
+                assert response.json() == appointment
+                assert response.json().get("cancelled")
+            else:
+                was_already_cancelled = appointment.cancelled
+                assert response.status_code == 400
+                assert response.json().get("detail").get("description") == "This appointment does not exist or is in the past."
+
+                db.refresh(appointment)
+
+                assert was_already_cancelled == appointment.cancelled
 
 
 def test_get_client(clients, normal_user_auth_header):

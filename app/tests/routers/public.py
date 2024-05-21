@@ -36,7 +36,7 @@ def test_get_slot_duration(appointment_general_settings):
 def test_get_next_closed_day(closed_days):
     response = client.get("/public/next-closed-day")
 
-    next_closed_date = str(datetime.datetime.utcnow().date() + relativedelta(days=7))
+    next_closed_date = closed_days[0].date.strftime("%Y-%m-%d")
 
     assert response.status_code == 200
     assert response.json() == {"date": next_closed_date, "note": "Workshop Day"}
