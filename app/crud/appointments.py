@@ -44,15 +44,6 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
     return appointment
 
 
-def get_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
-    appointment = db.scalar(
-        select(models.Appointment)
-        .where(models.Appointment.id == appointment_id)
-    )
-
-    return appointment
-
-
 def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
     appointment = db.scalar(
         select(models.Appointment)
@@ -99,11 +90,12 @@ def cancel_my_appointment(db: Session, client: models.Client, appointment_id: UU
         .where(
             (models.Appointment.id == appointment_id)
             & (models.Appointment.clientId == client.id)
+            & (models.Appointment.startDateTime > datetime.utcnow())
         )
     )
 
     if appointment is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Appointment Not Found"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This appointment does not exist or is in the past."})
 
     appointment.cancelled = True
     appointment.send_client_cancellation_email()
