@@ -68,12 +68,9 @@ def post_client_temp(db: Session, client_data: schemas.ClientCreate) -> models.C
         lastName=client_data.lastName.lower(),
         emailAddress=client_data.emailAddress.lower()
     )
-    try:
-        db.add(client_temp)
-        db.commit()
-    except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={
-            "description": "Something went wrong"})
+
+    db.add(client_temp)
+    db.commit()
 
     return client_temp
 

@@ -1,4 +1,3 @@
-import os
 from random import random
 
 from fastapi.testclient import TestClient
