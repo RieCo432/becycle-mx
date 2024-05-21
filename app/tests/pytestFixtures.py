@@ -163,8 +163,8 @@ def address() -> models.Address:
 
 
 @pytest.fixture
-def closed_days() -> list[models.ClosedDay]:
-    test_closed_days = add_closed_days(db=db)
+def closed_days(appointment_general_settings) -> list[models.ClosedDay]:
+    test_closed_days = add_closed_days(db=db, appointment_general_settings=appointment_general_settings)
 
     yield test_closed_days
 
@@ -227,6 +227,13 @@ def normal_user_auth_header(user_auth_tokens) -> dict:
 def admin_user_auth_header(user_auth_tokens) -> dict:
     return {
         "Authorization": "Bearer " + user_auth_tokens[0].access_token
+    }
+
+
+@pytest.fixture
+def appointment_manager_user_auth_header(user_auth_tokens) -> dict:
+    return {
+        "Authorization": "Bearer " + user_auth_tokens[1].access_token
     }
 
 

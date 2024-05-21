@@ -463,6 +463,13 @@ def add_appointment_types(db: Session) -> list[models.AppointmentType]:
             title="Medium Repair",
             description="You know what this is",
             duration=60
+        ),
+        models.AppointmentType(
+            id="srep",
+            active=False,
+            title="Small Repair",
+            description="You know what this is",
+            duration=30
         )
     ]
 
@@ -481,7 +488,7 @@ def add_appointments(db: Session, clients: list[models.Client], appointment_type
     while past_date_2.weekday() not in appointment_general_settings.openingDays:
         past_date_2 -= relativedelta(days=1)
 
-    future_date_1 = datetime.datetime.utcnow().date() + relativedelta(days=1)
+    future_date_1 = datetime.datetime.utcnow().date() + relativedelta(days=appointment_general_settings.minBookAhead)
     while future_date_1.weekday() not in appointment_general_settings.openingDays:
         future_date_1 += relativedelta(days=1)
 
@@ -506,7 +513,7 @@ def add_appointments(db: Session, clients: list[models.Client], appointment_type
             startDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=16, minute=15)),
             endDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=18, minute=15)),
             notes=None,
-            confirmed=False,
+            confirmed=True,
             cancelled=False,
             reminderSent=True
         ),
@@ -523,8 +530,8 @@ def add_appointments(db: Session, clients: list[models.Client], appointment_type
         models.Appointment(
             clientId=clients[2].id,
             typeId=appointment_types[1].id,
-            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
-            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=17, minute=15)),
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=18, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=19, minute=15)),
             notes=None,
             confirmed=False,
             cancelled=False,
@@ -566,6 +573,26 @@ def add_appointments(db: Session, clients: list[models.Client], appointment_type
             startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
             endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=18, minute=15)),
             notes=None,
+            confirmed=True,
+            cancelled=False,
+            reminderSent=True
+        ),
+        models.Appointment(
+            clientId=clients[4].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=17, minute=45)),
+            endDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=19, minute=45)),
+            notes=None,
+            confirmed=False,
+            cancelled=False,
+            reminderSent=True
+        ),
+        models.Appointment(
+            clientId=clients[4].id,
+            typeId=appointment_types[1].id,
+            startDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=18, minute=45)),
+            endDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=19, minute=45)),
+            notes=None,
             confirmed=False,
             cancelled=False,
             reminderSent=True
@@ -582,7 +609,7 @@ def add_appointment_settings(db: Session) -> models.AppointmentGeneralSettings:
     appointment_settings = models.AppointmentGeneralSettings(
         openingDays=[0, 2],
         minBookAhead=2,
-        maxBookAhead=30,
+        maxBookAhead=21,
         slotDuration=15
     )
 
@@ -632,15 +659,23 @@ def add_address(db: Session) -> models.Address:
     return address
 
 
-def add_closed_days(db: Session) -> list[models.ClosedDay]:
+def add_closed_days(db: Session, appointment_general_settings: models.AppointmentGeneralSettings) -> list[models.ClosedDay]:
+    future_date_1 = datetime.datetime.utcnow().date() + relativedelta(days=appointment_general_settings.minBookAhead)
+    while future_date_1.weekday() not in appointment_general_settings.openingDays:
+        future_date_1 += relativedelta(days=1)
+
+    future_date_2 = future_date_1 + relativedelta(days=1)
+    while future_date_2.weekday() not in appointment_general_settings.openingDays:
+        future_date_2 += relativedelta(days=1)
+
+    future_date_3 = future_date_2 + relativedelta(days=1)
+    while future_date_3.weekday() not in appointment_general_settings.openingDays:
+        future_date_3 += relativedelta(days=1)
+
     closed_days = [
         models.ClosedDay(
-            date=datetime.datetime.utcnow().date() + relativedelta(days=7),
+            date=future_date_3,
             note="Workshop Day"
-        ),
-        models.ClosedDay(
-            date=datetime.datetime.utcnow().date() + relativedelta(days=28),
-            note="Workshop Day 2"
         ),
     ]
 
@@ -733,6 +768,6 @@ if __name__ == "__main__":
     demo_appointment_concurrency_limits = add_appointment_concurrency_limits(db=demo_db)
     demo_appointments = add_appointments(db=demo_db, appointment_types=demo_appointment_types, clients=demo_clients, appointment_general_settings=demo_appointment_general_settings)
     demo_address = add_address(db=demo_db)
-    demo_closed_days = add_closed_days(db=demo_db)
+    demo_closed_days = add_closed_days(db=demo_db, appointment_general_settings=demo_appointment_general_settings)
     demo_deposit_exchanges = add_deposit_exchanges(db=demo_db, users=demo_users)
     demo_expense_types = add_expense_types(db=demo_db)

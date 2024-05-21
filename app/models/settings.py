@@ -32,6 +32,15 @@ class AppointmentType(Base):
     description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
     duration: Mapped[int] = mapped_column("duration", Integer, nullable=False, quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.active) == str(other.get("active")),
+            str(self.title) == str(other.get("title")),
+            str(self.description) == str(other.get("description")),
+            str(self.duration) == str(other.get("duration")),
+        ])
+
 
 class ClosedDay(Base):
     __tablename__ = "closeddays"
