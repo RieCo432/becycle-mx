@@ -198,7 +198,7 @@ def test_get_my_deposit_balance_normal_user(users, normal_user_auth_header):
     assert response.json().get("detail").get("description") == "This page can only be viewed by deposit bearers!"
 
 
-def test_get_my_deposit_balance(users, deposit_bearer_user_auth_header):
+def test_get_my_deposit_balance(users, deposit_bearer_user_auth_header, contracts, deposit_exchanges):
     response = client.get("/users/me/deposit_balance", headers=deposit_bearer_user_auth_header)
 
     assert response.status_code == 200
