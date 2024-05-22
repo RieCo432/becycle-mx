@@ -37,7 +37,7 @@ async def create_deposit_exchange(
             detail={"description": "Only Treasurer can transfer deposits to the BANK"}
         )
 
-    if amount > from_user.get_deposit_bearer_balance():
+    if amount > from_user.get_deposit_bearer_balance() and from_user.username != "BANK":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "From User does not have enough funds!"},

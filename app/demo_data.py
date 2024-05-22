@@ -232,6 +232,16 @@ def add_users(db: Session) -> list[models.User]:
             appointmentManager=False,
             treasurer=False,
             softDeleted=False),
+        models.User(
+            username="BANK",
+            password=bcrypt.hashpw("bank1234", bcrypt.gensalt()),
+            pin=None,
+            admin=False,
+            depositBearer=False,
+            rentalChecker=False,
+            appointmentManager=False,
+            treasurer=False,
+            softDeleted=False),
     ]
 
     db.add_all(users)
