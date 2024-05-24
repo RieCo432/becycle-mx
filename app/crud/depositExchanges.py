@@ -25,15 +25,6 @@ def create_deposit_exchange(
     return deposit_exchange
 
 
-def get_deposit_exchanges(db: Session) -> list[models.DepositExchange]:
-    deposit_exchanges = [_ for _ in db.scalars(
-        select(models.DepositExchange)
-        .order_by(models.DepositExchange.date.desc())
-    )]
-
-    return deposit_exchanges
-
-
 def get_deposit_exchange_dates(db: Session) -> list[date]:
     return [_ for _ in db.scalars(
         select(models.DepositExchange.date)

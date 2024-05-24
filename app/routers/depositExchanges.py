@@ -47,11 +47,6 @@ async def create_deposit_exchange(
     return crud.create_deposit_exchange(db=db, amount=amount, from_user_id=from_user.id, to_user_id=to_user.id)
 
 
-@deposit_exchanges.get("/deposit-exchanges", dependencies=[Depends(dep.get_current_active_user)])
-async def get_deposit_exchanges(db: Session = Depends(dep.get_db)) -> list[schemas.DepositExchange]:
-    return crud.get_deposit_exchanges(db=db)
-
-
 @deposit_exchanges.get("/deposit-exchanges/users", dependencies=[Depends(dep.get_current_active_user)])
 async def get_deposit_exchange_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
     return crud.get_deposit_exchange_users(db=db)
