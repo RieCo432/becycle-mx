@@ -113,6 +113,16 @@ def contracts(users: list[models.User], bikes: list[models.Bike], clients: list[
 
 
 @pytest.fixture
+def paper_contracts(contracts: list[models.Contract]) -> list[models.PaperContract]:
+    test_paper_contracts = add_paper_contracts(db=db, contracts=contracts)
+
+    yield test_paper_contracts
+
+    db.query(models.PaperContract).delete()
+    db.commit()
+
+
+@pytest.fixture
 def appointment_types() -> list[models.AppointmentType]:
     test_appointment_types = add_appointment_types(db=db)
 

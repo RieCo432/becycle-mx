@@ -64,6 +64,9 @@ class ContractType(Base):
 
     id: Mapped[str] = mapped_column("id", String(20), nullable=False, quote=False, primary_key=True)
 
+    def __eq__(self, other: dict):
+        return str(self.id) == str(other.get("id"))
+
 
 class ExpenseType(Base):
     __tablename__ = "expensetypes"

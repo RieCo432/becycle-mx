@@ -128,4 +128,3 @@ async def get_paper_contract_suggestions(old_id: str | None = None, db: Session 
         return crud.get_paper_contract_suggestions(db=db, old_id=old_id)
     else:
         return []
-

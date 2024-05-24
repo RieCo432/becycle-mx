@@ -458,6 +458,28 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
     return contracts
 
 
+def add_paper_contracts(db: Session, contracts: list[models.Contract]) -> list[models.PaperContract]:
+    paper_contracts = [
+        models.PaperContract(
+            id="123456abcdef789012ghijkl",
+            contractId=contracts[0].id,
+        ),
+        models.PaperContract(
+            id="lkjihg210987fedcba654321",
+            contractId=contracts[1].id,
+        ),
+        models.PaperContract(
+            id="123456fedcba789012lkjihg",
+            contractId=contracts[2].id,
+        ),
+    ]
+
+    db.add_all(paper_contracts)
+    db.commit()
+
+    return paper_contracts
+
+
 def add_appointment_types(db: Session) -> list[models.AppointmentType]:
     appointment_types = [
         models.AppointmentType(
@@ -781,3 +803,4 @@ if __name__ == "__main__":
     demo_closed_days = add_closed_days(db=demo_db, appointment_general_settings=demo_appointment_general_settings)
     demo_deposit_exchanges = add_deposit_exchanges(db=demo_db, users=demo_users)
     demo_expense_types = add_expense_types(db=demo_db)
+    demo_paper_contracts = add_paper_contracts(db=db, contracts=demo_contracts)

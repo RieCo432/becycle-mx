@@ -5,3 +5,4 @@ from .surveys import *
 from .client import *
 from .appointment import *
 from .depositExchange import *
+from .contract import *
