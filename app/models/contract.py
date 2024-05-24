@@ -57,7 +57,7 @@ class Contract(Base):
     expiryReminderSent: Mapped[bool] = mapped_column("expiryReminderSent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returnDetailsSent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
 
-    def __eq__(self, other: dict):
+    def __eq__dict(self, other: dict):
         return all([
             str(self.id) == str(other.get("id")),
             str(self.clientId) == str(other.get("clientId")),
@@ -80,7 +80,9 @@ class Contract(Base):
             str(self.returnDetailsSent) == str(other.get("returnDetailsSent")),
         ])
 
-    def __eq__(self, other: Self):
+    def __eq__(self, other):
+        if type(other) is dict:
+            return self.__eq__dict(other)
         return all([
             str(self.id) == str(other.id),
             str(self.clientId) == str(other.clientId),

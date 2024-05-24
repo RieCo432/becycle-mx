@@ -228,6 +228,49 @@ def test_patch_contract(contracts, users, admin_user_auth_header):
     assert contracts[2].depositCollectingUserId == users[0].id
 
 
+def test_patch_contract_returned(contracts, users, admin_user_auth_header):
+    patch_data = {
+        "depositAmountCollected": 40,
+        "conditionOfBike": "excellent",
+        "notes": "patched",
+        "contractType": "kids",
+        "startDate": (datetime.utcnow().date() - relativedelta(months=10)).strftime("%Y-%m-%d"),
+        "endDate": (datetime.utcnow().date() + relativedelta(months=2)).strftime("%Y-%m-%d"),
+        "workingUserId": str(users[0].id),
+        "checkingUserId": str(users[1].id),
+        "depositCollectingUserId": str(users[0].id),
+        "returned": True,
+        "returnedDate": datetime.utcnow().date().strftime("%Y-%m-%d"),
+        "depositAmountReturned": 30,
+        "returnAcceptingUserId": str(users[1].id),
+        "depositReturningUserId": str(users[2].id),
+    }
+
+    response = test_client.patch("/contracts/{contractId}".format(contractId=contracts[1].id), json=patch_data, headers=admin_user_auth_header)
+
+    assert response.status_code == 200
+
+    assert contracts[1] != response.json()
+
+    db.refresh(contracts[1])
+
+    assert response.json() == contracts[1]
+
+    assert contracts[1].depositAmountCollected == 40
+    assert contracts[1].conditionOfBike == "excellent"
+    assert contracts[1].notes == "patched"
+    assert contracts[1].contractType == "kids"
+    assert contracts[1].startDate == datetime.utcnow().date() - relativedelta(months=10)
+    assert contracts[1].endDate == datetime.utcnow().date() + relativedelta(months=2)
+    assert contracts[1].workingUserId == users[0].id
+    assert contracts[1].checkingUserId == users[1].id
+    assert contracts[1].depositCollectingUserId == users[0].id
+    assert contracts[1].depositAmountReturned == 30
+    assert contracts[1].returnedDate == datetime.utcnow().date()
+    assert contracts[1].returnAcceptingUserId == users[1].id
+    assert contracts[1].depositReturningUserId == users[2].id
+
+
 def test_return_bike_insufficient_funds(contracts, users, normal_user_auth_header):
     request_json = {
         "working_username": users[1].username,
