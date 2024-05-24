@@ -9,6 +9,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 import app.services as services
 from app.database.db import Base
 
+from typing import Self
+
 CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
 
@@ -76,6 +78,29 @@ class Contract(Base):
             str(self.detailsSent) == str(other.get("detailsSent")),
             str(self.expiryReminderSent) == str(other.get("expiryReminderSent")),
             str(self.returnDetailsSent) == str(other.get("returnDetailsSent")),
+        ])
+
+    def __eq__(self, other: Self):
+        return all([
+            str(self.id) == str(other.id),
+            str(self.clientId) == str(other.clientId),
+            str(self.bikeId) == str(other.bikeId),
+            str(self.workingUserId) == str(other.workingUserId),
+            str(self.checkingUserId) == str(other.checkingUserId),
+            str(self.depositCollectingUserId) == str(other.depositCollectingUserId),
+            str(self.returnAcceptingUserId) == str(other.returnAcceptingUserId),
+            str(self.depositReturningUserId) == str(other.depositReturningUserId),
+            str(self.startDate) == str(other.startDate),
+            str(self.endDate) == str(other.endDate),
+            str(self.returnedDate) == str(other.returnedDate),
+            str(self.depositAmountCollected) == str(other.depositAmountCollected),
+            str(self.depositAmountReturned) == str(other.depositAmountReturned),
+            str(self.conditionOfBike) == str(other.conditionOfBike),
+            str(self.contractType) == str(other.contractType),
+            str(self.notes) == str(other.notes),
+            str(self.detailsSent) == str(other.detailsSent),
+            str(self.expiryReminderSent) == str(other.expiryReminderSent),
+            str(self.returnDetailsSent) == str(other.returnDetailsSent),
         ])
 
     def send_creation_email(self):
