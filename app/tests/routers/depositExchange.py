@@ -3,44 +3,10 @@ from sqlalchemy import select
 
 from app.tests.pytestFixtures import *
 from app.main import app
-from dateutil.relativedelta import relativedelta
 import datetime
 
 test_client = TestClient(app)
 
-
-# @deposit_exchanges.post("/deposit-exchanges", dependencies=[Depends(dep.get_current_active_user)])
-# async def create_deposit_exchange(
-#         amount: Annotated[int, Body()],
-#         from_user: models.User = Depends(dep.get_deposit_exchange_from_user),
-#         to_user: models.User = Depends(dep.get_deposit_exchange_to_user),
-#         db: Session = Depends(dep.get_db)) -> schemas.DepositExchange:
-#
-#     if to_user.id == from_user.id:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail={"description": "To and From cannot be the same!"},
-#             headers={"WWW-Authenticate": "Bearer"}
-#         )
-#
-#     if (
-#             (to_user.username == 'BANK' and not from_user.treasurer)
-#             or (from_user.username == 'BANK' and not to_user.treasurer)
-#     ):
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail={"description": "Only Treasurer can transfer deposits to the BANK"}
-#         )
-#
-#     if amount > from_user.get_deposit_bearer_balance():
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail={"description": "From User does not have enough funds!"},
-#             headers={"WWW-Authenticate": "Bearer"}
-#         )
-#
-#     return crud.create_deposit_exchange(db=db, amount=amount, from_user_id=from_user.id, to_user_id=to_user.id)
-#
 
 def test_create_deposit_exchange_between_users(users, normal_user_auth_header, contracts, deposit_exchanges):
     from_user = users[0]
@@ -186,12 +152,12 @@ def test_create_deposit_exchange_insufficient_balance(users, normal_user_auth_he
     assert response.status_code == 400
     assert response.json().get("detail").get("description") == "From User does not have enough funds!"
 
-#
-# @deposit_exchanges.get("/deposit-exchanges", dependencies=[Depends(dep.get_current_active_user)])
-# async def get_deposit_exchanges(db: Session = Depends(dep.get_db)) -> list[schemas.DepositExchange]:
-#     return crud.get_deposit_exchanges(db=db)
-#
-#
-# @deposit_exchanges.get("/deposit-exchanges/users", dependencies=[Depends(dep.get_current_active_user)])
-# async def get_deposit_exchange_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
-#     return crud.get_deposit_exchange_users(db=db)
+
+def test_get_deposit_exchange_users(users, normal_user_auth_header):
+    response = test_client.get("/deposit-exchanges/users", headers=normal_user_auth_header)
+    expected_users = [u for u in users if u.treasurer or u.depositBearer or u.username == "BANK"]
+
+    assert response.status_code == 200
+    response_json = response.json()
+    assert len(response_json) == len(expected_users)
+    assert all([u in expected_users for u in response_json])
