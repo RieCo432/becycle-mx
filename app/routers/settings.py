@@ -48,7 +48,7 @@ async def create_appointment_concurrency_limit(
 
 
 @settings.delete("/settings/appointments/concurrency/{after_time}", dependencies=[Depends(dep.get_current_appointment_manager_user)])
-async def update_appointment_concurrency_limit(
+async def delete_appointment_concurrency_limit(
         after_time: time,
         db: Session = Depends(dep.get_db)) -> None:
     crud.delete_appointment_concurrency_limit(db=db, after_time=after_time)

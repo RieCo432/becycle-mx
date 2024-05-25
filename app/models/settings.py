@@ -22,6 +22,12 @@ class AppointmentConcurrencyLimit(Base):
     afterTime: Mapped[time] = mapped_column("afterTime", Time, primary_key=True, nullable=False, index=True, quote=False)
     maxConcurrent: Mapped[int] = mapped_column("maxConcurrent", Integer, nullable=False, quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            str(self.afterTime) == str(other.get("afterTime")),
+            str(self.maxConcurrent) == str(other.get("maxConcurrent"))
+        ])
+
 
 class AppointmentType(Base):
     __tablename__ = "appointmenttypes"
@@ -48,6 +54,12 @@ class ClosedDay(Base):
     date: Mapped[date] = mapped_column("date", Date, primary_key=True, nullable=False, index=True, quote=False)
     note: Mapped[str] = mapped_column("note", Text, nullable=False, quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            self.date.strftime("%Y-%m-%d") == str(other.get("date")),
+            str(self.note) == str(other.get("note"))
+        ])
+
 
 class Address(Base):
     __tablename__ = "address"
@@ -57,6 +69,14 @@ class Address(Base):
     street: Mapped[str] = mapped_column("street", Text, nullable=False, quote=False)
     postcode: Mapped[str] = mapped_column("postcode", Text, nullable=False, quote=False)
     city: Mapped[str] = mapped_column("city", Text, nullable=False, quote=False)
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.number) == str(other.get("number")),
+            str(self.street) == str(other.get("street")),
+            str(self.postcode) == str(other.get("postcode")),
+            str(self.city) == str(other.get("city"))
+        ])
 
 
 class ContractType(Base):

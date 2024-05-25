@@ -257,3 +257,13 @@ def deposit_bearer_user_auth_header(user_auth_tokens) -> dict:
 @pytest.fixture
 def client_auth_headers(client_auth_tokens) -> list[dict]:
     return [{"Authorization": "Bearer " + client_auth_token.access_token} for client_auth_token in client_auth_tokens]
+
+
+@pytest.fixture
+def expense_types() -> list[models.ExpenseType]:
+    test_expense_types = add_expense_types(db=db)
+
+    yield test_expense_types
+
+    db.query(models.ExpenseType).delete()
+    db.commit()

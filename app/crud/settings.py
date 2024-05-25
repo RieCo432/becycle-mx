@@ -313,8 +313,11 @@ def add_contract_type(db: Session, new_contract_type: schemas.ContractType) -> m
         id=new_contract_type.id
     )
 
-    db.add(contract_type)
-    db.commit()
+    try:
+        db.add(contract_type)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This contract type already exists!"})
     return contract_type
 
 
@@ -334,8 +337,13 @@ def add_expense_type(db: Session, new_expense_type: schemas.ExpenseType) -> mode
         id=new_expense_type.id,
         description=new_expense_type.description
     )
-    db.add(expense_type)
-    db.commit()
+
+    try:
+        db.add(expense_type)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This expense type already exists!"})
+
     return expense_type
 
 
