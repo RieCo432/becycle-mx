@@ -13,7 +13,7 @@ async def test_get_user_token_correct_password(users):
     for user in users:
         response = client.post("/users/token", data={
             "username": user.username,
-            "password": f"{user.username}1234"
+            "password": f"{user.username.lower()}1234"
         }, headers={
             "Content-Type": "application/x-www-form-urlencoded"
         })
@@ -237,7 +237,7 @@ def test_post_user_password_check(users):
     for user in users:
         response = client.post("/user/check/password", data={
             "username": user.username,
-            "password": f"{user.username}1234"
+            "password": f"{user.username.lower()}1234"
         }, headers={
             "Content-Type": "application/x-www-form-urlencoded"
         })
@@ -275,7 +275,7 @@ def test_post_user_password_or_pin_check_correct_password(users):
     for user in users:
         response = client.post("/user/check/password-or-pin", data={
             "username": user.username,
-            "password": f"{user.username}1234"
+            "password": f"{user.username.lower()}1234"
         }, headers={
             "Content-Type": "application/x-www-form-urlencoded"
         })
