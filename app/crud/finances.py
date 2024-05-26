@@ -445,7 +445,8 @@ def get_deposit_return_percentage(db: Session, start_date: date | None = None, e
 
     count_percentages_of_deposit_returned_by_contract_age = {}
     for percentage_of_deposit_returned_by_contract_age in percentages_of_deposit_returned_by_contract_age:
-        rough_age = percentage_of_deposit_returned_by_contract_age[0] // 28 * 28
+        sign_of_age = -1 if percentage_of_deposit_returned_by_contract_age[0] < 0 else 1
+        rough_age = sign_of_age * (abs(percentage_of_deposit_returned_by_contract_age[0]) // 28 * 28)
         percentage = percentage_of_deposit_returned_by_contract_age[1]
 
         if rough_age not in count_percentages_of_deposit_returned_by_contract_age:
