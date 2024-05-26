@@ -26,11 +26,11 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
                 {
                     "title": f"{clients[1].firstName} {clients[1].lastName}",
                     "type": "return",
-                    "diff_by_username": {users[0].username: -30}
+                    "diff_by_username": {users[0].username: -40}
                 }
             ],
-            "diff": {users[0].username: -30},
-            "balances": {users[0].username: 10}
+            "diff": {users[0].username: -40},
+            "balances": {users[0].username: 0}
         },
         (datetime.datetime.utcnow() - relativedelta(months=16)).date().strftime("%Y-%m-%d"): {
             "transactions": [
@@ -41,7 +41,7 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
                 }
             ],
             "diff": {users[2].username: 40},
-            "balances": {users[0].username: 10, users[2].username: 40}
+            "balances": {users[2].username: 40}
         },
         (datetime.datetime.utcnow() - relativedelta(months=15)).date().strftime("%Y-%m-%d"): {
             "transactions": [
@@ -52,7 +52,7 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
                 }
             ],
             "diff": {users[0].username: 40},
-            "balances": {users[0].username: 50, users[2].username: 40}
+            "balances": {users[0].username: 40, users[2].username: 40}
         },
         (datetime.datetime.utcnow() - relativedelta(months=10)).date().strftime("%Y-%m-%d"): {
             "transactions": [
@@ -73,7 +73,7 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
                 }
             ],
             "diff": {users[0].username: -40, users[2].username: 50},
-            "balances": {users[0].username: 10, users[2].username: 90}
+            "balances": {users[0].username: 0, users[2].username: 90}
         },
         (datetime.datetime.utcnow() - relativedelta(months=7)).date().strftime("%Y-%m-%d"): {
             "transactions": [
@@ -89,18 +89,18 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
                 }
             ],
             "diff": {users[2].username: 80},
-            "balances": {users[0].username: 10, users[2].username: 170}
+            "balances": {users[2].username: 170}
         },
         (datetime.datetime.utcnow() - relativedelta(months=5)).date().strftime("%Y-%m-%d"): {
             "transactions": [
                 {
                     "title": f"{clients[2].firstName} {clients[2].lastName}",
                     "type": "return",
-                    "diff_by_username": {users[2].username: -20}
+                    "diff_by_username": {users[2].username: -10}
                 }
             ],
-            "diff": {users[2].username: -20},
-            "balances": {users[0].username: 10, users[2].username: 150}
+            "diff": {users[2].username: -10},
+            "balances": {users[2].username: 160}
         },
         (datetime.datetime.utcnow() - relativedelta(months=3)).date().strftime("%Y-%m-%d"): {
             "transactions": [
@@ -116,23 +116,23 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
                 }
             ],
             "diff": {users[0].username: 80, users[2].username: -40},
-            "balances": {users[0].username: 90, users[2].username: 110}
+            "balances": {users[0].username: 80, users[2].username: 120}
         },
         (datetime.datetime.utcnow() - relativedelta(months=2)).date().strftime("%Y-%m-%d"): {
             "transactions": [
                 {
                     "title": f"{clients[4].firstName} {clients[4].lastName}",
                     "type": "return",
-                    "diff_by_username": {users[2].username: -30}
+                    "diff_by_username": {users[2].username: -20}
                 },
                 {
                     "title": f"{clients[4].firstName} {clients[4].lastName}",
                     "type": "return",
-                    "diff_by_username": {users[2].username: -40}
+                    "diff_by_username": {users[2].username: -30}
                 }
             ],
-            "diff": {users[2].username: -70},
-            "balances": {users[0].username: 90, users[2].username: 40}
+            "diff": {users[2].username: -50},
+            "balances": {users[0].username: 80, users[2].username: 70}
         },
     }
 
