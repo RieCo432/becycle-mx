@@ -872,18 +872,33 @@ def test_get_deposits_status_no_grace_period(contracts, normal_user_auth_header)
     assert response.status_code == 200
     assert response.json() == expected_data
 
+def test_get_deposit_return_percentage(contracts, normal_user_auth_header):
+    expected_data = [
+        {
+            "name": "Percentage Returned",
+            "type": 'bubble',
+            "data": [[-28, 75, 2], [-112, 100, 1], [56, 50, 1], [140, 25, 1]]
+        },
+        {
+            "name": "Trendline",
+            "type": 'line',
+            "data": [[-120, 100], [-31, 75], [60, 50], [153, 25]]
+        }
+    ]
+
+    response = test_client.get("/finances/deposits/return-percentage", headers=normal_user_auth_header)
+
+    assert response.status_code == 200
+
+    actual_data = response.json()
+
+    assert all([bubble in actual_data[0].get("data") for bubble in expected_data[0].get("data")])
+    assert all([1.05 * xy[1] >= actual_data[1].get("data")[i][1] >= 0.95 * xy[1] and actual_data[1].get("data")[i][0] == xy[0] for i, xy in enumerate(expected_data[1].get("data"))])
+
+    assert actual_data is not None
 
 
 
-#
-# @finances.get("/finances/deposits/return-percentage", dependencies=[Depends(dep.get_current_active_user)])
-# async def get_deposit_return_percentage(
-#         start: date | None = None,
-#         end: date | None = None,
-#         db: Session = Depends(dep.get_db)
-# ) -> list[schemas.DataSeriesWithType]:
-#     return crud.get_deposit_return_percentage(db=db, start_date=start, end_date=end)
-#
 #
 # @finances.get("/finances/deposits/required-float/worst-case", dependencies=[Depends(dep.get_current_active_user)])
 # async def get_worst_case_required_deposit_float(
