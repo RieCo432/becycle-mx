@@ -14,12 +14,12 @@ finances = APIRouter(
 )
 
 
-@finances.get("/finances/deposit-book")
+@finances.get("/finances/deposit-book", dependencies=[Depends(dep.get_current_active_user)])
 async def get_deposit_book(db: Session = Depends(dep.get_db)) -> schemas.DepositBalancesBook:
     return crud.get_deposit_balances_book(db=db)
 
 
-@finances.get("/finances/deposits/total")
+@finances.get("/finances/deposits/total", dependencies=[Depends(dep.get_current_active_user)])
 async def get_total_deposits(
         interval: str,
         start: date | None = None,
@@ -70,7 +70,7 @@ async def get_deposit_flow(
 
 
 @finances.get("/finances/deposits/status", dependencies=[Depends(dep.get_current_active_user)])
-async def get_contracts_percentage_returned_within_grace_period(
+async def get_deposits_status(
         grace_period: int,
         start: date | None = None,
         end: date | None = None,
