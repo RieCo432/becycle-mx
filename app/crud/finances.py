@@ -488,11 +488,9 @@ def get_worst_case_required_deposit_float(db: Session) -> dict[str: int]:
         )
     ]
 
-    total_returnable_deposit_amount = 0
     estimated_return_deposits_amount = 0
 
     for contract in all_unreturned_contracts:
-        total_returnable_deposit_amount += contract.depositAmountCollected
         days_after_end_date = (datetime.utcnow().date() - contract.endDate).days
         percentage = (trendline["a"] * days_after_end_date + trendline["c"]) / 100.0
         estimated_return_deposits_amount += int(ceil(contract.depositAmountCollected * percentage))
@@ -539,14 +537,12 @@ def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict
         )
     ]
 
-    total_returnable_deposit_amount = 0
     estimated_return_deposits_amount = 0
 
     for contract in all_unreturned_contracts:
         days_after_contract_end = (datetime.utcnow().date() - contract.endDate).days
         if days_after_contract_end > grace_period:
             continue
-        total_returnable_deposit_amount += contract.depositAmountCollected
         returned_days_after_end = max([
             mean_days_returned_after_contract_end,
             days_after_contract_end
