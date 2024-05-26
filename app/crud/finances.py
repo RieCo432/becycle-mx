@@ -593,9 +593,9 @@ def get_actual_cashflow(db: Session, interval: str, start_date: date | None = No
     if start_date is None:
         oldest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate).first()
         start_date = oldest_expense.transferDate
+
     if end_date is None:
-        newest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate.desc()).first()
-        end_date = newest_expense.transferDate
+        end_date = datetime.utcnow().date()
 
     interval_timedelta = get_interval_timedelta(interval=interval)
 
@@ -657,8 +657,7 @@ def get_provisional_cashflow(db: Session, interval: str, start_date: date | None
         oldest_expense = db.query(models.Expense).order_by(models.Expense.expenseDate).first()
         start_date = oldest_expense.expenseDate
     if end_date is None:
-        newest_expense = db.query(models.Expense).order_by(models.Expense.expenseDate.desc()).first()
-        end_date = newest_expense.expenseDate
+        end_date = datetime.utcnow().date()
 
     interval_timedelta = get_interval_timedelta(interval=interval)
 
@@ -720,8 +719,7 @@ def get_total_cashflow(db: Session, interval: str, start_date: date | None = Non
         oldest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate).first()
         start_date = oldest_expense.transferDate
     if end_date is None:
-        newest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate.desc()).first()
-        end_date = newest_expense.transferDate
+        end_date = datetime.utcnow().date()
 
     interval_timedelta = get_interval_timedelta(interval=interval)
 
