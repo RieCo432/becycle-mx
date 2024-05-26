@@ -155,7 +155,7 @@ export default {
       }
     },
     fetchTotalContractsSeries() {
-      requests.getTotalContractsDateSeries(this.interval, 'contractType', this.startDate, this.endDate).then((response) => {
+      requests.getTotalContractsDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
         this.totalContractSeries = response.data;
         this.updateStartDate(this.totalContractSeries[0].data[0][0]);
         this.updateEndDate(this.totalContractSeries[0].data[this.totalContractSeries[0].data.length -1][0]);

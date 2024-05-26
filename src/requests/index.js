@@ -537,11 +537,10 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getTotalContractsDateSeries(interval, breakdown, startDate=null, endDate=null) {
+  getTotalContractsDateSeries(interval, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/total', {
       params: {
         interval: interval,
-        breakdown: breakdown,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
       },
