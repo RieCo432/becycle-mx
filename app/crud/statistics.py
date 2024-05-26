@@ -101,7 +101,7 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
     return leaderboard
 
 
-def get_total_contracts_statistics(db: Session, interval: str, breakdown: str, start_date: date | None,
+def get_total_contracts_statistics(db: Session, interval: str, start_date: date | None,
                                    end_date: date | None) -> list[schemas.DataSeries]:
     if start_date is None:
         oldest_contract = db.query(models.Contract).order_by(models.Contract.startDate).first()
@@ -110,28 +110,19 @@ def get_total_contracts_statistics(db: Session, interval: str, breakdown: str, s
         end_date = datetime.utcnow().date()
     interval_timedelta = get_interval_timedelta(interval=interval)
 
-    if breakdown == 'contractType':
-        col = models.Contract.contractType
-        all_categories = [_ for _ in db.scalars(
-            db.query(col, func.count(col)).group_by(col)
-        )]
-    elif breakdown == 'bikeMake':
-        col = models.Bike.make
-        all_categories = [_ for _ in db.scalars(
-            db.query(col, func.count(col)).join(models.Contract).group_by(col)
-        )]
+    all_categories = [_ for _ in db.scalars(
+        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(models.Contract.contractType)
+    )]
 
     all_series = []
     data_series_by_breakdown = {}
 
     while end_date >= start_date:
-        query = db.query(col, func.count(col))
-        if breakdown == 'bikeMake':
-            query = query.join(models.Contract)
+        query = db.query(models.Contract.contractType, func.count(models.Contract.contractType))
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
                                                              query.where(models.Contract.startDate <= end_date)
-                                                             .group_by(col)
+                                                             .group_by(models.Contract.contractType)
                                                              ]}
         for breakdown in all_categories:
             count = counts_by_breakdown.get(breakdown, 0)
