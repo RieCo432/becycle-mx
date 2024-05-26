@@ -14,8 +14,8 @@ def delete_all(db: Session):
     db.query(models.PaperContract).delete()
     db.query(models.Contract).delete()
 
-    db.query(models.ExpenseReceipt).delete()
     db.query(models.Expense).delete()
+    db.query(models.ExpenseReceipt).delete()
 
     db.query(models.DepositExchange).delete()
 
@@ -742,7 +742,7 @@ def add_deposit_exchanges(db: Session, users: list[models.User]) -> list[models.
 def add_expense_types(db: Session) -> list[models.ExpenseType]:
     expense_types = [
         models.ExpenseType(
-            id="consumabled",
+            id="consumables",
             description="GT-85, Oil"
         ),
         models.ExpenseType(
@@ -759,6 +759,91 @@ def add_expense_types(db: Session) -> list[models.ExpenseType]:
     db.commit()
 
     return expense_types
+
+
+def add_expense_receipts(db: Session) -> list[models.ExpenseReceipt]:
+    expense_receipts = []
+
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    photos_directory = os.path.join(current_directory, "tests", "photos")
+    for i in range(5):
+        photo_path = os.path.join(photos_directory, f"receipt{i}.jpg")
+        with open(photo_path, "rb") as photo:
+            expense_receipts.append(
+                models.ExpenseReceipt(
+                    content=photo.read()
+                )
+            )
+
+    db.add_all(expense_receipts)
+    db.commit()
+
+    return expense_receipts
+
+
+def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], users: list[models.User], expense_types: list[models.ExpenseType]) -> list[models.Expense]:
+    expenses = [
+        models.Expense(
+            expenseUserId=users[2].id,
+            treasurerUserId=users[0].id,
+            expenseDate=datetime.datetime.utcnow().date() - relativedelta(months=15),
+            transferDate=datetime.datetime.utcnow().date() - relativedelta(months=9),
+            amount=-40,
+            type=expense_types[1].id,
+            notes="brake pads",
+            receiptFileId=expense_receipts[0].id,
+            receiptContentType="image/jpeg"
+        ),
+        models.Expense(
+            expenseUserId=users[1].id,
+            treasurerUserId=users[0].id,
+            expenseDate=datetime.datetime.utcnow().date() - relativedelta(months=11),
+            transferDate=datetime.datetime.utcnow().date() - relativedelta(months=9),
+            amount=-30,
+            type=expense_types[0].id,
+            notes="chain oil",
+            receiptFileId=expense_receipts[1].id,
+            receiptContentType="image/jpeg"
+        ),
+        models.Expense(
+            expenseUserId=users[0].id,
+            treasurerUserId=users[0].id,
+            expenseDate=datetime.datetime.utcnow().date() - relativedelta(months=7),
+            transferDate=datetime.datetime.utcnow().date() - relativedelta(months=4),
+            amount=+100,
+            type=expense_types[2].id,
+            notes="cash from safe",
+            receiptFileId=expense_receipts[2].id,
+            receiptContentType="image/jpeg"
+        ),
+        models.Expense(
+            expenseUserId=users[0].id,
+            treasurerUserId=None,
+            expenseDate=datetime.datetime.utcnow().date() - relativedelta(months=2),
+            transferDate=None,
+            amount=-80,
+            type=expense_types[1].id,
+            notes="chains",
+            receiptFileId=expense_receipts[3].id,
+            receiptContentType="image/jpeg"
+        ),
+        models.Expense(
+            expenseUserId=users[2].id,
+            treasurerUserId=None,
+            expenseDate=datetime.datetime.utcnow().date() - relativedelta(months=1),
+            transferDate=None,
+            amount=-40,
+            type=expense_types[0].id,
+            notes="gt-85",
+            receiptFileId=expense_receipts[4].id,
+            receiptContentType="image/jpeg"
+        ),
+    ]
+
+    db.add_all(expenses)
+    db.commit()
+
+    return expenses
 
 
 def add_contract_types(db: Session) -> list[models.ContractType]:
@@ -803,4 +888,6 @@ if __name__ == "__main__":
     demo_closed_days = add_closed_days(db=demo_db, appointment_general_settings=demo_appointment_general_settings)
     demo_deposit_exchanges = add_deposit_exchanges(db=demo_db, users=demo_users)
     demo_expense_types = add_expense_types(db=demo_db)
-    demo_paper_contracts = add_paper_contracts(db=db, contracts=demo_contracts)
+    demo_expense_receipts = add_expense_receipts(db=demo_db)
+    demo_expenses = add_expenses(db=demo_db, expense_receipts=demo_expense_receipts, users=demo_users)
+    demo_paper_contracts = add_paper_contracts(db=demo_db, contracts=demo_contracts)

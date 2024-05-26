@@ -8,3 +8,4 @@ from .depositExchange import *
 from .contract import *
 from .settings import *
 from .statistics import *
+from .finances import *

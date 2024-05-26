@@ -267,3 +267,23 @@ def expense_types() -> list[models.ExpenseType]:
 
     db.query(models.ExpenseType).delete()
     db.commit()
+
+
+@pytest.fixture
+def expense_receipts() -> list[models.ExpenseReceipt]:
+    test_expense_receipts = add_expense_receipts(db=db)
+
+    yield test_expense_receipts
+
+    db.query(models.ExpenseReceipt).delete()
+    db.commit()
+
+
+@pytest.fixture
+def expenses(expense_types, users, expense_receipts) -> list[models.Expense]:
+    test_expenses = add_expenses(db=db, users=users, expense_receipts=expense_receipts, expense_types=expense_types)
+
+    yield test_expenses
+
+    db.query(models.Expense).delete()
+    db.commit()
