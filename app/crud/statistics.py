@@ -269,7 +269,7 @@ list[schemas.DataSeries]:
     period_end_date = end_date
     period_start_date = period_end_date - interval_timedelta
 
-    while period_start_date >= start_date:
+    while period_end_date >= start_date:
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
                                                              db.query(models.Contract.contractType,
@@ -334,17 +334,13 @@ def get_contracts_status(db: Session, grace_period: int, start_date: date | None
             count_in_grace_period += 1
         elif contract.endDate + relativedelta(days=grace_period) < datetime.utcnow().date():
             count_expired += 1
-        else:
-            count_unaccounted += 1
 
     contracts_status = {
         "open": count_open,
         "in_grace_period": count_in_grace_period,
         "expired": count_expired,
         "returned": count_returned,
+        # **({"???": len(contracts_in_period) - sum([count_open, count_in_grace_period, count_expired, count_returned])} if len(contracts_in_period) - sum([count_open, count_in_grace_period, count_expired, count_returned]) > 0 else {})
     }
-
-    if count_unaccounted > 0:
-        contracts_status["???"] = count_unaccounted
 
     return contracts_status
