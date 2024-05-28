@@ -228,6 +228,13 @@ def test_delete_closed_day(closed_days, appointment_manager_user_auth_header):
     ) is None
 
 
+def test_delete_closed_day_not_exist(closed_days, appointment_manager_user_auth_header):
+    response = test_client.delete("/settings/closed-day/{date}".format(date="2022-06-13"), headers=appointment_manager_user_auth_header)
+    assert response.status_code == 400
+
+    assert response.json().get("detail").get("description") == "This date is not registered as a closed day."
+
+
 def test_update_address(address, admin_user_auth_header):
     response = test_client.put("/settings/address", json={
         "number": "69",

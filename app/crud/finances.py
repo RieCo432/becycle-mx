@@ -72,7 +72,7 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
             if diff == 0:
                 continue
             deposit_balances_book[deposit_transaction_date].balances[username] = deposit_balances_book[deposit_transaction_date].balances.get(username, 0) + diff
-            if deposit_balances_book[deposit_transaction_date].balances[username] < 0:
+            if deposit_balances_book[deposit_transaction_date].balances[username] < 0 and username != "BANK":
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail={"description": "One of the deposit bearers has a negative balance!"},
@@ -375,8 +375,7 @@ def get_deposits_status(db: Session, grace_period: int, start_date: date | None,
         "open": deposits_open,
         "in_grace_period": deposits_in_grace_period,
         "expired": deposits_expired,
-        "withheld": deposits_withheld,
-        **({"???": sum([c.depositAmountCollected for c in contracts_in_period]) - sum([deposits_open, deposits_in_grace_period, deposits_expired, deposits_withheld, deposits_returned])} if sum([c.depositAmountCollected for c in contracts_in_period]) - sum([deposits_open, deposits_in_grace_period, deposits_expired, deposits_withheld, deposits_returned]) > 0 else {})
+        "withheld": deposits_withheld
     }
 
     return deposits_status

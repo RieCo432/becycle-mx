@@ -113,10 +113,15 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
                     "title": "Exchange",
                     "type": "exchange",
                     "diff_by_username": {users[2].username: -80, users[0].username: 80}
+                },
+                {
+                    "title": "Exchange",
+                    "type": "exchange",
+                    "diff_by_username": {users[2].username: 40, users[6].username: -40}
                 }
             ],
-            "diff": {users[0].username: 80, users[2].username: -40},
-            "balances": {users[0].username: 80, users[2].username: 120}
+            "diff": {users[0].username: 80, users[2].username: 0, users[6].username: -40},
+            "balances": {users[0].username: 80, users[2].username: 160, users[6].username: -40}
         },
         (datetime.datetime.utcnow() - relativedelta(months=2)).date().strftime("%Y-%m-%d"): {
             "transactions": [
@@ -132,7 +137,7 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
                 }
             ],
             "diff": {users[2].username: -50},
-            "balances": {users[0].username: 80, users[2].username: 70}
+            "balances": {users[0].username: 80, users[2].username: 110}
         },
     }
 
@@ -152,6 +157,23 @@ def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_u
             transaction in expected_data[date].get("transactions")
             for transaction in actual_data[date].get("transactions")
         ]) for date in expected_data])
+
+
+def test_get_deposit_book_negative_balance(contracts, clients, users, deposit_exchanges, normal_user_auth_header):
+    invalid_deposit_exchange = models.DepositExchange(
+        fromUserId=users[0].id,
+        toUserId=users[2].id,
+        amount=100,
+        date=datetime.datetime.utcnow().date()
+    )
+
+    db.add(invalid_deposit_exchange)
+    db.commit()
+
+    response = test_client.get("/finances/deposit-book", headers=normal_user_auth_header)
+
+    assert response.status_code == 500
+    assert response.json().get("detail").get("description") == "One of the deposit bearers has a negative balance!"
 
 
 def test_get_total_deposits_yearly(contracts, normal_user_auth_header):
@@ -783,7 +805,7 @@ def test_get_deposit_flow_yearly(contracts, normal_user_auth_header):
     ]) for series_i in range(len(expected_data))])
 
 
-def test_get_collected_quarterly(contracts, normal_user_auth_header):
+def test_get_deposit_flow_quarterly(contracts, normal_user_auth_header):
     today = datetime.datetime.utcnow().date()
     today_str = today.strftime("%Y-%m-%d")
     one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")

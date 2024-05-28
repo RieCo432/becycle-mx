@@ -23,7 +23,7 @@ class DepositExchange(Base):
     amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)
     date: Mapped[date] = mapped_column("date", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, quote=False)
 
-    def __eq__(self, other: dict):
+    def equal_to_dict(self, other: dict):
         return all([
             str(self.id) == str(other.get("id")),
             str(self.fromUserId) == str(other.get("fromUserId")),
@@ -31,3 +31,15 @@ class DepositExchange(Base):
             self.amount == other.get("amount"),
             self.date == datetime.strptime(other.get("date"), "%Y-%m-%d").date()
         ])
+
+    def __eq__(self, other):
+        if type(other) is dict:
+            return self.equal_to_dict(other)
+        else:
+            return all([
+                self.id == other.id,
+                self.fromUserId == other.fromUserId,
+                self.toUserId == other.toUserId,
+                self.amount == other.amount,
+                self.date == other.date
+            ])

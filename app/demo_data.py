@@ -730,6 +730,12 @@ def add_deposit_exchanges(db: Session, users: list[models.User]) -> list[models.
             fromUserId=users[0].id,
             toUserId=users[2].id,
             date=(datetime.datetime.utcnow().date() - relativedelta(months=10))
+        ),
+        models.DepositExchange(
+            amount=40,
+            fromUserId=users[6].id,
+            toUserId=users[2].id,
+            date=(datetime.datetime.utcnow().date() - relativedelta(months=3))
         )
     ]
 

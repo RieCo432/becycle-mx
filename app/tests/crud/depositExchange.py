@@ -18,7 +18,7 @@ def test_get_deposit_exchanges_by_date(deposit_exchanges):
         actual_deposit_exchanges = crud.get_deposit_exchanges_by_date(db=db, date_of_exchange=d)
 
         assert len(expected_deposit_exchanges) == len(actual_deposit_exchanges)
-        assert all([de in expected_deposit_exchanges for de in actual_deposit_exchanges])
+        assert all([de in actual_deposit_exchanges for de in expected_deposit_exchanges])
 
 
 def test_get_deposit_exchanges_grouped_by_date(deposit_exchanges):
