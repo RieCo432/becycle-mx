@@ -255,6 +255,13 @@ def deposit_bearer_user_auth_header(user_auth_tokens) -> dict:
 
 
 @pytest.fixture
+def treasurer_user_auth_header(user_auth_tokens) -> dict:
+    return {
+        "Authorization": "Bearer " + user_auth_tokens[0].access_token
+    }
+
+
+@pytest.fixture
 def client_auth_headers(client_auth_tokens) -> list[dict]:
     return [{"Authorization": "Bearer " + client_auth_token.access_token} for client_auth_token in client_auth_tokens]
 

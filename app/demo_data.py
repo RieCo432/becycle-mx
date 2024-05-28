@@ -766,12 +766,21 @@ def add_expense_receipts(db: Session) -> list[models.ExpenseReceipt]:
 
     current_directory = os.path.dirname(os.path.abspath(__file__))
     photos_directory = os.path.join(current_directory, "tests", "photos")
-    for i in range(5):
+    for i in range(3):
         photo_path = os.path.join(photos_directory, f"receipt{i}.jpg")
         with open(photo_path, "rb") as photo:
             expense_receipts.append(
                 models.ExpenseReceipt(
                     content=photo.read()
+                )
+            )
+
+    for i in range(3, 5):
+        pdf_path = os.path.join(photos_directory, f"receipt{i}.pdf")
+        with open(pdf_path, "rb") as pdf:
+            expense_receipts.append(
+                models.ExpenseReceipt(
+                    content=pdf.read()
                 )
             )
 
@@ -825,7 +834,7 @@ def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], use
             type=expense_types[1].id,
             notes="chains",
             receiptFileId=expense_receipts[3].id,
-            receiptContentType="image/jpeg"
+            receiptContentType="application/pdf"
         ),
         models.Expense(
             expenseUserId=users[2].id,
@@ -836,7 +845,7 @@ def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], use
             type=expense_types[0].id,
             notes="gt-85",
             receiptFileId=expense_receipts[4].id,
-            receiptContentType="image/jpeg"
+            receiptContentType="application/pdf"
         ),
     ]
 

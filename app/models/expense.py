@@ -44,3 +44,16 @@ class Expense(Base):
     receiptFile: Mapped[ExpenseReceipt] = relationship(ExpenseReceipt, foreign_keys=[receiptFileId])
 
     receiptContentType: Mapped[str] = mapped_column("receiptContentType", Text, nullable=False, quote=False)
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.expenseUserId) == str(other.get("expenseUser").get("id")),
+            (other.get("treasurerUser") is None and self.treasurerUserId is None) or ((other.get("treasurerUser") is not None and self.treasurerUserId is not None) and (str(self.treasurerUserId) == str(other.get("treasurerUser").get("id")))),
+            self.expenseDate.strftime("%Y-%m-%d") == str(other.get("expenseDate")),
+            other.get("transferDate") is None if self.transferDate is None else self.transferDate.strftime("%Y-%m-%d") == str(other.get("transferDate")),
+            self.amount == other.get("amount"),
+            str(self.type) == str(other.get("type")),
+            str(self.notes) == str(other.get("notes")),
+            str(self.receiptContentType) == str(other.get("receiptContentType")),
+        ])

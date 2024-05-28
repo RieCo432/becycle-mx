@@ -93,3 +93,9 @@ class ExpenseType(Base):
 
     id: Mapped[str] = mapped_column("id", String(20), nullable=False, quote=False, primary_key=True)
     description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
+
+    def __eq__(self, other: dict):
+        return all([
+            self.id == other.get("id"),
+            self.description == other.get("description")
+        ])
