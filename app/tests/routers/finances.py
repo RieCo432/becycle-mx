@@ -898,26 +898,55 @@ def test_get_deposit_return_percentage(contracts, normal_user_auth_header):
     assert actual_data is not None
 
 
+def test_get_worst_case_required_deposit_float(contracts, normal_user_auth_header):
+    expected_data = {
+        "required": 60,
+        "excess": 90
+    }
 
-#
-# @finances.get("/finances/deposits/required-float/worst-case", dependencies=[Depends(dep.get_current_active_user)])
-# async def get_worst_case_required_deposit_float(
-#         db: Session = Depends(dep.get_db)
-# ) -> dict[str, int]:
-#     return crud.get_worst_case_required_deposit_float(db=db)
-#
-#
-# @finances.get("/finances/deposits/required-float/realistic", dependencies=[Depends(dep.get_current_active_user)])
-# async def get_realistic_case_required_deposit_float(
-#         grace_period: int,
-#         db: Session = Depends(dep.get_db)
-# ) -> dict[str, int]:
-#     return crud.get_realistic_required_deposit_float(db=db, grace_period=grace_period)
-#
-#
+    response = test_client.get("/finances/deposits/required-float/worst-case", headers=normal_user_auth_header)
+
+    assert response.status_code == 200
+
+    actual_data = response.json()
+
+    assert all([
+        1.05 * expected_data[key] >= actual_data[key] >= 0.95 * expected_data[key] for key in actual_data
+    ])
 
 
+def test_get_realistic_case_required_deposit_float_no_grace_period(contracts, normal_user_auth_header):
+    expected_data = {
+        "required": 0,
+        "excess": 150
+    }
 
+    response = test_client.get("/finances/deposits/required-float/realistic", params={"grace_period": 0}, headers=normal_user_auth_header)
+
+    assert response.status_code == 200
+
+    actual_data = response.json()
+
+    assert all([
+        1.05 * expected_data[key] >= actual_data[key] >= 0.95 * expected_data[key] for key in actual_data
+    ])
+
+
+def test_get_realistic_case_required_deposit_float_six_months_grace(contracts, normal_user_auth_header):
+    expected_data = {
+        "required": 10,
+        "excess": 140
+    }
+
+    response = test_client.get("/finances/deposits/required-float/realistic", params={"grace_period": 183}, headers=normal_user_auth_header)
+
+    assert response.status_code == 200
+
+    actual_data = response.json()
+
+    assert all([
+        1.05 * expected_data[key] >= actual_data[key] >= 0.95 * expected_data[key] for key in actual_data
+    ])
 
 
 def test_get_cashflow_actual_quarterly(expenses, normal_user_auth_header):

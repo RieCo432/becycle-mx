@@ -358,29 +358,26 @@ def get_deposits_status(db: Session, grace_period: int, start_date: date | None,
     deposits_in_grace_period = 0
     deposits_expired = 0
     deposits_withheld = 0
-    deposits_unaccounted = 0
+    deposits_returned = 0
 
     for contract in contracts_in_period:
         if contract.returnedDate is not None:
             deposits_withheld += contract.depositAmountCollected - contract.depositAmountReturned
+            deposits_returned += contract.depositAmountReturned
         elif contract.endDate >= datetime.utcnow().date():
             deposits_open += contract.depositAmountCollected
         elif contract.endDate + relativedelta(days=grace_period) >= datetime.utcnow().date():
             deposits_in_grace_period += contract.depositAmountCollected
         elif contract.endDate + relativedelta(days=grace_period) < datetime.utcnow().date():
             deposits_expired += contract.depositAmountCollected
-        else:
-            deposits_unaccounted += contract.depositAmountCollected
 
     deposits_status = {
         "open": deposits_open,
         "in_grace_period": deposits_in_grace_period,
         "expired": deposits_expired,
         "withheld": deposits_withheld,
+        **({"???": sum([c.depositAmountCollected for c in contracts_in_period]) - sum([deposits_open, deposits_in_grace_period, deposits_expired, deposits_withheld, deposits_returned])} if sum([c.depositAmountCollected for c in contracts_in_period]) - sum([deposits_open, deposits_in_grace_period, deposits_expired, deposits_withheld, deposits_returned]) > 0 else {})
     }
-
-    if deposits_unaccounted > 0:
-        deposits_status["???"] = deposits_unaccounted
 
     return deposits_status
 
@@ -502,16 +499,13 @@ def get_worst_case_required_deposit_float(db: Session) -> dict[str: int]:
     required_deposit_float = estimated_return_deposits_amount
     excess = current_deposit_float - required_deposit_float
 
-    if excess >= 0:
-        data = {
-            "required": estimated_return_deposits_amount,
-            "excess": excess
-        }
-    else:
-        data = {
-            "current float": current_deposit_float,
-            "deficiency": -excess
-        }
+    data = {
+        "required": required_deposit_float,
+        "excess": excess
+    } if excess >= 0 else {
+        "current float": current_deposit_float,
+        "deficiency": -excess
+    }
 
     return data
 
@@ -540,13 +534,12 @@ def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict
     estimated_return_deposits_amount = 0
 
     for contract in all_unreturned_contracts:
-        days_after_contract_end = (datetime.utcnow().date() - contract.endDate).days
-        if days_after_contract_end > grace_period:
-            continue
         returned_days_after_end = max([
             mean_days_returned_after_contract_end,
-            days_after_contract_end
+            (datetime.utcnow().date() - contract.endDate).days
         ])
+        if returned_days_after_end > grace_period:
+            continue
         percentage = (trendline["a"] * returned_days_after_end + trendline["c"]) / 100.0
         estimated_return_deposits_amount += int(ceil(contract.depositAmountCollected * percentage))
 
@@ -572,16 +565,13 @@ def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict
     required_deposit_float = estimated_return_deposits_amount - net_deposit_amount_to_be_collected
     excess = current_deposit_float - required_deposit_float
 
-    if excess >= 0:
-        data = {
-            "ideal float": required_deposit_float,
-            "excess": excess
-        }
-    else:
-        data = {
-            "current float": current_deposit_float,
-            "deficiency": -excess
-        }
+    data = {
+        "required": required_deposit_float,
+        "excess": excess
+    } if excess >= 0 else {
+        "current float": current_deposit_float,
+        "deficiency": -excess
+    }
 
     return data
 
