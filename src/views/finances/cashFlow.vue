@@ -242,7 +242,7 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  colors: ['#dddddd'],
+                  color: '#CBD5E1',
                   formatter: (s) => (s.replaceAll('_', ' ')),
                 },
                 value: {
@@ -250,7 +250,7 @@ export default {
                   fontSize: '16px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#dddddd',
+                  color: '#CBD5E1',
                   formatter: (s) => (s.replace('', '\u00A3')),
                 },
                 total: {
@@ -258,7 +258,7 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#dddddd',
+                  color: '#CBD5E1',
                   formatter: (w) => {
                     console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
@@ -286,7 +286,7 @@ export default {
           fontFamily: 'Inter',
           fontWeight: 400,
           labels: {
-            colors: ['#CBD5E1'],
+            colors: '#CBD5E1',
           },
         },
         chart: {
@@ -304,7 +304,7 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  colors: ['#dddddd'],
+                  color: '#CBD5E1',
                   formatter: (s) => (s.replaceAll('_', ' ')),
                 },
                 value: {
@@ -312,7 +312,7 @@ export default {
                   fontSize: '16px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#dddddd',
+                  color: '#CBD5E1',
                   formatter: (s) => (s.replace('', '\u00A3')),
                 },
                 total: {
@@ -320,7 +320,7 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#dddddd',
+                  color: '#CBD5E1',
                   formatter: (w) => {
                     console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
@@ -348,7 +348,7 @@ export default {
           fontFamily: 'Inter',
           fontWeight: 400,
           labels: {
-            colors: ['#CBD5E1'],
+            colors: '#CBD5E1',
           },
         },
         chart: {
@@ -366,7 +366,7 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  colors: ['#dddddd'],
+                  color: '#CBD5E1',
                   formatter: (s) => (s.replaceAll('_', ' ')),
                 },
                 value: {
@@ -374,7 +374,7 @@ export default {
                   fontSize: '16px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#dddddd',
+                  color: '#CBD5E1',
                   formatter: (s) => (s.replace('', '\u00A3')),
                 },
                 total: {
@@ -382,7 +382,7 @@ export default {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   fontFamily: 'Inter',
-                  color: '#dddddd',
+                  color: '#CBD5E1',
                   formatter: (w) => {
                     console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
