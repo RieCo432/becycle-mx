@@ -41,7 +41,7 @@ export default {
           position: 'top',
           horizontalAlign: 'left',
           labels: {
-            colors: ['#fffff'],
+            colors: '#CBD5E1',
           },
         },
         tooltip: {
@@ -52,28 +52,28 @@ export default {
           type: 'datetime',
           labels: {
             style: {
-              colors: '#dddddd',
+              colors: '#CBD5E1',
             },
           },
           axisTicks: {
-            color: '#dddddd',
+            color: '#CBD5E1',
           },
         },
         yaxis: {
           show: true,
           labels: {
             style: {
-              colors: ['#dddddd'],
+              colors: '#CBD5E1',
             },
             formatter: (val) => (`\u00A3${val}`),
           },
           axisTicks: {
-            color: '#dddddd',
+            color: '#CBD5E1',
           },
           title: {
             text: 'Value of Deposits',
             style: {
-              color: '#dddddd',
+              color: '#CBD5E1',
             },
           },
         },
@@ -103,7 +103,7 @@ export default {
           position: 'top',
           horizontalAlign: 'left',
           labels: {
-            colors: ['#fffff'],
+            colors: '#CBD5E1',
           },
         },
         tooltip: {
@@ -114,28 +114,28 @@ export default {
           type: 'datetime',
           labels: {
             style: {
-              colors: '#dddddd',
+              colors: '#CBD5E1',
             },
           },
           axisTicks: {
-            color: '#dddddd',
+            color: '#CBD5E1',
           },
         },
         yaxis: {
           show: true,
           labels: {
             style: {
-              colors: ['#dddddd'],
+              colors: '#CBD5E1',
             },
             formatter: (val) => (`\u00A3${val}`),
           },
           axisTicks: {
-            color: '#dddddd',
+            color: '#CBD5E1',
           },
           title: {
             text: 'Cashflow',
             style: {
-              color: '#dddddd',
+              color: '#CBD5E1',
             },
           },
         },
@@ -163,7 +163,7 @@ export default {
           position: 'top',
           horizontalAlign: 'left',
           labels: {
-            colors: ['#dddddd'],
+            colors: '#CBD5E1',
           },
         },
         tooltip: {
@@ -176,16 +176,16 @@ export default {
           type: 'numeric',
           labels: {
             style: {
-              colors: '#dddddd',
+              colors: '#CBD5E1',
             },
           },
           axisTicks: {
-            colors: ['#dddddd'],
+            colors: '#CBD5E1',
           },
           title: {
             text: 'Days Before/After Contract End',
             style: {
-              color: '#dddddd',
+              color: '#CBD5E1',
             },
           },
         },
@@ -195,12 +195,12 @@ export default {
           max: 100,
           labels: {
             style: {
-              colors: ['#dddddd'],
+              colors: '#CBD5E1',
             },
             formatter: (val) => (`${val}%`),
           },
           axisTicks: {
-            colors: ['#dddddd'],
+            colors: '#CBD5E1',
           },
         },
         plotOptions: {
@@ -224,7 +224,7 @@ export default {
           fontFamily: 'Inter',
           fontWeight: 400,
           labels: {
-            colors: ['#CBD5E1'],
+            colors: '#CBD5E1',
           },
         },
         chart: {

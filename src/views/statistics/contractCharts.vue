@@ -42,7 +42,7 @@ export default {
           position: 'top',
           horizontalAlign: 'left',
           labels: {
-            colors: ['#fffff'],
+            colors: '#CBD5E1',
           },
         },
         tooltip: {
@@ -53,27 +53,27 @@ export default {
           type: 'datetime',
           labels: {
             style: {
-              colors: '#dddddd',
+              colors: '#CBD5E1',
             },
           },
           axisTicks: {
-            color: '#dddddd',
+            color: '#CBD5E1',
           },
         },
         yaxis: {
           show: true,
           labels: {
             style: {
-              colors: '#dddddd',
+              colors: '#CBD5E1',
             },
           },
           axisTicks: {
-            color: '#dddddd',
+            color: '#CBD5E1',
           },
           title: {
             text: 'Number of Contracts',
             style: {
-              color: '#dddddd',
+              color: '#CBD5E1',
             },
           },
         },
