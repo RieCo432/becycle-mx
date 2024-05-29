@@ -904,5 +904,5 @@ if __name__ == "__main__":
     demo_deposit_exchanges = add_deposit_exchanges(db=demo_db, users=demo_users)
     demo_expense_types = add_expense_types(db=demo_db)
     demo_expense_receipts = add_expense_receipts(db=demo_db)
-    demo_expenses = add_expenses(db=demo_db, expense_receipts=demo_expense_receipts, users=demo_users)
+    demo_expenses = add_expenses(db=demo_db, expense_receipts=demo_expense_receipts, users=demo_users, expense_types=demo_expense_types)
     demo_paper_contracts = add_paper_contracts(db=demo_db, contracts=demo_contracts)
