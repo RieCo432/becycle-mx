@@ -13,7 +13,7 @@ export default {
   data() {
     return {
       interval: 'monthly',
-      gracePeriod: 28,
+      gracePeriod: 182,
       startDate: null,
       endDate: null,
       chartOptions: {
@@ -238,7 +238,7 @@ export default {
     <div class="col-span-12">
       <Card title="Controls">
         <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-6 items-center my-auto">
+          <div class="col-span-12 lg:col-span-6 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
                 :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
@@ -255,7 +255,7 @@ export default {
                 @drag-end="fetchAllSeries"
             ></vue-slider>
           </div>
-          <div class="col-span-6 items-center my-auto">
+          <div class="col-span-12 lg:col-span-6 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Grace Period (Days)</label>
             <vue-slider
                 name="gracePeriod"
@@ -271,7 +271,7 @@ export default {
                 @drag-end="fetchGracePeriodDependants"
             ></vue-slider>
           </div>
-          <div class="col-span-4 content-center">
+          <div class="col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period Start</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -284,7 +284,7 @@ export default {
             >
             </flat-pickr>
           </div>
-          <div class="col-span-4 content-center">
+          <div class="col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period End</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -299,7 +299,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Total Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -308,7 +308,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Active Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -317,7 +317,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="New Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -326,7 +326,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Returned Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -335,7 +335,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-4">
       <Card title="Contracts Status">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">

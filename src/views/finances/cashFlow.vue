@@ -528,7 +528,7 @@ export default {
     <div class="col-span-12">
       <Card title="Controls">
         <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-6 items-center my-auto">
+          <div class="col-span-12 lg:col-span-6 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
                 :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
@@ -545,7 +545,7 @@ export default {
                 @drag-end="fetchAllSeries"
             ></vue-slider>
           </div>
-          <div class="col-span-6 items-center my-auto">
+          <div class="col-span-12 lg:col-span-6 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Grace Period (Days)</label>
             <vue-slider
                 name="gracePeriod"
@@ -561,7 +561,7 @@ export default {
                 @drag-end="fetchGracePeriodDependants"
             ></vue-slider>
           </div>
-          <div class="col-span-4 content-center">
+          <div class="col-span-12 lg:col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period Start</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -574,7 +574,7 @@ export default {
             >
             </flat-pickr>
           </div>
-          <div class="col-span-4 content-center">
+          <div class="col-span-12 lg:col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period End</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -589,16 +589,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-4">
-      <Card title="Deposit Flow">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptionsDateSeries" :series="depositFlowSeries"></apexchart>
-          </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Actual Cashflow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -607,7 +598,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Provisional Cashflow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -616,7 +607,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Total Expenses and Income">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -625,7 +616,16 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-6">
+      <Card title="Deposit Flow">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-full">
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptionsDateSeries" :series="depositFlowSeries"></apexchart>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
       <Card title="Estimate: Everyone returns today">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -634,7 +634,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-4">
       <Card title="Estimate: Everyone returns normally">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -643,7 +643,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-4">
       <Card title="Deposits Status">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -652,7 +652,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-8">
+    <div class="col-span-12 lg:col-span-8">
       <Card title="Average Percentage of deposit returned">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">

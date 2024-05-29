@@ -175,7 +175,7 @@ export default {
     <div class="col-span-12">
       <Card title="Controls">
         <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-6 items-center my-auto">
+          <div class="col-span-12 lg:col-span-6 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
                 :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
@@ -192,7 +192,7 @@ export default {
                 @drag-end="fetchAllSeries"
             ></vue-slider>
           </div>
-          <div class="col-span-6 items-center my-auto">
+          <div class="col-span-12 lg:col-span-6 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Grace Period (Days)</label>
             <vue-slider
                 name="gracePeriod"
@@ -208,7 +208,7 @@ export default {
                 @drag-end="fetchClaimableDepositsSeries"
             ></vue-slider>
           </div>
-          <div class="col-span-4 content-center">
+          <div class="col-span-12 lg:col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period Start</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -221,7 +221,7 @@ export default {
             >
             </flat-pickr>
           </div>
-          <div class="col-span-4 content-center">
+          <div class="col-span-12 lg:col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period End</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -236,7 +236,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Total Deposits Collected">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -245,7 +245,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Claimable Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -254,7 +254,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Collected Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
@@ -263,7 +263,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-12 lg:col-span-6">
       <Card title="Returned Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
