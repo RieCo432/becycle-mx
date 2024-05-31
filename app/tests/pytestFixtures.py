@@ -33,6 +33,16 @@ def client_logins(clients) -> list[models.ClientLogin]:
 
 
 @pytest.fixture
+def client_logins_with_duplicate_clients(clients_with_duplicates) -> list[models.ClientLogin]:
+    test_client_logins_with_duplicates = add_client_logins(db=db, clients=clients_with_duplicates)
+
+    yield test_client_logins_with_duplicates
+
+    db.query(models.ClientLogin).delete()
+    db.commit()
+
+
+@pytest.fixture
 def client_logins_expired(clients) -> list[models.ClientLogin]:
     test_client_logins_expired = add_client_logins_expired(db=db, clients=clients)
 
@@ -53,12 +63,52 @@ def clients() -> list[models.Client]:
 
 
 @pytest.fixture
+def clients_with_duplicates() -> list[models.Client]:
+    test_clients_with_duplicates = add_clients_with_duplicates(db=db)
+
+    yield test_clients_with_duplicates
+
+    db.query(models.Client).delete()
+    db.commit()
+
+
+@pytest.fixture
+def detected_potential_client_duplicates(clients_with_duplicates) -> list[models.DetectedPotentialClientDuplicates]:
+    test_detected_potential_client_duplicates = add_detected_potential_client_duplicates(db=db, clients=clients_with_duplicates)
+
+    yield test_detected_potential_client_duplicates
+
+    db.query(models.DetectedPotentialClientDuplicates).delete()
+    db.commit()
+
+
+@pytest.fixture
 def bikes() -> list[models.Bike]:
     test_bikes = add_bikes(db=db)
 
     yield test_bikes
 
     db.query(models.Bike).delete()
+    db.commit()
+
+
+@pytest.fixture
+def bikes_with_duplicates() -> list[models.Bike]:
+    test_bikes_with_duplicates = add_bikes_with_duplicates(db=db)
+
+    yield test_bikes_with_duplicates
+
+    db.query(models.Bike).delete()
+    db.commit()
+
+
+@pytest.fixture
+def detected_potential_bike_duplicates(bikes_with_duplicates) -> list[models.DetectedPotentialBikeDuplicates]:
+    test_detected_potential_bike_duplicates = add_detected_potential_bike_duplicates(db=db, bikes=bikes_with_duplicates)
+
+    yield test_detected_potential_bike_duplicates
+
+    db.query(models.DetectedPotentialBikeDuplicates).delete()
     db.commit()
 
 
@@ -113,6 +163,16 @@ def contracts(users: list[models.User], bikes: list[models.Bike], clients: list[
 
 
 @pytest.fixture
+def contracts_with_duplicate_clients_and_bikes(users: list[models.User], bikes_with_duplicates: list[models.Bike], clients_with_duplicates: list[models.Client], contract_types: list[models.ContractType]) -> list[models.Contract]:
+    test_contracts = add_contracts(db=db, users=users, bikes=bikes_with_duplicates, clients=clients_with_duplicates, contract_types=contract_types)
+
+    yield test_contracts
+
+    db.query(models.Contract).delete()
+    db.commit()
+
+
+@pytest.fixture
 def paper_contracts(contracts: list[models.Contract]) -> list[models.PaperContract]:
     test_paper_contracts = add_paper_contracts(db=db, contracts=contracts)
 
@@ -135,6 +195,16 @@ def appointment_types() -> list[models.AppointmentType]:
 @pytest.fixture
 def appointments(appointment_types: list[models.AppointmentType], clients: list[models.Client], appointment_general_settings: models.AppointmentGeneralSettings) -> list[models.Appointment]:
     test_appointments = add_appointments(db=db, clients=clients, appointment_types=appointment_types, appointment_general_settings=appointment_general_settings)
+
+    yield test_appointments
+
+    db.query(models.Appointment).delete()
+    db.commit()
+
+
+@pytest.fixture
+def appointments_with_client_duplicates(appointment_types: list[models.AppointmentType], clients_with_duplicates: list[models.Client], appointment_general_settings: models.AppointmentGeneralSettings) -> list[models.Appointment]:
+    test_appointments = add_appointments(db=db, clients=clients_with_duplicates, appointment_types=appointment_types, appointment_general_settings=appointment_general_settings)
 
     yield test_appointments
 

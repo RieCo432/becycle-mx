@@ -24,6 +24,15 @@ class DetectedPotentialClientDuplicates(Base):
     ignore: Mapped[bool] = mapped_column("ignore", Boolean, default=False, server_default=text("FALSE"),
                                               nullable=False, quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.client1Id) == str(other.get("client1Id")),
+            str(self.client2Id) == str(other.get("client2Id")),
+            str(self.similarityScore) == str(other.get("similarityScore")),
+            str(self.ignore) == str(other.get("ignore")),
+        ])
+
 
 class DetectedPotentialBikeDuplicates(Base):
     __tablename__ = "detectedpotentialbikeduplicates"
@@ -41,3 +50,12 @@ class DetectedPotentialBikeDuplicates(Base):
 
     ignore: Mapped[bool] = mapped_column("ignore", Boolean, default=False, server_default=text("FALSE"),
                                               nullable=False, quote=False)
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.bike1Id) == str(other.get("bike1Id")),
+            str(self.bike2Id) == str(other.get("bike2Id")),
+            str(self.similarityScore) == str(other.get("similarityScore")),
+            str(self.ignore) == str(other.get("ignore")),
+        ])

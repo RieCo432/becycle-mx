@@ -44,7 +44,7 @@ def is_potential_client_duplicate_detected_before(db: Session, client1: models.C
 def find_potential_client_duplicates(db: Session) -> None:
     clients = get_all_clients(db=db)
 
-    for i in range(len(clients)):
+    for i in range(len(clients) - 1):
 
         client1 = clients[i]
 
@@ -56,9 +56,6 @@ def find_potential_client_duplicates(db: Session) -> None:
             client2 = clients[j]
 
             if client2.firstName.lower() == "notprovided" and client2.lastName.lower() == "notprovided":
-                continue
-
-            if client1.id == client2.id:
                 continue
 
             if is_potential_client_duplicate_detected_before(db=db, client1=client1, client2=client2):
@@ -135,9 +132,6 @@ def resolve_client_duplicate(db: Session, potential_client_duplicate_id: UUID, d
     discard_client = get_client(db=db, client_id=discard_client_id)
     keep_client = get_client(db=db, client_id=keep_client_id)
 
-    if discard_client is None or keep_client is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "One or more clients not found!"})
-
     discard_client_contracts = get_contracts(db=db, client_id=discard_client_id)
 
     for contract in discard_client_contracts:
@@ -210,7 +204,7 @@ def is_potential_bike_duplicate_detected_before(db: Session, bike1: models.Bike,
 def find_potential_bike_duplicates(db: Session) -> None:
     bikes = get_all_bikes(db=db)
 
-    for i in range(len(bikes)):
+    for i in range(len(bikes) - 1):
 
         bike1 = bikes[i]
 
@@ -222,9 +216,6 @@ def find_potential_bike_duplicates(db: Session) -> None:
             bike2 = bikes[j]
 
             if bike2.make.lower() == "notprovided" and bike2.model.lower() == "notprovided":
-                continue
-
-            if bike1.id == bike2.id:
                 continue
 
             if is_potential_bike_duplicate_detected_before(db=db, bike1=bike1, bike2=bike2):
@@ -320,9 +311,6 @@ def resolve_bike_duplicate(db: Session, potential_bike_duplicate_id: UUID, disca
 
     discard_bike = get_bike(db=db, bike_id=discard_bike_id)
     keep_bike = get_bike(db=db, bike_id=keep_bike_id)
-
-    if discard_bike is None or keep_bike is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "One or more bikes not found!"})
 
     discard_bike_contracts = get_contracts(db=db, bike_id=discard_bike_id)
 

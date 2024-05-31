@@ -95,6 +95,122 @@ def add_clients(db: Session) -> list[models.Client]:
     return clients
 
 
+def add_clients_with_duplicates(db: Session) -> list[models.Client]:
+    clients = [
+        models.Client(
+            firstName="alice",
+            lastName="humphrey",
+            emailAddress="alice.humphrey@example.com",
+            preBecycleSurveyCompleted=False,
+            periBecycleSurveyCompleted=False,
+            postBecycleSurveyCompleted=False
+        ),
+        models.Client(
+            firstName="alex",
+            lastName="smith",
+            emailAddress="a.smith@example.com",
+            preBecycleSurveyCompleted=True,
+            periBecycleSurveyCompleted=False,
+            postBecycleSurveyCompleted=False
+        ),
+        models.Client(
+            firstName="alice",
+            lastName="humfrey",
+            emailAddress="alice.humphrey@example.com",
+            preBecycleSurveyCompleted=False,
+            periBecycleSurveyCompleted=True,
+            postBecycleSurveyCompleted=False
+        ),
+        models.Client(
+            firstName="debby",
+            lastName="smith",
+            emailAddress="debby.smith@exmaple.com",
+            preBecycleSurveyCompleted=False,
+            periBecycleSurveyCompleted=False,
+            postBecycleSurveyCompleted=True
+        ),
+        models.Client(
+            firstName="alex",
+            lastName="smith",
+            emailAddress="alex.smith@example.com",
+            preBecycleSurveyCompleted=True,
+            periBecycleSurveyCompleted=True,
+            postBecycleSurveyCompleted=True
+        ),
+        models.Client(
+            firstName="notprovided",
+            lastName="notprovided",
+            emailAddress="sdjvhbsjvbwsjhdbv@notprovided.com",
+            preBecycleSurveyCompleted=True,
+            periBecycleSurveyCompleted=True,
+            postBecycleSurveyCompleted=True
+        ),
+        models.Client(
+            firstName="ab",
+            lastName="cd",
+            emailAddress="bgfdnggdbfdb@notprovided.com",
+            preBecycleSurveyCompleted=True,
+            periBecycleSurveyCompleted=True,
+            postBecycleSurveyCompleted=True
+        ),
+        models.Client(
+            firstName="ab",
+            lastName="ef",
+            emailAddress="dfnfdbdbfdbffggfr@notprovided.com",
+            preBecycleSurveyCompleted=True,
+            periBecycleSurveyCompleted=True,
+            postBecycleSurveyCompleted=True
+        ),
+        models.Client(
+            firstName="notprovided",
+            lastName="notprovided",
+            emailAddress="ewvrebsbsbrbsbsf@notprovided.com",
+            preBecycleSurveyCompleted=True,
+            periBecycleSurveyCompleted=True,
+            postBecycleSurveyCompleted=True
+        ),
+    ]
+
+    db.add_all(clients)
+    db.commit()
+
+    return clients
+
+
+def add_detected_potential_client_duplicates(db: Session, clients: list[models.Client]) -> list[models.DetectedPotentialClientDuplicates]:
+    client_duplicates = [
+        models.DetectedPotentialClientDuplicates(  # definitely a duplicate but accidentally marked to ignore
+            client1Id=clients[0].id,
+            client2Id=clients[2].id,
+            similarityScore=4,
+            ignore=True
+        ),
+        models.DetectedPotentialClientDuplicates(  # not a duplicate and already marked to ignore
+            client1Id=clients[3].id,
+            client2Id=clients[1].id,
+            similarityScore=2,
+            ignore=True,
+        ),
+        models.DetectedPotentialClientDuplicates(  # definitely a duplicate
+            client1Id=clients[4].id,
+            client2Id=clients[1].id,
+            similarityScore=5,
+            ignore=False,
+        ),
+        models.DetectedPotentialClientDuplicates(  # not a duplicate
+            client1Id=clients[4].id,
+            client2Id=clients[3].id,
+            similarityScore=2,
+            ignore=False
+        )
+    ]
+
+    db.add_all(client_duplicates)
+    db.commit()
+
+    return client_duplicates
+
+
 def add_client_logins(db: Session, clients: list[models.Client]) -> list[models.ClientLogin]:
     client_logins = [
         models.ClientLogin(
@@ -165,6 +281,63 @@ def add_bikes(db: Session) -> list[models.Bike]:
     db.commit()
 
     return bikes
+
+
+def add_bikes_with_duplicates(db: Session) -> list[models.Bike]:
+    bikes = [
+        models.Bike(make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
+        models.Bike(make="apollo", model="excelle", colour="black", decals=None, serialNumber="abcd1256"),
+        models.Bike(make="apolo", model="skidmark", colour="brown", decals=None, serialNumber="bcd1234"),
+        models.Bike(make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
+        models.Bike(make="raleigh", model="enigma", colour="blue and grey", decals=None, serialNumber="mnop3456"),
+        models.Bike(make="raleigh", model="enigma", colour="black and grey", decals=None, serialNumber="qrst7890"),
+        models.Bike(make="apollo", model="excelle", colour="green", decals=None, serialNumber="ijkl9012"),
+        models.Bike(make="notprovided", model="notprovided", colour="notprovided", decals=None, serialNumber="notprovided"),
+        models.Bike(make="notprovided", model="notprovided", colour="notprovided", decals=None,
+                    serialNumber="notprovided"),
+        models.Bike(make="ab", model="cd", colour="d", decals=None,
+                    serialNumber="notprovided"),
+        models.Bike(make="ralegh", model="engma", colour="black and grey", decals=None, serialNumber="qrst7890"),
+    ]
+
+    db.add_all(bikes)
+    db.commit()
+
+    return bikes
+
+
+def add_detected_potential_bike_duplicates(db: Session, bikes: list[models.Bike]) -> list[models.DetectedPotentialBikeDuplicates]:
+    bike_duplicates = [
+        models.DetectedPotentialBikeDuplicates(  # definitely a duplicate
+            bike1Id=bikes[0].id,
+            bike2Id=bikes[2].id,
+            similarityScore=5,
+            ignore=False
+        ),
+        models.DetectedPotentialBikeDuplicates(  # not a duplicate
+            bike1Id=bikes[1].id,
+            bike2Id=bikes[6].id,
+            similarityScore=4,
+            ignore=False,
+        ),
+        models.DetectedPotentialBikeDuplicates(  # not a duplicate, marked to ignore
+            bike1Id=bikes[5].id,
+            bike2Id=bikes[4].id,
+            similarityScore=5,
+            ignore=True
+        ),
+        models.DetectedPotentialBikeDuplicates(  # definitely a duplicate, marked to ignore
+            bike1Id=bikes[6].id,
+            bike2Id=bikes[0].id,
+            similarityScore=5,
+            ignore=False
+        ),
+    ]
+
+    db.add_all(bike_duplicates)
+    db.commit()
+
+    return bike_duplicates
 
 
 def add_users(db: Session) -> list[models.User]:

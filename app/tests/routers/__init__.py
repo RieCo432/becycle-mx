@@ -10,3 +10,4 @@ from .settings import *
 from .statistics import *
 from .finances import *
 from .expense import *
+from .admin import *
