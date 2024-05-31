@@ -27,16 +27,18 @@ def get_potential_client_duplicates_detected(db: Session) -> list[models.Detecte
 
 
 def is_potential_client_duplicate_detected_before(db: Session, client1: models.Client, client2: models.Client) -> bool:
-    if not str(client1.id) < str(client2.id):
-        temp = client1
-        client1 = client2
-        client2 = temp
-
     return len([_ for _ in db.scalars(
         select(models.DetectedPotentialClientDuplicates)
         .where(
-            (models.DetectedPotentialClientDuplicates.client1Id == client1.id)
-            & (models.DetectedPotentialClientDuplicates.client2Id == client2.id)
+            (
+                    (models.DetectedPotentialClientDuplicates.client1Id == client1.id)
+                    & (models.DetectedPotentialClientDuplicates.client2Id == client2.id)
+            )
+            | (
+                    (models.DetectedPotentialClientDuplicates.client2Id == client1.id)
+                    & (models.DetectedPotentialClientDuplicates.client1Id == client2.id)
+            )
+
         )
     )]) > 0
 
@@ -187,16 +189,18 @@ def get_potential_bike_duplicates_detected(db: Session) -> list[models.DetectedP
 
 
 def is_potential_bike_duplicate_detected_before(db: Session, bike1: models.Bike, bike2: models.Bike) -> bool:
-    if not str(bike1.id) < str(bike2.id):
-        temp = bike1
-        bike1 = bike2
-        bike2 = temp
 
     return len([_ for _ in db.scalars(
         select(models.DetectedPotentialBikeDuplicates)
         .where(
-            (models.DetectedPotentialBikeDuplicates.bike1Id == bike1.id)
-            & (models.DetectedPotentialBikeDuplicates.bike2Id == bike2.id)
+            (
+                    (models.DetectedPotentialBikeDuplicates.bike1Id == bike1.id)
+                    & (models.DetectedPotentialBikeDuplicates.bike2Id == bike2.id)
+            )
+            | (
+                    (models.DetectedPotentialBikeDuplicates.bike2Id == bike1.id)
+                    & (models.DetectedPotentialBikeDuplicates.bike1Id == bike2.id)
+            )
         )
     )]) > 0
 
