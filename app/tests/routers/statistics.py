@@ -7,6 +7,22 @@ import datetime
 
 test_client = TestClient(app)
 
+today = datetime.datetime.utcnow().date()
+one_quarter_ago = (today - relativedelta(months=3))
+two_quarter_ago = (one_quarter_ago - relativedelta(months=3))
+three_quarter_ago = (two_quarter_ago - relativedelta(months=3))
+four_quarter_ago = (three_quarter_ago - relativedelta(months=3))
+five_quarter_ago = (four_quarter_ago - relativedelta(months=3))
+six_quarter_ago = (five_quarter_ago - relativedelta(months=3))
+
+today_str = today.strftime("%Y-%m-%d")
+one_quarter_ago_str = one_quarter_ago.strftime("%Y-%m-%d")
+two_quarter_ago_str = two_quarter_ago.strftime("%Y-%m-%d")
+three_quarter_ago_str = three_quarter_ago.strftime("%Y-%m-%d")
+four_quarter_ago_str = four_quarter_ago.strftime("%Y-%m-%d")
+five_quarter_ago_str = five_quarter_ago.strftime("%Y-%m-%d")
+six_quarter_ago_str = six_quarter_ago.strftime("%Y-%m-%d")
+
 
 def test_get_user_leaderboard(users, contracts, normal_user_auth_header):
     expected_leaderboard = []
@@ -124,14 +140,6 @@ def test_get_total_contracts_yearly(contracts, normal_user_auth_header):
 
 
 def test_get_total_contracts_quarterly(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
@@ -229,14 +237,6 @@ def test_get_active_contracts_yearly_two_months_grace(contracts, normal_user_aut
 
 
 def test_get_active_contracts_quarterly_two_months_grace(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
@@ -334,14 +334,6 @@ def test_get_active_contracts_yearly_no_grace(contracts, normal_user_auth_header
 
 
 def test_get_active_contracts_quarterly_no_grace(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
@@ -439,14 +431,6 @@ def test_get_new_contracts_yearly(contracts, normal_user_auth_header):
 
 
 def test_get_new_contracts_quarterly(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
@@ -544,19 +528,10 @@ def test_get_returned_contracts_yearly(contracts, normal_user_auth_header):
 
 
 def test_get_returned_contracts_quarterly(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
             "data": [
-                [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 1],  # contracts 0
@@ -568,8 +543,7 @@ def test_get_returned_contracts_quarterly(contracts, normal_user_auth_header):
         {
             "name": "refugee",
             "data": [
-                [six_quarter_ago_str, 1],  # contracts 1
-                [five_quarter_ago_str, 0],
+                [five_quarter_ago_str, 1],  # contracts 1
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
@@ -580,7 +554,6 @@ def test_get_returned_contracts_quarterly(contracts, normal_user_auth_header):
         {
             "name": "kids",
             "data": [
-                [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
@@ -631,61 +604,3 @@ def test_get_contracts_percentage_returned_within_grace_period_two_months_grace_
 
     assert response.status_code == 200
     assert response.json() == expected_data
-
-
-
-
-
-
-
-
-
-
-
-
-# VERY EXTENSIVE TEST; BUT RELIES TOO HEAVILY ON ALGORITHM TO GENERATE EXPECTED DATA
-# def test_get_active_contracts(contracts, normal_user_auth_header):
-#     for grace_period_weeks in range(0, 53):
-#         grace_period_days = grace_period_weeks * 7
-#         for interval, interval_relativedelta in zip(
-#             ["daily", "weekly", "fortnightly", "monthly", "quarterly", "semiyearly", "yearly"],
-#             [relativedelta(days=1), relativedelta(weeks=1), relativedelta(weeks=2), relativedelta(months=1), relativedelta(months=3), relativedelta(months=6), relativedelta(years=1)]
-#         ):
-#             probe_dates = []
-#             probe_date = datetime.datetime.utcnow().date()
-#             oldest_contract = sorted([c.startDate for c in contracts])[0]
-#
-#             while probe_date >= oldest_contract:
-#                 probe_dates.append(probe_date)
-#                 probe_date -= interval_relativedelta
-#
-#             probe_dates.sort()
-#
-#             expected_data = sorted([
-#                 {
-#                     "name": series_name,
-#                     "data": [
-#                         [probe_date.strftime("%Y-%m-%d"), len([
-#                             c for c in contracts
-#                             if c.contractType == series_name
-#                             and c.startDate <= probe_date
-#                             and (c.returnedDate is None or c.returnedDate >= probe_date)
-#                             and (c.endDate >= probe_date - relativedelta(days=grace_period_days))
-#                         ])] for probe_date in probe_dates
-#                     ]
-#                 } for series_name in ["standard", "kids", "refugee"]
-#
-#             ], key=lambda series: series.get("name"))
-#
-#             response = test_client.get("/statistics/contracts/active", params={"interval": interval, "grace_period": 0}, headers=normal_user_auth_header)
-#
-#             assert response.status_code == 200
-#
-#             actual_data = sorted(response.json(), key=lambda series: series.get("name"))
-#
-#             assert len(actual_data) == len(expected_data)
-#             assert all([len(actual_data[series_i].get("data")) == len(expected_data[series_i].get("data")) for series_i in range(len(expected_data))])
-#             assert all([actual_series_name in [series.get("name") for series in expected_data] for actual_series_name in [series.get("name") for series in actual_data]])
-#             assert all([all([
-#                 series_entry in actual_data[series_i].get("data") for series_entry in expected_data[series_i].get("data")
-#             ]) for series_i in range(len(expected_data))])

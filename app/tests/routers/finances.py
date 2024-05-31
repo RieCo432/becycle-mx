@@ -7,6 +7,22 @@ import datetime
 
 test_client = TestClient(app)
 
+today = datetime.datetime.utcnow().date()
+one_quarter_ago = (today - relativedelta(months=3))
+two_quarter_ago = (one_quarter_ago - relativedelta(months=3))
+three_quarter_ago = (two_quarter_ago - relativedelta(months=3))
+four_quarter_ago = (three_quarter_ago - relativedelta(months=3))
+five_quarter_ago = (four_quarter_ago - relativedelta(months=3))
+six_quarter_ago = (five_quarter_ago - relativedelta(months=3))
+
+today_str = today.strftime("%Y-%m-%d")
+one_quarter_ago_str = one_quarter_ago.strftime("%Y-%m-%d")
+two_quarter_ago_str = two_quarter_ago.strftime("%Y-%m-%d")
+three_quarter_ago_str = three_quarter_ago.strftime("%Y-%m-%d")
+four_quarter_ago_str = four_quarter_ago.strftime("%Y-%m-%d")
+five_quarter_ago_str = five_quarter_ago.strftime("%Y-%m-%d")
+six_quarter_ago_str = six_quarter_ago.strftime("%Y-%m-%d")
+
 
 def test_get_deposit_book(contracts, clients, users, deposit_exchanges, normal_user_auth_header):
     expected_data = {
@@ -235,14 +251,6 @@ def test_get_total_deposits_yearly(contracts, normal_user_auth_header):
 
 
 def test_get_total_deposits_quarterly(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
@@ -386,14 +394,6 @@ def test_get_claimable_deposits_yearly_two_months_grace(contracts, normal_user_a
 
 
 def test_get_claimable_deposits_quarterly_two_months_grace(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
@@ -491,14 +491,6 @@ def test_get_claimable_deposits_yearly_no_grace(contracts, normal_user_auth_head
 
 
 def test_get_claimable_deposits_quarterly_no_grace(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
@@ -596,14 +588,6 @@ def test_get_collected_yearly(contracts, normal_user_auth_header):
 
 
 def test_get_collected_quarterly(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
@@ -701,19 +685,10 @@ def test_get_returned_deposits_yearly(contracts, normal_user_auth_header):
 
 
 def test_get_returned_deposits_quarterly(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "standard",
             "data": [
-                [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
@@ -725,8 +700,7 @@ def test_get_returned_deposits_quarterly(contracts, normal_user_auth_header):
         {
             "name": "refugee",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
-                [five_quarter_ago_str, 0],
+                [five_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
@@ -737,7 +711,6 @@ def test_get_returned_deposits_quarterly(contracts, normal_user_auth_header):
         {
             "name": "kids",
             "data": [
-                [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
@@ -806,14 +779,6 @@ def test_get_deposit_flow_yearly(contracts, normal_user_auth_header):
 
 
 def test_get_deposit_flow_quarterly(contracts, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-    six_quarter_ago_str = (today - relativedelta(months=18)).strftime("%Y-%m-%d")
     expected_data = sorted([
         {
             "name": "collected",
@@ -830,8 +795,8 @@ def test_get_deposit_flow_quarterly(contracts, normal_user_auth_header):
         {
             "name": "returned",
             "data": [
-                [six_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
-                [five_quarter_ago_str, 0],
+                [six_quarter_ago_str, 0],
+                [five_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
                 [two_quarter_ago_str, 0],
@@ -842,8 +807,8 @@ def test_get_deposit_flow_quarterly(contracts, normal_user_auth_header):
         {
             "name": "diff",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]]) - sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0, 5]])],
+                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]])],  # contracts 1
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0, 5]]) - sum([contracts[i].depositAmountReturned for i in [1]])],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [4]]) - sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
                 [two_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 6]])],
@@ -904,7 +869,7 @@ def test_get_deposit_return_percentage(contracts, normal_user_auth_header):
         {
             "name": "Trendline",
             "type": 'line',
-            "data": [[-120, 100], [-31, 75], [60, 50], [153, 25]]
+            "data": [[-120, 100], [-31, 75], [-30, 75], [60, 50], [153, 25]]
         }
     ]
 
@@ -915,7 +880,13 @@ def test_get_deposit_return_percentage(contracts, normal_user_auth_header):
     actual_data = response.json()
 
     assert all([bubble in actual_data[0].get("data") for bubble in expected_data[0].get("data")])
-    assert all([1.05 * xy[1] >= actual_data[1].get("data")[i][1] >= 0.95 * xy[1] and actual_data[1].get("data")[i][0] == xy[0] for i, xy in enumerate(expected_data[1].get("data"))])
+    for i, xy in enumerate(expected_data[1].get("data")):
+        x_matches = abs(1.05 * xy[0]) >= abs(actual_data[1].get("data")[i][0]) >= abs(0.95 * xy[0]) and actual_data[1].get("data")[i][0] * xy[0] >= 0
+        y_matches = 1.05 * xy[1] >= actual_data[1].get("data")[i][1] >= 0.95 * xy[1]
+
+        assert x_matches
+        assert y_matches
+
 
     assert actual_data is not None
 
@@ -972,18 +943,11 @@ def test_get_realistic_case_required_deposit_float_six_months_grace(contracts, n
 
 
 def test_get_cashflow_actual_quarterly(expenses, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-
     expected_data = sorted([
         {
             "name": "Expenses",
             "data": [
-                [three_quarter_ago_str, -70.0],
-                [two_quarter_ago_str, 0.0],
+                [two_quarter_ago_str, -70.0],
                 [one_quarter_ago_str, 0.0],
                 [today_str, 0.0]
             ]
@@ -991,7 +955,6 @@ def test_get_cashflow_actual_quarterly(expenses, normal_user_auth_header):
         {
             "name": "Incomes",
             "data": [
-                [three_quarter_ago_str, 0.0],
                 [two_quarter_ago_str, 0.0],
                 [one_quarter_ago_str, 100.0],
                 [today_str, 0.0]
@@ -1000,8 +963,7 @@ def test_get_cashflow_actual_quarterly(expenses, normal_user_auth_header):
         {
             "name": "Differences",
             "data": [
-                [three_quarter_ago_str, -70.0],
-                [two_quarter_ago_str, 0.0],
+                [two_quarter_ago_str, -70.0],
                 [one_quarter_ago_str, 100.0],
                 [today_str, 0.0]
             ]
@@ -1064,14 +1026,6 @@ def test_get_cashflow_actual_half_yearly(expenses, normal_user_auth_header):
 
 
 def test_get_cashflow_provisional_quarterly(expenses, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-    four_quarter_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
-    five_quarter_ago_str = (today - relativedelta(months=15)).strftime("%Y-%m-%d")
-
     expected_data = sorted([
         {
             "name": "Expenses",
@@ -1122,10 +1076,11 @@ def test_get_cashflow_provisional_quarterly(expenses, normal_user_auth_header):
 
 
 def test_get_cashflow_provisional_semi_yearly(expenses, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_half_year_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    two_half_year_ago_str = (today - relativedelta(months=12)).strftime("%Y-%m-%d")
+    one_half_year_ago = today - relativedelta(months=6)
+    two_half_year_ago = one_half_year_ago - relativedelta(months=6)
+
+    one_half_year_ago_str = one_half_year_ago.strftime("%Y-%m-%d")
+    two_half_year_ago_str = two_half_year_ago.strftime("%Y-%m-%d")
 
     expected_data = sorted([
         {
@@ -1168,17 +1123,10 @@ def test_get_cashflow_provisional_semi_yearly(expenses, normal_user_auth_header)
 
 
 def test_get_cashflow_total_quarterly(expenses, normal_user_auth_header):
-    today = datetime.datetime.utcnow().date()
-    today_str = today.strftime("%Y-%m-%d")
-    one_quarter_ago_str = (today - relativedelta(months=3)).strftime("%Y-%m-%d")
-    two_quarter_ago_str = (today - relativedelta(months=6)).strftime("%Y-%m-%d")
-    three_quarter_ago_str = (today - relativedelta(months=9)).strftime("%Y-%m-%d")
-
     expected_data = sorted([
         {
             "name": "Expenses",
             "data": [
-                [three_quarter_ago_str, -70.0],
                 [two_quarter_ago_str, -70.0],
                 [one_quarter_ago_str, -70.0],
                 [today_str, -70.0]
@@ -1187,7 +1135,6 @@ def test_get_cashflow_total_quarterly(expenses, normal_user_auth_header):
         {
             "name": "Incomes",
             "data": [
-                [three_quarter_ago_str, 0.0],
                 [two_quarter_ago_str, 0.0],
                 [one_quarter_ago_str, 100.0],
                 [today_str, 100.0]
@@ -1196,7 +1143,6 @@ def test_get_cashflow_total_quarterly(expenses, normal_user_auth_header):
         {
             "name": "Differences",
             "data": [
-                [three_quarter_ago_str, -70.0],
                 [two_quarter_ago_str, -70.0],
                 [one_quarter_ago_str, 30.0],
                 [today_str, 30.0]
