@@ -182,7 +182,7 @@ def add_detected_potential_client_duplicates(db: Session, clients: list[models.C
         models.DetectedPotentialClientDuplicates(  # definitely a duplicate but accidentally marked to ignore
             client1Id=clients[0].id,
             client2Id=clients[2].id,
-            similarityScore=4,
+            similarityScore=5,
             ignore=True
         ),
         models.DetectedPotentialClientDuplicates(  # not a duplicate and already marked to ignore
@@ -323,14 +323,20 @@ def add_detected_potential_bike_duplicates(db: Session, bikes: list[models.Bike]
         models.DetectedPotentialBikeDuplicates(  # not a duplicate, marked to ignore
             bike1Id=bikes[5].id,
             bike2Id=bikes[4].id,
+            similarityScore=7,
+            ignore=True
+        ),
+        models.DetectedPotentialBikeDuplicates(  # not a duplicate, marked to ignore
+            bike1Id=bikes[4].id,
+            bike2Id=bikes[10].id,
             similarityScore=5,
             ignore=True
         ),
         models.DetectedPotentialBikeDuplicates(  # definitely a duplicate, marked to ignore
-            bike1Id=bikes[6].id,
-            bike2Id=bikes[0].id,
-            similarityScore=5,
-            ignore=False
+            bike1Id=bikes[10].id,
+            bike2Id=bikes[5].id,
+            similarityScore=8,
+            ignore=True
         ),
     ]
 
