@@ -689,6 +689,7 @@ def test_get_returned_deposits_quarterly(contracts, normal_user_auth_header):
         {
             "name": "standard",
             "data": [
+                [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
@@ -700,7 +701,8 @@ def test_get_returned_deposits_quarterly(contracts, normal_user_auth_header):
         {
             "name": "refugee",
             "data": [
-                [five_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
+                [six_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
+                [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
@@ -711,6 +713,7 @@ def test_get_returned_deposits_quarterly(contracts, normal_user_auth_header):
         {
             "name": "kids",
             "data": [
+                [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
@@ -795,8 +798,8 @@ def test_get_deposit_flow_quarterly(contracts, normal_user_auth_header):
         {
             "name": "returned",
             "data": [
-                [six_quarter_ago_str, 0],
-                [five_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
+                [six_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
+                [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
                 [two_quarter_ago_str, 0],
@@ -807,8 +810,8 @@ def test_get_deposit_flow_quarterly(contracts, normal_user_auth_header):
         {
             "name": "diff",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]])],  # contracts 1
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0, 5]]) - sum([contracts[i].depositAmountReturned for i in [1]])],
+                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]]) - sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0, 5]])],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [4]]) - sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
                 [two_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 6]])],
@@ -947,7 +950,8 @@ def test_get_cashflow_actual_quarterly(expenses, normal_user_auth_header):
         {
             "name": "Expenses",
             "data": [
-                [two_quarter_ago_str, -70.0],
+                [three_quarter_ago_str, -70.0],
+                [two_quarter_ago_str, 0],
                 [one_quarter_ago_str, 0.0],
                 [today_str, 0.0]
             ]
@@ -955,6 +959,7 @@ def test_get_cashflow_actual_quarterly(expenses, normal_user_auth_header):
         {
             "name": "Incomes",
             "data": [
+                [three_quarter_ago_str, 0.0],
                 [two_quarter_ago_str, 0.0],
                 [one_quarter_ago_str, 100.0],
                 [today_str, 0.0]
@@ -963,7 +968,8 @@ def test_get_cashflow_actual_quarterly(expenses, normal_user_auth_header):
         {
             "name": "Differences",
             "data": [
-                [two_quarter_ago_str, -70.0],
+                [three_quarter_ago_str, -70.0],
+                [two_quarter_ago_str, 0.0],
                 [one_quarter_ago_str, 100.0],
                 [today_str, 0.0]
             ]

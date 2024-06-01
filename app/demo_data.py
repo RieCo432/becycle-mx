@@ -6,6 +6,15 @@ import app.models as models
 from sqlalchemy.orm import Session
 
 
+today = datetime.datetime.utcnow().date()
+one_quarter_ago = (today - relativedelta(months=3))
+two_quarter_ago = (one_quarter_ago - relativedelta(months=3))
+three_quarter_ago = (two_quarter_ago - relativedelta(months=3))
+four_quarter_ago = (three_quarter_ago - relativedelta(months=3))
+five_quarter_ago = (four_quarter_ago - relativedelta(months=3))
+six_quarter_ago = (five_quarter_ago - relativedelta(months=3))
+
+
 def delete_all(db: Session):
     db.query(models.RoadSegmentReport).delete()
     db.query(models.RoadSegmentReportType).delete()
@@ -503,9 +512,9 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             depositCollectingUserId=users[0].id,
             returnAcceptingUserId=users[0].id,
             depositReturningUserId=users[0].id,
-            startDate=(datetime.datetime.utcnow() - relativedelta(months=15)).date(),
-            endDate=(datetime.datetime.utcnow() - relativedelta(months=9)).date(),
-            returnedDate=(datetime.datetime.utcnow() - relativedelta(months=10)).date(),
+            startDate=five_quarter_ago,
+            endDate=three_quarter_ago,
+            returnedDate=three_quarter_ago - relativedelta(months=1),
             depositAmountCollected=40,
             depositAmountReturned=30,
             conditionOfBike="fair",
@@ -522,9 +531,9 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             depositCollectingUserId=users[0].id,
             returnAcceptingUserId=users[0].id,
             depositReturningUserId=users[0].id,
-            startDate=(datetime.datetime.utcnow() - relativedelta(months=20)).date(),
-            endDate=(datetime.datetime.utcnow() - relativedelta(months=14)).date(),
-            returnedDate=(datetime.datetime.utcnow() - relativedelta(months=18)).date(),
+            startDate=six_quarter_ago - relativedelta(months=2),
+            endDate=four_quarter_ago - relativedelta(months=2),
+            returnedDate=six_quarter_ago,
             depositAmountCollected=40,
             depositAmountReturned=40,
             conditionOfBike="fair",
@@ -541,8 +550,8 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             depositCollectingUserId=users[2].id,
             returnAcceptingUserId=None,
             depositReturningUserId=None,
-            startDate=(datetime.datetime.utcnow() - relativedelta(months=7)).date(),
-            endDate=(datetime.datetime.utcnow() - relativedelta(months=1)).date(),
+            startDate=two_quarter_ago - relativedelta(months=1),
+            endDate=today - relativedelta(months=1),
             returnedDate=None,
             depositAmountCollected=40,
             depositAmountReturned=None,
@@ -560,8 +569,8 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             depositCollectingUserId=users[2].id,
             returnAcceptingUserId=None,
             depositReturningUserId=None,
-            startDate=(datetime.datetime.utcnow() - relativedelta(months=3)).date(),
-            endDate=(datetime.datetime.utcnow() + relativedelta(months=3)).date(),
+            startDate=one_quarter_ago,
+            endDate=today + relativedelta(months=3),
             returnedDate=None,
             depositAmountCollected=40,
             depositAmountReturned=None,
@@ -579,9 +588,9 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             depositCollectingUserId=users[2].id,
             returnAcceptingUserId=users[2].id,
             depositReturningUserId=users[2].id,
-            startDate=(datetime.datetime.utcnow() - relativedelta(months=10)).date(),
-            endDate=(datetime.datetime.utcnow() - relativedelta(months=4)).date(),
-            returnedDate=(datetime.datetime.utcnow() - relativedelta(months=2)).date(),
+            startDate=three_quarter_ago - relativedelta(months=1),
+            endDate=one_quarter_ago - relativedelta(months=1),
+            returnedDate=today - relativedelta(months=2),
             depositAmountCollected=40,
             depositAmountReturned=20,
             conditionOfBike="fair",
@@ -598,9 +607,9 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             depositCollectingUserId=users[2].id,
             returnAcceptingUserId=users[2].id,
             depositReturningUserId=users[2].id,
-            startDate=(datetime.datetime.utcnow() - relativedelta(months=16)).date(),
-            endDate=(datetime.datetime.utcnow() - relativedelta(months=10)).date(),
-            returnedDate=(datetime.datetime.utcnow() - relativedelta(months=5)).date(),
+            startDate=five_quarter_ago - relativedelta(months=1),
+            endDate=three_quarter_ago - relativedelta(months=1),
+            returnedDate=one_quarter_ago - relativedelta(months=2),
             depositAmountCollected=40,
             depositAmountReturned=10,
             conditionOfBike="fair",
@@ -617,9 +626,9 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             depositCollectingUserId=users[2].id,
             returnAcceptingUserId=users[2].id,
             depositReturningUserId=users[2].id,
-            startDate=(datetime.datetime.utcnow() - relativedelta(months=7)).date(),
-            endDate=(datetime.datetime.utcnow() - relativedelta(months=1)).date(),
-            returnedDate=(datetime.datetime.utcnow() - relativedelta(months=2)).date(),
+            startDate=two_quarter_ago - relativedelta(months=1),
+            endDate=today - relativedelta(months=1),
+            returnedDate=today - relativedelta(months=2),
             depositAmountCollected=40,
             depositAmountReturned=30,
             conditionOfBike="fair",

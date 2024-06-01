@@ -532,6 +532,7 @@ def test_get_returned_contracts_quarterly(contracts, normal_user_auth_header):
         {
             "name": "standard",
             "data": [
+                [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 1],  # contracts 0
@@ -543,7 +544,8 @@ def test_get_returned_contracts_quarterly(contracts, normal_user_auth_header):
         {
             "name": "refugee",
             "data": [
-                [five_quarter_ago_str, 1],  # contracts 1
+                [six_quarter_ago_str, 1],  # contracts 1
+                [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
@@ -554,6 +556,7 @@ def test_get_returned_contracts_quarterly(contracts, normal_user_auth_header):
         {
             "name": "kids",
             "data": [
+                [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
