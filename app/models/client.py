@@ -47,13 +47,27 @@ class Client(Base):
                                                              nullable=False,
                                                              quote=False)
 
-    def __eq__(self, other: dict):
+    def __eq_dict__(self, other: dict):
         return all([
             str(self.id) == str(other.get("id")),
             str(self.firstName) == str(other.get("firstName")),
             str(self.lastName) == str(other.get("lastName")),
             str(self.emailAddress) == str(other.get("emailAddress"))
         ])
+
+    def __eq__(self, other):
+        if type(other) is dict:
+            return self.__eq_dict__(other)
+        else:
+            return all([
+                self.id == other.id,
+                self.firstName == other.firstName,
+                self.lastName == other.lastName,
+                self.emailAddress == other.emailAddress,
+                self.preBecycleSurveyCompleted == other.preBecycleSurveyCompleted,
+                self.periBecycleSurveyCompleted == other.periBecycleSurveyCompleted,
+                self.postBecycleSurveyCompleted == other.postBecycleSurveyCompleted
+            ])
 
 
 class ClientTemp(Base):

@@ -286,8 +286,7 @@ def deposit_exchanges(users) -> list[models.DepositExchange]:
 def user_auth_tokens(users) -> list[schemas.Token]:
     tokens = []
     for user in users:
-        access_token_expires = datetime.timedelta(minutes=int(os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"]))
-        access_token = auth.create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+        access_token = auth.create_access_token(data={"sub": user.username})
 
         tokens.append(
             schemas.Token(
@@ -303,8 +302,7 @@ def user_auth_tokens(users) -> list[schemas.Token]:
 def client_auth_tokens(clients) -> list[schemas.Token]:
     tokens = []
     for client in clients:
-        access_token_expires = datetime.timedelta(minutes=int(os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"]))
-        access_token = auth.create_access_token(data={"sub": str(client.id)}, expires_delta=access_token_expires)
+        access_token = auth.create_access_token(data={"sub": str(client.id)})
 
         tokens.append(
             schemas.Token(

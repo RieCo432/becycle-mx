@@ -57,7 +57,7 @@ async def get_current_user(token: Annotated[str, Depends(user_oauth2_scheme)], d
 async def get_current_client(token: Annotated[str, Depends(client_oauth2_scheme)], db: Session = Depends(get_db)) -> models.Client:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail={"description": "Could not validate credentials. Please login again!"},
+        detail={"description": "Could not validate credentials. Please login again."},
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:

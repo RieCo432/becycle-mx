@@ -34,8 +34,7 @@ async def get_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
     if user.softDeleted:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User has been soft-deleted"})
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+    access_token = auth.create_access_token(data={"sub": user.username})
 
     return {"access_token": access_token, "token_type": "bearer"}
 

@@ -76,7 +76,7 @@ class User(Base):
     presentationCard: Mapped["UserPresentationCard"] = relationship("UserPresentationCard", foreign_keys=[UserPresentationCard.userId],
                                                              back_populates="user")
 
-    def __eq__(self, other: dict):
+    def __eq_dict__(self, other: dict):
         return all([
             str(self.id) == str(other.get("id")),
             str(self.username) == str(other.get("username")),
@@ -87,6 +87,21 @@ class User(Base):
             str(self.treasurer) == str(other.get("treasurer")),
             str(self.softDeleted) == str(other.get("softDeleted")),
         ])
+
+    def __eq__(self, other):
+        if type(other) is dict:
+            return self.__eq_dict__(other)
+        else:
+            return all([
+                self.id == other.id,
+                self.username == other.username,
+                self.admin == other.admin,
+                self.depositBearer == other.depositBearer,
+                self.rentalChecker == other.rentalChecker,
+                self.appointmentManager == other.appointmentManager,
+                self.treasurer == other.treasurer,
+                self.softDeleted == other.softDeleted
+            ])
 
     def get_deposit_bearer_balance(self):
         contract_balance = sum([contract.depositAmountCollected for contract in self.depositCollectedContracts]) - sum(

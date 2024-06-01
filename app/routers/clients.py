@@ -13,8 +13,6 @@ import app.models as models
 import app.schemas as schemas
 from app import auth
 
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ['ACCESS_TOKEN_EXPIRE_MINUTES'])
-
 
 clients = APIRouter(
     tags=["clients"],
@@ -77,8 +75,7 @@ async def verify_client_temp(
 
     client = crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(data={"sub": str(client.id)}, expires_delta=access_token_expires)
+    access_token = auth.create_access_token(data={"sub": str(client.id)})
 
     return schemas.Token(
         access_token=access_token,
@@ -113,8 +110,7 @@ async def get_token(
 
     client = crud.authenticate_client(db=db, client_id=UUID(form_data.username), login_code=form_data.password)
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(data={"sub": str(client.id)}, expires_delta=access_token_expires)
+    access_token = auth.create_access_token(data={"sub": str(client.id)})
 
     return schemas.Token(
         access_token=access_token,

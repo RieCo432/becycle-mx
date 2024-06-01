@@ -418,7 +418,7 @@ def add_users(db: Session) -> list[models.User]:
             depositBearer=False,
             rentalChecker=False,
             appointmentManager=False,
-            treasurer=False,
+            treasurer=True,
             softDeleted=False),
         models.User(
             username="BANK",
