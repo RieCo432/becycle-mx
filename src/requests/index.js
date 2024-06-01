@@ -593,9 +593,6 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
     });
   },
-  getGeoJson() {
-    return axiosClient.get('/maps/geojson');
-  },
   getBboxGeojson(northBound, eastBound, southBound, westBound) {
     return axiosClient.get('/maps/bbox-road-map', {
       params: {
