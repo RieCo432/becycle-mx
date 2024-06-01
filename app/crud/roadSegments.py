@@ -66,8 +66,7 @@ def create_road_segment(db: Session,
         db.commit()
 
     else:
-        print("This Road Segment already exists")
-        new_road_segment = None
+        raise Exception("This Road Segment already exists")
 
     return new_road_segment
 

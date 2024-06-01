@@ -41,6 +41,14 @@ class RoadSegmentReportType(Base):
     description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
     scoreModifier: Mapped[int] = mapped_column("scoreModifier", Integer, nullable=False, quote=False)
 
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.title) == str(other.get("title")),
+            str(self.description) == str(other.get("description")),
+            str(self.scoreModifier) == str(other.get("scoreModifier")),
+        ])
+
 
 class RoadSegmentReport(Base):
     __tablename__ = "roadsegmentreports"

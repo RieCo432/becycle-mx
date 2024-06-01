@@ -317,6 +317,36 @@ def client_auth_tokens(clients) -> list[schemas.Token]:
 
 
 @pytest.fixture
+def road_segments() -> list[models.RoadSegment]:
+    test_road_segments = add_road_segments(db=db)
+
+    yield test_road_segments
+
+    db.query(models.RoadSegment).delete()
+    db.commit()
+
+
+@pytest.fixture
+def road_segment_report_types() -> list[models.RoadSegmentReportType]:
+    test_road_segment_report_types = add_road_segment_report_types(db=db)
+
+    yield test_road_segment_report_types
+
+    db.query(models.RoadSegmentReportType).delete()
+    db.commit()
+
+
+@pytest.fixture
+def road_segment_reports(road_segments, road_segment_report_types) -> list[models.RoadSegmentReport]:
+    test_road_segment_reports = add_road_segment_reports(db=db, road_segments=road_segments, road_segment_report_types=road_segment_report_types)
+
+    yield test_road_segment_reports
+
+    db.query(models.RoadSegmentReport).delete()
+    db.commit()
+
+
+@pytest.fixture
 def normal_user_auth_header(user_auth_tokens) -> dict:
     return {
         "Authorization": "Bearer " + user_auth_tokens[3].access_token

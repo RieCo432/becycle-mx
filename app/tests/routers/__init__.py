@@ -11,3 +11,4 @@ from .statistics import *
 from .finances import *
 from .expense import *
 from .admin import *
+from .maps import *
