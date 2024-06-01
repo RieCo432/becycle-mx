@@ -637,6 +637,139 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
     return contracts
 
 
+
+def add_contracts_test_reminders(db: Session, users: list[models.User], clients: list[models.Client], bikes: list[models.Bike], contract_types: list[models.ContractType]) -> list[models.Contract]:
+    past_date_2 = datetime.datetime.utcnow().date() - relativedelta(weeks=2)
+    past_date_1 = datetime.datetime.utcnow().date() - relativedelta(weeks=1)
+    future_date_1 = datetime.datetime.utcnow().date() + relativedelta(weeks=1)
+    future_date_2 = datetime.datetime.utcnow().date() + relativedelta(weeks=2)
+    future_date_3 = datetime.datetime.utcnow().date() + relativedelta(weeks=3)
+
+    contracts = [
+        models.Contract(  # no reminder, already past
+            clientId=clients[0].id,
+            bikeId=bikes[0].id,
+            workingUserId=users[0].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[0].id,
+            returnAcceptingUserId=None,
+            depositReturningUserId=None,
+            startDate=past_date_2,
+            endDate=past_date_1,
+            returnedDate=None,
+            depositAmountCollected=40,
+            depositAmountReturned=None,
+            conditionOfBike="fair",
+            contractType=contract_types[0].id,
+            notes="returned on time",
+            detailsSent=True,
+            expiryReminderSent=False,
+            returnDetailsSent=False
+        ), models.Contract(  # no reminder, already returned
+            clientId=clients[1].id,
+            bikeId=bikes[1].id,
+            workingUserId=users[0].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[0].id,
+            returnAcceptingUserId=users[0].id,
+            depositReturningUserId=users[0].id,
+            startDate=past_date_2,
+            endDate=future_date_1,
+            returnedDate=past_date_1,
+            depositAmountCollected=40,
+            depositAmountReturned=40,
+            conditionOfBike="fair",
+            contractType=contract_types[1].id,
+            notes="returned very early",
+            detailsSent=True,
+            expiryReminderSent=False,
+            returnDetailsSent=False
+        ), models.Contract(  # no reminder, already sent
+            clientId=clients[2].id,
+            bikeId=bikes[2].id,
+            workingUserId=users[0].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[2].id,
+            returnAcceptingUserId=None,
+            depositReturningUserId=None,
+            startDate=past_date_2,
+            endDate=future_date_1,
+            returnedDate=None,
+            depositAmountCollected=40,
+            depositAmountReturned=None,
+            conditionOfBike="good",
+            contractType=contract_types[0].id,
+            notes="this should be expired",
+            detailsSent=True,
+            expiryReminderSent=True,
+            returnDetailsSent=False
+        ), models.Contract(  # reminder
+            clientId=clients[3].id,
+            bikeId=bikes[3].id,
+            workingUserId=users[0].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[2].id,
+            returnAcceptingUserId=None,
+            depositReturningUserId=None,
+            startDate=past_date_2,
+            endDate=future_date_1,
+            returnedDate=None,
+            depositAmountCollected=40,
+            depositAmountReturned=None,
+            conditionOfBike="fair",
+            contractType=contract_types[2].id,
+            notes="this one is open",
+            detailsSent=True,
+            expiryReminderSent=False,
+            returnDetailsSent=False
+        ),
+        models.Contract(  # reminder
+            clientId=clients[2].id,
+            bikeId=bikes[5].id,
+            workingUserId=users[2].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[2].id,
+            returnAcceptingUserId=None,
+            depositReturningUserId=None,
+            startDate=past_date_2,
+            endDate=future_date_2,
+            returnedDate=None,
+            depositAmountCollected=40,
+            depositAmountReturned=None,
+            conditionOfBike="fair",
+            contractType=contract_types[1].id,
+            notes="returned very late",
+            detailsSent=True,
+            expiryReminderSent=False,
+            returnDetailsSent=False
+        ), models.Contract(  # no reminder
+            clientId=clients[4].id,
+            bikeId=bikes[6].id,
+            workingUserId=users[2].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[2].id,
+            returnAcceptingUserId=None,
+            depositReturningUserId=None,
+            startDate=past_date_2,
+            endDate=future_date_3,
+            returnedDate=None,
+            depositAmountCollected=40,
+            depositAmountReturned=None,
+            conditionOfBike="fair",
+            contractType=contract_types[0].id,
+            notes="returned on time",
+            detailsSent=True,
+            expiryReminderSent=False,
+            returnDetailsSent=False
+        )
+    ]
+
+    db.add_all(contracts)
+    db.commit()
+
+    return contracts
+
+
 def add_paper_contracts(db: Session, contracts: list[models.Contract]) -> list[models.PaperContract]:
     paper_contracts = [
         models.PaperContract(
@@ -807,6 +940,120 @@ def add_appointments(db: Session, clients: list[models.Client], appointment_type
             confirmed=False,
             cancelled=False,
             reminderSent=True
+        ),
+    ]
+
+    db.add_all(appointments)
+    db.commit()
+
+    return appointments
+
+
+def add_appointments_test_reminders(db: Session, clients: list[models.Client], appointment_types: list[models.AppointmentType], appointment_general_settings: models.AppointmentGeneralSettings) -> list[models.Appointment]:
+    past_date_1 = datetime.datetime.utcnow().date() - relativedelta(days=2)
+    future_date_1 = datetime.datetime.utcnow().date() + relativedelta(days=2)
+    future_date_2 = datetime.datetime.utcnow().date() + relativedelta(days=4)
+
+    appointments = [
+        models.Appointment(  # no reminder
+            clientId=clients[0].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(past_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(past_date_1, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=True,
+            cancelled=False,
+            reminderSent=False
+        ),
+        models.Appointment(  # no reminder
+            clientId=clients[1].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(past_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(past_date_1, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=True,
+            cancelled=False,
+            reminderSent=True
+        ),
+        models.Appointment(  # no reminder
+            clientId=clients[2].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=True,
+            cancelled=False,
+            reminderSent=True
+        ),
+        models.Appointment(  # no reminder
+            clientId=clients[2].id,
+            typeId=appointment_types[1].id,
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=18, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=19, minute=15)),
+            notes=None,
+            confirmed=False,
+            cancelled=False,
+            reminderSent=False
+        ),
+        models.Appointment(  # no reminder
+            clientId=clients[3].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=True,
+            cancelled=True,
+            reminderSent=False
+        ),
+        models.Appointment(  # reminder
+            clientId=clients[3].id,
+            typeId=appointment_types[1].id,
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=True,
+            cancelled=False,
+            reminderSent=False
+        ),
+        models.Appointment(  # no reminder
+            clientId=clients[3].id,
+            typeId=appointment_types[1].id,
+            startDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_1, datetime.time(hour=17, minute=15)),
+            notes=None,
+            confirmed=True,
+            cancelled=True,
+            reminderSent=True
+        ),
+        models.Appointment(  # no reminder
+            clientId=clients[4].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=16, minute=15)),
+            endDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=18, minute=15)),
+            notes=None,
+            confirmed=True,
+            cancelled=False,
+            reminderSent=False
+        ),
+        models.Appointment(  # no reminder
+            clientId=clients[4].id,
+            typeId=appointment_types[0].id,
+            startDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=17, minute=45)),
+            endDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=19, minute=45)),
+            notes=None,
+            confirmed=True,
+            cancelled=False,
+            reminderSent=True
+        ),
+        models.Appointment(  # no reminder
+            clientId=clients[4].id,
+            typeId=appointment_types[1].id,
+            startDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=18, minute=45)),
+            endDateTime=datetime.datetime.combine(future_date_2, datetime.time(hour=19, minute=45)),
+            notes=None,
+            confirmed=True,
+            cancelled=True,
+            reminderSent=False
         ),
     ]
 

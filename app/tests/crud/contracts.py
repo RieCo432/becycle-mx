@@ -56,3 +56,16 @@ def test_get_contracts_grouped_by_returned_date(contracts):
     actual_dict = crud.get_contracts_grouped_by_returned_date(db=db)
 
     assert expected_dict == actual_dict
+
+
+def test_get_contracts_for_expiry_email(contracts_soon):
+    contracts_for_reminder = crud.get_contracts_for_expiry_email(db=db)
+
+    assert len(contracts_for_reminder) == 2
+    assert all([c in contracts_soon[3:5] for c in contracts_for_reminder])
+
+
+def test_send_expiry_emails(contracts_soon):
+    assert all([not c.expiryReminderSent for c in contracts_soon[3:5]])
+    crud.send_expiry_emails(db=db)
+    assert all([c.expiryReminderSent for c in contracts_soon[3:5]])

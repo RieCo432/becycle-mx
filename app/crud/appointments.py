@@ -260,7 +260,8 @@ def get_appointments_for_reminder_email(db: Session) -> list[models.Appointment]
         _ for _ in db.scalars(
             select(models.Appointment)
             .where(
-                (models.Appointment.startDateTime < before_day)
+                (models.Appointment.startDateTime > datetime.utcnow())
+                & (models.Appointment.startDateTime < before_day)
                 & (models.Appointment.confirmed == True)
                 & (models.Appointment.cancelled == False)
                 & (models.Appointment.reminderSent == False)

@@ -242,7 +242,8 @@ def get_contracts_for_expiry_email(db: Session) -> list[models.Contract]:
             .where(
                 (models.Contract.returnedDate == None)
                 & (models.Contract.expiryReminderSent == False)
-                & (models.Contract.endDate < ending_before)
+                & (models.Contract.endDate <= ending_before)
+                & (models.Contract.endDate >= datetime.utcnow().date())
             )
         )
     ]

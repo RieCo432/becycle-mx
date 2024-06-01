@@ -28,7 +28,8 @@ class Appointment(Base):
 
     reminderSent: Mapped[bool] = mapped_column("reminderSent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
-    def __eq__(self, other: dict):
+
+    def __eq_dict__(self, other: dict):
         return all([
             str(self.id) == str(other.get("id")),
             str(self.clientId) == str(other.get("clientId")),
@@ -40,6 +41,22 @@ class Appointment(Base):
             str(self.cancelled) == str(other.get("cancelled")),
             str(self.reminderSent) == str(other.get("reminderSent")),
         ])
+
+    def __eq__(self, other):
+        if type(other) is dict:
+            return self.__eq_dict__(other)
+        else:
+            return all([
+                self.id == other.id,
+                self.clientId == other.clientId,
+                self.typeId == other.typeId,
+                self.startDateTime == other.startDateTime,
+                self.endDateTime == other.endDateTime,
+                self.notes == other.notes,
+                self.confirmed == other.confirmed,
+                self.cancelled == other.cancelled,
+                self.reminderSent == other.reminderSent
+            ])
 
     def send_request_received_email(self):
         email_html_content = services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime)

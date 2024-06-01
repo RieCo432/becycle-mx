@@ -163,6 +163,16 @@ def contracts(users: list[models.User], bikes: list[models.Bike], clients: list[
 
 
 @pytest.fixture
+def contracts_soon(users: list[models.User], bikes: list[models.Bike], clients: list[models.Client], contract_types: list[models.ContractType]) -> list[models.Contract]:
+    test_contracts = add_contracts_test_reminders(db=db, users=users, bikes=bikes, clients=clients, contract_types=contract_types)
+
+    yield test_contracts
+
+    db.query(models.Contract).delete()
+    db.commit()
+
+
+@pytest.fixture
 def contracts_with_duplicate_clients_and_bikes(users: list[models.User], bikes_with_duplicates: list[models.Bike], clients_with_duplicates: list[models.Client], contract_types: list[models.ContractType]) -> list[models.Contract]:
     test_contracts = add_contracts(db=db, users=users, bikes=bikes_with_duplicates, clients=clients_with_duplicates, contract_types=contract_types)
 
@@ -197,6 +207,16 @@ def appointments(appointment_types: list[models.AppointmentType], clients: list[
     test_appointments = add_appointments(db=db, clients=clients, appointment_types=appointment_types, appointment_general_settings=appointment_general_settings)
 
     yield test_appointments
+
+    db.query(models.Appointment).delete()
+    db.commit()
+
+
+@pytest.fixture
+def appointments_soon(appointment_types: list[models.AppointmentType], clients: list[models.Client], appointment_general_settings: models.AppointmentGeneralSettings):
+    test_appointments_soon = add_appointments_test_reminders(db=db, clients=clients, appointment_types=appointment_types, appointment_general_settings=appointment_general_settings)
+
+    yield test_appointments_soon
 
     db.query(models.Appointment).delete()
     db.commit()
