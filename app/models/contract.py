@@ -25,19 +25,19 @@ class Contract(Base):
     bikeId: Mapped[UUID] = mapped_column("bikeId", ForeignKey("bikes.id"), nullable=False, quote=False)
     bike: Mapped["Bike"] = relationship("Bike", back_populates="contracts")
 
-    workingUserId: Mapped[UUID] = mapped_column("workingUserId", ForeignKey("users.id"), nullable=False)
+    workingUserId: Mapped[UUID] = mapped_column("workingUserId", ForeignKey("users.id"), nullable=False, quote=False)
     workingUser: Mapped["User"] = relationship("User", foreign_keys=[workingUserId], back_populates="workedContracts")
 
-    checkingUserId: Mapped[UUID] = mapped_column("checkingUserId", ForeignKey("users.id"), nullable=False)
+    checkingUserId: Mapped[UUID] = mapped_column("checkingUserId", ForeignKey("users.id"), nullable=False, quote=False)
     checkingUser: Mapped["User"] = relationship("User", foreign_keys=[checkingUserId], back_populates="checkedContracts")
 
-    depositCollectingUserId: Mapped[UUID] = mapped_column("depositCollectingUserId", ForeignKey("users.id"), nullable=False)
+    depositCollectingUserId: Mapped[UUID] = mapped_column("depositCollectingUserId", ForeignKey("users.id"), nullable=False, quote=False)
     depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")
 
-    returnAcceptingUserId: Mapped[UUID] = mapped_column("returnAcceptingUserId", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None)
+    returnAcceptingUserId: Mapped[UUID] = mapped_column("returnAcceptingUserId", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
     returnAcceptingUser: Mapped["User"] = relationship("User", foreign_keys=[returnAcceptingUserId], back_populates="returnedContracts")
 
-    depositReturningUserId: Mapped[UUID] = mapped_column("depositReturningUserId", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None)
+    depositReturningUserId: Mapped[UUID] = mapped_column("depositReturningUserId", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
     depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")
 
     startDate: Mapped[date] = mapped_column("startDate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, quote=False)
