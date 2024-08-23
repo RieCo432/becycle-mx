@@ -6,6 +6,12 @@
                   <div class="col-span-12">
                     <p class="text-base text-slate-700 dark:text-slate-300">This is the official website for BECYCLE Workshop SCIO, the community bicycle library and workshop in Aberdeen.</p><br>
                     <p class="text-base text-slate-700 dark:text-slate-300" v-if="address">We are located at:<br>{{ address.number }} {{ address.street }}<br>{{ address.postcode }}, {{ address.city }}</p><br>
+                    <p class="text-base text-slate-700 dark:text-slate-300">You can donate to us via PayPal:<br>
+                      <!--<PayPalButton></PayPalButton>-->
+                      <div id="donate-button-container">
+                        <div id="donate-button"></div>
+                      </div>
+                    </p>
                     <p class="text-base text-slate-700 dark:text-slate-300">You can contact us on social media:<br>
                       <a href="https://facebook.com/beCyCleWorkshop/"><img src="/src/assets/images/social/Facebook_Logo_Primary.png" class="w-[32px] h-[32px] m-[16px] inline" alt="Facebook"/></a>
                       <a href="https://instagram.com/becycleworkshop/"><img src="/src/assets/images/social/Instagram_Glyph_Gradient.png" class="w-[32px] h-[32px] m-[16px] inline" alt="Instagram"/></a>
@@ -55,7 +61,7 @@ const credentialsStore = useCredentialsStore();
 export default {
   components: {
     DashButton,
-    Card,
+    Card
   },
   data() {
     return {
@@ -111,6 +117,22 @@ export default {
     });
     requests.getAddress().then((response) => {
       this.address = response.data;
+    });
+    function loadAsync(url, callback) {
+      const s = document.createElement('script');
+      s.setAttribute('src', url); s.onload = callback;
+      document.head.insertBefore(s, document.head.firstElementChild);
+    }
+    loadAsync('https://www.paypalobjects.com/donate/sdk/donate-sdk.js', function() {
+      PayPal.Donation.Button({
+        env: 'production',
+        hosted_button_id: '5XHLXRAKWQEEN',
+        image: {
+          src: 'https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif',
+          alt: 'Donate with PayPal button',
+          title: 'PayPal - The safer, easier way to pay online!',
+        },
+      }).render('#donate-button');
     });
   },
 };
