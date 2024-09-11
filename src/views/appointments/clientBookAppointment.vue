@@ -210,23 +210,30 @@ export default {
                     </div>
                   </template>
 
-
-                  <div class="col-span-1 bg-slate" v-for="(slots, date) in availableSlots" :key="date">
-                    <Card :title="new Date(date).toLocaleDateString(undefined, {weekday: 'long',
+                  <template v-if="Object.keys(availableSlots).length > 0">
+                    <div class="col-span-1 bg-slate" v-for="(slots, date) in availableSlots" :key="date">
+                      <Card :title="new Date(date).toLocaleDateString(undefined, {weekday: 'long',
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     })" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300 h-full">
-                      <div class="grid xl:grid-cols-6 sm:grid-cols-5 grid-cols-4 gap-3">
-                        <div v-for="(slot, j) in slots" :key="j">
-                          <DashButton :class="`w-full ${slot.available ? '' : 'bg-warning-500'}`" @click="() => {appointmentDatetime = (new Date(Date.parse(`${date}T${slot.time}+00:00`)))}">
-                            {{ (new Date(Date.parse(`${date}T${slot.time}+00:00`))).toLocaleTimeString(undefined, { timeZone: 'UTC', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
-                          </DashButton>
-                        </div>
+                        <div class="grid xl:grid-cols-6 sm:grid-cols-5 grid-cols-4 gap-3">
+                          <div v-for="(slot, j) in slots" :key="j">
+                            <DashButton :class="`w-full ${slot.available ? '' : 'bg-warning-500'}`" @click="() => {appointmentDatetime = (new Date(Date.parse(`${date}T${slot.time}+00:00`)))}">
+                              {{ (new Date(Date.parse(`${date}T${slot.time}+00:00`))).toLocaleTimeString(undefined, { timeZone: 'UTC', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
+                            </DashButton>
+                          </div>
 
-                      </div>
-                    </Card>
-                  </div>
+                        </div>
+                      </Card>
+                    </div>
+                  </template>
+
+                  <template v-else>
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Sorry, there are no appointments available at this time. Please check again later.
+                    </h4>
+                  </template>
 
                 </div>
               </div>
