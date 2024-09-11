@@ -16,7 +16,17 @@ function redirectToUserLoginIfUnauthorised(status) {
   } else {
     return status;
   }
-};
+}
+
+
+function redirectToClientLoginIfUnauthorised(status) {
+  if (status === 401) {
+    credentialsStore.logout();
+    router.push('/clients/login');
+  } else {
+    return status;
+  }
+}
 
 const axiosClient = axios.create({
   baseURL: `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}`,
@@ -42,6 +52,11 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
+  getUserMeNo401Redirect() {
+    return axiosClient.get('/users/me', {
+      headers: credentialsStore.getApiRequestHeader(),
+    });
+  },
   getClientLoginCode(emailAddress) {
     return axiosClient.get('/client/login-code', {
       params: {
@@ -62,6 +77,7 @@ export default {
   getClientMe() {
     return axiosClient.get('/clients/me', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
     });
   },
   getClientByEmail(emailAddress) {
@@ -290,6 +306,7 @@ export default {
   getMyContracts(open, closed, expired) {
     return axiosClient.get('/clients/me/contracts', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
       params: {
         open: open,
         closed: closed,
@@ -385,6 +402,7 @@ export default {
   getMyAppointments(past, future) {
     return axiosClient.get('/clients/me/appointments', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
     });
   },
   getClientAppointments(clientId, past, future) {
@@ -399,6 +417,7 @@ export default {
   getMyContract(contractId) {
     return axiosClient.get(`/clients/me/contracts/${contractId}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
     });
   },
   getOpeningDays() {
@@ -528,11 +547,10 @@ export default {
   cancelMyAppointment(appointmentId) {
     return axiosClient.patch(`/clients/me/appointments/${appointmentId}/cancel`, null, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
     });
   },
   postDepositExchange(amount, fromUsername, fromPassword, toUsername, toPassword) {
-    const headers = credentialsStore.getApiRequestHeader();
-    console.log(headers);
     return axiosClient.post('/deposit-exchanges', {
       amount: amount,
       deposit_returning_username: fromUsername,
@@ -583,6 +601,7 @@ export default {
   patchChangeNames(patchData) {
     return axiosClient.patch('/clients/me', patchData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
     });
   },
   patchClientChangeDetails(clientId, patchData) {
@@ -651,16 +670,19 @@ export default {
   postPreBecycleSurvey(surveyAnswers) {
     return axiosClient.post('/surveys/pre-becycle', surveyAnswers, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
     });
   },
   postPeriBecycleSurvey(surveyAnswers) {
     return axiosClient.post('/surveys/peri-becycle', surveyAnswers, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
     });
   },
   postPostBecycleSurvey(surveyAnswers) {
     return axiosClient.post('/surveys/post-becycle', surveyAnswers, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
     });
   },
   getBboxGeojson(northBound, eastBound, southBound, westBound) {

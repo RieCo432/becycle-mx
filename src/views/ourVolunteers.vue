@@ -18,7 +18,7 @@ export default {
     requests.getPublicUserPresentationCards().then((response) => {
       this.allUserPresentationCardDetails = response.data;
     });
-    requests.getUserMe().then((response) => {
+    requests.getUserMeNo401Redirect().then((response) => {
       this.isUserAdmin = response.data.admin;
     });
   },
