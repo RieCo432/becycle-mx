@@ -446,6 +446,7 @@ export default {
                     v-if="this.stepNumber !== 0"
                 />
                 <Button
+                    v-if="(stepNumber !== 1) && (stepNumber !== 2)"
                     :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                     btnClass="btn-dark"
                 />
