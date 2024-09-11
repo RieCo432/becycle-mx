@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import router from '@/router';
 
 
 const credentialsStore = useCredentialsStore();
@@ -7,6 +8,15 @@ const API_PROTOCOL = import.meta.env.VITE_API_PROTOCOL;
 const API_HOST = import.meta.env.VITE_API_HOST;
 const API_PORT = import.meta.env.VITE_API_PORT;
 const API_SUBDIR = import.meta.env.VITE_API_SUBDIR;
+
+function redirectToUserLoginIfUnauthorised(status) {
+  if (status === 401) {
+    credentialsStore.logout();
+    router.push('/users/login');
+  } else {
+    return status;
+  }
+};
 
 const axiosClient = axios.create({
   baseURL: `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}`,
@@ -29,6 +39,7 @@ export default {
   getUserMe() {
     return axiosClient.get('/users/me', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getClientLoginCode(emailAddress) {
@@ -56,6 +67,7 @@ export default {
   getClientByEmail(emailAddress) {
     return axiosClient.get('/clients', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         email_address: emailAddress,
       },
@@ -64,11 +76,13 @@ export default {
   postNewClient(clientData) {
     return axiosClient.post('/client', clientData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getEmailAddressSuggestions(emailAddress) {
     return axiosClient.get('/clients/email-address-suggestions', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         email_address: emailAddress,
       },
@@ -77,6 +91,7 @@ export default {
   getClientIdEmailAddress(emailAddress) {
     return axiosClient.get('/client/id-by-email', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         email_address: emailAddress,
       },
@@ -85,6 +100,7 @@ export default {
   getBikeMakeSuggestions(make) {
     return axiosClient.get('/bikes/suggest/makes', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         make: make,
       },
@@ -93,6 +109,7 @@ export default {
   getBikeModelSuggestions(model) {
     return axiosClient.get('/bikes/suggest/models', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         model: model,
       },
@@ -101,6 +118,7 @@ export default {
   getBikeSerialNumberSuggestions(serialNumber) {
     return axiosClient.get('/bikes/suggest/serial-numbers', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         serial_number: serialNumber,
       },
@@ -109,6 +127,7 @@ export default {
   getBikeColourSuggestions(colour) {
     return axiosClient.get('/bikes/suggest/colours', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         colour: colour,
       },
@@ -117,6 +136,7 @@ export default {
   findBike(make, model, colour, decals, serialNumber) {
     return axiosClient.get('/bike/find', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         make: make,
         model: model,
@@ -129,6 +149,7 @@ export default {
   findBikes(make, model, colour, serialNumber) {
     return axiosClient.get('/bikes/find', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         ...(make && {make: make.toLowerCase()}),
         ...(model && {model: model.toLowerCase()}),
@@ -140,6 +161,7 @@ export default {
   getBike(bikeId) {
     return axiosClient.get(`/bikes/${bikeId}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postNewBike(make, model, colour, decals, serialNumber) {
@@ -151,31 +173,37 @@ export default {
       serialNumber: serialNumber,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getContractTypes() {
     return axiosClient.get('/contract/types', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getBikeConditions() {
     return axiosClient.get('/bike/conditions', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getDepositBearers() {
     return axiosClient.get('/users/deposit-bearers', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getActiveUsers() {
     return axiosClient.get('/users/active-users', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getRentalCheckers() {
     return axiosClient.get('/users/rental-checkers', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   checkUserPassword(username, password) {
@@ -217,11 +245,13 @@ export default {
       deposit_receiving_user_password: depositCollectingPassword,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   findClient(firstName, lastName, emailAddress) {
     return axiosClient.get('/clients/find', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         first_name: firstName,
         last_name: lastName,
@@ -232,11 +262,13 @@ export default {
   getClient(clientId) {
     return axiosClient.get(`/clients/${clientId}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getClientContracts(clientId, open, closed, expired) {
     return axiosClient.get(`/clients/${clientId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         open: open,
         closed: closed,
@@ -247,6 +279,7 @@ export default {
   getBikeContracts(bikeId, open, closed, expired) {
     return axiosClient.get(`/bikes/${bikeId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: {
         open: open,
         closed: closed,
@@ -267,16 +300,19 @@ export default {
   getContract(contractId) {
     return axiosClient.get(`/contracts/${contractId}/`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getUser(userId) {
     return axiosClient.get(`/users/${userId}/`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchExtendContract(contractId) {
     return axiosClient.patch(`/contracts/${contractId}/extend`, null, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchReturnContract(contractId, depositAmountReturned, depositReturningUser, depositReturningPassword,
@@ -289,6 +325,7 @@ export default {
       working_user_password_or_pin: returnAcceptingPasswordOrPin,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postNewTempClient(firstName, lastName, emailAddress) {
@@ -330,6 +367,7 @@ export default {
       notes: notes,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postAppointment(clientId, typeId, startDateTime, notes, ignoreLimits=undefined) {
@@ -340,6 +378,7 @@ export default {
       notes: notes,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       params: ignoreLimits && {ignore_limits: ignoreLimits},
     });
   },
@@ -351,6 +390,7 @@ export default {
   getClientAppointments(clientId, past, future) {
     return axiosClient.get(`/clients/${clientId}/appointments`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getAppointmentType(typeId) {
@@ -377,31 +417,37 @@ export default {
         end_datetime: endDate,
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   confirmAppointment(appointmentId) {
     return axiosClient.patch(`/appointments/${appointmentId}/confirm`, {}, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   cancelAppointment(appointmentId) {
     return axiosClient.patch(`/appointments/${appointmentId}/cancel`, {}, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getDepositBook() {
     return axiosClient.get('/finances/deposit-book', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getUsers() {
     return axiosClient.get('/users', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchUser(userId, patchData) {
     return axiosClient.patch(`/users/${userId}/`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postNewUser(username, password, pin, admin, depositBearer, rentalChecker, appointmentManager, treasurer) {
@@ -416,56 +462,67 @@ export default {
       treasurer: treasurer,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchAppointmentType(appointmentTypeId, patchData) {
     return axiosClient.patch(`/appointments/types/${appointmentTypeId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postNewAppointmentType(newAppointmentTypeData) {
     return axiosClient.post('/appointments/types', newAppointmentTypeData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchAppointmentGeneralSettings(changedAppointmentGeneralSettings) {
     return axiosClient.patch('/settings/appointments/general', changedAppointmentGeneralSettings, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getAppointmentGeneralSettings() {
     return axiosClient.get('/settings/appointments/general', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   deleteClosedDay(closedDayDate) {
     return axiosClient.delete(`/settings/closed-day/${closedDayDate}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postClosedDay(closedDay) {
     return axiosClient.post('/settings/closed-day', closedDay, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getAppointmentConcurrencyLimits() {
     return axiosClient.get('/settings/appointments/concurrency', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchAppointmentConcurrencyLimit(afterTime, patchData) {
     return axiosClient.patch(`/settings/appointments/concurrency/${afterTime}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postNewAppointmentConcurrencyLimit(newConcurrencyLimitData) {
     return axiosClient.post('/settings/appointments/concurrency', newConcurrencyLimitData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   deleteAppointmentConcurrencyLimit(afterTime) {
     return axiosClient.delete(`/settings/appointments/concurrency/${afterTime}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   cancelMyAppointment(appointmentId) {
@@ -484,6 +541,7 @@ export default {
       deposit_receiving_user_password: toPassword,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getPaperIdSuggestions(paperId) {
@@ -492,6 +550,7 @@ export default {
         old_id: paperId,
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getContractIdFromPaperId(paperId) {
@@ -500,21 +559,25 @@ export default {
         paper_id: paperId,
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getUserLeaderboard() {
     return axiosClient.get('/statistics/users/leaderboard', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getClientLeaderboard() {
     return axiosClient.get('/statistics/clients/leaderboard', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getBikeLeaderboard() {
     return axiosClient.get('/statistics/bikes/leaderboard', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchChangeNames(patchData) {
@@ -525,16 +588,19 @@ export default {
   patchClientChangeDetails(clientId, patchData) {
     return axiosClient.patch(`/clients/${clientId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchBikeChangeDetails(bikeId, patchData) {
     return axiosClient.patch(`/bikes/${bikeId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchContractChangeDetails(contractId, patchData) {
     return axiosClient.patch(`/contracts/${contractId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getTotalContractsDateSeries(interval, startDate=null, endDate=null) {
@@ -545,6 +611,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getActiveContractsDateSeries(interval, gracePeriod, startDate=null, endDate=null) {
@@ -556,6 +623,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getNewContractsDateSeries(interval, startDate=null, endDate=null) {
@@ -566,6 +634,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getReturnedContractsDateSeries(interval, startDate=null, endDate=null) {
@@ -576,6 +645,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postPreBecycleSurvey(surveyAnswers) {
@@ -615,16 +685,19 @@ export default {
   refreshPotentialDuplicateClients() {
     return axiosClient.get('/admin/duplicates/clients/refresh', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getPotentialDuplicateClients() {
     return axiosClient.get('/admin/duplicates/clients', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchIgnorePotentialClientDuplicate(clientDuplicateId) {
     return axiosClient.patch(`/admin/duplicates/clients/${clientDuplicateId}/ignore`, undefined, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   putResolvePotentialClientDuplicate(clientDuplicateId, keepClientId, discardClientId) {
@@ -633,21 +706,25 @@ export default {
       keep_client_id: keepClientId,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   refreshPotentialDuplicateBikes() {
     return axiosClient.get('/admin/duplicates/bikes/refresh', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getPotentialDuplicateBikes() {
     return axiosClient.get('/admin/duplicates/bikes', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchIgnorePotentialBikeDuplicate(bikeDuplicateId) {
     return axiosClient.patch(`/admin/duplicates/bikes/${bikeDuplicateId}/ignore`, undefined, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   putResolvePotentialBikeDuplicate(bikeDuplicateId, keepBikeId, discardBikeId) {
@@ -656,28 +733,33 @@ export default {
       keep_bike_id: keepBikeId,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   downloadRawDataExcel() {
     return axiosClient.get('/admin/takeout/contracts.xlsx', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       responseType: 'blob',
     });
   },
   downloadRawDataPdf() {
     return axiosClient.get('/admin/takeout/contracts.pdf', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       responseType: 'blob',
     });
   },
   getContracts() {
     return axiosClient.get('/contracts', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   deleteContract(contractId) {
     return axiosClient.delete(`/contracts/${contractId}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getNextClosedDay() {
@@ -689,11 +771,13 @@ export default {
   putAddress(newAddress) {
     return axiosClient.put('/settings/address', newAddress, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getDepositExchangeUsers() {
     return axiosClient.get('/deposit-exchanges/users', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getTotalDepositsDateSeries(interval, startDate, endDate) {
@@ -704,6 +788,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getClaimableDepositsDateSeries(interval, gracePeriod, startDate=null, endDate=null) {
@@ -715,6 +800,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getDepositsCollectedDateSeries(interval, startDate, endDate) {
@@ -725,6 +811,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getDepositsReturnedDateSeries(interval, startDate, endDate) {
@@ -735,6 +822,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getDepositFlowDateSeries(interval, startDate, endDate) {
@@ -745,6 +833,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getContractsStatus(gracePeriod, startDate=null, endDate=null) {
@@ -755,6 +844,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getDepositsStatus(gracePeriod, startDate=null, endDate=null) {
@@ -765,6 +855,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getPercentageDepositReturnedAfterMonths(startDate, endDate) {
@@ -774,11 +865,13 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getWorstCaseRequiredDepositFloat() {
     return axiosClient.get('/finances/deposits/required-float/worst-case', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getRealisticRequiredDepositFloat(gracePeriod) {
@@ -787,6 +880,7 @@ export default {
         grace_period: gracePeriod,
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postNewExpense(amount, type, notes, expenseDate, receiptFile) {
@@ -801,26 +895,31 @@ export default {
         ...credentialsStore.getApiRequestHeader(),
         'Content-Type': 'multipart/form-data',
       },
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getExpenseTypes() {
     return axiosClient.get('/expenses/types', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getExpenses() {
     return axiosClient.get('/expenses', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchExpenseTransferred(expenseId) {
     return axiosClient.patch(`/expenses/${expenseId}/transfer`, undefined, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getExpenseReceipt(expenseId) {
     return axiosClient.get(`/expenses/${expenseId}/receipt`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
       responseType: 'blob',
     });
   },
@@ -832,6 +931,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getProvisionalCashflow(interval, startDate, endDate) {
@@ -842,6 +942,7 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getTotalCashflow(interval, startDate, endDate) {
@@ -852,16 +953,19 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getMyPresentationCard() {
     return axiosClient.get('/users/me/presentation-card', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   deleteMyPresentationCard() {
     return axiosClient.delete('/users/me/presentation-card', {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getPresentationCardPhoto(presentationCardId) {
@@ -877,6 +981,7 @@ export default {
         ...credentialsStore.getApiRequestHeader(),
         'Content-Type': 'multipart/form-data',
       },
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   getPublicUserPresentationCards() {
@@ -892,16 +997,19 @@ export default {
         ...credentialsStore.getApiRequestHeader(),
         'Content-Type': 'multipart/form-data',
       },
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   deleteUserPresentationCardDetails(presentationCardId) {
     return axiosClient.delete(`/users/presentation-card/${presentationCardId}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   deleteContractType(contractTypeId) {
     return axiosClient.delete(`/settings/contract-types/${contractTypeId}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postContractType(contractTypeId) {
@@ -909,11 +1017,13 @@ export default {
       id: contractTypeId,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   deleteExpenseType(expenseTypeId) {
     return axiosClient.delete(`/settings/expense-types/${expenseTypeId}`, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   postNewExpenseType(expenseTypeId, expenseTypeDescription) {
@@ -922,6 +1032,7 @@ export default {
       description: expenseTypeDescription,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchExpenseType(expenseTypeId, expenseTypeDescription) {
@@ -929,6 +1040,7 @@ export default {
       description: expenseTypeDescription,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
 };
