@@ -177,6 +177,7 @@ export default {
     };
   },
   created() {
+    requests.getUserMe(); // if this returns 401 the user will get redirected to login page
     this.fetchClientSuggestions = debounce(this.fetchClientSuggestions, 500, {leading: true, trailing: true});
     requests.getAppointmentTypes().then((response) => {
       this.appointmentTypes = response.data;
