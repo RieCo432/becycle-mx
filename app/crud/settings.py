@@ -138,6 +138,7 @@ def get_closed_days(db: Session, start_date: date | None = None, end_date: date 
         .where(
             and_(*query_filter)
         )
+        .order_by(models.ClosedDay.date)
     )]
 
 
