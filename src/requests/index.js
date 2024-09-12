@@ -13,9 +13,7 @@ function redirectToUserLoginIfUnauthorised(status) {
   if (status === 401) {
     credentialsStore.logout();
     router.push('/users/login');
-  } else {
-    return status;
-  }
+  } else return status < 300;
 }
 
 
@@ -23,9 +21,7 @@ function redirectToClientLoginIfUnauthorised(status) {
   if (status === 401) {
     credentialsStore.logout();
     router.push('/clients/login');
-  } else {
-    return status;
-  }
+  } else return status < 300;
 }
 
 const axiosClient = axios.create({
