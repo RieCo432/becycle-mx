@@ -34,6 +34,7 @@
             :value="suggestion"
             v-slot="{ active }"
             as="template"
+            @mousedown="(event) => selectedCallback(event, i)"
         >
           <li
               :class="{
@@ -41,7 +42,6 @@
                       'text-slate-600 dark:text-slate-300': !active,
                       }"
               class="relative cursor-default select-none py-2 px-4"
-              @click="(event) => selectedCallback(event, i)"
           >
                       <span class="block">
                         {{ suggestion }}
