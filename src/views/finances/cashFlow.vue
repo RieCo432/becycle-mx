@@ -4,6 +4,10 @@ import Card from '@/components/Card/index.vue';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 import requests from '@/requests';
+import {useThemeSettingsStore} from '@/store/themeSettings';
+
+const themeSettingsStore = useThemeSettingsStore();
+
 export default {
   name: 'depositCharts',
   components: {
@@ -20,9 +24,6 @@ export default {
         chart: {
           type: 'area',
           height: 300,
-        },
-        theme: {
-          mode: 'light',
         },
         dataLabels: {
           enabled: false,
@@ -45,7 +46,7 @@ export default {
           },
         },
         tooltip: {
-          theme: 'dark',
+          theme: themeSettingsStore.theme,
         },
         xaxis: {
           show: true,
@@ -83,9 +84,6 @@ export default {
           type: 'area',
           height: 300,
         },
-        theme: {
-          mode: 'light',
-        },
         dataLabels: {
           enabled: false,
         },
@@ -107,7 +105,7 @@ export default {
           },
         },
         tooltip: {
-          theme: 'dark',
+          theme: themeSettingsStore.theme,
         },
         xaxis: {
           show: true,
@@ -144,9 +142,6 @@ export default {
         chart: {
           type: 'line',
         },
-        theme: {
-          mode: 'light',
-        },
         dataLabels: {
           enabled: false,
         },
@@ -167,7 +162,7 @@ export default {
           },
         },
         tooltip: {
-          theme: 'dark',
+          theme: themeSettingsStore.theme,
           shared: false,
           intersect: true,
         },
