@@ -419,7 +419,14 @@ def get_deposit_return_percentage_trendline(percentages_of_deposit_returned_by_c
 
     reg = linear_model.LinearRegression()
 
-    reg.fit(X, y)
+    try:
+        reg.fit(X, y)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"description": "Value Error on linear regression"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     a = reg.coef_[0, 0]
     c = reg.intercept_[0]
 
