@@ -13,7 +13,9 @@
         <ComboboxOption
             v-if="((suggestions.indexOf(fieldModelValue) === -1) && allowNew)"
             :value="fieldModelValue"
-            v-slot="{ active }">
+            v-slot="{ active }"
+            as="template"
+        >
           <li
               :class="{
                       'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': active,
@@ -31,7 +33,7 @@
             :key="i"
             :value="suggestion"
             v-slot="{ active }"
-            @click="(event) => selectedCallback(event, i)"
+            as="template"
         >
           <li
               :class="{
@@ -39,6 +41,7 @@
                       'text-slate-600 dark:text-slate-300': !active,
                       }"
               class="relative cursor-default select-none py-2 px-4"
+              @click="(event) => selectedCallback(event, i)"
           >
                       <span class="block">
                         {{ suggestion }}
