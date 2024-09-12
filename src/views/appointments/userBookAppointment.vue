@@ -301,7 +301,7 @@ export default {
 
                   <div class="col-span-1">
                     <ComboboxTextInput
-                        :field-model-value="emailAddress"
+                        :field-model-value="firstName"
                         :suggestions="filteredClientSuggestionsLegible"
                         :selected-callback="selectClient">
                       <Textinput
@@ -318,7 +318,7 @@ export default {
 
                   <div class="col-span-1">
                     <ComboboxTextInput
-                        :field-model-value="emailAddress"
+                        :field-model-value="lastName"
                         :suggestions="filteredClientSuggestionsLegible"
                         :selected-callback="selectClient">
                       <Textinput
