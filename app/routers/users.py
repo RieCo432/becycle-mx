@@ -31,8 +31,6 @@ async def get_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
 
     if user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Incorrect username or password"})
-    if user.softDeleted:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User has been soft-deleted"})
 
     access_token = auth.create_access_token(data={"sub": user.username})
 

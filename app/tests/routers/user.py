@@ -37,8 +37,12 @@ def test_get_user_token_incorrect_password(users):
         }, headers={
             "Content-Type": "application/x-www-form-urlencoded"
         })
-        assert response.status_code == 400
-        assert response.json().get("detail").get("description") == "Incorrect username or password"
+        if not user.softDeleted:
+            assert response.status_code == 400
+            assert response.json().get("detail").get("description") == "Incorrect username or password"
+        else:
+            assert response.status_code == 400
+            assert response.json().get("detail").get("description") == "User has been soft-deleted"
 
 
 def test_get_user_token_invalid_password_default(users):
@@ -217,8 +221,12 @@ def test_post_user_password_check_wrong(users):
             "Content-Type": "application/x-www-form-urlencoded"
         })
 
-        assert response.status_code == 200
-        assert not response.json()
+        if not user.softDeleted:
+            assert response.status_code == 200
+            assert not response.json()
+        else:
+            assert response.status_code == 400
+            assert response.json().get("detail").get("description") == "User has been soft-deleted"
 
 
 def test_post_user_password_check_nonexistent_user(users):
@@ -242,8 +250,12 @@ def test_post_user_password_check(users):
             "Content-Type": "application/x-www-form-urlencoded"
         })
 
-        assert response.status_code == 200
-        assert response.json()
+        if not user.softDeleted:
+            assert response.status_code == 200
+            assert response.json()
+        else:
+            assert response.status_code == 400
+            assert response.json().get("detail").get("description") == "User has been soft-deleted"
 
 
 def test_post_user_password_or_pin_check_wrong_password(users):
@@ -255,8 +267,12 @@ def test_post_user_password_or_pin_check_wrong_password(users):
             "Content-Type": "application/x-www-form-urlencoded"
         })
 
-        assert response.status_code == 200
-        assert not response.json()
+        if not user.softDeleted:
+            assert response.status_code == 200
+            assert not response.json()
+        else:
+            assert response.status_code == 400
+            assert response.json().get("detail").get("description") == "User has been soft-deleted"
 
 
 def test_post_user_password_or_pin_check_nonexistent_user(users):
@@ -280,8 +296,12 @@ def test_post_user_password_or_pin_check_correct_password(users):
             "Content-Type": "application/x-www-form-urlencoded"
         })
 
-        assert response.status_code == 200
-        assert response.json()
+        if not user.softDeleted:
+            assert response.status_code == 200
+            assert response.json()
+        else:
+            assert response.status_code == 400
+            assert response.json().get("detail").get("description") == "User has been soft-deleted"
 
 
 def test_post_user_password_or_pin_check_wrong_pin(users):
@@ -293,8 +313,12 @@ def test_post_user_password_or_pin_check_wrong_pin(users):
             "Content-Type": "application/x-www-form-urlencoded"
         })
 
-        assert response.status_code == 200
-        assert not response.json()
+        if not user.softDeleted:
+            assert response.status_code == 200
+            assert not response.json()
+        else:
+            assert response.status_code == 400
+            assert response.json().get("detail").get("description") == "User has been soft-deleted"
 
 
 def test_post_user_password_or_pin_check_correct_pin(users):
@@ -306,12 +330,16 @@ def test_post_user_password_or_pin_check_correct_pin(users):
             "Content-Type": "application/x-www-form-urlencoded"
         })
 
-        assert response.status_code == 200
+        if not user.softDeleted:
+            assert response.status_code == 200
 
-        if user.pin is not None:
-            assert response.json()
+            if user.pin is not None:
+                assert response.json()
+            else:
+                assert not response.json()
         else:
-            assert not response.json()
+            assert response.status_code == 400
+            assert response.json().get("detail").get("description") == "User has been soft-deleted"
 
 
 def test_create_user_no_pin_no_roles(users, admin_user_auth_header):
