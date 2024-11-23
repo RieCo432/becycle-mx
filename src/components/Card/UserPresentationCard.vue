@@ -49,7 +49,7 @@ export default {
           this.files.splice(0, this.files.length, Object.assign(photoFile, {preview: this.photoUrl}));
         });
       } else {
-        this.photoUrl = 'src/assets/images/defaultProfilePicture.jpg';
+        this.photoUrl = '@/assets/images/defaultProfilePicture.jpg';
       }
     },
   },
