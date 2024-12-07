@@ -1,8 +1,0 @@
-.idea/
-venv/
-*__pycache__
-app/config.py
-app/mongodb_config.py
-loosely_typed_names_map.json
-app/data/temp/*
-app/tests/photos/contracts.xlsx
