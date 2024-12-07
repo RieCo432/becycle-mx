@@ -1,10 +1,17 @@
+#-----------------#
+# Since The Merge #
+#-----------------#
+
+*.env.*
+!*.env.template
+
+
 #---------------------------------#
 # From Original Parent Repository #
 #---------------------------------#
 
 postgresql/data
 secrets/*.env
-secrets/*.env.*
 
 
 
