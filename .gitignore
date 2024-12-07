@@ -4,6 +4,7 @@
 
 postgresql/data
 secrets/*.env
+secrets/*.env.*
 
 
 
