@@ -2,6 +2,7 @@
 # Since The Merge #
 #-----------------#
 
+*.env
 *.env.*
 !*.env.template
 
