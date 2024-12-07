@@ -1,0 +1,138 @@
+table.vgt-table {
+  @apply border-slate-100 border-r-0 border-l-0 dark:border-slate-700 bg-white dark:bg-slate-800;
+  &.table.vgt-table {
+    table-layout: fixed !important;
+  }
+}
+.vgt-inner-wrap {
+  @apply shadow-none;
+}
+.vgt-wrap {
+  .vgt-responsive {
+    border-radius: 100px !important;
+  }
+}
+
+// if not border
+.vgt-table th.line-numbers,
+.vgt-table th.vgt-checkbox-col {
+  border-right: none !important;
+  border-bottom: 1px solid #eef1f9 !important;
+}
+.vgt-table.bordered td,
+.vgt-table.bordered th {
+  @apply border-slate-100 dark:border-slate-700;
+}
+
+.vgt-table thead th {
+  @apply text-slate-600 dark:text-slate-300 text-xs leading-4 font-semibold  uppercase py-5 px-6 bg-gradient-to-t to-white from-white dark:to-slate-800 
+  dark:from-slate-800 rtl:text-right;
+}
+
+//
+.vgt-table {
+  &.centered {
+    td,
+    th {
+      @apply text-center;
+    }
+  }
+  &.table-head,
+  &.striped {
+    thead th {
+      @apply bg-gradient-to-t to-slate-100 from-slate-100 dark:to-slate-700 dark:from-slate-700;
+    }
+    td {
+      @apply border-slate-100 dark:border-slate-700;
+    }
+  }
+  &.borderless {
+    td,
+    th {
+      @apply border-none;
+    }
+    @apply border-none;
+  }
+  &.v-middle {
+    td {
+      vertical-align: middle;
+    }
+  }
+}
+.vgt-table.table-head thead th.vgt-checkbox-col {
+  background: #f8f8f8 !important;
+}
+
+.vgt-table th.sortable button:before {
+  @apply border-t-gray-500;
+}
+.vgt-table th.sortable button:after {
+  @apply border-b-gray-500;
+}
+.vgt-table thead th.sorting-asc button:after {
+  @apply border-b-black-500 dark:border-b-white;
+}
+.vgt-table thead th.sorting-desc button:before {
+  @apply border-t-black-500 dark:border-t-white;
+}
+.vgt-table.striped tbody tr:nth-of-type(even) {
+  @apply bg-gradient-to-t to-slate-100 from-slate-100 dark:to-slate-700 dark:from-slate-700;
+}
+.vgt-table.striped tbody tr:nth-of-type(odd) {
+  @apply bg-gradient-to-t to-white from-white dark:to-slate-800 dark:from-slate-800;
+}
+table.vgt-table td {
+  @apply text-slate-600 dark:text-slate-300 text-sm font-normal capitalize px-6 py-5   border-slate-100 dark:border-slate-700;
+}
+.vgt-table thead th {
+  @apply border-slate-100 dark:border-slate-700;
+}
+.vgt-table {
+  &.lesspadding td {
+    @apply px-3 py-2;
+  }
+  &.lesspadding2 td {
+    @apply px-3 py-[14px];
+  }
+}
+.table-fit.vgt-table {
+  @apply table-fixed;
+}
+
+.vgt-table th.vgt-checkbox-col {
+  background: transparent !important;
+}
+
+.vgt-table input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  @apply relative before:flex before:flex-col before:items-center before:justify-center   
+  before:w-[18px] before:h-[18px] before:m-[-0.7px] before:bg-slate-100 dark:before:bg-slate-500  before:absolute
+    before:inset-0 before:rounded;
+}
+.vgt-table .vgt-checkbox-col {
+  padding-left: 20px !important;
+}
+.vgt-table input[type="checkbox"]:checked {
+  @apply before:bg-slate-900;
+}
+
+.vgt-table input[type="checkbox"]:checked:before {
+  content: url("https://api.iconify.design/heroicons-outline/check.svg?color=white");
+  line-height: 10px;
+  @apply ring-2 ring-black-500 ring-offset-2 dark:ring-slate-700 dark:ring-offset-0;
+}
+
+.dark {
+  .vgt-table.table-head thead th.vgt-checkbox-col {
+    background: #334155 !important;
+    border-bottom: 1px solid transparent !important;
+  }
+  .vgt-table th.vgt-checkbox-col {
+    border-bottom: 1px solid #334155 !important;
+  }
+  .table-head.vgt-table thead th {
+    @apply border-none;
+  }
+}
