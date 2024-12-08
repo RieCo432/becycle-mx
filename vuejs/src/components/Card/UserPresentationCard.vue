@@ -48,8 +48,6 @@ export default {
           this.photoUrl = window.URL.createObjectURL(photoFile);
           this.files.splice(0, this.files.length, Object.assign(photoFile, {preview: this.photoUrl}));
         });
-      } else {
-        this.photoUrl = '/assets/images/defaultProfilePicture.jpg';
       }
     },
   },
@@ -117,7 +115,8 @@ export default {
     <form @submit.prevent="submitCardDetails">
       <div class="grid grid-cols-5 md:grid-cols-9 lg:grid-cols-12">
         <div class="col-span-5">
-          <img v-if="!inEditMode" :src="photoUrl" alt="Profile Picture" class="aspect-square rounded-3xl"/>
+          <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Profile Picture" class="aspect-square rounded-3xl"/>
+          <img v-if="!inEditMode && !photoUrl" src="@/assets/images/defaultProfilePicture.jpg" alt="Profile Picture" class="aspect-square rounded-3xl"/>
           <div v-if="inEditMode" class="h-full w-full aspect-square" @click="() => {
             files = [];
             isOldPhoto = false;
