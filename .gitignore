@@ -5,6 +5,8 @@
 *.env
 *.env.*
 !*.env.template
+fastapi/app/data/temp/*
+fastapi/app/tests/photos/contracts.xlsx
 
 
 #---------------------------------#
