@@ -13,20 +13,20 @@ class Appointment(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
-    clientId: Mapped[UUID] = mapped_column("clientId", ForeignKey("clients.id"), nullable=False, quote=False)
+    clientId: Mapped[UUID] = mapped_column("clientid", ForeignKey("clients.id"), nullable=False, quote=False)
     client: Mapped["Client"] = relationship("Client", back_populates="appointments")
 
-    typeId: Mapped[str] = mapped_column("typeId", ForeignKey("appointmenttypes.id"), nullable=False, quote=False)
+    typeId: Mapped[str] = mapped_column("typeid", ForeignKey("appointmenttypes.id"), nullable=False, quote=False)
     type: Mapped["AppointmentType"] = relationship("AppointmentType")
 
-    startDateTime: Mapped[datetime] = mapped_column("startDateTime", DateTime, nullable=False, quote=False)
-    endDateTime: Mapped[datetime] = mapped_column("endDateTime", DateTime, nullable=False, quote=False)
+    startDateTime: Mapped[datetime] = mapped_column("startdatetime", DateTime, nullable=False, quote=False)
+    endDateTime: Mapped[datetime] = mapped_column("enddatetime", DateTime, nullable=False, quote=False)
 
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
     confirmed: Mapped[bool] = mapped_column("confirmed", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
     cancelled: Mapped[bool] = mapped_column("cancelled", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
-    reminderSent: Mapped[bool] = mapped_column("reminderSent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    reminderSent: Mapped[bool] = mapped_column("remindersent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
 
     def __eq_dict__(self, other: dict):

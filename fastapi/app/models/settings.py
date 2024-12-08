@@ -10,17 +10,17 @@ class AppointmentGeneralSettings(Base):
     __tablename__ = "appointmentgeneralsettings"
 
     id: Mapped[int] = mapped_column("id", Integer, primary_key=True, nullable=False, default=1, server_default=text("1"), index=True, quote=False)
-    openingDays: Mapped[list[int]] = mapped_column("openingDays", ARRAY(Integer), nullable=False, quote=False)
-    minBookAhead: Mapped[int] = mapped_column("minBookAhead", Integer, nullable=False, quote=False)
-    maxBookAhead: Mapped[int] = mapped_column("maxBookAhead", Integer, nullable=False, quote=False)
-    slotDuration: Mapped[int] = mapped_column("slotDuration", Integer, nullable=False, quote=False)
+    openingDays: Mapped[list[int]] = mapped_column("openingdays", ARRAY(Integer), nullable=False, quote=False)
+    minBookAhead: Mapped[int] = mapped_column("minbookahead", Integer, nullable=False, quote=False)
+    maxBookAhead: Mapped[int] = mapped_column("maxbookahead", Integer, nullable=False, quote=False)
+    slotDuration: Mapped[int] = mapped_column("slotduration", Integer, nullable=False, quote=False)
 
 
 class AppointmentConcurrencyLimit(Base):
     __tablename__ = "appointmentconcurrencylimits"
 
-    afterTime: Mapped[time] = mapped_column("afterTime", Time, primary_key=True, nullable=False, index=True, quote=False)
-    maxConcurrent: Mapped[int] = mapped_column("maxConcurrent", Integer, nullable=False, quote=False)
+    afterTime: Mapped[time] = mapped_column("aftertime", Time, primary_key=True, nullable=False, index=True, quote=False)
+    maxConcurrent: Mapped[int] = mapped_column("maxconcurrent", Integer, nullable=False, quote=False)
 
     def __eq__(self, other: dict):
         return all([

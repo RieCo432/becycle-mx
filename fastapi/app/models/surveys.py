@@ -13,57 +13,57 @@ class PreBecycleSurvey(Base):
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
     datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
     # hurdles
-    hurdleSafety: Mapped[bool] = mapped_column("hurdleSafety", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    hurdleMoney: Mapped[bool] = mapped_column("hurdleMoney", Boolean, default=False, server_default=text("FALSE"),
+    hurdleSafety: Mapped[bool] = mapped_column("hurdlesafety", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    hurdleMoney: Mapped[bool] = mapped_column("hurdlemoney", Boolean, default=False, server_default=text("FALSE"),
                                              nullable=False, quote=False)
-    hurdleTime: Mapped[bool] = mapped_column("hurdleTime", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    hurdleSweating: Mapped[bool] = mapped_column("hurdleSweating", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    hurdleComfort: Mapped[bool] = mapped_column("hurdleComfort", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    hurdleDistance: Mapped[bool] = mapped_column("hurdleDistance", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    hurdleOther: Mapped[str] = mapped_column("hurdleOther", Text, default=None, server_default=text("NULL"), nullable=True, quote=False)
+    hurdleTime: Mapped[bool] = mapped_column("hurdletime", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    hurdleSweating: Mapped[bool] = mapped_column("hurdlesweating", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    hurdleComfort: Mapped[bool] = mapped_column("hurdlecomfort", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    hurdleDistance: Mapped[bool] = mapped_column("hurdledistance", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    hurdleOther: Mapped[str] = mapped_column("hurdleother", Text, default=None, server_default=text("NULL"), nullable=True, quote=False)
 
     # motivation
-    motivationMoney: Mapped[bool] = mapped_column("motivationMoney", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    motivationHealth: Mapped[bool] = mapped_column("motivationHealth", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    motivationEnvironmental: Mapped[bool] = mapped_column("motivationEnvironmental", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+    motivationMoney: Mapped[bool] = mapped_column("motivationmoney", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    motivationHealth: Mapped[bool] = mapped_column("motivationhealth", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    motivationEnvironmental: Mapped[bool] = mapped_column("motivationenvironmental", Boolean, default=False, server_default=text("FALSE"), nullable=False,
                                              quote=False)
-    motivationOther: Mapped[str] = mapped_column("motivationOther", Text, default=None, server_default=text("NULL"), nullable=True,
+    motivationOther: Mapped[str] = mapped_column("motivationother", Text, default=None, server_default=text("NULL"), nullable=True,
                                              quote=False)
 
     # options considered
-    consideredNewOnline: Mapped[bool] = mapped_column("consideredNewOnline", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+    consideredNewOnline: Mapped[bool] = mapped_column("considerednewonline", Boolean, default=False, server_default=text("FALSE"), nullable=False,
                                           quote=False)
-    consideredNewShop: Mapped[bool] = mapped_column("consideredNewShop", Boolean, default=False,
+    consideredNewShop: Mapped[bool] = mapped_column("considerednewshop", Boolean, default=False,
                                                       server_default=text("FALSE"), nullable=False,
                                                       quote=False)
-    consideredUsed: Mapped[bool] = mapped_column("consideredUsed", Boolean, default=False,
+    consideredUsed: Mapped[bool] = mapped_column("consideredused", Boolean, default=False,
                                                       server_default=text("FALSE"), nullable=False,
                                                       quote=False)
-    consideredLendingPrivate: Mapped[bool] = mapped_column("consideredLendingPrivate", Boolean, default=False,
+    consideredLendingPrivate: Mapped[bool] = mapped_column("consideredlendingprivate", Boolean, default=False,
                                                       server_default=text("FALSE"), nullable=False,
                                                       quote=False)
-    consideredLendingBecycle: Mapped[bool] = mapped_column("consideredLendingBecycle", Boolean, default=False,
+    consideredLendingBecycle: Mapped[bool] = mapped_column("consideredlendingbecycle", Boolean, default=False,
                                                       server_default=text("FALSE"), nullable=False,
                                                       quote=False)
-    consideredOther: Mapped[str] = mapped_column("consideredOther", Text, default=None,
+    consideredOther: Mapped[str] = mapped_column("consideredother", Text, default=None,
                                                       server_default=text("NULL"), nullable=True,
                                                       quote=False)
 
     # training
-    trainingExperienceMonths: Mapped[int] = mapped_column("trainingExperience", Integer, nullable=False, quote=False)
-    trainingFormal: Mapped[bool] = mapped_column("trainingFormal", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+    trainingExperienceMonths: Mapped[int] = mapped_column("trainingexperience", Integer, nullable=False, quote=False)
+    trainingFormal: Mapped[bool] = mapped_column("trainingformal", Boolean, default=False, server_default=text("FALSE"), nullable=False,
                                           quote=False)
-    trainingConfidence: Mapped[int] = mapped_column("trainingConfidence", Integer, nullable=False, quote=False)
-    trainingRules: Mapped[bool] = mapped_column("trainingRules", Boolean, default=False, server_default=text("FALSE"),
+    trainingConfidence: Mapped[int] = mapped_column("trainingconfidence", Integer, nullable=False, quote=False)
+    trainingRules: Mapped[bool] = mapped_column("trainingrules", Boolean, default=False, server_default=text("FALSE"),
                                                  nullable=False,
                                                  quote=False)
-    trainingDriver: Mapped[bool] = mapped_column("trainingDriver", Boolean, default=False, server_default=text("FALSE"),
+    trainingDriver: Mapped[bool] = mapped_column("trainingdriver", Boolean, default=False, server_default=text("FALSE"),
                                                 nullable=False,
                                                 quote=False)
 
     # interest
-    interestMaintenanceDesired: Mapped[int] = mapped_column("interestMaintenanceDesired", Integer, nullable=False, quote=False)
-    interestMaintenanceCurrent: Mapped[int] = mapped_column("interestMaintenanceCurrent", Integer, nullable=False, quote=False)
+    interestMaintenanceDesired: Mapped[int] = mapped_column("interestmaintenancedesired", Integer, nullable=False, quote=False)
+    interestMaintenanceCurrent: Mapped[int] = mapped_column("interestmaintenancecurrent", Integer, nullable=False, quote=False)
 
 
 class PeriBecycleSurvey(Base):
@@ -73,55 +73,55 @@ class PeriBecycleSurvey(Base):
     datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
 
     # service satisfaction
-    serviceSatisfactionGetBike: Mapped[int] = mapped_column("serviceSatisfactionGetBike", Integer, nullable=False, quote=False,
+    serviceSatisfactionGetBike: Mapped[int] = mapped_column("servicesatisfactiongetbike", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
-    serviceSatisfactionFixBike: Mapped[int] = mapped_column("serviceSatisfactionFixBike", Integer, nullable=False, quote=False,
+    serviceSatisfactionFixBike: Mapped[int] = mapped_column("servicesatisfactionfixbike", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
-    serviceSatisfactionLearn: Mapped[int] = mapped_column("serviceSatisfactionLearn", Integer, nullable=False, quote=False,
+    serviceSatisfactionLearn: Mapped[int] = mapped_column("servicesatisfactionlearn", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
 
     # roads opinion
-    roadsGreat: Mapped[bool] = mapped_column("roadsGreat", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    roadsLight: Mapped[bool] = mapped_column("roadsLight", Boolean, default=False, server_default=text("FALSE"),
+    roadsGreat: Mapped[bool] = mapped_column("roadsgreat", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsLight: Mapped[bool] = mapped_column("roadslight", Boolean, default=False, server_default=text("FALSE"),
                                              nullable=False, quote=False)
-    roadsPotholes: Mapped[bool] = mapped_column("roadsPotholes", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    roadsRubbish: Mapped[bool] = mapped_column("roadsRubbish", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    roadsParking: Mapped[bool] = mapped_column("roadsParking", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    roadsDark: Mapped[bool] = mapped_column("roadsDark", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsPotholes: Mapped[bool] = mapped_column("roadspotholes", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsRubbish: Mapped[bool] = mapped_column("roadsrubbish", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsParking: Mapped[bool] = mapped_column("roadsparking", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    roadsDark: Mapped[bool] = mapped_column("roadsdark", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
     # road users
-    usersSafe: Mapped[bool] = mapped_column("usersSafe", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    usersBusesUnsafe: Mapped[bool] = mapped_column("usersBusesUnsafe", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    usersCarsUnsafe: Mapped[bool] = mapped_column("usersCarsUnsafe", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+    usersSafe: Mapped[bool] = mapped_column("userssafe", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    usersBusesUnsafe: Mapped[bool] = mapped_column("usersbusesunsafe", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    usersCarsUnsafe: Mapped[bool] = mapped_column("userscarsunsafe", Boolean, default=False, server_default=text("FALSE"), nullable=False,
                                              quote=False)
-    usersTrucksUnsafe: Mapped[bool] = mapped_column("usersTrucksUnsafe", Boolean, default=None, server_default=text("FALSE"),
+    usersTrucksUnsafe: Mapped[bool] = mapped_column("userstrucksunsafe", Boolean, default=None, server_default=text("FALSE"),
                                             nullable=True,
                                             quote=False)
-    usersTaxisUnsafe: Mapped[bool] = mapped_column("usersTaxisUnsafe", Boolean, default=None, server_default=text("FALSE"), nullable=True,
+    usersTaxisUnsafe: Mapped[bool] = mapped_column("userstaxisunsafe", Boolean, default=None, server_default=text("FALSE"), nullable=True,
                                              quote=False)
-    usersCyclistsUnsafe: Mapped[bool] = mapped_column("usersCyclistsUnsafe", Boolean, default=None, server_default=text("FALSE"),
+    usersCyclistsUnsafe: Mapped[bool] = mapped_column("userscyclistsunsafe", Boolean, default=None, server_default=text("FALSE"),
                                                   nullable=True, quote=False)
-    usersPedestriansUnsafe: Mapped[bool] = mapped_column("usersPedestriansUnsafe", Boolean, default=None,
+    usersPedestriansUnsafe: Mapped[bool] = mapped_column("userspedestriansunsafe", Boolean, default=None,
                                                      server_default=text("FALSE"), nullable=True, quote=False)
 
     # routes used
-    routesRoads: Mapped[bool] = mapped_column("routesRoads", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+    routesRoads: Mapped[bool] = mapped_column("routesroads", Boolean, default=False, server_default=text("FALSE"), nullable=False,
                                           quote=False)
-    routesPavements: Mapped[bool] = mapped_column("routesPavements", Boolean, default=False,
+    routesPavements: Mapped[bool] = mapped_column("routespavements", Boolean, default=False,
                                                       server_default=text("FALSE"), nullable=False,
                                                       quote=False)
-    routesOffroad: Mapped[bool] = mapped_column("routesOffroad", Boolean, default=False,
+    routesOffroad: Mapped[bool] = mapped_column("routesoffroad", Boolean, default=False,
                                                       server_default=text("FALSE"), nullable=False,
                                                       quote=False)
 
     # accidents
-    accidentsNearMisses: Mapped[int] = mapped_column("accidentsNearMisses", Integer, nullable=False, quote=False, default=0, server_default=text('0'))
-    accidentsContact: Mapped[int] = mapped_column("accidentsContact", Integer, nullable=False, quote=False, default=0, server_default=text('0'))
+    accidentsNearMisses: Mapped[int] = mapped_column("accidentsnearmisses", Integer, nullable=False, quote=False, default=0, server_default=text('0'))
+    accidentsContact: Mapped[int] = mapped_column("accidentscontact", Integer, nullable=False, quote=False, default=0, server_default=text('0'))
 
     # harassment
-    harassmentExperienced: Mapped[bool] = mapped_column("harassmentExperienced", Boolean, default=False, server_default=text("FALSE"), nullable=False,
+    harassmentExperienced: Mapped[bool] = mapped_column("harassmentexperienced", Boolean, default=False, server_default=text("FALSE"), nullable=False,
                                           quote=False)
-    harassmentSuggestions: Mapped[str] = mapped_column("harassmentSuggestions", Text, nullable=True, quote=False)
+    harassmentSuggestions: Mapped[str] = mapped_column("harassmentsuggestions", Text, nullable=True, quote=False)
 
 
 class PostBecycleSurvey(Base):
@@ -131,64 +131,64 @@ class PostBecycleSurvey(Base):
     datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
 
     # service satisfaction
-    serviceSatisfactionGetBike: Mapped[int] = mapped_column("serviceSatisfactionGetBike", Integer, nullable=False, quote=False,
+    serviceSatisfactionGetBike: Mapped[int] = mapped_column("servicesatisfactiongetbike", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
-    serviceSatisfactionFixBike: Mapped[int] = mapped_column("serviceSatisfactionFixBike", Integer, nullable=False, quote=False,
+    serviceSatisfactionFixBike: Mapped[int] = mapped_column("servicesatisfactionfixbike", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
-    serviceSatisfactionLearn: Mapped[int] = mapped_column("serviceSatisfactionLearn", Integer, nullable=False, quote=False,
+    serviceSatisfactionLearn: Mapped[int] = mapped_column("servicesatisfactionlearn", Integer, nullable=False, quote=False,
                                                      default=0, server_default=text('0'))
 
     # stopped cycling
-    reasonStoppedCycling: Mapped[bool] = mapped_column("reasonStoppedCycling", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    reasonLeavingAberdeen: Mapped[bool] = mapped_column("reasonLeavingAberdeen", Boolean, default=False,
+    reasonStoppedCycling: Mapped[bool] = mapped_column("reasonstoppedcycling", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
+    reasonLeavingAberdeen: Mapped[bool] = mapped_column("reasonleavingaberdeen", Boolean, default=False,
                                                        server_default=text("FALSE"),
                                                        nullable=False, quote=False)
 
     # if stopped, why
 
-    issueSafety: Mapped[bool] = mapped_column("issueSafety", Boolean, default=False, server_default=text("FALSE"),
+    issueSafety: Mapped[bool] = mapped_column("issuesafety", Boolean, default=False, server_default=text("FALSE"),
                                                nullable=False, quote=False)
-    issueMoney: Mapped[bool] = mapped_column("issueMoney", Boolean, default=False, server_default=text("FALSE"),
+    issueMoney: Mapped[bool] = mapped_column("issuemoney", Boolean, default=False, server_default=text("FALSE"),
                                               nullable=False, quote=False)
-    issueTime: Mapped[bool] = mapped_column("issueTime", Boolean, default=False, server_default=text("FALSE"),
+    issueTime: Mapped[bool] = mapped_column("issuetime", Boolean, default=False, server_default=text("FALSE"),
                                              nullable=False, quote=False)
-    issueSweating: Mapped[bool] = mapped_column("issueSweating", Boolean, default=False, server_default=text("FALSE"),
+    issueSweating: Mapped[bool] = mapped_column("issuesweating", Boolean, default=False, server_default=text("FALSE"),
                                                  nullable=False, quote=False)
-    issueComfort: Mapped[bool] = mapped_column("issueComfort", Boolean, default=False, server_default=text("FALSE"),
+    issueComfort: Mapped[bool] = mapped_column("issuecomfort", Boolean, default=False, server_default=text("FALSE"),
                                                 nullable=False, quote=False)
-    issueDistance: Mapped[bool] = mapped_column("issueDistance", Boolean, default=False, server_default=text("FALSE"),
+    issueDistance: Mapped[bool] = mapped_column("issuedistance", Boolean, default=False, server_default=text("FALSE"),
                                                  nullable=False, quote=False)
-    issueOther: Mapped[str] = mapped_column("issueOther", Text, default=None, server_default=text("NULL"),
+    issueOther: Mapped[str] = mapped_column("issueother", Text, default=None, server_default=text("NULL"),
                                              nullable=True, quote=False)
 
     # these improvements would make me more likely to cycle again
-    improvementNone: Mapped[bool] = mapped_column("improvementNone", Boolean, default=False,
+    improvementNone: Mapped[bool] = mapped_column("improvementnone", Boolean, default=False,
                                                   server_default=text("FALSE"),
                                                   nullable=False, quote=False)
-    improvementCyclingPaths: Mapped[bool] = mapped_column("improvementCyclingPaths", Boolean, default=False, server_default=text("FALSE"),
+    improvementCyclingPaths: Mapped[bool] = mapped_column("improvementcyclingpaths", Boolean, default=False, server_default=text("FALSE"),
                                                 nullable=False, quote=False)
-    improvementLights: Mapped[bool] = mapped_column("improvementLights", Boolean, default=False,
+    improvementLights: Mapped[bool] = mapped_column("improvementlights", Boolean, default=False,
                                                           server_default=text("FALSE"),
                                                           nullable=False, quote=False)
-    improvementSurface: Mapped[bool] = mapped_column("improvementSurface", Boolean, default=False,
+    improvementSurface: Mapped[bool] = mapped_column("improvementsurface", Boolean, default=False,
                                                           server_default=text("FALSE"),
                                                           nullable=False, quote=False)
-    improvementCleaner: Mapped[bool] = mapped_column("improvementCleaner", Boolean, default=False,
+    improvementCleaner: Mapped[bool] = mapped_column("improvementcleaner", Boolean, default=False,
                                                           server_default=text("FALSE"),
                                                           nullable=False, quote=False)
-    improvementOther: Mapped[str] = mapped_column("improvementOther", Text, default=None,
+    improvementOther: Mapped[str] = mapped_column("improvementother", Text, default=None,
                                                           server_default=text("NULL"),
                                                           nullable=True, quote=False)
 
     # if not stopped cycling, what is the alternative
-    alternativeOwnBike: Mapped[bool] = mapped_column("alternativeOwnBike", Boolean, default=False, server_default=text("FALSE"),
+    alternativeOwnBike: Mapped[bool] = mapped_column("alternativeownbike", Boolean, default=False, server_default=text("FALSE"),
                                                nullable=False, quote=False)
-    alternativeShareFriendsFamily: Mapped[bool] = mapped_column("alternativeShareFriendsFamily", Boolean, default=False,
+    alternativeShareFriendsFamily: Mapped[bool] = mapped_column("alternativesharefriendsfamily", Boolean, default=False,
                                                      server_default=text("FALSE"),
                                                      nullable=False, quote=False)
-    alternativeAnotherBecycle: Mapped[bool] = mapped_column("alternativeAnotherBecycle", Boolean, default=False,
+    alternativeAnotherBecycle: Mapped[bool] = mapped_column("alternativeanotherbecycle", Boolean, default=False,
                                                          server_default=text("FALSE"),
                                                          nullable=False, quote=False)
-    alternativeOtherRental: Mapped[bool] = mapped_column("alternativeOtherRental", Boolean, default=False,
+    alternativeOtherRental: Mapped[bool] = mapped_column("alternativeotherrental", Boolean, default=False,
                                                      server_default=text("FALSE"),
                                                      nullable=False, quote=False)

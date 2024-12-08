@@ -10,7 +10,7 @@ POSTGRES_DATABASE = os.environ['POSTGRES_DB']
 POSTGRES_HOST = os.environ['POSTGRES_HOST']
 
 
-SQLALCHEMY_DATABASE_URL = url = URL.create(
+SQLALCHEMY_DATABASE_URL = URL.create(
     drivername="postgresql",
     username=POSTGRES_USER,
     password=POSTGRES_PASSWORD,

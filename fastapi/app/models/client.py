@@ -28,21 +28,21 @@ class Client(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
                                      server_default=text("uuid_generate_v4()"), index=True, quote=False)
-    firstName: Mapped[str] = mapped_column("firstName", String(40), nullable=False, index=True, quote=False)
-    lastName: Mapped[str] = mapped_column("lastName", String(40), nullable=False, index=True, quote=False)
-    emailAddress: Mapped[str] = mapped_column("emailAddress", String(255), nullable=False,
+    firstName: Mapped[str] = mapped_column("firstname", String(40), nullable=False, index=True, quote=False)
+    lastName: Mapped[str] = mapped_column("lastname", String(40), nullable=False, index=True, quote=False)
+    emailAddress: Mapped[str] = mapped_column("emailaddress", String(255), nullable=False,
                                               quote=False)  # , unique=True)
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="client")
     appointments: Mapped[List["Appointment"]] = relationship("Appointment", back_populates="client")
 
-    preBecycleSurveyCompleted: Mapped[bool] = mapped_column("preBecycleSurveyCompleted", Boolean, default=False, server_default=text("FALSE"),
+    preBecycleSurveyCompleted: Mapped[bool] = mapped_column("prebecyclesurveycompleted", Boolean, default=False, server_default=text("FALSE"),
                                                 nullable=False,
                                                 quote=False)
-    periBecycleSurveyCompleted: Mapped[bool] = mapped_column("periBecycleSurveyCompleted", Boolean, default=False,
+    periBecycleSurveyCompleted: Mapped[bool] = mapped_column("peribecyclesurveycompleted", Boolean, default=False,
                                                             server_default=text("FALSE"),
                                                             nullable=False,
                                                             quote=False)
-    postBecycleSurveyCompleted: Mapped[bool] = mapped_column("postBecycleSurveyCompleted", Boolean, default=False,
+    postBecycleSurveyCompleted: Mapped[bool] = mapped_column("postbecyclesurveycompleted", Boolean, default=False,
                                                              server_default=text("FALSE"),
                                                              nullable=False,
                                                              quote=False)
@@ -78,14 +78,14 @@ class ClientTemp(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
                                      server_default=text("uuid_generate_v4()"), index=True, quote=False)
-    firstName: Mapped[str] = mapped_column("firstName", String(40), nullable=False, index=True, quote=False)
-    lastName: Mapped[str] = mapped_column("lastName", String(40), nullable=False, index=True, quote=False)
-    emailAddress: Mapped[str] = mapped_column("emailAddress", String(255), nullable=False, quote=False, unique=True)
+    firstName: Mapped[str] = mapped_column("firstname", String(40), nullable=False, index=True, quote=False)
+    lastName: Mapped[str] = mapped_column("lastname", String(40), nullable=False, index=True, quote=False)
+    emailAddress: Mapped[str] = mapped_column("emailaddress", String(255), nullable=False, quote=False, unique=True)
 
-    verificationCode: Mapped[str] = mapped_column("verificationCode", String(6), nullable=False,
+    verificationCode: Mapped[str] = mapped_column("verificationcode", String(6), nullable=False,
                                                        default=lambda: generate_6_digit_code(),
                                                        server_default=generate_6_digit_code_sql(), quote=False)
-    expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,
+    expirationDateTime: Mapped[DateTime] = mapped_column("expirationdatetime", DateTime,
                                                          default=lambda: datetime.utcnow() + relativedelta(
                                                              minutes=CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES),
                                                          server_default=text(
@@ -109,13 +109,13 @@ class ClientLogin(Base):
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
                                      server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
-    clientId: Mapped[UUID] = mapped_column("clientId", ForeignKey("clients.id"), nullable=False, quote=False)
+    clientId: Mapped[UUID] = mapped_column("clientid", ForeignKey("clients.id"), nullable=False, quote=False)
     client: Mapped["Client"] = relationship("Client")
 
     code: Mapped[str] = mapped_column("code", String(6), nullable=False,
                                            default=lambda: generate_6_digit_code(),
                                            server_default=generate_6_digit_code_sql(), quote=False)
-    expirationDateTime: Mapped[DateTime] = mapped_column("expirationDateTime", DateTime,
+    expirationDateTime: Mapped[DateTime] = mapped_column("expirationdatetime", DateTime,
                                                          default=lambda: datetime.utcnow() + relativedelta(
                                                              minutes=CLIENT_LOGIN_CODE_EXPIRE_MINUTES),
                                                          server_default=text(

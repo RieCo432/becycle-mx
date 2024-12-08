@@ -15,7 +15,7 @@ class Bike(Base):
     model: Mapped[str] = mapped_column("model", String(40), nullable=False, quote=False)
     colour: Mapped[str] = mapped_column("colour", String(40), nullable=False, quote=False)
     decals: Mapped[str] = mapped_column("decals", String(40), nullable=True, quote=False)
-    serialNumber: Mapped[str] = mapped_column("serialNumber", String(40), nullable=False, quote=False)
+    serialNumber: Mapped[str] = mapped_column("serialnumber", String(40), nullable=False, quote=False)
 
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="bike")
 
