@@ -19,7 +19,7 @@ class Appointment(Base):
     typeId: Mapped[str] = mapped_column("typeid", ForeignKey("appointmenttypes.id"), nullable=False, quote=False)
     type: Mapped["AppointmentType"] = relationship("AppointmentType")
 
-    startDateTime: Mapped[datetime] = mapped_column("startdatetime", DateTime, nullable=False, quote=False)
+    startDateTime: Mapped[datetime] = mapped_column("startdatetime", DateTime, nullable=False, quote=False, index=True)
     endDateTime: Mapped[datetime] = mapped_column("enddatetime", DateTime, nullable=False, quote=False)
 
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
