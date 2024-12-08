@@ -10,6 +10,8 @@ COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 #
+COPY alembic.ini /code/alembic.ini
+COPY ./alembic /code/alembic
 COPY ./app /code/app
 
 ENV CLIENT_LOGIN_CODE_EXPIRE_MINUTES=60
