@@ -1,0 +1,22 @@
+name: Reject PRs Not Coming from Dev
+
+on:
+  pull_request:
+    branches:
+      - main  # This will trigger when a PR targets the `main` branch
+
+jobs:
+  check-source-branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if PR is from dev branch
+        if: github.event.pull_request.head.ref != 'dev'  # Condition to check if the PR is not from the dev branch
+        run: |
+          echo "This PR is not coming from the 'dev' branch, rejecting..."
+          exit 1  # Exit with non-zero status to reject the PR
+
+      - name: PR is from dev branch (approved)
+        if: github.event.pull_request.head.ref == 'dev'
+        run: |
+          echo "This PR is from the 'dev' branch. Proceeding..."
