@@ -1,0 +1,21 @@
+name: Server Update
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  ssh-login:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Set up SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.RASPI5_SSH_PRIVATE_KEY }}
+    - name: SSH into server and create a file
+      run: |
+        ssh -o StrictHostKeyChecking=no github-actions@becycle.uk -p 2222 'echo "Logged in successfully!"'
