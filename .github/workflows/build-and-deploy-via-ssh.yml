@@ -16,6 +16,9 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.RASPI5_SSH_PRIVATE_KEY }}
-    - name: SSH into server and create a file
+    - name: SSH into server, pull, build and restart service
       run: |
-        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 'echo "Logged in successfully!"'
+        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 cd /home/colin/becycle-mx
+        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 git pull
+        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 sudo docker-compose build
+        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 sudo systemctl restart becycle-mx
