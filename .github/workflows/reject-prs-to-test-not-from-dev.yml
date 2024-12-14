@@ -1,4 +1,4 @@
-name: Reject PRs Not Coming from Dev
+name: Reject PRs to Test Not Coming from Dev
 
 on:
   pull_request:
