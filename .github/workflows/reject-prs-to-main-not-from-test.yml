@@ -11,12 +11,12 @@ jobs:
 
     steps:
       - name: Check if PR is from dev branch
-        if: github.event.pull_request.head.ref != 'dev'  # Condition to check if the PR is not from the dev branch
+        if: github.event.pull_request.head.ref != 'test'  # Condition to check if the PR is not from the dev branch
         run: |
           echo "This PR is not coming from the 'dev' branch, rejecting..."
           exit 1  # Exit with non-zero status to reject the PR
 
       - name: PR is from dev branch (approved)
-        if: github.event.pull_request.head.ref == 'dev'
+        if: github.event.pull_request.head.ref == 'test'
         run: |
           echo "This PR is from the 'dev' branch. Proceeding..."
