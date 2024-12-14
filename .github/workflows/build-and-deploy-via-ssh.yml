@@ -18,4 +18,4 @@ jobs:
         ssh-private-key: ${{ secrets.RASPI5_SSH_PRIVATE_KEY }}
     - name: SSH into server and create a file
       run: |
-        ssh -o StrictHostKeyChecking=no github-actions@90.250.183.136 -p 2222 'echo "Logged in successfully!"'
+        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 'echo "Logged in successfully!"'
