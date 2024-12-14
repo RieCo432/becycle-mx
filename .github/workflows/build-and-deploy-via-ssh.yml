@@ -18,6 +18,9 @@ jobs:
         ssh-private-key: ${{ secrets.RASPI5_SSH_PRIVATE_KEY }}
     - name: SSH into server, pull, build and restart service
       run: |
-        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 cd /home/colin/becycle-mx && git pull
-        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 cd /home/colin/becycle-mx && sudo /bin/docker-compose build
-        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 cd /home/colin/becycle-mx && sudo /bin/systemctl restart becycle-mx
+        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 << 'EOF'
+          cd /home/colin/becycle-mx
+          git pull
+          sudo docker-compose build
+          sudo systemctl restart becycle-mx
+        EOF
