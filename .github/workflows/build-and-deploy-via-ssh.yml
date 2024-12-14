@@ -1,0 +1,26 @@
+name: Server Update
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  ssh-login:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Set up SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.RASPI5_SSH_PRIVATE_KEY }}
+    - name: SSH into server, pull, build and restart service
+      run: |
+        ssh -o StrictHostKeyChecking=no github-actions@ssh.becycle.uk -p 2222 << 'EOF'
+          cd /home/colin/becycle-mx
+          git pull
+          sudo docker-compose build
+          sudo systemctl restart becycle-mx
+        EOF
