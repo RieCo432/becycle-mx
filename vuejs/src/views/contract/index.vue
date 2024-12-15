@@ -49,6 +49,11 @@ export default {
     };
   },
   methods: {
+    userSortingFunction(user1, user2) {
+      if (user1.username.toLowerCase() < user2.username.toLowerCase()) return -1;
+      if (user1.username.toLowerCase() > user2.username.toLowerCase()) return 1;
+      return 0;
+    },
     getContract() {
       this.loadingContract = true;
       this.loadingBike = true;
@@ -110,13 +115,13 @@ export default {
   mounted() {
     this.getContract();
     requests.getDepositBearers().then((response) => {
-      this.depositBearers = response.data.map((user) => ({
+      this.depositBearers = response.data.sort(this.userSortingFunction).map((user) => ({
         label: user.username,
         value: user.username,
       }));
     });
     requests.getActiveUsers().then((response) => {
-      this.activeUsers = response.data.map((user) => ({
+      this.activeUsers = response.data.sort(this.userSortingFunction).map((user) => ({
         label: user.username,
         value: user.username,
       }));
