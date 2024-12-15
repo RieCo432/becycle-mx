@@ -850,6 +850,11 @@ export default {
     this.fetchColourSuggestions = debounce(this.fetchColourSuggestions, 500, {leading: true, trailing: true});
   },
   methods: {
+    userSortingFunction(user1, user2) {
+      if (user1.username.toLowerCase() < user2.username.toLowerCase()) return -1;
+      if (user1.username.toLowerCase() > user2.username.toLowerCase()) return 1;
+      return 0;
+    },
     datePlusSixMonths() {
       const date = new Date();
       return new Date(date.setMonth(date.getMonth() + 6));
@@ -929,19 +934,19 @@ export default {
     },
   },
   mounted() {
-    requests.getDepositBearers().then((response) => (this.depositBearers = response.data.map((user) =>
+    requests.getDepositBearers().then((response) => (this.depositBearers = response.data.sort(this.userSortingFunction).map((user) =>
       ({
         label: user.username,
         value: user.username,
       }),
     )));
-    requests.getActiveUsers().then((response) => (this.activeUsers = response.data.map((user) =>
+    requests.getActiveUsers().then((response) => (this.activeUsers = response.data.sort(this.userSortingFunction).map((user) =>
       ({
         label: user.username,
         value: user.username,
       }),
     )));
-    requests.getRentalCheckers().then((response) => (this.rentalCheckers = response.data.map((user) =>
+    requests.getRentalCheckers().then((response) => (this.rentalCheckers = response.data.sort(this.userSortingFunction).map((user) =>
       ({
         label: user.username,
         value: user.username,
