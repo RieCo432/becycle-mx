@@ -84,6 +84,7 @@ def get_deposit_bearers(db: Session) -> list[models.User]:
             models.User.depositBearer
             & (~models.User.softDeleted)
         )
+        .order_by(func.lower(models.User.username))
     )]
 
     return deposit_bearers
@@ -96,6 +97,7 @@ def get_rental_checkers(db: Session) -> list[models.User]:
             models.User.rentalChecker
             & (~models.User.softDeleted)
         )
+        .order_by(func.lower(models.User.username))
     )]
 
     return rental_checkers
@@ -107,6 +109,7 @@ def get_active_users(db: Session) -> list[models.User]:
         .where(
             ~models.User.softDeleted
         )
+        .order_by(func.lower(models.User.username))
     )]
 
     return active_users
