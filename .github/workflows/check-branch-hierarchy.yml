@@ -4,32 +4,20 @@ on:
   pull_request:
     branches:
       - main
-      - test
 
 jobs:
   check-source-branch:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fail if a PR to main is not coming from test
-        if: ${{ github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref != 'test' }}
+      - name: Fail if a PR to main is not coming from dev
+        if: ${{ github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref != 'dev' }}
         run: |
-          echo "This PR to 'main' is not coming from the 'test' branch, fail"
+          echo "This PR to 'main' is not coming from the 'dev' branch, fail"
           exit 1  # Exit with non-zero status to make the check fail
 
-      - name: Fail if a PR to test is not coming from dev
-        if: ${{ github.event.pull_request.base.ref == 'test' && github.event.pull_request.head.ref != 'dev' }}
+      - name: Pass if a PR to main is coming from dev
+        if: ${{ github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'dev' }}
         run: |
-          echo "This PR to 'test' is not coming from the 'dev' branch, fail."
-          exit 1  # Exit with non-zero status to make the check fail
-
-      - name: Pass if a PR to main is coming from test
-        if: ${{ github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'test' }}
-        run: |
-          echo "This PR to 'main' is coming from the 'test' branch, pass."
-
-      - name: Make sure a PR to test is coming from main
-        if: ${{ github.event.pull_request.base.ref == 'test' && github.event.pull_request.head.ref == 'dev' }}
-        run: |
-          echo "This PR to 'test' is coming from the 'dev' branch, pass."
+          echo "This PR to 'main' is coming from the 'dev' branch, pass."
 
