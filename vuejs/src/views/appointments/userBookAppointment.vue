@@ -81,7 +81,7 @@ export default {
       }
     });
 
-    const {handleSubmit} = useForm({
+    useForm({
       validationSchema: currentSchema,
       keepValuesOnUnmount: true,
     });
