@@ -63,7 +63,7 @@ export default {
       newAppointmentTypeDurationError,
       newAppointmentTypeActive,
       postNewAppointmentTypeSubmit,
-    }
+    };
   },
 };
 </script>

@@ -67,7 +67,7 @@ export default {
     };
   },
   emits: [
-      'bikeDetailsUpdated',
+    'bikeDetailsUpdated',
   ],
   props: {
     bike: {

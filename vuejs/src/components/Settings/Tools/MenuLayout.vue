@@ -101,18 +101,18 @@ export default {
     layout: {
       handler() {
         switch (this.layout) {
-          case 'vertical':
-            this.$store.themeSettingsStore.menuLayout = this.layout;
-            document.documentElement.setAttribute('menu-layout', this.layout);
-            localStorage.setItem('menuLayout', this.layout);
+        case 'vertical':
+          this.$store.themeSettingsStore.menuLayout = this.layout;
+          document.documentElement.setAttribute('menu-layout', this.layout);
+          localStorage.setItem('menuLayout', this.layout);
 
-            break;
-          case 'horizontal':
-            this.$store.themeSettingsStore.menuLayout = this.layout;
-            document.documentElement.setAttribute('menu-layout', this.layout);
-            localStorage.setItem('menuLayout', this.layout);
+          break;
+        case 'horizontal':
+          this.$store.themeSettingsStore.menuLayout = this.layout;
+          document.documentElement.setAttribute('menu-layout', this.layout);
+          localStorage.setItem('menuLayout', this.layout);
 
-            break;
+          break;
         }
       },
       immediate: true,

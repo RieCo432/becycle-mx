@@ -164,9 +164,9 @@ const filteredsearchList = computed(() =>
     searchList :
     searchList.filter((item) =>
       item.name
-          .toLowerCase()
-          .replace(/\s+/g, '')
-          .includes(query.value.toLowerCase().replace(/\s+/g, '')),
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .includes(query.value.toLowerCase().replace(/\s+/g, '')),
     ),
 );
 

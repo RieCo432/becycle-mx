@@ -53,29 +53,29 @@ export default {
     skin: {
       handler() {
         switch (this.skin) {
-          case 'default':
-            this.$store.themeSettingsStore.skin = this.skin;
+        case 'default':
+          this.$store.themeSettingsStore.skin = this.skin;
 
-            document.body.classList.remove('skin--bordered');
-            document.body.classList.add('skin--default');
-            localStorage.setItem('skin', this.skin);
-            break;
-          case 'bordered':
-            this.$store.themeSettingsStore.skin = this.skin;
-            // set body class by skin name
-            document.body.classList.remove('skin--default');
-            document.body.classList.add('skin--bordered');
+          document.body.classList.remove('skin--bordered');
+          document.body.classList.add('skin--default');
+          localStorage.setItem('skin', this.skin);
+          break;
+        case 'bordered':
+          this.$store.themeSettingsStore.skin = this.skin;
+          // set body class by skin name
+          document.body.classList.remove('skin--default');
+          document.body.classList.add('skin--bordered');
 
-            localStorage.setItem('skin', this.skin);
+          localStorage.setItem('skin', this.skin);
 
-            break;
-          default:
-            this.$store.themeSettingsStore.skin = this.skin;
+          break;
+        default:
+          this.$store.themeSettingsStore.skin = this.skin;
 
-            // set body class by skin name
-            document.body.classList.remove('skin--bordered');
-            document.body.classList.add('skin--default');
-            localStorage.setItem('skin', this.skin);
+          // set body class by skin name
+          document.body.classList.remove('skin--bordered');
+          document.body.classList.add('skin--default');
+          localStorage.setItem('skin', this.skin);
         }
       },
       immediate: true,

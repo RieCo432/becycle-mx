@@ -57,24 +57,24 @@ export default {
     footer: {
       handler() {
         switch (this.footer) {
-          case 'floating':
-            this.$store.themeSettingsStore.footerType = this.footer;
+        case 'floating':
+          this.$store.themeSettingsStore.footerType = this.footer;
 
-            break;
-          case 'sticky':
-            this.$store.themeSettingsStore.footerType = this.footer;
+          break;
+        case 'sticky':
+          this.$store.themeSettingsStore.footerType = this.footer;
 
-            break;
-          case 'static':
-            this.$store.themeSettingsStore.footerType = this.footer;
+          break;
+        case 'static':
+          this.$store.themeSettingsStore.footerType = this.footer;
 
-            break;
-          case 'hidden':
-            this.$store.themeSettingsStore.footerType = this.footer;
+          break;
+        case 'hidden':
+          this.$store.themeSettingsStore.footerType = this.footer;
 
-            break;
-          default:
-            this.$store.themeSettingsStore.footerType = this.footer;
+          break;
+        default:
+          this.$store.themeSettingsStore.footerType = this.footer;
         }
       },
       immediate: true,

@@ -119,8 +119,8 @@ export default {
     Button,
   },
   emits: [
-      'potentialBikeDuplicateIgnored',
-      'potentialBikeDuplicateResolved',
+    'potentialBikeDuplicateIgnored',
+    'potentialBikeDuplicateResolved',
   ],
   props: {
     parentClass: {

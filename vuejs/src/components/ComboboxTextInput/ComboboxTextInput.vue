@@ -56,7 +56,7 @@
 
 <script>
 import {Combobox, ComboboxInput, ComboboxOptions, ComboboxOption} from '@headlessui/vue';
-import {bool} from "yup";
+import {bool} from 'yup';
 
 export default {
   components: {

@@ -20,14 +20,14 @@ export default {
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
       emailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Email is required'),
+        .string()
+        .email('Email is not valid')
+        .required('Email is required'),
       confirmEmailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Confirm Email is required')
-          .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
+        .string()
+        .email('Email is not valid')
+        .required('Confirm Email is required')
+        .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
     });
 
     const {handleSubmit} = useForm({
@@ -68,7 +68,7 @@ export default {
     };
   },
   emits: [
-      'clientDetailsUpdated',
+    'clientDetailsUpdated',
   ],
   props: {
     client: {

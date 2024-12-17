@@ -79,9 +79,9 @@ export default {
     const files = ref([]);
     function onDrop(acceptFiles) {
       files.value = acceptFiles.map((file) =>
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          }),
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+        }),
       );
     }
 

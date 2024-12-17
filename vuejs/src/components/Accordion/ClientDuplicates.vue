@@ -113,8 +113,8 @@ export default {
     Button,
   },
   emits: [
-      'potentialClientDuplicateIgnored',
-      'potentialClientDuplicateResolved',
+    'potentialClientDuplicateIgnored',
+    'potentialClientDuplicateResolved',
   ],
   props: {
     parentClass: {

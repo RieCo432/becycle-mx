@@ -239,7 +239,7 @@ export default {
     });
   },
   postNewContract(clientId, bikeId, depositAmountCollected, conditionOfBike, contractType, notes, workingUser,
-      workingPasswordOrPin, checkingUser, checkingPasswordOrPin, depositCollectingUser, depositCollectingPassword) {
+    workingPasswordOrPin, checkingUser, checkingPasswordOrPin, depositCollectingUser, depositCollectingPassword) {
     return axiosClient.post('/contract', {
       contract_data: {
         clientId: clientId,
@@ -329,7 +329,7 @@ export default {
     });
   },
   patchReturnContract(contractId, depositAmountReturned, depositReturningUser, depositReturningPassword,
-      returnAcceptingUser, returnAcceptingPasswordOrPin) {
+    returnAcceptingUser, returnAcceptingPasswordOrPin) {
     return axiosClient.patch(`/contracts/${contractId}/return`, {
       deposit_amount_returned: depositAmountReturned,
       deposit_returning_username: depositReturningUser,

@@ -21,8 +21,8 @@ export default {
     };
   },
   emits: [
-      'concurrencyLimitAdjusted',
-      'concurrencyLimitDeleted',
+    'concurrencyLimitAdjusted',
+    'concurrencyLimitDeleted',
   ],
   methods: {
     setNewLimit() {
