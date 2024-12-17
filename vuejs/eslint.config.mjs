@@ -32,7 +32,8 @@ export default [...compat.extends('google', 'plugin:vue/vue3-essential'), {
     'indent': ['error', 2],
     'require-jsdoc': 'off',
     'valid-jsdoc': 'off',
-
+    'vue/no-reserved-component-names': 'off',
+    'vue/multi-word-component-names': 'off',
     'max-len': ['error', {
       code: 140,
     }],
