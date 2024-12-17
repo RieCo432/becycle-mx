@@ -155,20 +155,20 @@ export default {
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return consentSchema;
-        case 1:
-          return hurdleSchema;
-        case 2:
-          return motivationSchema;
-        case 3:
-          return consideredSchema;
-        case 4:
-          return trainingSchema;
-        case 5:
-          return interestSchema;
-        default:
-          return consentSchema;
+      case 0:
+        return consentSchema;
+      case 1:
+        return hurdleSchema;
+      case 2:
+        return motivationSchema;
+      case 3:
+        return consideredSchema;
+      case 4:
+        return trainingSchema;
+      case 5:
+        return interestSchema;
+      default:
+        return consentSchema;
       }
     });
 
@@ -265,7 +265,7 @@ export default {
           trainingDriver: trainingDriver.value,
           interestMaintenanceCurrent: interestMaintenanceCurrent.value,
           interestMaintenanceDesired: interestMaintenanceDesired.value,
-        }).then((response) => {
+        }).then(() => {
           toast.success('Your response has been recorded.', {timeout: 2000});
           router.push({path: '/home'});
         }).catch((error) => {
@@ -342,12 +342,16 @@ export default {
             :key="i"
         >
           <div
-              :class="`   ${
-            stepNumber >= i
-              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900'
-              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
-          }`"
-              class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
+              :class="`transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full ' +
+                'flex flex-col items-center justify-center ' +
+                'relative z-[66] ring-1 md:text-lg text-base font-medium' +
+                ${
+                  stepNumber >= i
+                    ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 ' +
+                      'dark:bg-slate-900 dark:ring-slate-900'
+                    : 'bg-white ring-slate-900 ring-opacity-70 text-slate-900 dark:text-slate-300 ' +
+                     'dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
+                }`"
           >
             <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
             <span v-else class="text-3xl">
@@ -404,7 +408,8 @@ export default {
             <div class="grid grid-cols-1 gap-5">
               <div class="col-span-1">
                 <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                  According to you, what are the biggest hurdles that have prevented, or still prevent you, from cycling? Tick all that apply.
+                  According to you, what are the biggest hurdles that have prevented, or still prevent you, from cycling?
+                    Tick all that apply.
                 </h4>
               </div>
               <div class="grid grid-cols-1 gap-5">
@@ -592,7 +597,8 @@ export default {
                 </div>
                 <div class="col-span-1">
                   <Textinput
-                      label="On a scale from 0 (not confident at all) to 10 (completely confident), how confident are in your ability to cycle on the roads in Aberdeen?"
+                      :label="'On a scale from 0 (not confident at all) to 10 (completely confident), ' +
+                              'how confident are in your ability to cycle on the roads in Aberdeen?'"
                       type="text"
                       placeholder="5"
                       name="trainingConfidence"

@@ -21,8 +21,8 @@ export default {
     };
   },
   emits: [
-      'concurrencyLimitAdjusted',
-      'concurrencyLimitDeleted',
+    'concurrencyLimitAdjusted',
+    'concurrencyLimitDeleted',
   ],
   methods: {
     setNewLimit() {
@@ -94,7 +94,8 @@ export default {
             id="d3"
             placeholder="Time picker"
             v-model="afterTime"
-            :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true, onClose: setNewAfterTime, minuteIncrement: 15 }"
+            :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true,
+                       onClose: setNewAfterTime, minuteIncrement: 15 }"
         />
       </div>
       <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">

@@ -2,7 +2,7 @@
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
-import {ref, toRef} from 'vue';
+import {toRef} from 'vue';
 import * as yup from 'yup';
 import {ErrorMessage, useField, useForm} from 'vee-validate';
 import requests from '@/requests';

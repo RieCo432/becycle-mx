@@ -1,3 +1,5 @@
+/* eslint new-cap: 0 */
+
 import {defineConfig} from 'vite';
 import path from 'path';
 import Vue from '@vitejs/plugin-vue';

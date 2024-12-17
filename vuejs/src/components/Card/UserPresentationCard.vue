@@ -79,9 +79,9 @@ export default {
     const files = ref([]);
     function onDrop(acceptFiles) {
       files.value = acceptFiles.map((file) =>
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          }),
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+        }),
       );
     }
 
@@ -116,14 +116,16 @@ export default {
       <div class="grid grid-cols-5 md:grid-cols-9 lg:grid-cols-12">
         <div class="col-span-5">
           <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Profile Picture" class="aspect-square rounded-3xl"/>
-          <img v-if="!inEditMode && !photoUrl" src="@/assets/images/defaultProfilePicture.jpg" alt="Profile Picture" class="aspect-square rounded-3xl"/>
+          <img v-if="!inEditMode && !photoUrl" src="@/assets/images/defaultProfilePicture.jpg"
+               alt="Profile Picture" class="aspect-square rounded-3xl"/>
           <div v-if="inEditMode" class="h-full w-full aspect-square" @click="() => {
             files = [];
             isOldPhoto = false;
           }">
             <div
                 v-bind="getRootProps()"
-                class="h-full text-center border-dashed border border-secondary-500 rounded-3xl flex flex-col justify-center justify-items-center"
+                class="h-full text-center border-dashed border border-secondary-500
+                       rounded-3xl flex flex-col justify-center justify-items-center"
                 :class="files.length === 0 ? 'cursor-pointer' : ' pointer-events-none'"
             >
               <div v-if="files.length === 0" class="h-full flex items-center">
@@ -152,7 +154,9 @@ export default {
           <div class="grid grid-cols-1 divide-y divide-solid divide-slate-600">
             <div class="col-span-1 p-3">
               <div class="grid grid-cols-8" v-if="!inEditMode">
-                <p class="w-full col-span-6 text-slate-700 dark:text-slate-300 text-2xl truncate font-semibold">{{presentationCardDetails.name}}</p>
+                <p class="w-full col-span-6 text-slate-700 dark:text-slate-300 text-2xl truncate font-semibold">
+                    {{presentationCardDetails.name}}
+                </p>
                 <DashButton v-if="editable" @click="openEditMode" class="col-span-1 rounded-l-full">
                   <Icon icon="heroicons-outline:pencil-square"></Icon>
                 </DashButton>

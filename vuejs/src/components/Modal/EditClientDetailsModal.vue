@@ -2,7 +2,7 @@
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
-import {ref, toRef} from 'vue';
+import {toRef} from 'vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
@@ -20,14 +20,14 @@ export default {
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
       emailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Email is required'),
+        .string()
+        .email('Email is not valid')
+        .required('Email is required'),
       confirmEmailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Confirm Email is required')
-          .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
+        .string()
+        .email('Email is not valid')
+        .required('Confirm Email is required')
+        .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
     });
 
     const {handleSubmit} = useForm({
@@ -68,7 +68,7 @@ export default {
     };
   },
   emits: [
-      'clientDetailsUpdated',
+    'clientDetailsUpdated',
   ],
   props: {
     client: {

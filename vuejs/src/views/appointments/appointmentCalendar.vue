@@ -85,7 +85,10 @@ export default {
       requests.getAppointments(fetchInfo.start, fetchInfo.end).then((response) => {
         Promise.all(response.data.filter((appointment) => !appointment['cancelled']).map((appointment) => {
           if (appointment['typeId'] !== 'closedDay') {
-            return Promise.all([requests.getClient(appointment['clientId']), requests.getAppointmentType(appointment['typeId'])]).then(([getClientResponse, getAppointmentTypeResponse]) => {
+            return Promise.all([
+              requests.getClient(appointment['clientId']),
+              requests.getAppointmentType(appointment['typeId']),
+            ]).then(([getClientResponse, getAppointmentTypeResponse]) => {
               const client = getClientResponse.data;
               const clientName = `${client['firstName']} ${client['lastName']}`;
               const appointmentType = getAppointmentTypeResponse.data;
@@ -95,7 +98,10 @@ export default {
                 title: `${clientName} for ${appointmentTypeTitle}`,
                 start: appointment['startDateTime'],
                 end: appointment['endDateTime'],
-                classNames: [appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500', 'text-white'],
+                classNames: [
+                  appointment['confirmed'] ? 'bg-success-500 dark:bg-success-500' : 'bg-warning-500 dark:bg-warning-500',
+                  'text-white',
+                ],
                 notes: appointment['notes'],
                 confirmed: appointment['confirmed'],
                 cancelled: appointment['cancelled'],
@@ -196,7 +202,8 @@ export default {
             ></FullCalendar>
           </div>
           <div class="absolute z-50 top-1/2 left-1/2 translate-x-28 w-20 h-20 p-0" ref="loaderBox">
-            <bounce-loader v-if="loaderBoxSize != null" class="z-50 h-100 w-100" :loading="isLoading" :size="loaderBoxSize" :color="loaderColor"></bounce-loader>
+            <bounce-loader v-if="loaderBoxSize != null" class="z-50 h-100 w-100" :loading="isLoading"
+                           :size="loaderBoxSize" :color="loaderColor"></bounce-loader>
           </div>
         </div>
 
@@ -210,7 +217,8 @@ export default {
         :user-is-appointment-manager="userIsAppointmentManager"
     >
     </AppointmentInfoModal>
-    <Modal :active-modal="showAddClosedDayModal" @close="showAddClosedDayModal = !showAddClosedDayModal" :title="`Add Closed Day on ${addClosedDayDate}`">
+    <Modal :active-modal="showAddClosedDayModal" @close="showAddClosedDayModal = !showAddClosedDayModal"
+           :title="`Add Closed Day on ${addClosedDayDate}`">
       <form @submit.prevent="submitAddClosedDay">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12">

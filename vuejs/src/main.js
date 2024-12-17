@@ -26,17 +26,17 @@ const pinia = createPinia();
 const app = createApp(App);
 app.use(pinia);
 app.use(VueSweetalert2)
-    .use(Toast, {
-      toastClassName: 'dashcode-toast',
-      bodyClassName: 'dashcode-toast-body',
-    })
-    .use(router)
-    .use(VueClickAway)
-    .use(VueTippy)
-    .use(VueFlatPickr)
-    .use(VueGoodTablePlugin)
-    .use(VueApexCharts)
-    .use(VCalendar);
+  .use(Toast, {
+    toastClassName: 'dashcode-toast',
+    bodyClassName: 'dashcode-toast-body',
+  })
+  .use(router)
+  .use(VueClickAway)
+  .use(VueTippy)
+  .use(VueFlatPickr)
+  .use(VueGoodTablePlugin)
+  .use(VueApexCharts)
+  .use(VCalendar);
 
 app.config.globalProperties.$store = {};
 app.mount('#app');

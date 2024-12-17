@@ -32,11 +32,6 @@
                       :select-options="{
                         enabled: false,
                         selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
-                        // selectioninfoClass: 'custom-class',
-                        // selectionText: 'rows selected',
-                        // clearSelectionText: 'clear',
-                        // disableSelectinfo: true, // disable the select info-500 panel on top
-                        // selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
                         }"
                       :group-options="{
                         enabled: groupedTable,
@@ -47,7 +42,7 @@
         <template v-slot:table-row="props">
           <span v-if="props.column.field === 'actions'">
             <div class="flex space-x-3 rtl:space-x-reverse">
-                <Tooltip placement="top" arrow theme="dark" v-for="action in actions">
+                <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
                   <template #button>
                     <div class="action-btn">
                       <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
@@ -77,12 +72,10 @@
   </div>
 </template>
 <script>
-import Dropdown from '@/components/Dropdown';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import InputGroup from '@/components/InputGroup';
 import Pagination from '@/components/Pagination';
-import {MenuItem} from '@headlessui/vue';
 import Tooltip from '@/components/Tooltip';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
@@ -91,10 +84,8 @@ export default {
   components: {
     Pagination,
     InputGroup,
-    Dropdown,
     Icon,
     Card,
-    MenuItem,
     Tooltip,
     TableSkeleton,
   },

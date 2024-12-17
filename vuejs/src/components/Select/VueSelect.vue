@@ -45,8 +45,8 @@
       class="mt-2"
       :class="
         msgTooltip
-          ? ' inline-block bg-danger-500 text-white text-[10px] px-2 py-1 rounded'
-          : ' text-danger-500 block text-sm'
+          ? 'inline-block bg-danger-500 text-white text-[10px] px-2 py-1 rounded'
+          : 'text-danger-500 block text-sm'
       "
       >{{ error }}</span
     >
@@ -177,7 +177,9 @@ export default {
 
   .vs--multiple {
     .vs__selected {
-      @apply text-xs text-slate-900 dark:text-slate-300 font-light bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-700 border rounded-[3px] h-fit;
+      @apply text-xs text-slate-900 dark:text-slate-300 font-light bg-white
+             dark:bg-slate-700 border-slate-200 dark:border-slate-700 border
+             rounded-[3px] h-fit;
       padding: 4px 8px !important;
     }
     .vs__deselect {

@@ -25,8 +25,10 @@ export default {
     const minutes = (this.slotDurationMinutes - hours * 60).toString().padStart(2, '0');
     this.slotDurationString = `${hours}:${minutes}:00`;
     const openingHours = (await requests.getOpeningHours()).data;
-    this.openTime = moment(new Date().setHours(...openingHours['open_time'].split(':'))).subtract(this.slotDurationMinutes, 'minutes').format('HH:mm:ss');
-    this.closeTime = moment(new Date().setHours(...openingHours['close_time'].split(':'))).add(this.slotDurationMinutes, 'minutes').format('HH:mm:ss');
+    this.openTime = moment(new Date().setHours(...openingHours['open_time'].split(':')))
+      .subtract(this.slotDurationMinutes, 'minutes').format('HH:mm:ss');
+    this.closeTime = moment(new Date().setHours(...openingHours['close_time'].split(':')))
+      .add(this.slotDurationMinutes, 'minutes').format('HH:mm:ss');
     this.loading = false;
   },
 };

@@ -1,7 +1,6 @@
 <script>
 import Card from '@/components/Card/index.vue';
 import VueSelect from '@/components/Select/VueSelect.vue';
-import Select from '@/components/Select';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
@@ -18,7 +17,6 @@ export default {
     Textinput,
     Card,
     VueSelect,
-    Select,
   },
   setup() {
     const openingDaysOptions = ref([

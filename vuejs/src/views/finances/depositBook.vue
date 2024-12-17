@@ -30,7 +30,9 @@ export default {
   },
   created() {
     requests.getDepositBook().then((response) => {
-      const allDates = Object.keys(response.data['dayBalances']).sort((dateStringA, dateStringB) => (new Date(dateStringA)).getTime() - new Date(dateStringB).getTime()).reverse();
+      const allDates = Object.keys(response.data['dayBalances'])
+        .sort((dateStringA, dateStringB) => (new Date(dateStringA)).getTime() - new Date(dateStringB).getTime())
+        .reverse();
       const book = allDates.map((viewDate) => {
         const pageOnDate = response.data['dayBalances'][viewDate];
         const depositBearers = Object.keys(pageOnDate['balances']);
@@ -67,10 +69,10 @@ export default {
               field: 'type',
             },
             ...depositBearers.map((username) => (
-                {
-                  label: username,
-                  field: username,
-                }
+              {
+                label: username,
+                field: username,
+              }
             )),
           ],
           data: [
@@ -103,7 +105,8 @@ export default {
       <Card>
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <DepositBookTable :loading="loadingBook" :actions="transactionActions" :book="book" :view-contract="viewContract"></DepositBookTable>
+            <DepositBookTable :loading="loadingBook" :actions="transactionActions"
+                              :book="book" :view-contract="viewContract"></DepositBookTable>
           </div>
         </div>
       </Card>

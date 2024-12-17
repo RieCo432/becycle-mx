@@ -55,17 +55,18 @@ export default {
     const {value: expenseDate, errorMessage: expenseDateError, resetField: resetExpenseDate} = useField('expenseDate');
 
     const submitNewExpense = handleSubmit(() => {
-      requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value, type.value, notes.value, expenseDate.value, files.value[0]).then((response) => {
-        toast.success('Expense Submitted', {timeout: 2000});
-        resetInOrOut();
-        resetType();
-        resetNotes();
-        resetAmount();
-        resetExpenseDate();
-        files.value = [];
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value, type.value, notes.value, expenseDate.value, files.value[0])
+        .then((response) => {
+          toast.success('Expense Submitted', {timeout: 2000});
+          resetInOrOut();
+          resetType();
+          resetNotes();
+          resetAmount();
+          resetExpenseDate();
+          files.value = [];
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     });
 
     return {
@@ -176,7 +177,8 @@ export default {
               <div @click="files = []">
                 <div
                     v-bind="getRootProps()"
-                    class="w-full text-center border-dashed border border-secondary-500 rounded-md py-[52px] flex flex-col justify-center items-center"
+                    class="w-full text-center border-dashed border border-secondary-500 rounded-md
+                           py-[52px] flex flex-col justify-center items-center"
                     :class="files.length === 0 ? 'cursor-pointer' : ' pointer-events-none'"
                 >
                   <div v-if="files.length === 0" class="w-full">

@@ -33,12 +33,12 @@ export default {
 
     const submitChangeDetails = handleUpdateAddressSubmit(() => {
       requests.putAddress(
-          {
-            number: number.value,
-            street: street.value,
-            postcode: postcode.value,
-            city: city.value,
-          }).then((response) => {
+        {
+          number: number.value,
+          street: street.value,
+          postcode: postcode.value,
+          city: city.value,
+        }).then((response) => {
         toast.success('Address updated', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});

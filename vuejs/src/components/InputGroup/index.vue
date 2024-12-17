@@ -232,8 +232,11 @@ export default {
 </script>
 <style lang="scss">
 .input-group-control {
-  @apply bg-white dark:bg-slate-900 dark:placeholder:text-slate-400 transition duration-300 ease-in-out border border-slate-200 dark:border-slate-700 focus:ring-0  focus:outline-none
-  rounded placeholder:text-slate-400 text-slate-900 text-sm px-3  placeholder:font-light focus:border-slate-600  dark:focus:border-slate-900 dark:text-white;
+  @apply bg-white dark:bg-slate-900 dark:placeholder:text-slate-400 transition
+         duration-300 ease-in-out border border-slate-200 dark:border-slate-700
+         focus:ring-0  focus:outline-none rounded placeholder:text-slate-400
+         text-slate-900 text-sm px-3  placeholder:font-light focus:border-slate-600
+         dark:focus:border-slate-900 dark:text-white;
 }
 .input-label {
   @apply mb-2 text-slate-500 text-sm leading-6 capitalize cursor-pointer;
@@ -271,12 +274,16 @@ export default {
 .inputGroup {
   &.has-prepend-slot {
     .input-group-control {
-      @apply ltr:border-l-0 rtl:border-r-0 ltr:rounded-tl-[0] rtl:rounded-tr-[0] ltr:rounded-bl-[0] rtl:rounded-br-[0] focus:ring-0 focus:border-slate-600 dark:focus:border-slate-700;
+      @apply ltr:border-l-0 rtl:border-r-0 ltr:rounded-tl-[0] rtl:rounded-tr-[0]
+             ltr:rounded-bl-[0] rtl:rounded-br-[0] focus:ring-0 focus:border-slate-600
+             dark:focus:border-slate-700;
     }
   }
   &.has-append-slot {
     .input-group-control {
-      @apply ltr:border-r-0 rtl:border-l-0 ltr:rounded-tr-[0] rtl:rounded-tl-[0] ltr:rounded-br-[0] rtl:rounded-bl-[0] focus:ring-0 focus:border-slate-600 dark:focus:border-slate-700;
+      @apply ltr:border-r-0 rtl:border-l-0 ltr:rounded-tr-[0] rtl:rounded-tl-[0]
+             ltr:rounded-br-[0] rtl:rounded-bl-[0] focus:ring-0 focus:border-slate-600
+             dark:focus:border-slate-700;
     }
   }
 }
@@ -286,7 +293,8 @@ export default {
   }
   .input-group-addon.right {
     .input-group-text {
-      @apply ltr:rounded-tl-[0] ltr:rounded-bl-[0] ltr:rounded-tr ltr:rounded-br rtl:rounded-tl  rtl:rounded-bl rtl:rounded-tr-[0] rtl:rounded-br-[0];
+      @apply ltr:rounded-tl-[0] ltr:rounded-bl-[0] ltr:rounded-tr ltr:rounded-br
+             rtl:rounded-tl  rtl:rounded-bl rtl:rounded-tr-[0] rtl:rounded-br-[0];
     }
   }
 }

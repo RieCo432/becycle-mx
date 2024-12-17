@@ -10,11 +10,14 @@
           >
             <div
                 :class="`   ${
-            stepNumber >= i
-              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900'
-              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
-          }`"
-                class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
+                    stepNumber >= i
+                      ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 ' +
+                        'dark:bg-slate-900 dark:ring-slate-900'
+                      : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 ' +
+                        'dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
+                  }`"
+                class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col
+                       items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
             >
               <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
               <span v-else class="text-3xl">
@@ -31,7 +34,8 @@
           "
             ></div>
             <div
-                class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100"
+                class="absolute top-full text-base md:leading-6 mt-3 transition
+                       duration-150 md:opacity-100 opacity-0 group-hover:opacity-100"
                 :class="
             stepNumber >= i
               ? ' text-slate-900 dark:text-slate-300'
@@ -134,7 +138,8 @@
               >
                 <div class="dark:text-slate-300 text-slate-600 text-sm">
                   <h1
-                      class="text-base bg-slate-900 dark:bg-slate-600 dark:bg-opacity-70 text-white rounded-t px-[9px] mt-[-5px] mx-[-9px] mb-3 py-2"
+                      class="text-base bg-slate-900 dark:bg-slate-600 dark:bg-opacity-70
+                      text-white rounded-t px-[9px] mt-[-5px] mx-[-9px] mb-3 py-2"
                   >
                     Why we do not use passwords
                   </h1>
@@ -215,14 +220,14 @@ export default {
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return emailSchema;
-        case 1:
-          return exisitingClient.value ? codeSchema : detailsSchema;
-        case 2:
-          return codeSchema;
-        default:
-          return emailSchema;
+      case 0:
+        return emailSchema;
+      case 1:
+        return exisitingClient.value ? codeSchema : detailsSchema;
+      case 2:
+        return codeSchema;
+      default:
+        return emailSchema;
       }
     });
 

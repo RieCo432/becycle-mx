@@ -45,7 +45,8 @@ export default {
 
 <template>
   <div class="grid 2xl:grid-cols-2 grid-cols-1 gap-5">
-    <div v-for="userPresentationCardDetails in allUserPresentationCardDetails" class="col-span-1">
+    <div v-for="userPresentationCardDetails in allUserPresentationCardDetails" class="col-span-1"
+         :key="userPresentationCardDetails.id">
       <UserPresentationCard
           :key="userPresentationCardDetails.id"
           :editable="isUserAdmin"

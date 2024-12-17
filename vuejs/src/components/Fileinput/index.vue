@@ -56,7 +56,9 @@
             >
           </span>
           <span
-            class="file-name flex-none cursor-pointer border-l px-4 border-slate-200 dark:border-slate-700 h-full inline-flex items-center bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-base rounded-tr rounded-br font-normal"
+            class="file-name flex-none cursor-pointer border-l px-4 border-slate-200 dark:border-slate-700 h-full
+                   inline-flex items-center bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400
+                   text-base rounded-tr rounded-br font-normal"
             >{{ label }}</span
           >
         </div>
@@ -149,7 +151,10 @@ export default {
 </script>
 <style lang="scss">
 .file-control {
-  @apply bg-transparent dark:bg-slate-900 dark:text-white transition duration-300 ease-in-out border border-slate-200 dark:border-slate-700 focus:ring-1 focus:ring-slate-900 dark:focus:ring-slate-900 focus:outline-none focus:ring-opacity-90 rounded   text-sm ltr:pl-3 rtl:pr-3   placeholder:font-normal;
+  @apply bg-transparent dark:bg-slate-900 dark:text-white transition duration-300 ease-in-out
+         border border-slate-200 dark:border-slate-700 focus:ring-1 focus:ring-slate-900
+         dark:focus:ring-slate-900 focus:outline-none focus:ring-opacity-90 rounded
+         text-sm ltr:pl-3 rtl:pr-3   placeholder:font-normal;
 }
 .badge-title {
   @apply bg-slate-900 text-white px-2 py-[3px] rounded text-sm;

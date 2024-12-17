@@ -121,26 +121,31 @@ export default {
   <div class="grid grid-cols-12">
     <div class="col-span-full">
       <Card>
-        <ExpenseSummaryTable title="Expenses" :loading="loadingExpenses" :columns="columns" :data="expenses" :actions="actions"></ExpenseSummaryTable>
+        <ExpenseSummaryTable title="Expenses" :loading="loadingExpenses"
+                             :columns="columns" :data="expenses" :actions="actions"></ExpenseSummaryTable>
       </Card>
     </div>
     <Modal @close="closeExpenseInfoModal()" :active-modal="showExpenseInfoModal" size-class="max-w-5xl" title="Expense Details">
       <div v-if="showExpenseInfoModal" class="grid grid-cols-6 lg:grid-cols-12">
         <div class="col-span-4 text-base text-slate-700 dark:text-slate-300">
           <p>Volunteer: {{ expenseInfo.expenseUser.username }}</p>
-          <p>Expense Date: {{ new Date(Date.parse(expenseInfo.expenseDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</p>
+          <p>Expense Date: {{ new Date(Date.parse(expenseInfo.expenseDate))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</p>
           <p>Amount: &#163; {{ expenseInfo.amount.toFixed(2) }}</p>
           <p>Type: {{ expenseInfo.type }}</p>
           <p>Notes: {{ expenseInfo.notes }}</p>
-          <p v-if="expenseInfo.transferDate !== null">Transfer Date: {{ new Date(Date.parse(expenseInfo.transferDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</p>
+          <p v-if="expenseInfo.transferDate !== null">Transfer Date: {{ new Date(Date.parse(expenseInfo.transferDate))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</p>
           <p v-if="expenseInfo.treasurerUser !== null">Treasurer: {{ expenseInfo.treasurerUser.username }}</p>
         </div>
         <div v-if="receiptUrl !== null" class="col-span-8">
           <img v-if="expenseInfo.receiptContentType.startsWith('image')" :src="receiptUrl" alt="Receipt"/>
-          <iframe v-if="expenseInfo.receiptContentType === 'application/pdf'" class="w-full h-[700px]" :src="receiptUrl" type="application/pdf"></iframe>
+          <iframe v-if="expenseInfo.receiptContentType === 'application/pdf'"
+                  class="w-full h-[700px]" :src="receiptUrl" type="application/pdf"></iframe>
         </div>
       </div>
-      <div v-if="expenseInfo.transferDate === null && isUserTreasurer" class="px-4 justify-end py-3 flex space-x-3 border-t border-slate-100 dark:border-slate-700">
+      <div v-if="expenseInfo.transferDate === null && isUserTreasurer"
+           class="px-4 justify-end py-3 flex space-x-3 border-t border-slate-100 dark:border-slate-700">
         <DashButton
             @click="patchExpenseTransferred(expenseInfo.id)"
         >Mark As Transferred</DashButton>

@@ -35,12 +35,12 @@ export default {
       handler() {
         if (this.direction) {
           this.$store.themeSettingsStore.direction = this.direction;
-          document.documentElement.setAttribute("dir", "rtl");
-          localStorage.setItem("direction", this.direction);
+          document.documentElement.setAttribute('dir', 'rtl');
+          localStorage.setItem('direction', this.direction);
         } else {
           this.$store.themeSettingsStore.direction = this.direction;
-          document.documentElement.setAttribute("dir", "ltr");
-          localStorage.setItem("direction", this.direction);
+          document.documentElement.setAttribute('dir', 'ltr');
+          localStorage.setItem('direction', this.direction);
         }
       },
       immediate: true,

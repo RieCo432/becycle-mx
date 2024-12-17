@@ -47,7 +47,7 @@ export default {
     };
   },
   emits: [
-      'clientDetailsUpdated',
+    'clientDetailsUpdated',
   ],
   props: {
     client: {

@@ -1,7 +1,6 @@
 <script>
 import Textinput from '@/components/Textinput/index.vue';
 import DashButton from '@/components/Button/index.vue';
-import Select from '@/components/Select/index.vue';
 import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Checkbox';
 import {computed, ref} from 'vue';
@@ -15,7 +14,7 @@ import SurveyInfo from '@/components/SurveyInfo/index.vue';
 
 export default {
   name: 'postBecycle',
-  components: {ErrorMessage, Checkbox, Card, DashButton, Textinput, Select, Icon, SurveyInfo},
+  components: {ErrorMessage, Checkbox, Card, DashButton, Textinput, Icon, SurveyInfo},
   setup() {
     const router = useRouter();
     const toast = useToast();
@@ -85,18 +84,18 @@ export default {
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return consentSchema;
-        case 1:
-          return satisfactionSchema;
-        case 2:
-          return reasonSchema;
-        case 3:
-          return issueAlternativeSchema;
-        case 4:
-          return improvementSchema;
-        default:
-          return consentSchema;
+      case 0:
+        return consentSchema;
+      case 1:
+        return satisfactionSchema;
+      case 2:
+        return reasonSchema;
+      case 3:
+        return issueAlternativeSchema;
+      case 4:
+        return improvementSchema;
+      default:
+        return consentSchema;
       }
     });
 
@@ -249,12 +248,16 @@ export default {
             :key="i"
         >
           <div
-              :class="`   ${
-            stepNumber >= i
-              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900'
-              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
-          }`"
-              class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
+              :class="`transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col ` +
+                      `items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium ` +
+                      ` ${
+                        stepNumber >= i
+                          ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500' +
+                            'dark:bg-slate-900 dark:ring-slate-900'
+                          : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 ' +
+                            'dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
+                      }`"
+              class=""
           >
             <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
             <span v-else class="text-3xl">

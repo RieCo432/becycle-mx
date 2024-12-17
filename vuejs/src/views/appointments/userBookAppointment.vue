@@ -2,8 +2,6 @@
 import {computed, ref} from 'vue';
 import requests from '@/requests';
 import Textinput from '@/components/Textinput/index.vue';
-import Checkbox from '@/components/Switch/index.vue';
-import Select from '@/components/Select/index.vue';
 import Button from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
@@ -24,8 +22,6 @@ export default {
     DashButton,
     Card,
     Button,
-    Select,
-    Checkbox,
     Textinput,
     AppointmentTypeCardSkeleton,
     AppointmentDateCardSkeleton,
@@ -65,27 +61,27 @@ export default {
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
       emailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Email is required'),
+        .string()
+        .email('Email is not valid')
+        .required('Email is required'),
       confirmEmailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Confirm Email is required')
-          .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
+        .string()
+        .email('Email is not valid')
+        .required('Confirm Email is required')
+        .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
     });
 
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return clientSchema;
-        default:
-          return null;
+      case 0:
+        return clientSchema;
+      default:
+        return null;
       }
     });
 
-    const {handleSubmit} = useForm({
+    useForm({
       validationSchema: currentSchema,
       keepValuesOnUnmount: true,
     });
@@ -102,7 +98,8 @@ export default {
       if (isLastStep) {
         stepNumber.value = totalSteps - 1;
         // handle submit
-        requests.postAppointment(clientId.value, appointmentType.value, appointmentDatetime.value.toISOString(), appointmentNotes.value, true).then((response) => {
+        requests.postAppointment(clientId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
+          appointmentNotes.value, true).then((response) => {
           toast.success('Appointment created.', {timeout: 2000});
           router.push(`/clients/${clientId.value}`);
         }).catch((error) => {
@@ -186,12 +183,12 @@ export default {
   methods: {
     fetchClientSuggestions() {
       requests.findClient(
-          this.firstName ? this.firstName.toLowerCase() : '',
-          this.lastName ? this.lastName.toLowerCase() : '',
-          this.emailAddress ? this.emailAddress.toLowerCase() :'')
-          .then((response) => {
-            this.clientSuggestions = response.data;
-          });
+        this.firstName ? this.firstName.toLowerCase() : '',
+        this.lastName ? this.lastName.toLowerCase() : '',
+        this.emailAddress ? this.emailAddress.toLowerCase() :'')
+        .then((response) => {
+          this.clientSuggestions = response.data;
+        });
     },
     selectClient(event, i) {
       const selectedClient = this.filtered_client_suggestions[i];
@@ -205,7 +202,7 @@ export default {
   computed: {
     filtered_client_suggestions() {
       return this.clientSuggestions.filter((client) => (
-          (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
+        (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
           (this.lastName && client.lastName.startsWith(this.lastName.toLowerCase())) ||
           (this.emailAddress && client.emailAddress.startsWith(this.emailAddress.toLowerCase()))
       ));
@@ -231,10 +228,13 @@ export default {
               <div
                   :class="`   ${
             stepNumber >= i
-              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900'
-              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
+              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 ' +
+                'dark:bg-slate-900 dark:ring-slate-900'
+              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 ' +
+                'dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
           }`"
-                  class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
+                  class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex
+                         flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
               >
                 <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
                 <span v-else class="text-3xl">
@@ -251,7 +251,8 @@ export default {
           "
               ></div>
               <div
-                  class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100"
+                  class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100
+                         opacity-0 group-hover:opacity-100"
                   :class="
             stepNumber >= i
               ? ' text-slate-900 dark:text-slate-300'
@@ -389,8 +390,10 @@ export default {
                     })" class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300 h-full">
                       <div class="grid xl:grid-cols-6 sm:grid-cols-5 grid-cols-4 gap-3">
                         <div v-for="(slot, j) in slots" :key="j">
-                          <DashButton :class="`w-full ${slot.available ? '' : 'bg-warning-500'}`" @click="() => {appointmentDatetime = (new Date(Date.parse(`${date}T${slot.time}+00:00`)))}">
-                            {{ (new Date(Date.parse(`${date}T${slot.time}+00:00`))).toLocaleTimeString(undefined, { timeZone: 'UTC', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
+                          <DashButton :class="`w-full ${slot.available ? '' : 'bg-warning-500'}`"
+                                      @click="() => {appointmentDatetime = (new Date(Date.parse(`${date}T${slot.time}+00:00`)))}">
+                            {{ (new Date(Date.parse(`${date}T${slot.time}+00:00`)))
+                              .toLocaleTimeString(undefined, { timeZone: 'UTC', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
                           </DashButton>
                         </div>
 
@@ -419,7 +422,10 @@ export default {
                       </tr>
                       <tr>
                         <td class="border border-slate-500">Date and Time</td>
-                        <td class="border border-slate-500">{{appointmentDatetime.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: "2-digit", minute: "2-digit", hour12: false, timeZone: 'UTC'})}}</td>
+                        <td class="border border-slate-500">
+                            {{appointmentDatetime.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long',
+                            year: 'numeric', hour: "2-digit", minute: "2-digit", hour12: false, timeZone: 'UTC'})}}
+                        </td>
                       </tr>
                     </table>
                   </div>
