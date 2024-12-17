@@ -86,10 +86,11 @@ export default {
         });
       });
     },
-    patchContractReturn(depositAmountReturned, depositReturningUser, depositReturningPassword, returnAcceptingUser, returnAcceptingPasswordOrPin) {
+    patchContractReturn(depositAmountReturned, depositReturningUser, depositReturningPassword,
+      returnAcceptingUser, returnAcceptingPasswordOrPin) {
       requests.patchReturnContract(this.contract.id, depositAmountReturned,
-          depositReturningUser, depositReturningPassword,
-          returnAcceptingUser, returnAcceptingPasswordOrPin).then((response) => {
+        depositReturningUser, depositReturningPassword,
+        returnAcceptingUser, returnAcceptingPasswordOrPin).then((response) => {
         toast.success('Contract Returned!', {timeout: 1000});
         this.contract = response.data;
         this.loadReturnUserDetails();

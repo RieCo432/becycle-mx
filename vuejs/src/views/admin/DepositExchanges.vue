@@ -72,16 +72,16 @@ export default {
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return amountSchema;
-        case 1:
-          return fromUserSchema;
-        case 2:
-          return toUserSchema;
-        case 3:
-          return reviewSchema;
-        default:
-          return amountSchema;
+      case 0:
+        return amountSchema;
+      case 1:
+        return fromUserSchema;
+      case 2:
+        return toUserSchema;
+      case 3:
+        return reviewSchema;
+      default:
+        return amountSchema;
       };
     });
 
@@ -106,12 +106,14 @@ export default {
       const isLastStep = stepNumber.value === totalSteps - 1;
       if (isLastStep) {
         stepNumber.value = totalSteps - 1;
-        requests.postDepositExchange(amount.value, fromUsername.value, fromPassword.value, toUsername.value, toPassword.value).then((response) => {
-          toast.success('Deposit Exchange Recorded', {timeout: 2000});
-          router.push({path: '/finances/deposits'});
-        }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-        });
+        requests.postDepositExchange(amount.value, fromUsername.value, fromPassword.value,
+          toUsername.value, toPassword.value)
+          .then((response) => {
+            toast.success('Deposit Exchange Recorded', {timeout: 2000});
+            router.push({path: '/finances/deposits'});
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+          });
       } else if (stepNumber.value === 0) {
         stepNumber.value++;
       } else if (stepNumber.value === 1) {
@@ -175,10 +177,13 @@ export default {
               <div
                   :class="`   ${
             stepNumber >= i
-              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900'
-              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
+              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 ' +
+                'dark:bg-slate-900 dark:ring-slate-900'
+              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 ' +
+                'dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
           }`"
-                  class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
+                  class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col
+                         items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
               >
                 <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
                 <span v-else class="text-3xl">
@@ -195,7 +200,8 @@ export default {
           "
               ></div>
               <div
-                  class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100"
+                  class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100
+                         opacity-0 group-hover:opacity-100"
                   :class="
             stepNumber >= i
               ? ' text-slate-900 dark:text-slate-300'

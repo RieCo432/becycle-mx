@@ -29,9 +29,6 @@
 import requests from '@/requests';
 import clientView from '@/views/client/clientView.vue';
 import {useToast} from 'vue-toastification';
-import Modal from '@/components/Modal/Modal.vue';
-import Button from '@/components/Button/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
 import EditMyDetailsModal from '@/components/Modal/EditMyDetailsModal.vue';
 
 const toast = useToast();
@@ -40,7 +37,6 @@ export default {
   name: 'ClientMe',
   components: {
     EditMyDetailsModal,
-    Textinput, Button, Modal,
     clientView,
   },
   data() {

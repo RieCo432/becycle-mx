@@ -29,7 +29,8 @@ export default {
   },
   methods: {
     fetchClients() {
-      requests.findClient(this.selectedClient.firstName.toLowerCase(), this.selectedClient.lastName.toLowerCase(), this.selectedClient.emailAddress.toLowerCase()).then((response) => {
+      requests.findClient(this.selectedClient.firstName.toLowerCase(), this.selectedClient.lastName.toLowerCase(),
+        this.selectedClient.emailAddress.toLowerCase()).then((response) => {
         this.clientSuggestions = response.data;
       });
     },
@@ -42,7 +43,9 @@ export default {
       return this.clientSuggestions.filter((client) => (
         (client.firstName.startsWith(this.selectedClient.firstName.toLowerCase()) && (this.selectedClient.firstName.toLowerCase())) ||
           (client.lastName.startsWith(this.selectedClient.lastName.toLowerCase()) && (this.selectedClient.lastName.toLowerCase())) ||
-          (client.emailAddress.startsWith(this.selectedClient.emailAddress.toLowerCase()) && (this.selectedClient.emailAddress.toLowerCase()))
+          (client.emailAddress.startsWith(
+            this.selectedClient.emailAddress.toLowerCase()) &&
+              (this.selectedClient.emailAddress.toLowerCase()))
       ));
     },
     filteredClientSuggestionsLegible() {

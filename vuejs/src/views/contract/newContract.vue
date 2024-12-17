@@ -12,10 +12,13 @@
               <div
                   :class="`   ${
             stepNumber >= i
-              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900'
-              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
+              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 ' +
+                'dark:bg-slate-900 dark:ring-slate-900'
+              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 ' +
+                'dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
           }`"
-                  class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
+                  class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col
+                         items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
               >
                 <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
                 <span v-else class="text-3xl">
@@ -32,7 +35,8 @@
           "
               ></div>
               <div
-                  class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100"
+                  class="absolute top-full text-base md:leading-6 mt-3 transition duration-150
+                         md:opacity-100 opacity-0 group-hover:opacity-100"
                   :class="
             stepNumber >= i
               ? ' text-slate-900 dark:text-slate-300'
@@ -480,12 +484,10 @@
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Icon from '@/components/Icon';
-import InputGroup from '@/components/InputGroup';
 import Textarea from '@/components/Textarea';
 import Textinput from '@/components/Textinput';
 import Radio from '@/components/Radio/index.vue';
-import VueSelect from '@/components/Select/VueSelect.vue';
-import {ErrorMessage, Field, useField, useForm} from 'vee-validate';
+import {ErrorMessage, useField, useForm} from 'vee-validate';
 import {computed, ref} from 'vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
@@ -501,14 +503,11 @@ export default {
   name: 'newContract',
   components: {
     Checkbox,
-    VueSelect,
     ErrorMessage,
-    Field,
     Card,
     Button,
     Icon,
     Textinput,
-    InputGroup,
     Textarea,
     ComboboxTextInput,
     Radio,
@@ -565,14 +564,14 @@ export default {
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
       emailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Email is required'),
+        .string()
+        .email('Email is not valid')
+        .required('Email is required'),
       confirmEmailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Confirm Email is required')
-          .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
+        .string()
+        .email('Email is not valid')
+        .required('Confirm Email is required')
+        .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
     });
 
     const bikeSchema = yup.object().shape({
@@ -603,7 +602,8 @@ export default {
     });
 
     const checkingUserSchema = yup.object().shape({
-      checkingUser: yup.string().required(' Checking Username is required ').notOneOf([yup.ref('workingUser')], 'Checking volunteer must be different from working volunteer'),
+      checkingUser: yup.string().required(' Checking Username is required ')
+        .notOneOf([yup.ref('workingUser')], 'Checking volunteer must be different from working volunteer'),
       checkingPasswordOrPin: yup.string().required(' Password or Pin is required '),
     });
 
@@ -615,22 +615,22 @@ export default {
     // find current step schema
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return clientSchema;
-        case 1:
-          return bikeSchema;
-        case 2:
-          return contractSchema;
-        case 3:
-          return depositCollectionSchema;
-        case 4:
-          return workingUserSchema;
-        case 5:
-          return checkingUserSchema;
-        case 6:
-          return reviewSchema;
-        default:
-          return clientSchema;
+      case 0:
+        return clientSchema;
+      case 1:
+        return bikeSchema;
+      case 2:
+        return contractSchema;
+      case 3:
+        return depositCollectionSchema;
+      case 4:
+        return workingUserSchema;
+      case 5:
+        return checkingUserSchema;
+      case 6:
+        return reviewSchema;
+      default:
+        return clientSchema;
       }
     });
 
@@ -658,13 +658,16 @@ export default {
 
     const {value: depositAmountCollected, errorMessage: depositAmountCollectedError} = useField('depositAmountCollected');
     const {value: depositCollectingUser, errorMessage: depositCollectingUserError} = useField('depositCollectingUser');
-    const {value: depositCollectingPassword, errorMessage: depositCollectingPasswordError, setErrors: depositCollectingPasswordSetErrors} = useField('depositCollectingPassword');
+    const {value: depositCollectingPassword, errorMessage: depositCollectingPasswordError,
+      setErrors: depositCollectingPasswordSetErrors} = useField('depositCollectingPassword');
 
     const {value: workingUser, errorMessage: workingUserError} = useField('workingUser');
-    const {value: workingPasswordOrPin, errorMessage: workingPasswordOrPinError, setErrors: workingPasswordOrPinSetErrors} = useField('workingPasswordOrPin');
+    const {value: workingPasswordOrPin, errorMessage: workingPasswordOrPinError,
+      setErrors: workingPasswordOrPinSetErrors} = useField('workingPasswordOrPin');
 
     const {value: checkingUser, errorMessage: checkingUserError} = useField('checkingUser');
-    const {value: checkingPasswordOrPin, errorMessage: checkingPasswordOrPinError, setErrors: checkingPasswordOrPinSetErrors} = useField('checkingPasswordOrPin');
+    const {value: checkingPasswordOrPin, errorMessage: checkingPasswordOrPinError,
+      setErrors: checkingPasswordOrPinSetErrors} = useField('checkingPasswordOrPin');
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
@@ -687,10 +690,13 @@ export default {
       const isLastStep = stepNumber.value === totalSteps - 1;
       if (isLastStep) {
         stepNumber.value = totalSteps - 1;
-        requests.postNewContract(clientId.value, bikeId.value, depositAmountCollected.value, condition.value, type.value, notes.value, workingUser.value, workingPasswordOrPin.value, checkingUser.value, checkingPasswordOrPin.value, depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
-          toast.success('Contract Recorded!', {timeout: 1000});
-          router.push({path: `/contracts/${response.data.id}`});
-        });
+        requests.postNewContract(clientId.value, bikeId.value, depositAmountCollected.value, condition.value,
+          type.value, notes.value, workingUser.value, workingPasswordOrPin.value, checkingUser.value,
+          checkingPasswordOrPin.value, depositCollectingUser.value, depositCollectingPassword.value)
+          .then((response) => {
+            toast.success('Contract Recorded!', {timeout: 1000});
+            router.push({path: `/contracts/${response.data.id}`});
+          });
       } else {
         if (stepNumber.value === 0) {
           // Client details processing
@@ -713,19 +719,19 @@ export default {
         } else if (stepNumber.value === 1) {
           // Bike details processing
           requests.findBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
-              .then((response) => {
-                bikeId.value = response.data['id'];
-                stepNumber.value++;
-              }).catch((error) => {
-                if (error.response.status === 404) {
-                  requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
-                      .then((response) => {
-                        toast.success('New Bike Created!', {timeout: 1000});
-                        bikeId.value = response.data['id'];
-                        stepNumber.value++;
-                      });
-                }
-              });
+            .then((response) => {
+              bikeId.value = response.data['id'];
+              stepNumber.value++;
+            }).catch((error) => {
+              if (error.response.status === 404) {
+                requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
+                  .then((response) => {
+                    toast.success('New Bike Created!', {timeout: 1000});
+                    bikeId.value = response.data['id'];
+                    stepNumber.value++;
+                  });
+              }
+            });
         } else if (stepNumber.value === 2) {
           // Nothing to process
           stepNumber.value++;
@@ -861,12 +867,12 @@ export default {
     },
     fetchClientSuggestions() {
       requests.findClient(
-          this.firstName ? this.firstName.toLowerCase() : '',
-          this.lastName ? this.lastName.toLowerCase() : '',
-          this.emailAddress ? this.emailAddress.toLowerCase() :'')
-          .then((response) => {
-            this.clientSuggestions = response.data;
-          });
+        this.firstName ? this.firstName.toLowerCase() : '',
+        this.lastName ? this.lastName.toLowerCase() : '',
+        this.emailAddress ? this.emailAddress.toLowerCase() :'')
+        .then((response) => {
+          this.clientSuggestions = response.data;
+        });
     },
     fetchBikeMakeSuggestions() {
       requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {

@@ -204,13 +204,15 @@ export default {
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
         const newStartDate = new Date(xaxis.min);
-        this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${newStartDate.getUTCDate().toString().padStart(2, '0')}`;
+        this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}
+        -${newStartDate.getUTCDate().toString().padStart(2, '0')}`;
       } else {
         this.startDate = null;
       }
       if (xaxis.max) {
         const newEndDate = new Date(xaxis.max);
-        this.endDate = `${newEndDate.getUTCFullYear()}-${(newEndDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${newEndDate.getUTCDate().toString().padStart(2, '0')}`;
+        this.endDate = `${newEndDate.getUTCFullYear()}-${(newEndDate.getUTCMonth() + 1).toString().padStart(2, '0')}
+        -${newEndDate.getUTCDate().toString().padStart(2, '0')}`;
       } else {
         this.endDate = null;
       }
@@ -305,7 +307,8 @@ export default {
       <Card title="Total Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="totalContractSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="chartOptions" :series="totalContractSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -314,7 +317,8 @@ export default {
       <Card title="Active Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="activeContractSeries"></apexchart>
+            <apexchart class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="chartOptions" :series="activeContractSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -323,7 +327,8 @@ export default {
       <Card title="New Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="newContractSeries"></apexchart>
+            <apexchart class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="chartOptions" :series="newContractSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -332,7 +337,8 @@ export default {
       <Card title="Returned Contracts">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="returnedContractSeries"></apexchart>
+            <apexchart class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="chartOptions" :series="returnedContractSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -341,7 +347,8 @@ export default {
       <Card title="Contracts Status">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="contractsStatusChartOptions" :series="contractsStatusSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut"
+                       :options="contractsStatusChartOptions" :series="contractsStatusSeries"></apexchart>
           </div>
         </div>
       </Card>
