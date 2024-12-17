@@ -13,40 +13,45 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-export default [...compat.extends('google', 'plugin:vue/vue3-essential'), {
-  plugins: {
-    vue,
+export default [
+  {
+    ignores: ['**/dist/', 'dist/', '/dist/'],
   },
-
-  languageOptions: {
-    globals: {
-      ...globals.browser,
+  ...compat.extends('google', 'plugin:vue/vue3-essential'),
+  {
+    plugins: {
+      vue,
     },
 
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-  },
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
 
-  rules: {
-    'linebreak-style': ['off', 'unix'],
-    'indent': ['error', 2],
-    'require-jsdoc': 'off',
-    'valid-jsdoc': 'off',
-    'vue/no-reserved-component-names': 'off',
-    'vue/multi-word-component-names': 'off',
-    'max-len': ['error', {
-      code: 140,
-    }],
-  },
-}, {
-  files: ['**/.eslintrc.{js,cjs}'],
-
-  languageOptions: {
-    globals: {
-      ...globals.node,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
     },
 
-    ecmaVersion: 5,
-    sourceType: 'commonjs',
-  },
-}];
+    rules: {
+      'linebreak-style': ['off', 'unix'],
+      'indent': ['error', 2],
+      'require-jsdoc': 'off',
+      'valid-jsdoc': 'off',
+      'vue/no-reserved-component-names': 'off',
+      'vue/multi-word-component-names': 'off',
+      'max-len': ['error', {
+        code: 140,
+      }],
+    },
+  }, {
+    files: ['**/eslint.config.{js,cjs}'],
+
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+
+      ecmaVersion: 5,
+      sourceType: 'commonjs',
+    },
+  }];
