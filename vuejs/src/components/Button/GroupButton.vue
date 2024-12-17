@@ -70,7 +70,8 @@ export default {
   .btn-danger,
   .btn-dark,
   .btn-light {
-    @apply ltr:border-r ltr:border-r-white rtl:border-l rtl:border-l-white ltr:border-opacity-10 rtl:border-opacity-10  last:border-r-0 hover:ring-0 hover:ring-offset-0 bg-opacity-90;
+    @apply ltr:border-r ltr:border-r-white rtl:border-l rtl:border-l-white ltr:border-opacity-10
+           rtl:border-opacity-10  last:border-r-0 hover:ring-0 hover:ring-offset-0 bg-opacity-90;
     &.active {
       @apply bg-opacity-100;
     }

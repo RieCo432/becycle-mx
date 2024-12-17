@@ -34,7 +34,7 @@
           selectionText: 'rows selected',
           clearSelectionText: 'clear',
           disableSelectinfo: true, // disable the select info-500 panel on top
-          selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
+          selectAllByGroup: true,
         }"
       >
         <template #pagination-top="props">
@@ -56,13 +56,15 @@
               v-if="props.column.field == 'expenseDate'"
               class="text-slate-500 dark:text-slate-300"
           >
-            {{ new Date(Date.parse(props.row.expenseDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+            {{ new Date(Date.parse(props.row.expenseDate))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span
               v-if="props.column.field == 'transferDate'"
               class="text-slate-500 dark:text-slate-300"
           >
-            {{ props.row.transferDate ? new Date(Date.parse(props.row.transferDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) : 'n/a' }}
+            {{ props.row.transferDate ? new Date(Date.parse(props.row.transferDate))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) : 'n/a' }}
           </span>
           <span
               v-if="props.column.field == 'amount'"
@@ -105,12 +107,10 @@
   </div>
 </template>
 <script>
-import Dropdown from '@/components/Dropdown';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import InputGroup from '@/components/InputGroup';
 import Pagination from '@/components/Pagination';
-import {MenuItem} from '@headlessui/vue';
 import Tooltip from '@/components/Tooltip';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
@@ -119,10 +119,8 @@ export default {
   components: {
     Pagination,
     InputGroup,
-    Dropdown,
     Icon,
     Card,
-    MenuItem,
     Tooltip,
     TableSkeleton,
   },

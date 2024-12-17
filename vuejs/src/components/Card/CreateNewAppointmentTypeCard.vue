@@ -20,8 +20,12 @@ export default {
     const newAppointmentTypeSchema = yup.object().shape({
       newAppointmentTypeId: yup.string().max(5, 'No more than 5 characters').required('Appointment Type ID is required'),
       newAppointmentTypeTitle: yup.string().max(30, 'No more than 30 characters').required('Appointment Type Title is required'),
-      newAppointmentTypeDescription: yup.string().max(300, 'No more than 300 characters').required('Appointment Type Description is required'),
-      newAppointmentTypeDuration: yup.number('Must be a number').integer('Must be an integer').positive('Must be positive').required('Appointment Type Duration is required'),
+      newAppointmentTypeDescription: yup.string().max(300, 'No more than 300 characters')
+        .required('Appointment Type Description is required'),
+      newAppointmentTypeDuration: yup.number('Must be a number')
+        .integer('Must be an integer')
+        .positive('Must be positive')
+        .required('Appointment Type Duration is required'),
       newAppointmentTypeActive: yup.bool(),
     });
 
@@ -32,7 +36,8 @@ export default {
 
     const {value: newAppointmentTypeId, errorMessage: newAppointmentTypeIdError} = useField('newAppointmentTypeId');
     const {value: newAppointmentTypeTitle, errorMessage: newAppointmentTypeTitleError} = useField('newAppointmentTypeTitle');
-    const {value: newAppointmentTypeDescription, errorMessage: newAppointmentTypeDescriptionError} = useField('newAppointmentTypeDescription');
+    const {value: newAppointmentTypeDescription,
+      errorMessage: newAppointmentTypeDescriptionError} = useField('newAppointmentTypeDescription');
     const {value: newAppointmentTypeDuration, errorMessage: newAppointmentTypeDurationError} = useField('newAppointmentTypeDuration');
     const {value: newAppointmentTypeActive} = useField('newAppointmentTypeActive');
 

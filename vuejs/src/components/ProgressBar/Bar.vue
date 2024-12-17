@@ -45,6 +45,7 @@ export default {
       // add backgroudn image
       if (this.striped === true) {
         el.style.backgroundImage =
+          // eslint-disable-next-line max-len
           'linear-gradient(45deg,hsla(0,0%,100%,.15) 25%,transparent 0,transparent 50%,hsla(0,0%,100%,.15) 0,hsla(0,0%,100%,.15) 75%,transparent 0,transparent)';
 
         el.style.backgroundSize = '.857rem .857rem';

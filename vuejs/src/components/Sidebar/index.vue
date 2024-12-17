@@ -102,7 +102,8 @@
         class="h-[60px] absolute top-[80px] nav-shadow z-[1] w-full transition-all duration-200 pointer-events-none"
         :class="[shadowbase ? ' opacity-100' : ' opacity-0']"
       ></div>
-      <simplebar :class="`sidebar-menu px-4 ${this.$store.themeSettingsStore.sidebarCollasp && !this.$store.themeSettingsStore.isMouseHovered
+      <simplebar :class="`sidebar-menu px-4 ${this.$store.themeSettingsStore.sidebarCollasp &&
+        !this.$store.themeSettingsStore.isMouseHovered
             ? this.closeHeightClass
             : this.openHeightClass}`">
         <Navmenu :items="topMenu" />
@@ -121,7 +122,6 @@ import {topMenu} from '../../constant/data';
 import Navmenu from './Navmenu';
 import simplebar from 'simplebar-vue';
 import 'simplebar/dist/simplebar.min.css';
-import {ref, onMounted} from 'vue';
 
 export default defineComponent({
   components: {

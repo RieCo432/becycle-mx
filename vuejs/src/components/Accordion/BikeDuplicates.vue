@@ -11,7 +11,8 @@
             ? 'bg-slate-50 dark:bg-slate-700 dark:bg-opacity-60 rounded-t-md '
             : 'bg-white dark:bg-slate-700  rounded-md'
         "
-          class="flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start text-base text-slate-600 dark:text-slate-300 px-8 py-4"
+          class="flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start
+                 text-base text-slate-600 dark:text-slate-300 px-8 py-4"
           @click="activeIndex = activeIndex === i ? null : i"
       >
         {{ item.bike1.make }} {{ item.bike1.model }} &lt;----&gt; {{ item.bike2.make }} {{ item.bike2.model }}

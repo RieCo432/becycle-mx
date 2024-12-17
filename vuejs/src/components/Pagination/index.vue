@@ -245,7 +245,9 @@ export default defineComponent({
   li {
     a,
     div {
-      @apply bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900 text-sm font-normal rounded leading-[16px] flex h-6 w-6 items-center justify-center transition-all duration-150;
+      @apply bg-slate-100 dark:bg-slate-700 dark:text-slate-400 text-slate-900
+        text-sm font-normal rounded leading-[16px] flex h-6 w-6 items-center
+        justify-center transition-all duration-150;
       &.active {
         @apply bg-slate-900 dark:bg-slate-600  dark:text-slate-200 text-white font-medium;
       }
@@ -258,7 +260,8 @@ export default defineComponent({
       &:first-child,
       &:last-child {
         button {
-          @apply hover:bg-slate-900 hover:text-white transition duration-150 text-slate-500 h-6 w-6 flex items-center justify-center rounded;
+          @apply hover:bg-slate-900 hover:text-white transition duration-150 text-slate-500
+                 h-6 w-6 flex items-center justify-center rounded;
         }
       }
       a,

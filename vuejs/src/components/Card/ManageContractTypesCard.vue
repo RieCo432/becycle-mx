@@ -25,7 +25,8 @@ export default {
       keepValuesOnDismount: true,
     });
 
-    const {value: newContractTypeId, errorMessage: newContractTypeIdError, resetField: resetNewContractTypeId} = useField('newContractTypeId');
+    const {value: newContractTypeId, errorMessage: newContractTypeIdError,
+      resetField: resetNewContractTypeId} = useField('newContractTypeId');
 
     const submitNewContractType = handleNewContractTypeSubmit(() => {
       requests.postContractType(newContractTypeId.value).then((response) => {

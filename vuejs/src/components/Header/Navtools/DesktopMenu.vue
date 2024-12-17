@@ -128,7 +128,8 @@ export default {
     > li {
       @apply inline-block relative;
       > a {
-        @apply relative flex capitalize items-start text-sm font-medium leading-6 text-slate-600 dark:text-slate-300 2xl:px-6 xl:px-5 py-6  transition-all duration-150;
+        @apply relative flex capitalize items-start text-sm font-medium leading-6
+               text-slate-600 dark:text-slate-300 2xl:px-6 xl:px-5 py-6  transition-all duration-150;
         .icon-box {
           @apply text-slate-500 dark:text-slate-300 transition-all duration-150 text-lg;
         }
@@ -168,7 +169,8 @@ export default {
   @apply relative pb-2 last:pb-0;
 }
 .main-menu > ul > li.menu-item-has-children > ul.sub-menu li a {
-  @apply text-sm  font-normal   text-slate-600 dark:text-slate-300 dark:hover:text-primary-500 capitalize py-1 last:pb-0 block hover:text-primary-500;
+  @apply text-sm  font-normal text-slate-600 dark:text-slate-300 dark:hover:text-primary-500
+         capitalize py-1 last:pb-0 block hover:text-primary-500;
 }
 .rt-mega-menu {
   a {

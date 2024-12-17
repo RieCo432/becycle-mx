@@ -33,7 +33,7 @@
           selectionText: 'rows selected',
           clearSelectionText: 'clear',
           disableSelectinfo: true, // disable the select info-500 panel on top
-          selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
+          selectAllByGroup: true,
         }"
       >
         <template v-slot:table-row="props">
@@ -67,15 +67,21 @@
             </span>
           </span>
           <span v-if="props.column.field === 'startDateTime'">
-            {{ new Date(Date.parse(props.row.startDateTime)).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: "2-digit", minute: "2-digit", hour12: false, }) }}
+            {{ new Date(Date.parse(props.row.startDateTime))
+              .toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+                                           hour: "2-digit", minute: "2-digit", hour12: false, }) }}
           </span>
           <span v-if="props.column.field === 'action'">
             <div class="flex space-x-3 rtl:space-x-reverse">
               <template v-for="action in actions">
-                <Tooltip placement="top" arrow theme="dark"  v-if="new Date(Date.parse(props.row.startDateTime)) > new Date() && (isClient || userIsAppointmentManager)">
+                <Tooltip placement="top" arrow theme="dark" :key="action.id"
+                         v-if="new Date(Date.parse(props.row.startDateTime)) > new Date() && (isClient || userIsAppointmentManager)">
                   <template #button >
                     <div class="action-btn">
-                      <Icon v-if="props.row.status !== 'cancelled' && !(props.row.status === 'confirmed' && action.id === 'confirm')" :icon="action.icon" @click="action.func(props.row.id)"/>
+                      <Icon
+                          v-if="props.row.status !== 'cancelled' &&
+                          !(props.row.status === 'confirmed' && action.id === 'confirm')"
+                          :icon="action.icon" @click="action.func(props.row.id)"/>
                     </div>
                   </template>
                   <span>{{action.label}}</span>
@@ -103,12 +109,10 @@
   </div>
 </template>
 <script>
-import Dropdown from '@/components/Dropdown';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import InputGroup from '@/components/InputGroup';
 import Pagination from '@/components/Pagination';
-import {MenuItem} from '@headlessui/vue';
 import Tooltip from '@/components/Tooltip';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
@@ -117,10 +121,8 @@ export default {
   components: {
     Pagination,
     InputGroup,
-    Dropdown,
     Icon,
     Card,
-    MenuItem,
     Tooltip,
     TableSkeleton,
   },

@@ -1,6 +1,5 @@
 <script>
 import Textinput from '@/components/Textinput/index.vue';
-import Button from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import requests from '@/requests';
@@ -13,7 +12,7 @@ const toast = useToast();
 
 export default {
   name: 'ManageExpenseTypesCard',
-  components: {DashButton, Card, Button, Textinput},
+  components: {DashButton, Card, Textinput},
   setup() {
     const expenseTypes = ref([]);
     const editExpenseTypeId = ref(null);
@@ -49,7 +48,8 @@ export default {
     });
 
     const {value: newExpenseTypeId, errorMessage: newExpenseTypeIdError, resetField: resetNewExpenseTypeId} = useField('newExpenseTypeId');
-    const {value: newExpenseTypeDescription, errorMessage: newExpenseTypeDescriptionError, resetField: resetNewExpenseTypeDescription} = useField('newExpenseTypeDescription');
+    const {value: newExpenseTypeDescription, errorMessage: newExpenseTypeDescriptionError,
+      resetField: resetNewExpenseTypeDescription} = useField('newExpenseTypeDescription');
 
     const submitNewExpenseType = handleNewExpenseTypeSubmit(() => {
       requests.postNewExpenseType(newExpenseTypeId.value, newExpenseTypeDescription.value).then((response) => {

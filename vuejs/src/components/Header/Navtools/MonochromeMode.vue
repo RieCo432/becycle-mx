@@ -1,7 +1,8 @@
 <template>
     <span
       @click="toggleMonochrome"
-      class="lg:h-[32px] lg:w-[32px] lg:bg-slate-50 lg:dark:bg-slate-900 dark:text-white text-slate-900 cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center"
+      class="lg:h-[32px] lg:w-[32px] lg:bg-slate-50 lg:dark:bg-slate-900 dark:text-white text-slate-900
+             cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center"
     >
       <Icon icon="mdi:palette-outline" class="font-bold"  />
     </span>

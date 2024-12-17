@@ -9,7 +9,9 @@
         </ComboboxInput>
       </div>
       <ComboboxOptions
-          class="absolute w-full mt-1 max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5 focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700 shadow-dropdown z-[9999]">
+          class="absolute w-full mt-1 max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5
+                 focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700
+                 shadow-dropdown z-[9999]">
         <ComboboxOption
             v-if="((suggestions.indexOf(fieldModelValue) === -1) && allowNew)"
             :value="fieldModelValue"
@@ -56,7 +58,6 @@
 
 <script>
 import {Combobox, ComboboxInput, ComboboxOptions, ComboboxOption} from '@headlessui/vue';
-import {bool} from 'yup';
 
 export default {
   components: {

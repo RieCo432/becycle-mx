@@ -167,7 +167,8 @@ export default {
   @apply text-sm leading-5 font-medium text-slate-600 dark:text-slate-300 mt-1;
 }
 .overlay {
-  @apply relative z-[1] after:absolute after:inset-0 after:w-full after:h-full after:bg-slate-900 after:bg-opacity-40 after:rounded-md after:z-[-1];
+  @apply relative z-[1] after:absolute after:inset-0 after:w-full after:h-full
+         after:bg-slate-900 after:bg-opacity-40 after:rounded-md after:z-[-1];
   .card-title,
   .card-subtitle {
     @apply text-white;

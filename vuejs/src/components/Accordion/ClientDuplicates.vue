@@ -11,7 +11,8 @@
             ? 'bg-slate-50 dark:bg-slate-700 dark:bg-opacity-60 rounded-t-md '
             : 'bg-white dark:bg-slate-700  rounded-md'
         "
-          class="flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start text-base text-slate-600 dark:text-slate-300 px-8 py-4"
+          class="flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start
+                 text-base text-slate-600 dark:text-slate-300 px-8 py-4"
           @click="activeIndex = activeIndex === i ? null : i"
       >
         {{ item.client1.firstName }} {{ item.client1.lastName }} &lt;----&gt; {{ item.client2.firstName }} {{ item.client2.lastName }}
@@ -50,7 +51,9 @@
                     <Button @click="resolvePotentialDuplicate(item.id, item.client1.id, item.client2.id)" class="ml-5">Keep</Button>
                   </template>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.client1.firstName }} {{ item.client1.lastName }}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">
+                        {{ item.client1.firstName }} {{ item.client1.lastName }}
+                    </p>
                   </div>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300">{{ item.client1.emailAddress }}</p>
@@ -71,7 +74,9 @@
                     <Button @click="resolvePotentialDuplicate(item.id, item.client2.id, item.client1.id)" class="ml-5">Keep</Button>
                   </template>
                   <div class="col-span-full">
-                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.client2.firstName }} {{ item.client2.lastName }}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 capitalize">
+                        {{ item.client2.firstName }} {{ item.client2.lastName }}
+                    </p>
                   </div>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300">{{ item.client2.emailAddress }}</p>

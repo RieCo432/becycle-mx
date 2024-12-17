@@ -3,7 +3,9 @@
     <span
       v-if="!this.$store.themeSettingsStore.isOpenSettings"
       @click="this.$store.themeSettingsStore.isOpenSettings = !this.$store.themeSettingsStore.isOpenSettings"
-      class="fixed ltr:md:right-[-32px] ltr:right-0 rtl:left-0 rtl:md:left-[-32px] top-1/2 z-[888] translate-y-1/2 bg-slate-800 text-slate-50 dark:bg-slate-700 dark:text-slate-300 cursor-pointer transform rotate-90 flex items-center text-sm font-medium px-2 py-2 shadow-deep ltr:rounded-b rtl:rounded-t"
+      class="fixed ltr:md:right-[-32px] ltr:right-0 rtl:left-0 rtl:md:left-[-32px] top-1/2 z-[888]
+        translate-y-1/2 bg-slate-800 text-slate-50 dark:bg-slate-700 dark:text-slate-300 cursor-pointer
+        transform rotate-90 flex items-center text-sm font-medium px-2 py-2 shadow-deep ltr:rounded-b rtl:rounded-t"
     >
       <Icon
         icon="heroicons:cog-6-tooth"
@@ -16,7 +18,8 @@
     <Transition name="lefttranslate">
       <div
         v-show="this.$store.themeSettingsStore.isOpenSettings"
-        class="setting-wrapper fixed ltr:right-0 rtl:left-0 top-0 md:w-[400px] w-[300px] bg-white dark:bg-slate-800 h-screen z-[9999] px-6 md:pb-6 pb-[100px] shadow-base2 dark:shadow-base3 border border-gray-5002 dark:border-slate-700"
+        class="setting-wrapper fixed ltr:right-0 rtl:left-0 top-0 md:w-[400px] w-[300px] bg-white dark:bg-slate-800
+        h-screen z-[9999] px-6 md:pb-6 pb-[100px] shadow-base2 dark:shadow-base3 border border-gray-5002 dark:border-slate-700"
         data-simplebar
       >
         <header

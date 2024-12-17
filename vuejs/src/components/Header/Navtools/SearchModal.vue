@@ -2,7 +2,8 @@
   <div>
     <button
       @click="openModal"
-      class="flex items-center xl:text-sm text-lg xl:text-slate-400 text-slate-800 dark:text-slate-300 px-1 space-x-3 rtl:space-x-reverse"
+      class="flex items-center xl:text-sm text-lg xl:text-slate-400 text-slate-800
+             dark:text-slate-300 px-1 space-x-3 rtl:space-x-reverse"
     >
       <Icon icon="heroicons-outline:search" /><span
         class="xl:inline-block hidden"
@@ -43,7 +44,8 @@
           <Combobox v-model="selected">
             <div class="relative">
               <div
-                class="relative mx-auto max-w-xl rounded-md bg-white dark:bg-slate-800 shadow-2xl ring-1 ring-gray-500-500 dark:ring-light divide-y divide-gray-500-300 dark:divide-light"
+                class="relative mx-auto max-w-xl rounded-md bg-white dark:bg-slate-800 shadow-2xl ring-1
+                       ring-gray-500-500 dark:ring-light divide-y divide-gray-500-300 dark:divide-light"
               >
                 <div
                   className="flex bg-white dark:bg-slate-800  px-3 rounded-md py-3 items-center"
@@ -54,7 +56,8 @@
                     <Icon icon="heroicons-outline:search" />
                   </div>
                   <ComboboxInput
-                    class="bg-transparent outline-none focus:outline-none border-none w-full flex-1 dark:placeholder:text-slate-300 dark:text-slate-200"
+                    class="bg-transparent outline-none focus:outline-none border-none w-full flex-1
+                           dark:placeholder:text-slate-300 dark:text-slate-200"
                     placeholder="Search..."
                     @change="query = $event.target.value"
                   />

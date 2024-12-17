@@ -19,7 +19,8 @@
           />
           <span
             :class="item.value === layout ? 'shadow-inset-4' : ''"
-            class="h-4 w-4 bg-white rounded-full dark:bg-transparent border border-secondary-500 inline-block ltr:mr-3 rtl:ml-3 transition-all duration-150"
+            class="h-4 w-4 bg-white rounded-full dark:bg-transparent border border-secondary-500 inline-block ltr:mr-3
+                   rtl:ml-3 transition-all duration-150"
           ></span>
           {{ item.label }}</label
         >

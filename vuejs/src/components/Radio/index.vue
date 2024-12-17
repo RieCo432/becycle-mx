@@ -22,7 +22,8 @@
               ' ring-[6px]  ring-inset ring-offset-2 dark:ring-offset-slate-600  dark:ring-offset-4 border-slate-700'
             : 'border-slate-400 dark:border-slate-600 dark:ring-slate-700'
         "
-        class="h-[18px] w-[18px] rounded-full border inline-flex bg-white dark:bg-slate-500 ltr:mr-3 rtl:ml-3 relative transition-all duration-150"
+        class="h-[18px] w-[18px] rounded-full border inline-flex bg-white dark:bg-slate-500 ltr:mr-3 rtl:ml-3
+               relative transition-all duration-150"
       >
       </span>
       <span
