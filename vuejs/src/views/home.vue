@@ -145,6 +145,7 @@ export default {
         },
       }).render('#donate-button');
     });
+    loadAsync('https://app.termly.io/resource-blocker/cfac8041-9e2d-4f64-9c8b-1ba418ea07a1?autoBlock=on');
   },
 };
 
