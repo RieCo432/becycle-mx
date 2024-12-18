@@ -223,4 +223,10 @@ export const topMenu = [
     link: '/volunteers',
     show: ['always'],
   },
+  {
+    title: 'Privacy Policy',
+    icon: 'heroicons-outline:shield-check',
+    link: '/privacy-policy',
+    show: ['always'],
+  },
 ];
