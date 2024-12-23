@@ -3,9 +3,11 @@ import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import requests from '@/requests';
 import ContractEditTable from '@/components/Tables/ContractEditTable.vue';
+import {useCredentialsStore} from '@/store/credentialsStore';
 import {useToast} from 'vue-toastification';
 
 const toast = useToast();
+const credentialsStore = useCredentialsStore();
 
 export default {
   name: 'rawData',
@@ -14,6 +16,7 @@ export default {
     return {
       loadingContracts: true,
       rawContractData: [],
+      isUserAdmin: false,
       columns: [
         {
           label: 'Client ID',
@@ -73,6 +76,8 @@ export default {
             this.viewContract(contractId);
           },
         },
+      ],
+      adminActions: [
         {
           label: 'Delete Contract',
           id: 'delete',
@@ -126,6 +131,14 @@ export default {
   },
   created() {
     this.getContracts();
+    if (credentialsStore.getTokenType() === 'user') {
+      requests.getUserMe().then((response) => {
+        this.isUserAdmin = response.data.admin;
+        if (this.isUserAdmin) {
+          this.actions.push(...this.adminActions);
+        }
+      });
+    }
   },
 };
 </script>
