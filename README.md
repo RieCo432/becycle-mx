@@ -31,7 +31,7 @@ Development:
 	  - create a new branch off of the "dev" branch following the naming conventions below:
 		  - Branches:
 			- Where applicable, prefix the branch name with the number of the GitHub issue being worked on.
-			- Use a short string of words, separated by hyphens to give a rough indication of what the purpose is
+			- Use a short string of words, separated by hyphens to give a rough indication of what the purpose is. Often, the part of the program being worked on can be good
 			- For example: #53-eslint-fixes
 		  - Commit:
 			- prefix the commit message with the GitHub issue number being worked on if applicable
