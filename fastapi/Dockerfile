@@ -27,4 +27,4 @@ ENV API_HOST_ADDRESS=0.0.0.0
 ENV API_HOST_PORT=8000
 
 #
-CMD uvicorn app.main:app --host ${API_HOST_ADDRESS} --port ${API_HOST_PORT}
+CMD alembic upgrade head && uvicorn app.main:app --host ${API_HOST_ADDRESS} --port ${API_HOST_PORT}
