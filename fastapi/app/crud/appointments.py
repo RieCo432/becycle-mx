@@ -118,17 +118,17 @@ def get_appointments_by_datetime(db: Session, dt: datetime) -> list[models.Appoi
 
 
 def get_remaining_concurrent_appointments_for_each_slot(db: Session) -> dict[date, dict[time, int]]:
-    maximum_concurrent_appointments_for_each_slot = get_maximum_concurrent_appointments_for_each_slot(db=db)
+    maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment = get_maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment(db=db)
 
     remaining_concurrent_appointments_for_each_slot = {}
 
-    for d in maximum_concurrent_appointments_for_each_slot.keys():
+    for d in maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment.keys():
         remaining_concurrent_appointments_for_each_slot[d] = {}
-        for t in maximum_concurrent_appointments_for_each_slot[d].keys():
+        for t in maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment[d].keys():
             # for each 15-minute slot get the non-cancelled appointments that will be happening at that date and time
             appointments_on_slot = get_appointments_by_datetime(db=db, dt=datetime.combine(d, t))
             # subtract the number of booked appointments from the maximum number of concurrent appointments
-            remaining_concurrent_appointments_for_each_slot[d][t] = (maximum_concurrent_appointments_for_each_slot[d][t]
+            remaining_concurrent_appointments_for_each_slot[d][t] = (maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment[d][t]
                                                                      - len(appointments_on_slot))
 
     return remaining_concurrent_appointments_for_each_slot
