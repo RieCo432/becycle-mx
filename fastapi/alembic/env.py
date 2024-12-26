@@ -10,9 +10,8 @@ from dotenv import load_dotenv
 
 print(path.join(Path(__file__).parents[1], "local-api.env"))
 
-load_dotenv(path.join(Path(__file__).parents[2], "secrets", "postgres.env"))
-load_dotenv(path.join(Path(__file__).parents[2], "secrets", "api.env"))
-load_dotenv(path.join(Path(__file__).parents[1], "local-api.env"))
+if "POSTGRES_HOST" not in os.environ:
+    load_dotenv(path.join(Path(__file__).parents[1], "local-api.env"))
 
 from app.models import *
 from app.database.db import engine, SQLALCHEMY_DATABASE_URL, Base
