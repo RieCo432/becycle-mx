@@ -30,6 +30,7 @@ class PatchAppointmentGeneralSettings(BaseModel):
     minBookAhead: int | None = None
     maxBookAhead: int | None = None
     slotDuration: int | None = None
+    gradualAvailability: bool | None = None
 
 
 class AppointmentConcurrencyLimit(BaseModel):
