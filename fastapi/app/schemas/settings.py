@@ -23,6 +23,7 @@ class AppointmentGeneralSettings(BaseModel):
     minBookAhead: int
     maxBookAhead: int
     slotDuration: int
+    gradualAvailability: bool
 
 
 class PatchAppointmentGeneralSettings(BaseModel):

@@ -7,12 +7,14 @@ import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import Textinput from '@/components/Textinput/index.vue';
 import Button from '@/components/Button/index.vue';
-import {ref} from 'vue';
+import {ref, onBeforeMount} from 'vue';
+import Switch from '@/components/Switch';
 const toast = useToast();
 
 export default {
   name: 'EditAppointmentGeneralSettingsCard',
   components: {
+    Switch,
     Button,
     Textinput,
     Card,
@@ -57,6 +59,7 @@ export default {
       minBookAhead: yup.number().integer().min(0, 'Must be at least 0').max(yup.ref('maxBookAhead'), 'Must be less than Max Book Ahead'),
       maxBookAhead: yup.number().integer().min(yup.ref('minBookAhead'), 'Must be more than Min Book Ahead'),
       slotDuration: yup.number().integer().positive(),
+      gradualAvailability: yup.bool(),
     });
 
     const {handleSubmit: handleAppointmentGeneralSettingsSubmit} = useForm({
@@ -68,17 +71,15 @@ export default {
     const {value: minBookAhead, errorMessage: minBookAheadError, resetField: resetMinBookAheadField} = useField('minBookAhead');
     const {value: maxBookAhead, errorMessage: maxBookAheadError, resetField: resetMaxBookAheadField} = useField('maxBookAhead');
     const {value: slotDuration, errorMessage: slotDurationError, resetField: resetSlotDurationField} = useField('slotDuration');
+    const {value: gradualAvailability, resetField: resetGradualAvailabilityField} = useField('gradualAvailability');
 
     const setFields = (data) => {
       resetOpeningDaysField({value: openingDaysOptions.value.filter((day) => (data.openingDays.includes(day.value)))});
       resetMinBookAheadField({value: data.minBookAhead.toString()});
       resetMaxBookAheadField({value: data.maxBookAhead.toString()});
       resetSlotDurationField({value: data.slotDuration.toString()});
+      resetGradualAvailabilityField({value: data.gradualAvailability});
     };
-
-    requests.getAppointmentGeneralSettings().then((response) => {
-      setFields(response.data);
-    });
 
     const patchAppointmentGeneralSettings = handleAppointmentGeneralSettingsSubmit(() => {
       console.log('Update');
@@ -87,11 +88,18 @@ export default {
         minBookAhead: parseInt(minBookAhead.value),
         maxBookAhead: parseInt(maxBookAhead.value),
         slotDuration: parseInt(slotDuration.value),
+        gradualAvailability: gradualAvailability.value,
       }).then((response) => {
         toast.success('Appointment General Settings updated', {timeout: 2000});
         setFields(response.data);
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+    });
+
+    onBeforeMount(() => {
+      requests.getAppointmentGeneralSettings().then((response) => {
+        setFields(response.data);
       });
     });
 
@@ -109,6 +117,8 @@ export default {
       slotDuration,
       slotDurationError,
       resetSlotDurationField,
+      gradualAvailability,
+      resetGradualAvailabilityField,
       patchAppointmentGeneralSettings,
     };
   },
@@ -150,7 +160,7 @@ export default {
                 :error="maxBookAheadError"
             />
           </div>
-          <div class="col-span-12">
+          <div class="col-span-6">
             <Textinput
                 label="Slot Duration"
                 type="text"
@@ -158,6 +168,17 @@ export default {
                 name="slotDuration"
                 v-model="slotDuration"
                 :error="slotDurationError"
+            />
+          </div>
+          <div class="col-span-6">
+            <label
+              class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+              Gradual Availability
+            </label>
+            <Switch
+              name="gradualAvailability"
+              active-class="bg-primary-500"
+              v-model="gradualAvailability"
             />
           </div>
           <div class="col-span-12">
