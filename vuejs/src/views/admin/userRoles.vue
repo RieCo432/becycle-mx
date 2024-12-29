@@ -222,7 +222,7 @@ export default {
     };
   },
   methods: {
-    patchUser(userId, patchData, failureCallback) {
+    patchUser(userId, patchData) {
       requests.patchUser(userId, patchData)
         .then((response) => {
           const indexInArray = this.userData.findIndex((user) => (user.id === userId));
@@ -231,7 +231,7 @@ export default {
         })
         .catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
-          failureCallback();
+          // failureCallback();
         });
     },
     getUserData() {

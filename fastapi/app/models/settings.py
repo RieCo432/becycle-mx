@@ -14,6 +14,7 @@ class AppointmentGeneralSettings(Base):
     minBookAhead: Mapped[int] = mapped_column("minbookahead", Integer, nullable=False, quote=False)
     maxBookAhead: Mapped[int] = mapped_column("maxbookahead", Integer, nullable=False, quote=False)
     slotDuration: Mapped[int] = mapped_column("slotduration", Integer, nullable=False, quote=False)
+    gradualAvailability: Mapped[bool] = mapped_column("gradualavailability", Boolean, nullable=False, quote=False, default=False, server_default=text("FALSE"))
 
 
 class AppointmentConcurrencyLimit(Base):

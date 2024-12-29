@@ -1,3 +1,4 @@
+import math
 from copy import copy
 from datetime import date, datetime, time
 
@@ -32,6 +33,8 @@ def update_appointment_general_settings(db: Session, updated_appointment_setting
         appointment_general_settings.maxBookAhead = updated_appointment_settings.maxBookAhead
     if updated_appointment_settings.slotDuration is not None:
         appointment_general_settings.slotDuration = updated_appointment_settings.slotDuration
+    if updated_appointment_settings.gradualAvailability is not None:
+        appointment_general_settings.gradualAvailability = updated_appointment_settings.gradualAvailability
 
     db.commit()
     return appointment_general_settings
@@ -186,6 +189,11 @@ def get_opening_week_days(db: Session) -> list[int]:
         select(models.AppointmentGeneralSettings.openingDays)
     )
 
+def get_gradual_availability(db: Session) -> bool:
+    return db.scalar(
+        select(models.AppointmentGeneralSettings.gradualAvailability)
+    )
+
 
 def get_opening_hours(db: Session) -> dict[str, time]:
     open_time = db.scalar(
@@ -214,7 +222,7 @@ def get_slot_duration(db: Session) -> int:
     )
 
 
-def get_open_days(db: Session) -> list[date]:
+def get_open_days_in_booking_period(db: Session) -> list[date]:
     period_start = datetime.utcnow().date() + relativedelta(days=get_min_book_ahead(db=db))
     period_end = datetime.utcnow().date() + relativedelta(days=get_max_book_ahead(db=db))
 
@@ -267,10 +275,31 @@ def get_maximum_concurrent_appointments_for_each_slot(db: Session) -> dict[date,
 
     maximum_concurrent_appointments_for_each_slot = {
         d: copy(maximum_concurrent_appointments_for_each_slot_of_day)
-        for d in get_open_days(db=db)
+        for d in get_open_days_in_booking_period(db=db)
     }
 
     return maximum_concurrent_appointments_for_each_slot
+
+
+def get_maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment(db: Session) -> dict[date, dict[time, int]]:
+    maximum_concurrent_appointments_for_each_slot = get_maximum_concurrent_appointments_for_each_slot(db=db)
+
+    maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment = {}
+
+    min_book_ahead = get_min_book_ahead(db=db)
+    max_book_ahead = get_max_book_ahead(db=db)
+
+    for d in maximum_concurrent_appointments_for_each_slot.keys():
+        maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment[d] = {}
+        days_from_today = (d - datetime.utcnow().date()).days - 1  # we don't want to live right on the edge
+
+        adjustment_factor = (max_book_ahead - days_from_today) / (max_book_ahead - min_book_ahead) if get_gradual_availability(db=db) else 1
+
+        for t in maximum_concurrent_appointments_for_each_slot[d].keys():
+            maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment[d][t] = (math.ceil(
+                    adjustment_factor * maximum_concurrent_appointments_for_each_slot[d][t]))
+
+    return maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment
 
 
 def get_address(db: Session) -> models.Address:
