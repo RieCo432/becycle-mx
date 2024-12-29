@@ -8,7 +8,6 @@ import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import Textinput from '@/components/Textinput/index.vue';
-import Select from '@/components/Select/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import Button from '@/components/Button/index.vue';
 import CreateNewAppointmentTypeCard from '@/components/Card/CreateNewAppointmentTypeCard.vue';
@@ -21,7 +20,6 @@ export default {
     CreateNewAppointmentTypeCard,
     Button,
     Checkbox,
-    Select,
     Textinput,
     AppointmentTypesTable,
     Card,
@@ -35,7 +33,8 @@ export default {
     const editAppointmentTypeSchema = yup.object().shape({
       editAppointmentTypeTitle: yup.string().max(30).required('Appointment Type Title is required'),
       editAppointmentTypeDescription: yup.string().max(300).required('Appointment Type description is required'),
-      editAppointmentTypeDuration: yup.number().integer('Duration must be an integer number of minutes').positive('Duration must be a positive number of minutes').required('Duration is required'),
+      editAppointmentTypeDuration: yup.number().integer('Duration must be an integer number of minutes')
+        .positive('Duration must be a positive number of minutes').required('Duration is required'),
       editAppointmentTypeActive: yup.bool(),
     });
 
@@ -44,9 +43,12 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: editAppointmentTypeTitle, errorMessage: editAppointmentTypeTitleError, resetField: resetEditAppointmentTypeTitleField} = useField('editAppointmentTypeTitle');
-    const {value: editAppointmentTypeDescription, errorMessage: editAppointmentTypeDescriptionError, resetField: resetEditAppointmentTypeDescriptionField} = useField('editAppointmentTypeDescription');
-    const {value: editAppointmentTypeDuration, errorMessage: editAppointmentTypeDurationError, resetField: resetEditAppointmentTypeDurationField} = useField('editAppointmentTypeDuration');
+    const {value: editAppointmentTypeTitle, errorMessage: editAppointmentTypeTitleError,
+      resetField: resetEditAppointmentTypeTitleField} = useField('editAppointmentTypeTitle');
+    const {value: editAppointmentTypeDescription, errorMessage: editAppointmentTypeDescriptionError,
+      resetField: resetEditAppointmentTypeDescriptionField} = useField('editAppointmentTypeDescription');
+    const {value: editAppointmentTypeDuration, errorMessage: editAppointmentTypeDurationError,
+      resetField: resetEditAppointmentTypeDurationField} = useField('editAppointmentTypeDuration');
     const {value: editAppointmentTypeActive, resetField: resetEditAppointmentTypeActiveField} = useField('editAppointmentTypeActive');
 
     const patchEditAppointmentTypeSubmit = handleEditAppointmentTypeSubmit(() => {
@@ -56,7 +58,8 @@ export default {
         duration: editAppointmentTypeDuration.value,
         active: editAppointmentTypeActive.value,
       }).then((response) => {
-        const indexInArray = appointmentTypes.value.findIndex((appointmentType) => (appointmentType.id === editAppointmentTypeModalInfo.value.id));
+        const indexInArray = appointmentTypes.value
+          .findIndex((appointmentType) => (appointmentType.id === editAppointmentTypeModalInfo.value.id));
         appointmentTypes.value.splice(indexInArray, 1, response.data);
         toast.success('Appointment Type updated', {timeout: 2000});
       }).catch((error) => {
@@ -88,39 +91,40 @@ export default {
   methods: {
     openEditAppointmentTypeModal(appointmentTypeId) {
       this.showEditAppointmentTypeModal = !this.showEditAppointmentTypeModal;
-      this.editAppointmentTypeModalInfo = this.appointmentTypes[this.appointmentTypes.findIndex((appointmentType) => (appointmentType.id === appointmentTypeId))];
+      this.editAppointmentTypeModalInfo = this.appointmentTypes[this.appointmentTypes
+        .findIndex((appointmentType) => (appointmentType.id === appointmentTypeId))];
       this.resetEditAppointmentTypeTitleField(
-          {
-            value: this.editAppointmentTypeModalInfo.title,
-          },
+        {
+          value: this.editAppointmentTypeModalInfo.title,
+        },
       );
       this.resetEditAppointmentTypeDescriptionField(
-          {
-            value: this.editAppointmentTypeModalInfo.description,
-          },
+        {
+          value: this.editAppointmentTypeModalInfo.description,
+        },
       );
       this.resetEditAppointmentTypeDurationField(
-          {
-            value: this.editAppointmentTypeModalInfo.duration.toString(),
-          },
+        {
+          value: this.editAppointmentTypeModalInfo.duration.toString(),
+        },
       );
       this.resetEditAppointmentTypeActiveField(
-          {
-            value: this.editAppointmentTypeModalInfo.active,
-          },
+        {
+          value: this.editAppointmentTypeModalInfo.active,
+        },
       );
     },
-    patchAppointmentType(appointmentTypeId, patchData, failureCallback) {
+    patchAppointmentType(appointmentTypeId, patchData) {
       requests.patchAppointmentType(appointmentTypeId, patchData)
-          .then((response) => {
-            const indexInArray = this.appointmentTypes.findIndex((appointmentType) => (appointmentType.id === appointmentTypeId));
-            this.appointmentTypes.splice(indexInArray, 1, response.data);
-            toast.success('Appointment Type updated', {timeout: 2000});
-          })
-          .catch((error) => {
-            toast.error(error.response.data.detail.description, {timeout: 2000});
-            failureCallback();
-          });
+        .then((response) => {
+          const indexInArray = this.appointmentTypes.findIndex((appointmentType) => (appointmentType.id === appointmentTypeId));
+          this.appointmentTypes.splice(indexInArray, 1, response.data);
+          toast.success('Appointment Type updated', {timeout: 2000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+          // failureCallback();
+        });
     },
   },
   data() {
@@ -183,7 +187,8 @@ export default {
                 :table-data="appointmentTypes"
                 :patch-appointment-type="patchAppointmentType"
             ></AppointmentTypesTable>
-            <Modal :title="`Edit Appointment Type ${editAppointmentTypeModalInfo.id}`" :active-modal="showEditAppointmentTypeModal" @close="showEditAppointmentTypeModal = !showEditAppointmentTypeModal">
+            <Modal :title="`Edit Appointment Type ${editAppointmentTypeModalInfo.id}`"
+                   :active-modal="showEditAppointmentTypeModal" @close="showEditAppointmentTypeModal = !showEditAppointmentTypeModal">
               <div class="grid grid-cols-12">
                 <div class="col-span-12">
                   <form @submit.prevent="patchEditAppointmentTypeSubmit" class="space-y-4">
@@ -228,7 +233,8 @@ export default {
       </Card>
     </div>
     <div class="2xl:col-span-3 col-span-12">
-      <CreateNewAppointmentTypeCard @new-appointment-type-created="(newAppointmentType) => appointmentTypes.push(newAppointmentType)"></CreateNewAppointmentTypeCard>
+      <CreateNewAppointmentTypeCard @new-appointment-type-created="(newAppointmentType) => appointmentTypes.push(newAppointmentType)">
+      </CreateNewAppointmentTypeCard>
     </div>
   </div>
 </template>

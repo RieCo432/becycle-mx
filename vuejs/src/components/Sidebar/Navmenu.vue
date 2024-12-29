@@ -248,7 +248,9 @@ export default {
 // menu item has chilren
 .item-has-children {
   .menu-arrow {
-    @apply h-5 w-5 text-base text-slate-300 bg-slate-100 dark:bg-[#334155] dark:text-slate-300 rounded-full flex justify-center items-center;
+    @apply h-5 w-5 text-base text-slate-300 bg-slate-100
+           dark:bg-[#334155] dark:text-slate-300 rounded-full
+           flex justify-center items-center;
   }
 }
 
@@ -263,7 +265,9 @@ export default {
   }
   .single-sidebar-menu {
     .text-box {
-      @apply absolute  left-full ml-5 w-[180px] top-0 px-4 py-3 bg-white shadow-dropdown rounded-[4px] dark:bg-slate-800 z-[999] invisible opacity-0 transition-all duration-150;
+      @apply absolute left-full ml-5 w-[180px] top-0 px-4 py-3 bg-white shadow-dropdown
+             rounded-[4px] dark:bg-slate-800 z-[999] invisible opacity-0 transition-all
+             duration-150;
     }
     &:hover {
       .text-box {
@@ -277,7 +281,11 @@ export default {
     }
 
     > ul {
-      @apply ml-4 absolute left-full top-0 w-[230px] bg-white shadow-dropdown rounded-[4px] dark:bg-slate-800 z-[999] px-4 pt-3 transition-all duration-150 invisible opacity-0;
+      @apply ml-4 absolute left-full top-0 w-[230px]
+             bg-white shadow-dropdown rounded-[4px]
+             dark:bg-slate-800 z-[999] px-4 pt-3
+             transition-all duration-150 invisible
+             opacity-0;
       display: block !important;
     }
     &:hover {

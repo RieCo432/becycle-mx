@@ -1077,7 +1077,8 @@ def add_appointment_settings(db: Session) -> models.AppointmentGeneralSettings:
         openingDays=[0, 2],
         minBookAhead=2,
         maxBookAhead=21,
-        slotDuration=15
+        slotDuration=15,
+        gradualAvailability=True
     )
 
     db.add(appointment_settings)

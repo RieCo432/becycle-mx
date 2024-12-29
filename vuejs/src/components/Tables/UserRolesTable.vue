@@ -33,7 +33,7 @@
           selectionText: 'rows selected',
           clearSelectionText: 'clear',
           disableSelectinfo: true, // disable the select info-500 panel on top
-          selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
+          selectAllByGroup: true,
         }"
       >
         <template v-slot:table-row="props">
@@ -51,53 +51,53 @@
             <Switch
                 :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
-                :model-value="props.row.admin"
-                @updateWithCallback="(eventObj) => patchUser(props.row.id, {admin: eventObj.newValue}, eventObj.failureCallback)"
+                v-model="props.row.admin"
+                @update="(newValue) => patchUser(props.row.id, {admin: newValue})"
             />
           </span>
           <span v-if="props.column.field === 'depositBearer'" class="flex">
             <Switch
                 :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
-                :model-value="props.row.depositBearer"
-                @updateWithCallback="(eventObj) => patchUser(props.row.id, {depositBearer: eventObj.newValue}, eventObj.failureCallback)"
+                v-model="props.row.depositBearer"
+                @update="(newValue) => patchUser(props.row.id, {depositBearer: newValue})"
             />
           </span>
           <span v-if="props.column.field === 'rentalChecker'" class="flex">
             <Switch
                 :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
-                :model-value="props.row.rentalChecker"
-                @updateWithCallback="(eventObj) => patchUser(props.row.id, {rentalChecker: eventObj.newValue}, eventObj.failureCallback)"
+                v-model="props.row.rentalChecker"
+                @update="(newValue) => patchUser(props.row.id, {rentalChecker: newValue})"
             />
           </span>
           <span v-if="props.column.field === 'appointmentManager'" class="flex">
             <Switch
                 :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
-                :model-value="props.row.appointmentManager"
-                @updateWithCallback="(eventObj) => patchUser(props.row.id, {appointmentManager: eventObj.newValue}, eventObj.failureCallback)"
+                v-model="props.row.appointmentManager"
+                @update="(newValue) => patchUser(props.row.id, {appointmentManager: newValue})"
             />
           </span>
           <span v-if="props.column.field === 'treasurer'" class="flex">
             <Switch
                 :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
-                :model-value="props.row.treasurer"
-                @updateWithCallback="(eventObj) => patchUser(props.row.id, {treasurer: eventObj.newValue}, eventObj.failureCallback)"
+                v-model="props.row.treasurer"
+                @update="(newValue) => patchUser(props.row.id, {treasurer: newValue})"
             />
           </span>
           <span v-if="props.column.field === 'softDeleted'" class="flex">
             <Switch
                 :disabled="!userIsAdmin"
                 active-class="bg-primary-500"
-                :model-value="props.row.softDeleted"
-                @updateWithCallback="(eventObj) => patchUser(props.row.id, {softDeleted: eventObj.newValue}, eventObj.failureCallback)"
+                v-model="props.row.softDeleted"
+                @update="(newValue) => patchUser(props.row.id, {softDeleted: newValue})"
             />
           </span>
           <span v-if="props.column.field == 'actions'">
             <div class="flex space-x-3 rtl:space-x-reverse">
-                <Tooltip placement="top" arrow theme="dark" v-for="action in actions">
+                <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
                   <template #button>
                     <div class="action-btn">
                       <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
@@ -127,12 +127,10 @@
   </div>
 </template>
 <script>
-import Dropdown from '@/components/Dropdown';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import InputGroup from '@/components/InputGroup';
 import Pagination from '@/components/Pagination';
-import {MenuItem} from '@headlessui/vue';
 import Tooltip from '@/components/Tooltip';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 import Switch from '@/components/Switch';
@@ -142,10 +140,8 @@ export default {
   components: {
     Pagination,
     InputGroup,
-    Dropdown,
     Icon,
     Card,
-    MenuItem,
     Tooltip,
     TableSkeleton,
     Switch,

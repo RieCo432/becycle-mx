@@ -82,7 +82,8 @@ export default {
             v-for="concurrencyLimit in concurrencyLimits"
             :concurrency-limit="concurrencyLimit"
             :key="concurrencyLimit.afterTime"
-            @concurrency-limit-adjusted="(updatedConcurrencyLimit) => handleConcurrencyLimitAdjusted(concurrencyLimit.afterTime, updatedConcurrencyLimit)"
+            @concurrency-limit-adjusted="(updatedConcurrencyLimit) =>
+              handleConcurrencyLimitAdjusted(concurrencyLimit.afterTime, updatedConcurrencyLimit)"
             @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.afterTime)"
             class="h-full"
         ></AppointmentConcurrencySlider>

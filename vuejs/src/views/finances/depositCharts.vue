@@ -139,13 +139,15 @@ export default {
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
         const newStartDate = new Date(xaxis.min);
-        this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${newStartDate.getUTCDate().toString().padStart(2, '0')}`;
+        this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString()
+          .padStart(2, '0')}-${newStartDate.getUTCDate().toString().padStart(2, '0')}`;
       } else {
         this.startDate = null;
       }
       if (xaxis.max) {
         const newEndDate = new Date(xaxis.max);
-        this.endDate = `${newEndDate.getUTCFullYear()}-${(newEndDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${newEndDate.getUTCDate().toString().padStart(2, '0')}`;
+        this.endDate = `${newEndDate.getUTCFullYear()}-${(newEndDate.getUTCMonth() + 1).toString()
+          .padStart(2, '0')}-${newEndDate.getUTCDate().toString().padStart(2, '0')}`;
       } else {
         this.endDate = null;
       }
@@ -240,7 +242,8 @@ export default {
       <Card title="Total Deposits Collected">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="totalDepositsSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="chartOptions" :series="totalDepositsSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -249,7 +252,8 @@ export default {
       <Card title="Claimable Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="claimableDepositsSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="chartOptions" :series="claimableDepositsSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -258,7 +262,8 @@ export default {
       <Card title="Collected Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="depositsCollectedSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="chartOptions" :series="depositsCollectedSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -267,7 +272,8 @@ export default {
       <Card title="Returned Deposits">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="chartOptions" :series="depositsReturnedSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="chartOptions" :series="depositsReturnedSeries"></apexchart>
           </div>
         </div>
       </Card>

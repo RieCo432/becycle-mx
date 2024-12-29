@@ -34,7 +34,7 @@
           selectionText: 'rows selected',
           clearSelectionText: 'clear',
           disableSelectinfo: true, // disable the select info-500 panel on top
-          selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
+          selectAllByGroup: true,
         }"
       >
         <template #pagination-top="props">
@@ -56,23 +56,26 @@
             v-if="props.column.field == 'startDate'"
             class="text-slate-500 dark:text-slate-300"
           >
-            {{ new Date(Date.parse(props.row.startDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+            {{ new Date(Date.parse(props.row.startDate))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span
               v-if="props.column.field == 'endDate'"
               class="text-slate-500 dark:text-slate-300"
           >
-            {{ new Date(Date.parse(props.row.endDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+            {{ new Date(Date.parse(props.row.endDate))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span
               v-if="props.column.field == 'returnedDate'"
               class="text-slate-500 dark:text-slate-300"
           >
-            {{ props.row.returnedDate ? new Date(Date.parse(props.row.returnedDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) : 'n/a' }}
+            {{ props.row.returnedDate ? new Date(Date.parse(props.row.returnedDate))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) : 'n/a' }}
           </span>
           <span v-if="props.column.field == 'action'">
             <div class="flex space-x-3 rtl:space-x-reverse">
-                <Tooltip placement="top" arrow theme="dark" v-for="action in actions">
+                <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
                   <template #button>
                     <div class="action-btn">
                       <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
@@ -88,12 +91,10 @@
   </div>
 </template>
 <script>
-import Dropdown from '@/components/Dropdown';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import InputGroup from '@/components/InputGroup';
 import Pagination from '@/components/Pagination';
-import {MenuItem} from '@headlessui/vue';
 import Tooltip from '@/components/Tooltip';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
@@ -102,10 +103,8 @@ export default {
   components: {
     Pagination,
     InputGroup,
-    Dropdown,
     Icon,
     Card,
-    MenuItem,
     Tooltip,
     TableSkeleton,
   },

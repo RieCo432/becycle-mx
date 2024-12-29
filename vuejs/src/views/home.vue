@@ -4,17 +4,24 @@
             <Card title="Welcome to BECYCLE">
                 <div class="grid grid-cols-12 h-full gap-5">
                   <div class="col-span-12">
-                    <p class="text-base text-slate-700 dark:text-slate-300">This is the official website for BECYCLE Workshop SCIO, the community bicycle library and workshop in Aberdeen.</p><br>
-                    <p class="text-base text-slate-700 dark:text-slate-300" v-if="address">We are located at:<br>{{ address.number }} {{ address.street }}<br>{{ address.postcode }}, {{ address.city }}</p><br>
-                    <p class="text-base text-slate-700 dark:text-slate-300">You can donate to our cause via PayPal:<br>
-                      <!--<PayPalButton></PayPalButton>-->
+                    <p class="text-base text-slate-700 dark:text-slate-300">
+                        This is the official website for BECYCLE Workshop SCIO,
+                        the community bicycle library and workshop in Aberdeen.</p><br>
+                    <p class="text-base text-slate-700 dark:text-slate-300" v-if="address">
+                        We are located at:<br>
+                        {{ address.number }} {{ address.street }}<br>
+                        {{ address.postcode }}, {{ address.city }}</p><br>
+                    <span class="text-base text-slate-700 dark:text-slate-300">You can donate to our cause via PayPal:</span><br>
                       <div id="donate-button-container">
                         <div id="donate-button"></div>
                       </div>
-                    </p>
                     <p class="text-base text-slate-700 dark:text-slate-300">You can contact us directly on social media:<br>
-                      <a href="https://facebook.com/beCyCleWorkshop/"><img src="/src/assets/images/social/Facebook_Logo_Primary.png" class="w-[32px] h-[32px] m-[16px] inline" alt="Facebook"/></a>
-                      <a href="https://instagram.com/becycleworkshop/"><img src="/src/assets/images/social/Instagram_Glyph_Gradient.png" class="w-[32px] h-[32px] m-[16px] inline" alt="Instagram"/></a>
+                      <a href="https://facebook.com/beCyCleWorkshop/">
+                          <img src="/src/assets/images/social/Facebook_Logo_Primary.png"
+                               class="w-[32px] h-[32px] m-[16px] inline" alt="Facebook"/></a>
+                      <a href="https://instagram.com/becycleworkshop/">
+                          <img src="/src/assets/images/social/Instagram_Glyph_Gradient.png"
+                               class="w-[32px] h-[32px] m-[16px] inline" alt="Instagram"/></a>
                     </p>
                   </div>
                   <div v-if="isNotUser" class="md:col-span-4 col-span-6 mt-auto">
@@ -43,7 +50,10 @@
                     enabled: false
                   }"/>
               <div v-if="nextClosedDay" class="mt-3">
-                <p class="dark:text-danger-500">We will be closed on {{ new Date(Date.parse(nextClosedDay.date)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</p>
+                <p class="dark:text-danger-500">
+                    We will be closed on {{ new Date(Date.parse(nextClosedDay.date))
+                    .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+                </p>
               </div>
             </Card>
         </div>
@@ -61,7 +71,7 @@ const credentialsStore = useCredentialsStore();
 export default {
   components: {
     DashButton,
-    Card
+    Card,
   },
   data() {
     return {
@@ -124,6 +134,7 @@ export default {
       document.head.insertBefore(s, document.head.firstElementChild);
     }
     loadAsync('https://www.paypalobjects.com/donate/sdk/donate-sdk.js', function() {
+      // eslint-disable-next-line new-cap
       PayPal.Donation.Button({
         env: 'production',
         hosted_button_id: '5XHLXRAKWQEEN',
@@ -134,6 +145,7 @@ export default {
         },
       }).render('#donate-button');
     });
+    loadAsync('https://app.termly.io/resource-blocker/cfac8041-9e2d-4f64-9c8b-1ba418ea07a1?autoBlock=on');
   },
 };
 

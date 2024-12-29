@@ -21,7 +21,8 @@
           />
           <span
             :class="item.value === footer ? 'shadow-inset-4' : ''"
-            class="flex-none h-4 w-4 bg-white dark:bg-transparent rounded-full border border-secondary-500 inline-block ltr:mr-3 rtl:ml-3 transition-all duration-150"
+            class="flex-none h-4 w-4 bg-white dark:bg-transparent rounded-full border border-secondary-500 inline-block
+                   ltr:mr-3 rtl:ml-3 transition-all duration-150"
           ></span>
           {{ item.label }}
         </label>
@@ -57,24 +58,24 @@ export default {
     footer: {
       handler() {
         switch (this.footer) {
-          case 'floating':
-            this.$store.themeSettingsStore.footerType = this.footer;
+        case 'floating':
+          this.$store.themeSettingsStore.footerType = this.footer;
 
-            break;
-          case 'sticky':
-            this.$store.themeSettingsStore.footerType = this.footer;
+          break;
+        case 'sticky':
+          this.$store.themeSettingsStore.footerType = this.footer;
 
-            break;
-          case 'static':
-            this.$store.themeSettingsStore.footerType = this.footer;
+          break;
+        case 'static':
+          this.$store.themeSettingsStore.footerType = this.footer;
 
-            break;
-          case 'hidden':
-            this.$store.themeSettingsStore.footerType = this.footer;
+          break;
+        case 'hidden':
+          this.$store.themeSettingsStore.footerType = this.footer;
 
-            break;
-          default:
-            this.$store.themeSettingsStore.footerType = this.footer;
+          break;
+        default:
+          this.$store.themeSettingsStore.footerType = this.footer;
         }
       },
       immediate: true,

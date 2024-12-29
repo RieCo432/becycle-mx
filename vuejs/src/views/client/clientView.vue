@@ -137,17 +137,7 @@ export default {
       ],
 
       appointmentActions: [
-        /*{
-          label: 'Edit Notes',
-          id: 'edit',
-          icon: 'heroicons:pencil-square',
-        },*/
-        /*{
-          label: 'Reschedule',
-          id: 'reschedule',
-          icon: 'heroicons:clock',
-        },*/
-          ...!this.isClient ? [{
+        ...!this.isClient ? [{
           label: 'Confirm Appointment',
           id: 'confirm',
           icon: 'heroicons-outline:check',
@@ -268,7 +258,11 @@ export default {
                   :active-modal="showCancelAppointmentModal"
                   title="Are you sure you want to cancel this appointment?"
                   @close="showCancelAppointmentModal = false">
-                <p class="text-slate-700 dark:text-slate-300">Date and Time: {{ new Date(Date.parse(cancelAppointmentModalInfo.startDateTime)).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: "2-digit", minute: "2-digit", hour12: false, }) }}</p>
+                <p class="text-slate-700 dark:text-slate-300">
+                    Date and Time: {{ new Date(Date.parse(cancelAppointmentModalInfo.startDateTime))
+                    .toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+                        hour: "2-digit", minute: "2-digit", hour12: false, }) }}
+                </p>
                 <p class="text-slate-700 dark:text-slate-300">Type: {{ cancelAppointmentModalInfo.type }}</p>
                 <p class="text-slate-700 dark:text-slate-300">Notes: {{ cancelAppointmentModalInfo.notes }}</p>
 

@@ -2,7 +2,7 @@
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
 import Textinput from '@/components/Textinput/index.vue';
-import {ref, toRef} from 'vue';
+import {toRef} from 'vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
@@ -67,7 +67,7 @@ export default {
     };
   },
   emits: [
-      'bikeDetailsUpdated',
+    'bikeDetailsUpdated',
   ],
   props: {
     bike: {

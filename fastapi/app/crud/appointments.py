@@ -13,9 +13,12 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
 
     required_consecutive_slots = math.ceil(appointment_type.duration / get_slot_duration(db=db))
 
+    remaining_concurrent_appointments_for_each_slot = get_remaining_concurrent_appointments_for_each_slot(db=db)
+
     if (not ignore_limits
             and not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots,
-                                                                dt=appointment_data.startDateTime)):
+                                                                dt=appointment_data.startDateTime,
+                                                                remaining_concurrent_appointments_for_each_slot=remaining_concurrent_appointments_for_each_slot)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Someone just requested this slot. Refreshing list... Please choose a new slot."},
@@ -115,31 +118,24 @@ def get_appointments_by_datetime(db: Session, dt: datetime) -> list[models.Appoi
 
 
 def get_remaining_concurrent_appointments_for_each_slot(db: Session) -> dict[date, dict[time, int]]:
-    maximum_concurrent_appointments_for_each_slot = get_maximum_concurrent_appointments_for_each_slot(db=db)
+    maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment = get_maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment(db=db)
 
     remaining_concurrent_appointments_for_each_slot = {}
 
-    for d in maximum_concurrent_appointments_for_each_slot.keys():
+    for d in maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment.keys():
         remaining_concurrent_appointments_for_each_slot[d] = {}
-        for t in maximum_concurrent_appointments_for_each_slot[d].keys():
+        for t in maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment[d].keys():
             # for each 15-minute slot get the non-cancelled appointments that will be happening at that date and time
             appointments_on_slot = get_appointments_by_datetime(db=db, dt=datetime.combine(d, t))
             # subtract the number of booked appointments from the maximum number of concurrent appointments
-            remaining_concurrent_appointments_for_each_slot[d][t] = (maximum_concurrent_appointments_for_each_slot[d][t]
+            remaining_concurrent_appointments_for_each_slot[d][t] = (maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment[d][t]
                                                                      - len(appointments_on_slot))
 
     return remaining_concurrent_appointments_for_each_slot
 
 
 def are_consecutive_slots_available_on_datetime(db: Session, n_slots: int, dt: datetime,
-                                                remaining_concurrent_appointments_for_each_slot: dict[date, dict[
-                                                    time, int]] | None = None) -> bool:
-    # if called as part of regular availability query, this dict can be passed in order to save time on not having to compute it again
-    # but at the moment that the appointment is recorded, availability should be re-checked, so in that case this method
-    # has to load the availability from scratch
-    if remaining_concurrent_appointments_for_each_slot is None:
-        remaining_concurrent_appointments_for_each_slot = get_remaining_concurrent_appointments_for_each_slot(db=db)
-
+                                                remaining_concurrent_appointments_for_each_slot: dict[date, dict[time, int]]) -> bool:
     slot_duration = get_slot_duration(db=db)
 
     # starting at dt + 0, check if the remaining number of slots available for each consecutive slot is higher than 0

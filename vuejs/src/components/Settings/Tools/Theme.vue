@@ -20,7 +20,8 @@
 
           <span
             :class="item.value === theme ? 'shadow-inset-4' : ''"
-            class="flex-none h-4 w-4 bg-white dark:bg-transparent rounded-full border border-secondary-500 inline-block ltr:mr-3 rtl:ml-3 transition-all duration-150"
+            class="flex-none h-4 w-4 bg-white dark:bg-transparent rounded-full border border-secondary-500 inline-block
+                   ltr:mr-3 rtl:ml-3 transition-all duration-150"
           ></span>
           {{ item.label }}
         </label>
@@ -53,30 +54,30 @@ export default {
     theme: {
       handler() {
         switch (this.theme) {
-          case 'light':
-            this.$store.themeSettingsStore.theme = this.theme;
-            document.body.classList.remove('dark');
-            document.body.classList.add(this.theme);
-            this.$store.themeSettingsStore.isDark = false;
-            localStorage.setItem('theme', this.theme);
-            break;
-          case 'dark':
-            this.$store.themeSettingsStore.theme = this.theme;
+        case 'light':
+          this.$store.themeSettingsStore.theme = this.theme;
+          document.body.classList.remove('dark');
+          document.body.classList.add(this.theme);
+          this.$store.themeSettingsStore.isDark = false;
+          localStorage.setItem('theme', this.theme);
+          break;
+        case 'dark':
+          this.$store.themeSettingsStore.theme = this.theme;
 
-            // set body class by theme name
-            document.body.classList.remove('light');
-            document.body.classList.add(this.theme);
-            this.$store.themeSettingsStore.isDark = true;
-            localStorage.setItem('theme', this.theme);
+          // set body class by theme name
+          document.body.classList.remove('light');
+          document.body.classList.add(this.theme);
+          this.$store.themeSettingsStore.isDark = true;
+          localStorage.setItem('theme', this.theme);
 
-            break;
-          default:
-            this.$store.themeSettingsStore.theme = this.theme;
+          break;
+        default:
+          this.$store.themeSettingsStore.theme = this.theme;
 
-            // set body class by theme name
-            document.body.classList.remove('dark');
-            document.body.classList.add(this.theme);
-            localStorage.setItem('theme', this.theme);
+          // set body class by theme name
+          document.body.classList.remove('dark');
+          document.body.classList.add(this.theme);
+          localStorage.setItem('theme', this.theme);
         }
       },
       immediate: true,

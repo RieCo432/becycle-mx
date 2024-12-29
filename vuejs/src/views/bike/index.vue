@@ -2,7 +2,6 @@
 import Card from '@/components/Card/index.vue';
 import ContractSummaryTable from '@/components/Tables/ContractSummaryTable.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
-import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
 import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkeleton.vue';
@@ -16,7 +15,6 @@ export default {
     EditBikeDetailsModal,
     ContractBikeCardSkeleton,
     DashButton,
-    TableSkeleton,
     Card,
     ContractSummaryTable,
   },

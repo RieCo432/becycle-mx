@@ -11,7 +11,8 @@
             ? 'bg-slate-50 dark:bg-slate-700 dark:bg-opacity-60 rounded-t-md '
             : 'bg-white dark:bg-slate-700  rounded-md'
         "
-        class="flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start text-base text-slate-600 dark:text-slate-300 px-8 py-4"
+        class="flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start
+               text-base text-slate-600 dark:text-slate-300 px-8 py-4"
         @click="activeIndex = activeIndex === i ? null : i"
       >
         {{ item.title }}
@@ -70,17 +71,20 @@ export default {
         {
           title: 'How does Dashcode work?',
           content:
-            'Jornalists call this critical, introductory section the  and when bridge properly executed, it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
+            'Jornalists call this critical, introductory section the  and when bridge properly executed, ' +
+              'it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
         },
         {
           title: 'Where i can learn more about using Dashcode?',
           content:
-            'Jornalists call this critical, introductory section the  and when bridge properly executed, it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
+            'Jornalists call this critical, introductory section the  and when bridge properly executed, ' +
+              'it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
         },
         {
           title: 'Why Dashcode is so important?',
           content:
-            'Jornalists call this critical, introductory section the  and when bridge properly executed, it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
+            'Jornalists call this critical, introductory section the  and when bridge properly executed, ' +
+              'it\'s the that carries your reader from anheadine try at attention-grabbing to the body of your blog post.',
         },
       ],
     },

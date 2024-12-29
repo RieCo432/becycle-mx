@@ -30,14 +30,15 @@ export default {
     });
 
     const newUserSchema = yup.object().shape({
-      username: yup.string().required('Username is required').notOneOf(userData.value.map((user) => (user.username)), 'This username exists already!'),
+      username: yup.string().required('Username is required')
+        .notOneOf(userData.value.map((user) => (user.username)), 'This username exists already!'),
       password: yup
-          .string()
-          .required('Password is required'),
+        .string()
+        .required('Password is required'),
       confirmPassword: yup
-          .string()
-          .required('Confirm Password is required')
-          .oneOf([yup.ref('password')], 'Passwords must match'),
+        .string()
+        .required('Confirm Password is required')
+        .oneOf([yup.ref('password')], 'Passwords must match'),
       pin: yup.string().matches(/^[0-9]{4}$/, 'Must be exactly 4 digits'),
       confirmPin: yup.string().oneOf([yup.ref('pin')], 'PINs must match'),
     });
@@ -62,9 +63,9 @@ export default {
 
     const postNewUser = handleNewUserSubmit(() => {
       console.log(username.value, password.value, pin.value, admin.value, depositBearer.value,
-          rentalChecker.value, appointmentManager.value, treasurer.value);
+        rentalChecker.value, appointmentManager.value, treasurer.value);
       requests.postNewUser(username.value, password.value, pin.value, admin.value, depositBearer.value,
-          rentalChecker.value, appointmentManager.value, treasurer.value).then((response) => {
+        rentalChecker.value, appointmentManager.value, treasurer.value).then((response) => {
         toast.success('User created!', {timeout: 2000});
         userData.value.push(response.data);
       }).finally(() => {
@@ -74,12 +75,12 @@ export default {
 
     const newPasswordSchema = yup.object().shape({
       newPassword: yup
-          .string()
-          .required('Password is required'),
+        .string()
+        .required('Password is required'),
       confirmNewPassword: yup
-          .string()
-          .required('Confirm Password is required')
-          .oneOf([yup.ref('newPassword')], 'Passwords must match'),
+        .string()
+        .required('Confirm Password is required')
+        .oneOf([yup.ref('newPassword')], 'Passwords must match'),
     });
 
     const {handleSubmit: handleNewPasswordSubmit, resetForm: resetNewPasswordForm} = useForm({
@@ -221,17 +222,17 @@ export default {
     };
   },
   methods: {
-    patchUser(userId, patchData, failureCallback) {
+    patchUser(userId, patchData) {
       requests.patchUser(userId, patchData)
-          .then((response) => {
-            const indexInArray = this.userData.findIndex((user) => (user.id === userId));
-            this.userData.splice(indexInArray, 1, response.data);
-            toast.success('User Role updated', {timeout: 1000});
-          })
-          .catch((error) => {
-            toast.error(error.response.data.detail.description, {timeout: 2000});
-            failureCallback();
-          });
+        .then((response) => {
+          const indexInArray = this.userData.findIndex((user) => (user.id === userId));
+          this.userData.splice(indexInArray, 1, response.data);
+          toast.success('User Role updated', {timeout: 1000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+          // failureCallback();
+        });
     },
     getUserData() {
       this.loadingUsers = true;
@@ -267,8 +268,10 @@ export default {
       <Card title="Users">
         <div class="grid grid-cols-12">
           <div class="col-span-12">
-            <UserRolesTable :loading="loadingUsers" :actions="userActions" :columns="userColumns" :table-data="userData" :patch-user="patchUser" :userIsAdmin="userMe.admin"></UserRolesTable>
-            <SetNewPasswordModal :active-modal="showSetNewPasswordModal" title="Set new password" :user-info="setNewPasswordModalInfo" @close="showSetNewPasswordModal = !showSetNewPasswordModal">
+            <UserRolesTable :loading="loadingUsers" :actions="userActions" :columns="userColumns"
+                            :table-data="userData" :patch-user="patchUser" :userIsAdmin="userMe.admin"></UserRolesTable>
+            <SetNewPasswordModal :active-modal="showSetNewPasswordModal" title="Set new password"
+                                 :user-info="setNewPasswordModalInfo" @close="showSetNewPasswordModal = !showSetNewPasswordModal">
               <div>
                 <form @submit.prevent="patchNewPassword" class="space-y-4">
                   <Textinput
@@ -298,7 +301,8 @@ export default {
                 </form>
               </div>
             </SetNewPasswordModal>
-            <SetNewPasswordModal :active-modal="showSetNewPinModal" :user-info="setNewPinModalInfo" title="Set new PIN" @close="showSetNewPinModal = !showSetNewPinModal">
+            <SetNewPasswordModal :active-modal="showSetNewPinModal" :user-info="setNewPinModalInfo"
+                                 title="Set new PIN" @close="showSetNewPinModal = !showSetNewPinModal">
               <div>
                 <form @submit.prevent="patchNewPin" class="space-y-4">
                   <Textinput

@@ -9,17 +9,16 @@
         class="hidden"
         :disabled="disabled"
         :name="name"
-        @change="onChange"
-        :value="value"
-        v-model="localValue"
+        @input="onInput($event.target.checked)"
+        :value="modelValue"
         v-bind="$attrs"
       />
       <div
-        :class="ck ? activeClass : 'bg-secondary-500'"
+        :class="modelValue ? activeClass : 'bg-secondary-500'"
         class="relative inline-flex h-6 w-[46px] ltr:mr-3 rtl:ml-3 items-center rounded-full transition-all duration-150"
       >
         <span
-          v-if="badge && ck"
+          v-if="badge && modelValue"
           :class="icon ? 'text-sm' : ' text-[9px]'"
           class="absolute left-1 top-1/2 -translate-y-1/2 capitalize font-bold text-white tracking-[1px]"
         >
@@ -42,7 +41,7 @@
 
         <span
           :class="
-            ck
+            modelValue
               ? 'ltr:translate-x-6 rtl:-translate-x-6'
               : 'ltr:translate-x-[2px] rtl:-translate-x-[2px]'
           "
@@ -61,7 +60,7 @@
 </template>
 <script>
 import Icon from '@/components/Icon';
-import {computed, defineComponent, ref} from 'vue';
+import {defineComponent} from 'vue';
 export default defineComponent({
   name: 'Checkbox',
   inheritAttrs: false,
@@ -84,9 +83,6 @@ export default defineComponent({
       type: String,
       default: 'bg-slate-900 dark:bg-slate-900 ',
     },
-    value: {
-      type: null,
-    },
     modelValue: {
       type: null,
     },
@@ -108,33 +104,18 @@ export default defineComponent({
     },
   },
   emits: {
-    'updateWithCallback': (eventObj) => ({
-      modelValue: eventObj.newValue,
-    }),
     'update:modelValue': (newValue) => ({
       modelValue: newValue,
     }),
-    // use newValue
-    // "update:active": (newValue) => true,
+    'update': (newValue) => ({
+      newValue: newValue,
+    }),
   },
-
-  setup(props, context) {
-    const ck = ref(props.modelValue);
-
-    // on change event
-    const onChange = () => {
-      ck.value = !ck.value;
-    };
-
-    const localValue = computed({
-      get: () => props.modelValue,
-      set: (newValue) => {
-        context.emit('updateWithCallback', {newValue: newValue, failureCallback: onChange});
-        context.emit('update:modelValue', newValue);
-      },
-    });
-
-    return {localValue, ck, onChange};
+  methods: {
+    onInput(newValue) {
+      this.$emit('update:modelValue', newValue);
+      this.$emit('update', newValue);
+    },
   },
 });
 </script>

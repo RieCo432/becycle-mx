@@ -19,7 +19,8 @@
           />
           <span
             :class="item.value === contentWidth ? 'shadow-inset-4' : ''"
-            class="flex-none h-4 w-4 bg-white dark:bg-transparent rounded-full border border-secondary-500 inline-block ltr:mr-3 rtl:ml-3 transition-all duration-150"
+            class="flex-none h-4 w-4 bg-white dark:bg-transparent rounded-full border border-secondary-500
+                   inline-block ltr:mr-3 rtl:ml-3 transition-all duration-150"
           ></span>
           {{ item.label }}
         </label>
@@ -52,17 +53,17 @@ export default {
     contentWidth: {
       handler() {
         switch (this.contentWidth) {
-          case 'full':
-            this.$store.themeSettingsStore.cWidth = this.contentWidth;
+        case 'full':
+          this.$store.themeSettingsStore.cWidth = this.contentWidth;
 
-            break;
-          case 'boxed':
-            this.$store.themeSettingsStore.cWidth = this.contentWidth;
+          break;
+        case 'boxed':
+          this.$store.themeSettingsStore.cWidth = this.contentWidth;
 
-            break;
+          break;
 
-          default:
-            this.$store.themeSettingsStore.cWidth = this.contentWidth;
+        default:
+          this.$store.themeSettingsStore.cWidth = this.contentWidth;
         }
       },
       immediate: true,

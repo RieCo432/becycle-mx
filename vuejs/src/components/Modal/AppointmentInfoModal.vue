@@ -30,7 +30,8 @@
               :leave-to="noFade ? '' : 'opacity-0 scale-95'"
           >
             <DialogPanel
-                class="w-full transform overflow-hidden rounded-md bg-white dark:bg-slate-800 text-left align-middle shadow-xl transition-all"
+                class="w-full transform overflow-hidden rounded-md bg-white dark:bg-slate-800 text-left
+                       align-middle shadow-xl transition-all"
                 :class="sizeClass"
             >
               <div
@@ -48,11 +49,17 @@
                   :class="scrollContent ? 'overflow-y-auto max-h-[400px]' : ''">
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Name: {{appointment.clientName}}</p>
                 <p>Type: {{appointment.typeTitle}}</p>
-                <p v-if="appointment.typeTitle !== 'Closed Day'">Time: {{appointment.startDateTime.getHours().toString().padStart(2, '0')}}:{{appointment.startDateTime.getMinutes().toString().padStart(2, '0')}} - {{appointment.endDateTime.getHours().toString().padStart(2, '0')}}:{{appointment.endDateTime.getMinutes().toString().padStart(2, '0')}}</p>
+                <p v-if="appointment.typeTitle !== 'Closed Day'">
+                    Time: {{appointment.startDateTime.getHours().toString()
+                    .padStart(2, '0')}}:{{appointment.startDateTime.getMinutes().toString()
+                    .padStart(2, '0')}} - {{appointment.endDateTime.getHours().toString()
+                    .padStart(2, '0')}}:{{appointment.endDateTime.getMinutes().toString()
+                    .padStart(2, '0')}}</p>
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Confirmed: {{appointment.confirmed ? 'Yes' : 'No'}}</p>
                 <p>Notes: {{appointment.notes}}</p>
               </div>
-              <div v-if="appointment.typeTitle !== 'Closed Day'" class="px-4 justify-end py-3 flex space-x-3 border-t border-slate-100 dark:border-slate-700">
+              <div v-if="appointment.typeTitle !== 'Closed Day'"
+                   class="px-4 justify-end py-3 flex space-x-3 border-t border-slate-100 dark:border-slate-700">
                 <DashButton
                     class="mr-auto"
                     @click="$router.push({path: `/clients/${appointment.client.id}`})"
@@ -128,7 +135,10 @@ export default {
       this.close();
     },
     deleteClosedDay() {
-      requests.deleteClosedDay(`${this.appointment.startDateTime.getFullYear()}-${(this.appointment.startDateTime.getMonth() + 1).toString().padStart(2, '0')}-${this.appointment.startDateTime.getDate().toString().padStart(2, '0')}`).then(() => {
+      requests.deleteClosedDay(
+        `${this.appointment.startDateTime.getFullYear()}`+
+                    `-${(this.appointment.startDateTime.getMonth() + 1).toString().padStart(2, '0')}`+
+                    `-${this.appointment.startDateTime.getDate().toString().padStart(2, '0')}`).then(() => {
         toast.warning('Closed Day Removed', {timeout: 2000});
         this.$emit('appointmentsUpdated');
       });

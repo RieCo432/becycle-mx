@@ -13,8 +13,6 @@
 </template>
 
 <script>
-
-import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 import UserPresentationCard from '@/components/Card/UserPresentationCard.vue';
 import {useToast} from 'vue-toastification';
@@ -25,7 +23,6 @@ export default {
   name: 'UserMe',
   components: {
     UserPresentationCard,
-    Card,
   },
   data() {
     return {

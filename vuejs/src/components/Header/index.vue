@@ -98,16 +98,16 @@ export default {
   methods: {
     navbarTypeClass() {
       switch (this.$store.themeSettingsStore.navbarType) {
-        case 'floating':
-          return 'floating';
-        case 'sticky':
-          return 'sticky top-0 z-[999]';
-        case 'static':
-          return 'static';
-        case 'hidden':
-          return 'hidden';
-        default:
-          return 'sticky top-0';
+      case 'floating':
+        return 'floating';
+      case 'sticky':
+        return 'sticky top-0 z-[999]';
+      case 'static':
+        return 'static';
+      case 'hidden':
+        return 'hidden';
+      default:
+        return 'sticky top-0';
       }
     },
     borderSwicthClass() {

@@ -58,51 +58,51 @@ export default {
 
     alertClass() {
       switch (this.type) {
-        case 'primary-light':
-          return 'bg-primary-500 bg-opacity-[14%] text-primary-500';
-        case 'secondary-light':
-          return 'bg-secondary-500 bg-opacity-[14%] text-slate-600';
-        case 'success-light':
-          return 'bg-success-500 bg-opacity-[14%] text-success-500';
-        case 'info-light':
-          return 'bg-info-500 bg-opacity-[14%] text-info-500';
-        case 'warning-light':
-          return 'bg-warning-500 bg-opacity-[14%] text-warning-500';
-        case 'danger-light':
-          return 'bg-danger-500 bg-opacity-[14%] text-danger-500';
-        case 'dark-light':
-          return 'bg-slate-800 bg-opacity-[14%] text-slate-800 dark:bg-slate-500 dark:bg-opacity-[14%]  dark:text-slate-300';
-        case 'primary':
-          return 'bg-primary-500 text-white';
-        case 'secondary':
-          return 'bg-secondary-500 text-white';
-        case 'success':
-          return 'bg-success-500 text-white';
-        case 'info':
-          return 'bg-info-500 text-white';
-        case 'warning':
-          return 'bg-warning-500 text-white';
-        case 'danger':
-          return 'bg-danger-500 text-white';
-        case 'dark':
-          return 'bg-slate-800 text-white dark:bg-slate-900 dark:text-slate-300';
-        case 'primary-outline':
-          return 'bg-white text-primary-500 border border-primary-500 dark:bg-slate-800';
-        case 'secondary-outline':
-          return 'bg-white text-secondary-500 border border-secondary-500 dark:bg-slate-800';
-        case 'success-outline':
-          return 'bg-white text-success-500 border border-success-500 dark:bg-slate-800';
-        case 'info-outline':
-          return 'bg-white text-info-500 border border-info-500 dark:bg-slate-800';
-        case 'warning-outline':
-          return 'bg-white text-warning-500 border border-warning-500 dark:bg-slate-800';
-        case 'danger-outline':
-          return 'bg-white text-danger-500 border border-danger-500 dark:bg-slate-800';
-        case 'dark-outline':
-          return 'bg-white text-slate-800 dark:text-slate-300 border border-slate-800 dark:border-slate-600  dark:bg-slate-800';
+      case 'primary-light':
+        return 'bg-primary-500 bg-opacity-[14%] text-primary-500';
+      case 'secondary-light':
+        return 'bg-secondary-500 bg-opacity-[14%] text-slate-600';
+      case 'success-light':
+        return 'bg-success-500 bg-opacity-[14%] text-success-500';
+      case 'info-light':
+        return 'bg-info-500 bg-opacity-[14%] text-info-500';
+      case 'warning-light':
+        return 'bg-warning-500 bg-opacity-[14%] text-warning-500';
+      case 'danger-light':
+        return 'bg-danger-500 bg-opacity-[14%] text-danger-500';
+      case 'dark-light':
+        return 'bg-slate-800 bg-opacity-[14%] text-slate-800 dark:bg-slate-500 dark:bg-opacity-[14%]  dark:text-slate-300';
+      case 'primary':
+        return 'bg-primary-500 text-white';
+      case 'secondary':
+        return 'bg-secondary-500 text-white';
+      case 'success':
+        return 'bg-success-500 text-white';
+      case 'info':
+        return 'bg-info-500 text-white';
+      case 'warning':
+        return 'bg-warning-500 text-white';
+      case 'danger':
+        return 'bg-danger-500 text-white';
+      case 'dark':
+        return 'bg-slate-800 text-white dark:bg-slate-900 dark:text-slate-300';
+      case 'primary-outline':
+        return 'bg-white text-primary-500 border border-primary-500 dark:bg-slate-800';
+      case 'secondary-outline':
+        return 'bg-white text-secondary-500 border border-secondary-500 dark:bg-slate-800';
+      case 'success-outline':
+        return 'bg-white text-success-500 border border-success-500 dark:bg-slate-800';
+      case 'info-outline':
+        return 'bg-white text-info-500 border border-info-500 dark:bg-slate-800';
+      case 'warning-outline':
+        return 'bg-white text-warning-500 border border-warning-500 dark:bg-slate-800';
+      case 'danger-outline':
+        return 'bg-white text-danger-500 border border-danger-500 dark:bg-slate-800';
+      case 'dark-outline':
+        return 'bg-white text-slate-800 dark:text-slate-300 border border-slate-800 dark:border-slate-600  dark:bg-slate-800';
 
-        default:
-          return 'bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-300';
+      default:
+        return 'bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-300';
       }
     },
   },

@@ -4,9 +4,7 @@ import DashButton from '@/components/Button/index.vue';
 import Select from '@/components/Select/index.vue';
 import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
-import {useRoute} from 'vue-router';
 import {computed, ref, toRef} from 'vue';
-import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import {useField, useForm, ErrorMessage} from 'vee-validate';
 import requests from '@/requests';
@@ -16,7 +14,6 @@ import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkel
 import ContractCardSkeleton from '@/components/Skeleton/ContractCardSkeleton.vue';
 import Icon from '@/components/Icon';
 
-const toast = useToast();
 
 export default {
   name: 'viewContract',
@@ -33,10 +30,7 @@ export default {
     Icon,
   },
   setup(props) {
-    const route = useRoute();
-
     const credentialsStore = useCredentialsStore();
-    const toast = useToast();
     const contractData = toRef(props, 'contract');
     const patchContractReturn = toRef(props, 'patchContractReturn');
 
@@ -60,7 +54,7 @@ export default {
 
     const depositReturningSchema = yup.object().shape({
       depositAmountReturned: yup.number().min(0, 'Must be positive').integer()
-          .required(' Deposit Amount is required '),
+        .required(' Deposit Amount is required '),
       depositReturningUser: yup.string().required(' Deposit Returner Username is required '),
       depositReturningPassword: yup.string().required(),
     });
@@ -77,14 +71,14 @@ export default {
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return depositReturningSchema;
-        case 1:
-          return returnAcceptingUserSchema;
-        case 2:
-          return reviewSchema;
-        default:
-          return depositReturningSchema;
+      case 0:
+        return depositReturningSchema;
+      case 1:
+        return returnAcceptingUserSchema;
+      case 2:
+        return reviewSchema;
+      default:
+        return depositReturningSchema;
       }
     });
 
@@ -93,12 +87,15 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: depositAmountReturned, errorMessage: depositAmountReturnedError, setErrors: depositAmountReturnedSetErrors} = useField('depositAmountReturned');
+    const {value: depositAmountReturned, errorMessage: depositAmountReturnedError,
+      setErrors: depositAmountReturnedSetErrors} = useField('depositAmountReturned');
     const {value: depositReturningUser, errorMessage: depositReturningUserError} = useField('depositReturningUser');
-    const {value: depositReturningPassword, errorMessage: depositReturningPasswordError, setErrors: depositReturningPasswordSetErrors} = useField('depositReturningPassword');
+    const {value: depositReturningPassword, errorMessage: depositReturningPasswordError,
+      setErrors: depositReturningPasswordSetErrors} = useField('depositReturningPassword');
 
     const {value: returnAcceptingUser, errorMessage: returnAcceptingUserError} = useField('returnAcceptingUser');
-    const {value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError, setErrors: returnAcceptingPasswordOrPinSetErrors} = useField('returnAcceptingPasswordOrPin');
+    const {value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError,
+      setErrors: returnAcceptingPasswordOrPinSetErrors} = useField('returnAcceptingPasswordOrPin');
 
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
@@ -117,7 +114,8 @@ export default {
       if (isLastStep) {
         stepNumber.value = totalSteps - 1;
         // handle submit
-        patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value, returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
+        patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value,
+          returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
       } else {
         if (stepNumber.value === 0) {
           if (depositAmountReturned.value > contractData.value.depositAmountCollected) {
@@ -340,12 +338,20 @@ export default {
             <template v-else>
               <div class="flex flex-col h-full">
                 <div class="flex-1">
-                  <p class="text-slate-600 dark:text-slate-300">From: {{new Date(Date.parse(contract.startDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">Until: {{new Date(Date.parse(contract.endDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">
+                      From: {{new Date(Date.parse(contract.startDate))
+                      .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                  </p>
+                  <p class="text-slate-600 dark:text-slate-300">
+                      Until: {{new Date(Date.parse(contract.endDate))
+                      .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                  </p>
                   <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Contract Type: {{contract.contractType}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.conditionOfBike}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">
+                      Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}
+                  </p>
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
                 </div>
@@ -368,10 +374,13 @@ export default {
                   <div
                       :class="`   ${
             stepNumber >= i
-              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 dark:bg-slate-900 dark:ring-slate-900'
-              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
+              ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 ' +
+                'dark:bg-slate-900 dark:ring-slate-900'
+              : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 ' +
+                'dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
           }`"
-                      class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
+                      class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col
+                             items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
                   >
                     <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
                     <span v-else class="text-3xl">
@@ -388,7 +397,8 @@ export default {
           "
                   ></div>
                   <div
-                      class="absolute top-full text-base md:leading-6 mt-3 transition duration-150 md:opacity-100 opacity-0 group-hover:opacity-100"
+                      class="absolute top-full text-base md:leading-6 mt-3 transition duration-150
+                             md:opacity-100 opacity-0 group-hover:opacity-100"
                       :class="
             stepNumber >= i
               ? ' text-slate-900 dark:text-slate-300'
@@ -472,7 +482,8 @@ export default {
                         <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                           Final Check
                         </h4>
-                        <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
+                        <table class="w-full text-base text-slate-800 dark:text-slate-300 border
+                                      border-collapse border-slate-500 bg-slate-700">
                           <thead>
                           <th colspan="2" class="border border-slate-500">Return Details</th>
                           </thead>
@@ -517,8 +528,13 @@ export default {
               </div>
             </div>
             <div v-else-if="contract.returnedDate != null">
-              <p class="text-slate-600 dark:text-slate-300">Returned on {{new Date(Date.parse(contract.returnedDate)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}</p>
-              <p class="text-slate-600 dark:text-slate-300">Deposit returned: &#163; {{contract.depositAmountReturned}} by {{depositReturnedByUsername}}</p>
+              <p class="text-slate-600 dark:text-slate-300">
+                  Returned on {{new Date(Date.parse(contract.returnedDate))
+                  .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+              </p>
+              <p class="text-slate-600 dark:text-slate-300">
+                  Deposit returned: &#163; {{contract.depositAmountReturned}} by {{depositReturnedByUsername}}
+              </p>
               <p class="text-slate-600 dark:text-slate-300">Received by {{returnAcceptedByUsername}}</p>
             </div>
           </Card>

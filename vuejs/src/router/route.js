@@ -20,6 +20,15 @@ const routes = [
         component: () => import('@/views/home.vue'),
       },
       {
+        path: '/privacy-policy',
+        name: 'privacyPolicy',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/privacy-policy',
+        },
+        component: () => import('@/views/privacyPolicy.vue'),
+      },
+      {
         path: '/me',
         name: 'Profile',
         meta: {

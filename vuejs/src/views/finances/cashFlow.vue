@@ -437,13 +437,15 @@ export default {
     },
     fetchWorstCaseRequiredDepositFloatSeries() {
       requests.getWorstCaseRequiredDepositFloat().then((response) => {
-        this.worstCaseRequiredDepositFloatChartOptions.labels.splice(0, this.worstCaseRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
+        this.worstCaseRequiredDepositFloatChartOptions.labels
+          .splice(0, this.worstCaseRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
         this.worstCaseRequiredDepositFloatSeries = Object.values(response.data);
       });
     },
     fetchRealisticRequiredDepositFloatSeries() {
       requests.getRealisticRequiredDepositFloat(this.gracePeriod).then((response) => {
-        this.realisticRequiredDepositFloatChartOptions.labels.splice(0, this.realisticRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
+        this.realisticRequiredDepositFloatChartOptions.labels
+          .splice(0, this.realisticRequiredDepositFloatChartOptions.labels.length, ...Object.keys(response.data));
         this.realisticRequiredDepositFloatSeries = Object.values(response.data);
       });
     },
@@ -485,13 +487,15 @@ export default {
     handleSelection(chart, {xaxis, yaxis}) {
       if (xaxis.min) {
         const newStartDate = new Date(xaxis.min);
-        this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${newStartDate.getUTCDate().toString().padStart(2, '0')}`;
+        this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString()
+          .padStart(2, '0')}-${newStartDate.getUTCDate().toString().padStart(2, '0')}`;
       } else {
         this.startDate = null;
       }
       if (xaxis.max) {
         const newEndDate = new Date(xaxis.max);
-        this.endDate = `${newEndDate.getUTCFullYear()}-${(newEndDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${newEndDate.getUTCDate().toString().padStart(2, '0')}`;
+        this.endDate = `${newEndDate.getUTCFullYear()}-${(newEndDate.getUTCMonth() + 1).toString()
+          .padStart(2, '0')}-${newEndDate.getUTCDate().toString().padStart(2, '0')}`;
       } else {
         this.endDate = null;
       }
@@ -588,7 +592,8 @@ export default {
       <Card title="Actual Cashflow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="actualCashflowSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="cashflowAreaChartOptionsDateSeries" :series="actualCashflowSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -597,7 +602,8 @@ export default {
       <Card title="Provisional Cashflow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="provisionalCashflowSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="cashflowAreaChartOptionsDateSeries" :series="provisionalCashflowSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -606,7 +612,8 @@ export default {
       <Card title="Total Expenses and Income">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="cashflowAreaChartOptionsDateSeries" :series="totalCashflowSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="cashflowAreaChartOptionsDateSeries" :series="totalCashflowSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -615,7 +622,8 @@ export default {
       <Card title="Deposit Flow">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area" :options="areaChartOptionsDateSeries" :series="depositFlowSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
+                       :options="areaChartOptionsDateSeries" :series="depositFlowSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -624,7 +632,8 @@ export default {
       <Card title="Estimate: Everyone returns today">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="worstCaseRequiredDepositFloatChartOptions" :series="worstCaseRequiredDepositFloatSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut"
+                       :options="worstCaseRequiredDepositFloatChartOptions" :series="worstCaseRequiredDepositFloatSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -633,7 +642,8 @@ export default {
       <Card title="Estimate: Everyone returns normally">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="realisticRequiredDepositFloatChartOptions" :series="realisticRequiredDepositFloatSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut"
+                       :options="realisticRequiredDepositFloatChartOptions" :series="realisticRequiredDepositFloatSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -642,7 +652,8 @@ export default {
       <Card title="Deposits Status">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut" :options="depositsStatusChartOptions" :series="depositsStatusSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut"
+                       :options="depositsStatusChartOptions" :series="depositsStatusSeries"></apexchart>
           </div>
         </div>
       </Card>
@@ -651,7 +662,8 @@ export default {
       <Card title="Average Percentage of deposit returned">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="line" :options="depositReturnPercentageMixedChart" :series="percentageDepositReturnedAfterMonthsSeries"></apexchart>
+            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="line"
+                       :options="depositReturnPercentageMixedChart" :series="percentageDepositReturnedAfterMonthsSeries"></apexchart>
           </div>
         </div>
       </Card>

@@ -74,6 +74,7 @@
 import {LMap, LTileLayer, LGeoJson, LMarker, LPopup} from '@vue-leaflet/vue-leaflet';
 import Select from '@/components/Select';
 import Button from '@/components/Button';
+// eslint-disable-next-line no-unused-vars
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import requests from '@/requests';
@@ -154,10 +155,10 @@ export default {
   created() {
     requests.getRoadSegmentReportTypes().then((response) => {
       this.roadSegmentReportTypes = response.data.map((type) => (
-          {
-            label: `${type.title}: ${type.description}`,
-            value: type.id,
-          }
+        {
+          label: `${type.title}: ${type.description}`,
+          value: type.id,
+        }
       ));
     });
   },
