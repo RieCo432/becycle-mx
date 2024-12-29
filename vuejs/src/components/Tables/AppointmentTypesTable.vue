@@ -40,9 +40,9 @@
           <span v-if="props.column.field === 'active'" class="flex">
             <Switch
                 active-class="bg-primary-500"
-                :model-value="props.row.active"
-                @updateWithCallback="(eventObj) =>
-                  patchAppointmentType(props.row.id, {active: eventObj.newValue}, eventObj.failureCallback)"
+                v-model="props.row.active"
+                @update="(newValue) =>
+                  patchAppointmentType(props.row.id, {active: newValue})"
             />
           </span>
           <span v-if="props.column.field == 'actions'">

@@ -9,7 +9,7 @@
         class="hidden"
         :disabled="disabled"
         :name="name"
-        @input="$emit('update:modelValue', $event.target.checked)"
+        @input="onInput($event.target.checked)"
         :value="modelValue"
         v-bind="$attrs"
       />
@@ -107,6 +107,15 @@ export default defineComponent({
     'update:modelValue': (newValue) => ({
       modelValue: newValue,
     }),
+    'update': (newValue) => ({
+      newValue: newValue,
+    }),
+  },
+  methods: {
+    onInput(newValue) {
+      this.$emit('update:modelValue', newValue);
+      this.$emit('update', newValue);
+    },
   },
 });
 </script>

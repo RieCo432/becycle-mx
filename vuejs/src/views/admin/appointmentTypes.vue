@@ -114,7 +114,7 @@ export default {
         },
       );
     },
-    patchAppointmentType(appointmentTypeId, patchData, failureCallback) {
+    patchAppointmentType(appointmentTypeId, patchData) {
       requests.patchAppointmentType(appointmentTypeId, patchData)
         .then((response) => {
           const indexInArray = this.appointmentTypes.findIndex((appointmentType) => (appointmentType.id === appointmentTypeId));
@@ -123,7 +123,7 @@ export default {
         })
         .catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
-          failureCallback();
+          // failureCallback();
         });
     },
   },
