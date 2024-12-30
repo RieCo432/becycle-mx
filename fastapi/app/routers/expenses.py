@@ -56,3 +56,15 @@ async def patch_expense_transferred(
         treasurer_user: models.User = Depends(dep.get_current_treasurer_user)
 ) -> schemas.Expense:
     return crud.patch_expense_transferred(db=db, expense_id=expense_id, treasurer_user=treasurer_user)
+
+@expenses.get("/expenses/tags")
+async def get_expense_tags(
+        inactive: bool = False,
+        db: Session = Depends(dep.get_db)) -> List[schemas.ExpenseTag]:
+    return crud.get_expense_tags(db=db, inactive=inactive)
+
+@expenses.post("/expenses/tags", dependencies=[Depends(dep.get_current_admin_user)])
+async def post_expense_tag(
+        new_expense_tag: schemas.ExpenseTag,
+        db: Session = Depends(dep.get_db)) -> schemas.ExpenseTag:
+    return crud.create_expense_tag(db=db, expense_tag=new_expense_tag)

@@ -96,3 +96,22 @@ def get_expenses(db: Session) -> list[models.Expense]:
     return [
         _ for _ in db.scalars(select(models.Expense))
     ]
+
+def get_expense_tags(db: Session, inactive: bool) -> list[models.ExpenseTag]:
+    tags = select(models.ExpenseTag)
+
+    if not inactive:
+        tags = tags.where(models.ExpenseTag.active == True)
+
+    return [_ for _ in db.scalars(tags)]
+
+def create_expense_tag(db: Session, expense_tag: schemas.ExpenseTag) -> models.ExpenseTag:
+    new_expense_tag = models.ExpenseTag(
+        id=expense_tag.id,
+        description=expense_tag.description,
+        active=expense_tag.active,
+    )
+    db.add(new_expense_tag)
+    db.commit()
+    return new_expense_tag
+
