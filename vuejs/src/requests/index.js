@@ -901,13 +901,14 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
-  postNewExpense(amount, type, notes, expenseDate, receiptFile) {
+  postNewExpense(amount, type, tagId, notes, expenseDate, receiptFile) {
     return axiosClient.post('/expenses', {
       amount: amount,
       expense_type: type,
+      tag_id: tagId,
       notes: notes,
-      receipt_file: receiptFile,
       expense_date: expenseDate,
+      receipt_file: receiptFile,
     }, {
       headers: {
         ...credentialsStore.getApiRequestHeader(),
@@ -918,6 +919,15 @@ export default {
   },
   getExpenseTypes() {
     return axiosClient.get('/expenses/types', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
+  getExpenseTags(inactive=false) {
+    return axiosClient.get('/expenses/tags', {
+      params: {
+        inactive: inactive,
+      },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
