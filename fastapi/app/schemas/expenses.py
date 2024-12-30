@@ -1,6 +1,3 @@
-from symtable import Class
-
-from fastapi import UploadFile
 from pydantic import BaseModel, ConfigDict
 from .user import User
 from datetime import date
@@ -18,9 +15,6 @@ class ExpenseBase(BaseModel):
     notes: str
     expenseDate: date
     tagId: str
-
-class ExpenseCreate(ExpenseBase):
-    receiptFile: UploadFile
 
 class Expense(ExpenseBase):
     model_config = ConfigDict(from_attributes=True)

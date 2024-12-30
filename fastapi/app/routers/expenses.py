@@ -22,11 +22,22 @@ expenses = APIRouter(
 
 @expenses.post("/expenses")
 async def post_expense(
-        new_expense: schemas.ExpenseCreate,
+        amount: Annotated[float, Body(embed=True)],
+        expense_type: Annotated[str, Body(embed=True)],
+        notes: Annotated[str, Body(embed=True)],
+        expense_date: Annotated[date, Body(embed=True)],
+        tag_id: Annotated[str, Body(embed=True)],
+        receipt_file: UploadFile,
         expense_user: schemas.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.Expense:
-    return crud.create_expense(db=db, expense_user=expense_user, expense_data=new_expense)
+    return crud.create_expense(db=db, expense_user=expense_user, expense_data=schemas.ExpenseBase(
+        amount=amount,
+        type=expense_type,
+        tagId=tag_id,
+        expenseDate=expense_date,
+        notes=notes,
+    ), receipt_file=receipt_file)
 
 
 @expenses.get("/expenses/{expense_id}/receipt")
