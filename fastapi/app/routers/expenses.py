@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, UploadFile, Body
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from typing import Annotated
+from typing import Annotated, List
 
 import app.crud as crud
 import app.dependencies as dep
@@ -22,20 +22,11 @@ expenses = APIRouter(
 
 @expenses.post("/expenses")
 async def post_expense(
-        expense_type: Annotated[str, Body(embed=True)],
-        amount: Annotated[float, Body(embed=True)],
-        notes: Annotated[str, Body(embed=True)],
-        expense_date: Annotated[date, Body(embed=True)],
-        receipt_file: UploadFile,
+        new_expense: schemas.ExpenseCreate,
         expense_user: schemas.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.Expense:
-    return crud.create_expense(db=db, expense_user=expense_user, expense_data=schemas.ExpenseCreate(
-        type=expense_type,
-        amount=amount,
-        notes=notes,
-        expenseDate=expense_date
-    ), receipt_file=receipt_file)
+    return crud.create_expense(db=db, expense_user=expense_user, expense_data=new_expense)
 
 
 @expenses.get("/expenses/{expense_id}/receipt")

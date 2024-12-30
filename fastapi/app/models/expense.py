@@ -48,7 +48,7 @@ class Expense(Base):
     type: Mapped[str] = mapped_column("type", Text, nullable=False, quote=False)
 
     tagId: Mapped[str] = mapped_column("tagId", ForeignKey("expensetags.id"), nullable=False, quote=False)
-    tag: Mapped[ExpenseTag] = relationship("ExpenseTag", foreign_keys=[tagId], back_populates="expenses")
+    tag: Mapped[ExpenseTag] = relationship("ExpenseTag", foreign_keys=[tagId])
 
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
 

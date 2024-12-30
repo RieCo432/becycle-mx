@@ -11,15 +11,15 @@ from sqlalchemy.orm import Session
 from fastapi import UploadFile, HTTPException, status
 
 
-def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseCreate, receipt_file: UploadFile) -> models.Expense:
-    if receipt_file.content_type.startswith("image"):
+def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseCreate) -> models.Expense:
+    if expense_data.receiptFile.content_type.startswith("image"):
         from PIL import Image
 
         current_dir = os.path.dirname(__file__)
         temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
-        output_file_path = os.path.join(temp_data_dir, receipt_file.filename)
+        output_file_path = os.path.join(temp_data_dir, expense_data.receiptFile.filename)
 
-        with Image.open(receipt_file.file) as image:
+        with Image.open(expense_data.receiptFile.file) as image:
             larger = max(image.size)
 
             if larger > 2048:
@@ -35,7 +35,7 @@ def create_expense(db: Session, expense_user: models.User, expense_data: schemas
 
     else:
         new_expense_receipt = models.ExpenseReceipt(
-            content=receipt_file.file.read(),
+            content=expense_data.receiptFile.file.read(),
         )
 
     db.add(new_expense_receipt)
@@ -46,7 +46,7 @@ def create_expense(db: Session, expense_user: models.User, expense_data: schemas
         notes=expense_data.notes,
         expenseUserId=expense_user.id,
         expenseDate=expense_data.expenseDate,
-        receiptContentType=receipt_file.content_type,
+        receiptContentType=expense_data.receiptFile.content_type,
         amount=expense_data.amount,
         receiptFileId=new_expense_receipt.id
     )
