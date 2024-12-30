@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, date
+from typing import List
 from uuid import uuid4
 
 from dateutil.relativedelta import relativedelta
@@ -19,6 +20,15 @@ class ExpenseReceipt(Base):
     content: Mapped[bytes] = mapped_column("content", LargeBinary, nullable=False, quote=False)
 
 
+class ExpenseTag(Base):
+    __tablename__ = "expensetags"
+
+    id: Mapped[str] = mapped_column("id", String(20), nullable=False, quote=False, primary_key=True)
+    description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
+    active: Mapped[bool] = mapped_column("active", Boolean, nullable=False, default=True, server_default=text("TRUE"),
+                                         quote=False)
+
+
 class Expense(Base):
     __tablename__ = "expenses"
 
@@ -36,6 +46,9 @@ class Expense(Base):
     amount: Mapped[float] = mapped_column("amount", Float, nullable=False, quote=False)
 
     type: Mapped[str] = mapped_column("type", Text, nullable=False, quote=False)
+
+    tagId: Mapped[str] = mapped_column("tagId", ForeignKey("expensetags.id"), nullable=False, quote=False)
+    tag: Mapped[ExpenseTag] = relationship("ExpenseTag", foreign_keys=[tagId], back_populates="expenses")
 
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
 
