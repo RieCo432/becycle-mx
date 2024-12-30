@@ -48,7 +48,8 @@ def create_expense(db: Session, expense_user: models.User, expense_data: schemas
         expenseDate=expense_data.expenseDate,
         receiptContentType=expense_data.receiptFile.content_type,
         amount=expense_data.amount,
-        receiptFileId=new_expense_receipt.id
+        receiptFileId=new_expense_receipt.id,
+        tagId=expense_data.tagId
     )
     db.add(new_expense)
     db.commit()
