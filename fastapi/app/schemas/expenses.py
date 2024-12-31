@@ -16,6 +16,10 @@ class ExpenseBase(BaseModel):
     expenseDate: date
     tagId: str
 
+class ExpenseTagUpdate(BaseModel):
+    description: str | None = None
+    active: bool | None = None
+
 class Expense(ExpenseBase):
     model_config = ConfigDict(from_attributes=True)
     expenseUser: User

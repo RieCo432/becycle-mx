@@ -1071,4 +1071,23 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
+  postNewExpenseTag(expenseTagId, expenseTagDescription) {
+    return axiosClient.post('/expenses/tags', {
+      id: expenseTagId,
+      description: expenseTagDescription,
+      active: true,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
+  patchExpenseTag(expenseTagId, expenseTagDescription, expenseTagActive) {
+    return axiosClient.patch(`/expenses/tags/${expenseTagId}`, {
+      description: expenseTagDescription,
+      active: expenseTagActive,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
 };

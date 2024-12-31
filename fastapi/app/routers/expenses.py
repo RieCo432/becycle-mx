@@ -79,3 +79,11 @@ async def post_expense_tag(
         new_expense_tag: schemas.ExpenseTag,
         db: Session = Depends(dep.get_db)) -> schemas.ExpenseTag:
     return crud.create_expense_tag(db=db, expense_tag=new_expense_tag)
+
+@expenses.patch("/expenses/tags/{expense_tag_id}", dependencies=[Depends(dep.get_current_admin_user)])
+async def patch_expense_tag(
+        expense_tag_id: str,
+        expense_tag_update: schemas.ExpenseTagUpdate,
+        db: Session = Depends(dep.get_db)
+) -> schemas.ExpenseTag:
+    return crud.update_expense_tag(db=db, expense_tag_id=expense_tag_id, expense_tag_update=expense_tag_update)

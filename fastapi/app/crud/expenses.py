@@ -116,3 +116,13 @@ def create_expense_tag(db: Session, expense_tag: schemas.ExpenseTag) -> models.E
     db.commit()
     return new_expense_tag
 
+def update_expense_tag(db: Session, expense_tag_id: str, expense_tag_update: schemas.ExpenseTagUpdate) -> models.ExpenseTag:
+    expense_tag = db.scalar(select(models.ExpenseTag).where(models.ExpenseTag.id == expense_tag_id))
+    if expense_tag_update.description is not None:
+        expense_tag.description = expense_tag_update.description
+    if expense_tag_update.active is not None:
+        expense_tag.active = expense_tag_update.active
+    db.commit()
+
+    return expense_tag
+
