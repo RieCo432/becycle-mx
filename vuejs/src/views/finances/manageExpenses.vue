@@ -24,6 +24,8 @@ export default {
       expenseInfo: {},
       showExpenseInfoModal: false,
       receiptUrl: null,
+      expenseTagsFilter: ['workshop', 'test'],
+      filterByTag: null,
       columns: [
         {
           label: 'Status',
@@ -44,6 +46,14 @@ export default {
         {
           label: 'Type',
           field: 'type',
+        },
+        {
+          label: 'Tag',
+          field: 'tag.id',
+          filterOptions: {
+            enabled: true,
+            filterDropdownItems: this.expenseTagsFilter,
+          },
         },
         {
           label: 'Notes',
@@ -90,7 +100,7 @@ export default {
       });
     },
     getExpenses() {
-      requests.getExpenses().then((response) => {
+      requests.getExpenses(this.filterByTag).then((response) => {
         this.expenses = response.data;
         this.loadingExpenses = false;
       });
@@ -100,8 +110,11 @@ export default {
       this.receiptUrl = null;
     },
   },
-  mounted() {
+  created() {
     this.getExpenses();
+    requests.getExpenseTags(true).then((response) => {
+      this.expenseTagsFilter = response.data.map((tag) => (`${tag.id}`));
+    });
     requests.getUserMe().then((response) => {
       this.isUserTreasurer = response.data.treasurer;
       if (this.isUserTreasurer) {
@@ -121,7 +134,7 @@ export default {
   <div class="grid grid-cols-12">
     <div class="col-span-full">
       <Card>
-        <ExpenseSummaryTable title="Expenses" :loading="loadingExpenses"
+        <ExpenseSummaryTable  title="Expenses" :loading="loadingExpenses"
                              :columns="columns" :data="expenses" :actions="actions"></ExpenseSummaryTable>
       </Card>
     </div>

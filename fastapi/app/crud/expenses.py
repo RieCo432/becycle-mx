@@ -93,9 +93,12 @@ def patch_expense_transferred(db: Session, expense_id: UUID, treasurer_user: mod
     return expense
 
 
-def get_expenses(db: Session) -> list[models.Expense]:
+def get_expenses(db: Session, tag_id: str | None) -> list[models.Expense]:
+    expenses = select(models.Expense)
+    if tag_id is not None:
+        expenses = expenses.where(models.Expense.tagId == tag_id)
     return [
-        _ for _ in db.scalars(select(models.Expense))
+        _ for _ in db.scalars(expenses)
     ]
 
 def get_expense_tags(db: Session, inactive: bool) -> list[models.ExpenseTag]:

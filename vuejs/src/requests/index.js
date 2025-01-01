@@ -932,8 +932,9 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
-  getExpenses() {
+  getExpenses(filterByTag=null) {
     return axiosClient.get('/expenses', {
+      params: filterByTag ? {tag: filterByTag} : null,
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });

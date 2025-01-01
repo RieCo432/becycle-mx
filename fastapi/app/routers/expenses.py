@@ -55,9 +55,10 @@ async def get_expense_types(db: Session = Depends(dep.get_db)) -> list[schemas.E
 
 @expenses.get("/expenses")
 async def get_expenses(
+        tag: str | None = None,
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.Expense]:
-    return crud.get_expenses(db=db)
+    return crud.get_expenses(db=db, tag_id=tag)
 
 
 @expenses.patch("/expenses/{expense_id}/transfer")
