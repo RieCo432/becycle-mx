@@ -952,34 +952,37 @@ export default {
       responseType: 'blob',
     });
   },
-  getActualCashflow(interval, startDate, endDate) {
+  getActualCashflow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/actual', {
       params: {
         interval: interval,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
+        ...(tag && {tag: tag}),
       },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
-  getProvisionalCashflow(interval, startDate, endDate) {
+  getProvisionalCashflow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/provisional', {
       params: {
         interval: interval,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
+        ...(tag && {tag: tag}),
       },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
-  getTotalCashflow(interval, startDate, endDate) {
+  getTotalCashflow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/total', {
       params: {
         interval: interval,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
+        ...(tag && {tag: tag}),
       },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
