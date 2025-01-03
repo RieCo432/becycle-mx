@@ -582,7 +582,8 @@ def get_realistic_required_deposit_float(db: Session, grace_period: int) -> dict
     return data
 
 
-def get_actual_cashflow(db: Session, interval: str, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+def get_actual_cashflow(db: Session, interval: str, start_date: date | None = None,
+                        end_date: date | None = None, tag_id: str | None = None) -> list[schemas.DataSeries]:
     if start_date is None:
         oldest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate).first()
         start_date = oldest_expense.transferDate
@@ -600,8 +601,7 @@ def get_actual_cashflow(db: Session, interval: str, start_date: date | None = No
     diff_series = []
 
     while interval_end_date >= start_date:
-        expenses_in_interval = db.scalar(
-            select(func.coalesce(func.sum(models.Expense.amount), 0))
+        expenses_in_interval_query = (select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
                 (models.Expense.transferDate > interval_start_date)
                 & (models.Expense.transferDate <= interval_end_date)
@@ -609,14 +609,23 @@ def get_actual_cashflow(db: Session, interval: str, start_date: date | None = No
             )
         )
 
-        income_in_interval = db.scalar(
-            select(func.coalesce(func.sum(models.Expense.amount), 0))
+        if tag_id is not None:
+            expenses_in_interval_query = expenses_in_interval_query.where(models.Expense.tagId == tag_id)
+
+        expenses_in_interval = db.scalar(expenses_in_interval_query)
+
+        income_in_interval_query = (select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
                 (models.Expense.transferDate > interval_start_date)
                 & (models.Expense.transferDate <= interval_end_date)
                 & (models.Expense.amount > 0)
             )
         )
+
+        if tag_id is not None:
+            income_in_interval_query = income_in_interval_query.where(models.Expense.tagId == tag_id)
+
+        income_in_interval = db.scalar(income_in_interval_query)
 
         expense_series.append([interval_end_date, expenses_in_interval])
         income_series.append([interval_end_date, income_in_interval])
@@ -645,7 +654,8 @@ def get_actual_cashflow(db: Session, interval: str, start_date: date | None = No
     ]
 
 
-def get_provisional_cashflow(db: Session, interval: str, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+def get_provisional_cashflow(db: Session, interval: str, start_date: date | None = None,
+                             end_date: date | None = None, tag_id: str | None = None) -> list[schemas.DataSeries]:
     if start_date is None:
         oldest_expense = db.query(models.Expense).order_by(models.Expense.expenseDate).first()
         start_date = oldest_expense.expenseDate
@@ -662,8 +672,7 @@ def get_provisional_cashflow(db: Session, interval: str, start_date: date | None
     diff_series = []
 
     while interval_end_date >= start_date:
-        expenses_in_interval = db.scalar(
-            select(func.coalesce(func.sum(models.Expense.amount), 0))
+        expenses_in_interval_query = (select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
                 (models.Expense.expenseDate > interval_start_date)
                 & (models.Expense.expenseDate <= interval_end_date)
@@ -671,14 +680,23 @@ def get_provisional_cashflow(db: Session, interval: str, start_date: date | None
             )
         )
 
-        income_in_interval = db.scalar(
-            select(func.coalesce(func.sum(models.Expense.amount), 0))
+        if tag_id is not None:
+            expenses_in_interval_query = expenses_in_interval_query.where(models.Expense.tagId == tag_id)
+
+        expenses_in_interval = db.scalar(expenses_in_interval_query)
+
+        income_in_interval_query = (select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
                 (models.Expense.expenseDate > interval_start_date)
                 & (models.Expense.expenseDate <= interval_end_date)
                 & (models.Expense.amount > 0)
             )
         )
+
+        if tag_id is not None:
+            income_in_interval_query = income_in_interval_query.where(models.Expense.tagId == tag_id)
+
+        income_in_interval = db.scalar(income_in_interval_query)
 
         expense_series.append([interval_end_date, expenses_in_interval])
         income_series.append([interval_end_date, income_in_interval])
@@ -707,7 +725,8 @@ def get_provisional_cashflow(db: Session, interval: str, start_date: date | None
     ]
 
 
-def get_total_cashflow(db: Session, interval: str, start_date: date | None = None, end_date: date | None = None) -> list[schemas.DataSeries]:
+def get_total_cashflow(db: Session, interval: str, start_date: date | None = None,
+                       end_date: date | None = None, tag_id: str | None = None) -> list[schemas.DataSeries]:
     if start_date is None:
         oldest_expense = db.query(models.Expense).where(models.Expense.transferDate != None).order_by(models.Expense.transferDate).first()
         start_date = oldest_expense.transferDate
@@ -723,21 +742,29 @@ def get_total_cashflow(db: Session, interval: str, start_date: date | None = Non
     diff_series = []
 
     while period_end_date >= start_date:
-        expenses_in_interval = db.scalar(
-            select(func.coalesce(func.sum(models.Expense.amount), 0))
+        expenses_in_interval_query = (select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
                 (models.Expense.transferDate <= period_end_date)
                 & (models.Expense.amount < 0)
             )
         )
 
-        income_in_interval = db.scalar(
-            select(func.coalesce(func.sum(models.Expense.amount), 0))
+        if tag_id is not None:
+            expenses_in_interval_query = expenses_in_interval_query.where(models.Expense.tagId == tag_id)
+
+        expenses_in_interval = db.scalar(expenses_in_interval_query)
+
+        income_in_interval_query = (select(func.coalesce(func.sum(models.Expense.amount), 0))
             .where(
                 (models.Expense.transferDate <= period_end_date)
                 & (models.Expense.amount > 0)
             )
         )
+
+        if tag_id is not None:
+            income_in_interval_query = income_in_interval_query.where(models.Expense.tagId == tag_id)
+
+        income_in_interval = db.scalar(income_in_interval_query)
 
         expense_series.append([period_end_date, expenses_in_interval])
         income_series.append([period_end_date, income_in_interval])

@@ -108,9 +108,10 @@ async def get_cashflow_actual(
         interval: str,
         start_date: date | None = None,
         end_date: date | None = None,
+        tag: str | None = None,
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.DataSeries]:
-    return crud.get_actual_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date)
+    return crud.get_actual_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date, tag_id=tag)
 
 
 @finances.get("/finances/cashflow/provisional", dependencies=[Depends(dep.get_current_active_user)])
@@ -118,9 +119,10 @@ async def get_cashflow_provisional(
         interval: str,
         start_date: date | None = None,
         end_date: date | None = None,
+        tag: str | None = None,
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.DataSeries]:
-    return crud.get_provisional_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date)
+    return crud.get_provisional_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date, tag_id=tag)
 
 
 @finances.get("/finances/cashflow/total", dependencies=[Depends(dep.get_current_active_user)])
@@ -128,6 +130,7 @@ async def get_cashflow_total(
         interval: str,
         start_date: date | None = None,
         end_date: date | None = None,
+        tag: str | None = None,
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.DataSeries]:
-    return crud.get_total_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date)
+    return crud.get_total_cashflow(db=db, interval=interval, start_date=start_date, end_date=end_date, tag_id=tag)

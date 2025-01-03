@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from fastapi import UploadFile, HTTPException, status
 
 
-def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseCreate, receipt_file: UploadFile) -> models.Expense:
+def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseBase, receipt_file: UploadFile) -> models.Expense:
     if receipt_file.content_type.startswith("image"):
         from PIL import Image
 
@@ -48,7 +48,8 @@ def create_expense(db: Session, expense_user: models.User, expense_data: schemas
         expenseDate=expense_data.expenseDate,
         receiptContentType=receipt_file.content_type,
         amount=expense_data.amount,
-        receiptFileId=new_expense_receipt.id
+        receiptFileId=new_expense_receipt.id,
+        tagId=expense_data.tagId
     )
     db.add(new_expense)
     db.commit()
@@ -92,7 +93,39 @@ def patch_expense_transferred(db: Session, expense_id: UUID, treasurer_user: mod
     return expense
 
 
-def get_expenses(db: Session) -> list[models.Expense]:
+def get_expenses(db: Session, tag_id: str | None) -> list[models.Expense]:
+    expenses = select(models.Expense)
+    if tag_id is not None:
+        expenses = expenses.where(models.Expense.tagId == tag_id)
     return [
-        _ for _ in db.scalars(select(models.Expense))
+        _ for _ in db.scalars(expenses)
     ]
+
+def get_expense_tags(db: Session, inactive: bool) -> list[models.ExpenseTag]:
+    tags = select(models.ExpenseTag)
+
+    if not inactive:
+        tags = tags.where(models.ExpenseTag.active == True)
+
+    return [_ for _ in db.scalars(tags)]
+
+def create_expense_tag(db: Session, expense_tag: schemas.ExpenseTag) -> models.ExpenseTag:
+    new_expense_tag = models.ExpenseTag(
+        id=expense_tag.id,
+        description=expense_tag.description,
+        active=expense_tag.active,
+    )
+    db.add(new_expense_tag)
+    db.commit()
+    return new_expense_tag
+
+def update_expense_tag(db: Session, expense_tag_id: str, expense_tag_update: schemas.ExpenseTagUpdate) -> models.ExpenseTag:
+    expense_tag = db.scalar(select(models.ExpenseTag).where(models.ExpenseTag.id == expense_tag_id))
+    if expense_tag_update.description is not None:
+        expense_tag.description = expense_tag_update.description
+    if expense_tag_update.active is not None:
+        expense_tag.active = expense_tag_update.active
+    db.commit()
+
+    return expense_tag
+

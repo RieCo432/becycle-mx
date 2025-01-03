@@ -5,12 +5,14 @@ import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 import requests from '@/requests';
 import {useThemeSettingsStore} from '@/store/themeSettings';
+import Select from '@/components/Select/index.vue';
 
 const themeSettingsStore = useThemeSettingsStore();
 
 export default {
   name: 'depositCharts',
   components: {
+    Select,
     Card,
     VueSlider,
   },
@@ -20,6 +22,8 @@ export default {
       gracePeriod: 184,
       startDate: null,
       endDate: null,
+      expenseTagFilter: '',
+      expenseTags: [{label: 'All', value: ''}],
       areaChartOptionsDateSeries: {
         chart: {
           type: 'area',
@@ -450,21 +454,24 @@ export default {
       });
     },
     fetchActualCashflowSeries() {
-      requests.getActualCashflow(this.interval, this.startDate, this.endDate).then((response) => {
+      requests.getActualCashflow(this.interval, this.startDate, this.endDate,
+        this.expenseTagFilter !== '' ? this.expenseTagFilter : null).then((response) => {
         this.actualCashflowSeries = response.data;
         this.updateStartDate(this.actualCashflowSeries[0].data[0][0]);
         this.updateEndDate(this.actualCashflowSeries[0].data[this.actualCashflowSeries[0].data.length -1][0]);
       });
     },
     fetchProvisionalCashflowSeries() {
-      requests.getProvisionalCashflow(this.interval, this.startDate, this.endDate).then((response) => {
+      requests.getProvisionalCashflow(this.interval, this.startDate, this.endDate,
+        this.expenseTagFilter !== '' ? this.expenseTagFilter : null).then((response) => {
         this.provisionalCashflowSeries = response.data;
         this.updateStartDate(this.provisionalCashflowSeries[0].data[0][0]);
         this.updateEndDate(this.provisionalCashflowSeries[0].data[this.provisionalCashflowSeries[0].data.length -1][0]);
       });
     },
     fetchTotalCashflowSeries() {
-      requests.getTotalCashflow(this.interval, this.startDate, this.endDate).then((response) => {
+      requests.getTotalCashflow(this.interval, this.startDate, this.endDate,
+        this.expenseTagFilter !== '' ? this.expenseTagFilter : null).then((response) => {
         this.totalCashflowSeries = response.data;
         this.updateStartDate(this.totalCashflowSeries[0].data[0][0]);
         this.updateEndDate(this.totalCashflowSeries[0].data[this.totalCashflowSeries[0].data.length -1][0]);
@@ -501,6 +508,21 @@ export default {
       }
       this.fetchAllSeries();
     },
+    getExpenseTags() {
+      requests.getExpenseTags().then((response) => {
+        this.expenseTags.splice(0, this.expenseTags.length, {
+          label: 'All',
+          value: '',
+        });
+        this.expenseTags.push(...response.data.map((t) => (
+          {
+            label: `${t.id} --- ${t.description}`,
+            value: t.id,
+          }
+        )));
+      });
+      this.expenseTagFilter = '';
+    },
   },
   watch: {
     startDate(newStartDate, oldStartDate) {
@@ -518,6 +540,7 @@ export default {
   },
   created() {
     this.fetchAllSeries();
+    this.getExpenseTags();
   },
 };
 </script>
@@ -560,7 +583,7 @@ export default {
                 @drag-end="fetchGracePeriodDependants"
             ></vue-slider>
           </div>
-          <div class="col-span-12 lg:col-span-6 content-center">
+          <div class="col-span-12 lg:col-span-4 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period Start</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -573,7 +596,7 @@ export default {
             >
             </flat-pickr>
           </div>
-          <div class="col-span-12 lg:col-span-6 content-center">
+          <div class="col-span-12 lg:col-span-4 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period End</label>
             <flat-pickr
                 class="form-control m-auto"
@@ -584,6 +607,15 @@ export default {
                 :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
             >
             </flat-pickr>
+          </div>
+          <div class="col-span-12 lg:col-span-4 content-center">
+            <label class="text-slate-700 dark:text-slate-300">Filter By Tag</label>
+            <Select
+                :options="expenseTags"
+                v-model="expenseTagFilter"
+                disable-placeholder
+                @input="fetchAllSeries"
+            ></Select>
           </div>
         </div>
       </Card>
