@@ -24,7 +24,6 @@ export default {
       expenseInfo: {},
       showExpenseInfoModal: false,
       receiptUrl: null,
-      expenseTagsFilter: ['workshop', 'test'],
       filterByTag: null,
       columns: [
         {
@@ -52,7 +51,8 @@ export default {
           field: 'tag.id',
           filterOptions: {
             enabled: true,
-            filterDropdownItems: this.expenseTagsFilter,
+            placeholder: 'No Filter',
+            filterDropdownItems: [],
           },
         },
         {
@@ -113,7 +113,9 @@ export default {
   created() {
     this.getExpenses();
     requests.getExpenseTags(true).then((response) => {
-      this.expenseTagsFilter = response.data.map((tag) => (`${tag.id}`));
+      const tagColumnIndex = this.columns.findIndex((column) => (column.field === 'tag.id'));
+      this.columns[tagColumnIndex]
+        .filterOptions.filterDropdownItems.splice(0, this.columns[tagColumnIndex].length, ...response.data.map((tag) => (`${tag.id}`)));
     });
     requests.getUserMe().then((response) => {
       this.isUserTreasurer = response.data.treasurer;
