@@ -93,6 +93,54 @@ def patch_expense_transferred(db: Session, expense_id: UUID, treasurer_user: mod
     return expense
 
 
+def delete_expense(db: Session, expense_id: UUID) -> None:
+    expense = db.scalar(
+        select(models.Expense)
+        .where(models.Expense.id == expense_id)
+    )
+
+    if expense is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense not found"})
+
+    db.delete(expense)
+    db.commit()
+
+
+def update_expense(db: Session, expense_id: UUID, updated_expense_data: schemas.ExpenseUpdate) -> models.Expense:
+    expense = db.scalar(
+        select(models.Expense)
+        .where(models.Expense.id == expense_id)
+    )
+
+    if expense is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense not found"})
+
+    if updated_expense_data.type is not None:
+        expense.type = updated_expense_data.type
+    if updated_expense_data.notes is not None:
+        expense.notes = updated_expense_data.notes
+    if updated_expense_data.expenseDate is not None:
+        expense.expenseDate = updated_expense_data.expenseDate
+    if updated_expense_data.amount is not None:
+        expense.amount = updated_expense_data.amount
+    if updated_expense_data.tagId is not None:
+        expense.tagId = updated_expense_data.tagId
+    if updated_expense_data.expenseUserId is not None:
+        expense.expenseUserId = updated_expense_data.expenseUserId
+    if updated_expense_data.transferred is not None:
+        if updated_expense_data.transferred:
+            if updated_expense_data.treasurerUserId is not None:
+                expense.treasurerUserId = updated_expense_data.treasurerUserId
+            if updated_expense_data.transferDate is not None:
+                expense.transferDate = updated_expense_data.transferDate
+        else:
+            expense.treasurerUserId = None
+            expense.transferDate = None
+
+    db.commit()
+    return expense
+
+
 def get_expenses(db: Session, tag_id: str | None) -> list[models.Expense]:
     expenses = select(models.Expense)
     if tag_id is not None:

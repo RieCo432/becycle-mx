@@ -403,10 +403,19 @@ def expense_receipts() -> list[models.ExpenseReceipt]:
     db.query(models.ExpenseReceipt).delete()
     db.commit()
 
+@pytest.fixture
+def expense_tags() -> list[models.ExpenseTag]:
+    test_expense_tags = add_expense_tags(db=db)
+
+    yield test_expense_tags
+
+    db.query(models.ExpenseTag).delete()
+    db.commit()
+
 
 @pytest.fixture
-def expenses(expense_types, users, expense_receipts) -> list[models.Expense]:
-    test_expenses = add_expenses(db=db, users=users, expense_receipts=expense_receipts, expense_types=expense_types)
+def expenses(expense_types, expense_tags, users, expense_receipts) -> list[models.Expense]:
+    test_expenses = add_expenses(db=db, users=users, expense_receipts=expense_receipts, expense_types=expense_types, expense_tags=expense_tags)
 
     yield test_expenses
 

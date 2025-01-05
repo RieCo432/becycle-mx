@@ -1,10 +1,13 @@
+from collections.abc import Callable
 from datetime import date
 
-from fastapi import APIRouter, Depends, UploadFile, Body
+from fastapi import APIRouter, Depends, UploadFile, Body, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from typing import Annotated, List
+
+from starlette import status
 
 import app.crud as crud
 import app.dependencies as dep
@@ -61,6 +64,15 @@ async def get_expenses(
     return crud.get_expenses(db=db, tag_id=tag)
 
 
+@expenses.delete("/expenses/{expense_id}")
+async def delete_expense(
+        expense_id: UUID,
+        user: Annotated[models.User, Depends(dep.get_current_admin_user)],
+        db: Session = Depends(dep.get_db)
+) -> None:
+    crud.delete_expense(db=db, expense_id=expense_id)
+
+
 @expenses.patch("/expenses/{expense_id}/transfer")
 async def patch_expense_transferred(
         expense_id: UUID,
@@ -68,6 +80,17 @@ async def patch_expense_transferred(
         treasurer_user: models.User = Depends(dep.get_current_treasurer_user)
 ) -> schemas.Expense:
     return crud.patch_expense_transferred(db=db, expense_id=expense_id, treasurer_user=treasurer_user)
+
+
+@expenses.patch("/expenses/{expense_id}")
+async def patch_expense(
+        updated_expense_data: schemas.ExpenseUpdate,
+        expense_id: UUID,
+        db: Session = Depends(dep.get_db),
+        treasurer_user: models.User = Depends(dep.get_current_admin_user)
+) -> schemas.Expense:
+    return crud.update_expense(db=db, expense_id=expense_id, updated_expense_data=updated_expense_data)
+
 
 @expenses.get("/expenses/tags")
 async def get_expense_tags(

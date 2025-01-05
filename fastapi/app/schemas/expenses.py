@@ -28,3 +28,14 @@ class Expense(ExpenseBase):
     id: UUID
     receiptContentType: str
     tag: ExpenseTag
+
+class ExpenseUpdate(BaseModel):
+    amount: float | None = None
+    type: str | None = None
+    notes: str | None = None
+    expenseDate: date | None = None
+    tagId: str | None = None
+    expenseUserId: UUID | None = None
+    transferred: bool | None = None
+    treasurerUserId: UUID | None = None
+    transferDate: date | None = None
