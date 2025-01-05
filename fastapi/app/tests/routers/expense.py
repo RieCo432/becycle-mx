@@ -8,7 +8,7 @@ import datetime
 test_client = TestClient(app)
 
 
-def test_post_expense_small_receipt(expenses, expense_types, expense_receipts, normal_user_auth_header):
+def test_post_expense_small_receipt(expenses, expense_types, expense_receipts, expense_tags, normal_user_auth_header):
     current_directory = os.path.dirname(__file__)
     tests_directory = os.path.dirname(current_directory)
     photos_directory = os.path.join(tests_directory, "photos")
@@ -18,6 +18,7 @@ def test_post_expense_small_receipt(expenses, expense_types, expense_receipts, n
             "expense_type": expense_types[0].id,
             "amount": 40,
             "notes": "Some stuff",
+            "tag_id": expense_tags[0].id,
             "expense_date": datetime.datetime.utcnow().date().strftime("%Y-%m-%d")
         }
 
@@ -41,7 +42,7 @@ def test_post_expense_small_receipt(expenses, expense_types, expense_receipts, n
     assert expense_db.expenseDate == datetime.datetime.utcnow().date()
 
 
-def test_post_expense_big_receipt_landscape(expenses, expense_types, expense_receipts, normal_user_auth_header):
+def test_post_expense_big_receipt_landscape(expenses, expense_types, expense_receipts, expense_tags, normal_user_auth_header):
     current_directory = os.path.dirname(__file__)
     tests_directory = os.path.dirname(current_directory)
     photos_directory = os.path.join(tests_directory, "photos")
@@ -51,6 +52,7 @@ def test_post_expense_big_receipt_landscape(expenses, expense_types, expense_rec
             "expense_type": expense_types[0].id,
             "amount": 40,
             "notes": "Some stuff",
+            "tag_id": expense_tags[0].id,
             "expense_date": datetime.datetime.utcnow().date().strftime("%Y-%m-%d")
         }
 
@@ -80,7 +82,7 @@ def test_post_expense_big_receipt_landscape(expenses, expense_types, expense_rec
     assert photo.size[1] <= 2048
 
 
-def test_post_expense_big_receipt_portrait(expenses, expense_types, expense_receipts, normal_user_auth_header):
+def test_post_expense_big_receipt_portrait(expenses, expense_types, expense_receipts, expense_tags, normal_user_auth_header):
     current_directory = os.path.dirname(__file__)
     tests_directory = os.path.dirname(current_directory)
     photos_directory = os.path.join(tests_directory, "photos")
@@ -90,6 +92,7 @@ def test_post_expense_big_receipt_portrait(expenses, expense_types, expense_rece
             "expense_type": expense_types[0].id,
             "amount": 40,
             "notes": "Some stuff",
+            "tag_id": expense_tags[0].id,
             "expense_date": datetime.datetime.utcnow().date().strftime("%Y-%m-%d")
         }
 
@@ -119,7 +122,7 @@ def test_post_expense_big_receipt_portrait(expenses, expense_types, expense_rece
     assert photo.size[1] <= 2048
 
 
-def test_post_expense_pdf(expenses, expense_types, expense_receipts, normal_user_auth_header):
+def test_post_expense_pdf(expenses, expense_types, expense_receipts, expense_tags, normal_user_auth_header):
     current_directory = os.path.dirname(__file__)
     tests_directory = os.path.dirname(current_directory)
     photos_directory = os.path.join(tests_directory, "photos")
@@ -129,6 +132,7 @@ def test_post_expense_pdf(expenses, expense_types, expense_receipts, normal_user
             "expense_type": expense_types[0].id,
             "amount": 40,
             "notes": "Some stuff",
+            "tag_id": expense_tags[0].id,
             "expense_date": datetime.datetime.utcnow().date().strftime("%Y-%m-%d")
         }
 
