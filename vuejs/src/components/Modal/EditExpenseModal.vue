@@ -205,6 +205,9 @@ export default {
   <Modal :active-modal="showModal" @close="closeModal" title="Edit Expense">
     <form @submit.prevent="submitPatchExpense">
       <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
+        <div class="col-span-full">
+          <h3 class="text-danger-500 dark:text-danger-600">BE CAREFUL! NO VALIDATION IS DONE ON THESE INPUTS</h3>
+        </div>
         <div class="col-span-6">
           <Textinput
               label="Amount (&pound;)"
