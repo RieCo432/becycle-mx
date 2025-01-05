@@ -93,6 +93,19 @@ def patch_expense_transferred(db: Session, expense_id: UUID, treasurer_user: mod
     return expense
 
 
+def delete_expense(db: Session, expense_id: UUID) -> None:
+    expense = db.scalar(
+        select(models.Expense)
+        .where(models.Expense.id == expense_id)
+    )
+
+    if expense is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense not found"})
+
+    db.delete(expense)
+    db.commit()
+
+
 def get_expenses(db: Session, tag_id: str | None) -> list[models.Expense]:
     expenses = select(models.Expense)
     if tag_id is not None:

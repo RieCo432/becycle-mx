@@ -20,6 +20,7 @@ export default {
     return {
       loadingExpenses: true,
       isUserTreasurer: false,
+      isUserAdmin: false,
       expenses: [],
       expenseInfo: {},
       showExpenseInfoModal: false,
@@ -99,6 +100,18 @@ export default {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
     },
+    deleteExpense(expenseId) {
+      const confirmed = confirm('Are you sure you want to delete this expense?');
+      if (confirmed) {
+        requests.deleteExpense(expenseId).then((response) => {
+          toast.warning('Expense Deleted', {timeout: 2000});
+          const indexInArray = this.expenses.findIndex((e) => (e.id === expenseId));
+          this.expenses.splice(indexInArray, 1);
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+      }
+    },
     getExpenses() {
       requests.getExpenses(this.filterByTag).then((response) => {
         this.expenses = response.data;
@@ -119,12 +132,21 @@ export default {
     });
     requests.getUserMe().then((response) => {
       this.isUserTreasurer = response.data.treasurer;
+      this.isUserAdmin = response.data.admin;
       if (this.isUserTreasurer) {
         this.actions.push({
           id: 'markTransferred',
           label: 'Mark as transferred',
           icon: 'heroicons-outline:arrows-right-left',
           func: (expenseId) => this.patchExpenseTransferred(expenseId),
+        });
+      }
+      if (this.isUserAdmin) {
+        this.actions.push({
+          id: 'delete',
+          label: 'Delete expense',
+          icon: 'heroicons-outline:trash',
+          func: (expenseId) => this.deleteExpense(expenseId),
         });
       }
     });

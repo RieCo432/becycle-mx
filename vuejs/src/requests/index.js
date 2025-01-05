@@ -945,6 +945,12 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
+  deleteExpense(expenseId) {
+    return axiosClient.delete(`/expenses/${expenseId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
   getExpenseReceipt(expenseId) {
     return axiosClient.get(`/expenses/${expenseId}/receipt`, {
       headers: credentialsStore.getApiRequestHeader(),

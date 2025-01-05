@@ -1,10 +1,13 @@
+from collections.abc import Callable
 from datetime import date
 
-from fastapi import APIRouter, Depends, UploadFile, Body
+from fastapi import APIRouter, Depends, UploadFile, Body, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from typing import Annotated, List
+
+from starlette import status
 
 import app.crud as crud
 import app.dependencies as dep
@@ -59,6 +62,15 @@ async def get_expenses(
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.Expense]:
     return crud.get_expenses(db=db, tag_id=tag)
+
+
+@expenses.delete("/expenses/{expense_id}")
+async def delete_expense(
+        expense_id: UUID,
+        user: Annotated[models.User, Depends(dep.get_current_admin_user)],
+        db: Session = Depends(dep.get_db)
+) -> None:
+    crud.delete_expense(db=db, expense_id=expense_id)
 
 
 @expenses.patch("/expenses/{expense_id}/transfer")
