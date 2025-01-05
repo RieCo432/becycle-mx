@@ -81,6 +81,17 @@ async def patch_expense_transferred(
 ) -> schemas.Expense:
     return crud.patch_expense_transferred(db=db, expense_id=expense_id, treasurer_user=treasurer_user)
 
+
+@expenses.patch("/expenses/{expense_id}")
+async def patch_expense(
+        updated_expense_data: schemas.ExpenseUpdate,
+        expense_id: UUID,
+        db: Session = Depends(dep.get_db),
+        treasurer_user: models.User = Depends(dep.get_current_admin_user)
+) -> schemas.Expense:
+    return crud.update_expense(db=db, expense_id=expense_id, updated_expense_data=updated_expense_data)
+
+
 @expenses.get("/expenses/tags")
 async def get_expense_tags(
         inactive: bool = False,

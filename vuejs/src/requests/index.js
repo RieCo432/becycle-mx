@@ -945,6 +945,23 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
+  patchExpense(expenseId, amount, type, tagId, notes,
+    expenseDate, expenseUserId, transferred, treasurerUserId, transferDate) {
+    return axiosClient.patch(`/expenses/${expenseId}`, {
+      amount: amount,
+      type: type,
+      tagId: tagId,
+      notes: notes,
+      expenseDate: expenseDate,
+      expenseUserId: expenseUserId,
+      transferred: transferred,
+      ...transferred && {treasurerUserId: treasurerUserId},
+      ...transferred && {transferDate: transferDate},
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
   deleteExpense(expenseId) {
     return axiosClient.delete(`/expenses/${expenseId}`, {
       headers: credentialsStore.getApiRequestHeader(),

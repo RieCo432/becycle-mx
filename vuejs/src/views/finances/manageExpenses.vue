@@ -5,12 +5,14 @@ import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import DashButton from '@/components/Button/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
+import EditExpenseModal from '@/components/Modal/EditExpenseModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'manageExpenses',
   components: {
+    EditExpenseModal,
     DashButton,
     ExpenseSummaryTable,
     Card,
@@ -24,6 +26,8 @@ export default {
       expenses: [],
       expenseInfo: {},
       showExpenseInfoModal: false,
+      showExpenseEditModal: false,
+      editExpense: null,
       receiptUrl: null,
       filterByTag: null,
       columns: [
@@ -122,6 +126,18 @@ export default {
       this.showExpenseInfoModal = false;
       this.receiptUrl = null;
     },
+    openEditExpenseModal(expenseId) {
+      this.editExpense = this.expenses.find((e) => e.id === expenseId);
+      this.showExpenseEditModal = true;
+    },
+    closeExpenseEditModal() {
+      this.showExpenseEditModal = false;
+      this.editExpense = null;
+    },
+    expenseUpdated(updatedExpense) {
+      const indexInArray = this.expenses.findIndex((e) => (e.id === updatedExpense.id));
+      this.expenses.splice(indexInArray, 1, updatedExpense);
+    },
   },
   created() {
     this.getExpenses();
@@ -142,6 +158,12 @@ export default {
         });
       }
       if (this.isUserAdmin) {
+        this.actions.push({
+          id: 'editExpense',
+          label: 'Edit Expense',
+          icon: 'heroicons-outline:pencil',
+          func: (expenseId) => this.openEditExpenseModal(expenseId),
+        });
         this.actions.push({
           id: 'delete',
           label: 'Delete expense',
@@ -188,6 +210,13 @@ export default {
         >Mark As Transferred</DashButton>
       </div>
     </Modal>
+    <EditExpenseModal
+        :show-modal="showExpenseEditModal"
+        :expense="editExpense"
+        :close-modal="closeExpenseEditModal"
+        @expense-updated="expenseUpdated"
+        @close="closeExpenseEditModal"
+    ></EditExpenseModal>
   </div>
 </template>
 
