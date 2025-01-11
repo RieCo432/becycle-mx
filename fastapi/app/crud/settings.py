@@ -293,7 +293,7 @@ def get_maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_ap
         maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment[d] = {}
         days_from_today = (d - datetime.utcnow().date()).days - 1  # we don't want to live right on the edge
 
-        adjustment_factor = (max_book_ahead - days_from_today) / (max_book_ahead - min_book_ahead) if get_gradual_availability(db=db) else 1
+        adjustment_factor = min((max_book_ahead - days_from_today) / (max_book_ahead - min_book_ahead), 1) if get_gradual_availability(db=db) else 1
 
         for t in maximum_concurrent_appointments_for_each_slot[d].keys():
             maximum_concurrent_appointments_for_each_slot_adjusted_for_time_until_appointment[d][t] = (math.ceil(
