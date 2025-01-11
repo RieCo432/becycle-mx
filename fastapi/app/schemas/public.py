@@ -14,6 +14,6 @@ class ClosedPeriod(ClosedDay):
     nextOpen: date
 
 
-class ClosedEntry(BaseModel):
+class Closure(BaseModel):
     type: str
     item: ClosedDay | ClosedPeriod

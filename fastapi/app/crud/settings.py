@@ -157,7 +157,7 @@ def get_theoretical_open_days_in_period(db: Session, start_date: date | None = N
     return theoretical_open_days
 
 
-def get_closed_days_and_periods(db:Session, start_date: date | None = None, end_date: date | None = None) -> list[schemas.ClosedEntry]:
+def get_upcoming_closures(db:Session, start_date: date | None = None, end_date: date | None = None) -> list[schemas.Closure]:
     query = select(models.ClosedDay)
 
     if start_date is not None:
@@ -168,7 +168,7 @@ def get_closed_days_and_periods(db:Session, start_date: date | None = None, end_
 
 
     theoretical_open_dates = get_theoretical_open_days_in_period(db=db, start_date=start_date, end_date=end_date)
-    closed_days_and_periods = []
+    upcoming_closures = []
 
     probe = 0
 
@@ -179,7 +179,7 @@ def get_closed_days_and_periods(db:Session, start_date: date | None = None, end_
                 probe_ahead += 1
 
             if probe_ahead == probe + 1:
-                closed_days_and_periods.append(schemas.ClosedEntry(
+                upcoming_closures.append(schemas.Closure(
                     type="day",
                     item=schemas.ClosedDay(
                         date=theoretical_open_dates[probe],
@@ -188,7 +188,7 @@ def get_closed_days_and_periods(db:Session, start_date: date | None = None, end_
                     )
                 ))
             else:
-                closed_days_and_periods.append(schemas.ClosedEntry(
+                upcoming_closures.append(schemas.Closure(
                     type="period",
                     item=schemas.ClosedPeriod(
                         date=theoretical_open_dates[probe],
@@ -202,7 +202,7 @@ def get_closed_days_and_periods(db:Session, start_date: date | None = None, end_
         else:
             probe += 1
 
-    return closed_days_and_periods
+    return upcoming_closures
 
 
 def create_closed_day(
