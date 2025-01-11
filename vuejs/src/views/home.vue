@@ -49,12 +49,28 @@
                   :sort-options="{
                     enabled: false
                   }"/>
-              <div v-if="nextClosedDay" class="mt-3">
-                <p class="dark:text-danger-500">
-                    We will be closed on {{ new Date(Date.parse(nextClosedDay.date))
-                    .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
-                </p>
-              </div>
+                <div v-if="upcomingClosures.length > 0" class="mt-3">
+                  <h3 class="text-lg font-bold">We will be closed...</h3>
+                    <template v-for="closure in upcomingClosures" :key="closure">
+                        <p v-if="closure.type==='day'" class="dark:text-danger-500">
+                          on {{ new Date(Date.parse(closure.item.date))
+                            .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+                          for {{closure.item.note}}.
+                        </p>
+                        <template v-else-if="closure.type==='period'">
+                          <p class="dark:text-danger-500">
+                            from {{ new Date(Date.parse(closure.item.date))
+                              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+                            until {{ new Date(Date.parse(closure.item.untilDate))
+                              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+                            for {{closure.item.note}}.
+                          </p>
+                          <p class="dark:text-danger-500">We will re-open on {{ new Date(Date.parse(closure.item.nextOpen))
+                              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</p>
+                        </template>
+                      <br/>
+                  </template>
+                </div>
             </Card>
         </div>
     </div>
@@ -77,7 +93,7 @@ export default {
     return {
       loading: true,
       openingTimes: null,
-      nextClosedDay: null,
+      upcomingClosures: [],
       address: null,
       columns: [
         {
@@ -122,8 +138,8 @@ export default {
       this.openingTimes = response.data;
       this.loading = false;
     });
-    requests.getNextClosedDay().then((response) => {
-      this.nextClosedDay = response.data;
+    requests.getUpcomingClosures().then((response) => {
+      this.upcomingClosures = response.data;
     });
     requests.getAddress().then((response) => {
       this.address = response.data;
