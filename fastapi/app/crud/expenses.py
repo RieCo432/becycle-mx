@@ -177,3 +177,16 @@ def update_expense_tag(db: Session, expense_tag_id: str, expense_tag_update: sch
 
     return expense_tag
 
+def does_expense_exist(db: Session, expense_user: models.User, expense_data: schemas.ExpenseBase) -> bool:
+    existing_expense = db.scalar(
+        select(models.Expense)
+        .where(
+            (models.Expense.expenseUserId == expense_user.id)
+            & (models.Expense.type == expense_data.type)
+            & (models.Expense.amount == expense_data.amount)
+            & (models.Expense.tagId == expense_data.tagId)
+            & (models.Expense.expenseDate == expense_data.expenseDate)
+        )
+    )
+    return existing_expense is not None
+
