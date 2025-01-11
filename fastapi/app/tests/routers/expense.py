@@ -152,6 +152,56 @@ def test_post_expense_pdf(expenses, expense_types, expense_receipts, expense_tag
     assert response_json == expense_db
 
 
+def test_post_expense_error_on_duplicate(expenses, expense_types, expense_receipts, expense_tags, normal_user_auth_header):
+    current_directory = os.path.dirname(__file__)
+    tests_directory = os.path.dirname(current_directory)
+    photos_directory = os.path.join(tests_directory, "photos")
+    pdf_filepath = os.path.join(photos_directory, "test_receipt.pdf")
+    with open(pdf_filepath, "rb") as pdf_file:
+        new_expense_details = {
+            "expense_type": expense_types[0].id,
+            "amount": 40,
+            "notes": "Some stuff",
+            "tag_id": expense_tags[0].id,
+            "expense_date": datetime.datetime.utcnow().date().strftime("%Y-%m-%d")
+        }
+
+        response = test_client.post("/expenses",
+                               data=new_expense_details,
+                               files={"receipt_file": ("test_receipt.pdf", pdf_file, "application/pdf")},
+                               headers=normal_user_auth_header)
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+    expense_db = db.scalar(
+        select(models.Expense)
+        .where(models.Expense.expenseDate == datetime.datetime.utcnow().date())
+    )
+
+    assert response_json == expense_db
+
+
+    with open(pdf_filepath, "rb") as pdf_file:
+        new_duplicate_expense_details = {
+            "expense_type": expense_types[0].id,
+            "amount": 40,
+            "notes": "Some stuff",
+            "tag_id": expense_tags[0].id,
+            "expense_date": datetime.datetime.utcnow().date().strftime("%Y-%m-%d")
+        }
+
+        response = test_client.post("/expenses",
+                               data=new_duplicate_expense_details,
+                               files={"receipt_file": ("test_receipt.pdf", pdf_file, "application/pdf")},
+                               headers=normal_user_auth_header)
+
+        assert response.status_code == 409
+        response_json = response.json()
+
+    assert response_json.get("detail").get("description") == "This appears to be a duplicate expense. Please contact a system admin if this is a mistake."
+
+
 def test_get_expense_receipt(expenses, expense_receipts, normal_user_auth_header):
     for expense, expense_receipt in zip(expenses, expense_receipts):
 

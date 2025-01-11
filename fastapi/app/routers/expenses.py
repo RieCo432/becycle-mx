@@ -34,13 +34,20 @@ async def post_expense(
         expense_user: schemas.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.Expense:
-    return crud.create_expense(db=db, expense_user=expense_user, expense_data=schemas.ExpenseBase(
+    expense_data = schemas.ExpenseBase(
         amount=amount,
         type=expense_type,
         tagId=tag_id,
         expenseDate=expense_date,
         notes=notes,
-    ), receipt_file=receipt_file)
+    )
+
+    if crud.does_expense_exist(db=db, expense_user=expense_user, expense_data=expense_data):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"description": "This appears to be a duplicate expense. Please contact a system admin if this is a mistake."}
+        )
+    return crud.create_expense(db=db, expense_user=expense_user, expense_data=expense_data, receipt_file=receipt_file)
 
 
 @expenses.get("/expenses/{expense_id}/receipt")
