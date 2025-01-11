@@ -42,6 +42,11 @@ def get_next_closed_day(db: Session = Depends(dep.get_db)) -> schemas.ClosedDay:
     return crud.get_closed_days(db=db, start_date=datetime.datetime.utcnow().date())[0]
 
 
+@public.get("/public/closed-days-and-periods")
+def get_closed_days_and_periods(db: Session = Depends(dep.get_db)) -> list[schemas.ClosedEntry]:
+    return crud.get_closed_days_and_periods(db=db, start_date=datetime.datetime.utcnow().date())
+
+
 @public.get("/public/address")
 def get_address(db: Session = Depends(dep.get_db)) -> schemas.Address:
     return crud.get_address(db=db)
