@@ -805,7 +805,7 @@ def add_paper_contracts(db: Session, contracts: list[models.Contract]) -> list[m
 def add_appointment_types(db: Session) -> list[models.AppointmentType]:
     appointment_types = [
         models.AppointmentType(
-            id="lend",
+            id="rent",
             active=True,
             title="Lending",
             description="You know what this is",

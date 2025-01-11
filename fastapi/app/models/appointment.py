@@ -28,6 +28,8 @@ class Appointment(Base):
 
     reminderSent: Mapped[bool] = mapped_column("remindersent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
+    _rental_note = "<p>Please note that the rental deposit must be paid in <span style=\"color:#ff0000\">CASH ONLY</span>. This is because we cannot return money via card.</p>"
+
 
     def __eq_dict__(self, other: dict):
         return all([
@@ -59,7 +61,9 @@ class Appointment(Base):
             ])
 
     def send_request_received_email(self):
-        email_html_content = services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime)
+        email_html_content = (
+            services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime)) if self.type.id != "rent" \
+            else services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime, Appointment._rental_note)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Appointment Request Received",
@@ -67,7 +71,8 @@ class Appointment(Base):
         )
 
     def send_confirmation_email(self):
-        email_html_content = services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime)
+        email_html_content = services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime) if self.type.id != "rent" \
+            else services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime, Appointment._rental_note)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Confirmation",
@@ -99,7 +104,8 @@ class Appointment(Base):
         )
 
     def send_reminder_email(self):
-        email_html_content = services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime)
+        email_html_content = services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime) if self.type.id != "rent" \
+            else services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime, Appointment._rental_note)
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Reminder",
