@@ -68,7 +68,7 @@ export default {
           resetExpenseDate();
           files.value = [];
         }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
+          toast.error(error.response.data.detail.description, {timeout: 5000});
         });
     });
 
