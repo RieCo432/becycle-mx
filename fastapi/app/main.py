@@ -9,8 +9,6 @@ from app.database.db import engine, Base, SessionLocal
 from app.dependencies import get_db
 import app.crud as crud
 
-Base.metadata.create_all(bind=engine)
-
 if os.environ["PRODUCTION"] == "true":
     app = FastAPI(dependencies=[Depends(get_db)], docs_url=None, redoc_url=None)
 else:
