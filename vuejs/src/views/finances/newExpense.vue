@@ -38,6 +38,7 @@ export default {
     const newExpenseSchemas = yup.object().shape({
       inOrOut: yup.string().required().oneOf(['in', 'out']),
       type: yup.string().required(),
+      tagId: yup.string().required(),
       notes: yup.string().required(),
       amount: yup.number().required(),
       expenseDate: yup.date().required(),
@@ -50,22 +51,24 @@ export default {
 
     const {value: inOrOut, errorMessage: inOrOutError, resetField: resetInOrOut} = useField('inOrOut');
     const {value: type, errorMessage: typeError, resetField: resetType} = useField('type');
+    const {value: tagId, errorMessage: tagError, resetField: resetTag} = useField('tagId');
     const {value: notes, errorMessage: notesError, resetField: resetNotes} = useField('notes');
     const {value: amount, errorMessage: amountError, resetField: resetAmount} = useField('amount');
     const {value: expenseDate, errorMessage: expenseDateError, resetField: resetExpenseDate} = useField('expenseDate');
 
     const submitNewExpense = handleSubmit(() => {
-      requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value, type.value, notes.value, expenseDate.value, files.value[0])
+      requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value, type.value, tagId.value, notes.value, expenseDate.value, files.value[0])
         .then((response) => {
           toast.success('Expense Submitted', {timeout: 2000});
           resetInOrOut();
           resetType();
+          resetTag();
           resetNotes();
           resetAmount();
           resetExpenseDate();
           files.value = [];
         }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
+          toast.error(error.response.data.detail.description, {timeout: 5000});
         });
     });
 
@@ -78,6 +81,8 @@ export default {
       inOrOutError,
       type,
       typeError,
+      tagId,
+      tagError,
       notes,
       notesError,
       amount,
@@ -90,6 +95,7 @@ export default {
   data() {
     return {
       expenseTypes: [],
+      expenseTags: [],
       inOrOutOptions: [
         {
           label: 'OUT of the bank account',
@@ -105,6 +111,14 @@ export default {
   created() {
     requests.getExpenseTypes().then((response) => {
       this.expenseTypes = response.data.map((t) => (
+        {
+          label: `${t.id} --- ${t.description}`,
+          value: t.id,
+        }
+      ));
+    });
+    requests.getExpenseTags().then((response) => {
+      this.expenseTags = response.data.map((t) => (
         {
           label: `${t.id} --- ${t.description}`,
           value: t.id,
@@ -148,6 +162,15 @@ export default {
                   v-model="type"
                   name="type"
                   :error="typeError"
+              />
+            </div>
+            <div class="col-span-6">
+              <Select
+                :options="expenseTags"
+                label="Tag/Project"
+                v-model="tagId"
+                name="tagId"
+                :error="tagError"
               />
             </div>
             <div class="col-span-6">

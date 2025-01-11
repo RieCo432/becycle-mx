@@ -901,13 +901,14 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
-  postNewExpense(amount, type, notes, expenseDate, receiptFile) {
+  postNewExpense(amount, type, tagId, notes, expenseDate, receiptFile) {
     return axiosClient.post('/expenses', {
       amount: amount,
       expense_type: type,
+      tag_id: tagId,
       notes: notes,
-      receipt_file: receiptFile,
       expense_date: expenseDate,
+      receipt_file: receiptFile,
     }, {
       headers: {
         ...credentialsStore.getApiRequestHeader(),
@@ -922,14 +923,47 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
-  getExpenses() {
+  getExpenseTags(inactive=false) {
+    return axiosClient.get('/expenses/tags', {
+      params: {
+        inactive: inactive,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
+  getExpenses(filterByTag=null) {
     return axiosClient.get('/expenses', {
+      params: filterByTag ? {tag: filterByTag} : null,
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
   patchExpenseTransferred(expenseId) {
     return axiosClient.patch(`/expenses/${expenseId}/transfer`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
+  patchExpense(expenseId, amount, type, tagId, notes,
+    expenseDate, expenseUserId, transferred, treasurerUserId, transferDate) {
+    return axiosClient.patch(`/expenses/${expenseId}`, {
+      amount: amount,
+      type: type,
+      tagId: tagId,
+      notes: notes,
+      expenseDate: expenseDate,
+      expenseUserId: expenseUserId,
+      transferred: transferred,
+      ...transferred && {treasurerUserId: treasurerUserId},
+      ...transferred && {transferDate: transferDate},
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
+  deleteExpense(expenseId) {
+    return axiosClient.delete(`/expenses/${expenseId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
@@ -941,34 +975,37 @@ export default {
       responseType: 'blob',
     });
   },
-  getActualCashflow(interval, startDate, endDate) {
+  getActualCashflow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/actual', {
       params: {
         interval: interval,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
+        ...(tag && {tag: tag}),
       },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
-  getProvisionalCashflow(interval, startDate, endDate) {
+  getProvisionalCashflow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/provisional', {
       params: {
         interval: interval,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
+        ...(tag && {tag: tag}),
       },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
-  getTotalCashflow(interval, startDate, endDate) {
+  getTotalCashflow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/total', {
       params: {
         interval: interval,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
+        ...(tag && {tag: tag}),
       },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
@@ -1056,6 +1093,25 @@ export default {
   patchExpenseType(expenseTypeId, expenseTypeDescription) {
     return axiosClient.patch(`/settings/expense-types/${expenseTypeId}`, {
       description: expenseTypeDescription,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
+  postNewExpenseTag(expenseTagId, expenseTagDescription) {
+    return axiosClient.post('/expenses/tags', {
+      id: expenseTagId,
+      description: expenseTagDescription,
+      active: true,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
+  patchExpenseTag(expenseTagId, expenseTagDescription, expenseTagActive) {
+    return axiosClient.patch(`/expenses/tags/${expenseTagId}`, {
+      description: expenseTagDescription,
+      active: expenseTagActive,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),

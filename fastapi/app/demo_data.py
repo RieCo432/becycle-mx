@@ -52,6 +52,7 @@ def delete_all(db: Session):
     db.query(models.ClientTemp).delete()
     db.query(models.ClosedDay).delete()
     db.query(models.ExpenseType).delete()
+    db.query(models.ExpenseTag).delete()
 
 
 def add_clients(db: Session) -> list[models.Client]:
@@ -804,7 +805,7 @@ def add_paper_contracts(db: Session, contracts: list[models.Contract]) -> list[m
 def add_appointment_types(db: Session) -> list[models.AppointmentType]:
     appointment_types = [
         models.AppointmentType(
-            id="lend",
+            id="rent",
             active=True,
             title="Lending",
             description="You know what this is",
@@ -1203,6 +1204,24 @@ def add_expense_types(db: Session) -> list[models.ExpenseType]:
     return expense_types
 
 
+def add_expense_tags(db: Session) -> list[models.ExpenseTag]:
+    expense_tags = [
+        models.ExpenseTag(
+            id="workshop",
+            description="Regular workshop expenses"
+        ),
+        models.ExpenseTag(
+            id="test",
+            description="Just testing"
+        ),
+    ]
+
+    db.add_all(expense_tags)
+    db.commit()
+
+    return expense_tags
+
+
 def add_expense_receipts(db: Session) -> list[models.ExpenseReceipt]:
     expense_receipts = []
 
@@ -1232,7 +1251,7 @@ def add_expense_receipts(db: Session) -> list[models.ExpenseReceipt]:
     return expense_receipts
 
 
-def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], users: list[models.User], expense_types: list[models.ExpenseType]) -> list[models.Expense]:
+def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], users: list[models.User], expense_types: list[models.ExpenseType], expense_tags: list[models.ExpenseTag]) -> list[models.Expense]:
     expenses = [
         models.Expense(
             expenseUserId=users[2].id,
@@ -1243,7 +1262,8 @@ def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], use
             type=expense_types[1].id,
             notes="brake pads",
             receiptFileId=expense_receipts[0].id,
-            receiptContentType="image/jpeg"
+            receiptContentType="image/jpeg",
+            tagId=expense_tags[0].id,
         ),
         models.Expense(
             expenseUserId=users[1].id,
@@ -1254,7 +1274,8 @@ def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], use
             type=expense_types[0].id,
             notes="chain oil",
             receiptFileId=expense_receipts[1].id,
-            receiptContentType="image/jpeg"
+            receiptContentType="image/jpeg",
+            tagId=expense_tags[1].id,
         ),
         models.Expense(
             expenseUserId=users[0].id,
@@ -1265,7 +1286,8 @@ def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], use
             type=expense_types[2].id,
             notes="cash from safe",
             receiptFileId=expense_receipts[2].id,
-            receiptContentType="image/jpeg"
+            receiptContentType="image/jpeg",
+            tagId=expense_tags[0].id,
         ),
         models.Expense(
             expenseUserId=users[0].id,
@@ -1276,7 +1298,8 @@ def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], use
             type=expense_types[1].id,
             notes="chains",
             receiptFileId=expense_receipts[3].id,
-            receiptContentType="application/pdf"
+            receiptContentType="application/pdf",
+            tagId=expense_tags[1].id,
         ),
         models.Expense(
             expenseUserId=users[2].id,
@@ -1287,7 +1310,8 @@ def add_expenses(db: Session, expense_receipts: list[models.ExpenseReceipt], use
             type=expense_types[0].id,
             notes="gt-85",
             receiptFileId=expense_receipts[4].id,
-            receiptContentType="application/pdf"
+            receiptContentType="application/pdf",
+            tagId=expense_tags[0].id,
         ),
     ]
 
@@ -1438,8 +1462,9 @@ if __name__ == "__main__":
     demo_closed_days = add_closed_days(db=demo_db, appointment_general_settings=demo_appointment_general_settings)
     demo_deposit_exchanges = add_deposit_exchanges(db=demo_db, users=demo_users)
     demo_expense_types = add_expense_types(db=demo_db)
+    demo_expense_tags = add_expense_tags(db=demo_db)
     demo_expense_receipts = add_expense_receipts(db=demo_db)
-    demo_expenses = add_expenses(db=demo_db, expense_receipts=demo_expense_receipts, users=demo_users, expense_types=demo_expense_types)
+    demo_expenses = add_expenses(db=demo_db, expense_receipts=demo_expense_receipts, users=demo_users, expense_types=demo_expense_types, expense_tags=demo_expense_tags)
     demo_paper_contracts = add_paper_contracts(db=demo_db, contracts=demo_contracts)
     demo_road_segments = add_road_segments(db=demo_db)
     demo_road_segment_report_types = add_road_segment_report_types(db=demo_db)

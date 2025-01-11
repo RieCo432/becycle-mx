@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from fastapi import UploadFile, HTTPException, status
 
 
-def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseCreate, receipt_file: UploadFile) -> models.Expense:
+def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseBase, receipt_file: UploadFile) -> models.Expense:
     if receipt_file.content_type.startswith("image"):
         from PIL import Image
 
@@ -48,7 +48,8 @@ def create_expense(db: Session, expense_user: models.User, expense_data: schemas
         expenseDate=expense_data.expenseDate,
         receiptContentType=receipt_file.content_type,
         amount=expense_data.amount,
-        receiptFileId=new_expense_receipt.id
+        receiptFileId=new_expense_receipt.id,
+        tagId=expense_data.tagId
     )
     db.add(new_expense)
     db.commit()
@@ -92,7 +93,100 @@ def patch_expense_transferred(db: Session, expense_id: UUID, treasurer_user: mod
     return expense
 
 
-def get_expenses(db: Session) -> list[models.Expense]:
+def delete_expense(db: Session, expense_id: UUID) -> None:
+    expense = db.scalar(
+        select(models.Expense)
+        .where(models.Expense.id == expense_id)
+    )
+
+    if expense is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense not found"})
+
+    db.delete(expense)
+    db.commit()
+
+
+def update_expense(db: Session, expense_id: UUID, updated_expense_data: schemas.ExpenseUpdate) -> models.Expense:
+    expense = db.scalar(
+        select(models.Expense)
+        .where(models.Expense.id == expense_id)
+    )
+
+    if expense is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense not found"})
+
+    if updated_expense_data.type is not None:
+        expense.type = updated_expense_data.type
+    if updated_expense_data.notes is not None:
+        expense.notes = updated_expense_data.notes
+    if updated_expense_data.expenseDate is not None:
+        expense.expenseDate = updated_expense_data.expenseDate
+    if updated_expense_data.amount is not None:
+        expense.amount = updated_expense_data.amount
+    if updated_expense_data.tagId is not None:
+        expense.tagId = updated_expense_data.tagId
+    if updated_expense_data.expenseUserId is not None:
+        expense.expenseUserId = updated_expense_data.expenseUserId
+    if updated_expense_data.transferred is not None:
+        if updated_expense_data.transferred:
+            if updated_expense_data.treasurerUserId is not None:
+                expense.treasurerUserId = updated_expense_data.treasurerUserId
+            if updated_expense_data.transferDate is not None:
+                expense.transferDate = updated_expense_data.transferDate
+        else:
+            expense.treasurerUserId = None
+            expense.transferDate = None
+
+    db.commit()
+    return expense
+
+
+def get_expenses(db: Session, tag_id: str | None) -> list[models.Expense]:
+    expenses = select(models.Expense)
+    if tag_id is not None:
+        expenses = expenses.where(models.Expense.tagId == tag_id)
     return [
-        _ for _ in db.scalars(select(models.Expense))
+        _ for _ in db.scalars(expenses)
     ]
+
+def get_expense_tags(db: Session, inactive: bool) -> list[models.ExpenseTag]:
+    tags = select(models.ExpenseTag)
+
+    if not inactive:
+        tags = tags.where(models.ExpenseTag.active == True)
+
+    return [_ for _ in db.scalars(tags)]
+
+def create_expense_tag(db: Session, expense_tag: schemas.ExpenseTag) -> models.ExpenseTag:
+    new_expense_tag = models.ExpenseTag(
+        id=expense_tag.id,
+        description=expense_tag.description,
+        active=expense_tag.active,
+    )
+    db.add(new_expense_tag)
+    db.commit()
+    return new_expense_tag
+
+def update_expense_tag(db: Session, expense_tag_id: str, expense_tag_update: schemas.ExpenseTagUpdate) -> models.ExpenseTag:
+    expense_tag = db.scalar(select(models.ExpenseTag).where(models.ExpenseTag.id == expense_tag_id))
+    if expense_tag_update.description is not None:
+        expense_tag.description = expense_tag_update.description
+    if expense_tag_update.active is not None:
+        expense_tag.active = expense_tag_update.active
+    db.commit()
+
+    return expense_tag
+
+def does_expense_exist(db: Session, expense_user: models.User, expense_data: schemas.ExpenseBase) -> bool:
+    existing_expense = db.scalar(
+        select(models.Expense)
+        .where(
+            (models.Expense.expenseUserId == expense_user.id)
+            & (models.Expense.type == expense_data.type)
+            & (models.Expense.amount == expense_data.amount)
+            & (models.Expense.tagId == expense_data.tagId)
+            & (models.Expense.expenseDate == expense_data.expenseDate)
+        )
+    )
+    return existing_expense is not None
+

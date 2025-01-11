@@ -27,7 +27,7 @@
         :size="size"
         :multiple="multiple"
       >
-        <option value="" disabled selected>{{ placeholder }}</option>
+        <option v-if="!disablePlaceholder" value="" disabled selected>{{ placeholder }}</option>
         <template v-if="!$slots.default && options">
           <option
             v-for="(item, index) in options"
@@ -128,6 +128,10 @@ export default {
       type: String,
     },
     multiple: {
+      type: Boolean,
+      default: false,
+    },
+    disablePlaceholder: {
       type: Boolean,
       default: false,
     },
