@@ -255,9 +255,14 @@ def upgrade() -> None:
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
 
     op.bulk_insert(users_table,
-                   [{"username": "1",
+                   [{"username": "admin",
                      "password": bcrypt.hashpw("password", bcrypt.gensalt()),
-                     "pin": bcrypt.hashpw("0000", bcrypt.gensalt())}])
+                     "pin": bcrypt.hashpw("0000", bcrypt.gensalt()),
+                     "admin": True,
+                     "depositbearer": True,
+                     "rentalchecker": True,
+                     "appointmentmanager": True,
+                     "treasurer": True,}])
 
     op.create_table('appointments',
     sa.Column('id', sa.UUID(), server_default=sa.text('uuid_generate_v4()'), nullable=False),
