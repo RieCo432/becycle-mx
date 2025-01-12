@@ -50,23 +50,25 @@
                     enabled: false
                   }"/>
                 <div v-if="upcomingClosures.length > 0" class="mt-3">
-                  <h3 class="text-lg font-bold">We will be closed...</h3>
+                    <h3 class="text-lg font-bold">We will be closed...</h3>
                     <template v-for="closure in upcomingClosures" :key="closure">
                         <p v-if="closure.type==='day'" class="dark:text-danger-500">
-                          on {{ new Date(Date.parse(closure.item.date))
+                          {{ new Date(Date.parse(closure.item.date))
                             .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
                           for {{closure.item.note}}.
                         </p>
                         <template v-else-if="closure.type==='period'">
-                          <p class="dark:text-danger-500">
-                            from {{ new Date(Date.parse(closure.item.date))
-                              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
-                            until {{ new Date(Date.parse(closure.item.untilDate))
-                              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
-                            for {{closure.item.note}}.
-                          </p>
-                          <p class="dark:text-danger-500">We will re-open on {{ new Date(Date.parse(closure.item.nextOpen))
-                              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</p>
+                            <p class="dark:text-danger-500">
+                              from {{ new Date(Date.parse(closure.item.date))
+                                .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+                            </p>
+                            <p class="dark:text-danger-500">
+                              until {{ new Date(Date.parse(closure.item.untilDate))
+                                .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+                            </p>
+                            <p class="dark:text-danger-500">We will re-open on {{ new Date(Date.parse(closure.item.nextOpen))
+                                .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+                            </p>
                         </template>
                       <br/>
                   </template>
