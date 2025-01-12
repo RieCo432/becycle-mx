@@ -45,7 +45,7 @@ def validate_user_signature(username: str, password_or_pin, db: Session) -> mode
         return None
     if user.softDeleted:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User has been soft-deleted"})
-    if bcrypt.checkpw(password_or_pin, user.password):
+    if _validate_password_or_pin(password_or_pin, user.password) or _validate_password_or_pin(password_or_pin, user.pin):
         return user
     if user.pin is None:
         return None
@@ -54,6 +54,10 @@ def validate_user_signature(username: str, password_or_pin, db: Session) -> mode
 
     return None
 
+def _validate_password_or_pin(password_or_pin, actual):
+    if (actual is None):
+        return False
+    return bcrypt(password_or_pin, actual)
 
 def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
     user = models.User(
