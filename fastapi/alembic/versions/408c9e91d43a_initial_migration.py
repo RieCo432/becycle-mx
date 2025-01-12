@@ -256,7 +256,7 @@ def upgrade() -> None:
 
     op.bulk_insert(users_table,
                    [{"username": "admin",
-                     "password": bcrypt.hashpw("password", bcrypt.gensalt()),
+                     "password": bcrypt.hashpw("admin", bcrypt.gensalt()),
                      "pin": bcrypt.hashpw("0000", bcrypt.gensalt()),
                      "admin": True,
                      "depositbearer": True,
