@@ -65,3 +65,13 @@ async def get_user_presentation_card_photo(
         db: Session = Depends(dep.get_db)
 ) -> FileResponse:
     return FileResponse(**crud.get_user_presentation_card_photo(db=db, card_id=card_id))
+
+
+@public.get("/public/upcoming-open-dates")
+async def get_upcoming_open_dates(
+        start_date: datetime.date | None = None,
+        end_date: datetime.date | None = None,
+        db:Session = Depends(dep.get_db)
+) -> list[datetime.date]:
+    return crud.get_open_days_in_period(db=db, start_date=start_date, end_date=end_date)
+

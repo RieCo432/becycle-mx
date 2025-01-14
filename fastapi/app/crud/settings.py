@@ -157,6 +157,20 @@ def get_theoretical_open_days_in_period(db: Session, start_date: date | None = N
     return theoretical_open_days
 
 
+def get_open_days_in_period(db: Session, start_date: date | None = None, end_date: date | None = None) -> list[date]:
+    if start_date is None:
+        start_date = datetime.utcnow().date()
+    if end_date is None:
+        end_date = (datetime.utcnow() + relativedelta(months=6)).date()
+
+    theoretical_open_days = get_theoretical_open_days_in_period(db=db, start_date=start_date, end_date=end_date)
+    closed_dates = [closedDay.date for closedDay in get_closed_days(db=db, start_date=start_date, end_date=end_date)]
+
+    open_days = [d for d in theoretical_open_days if d not in closed_dates]
+
+    return open_days
+
+
 def get_upcoming_closures(db:Session, start_date: date | None = None, end_date: date | None = None) -> list[schemas.Closure]:
     query = select(models.ClosedDay)
 
