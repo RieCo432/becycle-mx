@@ -1120,4 +1120,7 @@ export default {
   getUpcomingClosures() {
     return axiosClient.get('/public/upcoming-closures');
   },
+  getUpcomingOpenDates() {
+    return axiosClient.get('/public/upcoming-open-dates');
+  },
 };

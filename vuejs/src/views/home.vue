@@ -1,6 +1,6 @@
 <template>
     <div class="grid grid-cols-12 gap-5">
-        <div class="lg:col-span-8 col-span-12">
+        <div class="lg:col-span-6 col-span-12">
             <Card title="Welcome to BECYCLE">
                 <div class="grid grid-cols-12 h-full gap-5">
                   <div class="col-span-12">
@@ -40,7 +40,7 @@
 
             </Card>
         </div>
-        <div class="lg:col-span-4 col-span-12">
+        <div class="lg:col-span-3 col-span-12">
             <Card title="Opening Times and Closed Days" v-if="!loading">
                 <vue-good-table
                   :columns="columns"
@@ -49,31 +49,12 @@
                   :sort-options="{
                     enabled: false
                   }"/>
-                <div v-if="upcomingClosures.length > 0" class="mt-3">
-                    <h3 class="text-lg font-bold">We will be closed...</h3>
-                    <template v-for="closure in upcomingClosures" :key="closure">
-                        <p v-if="closure.type==='day'" class="dark:text-danger-500">
-                          {{ new Date(Date.parse(closure.item.date))
-                            .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
-                          for {{closure.item.note}}.
-                        </p>
-                        <template v-else-if="closure.type==='period'">
-                            <p class="dark:text-danger-500">
-                              from {{ new Date(Date.parse(closure.item.date))
-                                .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
-                            </p>
-                            <p class="dark:text-danger-500">
-                              until {{ new Date(Date.parse(closure.item.untilDate))
-                                .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
-                            </p>
-                            <p class="dark:text-danger-500">We will re-open on {{ new Date(Date.parse(closure.item.nextOpen))
-                                .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
-                            </p>
-                        </template>
-                      <br/>
-                  </template>
-                </div>
             </Card>
+        </div>
+        <div class="lg:col-span-3 col-span-12">
+          <Card title="Calendar">
+            <Calendar :is-dark="themeSettingsStore.isDark" :attributes="calendarAttributes" first-day-of-week="2" :min-date="new Date()" />
+          </Card>
         </div>
     </div>
 </template>
@@ -83,20 +64,26 @@ import requests from '@/requests';
 import Card from '@/components/Card';
 import DashButton from '@/components/Button/index.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import {useThemeSettingsStore} from '@/store/themeSettings';
+import {Calendar} from 'v-calendar';
+import 'v-calendar/style.css';
 
 const credentialsStore = useCredentialsStore();
+const themeSettingsStore = useThemeSettingsStore();
 
 export default {
   components: {
     DashButton,
     Card,
+    Calendar,
   },
   data() {
     return {
       loading: true,
       openingTimes: null,
-      upcomingClosures: [],
       address: null,
+      themeSettingsStore: themeSettingsStore,
+      calendarAttributes: [],
       columns: [
         {
           label: 'Day',
@@ -141,7 +128,41 @@ export default {
       this.loading = false;
     });
     requests.getUpcomingClosures().then((response) => {
-      this.upcomingClosures = response.data;
+      const closedDays = response.data.filter((closure) => closure.type === 'day')
+        .map((closure) => (new Date(Date.parse(closure.item.date))));
+      const closedPeriods = response.data.filter((closure) => closure.type === 'period')
+        .map((closure) => (
+          [
+            new Date(Date.parse(closure.item.date)),
+            new Date(Date.parse(closure.item.untilDate)),
+          ]));
+      this.calendarAttributes.push({
+        key: 'closedDays',
+        dates: closedDays,
+        highlight: {
+          color: 'red',
+          fillMode: 'light',
+        },
+      });
+      this.calendarAttributes.push({
+        key: 'closedPeriods',
+        dates: closedPeriods,
+        highlight: {
+          color: 'red',
+          fillMode: 'light',
+        },
+      });
+    });
+    requests.getUpcomingOpenDates().then((response) => {
+      const openDays = response.data.map((openDay) => (new Date(Date.parse(openDay))));
+      this.calendarAttributes.push({
+        key: 'openDays',
+        dates: openDays,
+        highlight: {
+          color: 'green',
+          fillMode: 'light',
+        },
+      });
     });
     requests.getAddress().then((response) => {
       this.address = response.data;
