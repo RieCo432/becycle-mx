@@ -41,10 +41,11 @@
             </Card>
         </div>
         <div class="lg:col-span-6 col-span-12">
-            <Card title="Opening Days and Times" v-if="!loadingOpeningTimes && !loadingClosedDays && !loadingOpenDays">
+            <Card title="Opening Days and Times">
               <div class="grid grid-cols-12 gap-5">
                 <div class="col-span-12">
                   <Calendar
+                      v-if="!loadingClosedDays && !loadingOpenDays"
                       expanded
                       :is-dark="themeSettingsStore.isDark"
                       :columns="numCalendarColumns"
@@ -52,15 +53,20 @@
                       :attributes="calendarAttributes"
                       :first-day-of-week="2"
                       :min-date="new Date()"/>
+                  <div v-else class="rounded-md h-64 animate-pulse items-center bg-[#C4C4C4] dark:bg-slate-500 mx-auto"></div>
                 </div>
                 <div class="col-span-12">
                   <vue-good-table
+                      v-if="!loadingOpeningTimes"
                       :columns="columns"
                       :rows="openingTimes"
                       style-class="vgt-table"
                       :sort-options="{
                     enabled: false
                   }"/>
+                  <div v-else>
+                    <TableSkeleton num-columns="3" count="2"></TableSkeleton>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -77,6 +83,7 @@ import {useThemeSettingsStore} from '@/store/themeSettings';
 import {Calendar} from 'v-calendar';
 import 'v-calendar/style.css';
 import {useScreens} from 'vue-screen-utils';
+import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
 const credentialsStore = useCredentialsStore();
 const themeSettingsStore = useThemeSettingsStore();
@@ -91,6 +98,7 @@ const {mapCurrent} = useScreens({
 
 export default {
   components: {
+    TableSkeleton,
     DashButton,
     Card,
     Calendar,
