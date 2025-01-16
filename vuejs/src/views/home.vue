@@ -40,21 +40,30 @@
 
             </Card>
         </div>
-        <div class="lg:col-span-3 col-span-12">
-            <Card title="Opening Times and Closed Days" v-if="!loading">
-                <vue-good-table
-                  :columns="columns"
-                  :rows="openingTimes"
-                  style-class="vgt-table"
-                  :sort-options="{
+        <div class="lg:col-span-6 col-span-12">
+            <Card title="Opening Days and Times" v-if="!loadingOpeningTimes && !loadingClosedDays && !loadingOpenDays">
+              <div class="grid grid-cols-12 gap-5">
+                <div class="col-span-12">
+                  <Calendar
+                      expanded
+                      :is-dark="themeSettingsStore.isDark"
+                      :columns="numCalendarColumns"
+                      :step="1"
+                      :attributes="calendarAttributes"
+                      :first-day-of-week="2"
+                      :min-date="new Date()"/>
+                </div>
+                <div class="col-span-12">
+                  <vue-good-table
+                      :columns="columns"
+                      :rows="openingTimes"
+                      style-class="vgt-table"
+                      :sort-options="{
                     enabled: false
                   }"/>
+                </div>
+              </div>
             </Card>
-        </div>
-        <div class="lg:col-span-3 col-span-12">
-          <Card title="Calendar">
-            <Calendar :is-dark="themeSettingsStore.isDark" :attributes="calendarAttributes" first-day-of-week="2" :min-date="new Date()" />
-          </Card>
         </div>
     </div>
 </template>
@@ -67,9 +76,18 @@ import {useCredentialsStore} from '@/store/credentialsStore';
 import {useThemeSettingsStore} from '@/store/themeSettings';
 import {Calendar} from 'v-calendar';
 import 'v-calendar/style.css';
+import {useScreens} from 'vue-screen-utils';
 
 const credentialsStore = useCredentialsStore();
 const themeSettingsStore = useThemeSettingsStore();
+const {mapCurrent} = useScreens({
+  xs: '0px',
+  sm: '640px',
+  md: '768px',
+  lg: '1024px',
+  xl: '1280px',
+  xxl: '1536px',
+});
 
 export default {
   components: {
@@ -79,11 +97,14 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      loadingOpeningTimes: true,
+      loadingClosedDays: true,
+      loadingOpenDays: true,
       openingTimes: null,
       address: null,
       themeSettingsStore: themeSettingsStore,
       calendarAttributes: [],
+      numCalendarColumns: mapCurrent({xs: 1, sm: 2, md: 2, lg: 1, xxl: 2}, 1),
       columns: [
         {
           label: 'Day',
@@ -125,7 +146,7 @@ export default {
   mounted() {
     requests.getOpeningTimes().then((response) => {
       this.openingTimes = response.data;
-      this.loading = false;
+      this.loadingOpeningTimes = false;
     });
     requests.getUpcomingClosures().then((response) => {
       const closedDays = response.data.filter((closure) => closure.type === 'day')
@@ -152,17 +173,20 @@ export default {
           fillMode: 'light',
         },
       });
+      this.loadingClosedDays = false;
     });
     requests.getUpcomingOpenDates().then((response) => {
-      const openDays = response.data.map((openDay) => (new Date(Date.parse(openDay))));
-      this.calendarAttributes.push({
-        key: 'openDays',
-        dates: openDays,
-        highlight: {
-          color: 'green',
-          fillMode: 'light',
-        },
+      response.data.forEach((openDay) => {
+        this.calendarAttributes.push({
+          key: 'openDays' + openDay,
+          dates: new Date(Date.parse(openDay)),
+          highlight: {
+            color: 'green',
+            fillMode: 'light',
+          },
+        });
       });
+      this.loadingOpenDays = false;
     });
     requests.getAddress().then((response) => {
       this.address = response.data;
