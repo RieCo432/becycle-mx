@@ -7,10 +7,17 @@
                     <p class="text-base text-slate-700 dark:text-slate-300">
                         This is the official website for BECYCLE Workshop SCIO,
                         the community bicycle library and workshop in Aberdeen.</p><br>
-                    <p class="text-base text-slate-700 dark:text-slate-300" v-if="address">
+                    <p class="text-base text-slate-700 dark:text-slate-300" v-if="!loadingAddress">
                         We are located at:<br>
                         {{ address.number }} {{ address.street }}<br>
-                        {{ address.postcode }}, {{ address.city }}</p><br>
+                        {{ address.postcode }}, {{ address.city }}
+                    </p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 animate-pulse" v-else>
+                      We are located at:<br>
+                      Loading...<br>
+                      Loading...
+                    </p>
+                    <br>
                     <span class="text-base text-slate-700 dark:text-slate-300">You can donate to our cause via PayPal:</span><br>
                       <div id="donate-button-container">
                         <div id="donate-button"></div>
@@ -108,6 +115,7 @@ export default {
       loadingOpeningTimes: true,
       loadingClosedDays: true,
       loadingOpenDays: true,
+      loadingAddress: true,
       openingTimes: null,
       address: null,
       themeSettingsStore: themeSettingsStore,
@@ -198,6 +206,7 @@ export default {
     });
     requests.getAddress().then((response) => {
       this.address = response.data;
+      this.loadingAddress = false;
     });
     function loadAsync(url, callback) {
       const s = document.createElement('script');
