@@ -296,6 +296,8 @@ def verify_appointment_hyperlink_parameters(db: Session, appointment_id: UUID, c
         .where(
             (models.Appointment.id == appointment_id)
             & (models.Appointment.clientId == client_id)
+            & (models.Appointment.startDateTime > datetime.utcnow())
+            & (~models.Appointment.cancelled)
         )
     )
     if appointment is None:

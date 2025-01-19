@@ -88,7 +88,7 @@ async def get_appointment_via_hyperlink(
         appointment_id: UUID,
         client_id: UUID,
         db: Session = Depends(dep.get_db)
-) -> schemas.Appointment:
+) -> schemas.AppointmentFull:
     crud.verify_appointment_hyperlink_parameters(db=db, appointment_id=appointment_id, client_id=client_id)
     return crud.get_appointment(db=db, appointment_id=appointment_id)
 
