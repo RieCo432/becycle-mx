@@ -83,6 +83,26 @@ async def cancel_appointment(
     return appointment
 
 
+@appointments.get("/appointments")
+async def get_appointment_via_hyperlink(
+        appointment_id: UUID,
+        client_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.AppointmentFull:
+    crud.verify_appointment_hyperlink_parameters(db=db, appointment_id=appointment_id, client_id=client_id)
+    return crud.get_appointment(db=db, appointment_id=appointment_id)
+
+
+@appointments.patch("/appointments/cancel")
+async def cancel_appointment_via_hyperlink(
+        appointment_id: UUID,
+        client_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> None:
+    crud.verify_appointment_hyperlink_parameters(db=db, appointment_id=appointment_id, client_id=client_id)
+    crud.cancel_appointment(db=db, appointment_id=appointment_id)
+
+
 @appointments.get("/appointments/available")
 async def get_available_appointments(
         appointment_type_id: str,

@@ -1,6 +1,6 @@
 import math
 from copy import copy
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, DAILY
@@ -145,6 +145,80 @@ def get_closed_days(db: Session, start_date: date | None = None, end_date: date 
     )]
 
 
+def get_theoretical_open_days_in_period(db: Session, start_date: date | None = None, end_date: date | None = None) -> list[date]:
+    period_start = start_date if start_date is not None else datetime.utcnow().date()
+    period_end = end_date if end_date is not None else datetime.utcnow().date() + relativedelta(months=6)
+
+    opening_weekdays = get_opening_week_days(db=db)
+
+    theoretical_open_days = [d.date() for d in rrule(DAILY, dtstart=period_start, until=period_end)
+                             if (d.weekday() in opening_weekdays)]
+
+    return theoretical_open_days
+
+
+def get_open_days_in_period(db: Session, start_date: date | None = None, end_date: date | None = None) -> list[date]:
+    if start_date is None:
+        start_date = datetime.utcnow().date()
+    if end_date is None:
+        end_date = (datetime.utcnow() + relativedelta(months=6)).date()
+
+    theoretical_open_days = get_theoretical_open_days_in_period(db=db, start_date=start_date, end_date=end_date)
+    closed_dates = [closedDay.date for closedDay in get_closed_days(db=db, start_date=start_date, end_date=end_date)]
+
+    open_days = [d for d in theoretical_open_days if d not in closed_dates]
+
+    return open_days
+
+
+def get_upcoming_closures(db:Session, start_date: date | None = None, end_date: date | None = None) -> list[schemas.Closure]:
+    query = select(models.ClosedDay)
+
+    if start_date is not None:
+        query = query.where(models.ClosedDay.date >= start_date)
+
+    closed_days = [_ for _ in db.scalars(query)]
+    closed_days_dates = [closed_day.date for closed_day in closed_days]
+
+
+    theoretical_open_dates = get_theoretical_open_days_in_period(db=db, start_date=start_date, end_date=end_date)
+    upcoming_closures = []
+
+    probe = 0
+
+    while probe < len(theoretical_open_dates)-1:
+        if theoretical_open_dates[probe] in closed_days_dates:
+            probe_ahead = probe + 1
+            while theoretical_open_dates[probe_ahead] in closed_days_dates:
+                probe_ahead += 1
+
+            if probe_ahead == probe + 1:
+                upcoming_closures.append(schemas.Closure(
+                    type="day",
+                    item=schemas.ClosedDay(
+                        date=theoretical_open_dates[probe],
+                        note=db.scalar(select(models.ClosedDay.note).where(
+                            models.ClosedDay.date == theoretical_open_dates[probe])),
+                    )
+                ))
+            else:
+                upcoming_closures.append(schemas.Closure(
+                    type="period",
+                    item=schemas.ClosedPeriod(
+                        date=theoretical_open_dates[probe],
+                        untilDate=theoretical_open_dates[probe_ahead - 1],
+                        nextOpen=theoretical_open_dates[probe_ahead],
+                        note=db.scalar(select(models.ClosedDay.note).where(
+                            models.ClosedDay.date == theoretical_open_dates[probe])),
+                    )
+                ))
+            probe = probe_ahead
+        else:
+            probe += 1
+
+    return upcoming_closures
+
+
 def create_closed_day(
         db: Session,
         closed_day_data: schemas.ClosedDay) -> models.ClosedDay:
@@ -228,13 +302,11 @@ def get_open_days_in_booking_period(db: Session) -> list[date]:
 
     closed_dates = [closed_day.date for closed_day in get_closed_days(db=db, start_date=period_start)]
 
-    opening_weekdays = get_opening_week_days(db=db)
+    theoretical_open_days = get_theoretical_open_days_in_period(db=db, start_date=period_start, end_date=period_end)
 
-    open_days = [d.date() for d in rrule(DAILY, dtstart=period_start, until=period_end)
-                 if (d.weekday() in opening_weekdays)
-                 and d.date() not in closed_dates]
+    actual_open_days = [day for day in theoretical_open_days if day not in closed_dates]
 
-    return open_days
+    return actual_open_days
 
 
 def get_maximum_concurrent_appointments_for_each_slot_of_day(db: Session) -> dict[time, int]:

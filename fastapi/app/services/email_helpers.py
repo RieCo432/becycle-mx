@@ -60,14 +60,14 @@ def build_client_login_code_html(login_code: str):
             "</html>".format(login_code))
 
 
-def build_appointment_confirmation_email(appointment_title: str, appointment_start_datetime: datetime, additional_note: str | None = None):
+def build_appointment_confirmation_email(appointment_title: str, appointment_start_datetime: datetime, appointment_id: UUID, client_id: UUID, additional_note: str | None = None):
     return ("<html>"
             "   <body>"
             "       <h2>Your Appointment is confirmed!</h2>"
             "       <p>We are looking forward to seeing on {:s}, the {:d} {:s} {:d} at {:02d}:{:02d} for your appointment: {}!</p>"
             "       {:s}"
             "       <p>If you wish to cancel your appointment, "
-            "please head to <a href='https://becycle.uk/'>becycle.uk</a>, login as a client and go to your profile.</p>"
+            "please click <a href='https://becycle.uk/appointments/cancel?appointmentId={:s}&clientId={:s}'>this link</a>.</p>"
             "   </body>"
             "</html>".format(
                 weekdays[appointment_start_datetime.weekday()],
@@ -77,18 +77,20 @@ def build_appointment_confirmation_email(appointment_title: str, appointment_sta
                 appointment_start_datetime.hour,
                 appointment_start_datetime.minute,
                 appointment_title,
-                "" if additional_note is None else additional_note
+                "" if additional_note is None else additional_note,
+                str(appointment_id),
+                str(client_id)
             ))
 
 
-def build_appointment_reminder_email(appointment_title: str, appointment_start_datetime: datetime, additional_note: str | None = None):
+def build_appointment_reminder_email(appointment_title: str, appointment_start_datetime: datetime, appointment_id: UUID, client_id: UUID, additional_note: str | None = None):
     return ("<html>"
             "   <body>"
             "       <h2>Please do not forget to attend your BECYCLE Appointment</h2>"
             "       <p>We are looking forward to seeing on {:s}, the {:d} {:s} {:d} at {:02d}:{:02d} for your appointment: {}!</p>"
             "       {:s}"
             "       <p>If you wish to cancel your appointment, "
-            "please head to <a href='https://becycle.uk/'>becycle.uk</a>, login as a client and go to your profile.</p>"
+            "please click <a href='https://becycle.uk/appointments/cancel?appointmentId={:s}&clientId={:s}'>this link</a>.</p>"
             "   </body>"
             "</html>".format(
                 weekdays[appointment_start_datetime.weekday()],
@@ -98,18 +100,20 @@ def build_appointment_reminder_email(appointment_title: str, appointment_start_d
                 appointment_start_datetime.hour,
                 appointment_start_datetime.minute,
                 appointment_title,
-                "" if additional_note is None else additional_note
+                "" if additional_note is None else additional_note,
+                str(appointment_id),
+                str(client_id)
             ))
 
 
-def build_appointment_request_received_email(appointment_title: str, appointment_start_datetime: datetime, additional_note: str | None = None):
+def build_appointment_request_received_email(appointment_title: str, appointment_start_datetime: datetime, appointment_id: UUID, client_id: UUID, additional_note: str | None = None):
     return ("<html>"
             "   <body>"
             "       <h2>We have received your appointment request!</h2>"
             "       <p>You have requested a {} appointment for {:s}, the {:d} {:s} {:d} at {:02d}:{:02d}.</p>"
             "       {:s}"
             "       <p>If you wish to cancel your appointment, "
-            "please head to <a href='https://becycle.uk/'>becycle.uk</a>, login as a client and go to your profile.</p>"
+            "please click <a href='https://becycle.uk/appointments/cancel?appointmentId={:s}&clientId={:s}'>this link</a>.</p>"
             "   </body>"
             "</html>".format(
                 appointment_title,
@@ -119,7 +123,9 @@ def build_appointment_request_received_email(appointment_title: str, appointment
                 appointment_start_datetime.year,
                 appointment_start_datetime.hour,
                 appointment_start_datetime.minute,
-                "" if additional_note is None else additional_note
+                "" if additional_note is None else additional_note,
+                str(appointment_id),
+                str(client_id)
             ))
 
 

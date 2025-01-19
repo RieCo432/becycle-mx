@@ -26,6 +26,10 @@ export default {
           type: 'area',
           height: 300,
           stacked: true,
+          zoom: {
+            enabled: true,
+            allowMouseWheelZoom: false,
+          },
         },
         dataLabels: {
           enabled: false,

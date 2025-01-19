@@ -139,6 +139,16 @@ const routes = [
         },
         component: () => import('@/views/client/findClient.vue'),
       },
+
+      {
+        path: '/appointments/cancel',
+        name: 'Cancel Appointment',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/home',
+        },
+        component: () => import('@/views/appointments/cancel.vue'),
+      },
       {
         path: '/appointments/book',
         name: 'Book Appointment',

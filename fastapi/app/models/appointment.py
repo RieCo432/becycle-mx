@@ -62,8 +62,8 @@ class Appointment(Base):
 
     def send_request_received_email(self):
         email_html_content = (
-            services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime)) if self.type.id != "rent" \
-            else services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime, Appointment._rental_note)
+            services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime, self.id, self.clientId)) if self.type.id != "rent" \
+            else services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime, self.id, self.clientId, Appointment._rental_note)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Appointment Request Received",
@@ -71,8 +71,8 @@ class Appointment(Base):
         )
 
     def send_confirmation_email(self):
-        email_html_content = services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime) if self.type.id != "rent" \
-            else services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime, Appointment._rental_note)
+        email_html_content = services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime, self.id, self.clientId) if self.type.id != "rent" \
+            else services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime, self.id, self.clientId, Appointment._rental_note)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Confirmation",
@@ -104,8 +104,8 @@ class Appointment(Base):
         )
 
     def send_reminder_email(self):
-        email_html_content = services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime) if self.type.id != "rent" \
-            else services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime, Appointment._rental_note)
+        email_html_content = services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime, self.id, self.clientId) if self.type.id != "rent" \
+            else services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime, self.id, self.clientId, Appointment._rental_note)
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Reminder",

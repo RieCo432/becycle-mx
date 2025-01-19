@@ -1,16 +1,23 @@
 <template>
     <div class="grid grid-cols-12 gap-5">
-        <div class="lg:col-span-8 col-span-12">
+        <div class="lg:col-span-6 col-span-12">
             <Card title="Welcome to BECYCLE">
                 <div class="grid grid-cols-12 h-full gap-5">
                   <div class="col-span-12">
                     <p class="text-base text-slate-700 dark:text-slate-300">
                         This is the official website for BECYCLE Workshop SCIO,
                         the community bicycle library and workshop in Aberdeen.</p><br>
-                    <p class="text-base text-slate-700 dark:text-slate-300" v-if="address">
+                    <p class="text-base text-slate-700 dark:text-slate-300" v-if="!loadingAddress">
                         We are located at:<br>
                         {{ address.number }} {{ address.street }}<br>
-                        {{ address.postcode }}, {{ address.city }}</p><br>
+                        {{ address.postcode }}, {{ address.city }}
+                    </p>
+                    <p class="text-base text-slate-700 dark:text-slate-300 animate-pulse" v-else>
+                      We are located at:<br>
+                      Loading...<br>
+                      Loading...
+                    </p>
+                    <br>
                     <span class="text-base text-slate-700 dark:text-slate-300">You can donate to our cause via PayPal:</span><br>
                       <div id="donate-button-container">
                         <div id="donate-button"></div>
@@ -40,20 +47,34 @@
 
             </Card>
         </div>
-        <div class="lg:col-span-4 col-span-12">
-            <Card title="Opening Times and Closed Days" v-if="!loading">
-                <vue-good-table
-                  :columns="columns"
-                  :rows="openingTimes"
-                  style-class="vgt-table"
-                  :sort-options="{
+        <div class="lg:col-span-6 col-span-12">
+            <Card title="Opening Days and Times">
+              <div class="grid grid-cols-12 gap-5">
+                <div class="col-span-12">
+                  <Calendar
+                      v-if="!loadingClosedDays && !loadingOpenDays"
+                      expanded
+                      :is-dark="themeSettingsStore.isDark"
+                      :columns="numCalendarColumns"
+                      :step="1"
+                      :attributes="calendarAttributes"
+                      :first-day-of-week="2"
+                      :min-date="new Date()"/>
+                  <div v-else class="rounded-md h-64 animate-pulse items-center bg-[#C4C4C4] dark:bg-slate-500 mx-auto"></div>
+                </div>
+                <div class="col-span-12">
+                  <vue-good-table
+                      v-if="!loadingOpeningTimes"
+                      :columns="columns"
+                      :rows="openingTimes"
+                      style-class="vgt-table"
+                      :sort-options="{
                     enabled: false
                   }"/>
-              <div v-if="nextClosedDay" class="mt-3">
-                <p class="dark:text-danger-500">
-                    We will be closed on {{ new Date(Date.parse(nextClosedDay.date))
-                    .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
-                </p>
+                  <div v-else>
+                    <TableSkeleton num-columns="3" count="2"></TableSkeleton>
+                  </div>
+                </div>
               </div>
             </Card>
         </div>
@@ -65,20 +86,41 @@ import requests from '@/requests';
 import Card from '@/components/Card';
 import DashButton from '@/components/Button/index.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import {useThemeSettingsStore} from '@/store/themeSettings';
+import {Calendar} from 'v-calendar';
+import 'v-calendar/style.css';
+import {useScreens} from 'vue-screen-utils';
+import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
 const credentialsStore = useCredentialsStore();
+const themeSettingsStore = useThemeSettingsStore();
+const {mapCurrent} = useScreens({
+  xs: '0px',
+  sm: '640px',
+  md: '768px',
+  lg: '1024px',
+  xl: '1280px',
+  xxl: '1536px',
+});
 
 export default {
   components: {
+    TableSkeleton,
     DashButton,
     Card,
+    Calendar,
   },
   data() {
     return {
-      loading: true,
+      loadingOpeningTimes: true,
+      loadingClosedDays: true,
+      loadingOpenDays: true,
+      loadingAddress: true,
       openingTimes: null,
-      nextClosedDay: null,
       address: null,
+      themeSettingsStore: themeSettingsStore,
+      calendarAttributes: [],
+      numCalendarColumns: mapCurrent({xs: 1, sm: 2, md: 2, lg: 1, xxl: 2}, 1),
       columns: [
         {
           label: 'Day',
@@ -120,13 +162,51 @@ export default {
   mounted() {
     requests.getOpeningTimes().then((response) => {
       this.openingTimes = response.data;
-      this.loading = false;
+      this.loadingOpeningTimes = false;
     });
-    requests.getNextClosedDay().then((response) => {
-      this.nextClosedDay = response.data;
+    requests.getUpcomingClosures().then((response) => {
+      const closedDays = response.data.filter((closure) => closure.type === 'day')
+        .map((closure) => (new Date(Date.parse(closure.item.date))));
+      const closedPeriods = response.data.filter((closure) => closure.type === 'period')
+        .map((closure) => (
+          [
+            new Date(Date.parse(closure.item.date)),
+            new Date(Date.parse(closure.item.untilDate)),
+          ]));
+      this.calendarAttributes.push({
+        key: 'closedDays',
+        dates: closedDays,
+        highlight: {
+          color: 'red',
+          fillMode: 'light',
+        },
+      });
+      this.calendarAttributes.push({
+        key: 'closedPeriods',
+        dates: closedPeriods,
+        highlight: {
+          color: 'red',
+          fillMode: 'light',
+        },
+      });
+      this.loadingClosedDays = false;
+    });
+    requests.getUpcomingOpenDates().then((response) => {
+      response.data.forEach((openDay) => {
+        this.calendarAttributes.push({
+          key: 'openDays' + openDay,
+          dates: new Date(Date.parse(openDay)),
+          highlight: {
+            color: 'green',
+            fillMode: 'light',
+          },
+        });
+      });
+      this.loadingOpenDays = false;
     });
     requests.getAddress().then((response) => {
       this.address = response.data;
+      this.loadingAddress = false;
     });
     function loadAsync(url, callback) {
       const s = document.createElement('script');

@@ -42,6 +42,11 @@ def get_next_closed_day(db: Session = Depends(dep.get_db)) -> schemas.ClosedDay:
     return crud.get_closed_days(db=db, start_date=datetime.datetime.utcnow().date())[0]
 
 
+@public.get("/public/upcoming-closures")
+def get_upcoming_closures(db: Session = Depends(dep.get_db)) -> list[schemas.Closure]:
+    return crud.get_upcoming_closures(db=db, start_date=datetime.datetime.utcnow().date())
+
+
 @public.get("/public/address")
 def get_address(db: Session = Depends(dep.get_db)) -> schemas.Address:
     return crud.get_address(db=db)
@@ -60,3 +65,13 @@ async def get_user_presentation_card_photo(
         db: Session = Depends(dep.get_db)
 ) -> FileResponse:
     return FileResponse(**crud.get_user_presentation_card_photo(db=db, card_id=card_id))
+
+
+@public.get("/public/upcoming-open-dates")
+async def get_upcoming_open_dates(
+        start_date: datetime.date | None = None,
+        end_date: datetime.date | None = None,
+        db:Session = Depends(dep.get_db)
+) -> list[datetime.date]:
+    return crud.get_open_days_in_period(db=db, start_date=start_date, end_date=end_date)
+
