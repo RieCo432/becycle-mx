@@ -28,6 +28,10 @@ export default {
         chart: {
           type: 'area',
           height: 300,
+          zoom: {
+            enabled: true,
+            allowMouseWheelZoom: false,
+          },
         },
         dataLabels: {
           enabled: false,
@@ -87,6 +91,10 @@ export default {
         chart: {
           type: 'area',
           height: 300,
+          zoom: {
+            enabled: true,
+            allowMouseWheelZoom: false,
+          },
         },
         dataLabels: {
           enabled: false,
@@ -145,6 +153,10 @@ export default {
       depositReturnPercentageMixedChart: {
         chart: {
           type: 'line',
+          zoom: {
+            enabled: true,
+            allowMouseWheelZoom: false,
+          },
         },
         dataLabels: {
           enabled: false,
@@ -664,7 +676,7 @@ export default {
       <Card title="Estimate: Everyone returns today">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut"
+            <apexchart class="text-slate-700 dark:text-slate-300" type="donut"
                        :options="worstCaseRequiredDepositFloatChartOptions" :series="worstCaseRequiredDepositFloatSeries"></apexchart>
           </div>
         </div>
@@ -674,7 +686,7 @@ export default {
       <Card title="Estimate: Everyone returns normally">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut"
+            <apexchart class="text-slate-700 dark:text-slate-300" type="donut"
                        :options="realisticRequiredDepositFloatChartOptions" :series="realisticRequiredDepositFloatSeries"></apexchart>
           </div>
         </div>
@@ -684,7 +696,7 @@ export default {
       <Card title="Deposits Status">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut"
+            <apexchart class="text-slate-700 dark:text-slate-300" type="donut"
                        :options="depositsStatusChartOptions" :series="depositsStatusSeries"></apexchart>
           </div>
         </div>
@@ -694,7 +706,7 @@ export default {
       <Card title="Average Percentage of deposit returned">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="line"
+            <apexchart class="text-slate-700 dark:text-slate-300" type="line"
                        :options="depositReturnPercentageMixedChart" :series="percentageDepositReturnedAfterMonthsSeries"></apexchart>
           </div>
         </div>
