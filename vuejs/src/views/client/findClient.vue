@@ -117,7 +117,7 @@ export default {
           <div class="col-span-3 mt-10">
             <Button
                 v-if="selectedClient.id !== null"
-                text="Confirm"
+                text="Go To Client"
                 class="btn-dark"
                 @click="$router.push({path: `/clients/${selectedClient.id}`})"
             />
