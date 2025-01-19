@@ -1117,4 +1117,10 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
+  getUpcomingClosures() {
+    return axiosClient.get('/public/upcoming-closures');
+  },
+  getUpcomingOpenDates() {
+    return axiosClient.get('/public/upcoming-open-dates');
+  },
 };
