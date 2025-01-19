@@ -63,6 +63,7 @@ export default {
           <Button
               @click="cancelAppointment"
               text="Cancel Appointment"
+              class="bg-danger-500 dark:bg-danger-500"
           />
         </div>
         <ContractCardSkeleton v-else>
