@@ -277,3 +277,28 @@ def send_appointment_reminders(db: Session):
         except SMTPServerDisconnected as e:
             print(e)
     db.commit()
+
+
+def get_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
+    appointment = db.scalar(
+        select(models.Appointment)
+        .where(models.Appointment.id == appointment_id)
+    )
+    if appointment is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Appointment not found."})
+
+    return appointment
+
+
+def verify_appointment_hyperlink_parameters(db: Session, appointment_id: UUID, client_id: UUID) -> None:
+    appointment = db.scalar(
+        select(models.Appointment)
+        .where(
+            (models.Appointment.id == appointment_id)
+            & (models.Appointment.clientId == client_id)
+            & (models.Appointment.startDateTime > datetime.utcnow())
+            & (~models.Appointment.cancelled)
+        )
+    )
+    if appointment is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Appointment not found."})

@@ -1123,4 +1123,20 @@ export default {
   getUpcomingOpenDates() {
     return axiosClient.get('/public/upcoming-open-dates');
   },
+  getAppointmentViaHyperlink(appointmentId, clientId) {
+    return axiosClient.get('/appointments', {
+      params: {
+        appointment_id: appointmentId,
+        client_id: clientId,
+      },
+    });
+  },
+  cancelAppointmentViaHyperlink(appointmentId, clientId) {
+    return axiosClient.patch('/appointments/cancel', {}, {
+      params: {
+        appointment_id: appointmentId,
+        client_id: clientId,
+      },
+    });
+  },
 };
