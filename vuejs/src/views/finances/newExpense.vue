@@ -24,7 +24,6 @@ export default {
     ErrorMessage,
   },
   setup() {
-    const files = ref([]);
     function onDrop(acceptFiles) {
       files.value = acceptFiles.map((file) =>
         Object.assign(file, {
@@ -42,6 +41,7 @@ export default {
       notes: yup.string().required(),
       amount: yup.number().required(),
       expenseDate: yup.date().required(),
+      file: yup.array().length(1),
     });
 
     const {handleSubmit} = useForm({
@@ -55,6 +55,9 @@ export default {
     const {value: notes, errorMessage: notesError, resetField: resetNotes} = useField('notes');
     const {value: amount, errorMessage: amountError, resetField: resetAmount} = useField('amount');
     const {value: expenseDate, errorMessage: expenseDateError, resetField: resetExpenseDate} = useField('expenseDate');
+    const {value: files, errorMessage: fileError, resetField: resetFile} = useField('file');
+
+    files.value = [];
 
     const submitNewExpense = handleSubmit(() => {
       requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value, type.value, tagId.value, notes.value, expenseDate.value, files.value[0])
@@ -89,6 +92,7 @@ export default {
       amountError,
       expenseDate,
       expenseDateError,
+      fileError,
       submitNewExpense,
     };
   },
@@ -200,9 +204,10 @@ export default {
               <div @click="files = []">
                 <div
                     v-bind="getRootProps()"
-                    class="w-full text-center border-dashed border border-secondary-500 rounded-md
-                           py-[52px] flex flex-col justify-center items-center"
-                    :class="files.length === 0 ? 'cursor-pointer' : ' pointer-events-none'"
+                    :class="'w-full text-center border rounded-md py-[52px] flex flex-col justify-center items-center '
+                    + (files.length === 0 ? 'cursor-pointer' : ' pointer-events-none') + ' '
+                    + (fileError ? 'border-danger-500 border-solid' : 'border-secondary-500 border-dashed')
+                    "
                 >
                   <div v-if="files.length === 0" class="w-full">
                     <input v-bind="getInputProps()" class="hidden" />
@@ -226,6 +231,7 @@ export default {
                   </div>
                 </div>
               </div>
+              <span v-if="fileError" class="text-danger-500">{{ fileError }}</span>
             </div>
             <div class="col-span-full">
               <Button type="submit" class="btn block w-full text-center">
