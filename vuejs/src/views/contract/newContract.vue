@@ -294,7 +294,8 @@
                       :field-model-value="depositCollectingUser"
                       :suggestions="filtered_deposit_collecting_user_suggestions"
                       :selected-callback="selectDepositCollectingUser"
-                      :allow-new="false">
+                      :allow-new="false"
+                      :open-by-default="true">
                     <Textinput
                         label="Deposit Collector"
                         type="text"
@@ -329,7 +330,8 @@
                       :field-model-value="workingUser"
                       :suggestions="filtered_working_user_suggestions"
                       :selected-callback="selectWorkingUser"
-                      :allow-new="false">
+                      :allow-new="false"
+                      :open-by-default="true">
                     <Textinput
                         label="Working Volunteer"
                         type="text"
@@ -365,7 +367,8 @@
                       :field-model-value="checkingUser"
                       :suggestions="filtered_checking_user_suggestions"
                       :selected-callback="selectCheckingUser"
-                      :allow-new="false">
+                      :allow-new="false"
+                      :open-by-default="true">
                     <Textinput
                         label="Safety Checking User"
                         type="text"
@@ -695,6 +698,10 @@ export default {
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
+    depositCollectingUser.value = '';
+    workingUser.value = '';
+    checkingUser.value = '';
+
     function workingUserSelected() {
       workingPasswordOrPin.value = null;
       if (workingUser.value === depositCollectingUser.value) {
@@ -979,13 +986,22 @@ export default {
       return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour.toLowerCase()))).slice(0, 4);
     },
     filtered_deposit_collecting_user_suggestions() {
-      return this.depositBearers.filter((suggestion) => (suggestion.startsWith(this.depositCollectingUser.toLowerCase()))).sort(this.userSortingFunction);
+      return this.depositBearers
+        .filter((suggestion) => (suggestion.startsWith(this.depositCollectingUser.toLowerCase())))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
     },
     filtered_working_user_suggestions() {
-      return this.activeUsers.filter((suggestion) => (suggestion.startsWith(this.workingUser.toLowerCase()))).sort(this.userSortingFunction);
+      return this.activeUsers
+        .filter((suggestion) => (suggestion.startsWith(this.workingUser.toLowerCase())))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
     },
     filtered_checking_user_suggestions() {
-      return this.rentalCheckers.filter((suggestion) => (suggestion.startsWith(this.checkingUser.toLowerCase()))).sort(this.userSortingFunction);
+      return this.rentalCheckers
+        .filter((suggestion) => (suggestion.startsWith(this.checkingUser.toLowerCase())))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
     },
   },
 };

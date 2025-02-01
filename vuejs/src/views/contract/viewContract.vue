@@ -102,6 +102,9 @@ export default {
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
+    depositReturningUser.value = '';
+    returnAcceptingUser.value = '';
+
     function returnAcceptingUserSelected() {
       returnAcceptingPasswordOrPin.value = null;
       if (returnAcceptingUser.value === depositReturningUser.value) {
@@ -286,11 +289,11 @@ export default {
   computed: {
     filtered_deposit_returning_user_suggestions() {
       return this.depositBearers.filter((suggestion) =>
-        (suggestion.startsWith(this.depositReturningUser.toLowerCase()))).sort(this.userSortingFunction);
+        (suggestion.startsWith(this.depositReturningUser.toLowerCase()))).sort(this.userSortingFunction).slice(0, 10);
     },
     filtered_return_accepting_user_suggestions() {
       return this.activeUsers.filter((suggestion) =>
-        (suggestion.startsWith(this.returnAcceptingUser.toLowerCase()))).sort(this.userSortingFunction);
+        (suggestion.startsWith(this.returnAcceptingUser.toLowerCase()))).sort(this.userSortingFunction).slice(0, 10);
     },
   },
 };
@@ -458,7 +461,8 @@ export default {
                           :field-model-value="depositReturningUser"
                           :suggestions="filtered_deposit_returning_user_suggestions"
                           :selected-callback="selectDepositReturningUser"
-                          :allow-new="false">
+                          :allow-new="false"
+                          :open-by-default="true">
                         <Textinput
                             label="Deposit Returner"
                             type="text"
@@ -493,7 +497,8 @@ export default {
                           :field-model-value="returnAcceptingUser"
                           :suggestions="filtered_return_accepting_user_suggestions"
                           :selected-callback="selectReturnAcceptingUser"
-                          :allow-new="false">
+                          :allow-new="false"
+                          :open-by-default="true">
                         <Textinput
                             label="Return Accepting Volunteer"
                             type="text"
