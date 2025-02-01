@@ -557,7 +557,17 @@ export default {
     const clientId = ref('');
     const bikeId = ref('');
 
+    const depositBearers = ref([]);
+    const rentalCheckers = ref([]);
+    const activeUsers = ref([]);
+
     const router = useRouter();
+
+    function userSortingFunction(user1, user2) {
+      if (user1.username.toLowerCase() < user2.username.toLowerCase()) return -1;
+      if (user1.username.toLowerCase() > user2.username.toLowerCase()) return 1;
+      return 0;
+    }
 
     // step by step yup schema
     const clientSchema = yup.object().shape({
@@ -733,6 +743,12 @@ export default {
               }
             });
         } else if (stepNumber.value === 2) {
+          requests.getDepositBearers().then((response) => (depositBearers.value = response.data.sort(userSortingFunction).map((user) =>
+            ({
+              label: user.username,
+              value: user.username,
+            }),
+          )));
           // Nothing to process
           stepNumber.value++;
         } else if (stepNumber.value === 3) {
@@ -744,6 +760,12 @@ export default {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
           });
+          requests.getActiveUsers().then((response) => (activeUsers.value = response.data.sort(userSortingFunction).map((user) =>
+            ({
+              label: user.username,
+              value: user.username,
+            }),
+          )));
         } else if (stepNumber.value === 4) {
           // check password or pin of working volunteer
           requests.checkUserPasswordOrPin(workingUser.value, workingPasswordOrPin.value).then((response) => {
@@ -753,6 +775,12 @@ export default {
               workingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
           });
+          requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.sort(userSortingFunction).map((user) =>
+            ({
+              label: user.username,
+              value: user.username,
+            }),
+          )));
         } else if (stepNumber.value === 5) {
           // check password or pin of checking volunteer
           requests.checkUserPasswordOrPin(checkingUser.value, checkingPasswordOrPin.value).then((response) => {
@@ -780,6 +808,10 @@ export default {
       lastName,
       lastNameError,
       clientId,
+
+      depositBearers,
+      activeUsers,
+      rentalCheckers,
 
       make,
       makeError,
@@ -843,9 +875,6 @@ export default {
       model_suggestions: [],
       colour_suggestions: [],
       serial_number_suggestions: [],
-      depositBearers: [],
-      rentalCheckers: [],
-      activeUsers: [],
     };
   },
   created() {
@@ -856,11 +885,6 @@ export default {
     this.fetchColourSuggestions = debounce(this.fetchColourSuggestions, 500, {leading: true, trailing: true});
   },
   methods: {
-    userSortingFunction(user1, user2) {
-      if (user1.username.toLowerCase() < user2.username.toLowerCase()) return -1;
-      if (user1.username.toLowerCase() > user2.username.toLowerCase()) return 1;
-      return 0;
-    },
     datePlusSixMonths() {
       const date = new Date();
       return new Date(date.setMonth(date.getMonth() + 6));
@@ -938,26 +962,6 @@ export default {
     filtered_colour_suggestions() {
       return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour.toLowerCase()))).slice(0, 4);
     },
-  },
-  mounted() {
-    requests.getDepositBearers().then((response) => (this.depositBearers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
-    requests.getActiveUsers().then((response) => (this.activeUsers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
-    requests.getRentalCheckers().then((response) => (this.rentalCheckers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
   },
 };
 </script>
