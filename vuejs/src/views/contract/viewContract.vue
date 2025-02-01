@@ -13,11 +13,13 @@ import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCard
 import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkeleton.vue';
 import ContractCardSkeleton from '@/components/Skeleton/ContractCardSkeleton.vue';
 import Icon from '@/components/Icon';
+import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 
 
 export default {
   name: 'viewContract',
   components: {
+    ComboboxTextInput,
     Checkbox,
     Select,
     Card,
@@ -180,6 +182,18 @@ export default {
         this.$router.push({path: '/me'});
       }
     },
+    userSortingFunction(user1, user2) {
+      if (user1.toLowerCase() > user2.toLowerCase()) return 1;
+      if (user1.toLowerCase() < user2.toLowerCase()) return -1;
+      return 0;
+    },
+    selectDepositReturningUser(event) {
+      this.depositReturningUser = event.target.innerText;
+    },
+    selectReturnAcceptingUser(event) {
+      this.returnAcceptingUser = event.target.innerText;
+      this.returnAcceptingUserSelected();
+    },
   },
   props: {
     client: {
@@ -267,6 +281,16 @@ export default {
     openEditContractDetailsModal: {
       type: Function,
       default: () => {},
+    },
+  },
+  computed: {
+    filtered_deposit_returning_user_suggestions() {
+      return this.depositBearers.filter((suggestion) =>
+        (suggestion.startsWith(this.depositReturningUser.toLowerCase()))).sort(this.userSortingFunction);
+    },
+    filtered_return_accepting_user_suggestions() {
+      return this.activeUsers.filter((suggestion) =>
+        (suggestion.startsWith(this.returnAcceptingUser.toLowerCase()))).sort(this.userSortingFunction);
     },
   },
 };
@@ -430,13 +454,21 @@ export default {
                           :error="depositAmountReturnedError"
                       />
 
-                      <Select
-                          :options="depositBearers"
-                          label="Deposit Returner"
-                          v-model="depositReturningUser"
-                          name="depositReturningUser"
-                          :error="depositReturningUserError"
-                      />
+                      <ComboboxTextInput
+                          :field-model-value="depositReturningUser"
+                          :suggestions="filtered_deposit_returning_user_suggestions"
+                          :selected-callback="selectDepositReturningUser"
+                          :allow-new="false">
+                        <Textinput
+                            label="Deposit Returner"
+                            type="text"
+                            placeholder="workshop"
+                            name="depositReturningUser"
+                            v-model="depositReturningUser"
+                            :error="depositReturningUserError"
+                            @input="() => {}"
+                        />
+                      </ComboboxTextInput>
 
                       <Textinput
                           label="Deposit Returner Password"
@@ -457,14 +489,21 @@ export default {
                         </h4>
                       </div>
 
-                      <Select
-                          :options="activeUsers"
-                          label="Return Accepting Volunteer"
-                          v-model="returnAcceptingUser"
-                          name="returnAcceptingUser"
-                          :error="returnAcceptingUserError"
-                          @change="returnAcceptingUserSelected"
-                      />
+                      <ComboboxTextInput
+                          :field-model-value="returnAcceptingUser"
+                          :suggestions="filtered_return_accepting_user_suggestions"
+                          :selected-callback="selectReturnAcceptingUser"
+                          :allow-new="false">
+                        <Textinput
+                            label="Return Accepting Volunteer"
+                            type="text"
+                            placeholder="workshop"
+                            name="returnAcceptingUser"
+                            v-model="returnAcceptingUser"
+                            :error="returnAcceptingUserError"
+                            @input="() => {}"
+                        />
+                      </ComboboxTextInput>
 
                       <Textinput
                           label="Password or Pin"
