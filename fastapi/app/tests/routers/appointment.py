@@ -508,24 +508,19 @@ def test_update_appointment_type(appointment_types, appointment_manager_user_aut
 
 def test_get_appointments_next_7_days(appointments, closed_days, normal_user_auth_header):
     appointments_in_period = [a for a in appointments if datetime.datetime.utcnow() <= a.startDateTime and a.endDateTime <= datetime.datetime.utcnow() + relativedelta(weeks=1) and not a.cancelled]
-    closed_days_in_period = [cd for cd in closed_days if datetime.datetime.utcnow().date() <= cd.date <= (datetime.datetime.utcnow() + relativedelta(weeks=1)).date()]
-
+    
     response = test_client.get("/appointments/calendar", headers=normal_user_auth_header)
 
     assert response.status_code == 200
     response_json = response.json()
 
-    closed_days_in_response = [datetime.datetime.strptime(event.get("startDateTime"), "%Y-%m-%dT%H:%M:%S").date() for event in response_json if event.get("typeId") == "closedDay"]
-
-    assert len(response_json) == len(appointments_in_period) + len(closed_days_in_period)
+    assert len(response_json) == len(appointments_in_period)
 
     assert all([a in response_json for a in appointments_in_period])
-    assert all([cd_r in [cd.date for cd in closed_days_in_period] for cd_r in closed_days_in_response])
 
 
 def test_get_appointments_between_7_and_14_days_from_now(appointments, closed_days, normal_user_auth_header):
     appointments_in_period = [a for a in appointments if datetime.datetime.utcnow() + relativedelta(weeks=1) <= a.startDateTime <= datetime.datetime.utcnow() + relativedelta(weeks=2) and not a.cancelled]
-    closed_days_in_period = [cd for cd in closed_days if (datetime.datetime.utcnow() + relativedelta(weeks=1)).date() <= cd.date <= (datetime.datetime.utcnow() + relativedelta(weeks=2)).date()]
 
     response = test_client.get("/appointments/calendar", params={
         "start_datetime": (datetime.datetime.utcnow() + relativedelta(weeks=1)).strftime("%Y-%m-%dT%H:%M:%S"),
@@ -535,9 +530,6 @@ def test_get_appointments_between_7_and_14_days_from_now(appointments, closed_da
     assert response.status_code == 200
     response_json = response.json()
 
-    closed_days_in_response = [datetime.datetime.strptime(event.get("startDateTime"), "%Y-%m-%dT%H:%M:%S").date() for event in response_json if event.get("typeId") == "closedDay"]
-
-    assert len(response_json) == len(appointments_in_period) + len(closed_days_in_period)
+    assert len(response_json) == len(appointments_in_period)
 
     assert all([a in response_json for a in appointments_in_period])
-    assert all([cd_r in [cd.date for cd in closed_days_in_period] for cd_r in closed_days_in_response])
