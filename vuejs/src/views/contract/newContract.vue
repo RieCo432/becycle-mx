@@ -696,6 +696,10 @@ export default {
           .then((response) => {
             toast.success('Contract Recorded!', {timeout: 1000});
             router.push({path: `/contracts/${response.data.id}`});
+          }).catch((error) => {
+            if (error.response.status === 409) {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            }
           });
       } else {
         if (stepNumber.value === 0) {
