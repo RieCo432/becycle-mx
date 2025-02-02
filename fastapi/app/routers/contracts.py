@@ -45,6 +45,13 @@ async def create_contract(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    if crud.does_contract_exist(db=db, contract_data=contract_data):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"description": "Contract already exists!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     contract = crud.create_contract(
         contract_data=contract_data,
         working_user_id=working_user.id,

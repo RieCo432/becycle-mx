@@ -97,10 +97,14 @@ async def get_appointment_via_hyperlink(
 async def cancel_appointment_via_hyperlink(
         appointment_id: UUID,
         client_id: UUID,
+        email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)
 ) -> None:
     crud.verify_appointment_hyperlink_parameters(db=db, appointment_id=appointment_id, client_id=client_id)
-    crud.cancel_appointment(db=db, appointment_id=appointment_id)
+    appointment = crud.cancel_appointment(db=db, appointment_id=appointment_id)
+
+    email_tasks.add_task(appointment.send_client_cancellation_email)
+
 
 
 @appointments.get("/appointments/available")

@@ -65,7 +65,7 @@
     "vue3-click-away": "^1.2.4",
     "vue3-dropzone": "^2.0.1",
     "vuedraggable": "^4.1.0",
-    "yup": "^0.32.11"
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

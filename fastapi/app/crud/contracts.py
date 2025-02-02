@@ -105,6 +105,16 @@ def create_contract(
     return contract
 
 
+def does_contract_exist(db: Session, contract_data: schemas.ContractCreate):
+    contracts = get_contracts(db=db, client_id=contract_data.clientId, bike_id=contract_data.bikeId, open=True, closed=True, expired=True)
+
+    for contract in contracts:
+        if contract.startDate == datetime.utcnow().date():
+            return True
+
+    return False
+
+
 def return_contract(
         db: Session,
         contract_id: UUID,

@@ -40,8 +40,8 @@ class Contract(Base):
     depositReturningUserId: Mapped[UUID] = mapped_column("depositreturninguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
     depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")
 
-    startDate: Mapped[date] = mapped_column("startdate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, quote=False)
-    endDate: Mapped[date] = mapped_column("enddate", Date, default=datetime.utcnow().date() + relativedelta(months=CONTRACT_EXPIRE_MONTHS), server_default=text("(current_date at time zone 'utc' + make_interval(months => {:d}))".format(CONTRACT_EXPIRE_MONTHS)), nullable=False, quote=False)
+    startDate: Mapped[date] = mapped_column("startdate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, index=True, quote=False)
+    endDate: Mapped[date] = mapped_column("enddate", Date, default=datetime.utcnow().date() + relativedelta(months=CONTRACT_EXPIRE_MONTHS), server_default=text("(current_date at time zone 'utc' + make_interval(months => {:d}))".format(CONTRACT_EXPIRE_MONTHS)), nullable=False, index=True, quote=False)
 
     returnedDate: Mapped[date] = mapped_column("returneddate", Date, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
