@@ -288,12 +288,20 @@ export default {
   },
   computed: {
     filtered_deposit_returning_user_suggestions() {
-      return this.depositBearers.filter((suggestion) =>
-        (suggestion.startsWith(this.depositReturningUser.toLowerCase()))).sort(this.userSortingFunction).slice(0, 10);
+      return this.depositBearers
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith(this.depositReturningUser.toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
     },
     filtered_return_accepting_user_suggestions() {
-      return this.activeUsers.filter((suggestion) =>
-        (suggestion.startsWith(this.returnAcceptingUser.toLowerCase()))).sort(this.userSortingFunction).slice(0, 10);
+      return this.activeUsers
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith(this.returnAcceptingUser.toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
     },
   },
 };
