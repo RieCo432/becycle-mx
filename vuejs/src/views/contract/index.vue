@@ -116,16 +116,10 @@ export default {
   mounted() {
     this.getContract();
     requests.getDepositBearers().then((response) => {
-      this.depositBearers = response.data.sort(this.userSortingFunction).map((user) => ({
-        label: user.username,
-        value: user.username,
-      }));
+      this.depositBearers = response.data.sort(this.userSortingFunction).map((user) => (user.username));
     });
     requests.getActiveUsers().then((response) => {
-      this.activeUsers = response.data.sort(this.userSortingFunction).map((user) => ({
-        label: user.username,
-        value: user.username,
-      }));
+      this.activeUsers = response.data.sort(this.userSortingFunction).map((user) => (user.username));
     });
     requests.getUserMe().then((response) => {
       this.isUserAdmin = response.data.admin;

@@ -290,13 +290,22 @@
                       :error="depositAmountCollectedError"
                   />
 
-                  <Select
-                      :options="depositBearers"
-                      label="Deposit Collector"
-                      v-model="depositCollectingUser"
-                      name="depositCollectingUser"
-                      :error="depositCollectingUserError"
-                  />
+                  <ComboboxTextInput
+                      :field-model-value="depositCollectingUser"
+                      :suggestions="filtered_deposit_collecting_user_suggestions"
+                      :selected-callback="selectDepositCollectingUser"
+                      :allow-new="false"
+                      :open-by-default="true">
+                    <Textinput
+                        label="Deposit Collector"
+                        type="text"
+                        placeholder="workshop"
+                        name="depositCollectingUser"
+                        v-model="depositCollectingUser"
+                        :error="depositCollectingUserError"
+                        @input="() => {}"
+                    />
+                  </ComboboxTextInput>
 
                   <Textinput
                       label="Deposit Collector Password"
@@ -317,14 +326,22 @@
                     </h4>
                   </div>
 
-                  <Select
-                      :options="activeUsers"
-                      label="Working Volunteer"
-                      v-model="workingUser"
-                      name="workingUser"
-                      :error="workingUserError"
-                      @change="workingUserSelected"
-                  />
+                  <ComboboxTextInput
+                      :field-model-value="workingUser"
+                      :suggestions="filtered_working_user_suggestions"
+                      :selected-callback="selectWorkingUser"
+                      :allow-new="false"
+                      :open-by-default="true">
+                    <Textinput
+                        label="Working Volunteer"
+                        type="text"
+                        placeholder="workshop"
+                        name="workingUser"
+                        v-model="workingUser"
+                        :error="workingUserError"
+                        @input="() => {}"
+                    />
+                  </ComboboxTextInput>
 
                   <Textinput
                       label="Working User Password or Pin"
@@ -346,14 +363,22 @@
                     </h4>
                   </div>
 
-                  <Select
-                      :options="rentalCheckers"
-                      label="Safety Checking User"
-                      v-model="checkingUser"
-                      name="checkingUser"
-                      :error="checkingUserError"
-                      @change="checkingUserSelected"
-                  />
+                  <ComboboxTextInput
+                      :field-model-value="checkingUser"
+                      :suggestions="filtered_checking_user_suggestions"
+                      :selected-callback="selectCheckingUser"
+                      :allow-new="false"
+                      :open-by-default="true">
+                    <Textinput
+                        label="Safety Checking User"
+                        type="text"
+                        placeholder="workshop"
+                        name="checkingUser"
+                        v-model="checkingUser"
+                        :error="checkingUserError"
+                        @input="() => {}"
+                    />
+                  </ComboboxTextInput>
 
                   <Textinput
                       label="Checking User Password or Pin"
@@ -494,7 +519,6 @@ import * as yup from 'yup';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
-import Select from '@/components/Select';
 import Checkbox from '@/components/Switch/index.vue';
 import {useRouter} from 'vue-router';
 
@@ -511,7 +535,6 @@ export default {
     Textarea,
     ComboboxTextInput,
     Radio,
-    Select,
   },
   setup() {
     const steps = [
@@ -556,6 +579,10 @@ export default {
 
     const clientId = ref('');
     const bikeId = ref('');
+
+    const depositBearers = ref([]);
+    const rentalCheckers = ref([]);
+    const activeUsers = ref([]);
 
     const router = useRouter();
 
@@ -671,6 +698,10 @@ export default {
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
+    depositCollectingUser.value = '';
+    workingUser.value = '';
+    checkingUser.value = '';
+
     function workingUserSelected() {
       workingPasswordOrPin.value = null;
       if (workingUser.value === depositCollectingUser.value) {
@@ -737,6 +768,8 @@ export default {
               }
             });
         } else if (stepNumber.value === 2) {
+          requests.getDepositBearers().then((response) =>
+            (depositBearers.value = response.data.map((user) => (user.username))));
           // Nothing to process
           stepNumber.value++;
         } else if (stepNumber.value === 3) {
@@ -748,6 +781,7 @@ export default {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
           });
+          requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
         } else if (stepNumber.value === 4) {
           // check password or pin of working volunteer
           requests.checkUserPasswordOrPin(workingUser.value, workingPasswordOrPin.value).then((response) => {
@@ -757,6 +791,7 @@ export default {
               workingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
           });
+          requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.map((user) => (user.username))));
         } else if (stepNumber.value === 5) {
           // check password or pin of checking volunteer
           requests.checkUserPasswordOrPin(checkingUser.value, checkingPasswordOrPin.value).then((response) => {
@@ -784,6 +819,10 @@ export default {
       lastName,
       lastNameError,
       clientId,
+
+      depositBearers,
+      activeUsers,
+      rentalCheckers,
 
       make,
       makeError,
@@ -847,9 +886,6 @@ export default {
       model_suggestions: [],
       colour_suggestions: [],
       serial_number_suggestions: [],
-      depositBearers: [],
-      rentalCheckers: [],
-      activeUsers: [],
     };
   },
   created() {
@@ -861,8 +897,8 @@ export default {
   },
   methods: {
     userSortingFunction(user1, user2) {
-      if (user1.username.toLowerCase() < user2.username.toLowerCase()) return -1;
-      if (user1.username.toLowerCase() > user2.username.toLowerCase()) return 1;
+      if (user1.toLowerCase() > user2.toLowerCase()) return 1;
+      if (user1.toLowerCase() < user2.toLowerCase()) return -1;
       return 0;
     },
     datePlusSixMonths() {
@@ -918,6 +954,17 @@ export default {
     selectColour(event) {
       this.colour = event.target.innerText;
     },
+    selectDepositCollectingUser(event) {
+      this.depositCollectingUser = event.target.innerText;
+    },
+    selectWorkingUser(event) {
+      this.workingUser = event.target.innerText;
+      this.workingUserSelected();
+    },
+    selectCheckingUser(event) {
+      this.checkingUser = event.target.innerText;
+      this.checkingUserSelected();
+    },
   },
   computed: {
     filtered_client_suggestions() {
@@ -942,26 +989,24 @@ export default {
     filtered_colour_suggestions() {
       return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour.toLowerCase()))).slice(0, 4);
     },
-  },
-  mounted() {
-    requests.getDepositBearers().then((response) => (this.depositBearers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
-    requests.getActiveUsers().then((response) => (this.activeUsers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
-    requests.getRentalCheckers().then((response) => (this.rentalCheckers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
+    filtered_deposit_collecting_user_suggestions() {
+      return this.depositBearers
+        .filter((suggestion) => (suggestion.startsWith(this.depositCollectingUser.toLowerCase())))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_working_user_suggestions() {
+      return this.activeUsers
+        .filter((suggestion) => (suggestion.startsWith(this.workingUser.toLowerCase())))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_checking_user_suggestions() {
+      return this.rentalCheckers
+        .filter((suggestion) => (suggestion.startsWith(this.checkingUser.toLowerCase())))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
   },
 };
 </script>
