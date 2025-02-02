@@ -991,19 +991,26 @@ export default {
     },
     filtered_deposit_collecting_user_suggestions() {
       return this.depositBearers
-        .filter((suggestion) => (suggestion.startsWith(this.depositCollectingUser.toLowerCase())))
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith(this.depositCollectingUser.toLowerCase()))
         .sort(this.userSortingFunction)
         .slice(0, 10);
     },
     filtered_working_user_suggestions() {
       return this.activeUsers
-        .filter((suggestion) => (suggestion.startsWith(this.workingUser.toLowerCase())))
+        .filter((suggestion) =>
+          suggestion
+            .toLowerCase()
+            .startsWith(this.workingUser.toLowerCase()))
         .sort(this.userSortingFunction)
         .slice(0, 10);
     },
     filtered_checking_user_suggestions() {
       return this.rentalCheckers
-        .filter((suggestion) => (suggestion.startsWith(this.checkingUser.toLowerCase())))
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith(this.checkingUser.toLowerCase()))
         .sort(this.userSortingFunction)
         .slice(0, 10);
     },
