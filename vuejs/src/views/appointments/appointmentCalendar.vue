@@ -114,8 +114,8 @@ export default {
                 id: closedDay['date'],
                 typeTitle: 'Closed Day',
                 title: 'Closed Day',
-                start: closedDay['date'],
-                end: closedDay['date'],
+                start: new Date(closedDay['date'] + ' 00:00:00'),
+                end: new Date(closedDay['date'] + ' 23:59:59'),
                 classNames: 'bg-success-500 dark:bg-success-500',
                 notes: closedDay['note'],
               })));
