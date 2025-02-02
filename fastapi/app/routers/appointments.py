@@ -147,18 +147,7 @@ async def update_appointment_type(
 async def get_appointments(
         start_datetime: datetime = datetime.utcnow(),
         end_datetime: datetime = datetime.utcnow() + relativedelta.relativedelta(weeks=1),
-        db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
+        db: Session = Depends(dep.get_db)) -> list[schemas.AppointmentFull]:
     booked_appointments = crud.get_appointments(db=db, start_datetime=start_datetime, end_datetime=end_datetime)
-    closed_days = crud.get_closed_days(db=db, start_date=start_datetime.date(), end_date=end_datetime.date())
-
-    for closed_day in closed_days:
-        booked_appointments.append(schemas.Appointment(
-            id=uuid.uuid4(),
-            typeId='closedDay',
-            startDateTime=datetime.combine(closed_day.date, time(hour=0, minute=0, second=0)),
-            endDateTime=datetime.combine(closed_day.date, time(hour=23, minute=59, second=59)),
-            notes=closed_day.note,
-            clientId=uuid.uuid4()
-        ))
 
     return booked_appointments

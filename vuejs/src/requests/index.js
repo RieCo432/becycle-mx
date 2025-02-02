@@ -516,6 +516,16 @@ export default {
       validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
     });
   },
+  getClosedDays(startDate, endDate) {
+    return axiosClient.get('/settings/closed-days', {
+      params: {
+        start_date: startDate,
+        end_date: endDate,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => redirectToUserLoginIfUnauthorised(status),
+    });
+  },
   getAppointmentConcurrencyLimits() {
     return axiosClient.get('/settings/appointments/concurrency', {
       headers: credentialsStore.getApiRequestHeader(),

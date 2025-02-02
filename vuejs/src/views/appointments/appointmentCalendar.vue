@@ -82,20 +82,18 @@ export default {
       });
     },
     getAppointments(fetchInfo, successCallback) {
-      requests.getAppointments(fetchInfo.start, fetchInfo.end).then((response) => {
-        Promise.all(response.data.filter((appointment) => !appointment['cancelled']).map((appointment) => {
-          if (appointment['typeId'] !== 'closedDay') {
-            return Promise.all([
-              requests.getClient(appointment['clientId']),
-              requests.getAppointmentType(appointment['typeId']),
-            ]).then(([getClientResponse, getAppointmentTypeResponse]) => {
-              const client = getClientResponse.data;
-              const clientName = `${client['firstName']} ${client['lastName']}`;
-              const appointmentType = getAppointmentTypeResponse.data;
-              const appointmentTypeTitle = appointmentType['title'];
-              return {
+      Promise.all([
+        requests.getAppointments(fetchInfo.start, fetchInfo.end),
+        requests.getClosedDays(fetchInfo.start, fetchInfo.end),
+      ])
+        .then(([responseAppointment, responseClosedDays]) => {
+          const appointmentSummaries = [];
+          appointmentSummaries.push(...responseAppointment.data
+            .filter((appointment) => !appointment['cancelled'])
+            .map((appointment) => (
+              {
                 id: appointment['id'],
-                title: `${clientName} for ${appointmentTypeTitle}`,
+                title: `${appointment['client']['firstName']} ${appointment['client']['lastName']} for ${appointment['type']['title']}`,
                 start: appointment['startDateTime'],
                 end: appointment['endDateTime'],
                 classNames: [
@@ -105,26 +103,25 @@ export default {
                 notes: appointment['notes'],
                 confirmed: appointment['confirmed'],
                 cancelled: appointment['cancelled'],
-                typeTitle: appointmentTypeTitle,
-                client: client,
-                clientName: clientName,
-              };
-            });
-          } else {
-            return {
-              id: appointment['startDateTime'],
-              typeTitle: 'Closed Day',
-              title: 'Closed Day',
-              start: appointment['startDateTime'],
-              end: appointment['endDateTime'],
-              classNames: 'bg-success-500 dark:bg-success-500',
-              notes: appointment['notes'],
-            };
-          }
-        })).then((appointmentSummaries) => {
+                typeTitle: appointment['type']['title'],
+                client: appointment['client'],
+                clientName: `${appointment['client']['firstName']} ${appointment['client']['lastName']}`,
+              })));
+
+          appointmentSummaries.push(...responseClosedDays.data
+            .map((closedDay) => (
+              {
+                id: closedDay['date'],
+                typeTitle: 'Closed Day',
+                title: 'Closed Day',
+                start: closedDay['date'],
+                end: closedDay['date'],
+                classNames: 'bg-success-500 dark:bg-success-500',
+                notes: closedDay['note'],
+              })));
+          console.log(appointmentSummaries);
           successCallback(appointmentSummaries);
         });
-      });
     },
   },
   data() {
