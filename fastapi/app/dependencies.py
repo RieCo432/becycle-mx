@@ -29,6 +29,8 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail={"description": "Database Unavailable. Please try again later."})
     finally:
         db.close()
 
