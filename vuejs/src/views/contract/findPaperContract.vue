@@ -23,7 +23,7 @@ export default {
         });
       }
     },
-    selectPaperId(event, i) {
+    selectPaperId(i) {
       this.paperId = this.filteredPaperIdSuggestions[i];
     },
     goToContract() {

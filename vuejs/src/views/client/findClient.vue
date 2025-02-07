@@ -34,7 +34,7 @@ export default {
         this.clientSuggestions = response.data;
       });
     },
-    selectClient(event, i) {
+    selectClient(i) {
       this.selectedClient = this.filtered_client_suggestions[i];
     },
   },

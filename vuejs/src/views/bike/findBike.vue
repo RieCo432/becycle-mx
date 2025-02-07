@@ -39,7 +39,7 @@ export default {
         this.bikeSuggestions = response.data;
       });
     },
-    selectBike(event, i) {
+    selectBike(i) {
       this.selectedBike = this.filtered_bike_suggestions[i];
     },
   },

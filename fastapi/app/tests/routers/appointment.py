@@ -508,7 +508,7 @@ def test_update_appointment_type(appointment_types, appointment_manager_user_aut
 
 def test_get_appointments_next_7_days(appointments, closed_days, normal_user_auth_header):
     appointments_in_period = [a for a in appointments if datetime.datetime.utcnow() <= a.startDateTime and a.endDateTime <= datetime.datetime.utcnow() + relativedelta(weeks=1) and not a.cancelled]
-    
+
     response = test_client.get("/appointments/calendar", headers=normal_user_auth_header)
 
     assert response.status_code == 200

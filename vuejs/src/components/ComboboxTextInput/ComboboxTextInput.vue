@@ -1,19 +1,30 @@
 <template>
   <Combobox
-      @click="isOpen = openByDefault">
-    <div class="relative mt-0">
+
+      v-slot="{ activeIndex, open }"
+  >
+    <div class="relative mt-0"
+         @focusout="open = false"
+         @focus="open = openByDefault; activeIndex = 0">
       <div
           class="relative w-full"
+
       >
         <ComboboxInput
             as="template"
-            @focusout="isOpen = false"
-            @input="isOpen = true"
+            @keydown.enter="() => {
+              if (activeIndex >= (allowNew ? 1 : 0)) {
+                selected(activeIndex - (allowNew ? 1 : 0))
+              } else {
+                open = false;
+              }
+            }"
+            @input="open = true; activeIndex = 0;"
             >
           <slot></slot>
         </ComboboxInput>
       </div>
-      <div v-show="isOpen">
+      <div v-show="open">
         <ComboboxOptions
             class="absolute w-full mt-1 max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5
                  focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700
@@ -44,7 +55,7 @@
               :value="suggestion"
               v-slot="{ active }"
               as="template"
-              @mousedown="(event) => selected(event, i)"
+              @mousedown="() => {selected(i); open = false;}"
           >
             <li
                 :class="{
@@ -104,9 +115,9 @@ export default {
     };
   },
   methods: {
-    selected(event, i) {
-      this.selectedCallback(event, i);
-      this.isOpen = false;
+    selected(i) {
+      this.selectedCallback(i);
+      // this.isOpen = false;
     },
   },
 };

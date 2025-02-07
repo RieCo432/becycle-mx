@@ -934,7 +934,7 @@ export default {
         this.colour_suggestions = response.data;
       });
     },
-    selectClient(event, i) {
+    selectClient(i) {
       const selectedClient = this.filtered_client_suggestions[i];
       this.clientId = selectedClient.id;
       this.emailAddress = selectedClient.emailAddress;
@@ -942,27 +942,27 @@ export default {
       this.firstName = selectedClient.firstName;
       this.lastName = selectedClient.lastName;
     },
-    selectMake(event) {
-      this.make = event.target.innerText;
+    selectMake(i) {
+      this.make = this.filtered_make_suggestions[i];
     },
-    selectModel(event) {
-      this.model = event.target.innerText;
+    selectModel(i) {
+      this.model = this.filtered_model_suggestions[i];
     },
-    selectSerialNumber(event) {
-      this.serialNumber = event.target.innerText;
+    selectSerialNumber(i) {
+      this.serialNumber = this.filtered_serial_number_suggestions[i];
     },
-    selectColour(event) {
-      this.colour = event.target.innerText;
+    selectColour(i) {
+      this.colour = this.filtered_colour_suggestions[i];
     },
-    selectDepositCollectingUser(event) {
-      this.depositCollectingUser = event.target.innerText;
+    selectDepositCollectingUser(i) {
+      this.depositCollectingUser = this.filtered_deposit_collecting_user_suggestions[i];
     },
-    selectWorkingUser(event) {
-      this.workingUser = event.target.innerText;
+    selectWorkingUser(i) {
+      this.workingUser = this.filtered_working_user_suggestions[i];
       this.workingUserSelected();
     },
-    selectCheckingUser(event) {
-      this.checkingUser = event.target.innerText;
+    selectCheckingUser(i) {
+      this.checkingUser = this.filtered_checking_user_suggestions[i];
       this.checkingUserSelected();
     },
   },

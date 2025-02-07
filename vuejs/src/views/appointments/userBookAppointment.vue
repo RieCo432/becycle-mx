@@ -190,7 +190,7 @@ export default {
           this.clientSuggestions = response.data;
         });
     },
-    selectClient(event, i) {
+    selectClient(i) {
       const selectedClient = this.filtered_client_suggestions[i];
       this.clientId = selectedClient.id;
       this.emailAddress = selectedClient.emailAddress;

@@ -190,11 +190,11 @@ export default {
       if (user1.toLowerCase() < user2.toLowerCase()) return -1;
       return 0;
     },
-    selectDepositReturningUser(event) {
-      this.depositReturningUser = event.target.innerText;
+    selectDepositReturningUser(i) {
+      this.depositReturningUser = this.filtered_deposit_returning_user_suggestions[i];
     },
-    selectReturnAcceptingUser(event) {
-      this.returnAcceptingUser = event.target.innerText;
+    selectReturnAcceptingUser(i) {
+      this.returnAcceptingUser = this.filtered_return_accepting_user_suggestions[i];
       this.returnAcceptingUserSelected();
     },
   },
