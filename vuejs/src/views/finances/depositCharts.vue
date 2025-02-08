@@ -93,9 +93,7 @@ export default {
     updateStartDate(newStartDate) {
       const newStartDateParsed = new Date(Date.parse(newStartDate));
       const oldStartDateParsed = this.startDate ? new Date(Date.parse(this.startDate)) : null;
-      console.log('updateStartDate', newStartDate, this.startDate);
       if (!oldStartDateParsed || newStartDateParsed < oldStartDateParsed) {
-        console.log('updating');
         this.startDate = newStartDate;
       }
     },
