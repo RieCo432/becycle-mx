@@ -403,7 +403,9 @@ def get_percentages_of_deposit_returned_by_contract_age(db: Session, start_date:
 
     for contract in all_returned_contracts_in_period:
         days_after_contract_end = (contract.returnedDate - contract.endDate).days
-
+        # Since a percentage cannot be determined for contracts on a 0 deposit, exclude them from the statistics
+        if contract.depositAmountCollected == 0:
+            continue
         percentages_of_deposit_returned_by_contract_age.append([int(days_after_contract_end),
                                                                 int(100 * contract.depositAmountReturned / contract.depositAmountCollected)])
 
