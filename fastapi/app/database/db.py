@@ -18,7 +18,7 @@ SQLALCHEMY_DATABASE_URL = URL.create(
     host=POSTGRES_HOST
 )
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_size=20, max_overflow=40, pool_timeout=5)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

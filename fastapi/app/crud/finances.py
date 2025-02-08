@@ -414,6 +414,13 @@ def get_deposit_return_percentage_trendline(percentages_of_deposit_returned_by_c
     x_raw = np.array([xy[0] for xy in percentages_of_deposit_returned_by_contract_age])
     y_raw = np.array([xy[1] for xy in percentages_of_deposit_returned_by_contract_age])
 
+    if len(y_raw) == 0 or len(x_raw) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "No data to generate a trendline from."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     X = x_raw[:, np.newaxis]
     y = y_raw[:, np.newaxis]
 
