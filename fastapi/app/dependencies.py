@@ -2,6 +2,7 @@ import os
 from typing import Annotated
 from uuid import UUID
 
+import sqlalchemy.exc
 from fastapi import Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -29,8 +30,8 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
-    except:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail={"description": "Database Unavailable. Please try again later."})
+    except sqlalchemy.exc.TimeoutError:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail={"description": "Service Temporarily Unavailable. Please try again later."})
     finally:
         db.close()
 
