@@ -5,12 +5,14 @@ import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import Button from '@/components/Button/index.vue';
 import window from '@/mixins/window';
+import Select from '@/components/Select/index.vue';
 
 const toast = useToast();
 export default {
   name: 'AppointmentConcurrencySlider',
   mixins: [window],
   components: {
+    Select,
     Button,
     VueSlider,
   },
@@ -18,6 +20,7 @@ export default {
     return {
       maxConcurrent: 0,
       afterTime: null,
+      weekDay: null,
     };
   },
   emits: [
@@ -26,28 +29,50 @@ export default {
   ],
   methods: {
     setNewLimit() {
-      requests.patchAppointmentConcurrencyLimit(this.concurrencyLimit.afterTime, {maxConcurrent: this.maxConcurrent}).then((response) => {
-        toast.success('Limit adjusted!', {timeout: 1000});
-        this.$emit('concurrencyLimitAdjusted', response.data);
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-        this.loadConcurrencyLimit();
-      });
-    },
-    setNewAfterTime(newAfterTime, newTimeAfterString, instance) {
-      if (newTimeAfterString !== this.concurrencyLimit.afterTime) {
-        requests.patchAppointmentConcurrencyLimit(this.concurrencyLimit.afterTime, {afterTime: newTimeAfterString}).then((response) => {
-          toast.success('After Time adjusted!', {timeout: 1000});
+      requests.patchAppointmentConcurrencyLimit(
+        this.concurrencyLimit.weekDay,
+        this.concurrencyLimit.afterTime,
+        {maxConcurrent: this.maxConcurrent})
+        .then((response) => {
+          toast.success('Limit adjusted!', {timeout: 1000});
           this.$emit('concurrencyLimitAdjusted', response.data);
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
           this.loadConcurrencyLimit();
         });
+    },
+    setNewAfterTime(newAfterTime, newTimeAfterString, instance) {
+      if (newTimeAfterString !== this.concurrencyLimit.afterTime) {
+        requests.patchAppointmentConcurrencyLimit(
+          this.concurrencyLimit.weekDay,
+          this.concurrencyLimit.afterTime,
+          {afterTime: newTimeAfterString})
+          .then((response) => {
+            toast.success('After Time adjusted!', {timeout: 1000});
+            this.$emit('concurrencyLimitAdjusted', response.data);
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+            this.loadConcurrencyLimit();
+          });
       }
+    },
+    setNewWeekDay() {
+      requests.patchAppointmentConcurrencyLimit(
+        this.concurrencyLimit.weekDay,
+        this.concurrencyLimit.afterTime,
+        {weekDay: parseInt(this.weekDay)})
+        .then((response) => {
+          toast.success('Limit adjusted!', {timeout: 1000});
+          this.$emit('concurrencyLimitAdjusted', response.data);
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+          this.loadConcurrencyLimit();
+        });
     },
     loadConcurrencyLimit() {
       this.maxConcurrent = this.concurrencyLimit.maxConcurrent;
       this.afterTime = this.concurrencyLimit.afterTime;
+      this.weekDay = this.concurrencyLimit.weekDay;
     },
     deleteConcurrencyLimit() {
       requests.deleteAppointmentConcurrencyLimit(this.afterTime).then((response) => {
@@ -62,6 +87,10 @@ export default {
   props: {
     concurrencyLimit: {
       type: Object,
+      required: true,
+    },
+    weekDayOptions: {
+      type: Array,
       required: true,
     },
   },
@@ -87,6 +116,14 @@ export default {
             @drag-end="setNewLimit"
             class="m-auto 2xl:h-full"
         ></vue-slider>
+      </div>
+      <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
+        <Select
+            @change="setNewWeekDay"
+            :options="weekDayOptions"
+            v-model="weekDay"
+            name="weekDay"
+        />
       </div>
       <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
         <flat-pickr

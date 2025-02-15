@@ -556,8 +556,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  patchAppointmentConcurrencyLimit(afterTime, patchData) {
-    return axiosClient.patch(`/settings/appointments/concurrency/${afterTime}`, patchData, {
+  patchAppointmentConcurrencyLimit(weekday, afterTime, patchData) {
+    return axiosClient.patch(`/settings/appointments/concurrency/${weekday}/${afterTime}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

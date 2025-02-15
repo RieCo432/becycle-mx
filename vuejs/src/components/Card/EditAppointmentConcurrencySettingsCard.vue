@@ -27,13 +27,24 @@ export default {
       concurrencyLimits: [],
       newAfterTime: null,
       newLimit: 0,
+      weekDayOptions: [],
+      weekDaysColloquial: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     };
   },
   created() {
-    requests.getAppointmentConcurrencyLimits().then((response) => {
-      this.concurrencyLimits = response.data;
-      this.loadingConcurrencyLimits = false;
-    });
+    Promise.all([
+      requests.getAppointmentConcurrencyLimits(),
+      requests.getOpeningDays()])
+      .then(([concurrencyLimitsResponse, openingDaysResponse]) => {
+        this.concurrencyLimits = concurrencyLimitsResponse.data;
+        this.weekDayOptions = openingDaysResponse.data.map((openingDay) => (
+          {
+            value: openingDay,
+            label: this.weekDaysColloquial[openingDay],
+          }
+        ));
+        this.loadingConcurrencyLimits = false;
+      });
   },
   methods: {
     handleConcurrencyLimitAdjusted(originalAfterTime, updatedConcurrencyLimit) {
@@ -82,6 +93,7 @@ export default {
             v-for="concurrencyLimit in concurrencyLimits"
             :concurrency-limit="concurrencyLimit"
             :key="concurrencyLimit.afterTime"
+            :week-day-options="weekDayOptions"
             @concurrency-limit-adjusted="(updatedConcurrencyLimit) =>
               handleConcurrencyLimitAdjusted(concurrencyLimit.afterTime, updatedConcurrencyLimit)"
             @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.afterTime)"
