@@ -8,6 +8,7 @@ import 'vue-slider-component/theme/antd.css';
 import Button from '@/components/Button/index.vue';
 import ConcurrencyLimitsSkeleton from '@/components/Skeleton/ConcurrencyLimitsSkeleton.vue';
 import window from '@/mixins/window';
+import Select from '@/components/Select/index.vue';
 
 const toast = useToast();
 
@@ -15,6 +16,7 @@ export default {
   name: 'EditAppointmentConcurrencySettingsCard',
   mixins: [window],
   components: {
+    Select,
     Button,
     AppointmentConcurrencySlider,
     Card,
@@ -25,6 +27,7 @@ export default {
     return {
       loadingConcurrencyLimits: true,
       concurrencyLimits: [],
+      newWeekDay: null,
       newAfterTime: null,
       newLimit: 0,
       weekDayOptions: [],
@@ -70,10 +73,11 @@ export default {
       this.concurrencyLimits.sort(this.sortConcurrencyLimits);
     },
     postNewConcurrencyLimit() {
-      if (this.newAfterTime == null) {
-        toast.error('You must choose a time!', {timeout: 2000});
+      if (this.newWeekDay == null || this.newAfterTime == null) {
+        toast.error('You must choose a week day and time!', {timeout: 2000});
       } else {
         requests.postNewAppointmentConcurrencyLimit({
+          weekDay: parseInt(this.newWeekDay),
           afterTime: this.newAfterTime.concat(':00'),
           maxConcurrent: this.newLimit,
         }).then((response) => {
@@ -83,6 +87,7 @@ export default {
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         }).finally(() => {
+          this.newWeekDay = null;
           this.newLimit = 0;
           this.newAfterTime = null;
         });
@@ -121,6 +126,14 @@ export default {
                   :min="0"
                   class="m-auto 2xl:h-full"
               ></vue-slider>
+            </div>
+            <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
+              <Select
+                  placeholder="Day"
+                  :options="weekDayOptions"
+                  v-model="newWeekDay"
+                  name="weekDay"
+              />
             </div>
             <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
               <flat-pickr
