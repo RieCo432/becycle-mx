@@ -728,16 +728,14 @@ export default {
             toast.success('Contract Recorded!', {timeout: 1000});
             router.push({path: `/contracts/${response.data.id}`});
           }).catch((error) => {
-            if (error.response.status === 409) {
-              toast.error(error.response.data.detail.description, {timeout: 5000});
-            }
+            toast.error(error.response.data.detail.description, {timeout: 5000});
           });
       } else {
         if (stepNumber.value === 0) {
           // Client details processing
           requests.getClientByEmail(emailAddress.value).then((response) => {
             clientId.value = response.data[0]['id'];
-            stepNumber.value++;
+            stepNumber.value = 1;
           }).catch((error) => {
             if (error.response.status === 404) {
               requests.postNewClient({
@@ -747,7 +745,7 @@ export default {
               }).then((response) => {
                 toast.success('New Client Created!', {timeout: 1000});
                 clientId.value = response.data['id'];
-                stepNumber.value++;
+                stepNumber.value = 1;
               });
             }
           });
@@ -756,14 +754,14 @@ export default {
           requests.findBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
             .then((response) => {
               bikeId.value = response.data['id'];
-              stepNumber.value++;
+              stepNumber.value = 2;
             }).catch((error) => {
               if (error.response.status === 404) {
                 requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
                   .then((response) => {
                     toast.success('New Bike Created!', {timeout: 1000});
                     bikeId.value = response.data['id'];
-                    stepNumber.value++;
+                    stepNumber.value = 2;
                   });
               }
             });
@@ -771,12 +769,12 @@ export default {
           requests.getDepositBearers().then((response) =>
             (depositBearers.value = response.data.map((user) => (user.username))));
           // Nothing to process
-          stepNumber.value++;
+          stepNumber.value = 3;
         } else if (stepNumber.value === 3) {
           // Check password of deposit collector
           requests.checkUserPassword(depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 4;
             } else {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
@@ -786,7 +784,7 @@ export default {
           // check password or pin of working volunteer
           requests.checkUserPasswordOrPin(workingUser.value, workingPasswordOrPin.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 5;
             } else {
               workingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
@@ -796,7 +794,7 @@ export default {
           // check password or pin of checking volunteer
           requests.checkUserPasswordOrPin(checkingUser.value, checkingPasswordOrPin.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 6;
             } else {
               checkingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
