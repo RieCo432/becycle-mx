@@ -502,12 +502,12 @@ def update_expense_type(db: Session, expense_type_id: str, description: str) -> 
 
 def get_opening_times(db: Session) -> list[schemas.DayOpeningTimes]:
     general_settings = get_appointment_general_settings(db=db)
-    appointment_concurrency_limits = get_appointment_concurrency_limits(db=db)
 
     day_translate = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
     opening_times = []
 
     for opening_weekday in general_settings.openingDays:
+        appointment_concurrency_limits = get_appointment_concurrency_limits(db=db, weekday=opening_weekday)
         open_time = None
         close_time = None
         for appointment_concurrency_limit in appointment_concurrency_limits:
