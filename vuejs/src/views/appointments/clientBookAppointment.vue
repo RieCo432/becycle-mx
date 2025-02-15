@@ -64,18 +64,18 @@ export default {
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
-          stepNumber.value--;
+          stepNumber.value = 1;
         });
       } else {
         if (stepNumber.value === 0) {
-          stepNumber.value++;
+          stepNumber.value = 1;
           availableSlots.value = null;
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
         } else if (stepNumber.value === 1) {
           // handle return accepting user
-          stepNumber.value++;
+          stepNumber.value = 2;
         }
       }
     };

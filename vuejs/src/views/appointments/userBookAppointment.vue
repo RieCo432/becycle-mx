@@ -114,7 +114,7 @@ export default {
           // Client details processing
           requests.getClientByEmail(emailAddress.value).then((response) => {
             clientId.value = response.data[0]['id'];
-            stepNumber.value++;
+            stepNumber.value = 1;
           }).catch((error) => {
             if (error.response.status === 404) {
               requests.postNewClient({
@@ -124,18 +124,18 @@ export default {
               }).then((response) => {
                 toast.success('New Client Created!', {timeout: 1000});
                 clientId.value = response.data['id'];
-                stepNumber.value++;
+                stepNumber.value = 1;
               });
             }
           });
         } else if (stepNumber.value === 1) {
-          stepNumber.value++;
+          stepNumber.value = 2;
           availableSlots.value = null;
           requests.getAvailableAppointmentSlots(appointmentType.value, true).then((response) => {
             availableSlots.value = response.data;
           });
         } else if (stepNumber.value === 2) {
-          stepNumber.value++;
+          stepNumber.value = 3;
         }
       }
     };

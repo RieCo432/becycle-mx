@@ -129,7 +129,7 @@ export default {
           }
           requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 1;
             } else {
               depositReturningPasswordSetErrors('Wrong Password!');
             }
@@ -138,7 +138,7 @@ export default {
           // handle return accepting user
           requests.checkUserPasswordOrPin(returnAcceptingUser.value, returnAcceptingPasswordOrPin.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 2;
             } else {
               returnAcceptingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
