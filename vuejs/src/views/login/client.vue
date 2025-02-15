@@ -305,13 +305,13 @@ export default {
               }
             }
           }).finally(() => {
-            stepNumber.value++;
+            stepNumber.value = 1;
           });
         } else if (stepNumber.value === 1 && !exisitingClient.value) {
           // create the new client using supplied first and last name
           requests.postNewTempClient(firstName.value, lastName.value, emailAddress.value).then((response) => {
             clientId.value = response.data.id;
-            stepNumber.value++;
+            stepNumber.value = 2;
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
           });
