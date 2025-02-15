@@ -99,7 +99,7 @@ export default {
 
 <template>
   <Card title="Appointment Concurrency Settings">
-    <div v-if="!loadingConcurrencyLimits" class="grid grid-cols-12 gap-5 h-full">
+    <div v-if="!loadingConcurrencyLimits" class="grid grid-cols-12 2xl:grid-cols-8 gap-5 h-full">
         <AppointmentConcurrencySlider
             v-for="concurrencyLimit in concurrencyLimits"
             :concurrency-limit="concurrencyLimit"
@@ -110,7 +110,7 @@ export default {
             @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.weekDay, concurrencyLimit.afterTime)"
             class="h-full"
         ></AppointmentConcurrencySlider>
-      <div class="col-span-12 mt-20 2xl:mt-auto 2xl:col-span-1 h-full 2xl:col-end-13">
+      <div class="col-span-12 mt-20 2xl:mt-auto 2xl:col-span-1 h-full 2xl:col-end-9">
         <form @submit.prevent="postNewConcurrencyLimit">
           <div class="h-full grid grid-cols-12 2xl:grid-cols-1 gap-4">
             <div class="col-span-6 2xl:col-span-1 2xl:h-64 items-center my-auto">
@@ -127,7 +127,7 @@ export default {
                   class="m-auto 2xl:h-full"
               ></vue-slider>
             </div>
-            <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
+            <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
               <Select
                   placeholder="Day"
                   :options="weekDayOptions"
@@ -135,7 +135,7 @@ export default {
                   name="weekDay"
               />
             </div>
-            <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
+            <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
               <flat-pickr
                   class="form-control m-auto"
                   name="newAfterTime"

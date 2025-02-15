@@ -120,7 +120,7 @@ export default {
             class="m-auto 2xl:h-full"
         ></vue-slider>
       </div>
-      <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
+      <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
         <Select
             @change="setNewWeekDay"
             :options="weekDayOptions"
@@ -128,7 +128,7 @@ export default {
             name="weekDay"
         />
       </div>
-      <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
+      <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
         <flat-pickr
             class="form-control m-auto"
             id="d3"
