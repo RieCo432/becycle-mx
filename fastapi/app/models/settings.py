@@ -20,11 +20,13 @@ class AppointmentGeneralSettings(Base):
 class AppointmentConcurrencyLimit(Base):
     __tablename__ = "appointmentconcurrencylimits"
 
+    weekDay: Mapped[int] = mapped_column("weekday", Integer, primary_key=True, nullable=False, index=True, quote=False)
     afterTime: Mapped[time] = mapped_column("aftertime", Time, primary_key=True, nullable=False, index=True, quote=False)
     maxConcurrent: Mapped[int] = mapped_column("maxconcurrent", Integer, nullable=False, quote=False)
 
     def __eq__(self, other: dict):
         return all([
+            str(self.weekday) == str(other["weekday"]),
             str(self.afterTime) == str(other.get("afterTime")),
             str(self.maxConcurrent) == str(other.get("maxConcurrent"))
         ])
