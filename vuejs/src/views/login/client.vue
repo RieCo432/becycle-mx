@@ -254,10 +254,7 @@ export default {
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         // handle submit
         if (exisitingClient.value) {
           requests.getClientToken(clientId.value, code.value).then((response) => {
@@ -305,13 +302,13 @@ export default {
               }
             }
           }).finally(() => {
-            stepNumber.value++;
+            stepNumber.value = 1;
           });
         } else if (stepNumber.value === 1 && !exisitingClient.value) {
           // create the new client using supplied first and last name
           requests.postNewTempClient(firstName.value, lastName.value, emailAddress.value).then((response) => {
             clientId.value = response.data.id;
-            stepNumber.value++;
+            stepNumber.value = 2;
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
           });

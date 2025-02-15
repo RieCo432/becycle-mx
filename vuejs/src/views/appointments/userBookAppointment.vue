@@ -93,10 +93,7 @@ export default {
 
     const submit = () => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         // handle submit
         requests.postAppointment(clientId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
           appointmentNotes.value, true).then((response) => {
@@ -114,7 +111,7 @@ export default {
           // Client details processing
           requests.getClientByEmail(emailAddress.value).then((response) => {
             clientId.value = response.data[0]['id'];
-            stepNumber.value++;
+            stepNumber.value = 1;
           }).catch((error) => {
             if (error.response.status === 404) {
               requests.postNewClient({
@@ -124,18 +121,18 @@ export default {
               }).then((response) => {
                 toast.success('New Client Created!', {timeout: 1000});
                 clientId.value = response.data['id'];
-                stepNumber.value++;
+                stepNumber.value = 1;
               });
             }
           });
         } else if (stepNumber.value === 1) {
-          stepNumber.value++;
+          stepNumber.value = 2;
           availableSlots.value = null;
           requests.getAvailableAppointmentSlots(appointmentType.value, true).then((response) => {
             availableSlots.value = response.data;
           });
         } else if (stepNumber.value === 2) {
-          stepNumber.value++;
+          stepNumber.value = 3;
         }
       }
     };

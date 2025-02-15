@@ -717,10 +717,7 @@ export default {
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         requests.postNewContract(clientId.value, bikeId.value, depositAmountCollected.value, condition.value,
           type.value, notes.value, workingUser.value, workingPasswordOrPin.value, checkingUser.value,
           checkingPasswordOrPin.value, depositCollectingUser.value, depositCollectingPassword.value)

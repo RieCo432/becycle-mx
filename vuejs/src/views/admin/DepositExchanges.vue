@@ -101,10 +101,7 @@ export default {
     const {value: reviewed, errorMessage: reviewedError} = useField('reviewed');
 
     const submitDepositExchange = handleDepositExchangeSubmit(() => {
-      console.log('Next');
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
+      if (stepNumber.value === steps.length - 1) {
         stepNumber.value = totalSteps - 1;
         requests.postDepositExchange(amount.value, fromUsername.value, fromPassword.value,
           toUsername.value, toPassword.value)
@@ -115,11 +112,11 @@ export default {
             toast.error(error.response.data.detail.description, {timeout: 2000});
           });
       } else if (stepNumber.value === 0) {
-        stepNumber.value++;
+        stepNumber.value = 1;
       } else if (stepNumber.value === 1) {
         requests.checkUserPassword(fromUsername.value, fromPassword.value).then((response) => {
           if (response.data) {
-            stepNumber.value++;
+            stepNumber.value = 2;
           } else {
             setErrorsFromPassword('Wrong Password');
           }
@@ -127,7 +124,7 @@ export default {
       } else if (stepNumber.value === 2) {
         requests.checkUserPassword(toUsername.value, toPassword.value).then((response) => {
           if (response.data) {
-            stepNumber.value++;
+            stepNumber.value = 3;
           } else {
             setErrorsToPassword('Wrong Password');
           }
