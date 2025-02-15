@@ -47,19 +47,25 @@ export default {
       });
   },
   methods: {
-    handleConcurrencyLimitAdjusted(originalAfterTime, updatedConcurrencyLimit) {
-      const indexInArray = this.concurrencyLimits.findIndex((concurrencyLimit) => concurrencyLimit.afterTime === originalAfterTime);
+    handleConcurrencyLimitAdjusted(originalWeekDay, originalAfterTime, updatedConcurrencyLimit) {
+      const indexInArray = this.concurrencyLimits.findIndex(
+        (concurrencyLimit) => (concurrencyLimit.weekDay === originalWeekDay && concurrencyLimit.afterTime === originalAfterTime),
+      );
       this.concurrencyLimits.splice(indexInArray, 1, updatedConcurrencyLimit);
       this.concurrencyLimits.sort(this.sortConcurrencyLimits);
     },
     sortConcurrencyLimits(a, b) {
+      const aD = a.weekDay;
+      const bD = b.weekDay;
       const [aH, aM] = a.afterTime.split(':');
       const [bH, bM] = b.afterTime.split(':');
 
-      return 60 * (aH - bH) + (aM - bM);
+      return (aM - bM) + 60 * ((aH - bH) + 24 * (aD - bD));
     },
-    removeConcurrencyLimit(afterTime) {
-      const indexInArray = this.concurrencyLimits.findIndex((concurrencyLimit) => concurrencyLimit.afterTime === afterTime);
+    removeConcurrencyLimit(weekDay, afterTime) {
+      const indexInArray = this.concurrencyLimits.findIndex(
+        (concurrencyLimit) => (concurrencyLimit.weekDay === weekDay && concurrencyLimit.afterTime === afterTime),
+      );
       this.concurrencyLimits.splice(indexInArray, 1);
       this.concurrencyLimits.sort(this.sortConcurrencyLimits);
     },
@@ -92,11 +98,11 @@ export default {
         <AppointmentConcurrencySlider
             v-for="concurrencyLimit in concurrencyLimits"
             :concurrency-limit="concurrencyLimit"
-            :key="concurrencyLimit.afterTime"
+            :key="`${concurrencyLimit.weekDay}${concurrencyLimit.afterTime}`"
             :week-day-options="weekDayOptions"
             @concurrency-limit-adjusted="(updatedConcurrencyLimit) =>
-              handleConcurrencyLimitAdjusted(concurrencyLimit.afterTime, updatedConcurrencyLimit)"
-            @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.afterTime)"
+              handleConcurrencyLimitAdjusted(concurrencyLimit.weekDay, concurrencyLimit.afterTime, updatedConcurrencyLimit)"
+            @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.weekDay, concurrencyLimit.afterTime)"
             class="h-full"
         ></AppointmentConcurrencySlider>
       <div class="col-span-12 mt-20 2xl:mt-auto 2xl:col-span-1 h-full 2xl:col-end-13">
