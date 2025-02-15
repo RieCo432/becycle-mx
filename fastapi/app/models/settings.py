@@ -1,6 +1,6 @@
 from datetime import time, date
 
-from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date
+from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date, PrimaryKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.db import Base
@@ -23,6 +23,11 @@ class AppointmentConcurrencyLimit(Base):
     weekDay: Mapped[int] = mapped_column("weekday", Integer, primary_key=True, nullable=False, index=True, quote=False)
     afterTime: Mapped[time] = mapped_column("aftertime", Time, primary_key=True, nullable=False, index=True, quote=False)
     maxConcurrent: Mapped[int] = mapped_column("maxconcurrent", Integer, nullable=False, quote=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint(weekDay, afterTime),
+        {}
+    )
 
     def __eq__(self, other: dict):
         return all([

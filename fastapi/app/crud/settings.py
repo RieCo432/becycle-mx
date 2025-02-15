@@ -41,7 +41,9 @@ def update_appointment_general_settings(db: Session, updated_appointment_setting
 
 
 def get_appointment_concurrency_limits(db: Session, weekday: int | None = None) -> list[models.AppointmentConcurrencyLimit]:
-    appointment_concurrency_limits_query = select(models.AppointmentConcurrencyLimit).order_by(models.AppointmentConcurrencyLimit.afterTime)
+    appointment_concurrency_limits_query = (select(models.AppointmentConcurrencyLimit)
+                                            .order_by(models.AppointmentConcurrencyLimit.weekDay)
+                                            .order_by(models.AppointmentConcurrencyLimit.afterTime))
 
     if weekday is not None:
         appointment_concurrency_limits_query = appointment_concurrency_limits_query.where(models.AppointmentConcurrencyLimit.weekDay == weekday)
@@ -65,6 +67,7 @@ def add_appointment_concurrency_limit(
         appointment_concurrency_limit_data: schemas.AppointmentConcurrencyLimit) -> models.AppointmentConcurrencyLimit:
 
     new_appointment_concurrency_limit = models.AppointmentConcurrencyLimit(
+        weekDay=appointment_concurrency_limit_data.weekDay,
         afterTime=appointment_concurrency_limit_data.afterTime,
         maxConcurrent=appointment_concurrency_limit_data.maxConcurrent
     )
@@ -73,7 +76,7 @@ def add_appointment_concurrency_limit(
         db.add(new_appointment_concurrency_limit)
         db.commit()
     except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "There already is a concurrency limit for this time!"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "There already is a concurrency limit for this time and weekday!"})
 
     return new_appointment_concurrency_limit
 
