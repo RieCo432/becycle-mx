@@ -91,17 +91,28 @@ def add_appointment_concurrency_limit(
 
 def patch_appointment_concurrency_limit(
         db: Session,
+        weekday: int,
         after_time: time,
         new_appointment_concurrency_limit_data: schemas.PatchAppointmentConcurrencyLimit) -> models.AppointmentConcurrencyLimit:
 
     appointment_concurrency_limit = db.scalar(
         select(models.AppointmentConcurrencyLimit)
-        .where(models.AppointmentConcurrencyLimit.afterTime == after_time)
+        .where(
+            (models.AppointmentConcurrencyLimit.afterTime == after_time)
+            & (models.AppointmentConcurrencyLimit.weekDay == weekday)
+        )
     )
 
     if appointment_concurrency_limit is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no limit for this time!"})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no limit for this time or weekday!"})
 
+    if new_appointment_concurrency_limit_data.weekDay is not None:
+        if new_appointment_concurrency_limit_data.weekDay not in get_opening_week_days(db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"description": "The specified weekday is not in the list of opening days."}
+            )
+        appointment_concurrency_limit.weekDay = new_appointment_concurrency_limit_data.weekDay
     if new_appointment_concurrency_limit_data.afterTime is not None:
         appointment_concurrency_limit.afterTime = new_appointment_concurrency_limit_data.afterTime
     if new_appointment_concurrency_limit_data.maxConcurrent is not None:
@@ -110,7 +121,7 @@ def patch_appointment_concurrency_limit(
     try:
         db.commit()
     except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Is there already a limit for this time?"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Is there already a limit for this time or weekday?"})
 
     return appointment_concurrency_limit
 
@@ -129,7 +140,7 @@ def delete_appointment_concurrency_limit(
     )
 
     if appointment_concurrency_limit is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "This appointment concurrency does not exist!"})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "This appointment concurrency limit does not exist!"})
 
     db.delete(appointment_concurrency_limit)
     db.commit()

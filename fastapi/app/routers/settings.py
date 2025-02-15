@@ -56,12 +56,13 @@ async def delete_appointment_concurrency_limit(
 
 
 
-@settings.patch("/settings/appointments/concurrency/{after_time}", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+@settings.patch("/settings/appointments/concurrency/{weekday}/{after_time}", dependencies=[Depends(dep.get_current_appointment_manager_user)])
 async def update_appointment_concurrency_limit(
+        weekday: int,
         after_time: time,
         new_appointment_concurrency_limit_data: schemas.PatchAppointmentConcurrencyLimit,
         db: Session = Depends(dep.get_db)) -> schemas.AppointmentConcurrencyLimit:
-    return crud.patch_appointment_concurrency_limit(db=db, after_time=after_time, new_appointment_concurrency_limit_data=new_appointment_concurrency_limit_data)
+    return crud.patch_appointment_concurrency_limit(db=db, weekday=weekday, after_time=after_time, new_appointment_concurrency_limit_data=new_appointment_concurrency_limit_data)
 
 
 @settings.get("/settings/closed-days", dependencies=[Depends(dep.get_current_active_user)])
