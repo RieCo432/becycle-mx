@@ -114,10 +114,7 @@ export default {
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         // handle submit
         patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value,
           returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);

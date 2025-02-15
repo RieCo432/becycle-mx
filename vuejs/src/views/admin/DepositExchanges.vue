@@ -101,10 +101,7 @@ export default {
     const {value: reviewed, errorMessage: reviewedError} = useField('reviewed');
 
     const submitDepositExchange = handleDepositExchangeSubmit(() => {
-      console.log('Next');
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
+      if (stepNumber.value === steps.length - 1) {
         stepNumber.value = totalSteps - 1;
         requests.postDepositExchange(amount.value, fromUsername.value, fromPassword.value,
           toUsername.value, toPassword.value)

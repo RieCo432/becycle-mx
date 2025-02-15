@@ -93,10 +93,7 @@ export default {
 
     const submit = () => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         // handle submit
         requests.postAppointment(clientId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
           appointmentNotes.value, true).then((response) => {
