@@ -568,8 +568,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  deleteAppointmentConcurrencyLimit(afterTime) {
-    return axiosClient.delete(`/settings/appointments/concurrency/${afterTime}`, {
+  deleteAppointmentConcurrencyLimit(weekday, afterTime) {
+    return axiosClient.delete(`/settings/appointments/concurrency/${weekday}/${afterTime}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

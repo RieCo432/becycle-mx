@@ -75,13 +75,16 @@ export default {
       this.weekDay = this.concurrencyLimit.weekDay;
     },
     deleteConcurrencyLimit() {
-      requests.deleteAppointmentConcurrencyLimit(this.afterTime).then((response) => {
-        toast.success('Concurrency Limit removed', {timeout: 2000});
-        this.$emit('concurrencyLimitDeleted');
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-        this.loadConcurrencyLimit();
-      });
+      requests.deleteAppointmentConcurrencyLimit(
+        this.concurrencyLimit.weekDay,
+        this.concurrencyLimit.afterTime)
+        .then((response) => {
+          toast.success('Concurrency Limit removed', {timeout: 2000});
+          this.$emit('concurrencyLimitDeleted');
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+          this.loadConcurrencyLimit();
+        });
     },
   },
   props: {
