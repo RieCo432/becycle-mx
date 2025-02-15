@@ -306,10 +306,9 @@ def get_opening_hours(db: Session) -> dict[str, time]:
     close_time = db.scalar(
         select(models.AppointmentConcurrencyLimit.afterTime)
         .where(
-            (models.AppointmentConcurrencyLimit.afterTime > open_time)
-            & (models.AppointmentConcurrencyLimit.maxConcurrent == 0)
+            models.AppointmentConcurrencyLimit.maxConcurrent == 0
         )
-        .order_by(models.AppointmentConcurrencyLimit.afterTime)
+        .order_by(models.AppointmentConcurrencyLimit.afterTime.desc())
     )
 
     return {
