@@ -66,6 +66,14 @@ def add_appointment_concurrency_limit(
         db: Session,
         appointment_concurrency_limit_data: schemas.AppointmentConcurrencyLimit) -> models.AppointmentConcurrencyLimit:
 
+    opening_days = get_opening_week_days(db=db)
+
+    if appointment_concurrency_limit_data.weekDay not in opening_days:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "The specified weekday is not in the list of opening days."}
+        )
+
     new_appointment_concurrency_limit = models.AppointmentConcurrencyLimit(
         weekDay=appointment_concurrency_limit_data.weekDay,
         afterTime=appointment_concurrency_limit_data.afterTime,
