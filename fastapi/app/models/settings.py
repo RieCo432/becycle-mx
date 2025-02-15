@@ -26,7 +26,7 @@ class AppointmentConcurrencyLimit(Base):
 
     def __eq__(self, other: dict):
         return all([
-            str(self.weekday) == str(other["weekday"]),
+            str(self.weekDay) == str(other["weekday"]),
             str(self.afterTime) == str(other.get("afterTime")),
             str(self.maxConcurrent) == str(other.get("maxConcurrent"))
         ])

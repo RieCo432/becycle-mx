@@ -40,11 +40,13 @@ def update_appointment_general_settings(db: Session, updated_appointment_setting
     return appointment_general_settings
 
 
-def get_appointment_concurrency_limits(db: Session) -> list[models.AppointmentConcurrencyLimit]:
-    appointment_concurrency_limits = [_ for _ in db.scalars(
-        select(models.AppointmentConcurrencyLimit)
-        .order_by(models.AppointmentConcurrencyLimit.afterTime)
-    )]
+def get_appointment_concurrency_limits(db: Session, weekday: int | None = None) -> list[models.AppointmentConcurrencyLimit]:
+    appointment_concurrency_limits_query = select(models.AppointmentConcurrencyLimit).order_by(models.AppointmentConcurrencyLimit.afterTime)
+
+    if weekday is not None:
+        appointment_concurrency_limits_query = appointment_concurrency_limits_query.where(models.AppointmentConcurrencyLimit.weekDay == weekday)
+
+    appointment_concurrency_limits = [_ for _ in db.scalars(appointment_concurrency_limits_query)]
 
     return appointment_concurrency_limits
 
@@ -309,8 +311,12 @@ def get_open_days_in_booking_period(db: Session) -> list[date]:
     return actual_open_days
 
 
-def get_maximum_concurrent_appointments_for_each_slot_of_day(db: Session) -> dict[time, int]:
-    appointment_concurrency_limits_by_time_after = {acl.afterTime: acl.maxConcurrent for acl in get_appointment_concurrency_limits(db=db)}
+def get_maximum_concurrent_appointments_for_each_slot_of_weekday(db: Session, weekday: int) -> dict[time, int]:
+    appointment_concurrency_limits_by_time_after = {acl.afterTime: acl.maxConcurrent for acl in get_appointment_concurrency_limits(db=db, weekday=weekday)}
+
+    if len(appointment_concurrency_limits_by_time_after) == 0:
+        return {}
+
     sorted_appointment_concurrency_limit_times = sorted(appointment_concurrency_limits_by_time_after.keys())
 
     slot_duration = get_slot_duration(db=db)
@@ -343,12 +349,11 @@ def get_maximum_concurrent_appointments_for_each_slot_of_day(db: Session) -> dic
 
 
 def get_maximum_concurrent_appointments_for_each_slot(db: Session) -> dict[date, dict[time, int]]:
-    maximum_concurrent_appointments_for_each_slot_of_day = get_maximum_concurrent_appointments_for_each_slot_of_day(db=db)
+    maximum_concurrent_appointments_for_each_slot = {}
 
-    maximum_concurrent_appointments_for_each_slot = {
-        d: copy(maximum_concurrent_appointments_for_each_slot_of_day)
-        for d in get_open_days_in_booking_period(db=db)
-    }
+    opening_days_in_booking_period = get_open_days_in_booking_period(db=db)
+    for opening_date in opening_days_in_booking_period:
+        maximum_concurrent_appointments_for_each_slot[opening_date] = get_maximum_concurrent_appointments_for_each_slot_of_weekday(db=db, weekday=opening_date.weekday())
 
     return maximum_concurrent_appointments_for_each_slot
 
