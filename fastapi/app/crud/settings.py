@@ -117,11 +117,15 @@ def patch_appointment_concurrency_limit(
 
 def delete_appointment_concurrency_limit(
         db: Session,
+        weekday: int,
         after_time: time) -> None:
 
     appointment_concurrency_limit = db.scalar(
         select(models.AppointmentConcurrencyLimit)
-        .where(models.AppointmentConcurrencyLimit.afterTime == after_time)
+        .where(
+            (models.AppointmentConcurrencyLimit.afterTime == after_time)
+            & (models.AppointmentConcurrencyLimit.weekDay == weekday)
+        )
     )
 
     if appointment_concurrency_limit is None:
