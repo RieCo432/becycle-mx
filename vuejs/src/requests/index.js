@@ -439,8 +439,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
-  getOpeningHours() {
-    return axiosClient.get('/public/opening-hours', {
+  getCalendarTimeRange() {
+    return axiosClient.get('/public/calendar-time-range', {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },

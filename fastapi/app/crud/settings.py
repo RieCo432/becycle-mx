@@ -297,7 +297,7 @@ def get_gradual_availability(db: Session) -> bool:
     )
 
 
-def get_opening_hours(db: Session) -> dict[str, time]:
+def get_calendar_time_range(db: Session) -> dict[str, time]:
     open_time = db.scalar(
         select(models.AppointmentConcurrencyLimit.afterTime)
         .where(models.AppointmentConcurrencyLimit.maxConcurrent > 0)
