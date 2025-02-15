@@ -115,11 +115,11 @@ export default {
             toast.error(error.response.data.detail.description, {timeout: 2000});
           });
       } else if (stepNumber.value === 0) {
-        stepNumber.value++;
+        stepNumber.value = 1;
       } else if (stepNumber.value === 1) {
         requests.checkUserPassword(fromUsername.value, fromPassword.value).then((response) => {
           if (response.data) {
-            stepNumber.value++;
+            stepNumber.value = 2;
           } else {
             setErrorsFromPassword('Wrong Password');
           }
@@ -127,7 +127,7 @@ export default {
       } else if (stepNumber.value === 2) {
         requests.checkUserPassword(toUsername.value, toPassword.value).then((response) => {
           if (response.data) {
-            stepNumber.value++;
+            stepNumber.value = 3;
           } else {
             setErrorsToPassword('Wrong Password');
           }
