@@ -35,11 +35,13 @@ class PatchAppointmentGeneralSettings(BaseModel):
 
 
 class AppointmentConcurrencyLimit(BaseModel):
+    weekDay: int
     afterTime: time
     maxConcurrent: int
 
 
 class PatchAppointmentConcurrencyLimit(BaseModel):
+    weekDay: int | None = None
     afterTime: time | None = None
     maxConcurrent: int | None = None
 

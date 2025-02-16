@@ -439,8 +439,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
-  getOpeningHours() {
-    return axiosClient.get('/public/opening-hours', {
+  getCalendarTimeRange() {
+    return axiosClient.get('/public/calendar-time-range', {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
@@ -556,8 +556,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  patchAppointmentConcurrencyLimit(afterTime, patchData) {
-    return axiosClient.patch(`/settings/appointments/concurrency/${afterTime}`, patchData, {
+  patchAppointmentConcurrencyLimit(weekday, afterTime, patchData) {
+    return axiosClient.patch(`/settings/appointments/concurrency/${weekday}/${afterTime}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -568,8 +568,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  deleteAppointmentConcurrencyLimit(afterTime) {
-    return axiosClient.delete(`/settings/appointments/concurrency/${afterTime}`, {
+  deleteAppointmentConcurrencyLimit(weekday, afterTime) {
+    return axiosClient.delete(`/settings/appointments/concurrency/${weekday}/${afterTime}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

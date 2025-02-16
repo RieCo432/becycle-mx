@@ -40,11 +40,15 @@ def update_appointment_general_settings(db: Session, updated_appointment_setting
     return appointment_general_settings
 
 
-def get_appointment_concurrency_limits(db: Session) -> list[models.AppointmentConcurrencyLimit]:
-    appointment_concurrency_limits = [_ for _ in db.scalars(
-        select(models.AppointmentConcurrencyLimit)
-        .order_by(models.AppointmentConcurrencyLimit.afterTime)
-    )]
+def get_appointment_concurrency_limits(db: Session, weekday: int | None = None) -> list[models.AppointmentConcurrencyLimit]:
+    appointment_concurrency_limits_query = (select(models.AppointmentConcurrencyLimit)
+                                            .order_by(models.AppointmentConcurrencyLimit.weekDay)
+                                            .order_by(models.AppointmentConcurrencyLimit.afterTime))
+
+    if weekday is not None:
+        appointment_concurrency_limits_query = appointment_concurrency_limits_query.where(models.AppointmentConcurrencyLimit.weekDay == weekday)
+
+    appointment_concurrency_limits = [_ for _ in db.scalars(appointment_concurrency_limits_query)]
 
     return appointment_concurrency_limits
 
@@ -62,7 +66,16 @@ def add_appointment_concurrency_limit(
         db: Session,
         appointment_concurrency_limit_data: schemas.AppointmentConcurrencyLimit) -> models.AppointmentConcurrencyLimit:
 
+    opening_days = get_opening_week_days(db=db)
+
+    if appointment_concurrency_limit_data.weekDay not in opening_days:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "The specified weekday is not in the list of opening days."}
+        )
+
     new_appointment_concurrency_limit = models.AppointmentConcurrencyLimit(
+        weekDay=appointment_concurrency_limit_data.weekDay,
         afterTime=appointment_concurrency_limit_data.afterTime,
         maxConcurrent=appointment_concurrency_limit_data.maxConcurrent
     )
@@ -71,24 +84,35 @@ def add_appointment_concurrency_limit(
         db.add(new_appointment_concurrency_limit)
         db.commit()
     except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "There already is a concurrency limit for this time!"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "There already is a concurrency limit for this time and weekday!"})
 
     return new_appointment_concurrency_limit
 
 
 def patch_appointment_concurrency_limit(
         db: Session,
+        weekday: int,
         after_time: time,
         new_appointment_concurrency_limit_data: schemas.PatchAppointmentConcurrencyLimit) -> models.AppointmentConcurrencyLimit:
 
     appointment_concurrency_limit = db.scalar(
         select(models.AppointmentConcurrencyLimit)
-        .where(models.AppointmentConcurrencyLimit.afterTime == after_time)
+        .where(
+            (models.AppointmentConcurrencyLimit.afterTime == after_time)
+            & (models.AppointmentConcurrencyLimit.weekDay == weekday)
+        )
     )
 
     if appointment_concurrency_limit is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no limit for this time!"})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "There is no limit for this time or weekday!"})
 
+    if new_appointment_concurrency_limit_data.weekDay is not None:
+        if new_appointment_concurrency_limit_data.weekDay not in get_opening_week_days(db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"description": "The specified weekday is not in the list of opening days."}
+            )
+        appointment_concurrency_limit.weekDay = new_appointment_concurrency_limit_data.weekDay
     if new_appointment_concurrency_limit_data.afterTime is not None:
         appointment_concurrency_limit.afterTime = new_appointment_concurrency_limit_data.afterTime
     if new_appointment_concurrency_limit_data.maxConcurrent is not None:
@@ -97,22 +121,26 @@ def patch_appointment_concurrency_limit(
     try:
         db.commit()
     except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Is there already a limit for this time?"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Is there already a limit for this time or weekday?"})
 
     return appointment_concurrency_limit
 
 
 def delete_appointment_concurrency_limit(
         db: Session,
+        weekday: int,
         after_time: time) -> None:
 
     appointment_concurrency_limit = db.scalar(
         select(models.AppointmentConcurrencyLimit)
-        .where(models.AppointmentConcurrencyLimit.afterTime == after_time)
+        .where(
+            (models.AppointmentConcurrencyLimit.afterTime == after_time)
+            & (models.AppointmentConcurrencyLimit.weekDay == weekday)
+        )
     )
 
     if appointment_concurrency_limit is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "This appointment concurrency does not exist!"})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "This appointment concurrency limit does not exist!"})
 
     db.delete(appointment_concurrency_limit)
     db.commit()
@@ -269,7 +297,7 @@ def get_gradual_availability(db: Session) -> bool:
     )
 
 
-def get_opening_hours(db: Session) -> dict[str, time]:
+def get_calendar_time_range(db: Session) -> dict[str, time]:
     open_time = db.scalar(
         select(models.AppointmentConcurrencyLimit.afterTime)
         .where(models.AppointmentConcurrencyLimit.maxConcurrent > 0)
@@ -278,10 +306,9 @@ def get_opening_hours(db: Session) -> dict[str, time]:
     close_time = db.scalar(
         select(models.AppointmentConcurrencyLimit.afterTime)
         .where(
-            (models.AppointmentConcurrencyLimit.afterTime > open_time)
-            & (models.AppointmentConcurrencyLimit.maxConcurrent == 0)
+            models.AppointmentConcurrencyLimit.maxConcurrent == 0
         )
-        .order_by(models.AppointmentConcurrencyLimit.afterTime)
+        .order_by(models.AppointmentConcurrencyLimit.afterTime.desc())
     )
 
     return {
@@ -309,8 +336,12 @@ def get_open_days_in_booking_period(db: Session) -> list[date]:
     return actual_open_days
 
 
-def get_maximum_concurrent_appointments_for_each_slot_of_day(db: Session) -> dict[time, int]:
-    appointment_concurrency_limits_by_time_after = {acl.afterTime: acl.maxConcurrent for acl in get_appointment_concurrency_limits(db=db)}
+def get_maximum_concurrent_appointments_for_each_slot_of_weekday(db: Session, weekday: int) -> dict[time, int]:
+    appointment_concurrency_limits_by_time_after = {acl.afterTime: acl.maxConcurrent for acl in get_appointment_concurrency_limits(db=db, weekday=weekday)}
+
+    if len(appointment_concurrency_limits_by_time_after) == 0:
+        return {}
+
     sorted_appointment_concurrency_limit_times = sorted(appointment_concurrency_limits_by_time_after.keys())
 
     slot_duration = get_slot_duration(db=db)
@@ -343,12 +374,11 @@ def get_maximum_concurrent_appointments_for_each_slot_of_day(db: Session) -> dic
 
 
 def get_maximum_concurrent_appointments_for_each_slot(db: Session) -> dict[date, dict[time, int]]:
-    maximum_concurrent_appointments_for_each_slot_of_day = get_maximum_concurrent_appointments_for_each_slot_of_day(db=db)
+    maximum_concurrent_appointments_for_each_slot = {}
 
-    maximum_concurrent_appointments_for_each_slot = {
-        d: copy(maximum_concurrent_appointments_for_each_slot_of_day)
-        for d in get_open_days_in_booking_period(db=db)
-    }
+    opening_days_in_booking_period = get_open_days_in_booking_period(db=db)
+    for opening_date in opening_days_in_booking_period:
+        maximum_concurrent_appointments_for_each_slot[opening_date] = get_maximum_concurrent_appointments_for_each_slot_of_weekday(db=db, weekday=opening_date.weekday())
 
     return maximum_concurrent_appointments_for_each_slot
 
@@ -472,12 +502,12 @@ def update_expense_type(db: Session, expense_type_id: str, description: str) -> 
 
 def get_opening_times(db: Session) -> list[schemas.DayOpeningTimes]:
     general_settings = get_appointment_general_settings(db=db)
-    appointment_concurrency_limits = get_appointment_concurrency_limits(db=db)
 
     day_translate = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
     opening_times = []
 
     for opening_weekday in general_settings.openingDays:
+        appointment_concurrency_limits = get_appointment_concurrency_limits(db=db, weekday=opening_weekday)
         open_time = None
         close_time = None
         for appointment_concurrency_limit in appointment_concurrency_limits:
@@ -490,12 +520,13 @@ def get_opening_times(db: Session) -> list[schemas.DayOpeningTimes]:
             if open_time is not None and close_time is not None and close_time > open_time:
                 break
 
-        opening_times.append(
-            schemas.DayOpeningTimes(
-                day=day_translate[opening_weekday],
-                open="{:02d}:{:02d}".format(open_time.hour, open_time.minute),
-                close="{:02d}:{:02d}".format(close_time.hour, close_time.minute),
+        if open_time is not None and close_time is not None:
+            opening_times.append(
+                schemas.DayOpeningTimes(
+                    day=day_translate[opening_weekday],
+                    open="{:02d}:{:02d}".format(open_time.hour, open_time.minute),
+                    close="{:02d}:{:02d}".format(close_time.hour, close_time.minute),
+                )
             )
-        )
 
     return opening_times

@@ -50,10 +50,7 @@ export default {
 
     const submit = () => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         // handle submit
         requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(),
           appointmentNotes.value).then((response) => {
@@ -64,18 +61,18 @@ export default {
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
-          stepNumber.value--;
+          stepNumber.value = 1;
         });
       } else {
         if (stepNumber.value === 0) {
-          stepNumber.value++;
+          stepNumber.value = 1;
           availableSlots.value = null;
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
         } else if (stepNumber.value === 1) {
           // handle return accepting user
-          stepNumber.value++;
+          stepNumber.value = 2;
         }
       }
     };

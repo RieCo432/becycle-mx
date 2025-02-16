@@ -1092,19 +1092,43 @@ def add_appointment_concurrency_limits(db: Session) -> list[models.AppointmentCo
     appointment_concurrency_limits = [
         models.AppointmentConcurrencyLimit(
             afterTime=datetime.time(hour=0, minute=0),
-            maxConcurrent=0
+            maxConcurrent=0,
+            weekDay=0
         ),
         models.AppointmentConcurrencyLimit(
             afterTime=datetime.time(hour=16, minute=15),
-            maxConcurrent=2
+            maxConcurrent=2,
+            weekDay=0
         ),
         models.AppointmentConcurrencyLimit(
             afterTime=datetime.time(hour=17, minute=30),
-            maxConcurrent=4
+            maxConcurrent=4,
+            weekDay=0
         ),
         models.AppointmentConcurrencyLimit(
             afterTime=datetime.time(hour=19, minute=45),
-            maxConcurrent=0
+            maxConcurrent=0,
+            weekDay=0
+        ),
+        models.AppointmentConcurrencyLimit(
+            afterTime=datetime.time(hour=0, minute=0),
+            maxConcurrent=0,
+            weekDay=2
+        ),
+        models.AppointmentConcurrencyLimit(
+            afterTime=datetime.time(hour=16, minute=15),
+            maxConcurrent=3,
+            weekDay=2
+        ),
+        models.AppointmentConcurrencyLimit(
+            afterTime=datetime.time(hour=17, minute=30),
+            maxConcurrent=6,
+            weekDay=2
+        ),
+        models.AppointmentConcurrencyLimit(
+            afterTime=datetime.time(hour=19, minute=45),
+            maxConcurrent=0,
+            weekDay=2
         )
     ]
 
