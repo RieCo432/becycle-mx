@@ -520,12 +520,13 @@ def get_opening_times(db: Session) -> list[schemas.DayOpeningTimes]:
             if open_time is not None and close_time is not None and close_time > open_time:
                 break
 
-        opening_times.append(
-            schemas.DayOpeningTimes(
-                day=day_translate[opening_weekday],
-                open="{:02d}:{:02d}".format(open_time.hour, open_time.minute),
-                close="{:02d}:{:02d}".format(close_time.hour, close_time.minute),
+        if open_time is not None and close_time is not None:
+            opening_times.append(
+                schemas.DayOpeningTimes(
+                    day=day_translate[opening_weekday],
+                    open="{:02d}:{:02d}".format(open_time.hour, open_time.minute),
+                    close="{:02d}:{:02d}".format(close_time.hour, close_time.minute),
+                )
             )
-        )
 
     return opening_times
