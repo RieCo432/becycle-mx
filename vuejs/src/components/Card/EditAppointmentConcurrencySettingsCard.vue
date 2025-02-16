@@ -6,9 +6,9 @@ import {useToast} from 'vue-toastification';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 import Button from '@/components/Button/index.vue';
-import ConcurrencyLimitsSkeleton from '@/components/Skeleton/ConcurrencyLimitsSkeleton.vue';
 import window from '@/mixins/window';
 import Select from '@/components/Select/index.vue';
+import {number} from 'yup';
 
 const toast = useToast();
 
@@ -21,57 +21,38 @@ export default {
     AppointmentConcurrencySlider,
     Card,
     VueSlider,
-    ConcurrencyLimitsSkeleton,
   },
   data() {
     return {
-      loadingConcurrencyLimits: true,
-      concurrencyLimits: [],
-      newWeekDay: null,
+      newWeekDay: this.weekDay,
       newAfterTime: null,
       newLimit: 0,
-      weekDayOptions: [],
-      weekDaysColloquial: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     };
   },
-  created() {
-    Promise.all([
-      requests.getAppointmentConcurrencyLimits(),
-      requests.getOpeningDays()])
-      .then(([concurrencyLimitsResponse, openingDaysResponse]) => {
-        this.concurrencyLimits = concurrencyLimitsResponse.data;
-        this.weekDayOptions = openingDaysResponse.data.map((openingDay) => (
-          {
-            value: openingDay,
-            label: this.weekDaysColloquial[openingDay],
-          }
-        ));
-        this.loadingConcurrencyLimits = false;
-      });
+  props: {
+    weekDay: {
+      type: number,
+      required: true,
+    },
+    weekDayOptions: {
+      type: Array,
+      required: true,
+    },
+    concurrencyLimits: {
+      type: Array,
+      required: true,
+    },
+    weekDayName: {
+      type: String,
+      required: true,
+    },
   },
+  emits: [
+    'concurrencyLimitAdjusted',
+    'concurrencyLimitDeleted',
+    'concurrencyLimitAdded',
+  ],
   methods: {
-    handleConcurrencyLimitAdjusted(originalWeekDay, originalAfterTime, updatedConcurrencyLimit) {
-      const indexInArray = this.concurrencyLimits.findIndex(
-        (concurrencyLimit) => (concurrencyLimit.weekDay === originalWeekDay && concurrencyLimit.afterTime === originalAfterTime),
-      );
-      this.concurrencyLimits.splice(indexInArray, 1, updatedConcurrencyLimit);
-      this.concurrencyLimits.sort(this.sortConcurrencyLimits);
-    },
-    sortConcurrencyLimits(a, b) {
-      const aD = a.weekDay;
-      const bD = b.weekDay;
-      const [aH, aM] = a.afterTime.split(':');
-      const [bH, bM] = b.afterTime.split(':');
-
-      return (aM - bM) + 60 * ((aH - bH) + 24 * (aD - bD));
-    },
-    removeConcurrencyLimit(weekDay, afterTime) {
-      const indexInArray = this.concurrencyLimits.findIndex(
-        (concurrencyLimit) => (concurrencyLimit.weekDay === weekDay && concurrencyLimit.afterTime === afterTime),
-      );
-      this.concurrencyLimits.splice(indexInArray, 1);
-      this.concurrencyLimits.sort(this.sortConcurrencyLimits);
-    },
     postNewConcurrencyLimit() {
       if (this.newWeekDay == null || this.newAfterTime == null) {
         toast.error('You must choose a week day and time!', {timeout: 2000});
@@ -81,13 +62,12 @@ export default {
           afterTime: this.newAfterTime.concat(':00'),
           maxConcurrent: this.newLimit,
         }).then((response) => {
-          this.concurrencyLimits.push(response.data);
-          this.concurrencyLimits.sort(this.sortConcurrencyLimits);
+          this.$emit('concurrencyLimitAdded', response.data);
           toast.success('Appointment Concurrency Limit added', {timeout: 2000});
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         }).finally(() => {
-          this.newWeekDay = null;
+          this.newWeekDay = this.weekDay;
           this.newLimit = 0;
           this.newAfterTime = null;
         });
@@ -98,16 +78,16 @@ export default {
 </script>
 
 <template>
-  <Card title="Appointment Concurrency Settings">
-    <div v-if="!loadingConcurrencyLimits" class="grid grid-cols-12 2xl:grid-cols-8 gap-5 h-full">
+  <Card :title="`Appointment Limits for ${weekDayName}`">
+    <div class="grid grid-cols-12 2xl:grid-cols-8 gap-5 h-full">
         <AppointmentConcurrencySlider
             v-for="concurrencyLimit in concurrencyLimits"
             :concurrency-limit="concurrencyLimit"
             :key="`${concurrencyLimit.weekDay}${concurrencyLimit.afterTime}`"
             :week-day-options="weekDayOptions"
             @concurrency-limit-adjusted="(updatedConcurrencyLimit) =>
-              handleConcurrencyLimitAdjusted(concurrencyLimit.weekDay, concurrencyLimit.afterTime, updatedConcurrencyLimit)"
-            @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.weekDay, concurrencyLimit.afterTime)"
+            $emit('concurrencyLimitAdjusted', concurrencyLimit.weekDay, concurrencyLimit.afterTime, updatedConcurrencyLimit)"
+            @concurrency-limit-deleted="$emit('concurrencyLimitDeleted', concurrencyLimit.weekDay, concurrencyLimit.afterTime)"
             class="h-full"
         ></AppointmentConcurrencySlider>
       <div class="col-span-12 mt-20 2xl:mt-auto 2xl:col-span-1 h-full 2xl:col-end-9">
@@ -155,7 +135,6 @@ export default {
         </form>
       </div>
     </div>
-    <ConcurrencyLimitsSkeleton v-else :count="6"></ConcurrencyLimitsSkeleton>
   </Card>
 </template>
 
