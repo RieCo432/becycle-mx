@@ -20,41 +20,18 @@ export default {
     Card,
     VueSelect,
   },
-  setup() {
-    const openingDaysOptions = ref([
-      {
-        label: 'Monday',
-        value: 0,
-      },
-      {
-        label: 'Tuesday',
-        value: 1,
-      },
-      {
-        label: 'Wednesday',
-        value: 2,
-      },
-      {
-        label: 'Thursday',
-        value: 3,
-      },
-      {
-        label: 'Friday',
-        value: 4,
-      },
-      {
-        label: 'Saturday',
-        value: 5,
-      },
-      {
-        label: 'Sunday',
-        value: 6,
-      },
-    ]);
+  emits: ['openingDaysUpdated'],
+  props: {
+    openingDaysOptions: {
+      type: Array,
+      required: true,
+    },
+  },
+  setup(props, context) {
     const appointmentGeneralSettingsSchema = yup.object().shape({
       openingDays: yup.array().of(yup.object({
-        label: yup.string().oneOf(openingDaysOptions.value.map((option) => (option.label))),
-        value: yup.number().oneOf(openingDaysOptions.value.map((option) => (option.value))),
+        label: yup.string().oneOf(props.openingDaysOptions.map((option) => (option.label))),
+        value: yup.number().oneOf(props.openingDaysOptions.map((option) => (option.value))),
       })).max(7),
       minBookAhead: yup.number().integer().min(0, 'Must be at least 0').max(yup.ref('maxBookAhead'), 'Must be less than Max Book Ahead'),
       maxBookAhead: yup.number().integer().min(yup.ref('minBookAhead'), 'Must be more than Min Book Ahead'),
@@ -74,7 +51,7 @@ export default {
     const {value: gradualAvailability, resetField: resetGradualAvailabilityField} = useField('gradualAvailability');
 
     const setFields = (data) => {
-      resetOpeningDaysField({value: openingDaysOptions.value.filter((day) => (data.openingDays.includes(day.value)))});
+      resetOpeningDaysField({value: props.openingDaysOptions.filter((day) => (data.openingDays.includes(day.value)))});
       resetMinBookAheadField({value: data.minBookAhead.toString()});
       resetMaxBookAheadField({value: data.maxBookAhead.toString()});
       resetSlotDurationField({value: data.slotDuration.toString()});
@@ -92,6 +69,7 @@ export default {
       }).then((response) => {
         toast.success('Appointment General Settings updated', {timeout: 2000});
         setFields(response.data);
+        context.emit('openingDaysUpdated', response.data.openingDays);
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
@@ -104,7 +82,6 @@ export default {
     });
 
     return {
-      openingDaysOptions,
       openingDays,
       openingDaysError,
       resetOpeningDaysField,

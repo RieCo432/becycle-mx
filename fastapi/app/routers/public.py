@@ -27,9 +27,9 @@ def get_opening_days(db: Session = Depends(dep.get_db)) -> list[int]:
     return crud.get_opening_week_days(db=db)
 
 
-@public.get("/public/opening-hours")
-def get_opening_hours(db: Session = Depends(dep.get_db)) -> dict[str, time]:
-    return crud.get_opening_hours(db=db)
+@public.get("/public/calendar-time-range")
+def get_calendar_time_range(db: Session = Depends(dep.get_db)) -> dict[str, time]:
+    return crud.get_calendar_time_range(db=db)
 
 
 @public.get("/public/slot-duration")
