@@ -5,10 +5,12 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import Button from '@/components/Button/index.vue';
+import DashButton from '@/components/Button/index.vue';
 
 export default {
   name: 'findBike',
   components: {
+    DashButton,
     Button,
     ComboboxTextInput, Textinput,
     Card,
@@ -41,6 +43,38 @@ export default {
     },
     selectBike(event, i) {
       this.selectedBike = this.filtered_bike_suggestions[i];
+    },
+    async readBikeDetailsFromNfcTag() {
+      try {
+        const ndef = new NDEFReader();
+        await ndef.scan();
+        console.log('> Scan started');
+
+        ndef.addEventListener('readingerror', () => {
+          console.log('Argh! Cannot read data from the NFC tag. Try another one?');
+        });
+
+        ndef.addEventListener('reading', ({message, serialNumber}) => {
+          console.log(`> Serial Number: ${serialNumber}`);
+          console.log(`> Records: (${message.records.length})`);
+
+          const record = message.records[0];
+          console.assert(record.recordType === 'mime');
+          if (record.mediaType === 'application/json') {
+            const textDecoder = new TextDecoder();
+            console.log(`JSON: ${textDecoder.decode(record.data)}`);
+            const bike = JSON.parse(textDecoder.decode(record.data));
+            this.selectedBike.make = bike.make;
+            this.selectedBike.model = bike.model;
+            this.selectedBike.colour = bike.colour;
+            this.selectedBike.serialNumber = bike.serialNumber;
+            this.selectedBike.decals = bike.decals;
+            this.selectedBike.id = bike.id;
+          }
+        });
+      } catch (error) {
+        log('Argh! ' + error);
+      };
     },
   },
   computed: {
@@ -136,7 +170,7 @@ export default {
             </ComboboxTextInput>
           </div>
 
-          <div class="col-span-3 mt-10">
+          <div class="col-span-6 mt-10">
             <Button
                 v-if="selectedBike.id !== null"
                 text="Go To Bike"
@@ -144,6 +178,9 @@ export default {
                 @click="$router.push({path: `/bikes/${selectedBike.id}`})"
             />
             <span v-else class="text-red-500">No bike selected!</span>
+          </div>
+          <div class="col-span-6 mt-10">
+            <DashButton @click="readBikeDetailsFromNfcTag">Read From NFC Tag</DashButton>
           </div>
 
         </div>

@@ -116,6 +116,19 @@ export default {
     openEditBikeDetailsModal() {
       this.showEditBikeDetailsModal = true;
     },
+    writeBikeDetailsToNfcTag() {
+      try {
+        const encoder = new TextEncoder();
+        const ndef = new NDEFReader();
+        ndef.write({
+          records: [
+            {recordType: 'mime', mediaType: 'application/json', data: encoder.encode(JSON.stringify(this.bike))},
+          ],
+        }, {overwrite: true}).then(() => console.log('> Message written' + JSON.stringify(this.bike)));
+      } catch (error) {
+        console.log('Argh! ' + error);
+      }
+    },
   },
 };
 </script>
@@ -132,6 +145,11 @@ export default {
               <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+            </div>
+            <div class="col-span-6 mt-auto">
+              <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">
+                Write To NFC Tag
+              </DashButton>
             </div>
             <div class="col-span-6 mt-auto">
               <DashButton class="w-full" @click="openEditBikeDetailsModal">
