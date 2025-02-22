@@ -6,6 +6,10 @@ import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import Button from '@/components/Button/index.vue';
 import DashButton from '@/components/Button/index.vue';
+import nfc from '@/nfc';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
 
 export default {
   name: 'findBike',
@@ -17,6 +21,7 @@ export default {
   },
   data() {
     return {
+      isInReadMode: false,
       bikeSuggestions: [],
       selectedBike: {
         make: null,
@@ -44,37 +49,21 @@ export default {
     selectBike(event, i) {
       this.selectedBike = this.filtered_bike_suggestions[i];
     },
-    async readBikeDetailsFromNfcTag() {
-      try {
-        const ndef = new NDEFReader();
-        await ndef.scan();
-        console.log('> Scan started');
-
-        ndef.addEventListener('readingerror', () => {
-          console.log('Argh! Cannot read data from the NFC tag. Try another one?');
-        });
-
-        ndef.addEventListener('reading', ({message, serialNumber}) => {
-          console.log(`> Serial Number: ${serialNumber}`);
-          console.log(`> Records: (${message.records.length})`);
-
-          const record = message.records[0];
-          console.assert(record.recordType === 'mime');
-          if (record.mediaType === 'application/json') {
-            const textDecoder = new TextDecoder();
-            console.log(`JSON: ${textDecoder.decode(record.data)}`);
-            const bike = JSON.parse(textDecoder.decode(record.data));
-            this.selectedBike.make = bike.make;
-            this.selectedBike.model = bike.model;
-            this.selectedBike.colour = bike.colour;
-            this.selectedBike.serialNumber = bike.serialNumber;
-            this.selectedBike.decals = bike.decals;
-            this.selectedBike.id = bike.id;
+    readBikeDetailsFromNfcTag() {
+      this.isInReadMode = true;
+      nfc.readBikeDetailsFromNfcTag()
+        .then((bike) => {
+          if (bike) {
+            toast.success('Details read!', {timeout: 1000});
+            this.selectedBike = bike;
           }
+        })
+        .catch((err) => {
+          toast.error(err.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isInReadMode = false;
         });
-      } catch (error) {
-        log('Argh! ' + error);
-      };
     },
   },
   computed: {
@@ -180,7 +169,7 @@ export default {
             <span v-else class="text-red-500">No bike selected!</span>
           </div>
           <div class="col-span-6 mt-10">
-            <DashButton @click="readBikeDetailsFromNfcTag">Read From NFC Tag</DashButton>
+            <DashButton @click="readBikeDetailsFromNfcTag" :is-disabled="isInReadMode">Read From NFC Tag</DashButton>
           </div>
 
         </div>

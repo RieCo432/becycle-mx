@@ -6,8 +6,11 @@ import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
 import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkeleton.vue';
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
+import nfc from '@/nfc';
+import {useToast} from 'vue-toastification';
 
 const credentialsStore = useCredentialsStore();
+const toast = useToast();
 
 export default {
   name: 'clientView',
@@ -25,6 +28,7 @@ export default {
       loadingContracts: true,
       loadingBikeDetails: true,
       showEditBikeDetailsModal: false,
+      isInWriteMode: false,
       contractActions: [
         {
           name: 'View',
@@ -117,17 +121,17 @@ export default {
       this.showEditBikeDetailsModal = true;
     },
     writeBikeDetailsToNfcTag() {
-      try {
-        const encoder = new TextEncoder();
-        const ndef = new NDEFReader();
-        ndef.write({
-          records: [
-            {recordType: 'mime', mediaType: 'application/json', data: encoder.encode(JSON.stringify(this.bike))},
-          ],
-        }, {overwrite: true}).then(() => console.log('> Message written' + JSON.stringify(this.bike)));
-      } catch (error) {
-        console.log('Argh! ' + error);
-      }
+      this.isInWriteMode = true;
+      nfc.writeBikeDetailsToNfcTag(this.bike)
+        .then(() => {
+          toast.success('Details written.', {timeout: 1000});
+        })
+        .catch((err) => {
+          toast.error(err.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isInWriteMode = false;
+        });
     },
   },
 };
@@ -147,7 +151,7 @@ export default {
               <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
             </div>
             <div class="col-span-6 mt-auto">
-              <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">
+              <DashButton class="w-full" :is-disabled="isInWriteMode" @click="writeBikeDetailsToNfcTag">
                 Write To NFC Tag
               </DashButton>
             </div>
