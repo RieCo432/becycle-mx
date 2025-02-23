@@ -5,16 +5,23 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import Button from '@/components/Button/index.vue';
+import DashButton from '@/components/Button/index.vue';
+import nfc from '@/nfc';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
 
 export default {
   name: 'findBike',
   components: {
+    DashButton,
     Button,
     ComboboxTextInput, Textinput,
     Card,
   },
   data() {
     return {
+      isInReadMode: false,
       bikeSuggestions: [],
       selectedBike: {
         make: null,
@@ -41,6 +48,22 @@ export default {
     },
     selectBike(event, i) {
       this.selectedBike = this.filtered_bike_suggestions[i];
+    },
+    readBikeDetailsFromNfcTag() {
+      this.isInReadMode = true;
+      nfc.readBikeDetailsFromNfcTag()
+        .then((bike) => {
+          if (bike) {
+            toast.success('Details read!', {timeout: 1000});
+            this.selectedBike = bike;
+          }
+        })
+        .catch((err) => {
+          toast.error(err.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isInReadMode = false;
+        });
     },
   },
   computed: {
@@ -136,7 +159,7 @@ export default {
             </ComboboxTextInput>
           </div>
 
-          <div class="col-span-3 mt-10">
+          <div class="col-span-6 mt-10">
             <Button
                 v-if="selectedBike.id !== null"
                 text="Go To Bike"
@@ -144,6 +167,9 @@ export default {
                 @click="$router.push({path: `/bikes/${selectedBike.id}`})"
             />
             <span v-else class="text-red-500">No bike selected!</span>
+          </div>
+          <div class="col-span-6 mt-10">
+            <DashButton @click="readBikeDetailsFromNfcTag" :is-disabled="isInReadMode">Read From NFC Tag</DashButton>
           </div>
 
         </div>
