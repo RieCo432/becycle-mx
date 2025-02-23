@@ -49,13 +49,36 @@ export default {
     selectBike(event, i) {
       this.selectedBike = this.filtered_bike_suggestions[i];
     },
+    verifyBikeDetails(rfidTagSerialNumber) {
+      requests.getBikeByRfidTagSerialNumber(rfidTagSerialNumber)
+        .then((response) => {
+          const bike = response.data;
+          let allSame = true;
+          allSame &= bike.make === this.selectedBike.make;
+          allSame &= bike.model === this.selectedBike.model;
+          allSame &= bike.colour === this.selectedBike.colour;
+          allSame &= bike.decals === this.selectedBike.decals;
+          allSame &= bike.serialNumber === this.selectedBike.serialNumber;
+          allSame &= bike.id === this.selectedBike.id;
+          if (!allSame) {
+            toast.warning('Some of the bike details do not match with the recorded details', {timeout: 4000});
+          }
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 1000});
+        });
+    },
     readBikeDetailsFromNfcTag() {
       this.isInReadMode = true;
       nfc.readBikeDetailsFromNfcTag()
-        .then((bike) => {
-          if (bike) {
+        .then((response) => {
+          if (response.bike) {
+            const bike = response.bike;
             toast.success('Details read!', {timeout: 1000});
             this.selectedBike = bike;
+            this.verifyBikeDetails(response.rfidTagSerialNumber);
+          } else {
+            toast.error('Some error occurred!', {timeout: 1000});
           }
         })
         .catch((err) => {

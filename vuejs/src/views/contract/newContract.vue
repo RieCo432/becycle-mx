@@ -529,6 +529,7 @@ import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
 
+const toast = useToast();
 
 export default {
   name: 'newContract',
@@ -970,15 +971,43 @@ export default {
       this.checkingUser = event.target.innerText;
       this.checkingUserSelected();
     },
+    verifyBikeDetails(rfidTagSerialNumber) {
+      requests.getBikeByRfidTagSerialNumber(rfidTagSerialNumber)
+        .then((response) => {
+          const bike = response.data;
+          console.log(bike);
+          let allSame = true;
+          allSame &= bike.make === this.make;
+          allSame &= bike.model === this.model;
+          allSame &= bike.colour === this.colour;
+          allSame &= (bike.decals ? bike.decals : '') === this.decals;
+          allSame &= bike.serialNumber === this.serialNumber;
+          allSame &= bike.id === this.bikeId;
+          if (!allSame) {
+            toast.warning('Some of the bike details do not match with the recorded details', {timeout: 4000});
+          }
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 1000});
+        });
+    },
     readBikeDetailsFromNfcTag() {
       this.isNfcActive = true;
-      nfc.readBikeDetailsFromNfcTag().then((bike) => {
-        this.make = bike.make;
-        this.model = bike.model;
-        this.colour = bike.colour;
-        this.decals = bike.decals ? bike.decals : '';
-        this.serialNumber = bike.serialNumber;
-        this.bikeId = bike.id;
+      nfc.readBikeDetailsFromNfcTag().then((response) => {
+        if (response.bike) {
+          toast.success('Details read!', {timeout: 1000});
+          const bike = response.bike;
+          this.make = bike.make;
+          this.model = bike.model;
+          this.colour = bike.colour;
+          this.decals = bike.decals ? bike.decals : '';
+          this.serialNumber = bike.serialNumber;
+          this.bikeId = bike.id;
+          console.log(bike);
+          this.verifyBikeDetails(response.rfidTagSerialNumber);
+        } else {
+          toast.error('Some error occurred!', {timeout: 1000});
+        }
       })
         .catch((error) => {
           toast.error(error.message, {timeout: 1000});

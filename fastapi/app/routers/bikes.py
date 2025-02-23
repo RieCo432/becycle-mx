@@ -70,6 +70,14 @@ async def patch_bike(
     return crud.update_bike(db=db, bike_id=bike_id, updated_bike_data=updated_bike_data)
 
 
+@bikes.get("/bikes/tag/{rfid_tag_serial_number}", dependencies=[Depends(dep.get_current_active_user)])
+async def get_bike_by_tag(
+        rfid_tag_serial_number: str,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Bike:
+    return crud.get_bike_by_rfid_tag_serial_number(db=db, rfid_tag_serial_number=rfid_tag_serial_number)
+
+
 @bikes.get("/bikes/{bike_id}/contracts", dependencies=[Depends(dep.get_current_active_user)])
 async def get_bike_contracts(
         bike_id: UUID,

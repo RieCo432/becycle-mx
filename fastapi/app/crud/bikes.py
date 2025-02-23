@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session
+from starlette import status
 
 import app.models as models
 import app.schemas as schemas
@@ -28,7 +29,7 @@ def find_similar_bikes(db: Session, make: str | None = None, model: str | None =
     )]
 
     if len(bikes) == 0:
-        raise HTTPException(status_code=404, detail={"description": "No bikes found"})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "No bikes found"})
 
     return bikes
 
@@ -56,6 +57,17 @@ def get_all_bikes(db: Session) -> list[schemas.Bike]:
     return [_ for _ in db.scalars(
         select(models.Bike)
     )]
+
+def get_bike_by_rfid_tag_serial_number(db: Session, rfid_tag_serial_number: str) -> schemas.Bike:
+    bike = db.scalar(
+        select(models.Bike)
+        .where(models.Bike.rfidTagSerialNumber == rfid_tag_serial_number)
+    )
+
+    if bike is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Bike not found"})
+
+    return bike
 
 
 def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:

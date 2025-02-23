@@ -58,13 +58,12 @@ export default {
         });
 
         ndef.addEventListener('reading', ({message, serialNumber}) => {
-          console.log(serialNumber);
           const record = message.records[0];
           if (record.recordType === 'mime' && record.mediaType === 'application/json') {
             const textDecoder = new TextDecoder();
             const text = textDecoder.decode(record.data);
             const bike = JSON.parse(text);
-            resolve(bike);
+            resolve({bike: bike, rfidTagSerialNumber: serialNumber});
           }
         });
       } catch (error) {
