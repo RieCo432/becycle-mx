@@ -27,5 +27,6 @@ class Bike(Base):
             str(self.model) == str(other.get("model", None)),
             str(self.colour) == str(other.get("colour", None)),
             str(self.decals) == str(other.get("decals", None)),
-            str(self.serialNumber) == str(other.get("serialNumber", None))
+            str(self.serialNumber) == str(other.get("serialNumber", None)),
+            str(self.rfidTagSerialNumber) == str(other.get("rfidTagSerialNumber", None))
         ])

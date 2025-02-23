@@ -123,6 +123,8 @@ def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase)
         bike.decals = updated_bike_data.decals.lower()
     if updated_bike_data.serialNumber is not None:
         bike.serialNumber = updated_bike_data.serialNumber.lower()
+    if updated_bike_data.rfidTagSerialNumber is not None:
+        bike.rfidTagSerialNumber = updated_bike_data.rfidTagSerialNumber.lower()
 
     db.commit()
 

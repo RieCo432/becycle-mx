@@ -124,7 +124,15 @@ export default {
       this.isInWriteMode = true;
       nfc.writeBikeDetailsToNfcTag(this.bike)
         .then((tagSerialNumber) => {
-          toast.success('Details written.' + tagSerialNumber, {timeout: 1000});
+          toast.success('Details written.');
+          this.bike.rfidTagSerialNumber = tagSerialNumber;
+          requests.patchBikeChangeDetails(this.bike.id, this.bike)
+            .then((response) => {
+              toast.success('RFID Tag Serial Number recorded.', {timeout: 1000});
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 1000});
+            });
         })
         .catch((err) => {
           toast.error(err.message, {timeout: 1000});
