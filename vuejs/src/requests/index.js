@@ -185,6 +185,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getBikeByRfidTagSerialNumber(rfidTagSerialNumber) {
+    return axiosClient.get(`/bikes/tag/${rfidTagSerialNumber}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   postNewBike(make, model, colour, decals, serialNumber) {
     return axiosClient.post('/bike', {
       make: make,
