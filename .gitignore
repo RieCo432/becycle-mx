@@ -8,6 +8,7 @@
 fastapi/app/data/temp/*
 fastapi/app/tests/photos/contracts.xlsx
 vuejs/dist
+*.pem
 
 
 #---------------------------------#

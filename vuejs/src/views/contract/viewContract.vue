@@ -14,7 +14,10 @@ import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkel
 import ContractCardSkeleton from '@/components/Skeleton/ContractCardSkeleton.vue';
 import Icon from '@/components/Icon';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
+import nfc from '@/nfc';
+import {useToast} from 'vue-toastification';
 
+const toast = useToast();
 
 export default {
   name: 'viewContract',
@@ -35,7 +38,7 @@ export default {
     const credentialsStore = useCredentialsStore();
     const contractData = toRef(props, 'contract');
     const patchContractReturn = toRef(props, 'patchContractReturn');
-
+    const isInWriteMode = ref(false);
 
     const steps = [
       {
@@ -149,6 +152,7 @@ export default {
     };
 
     return {
+      isInWriteMode,
       contractData,
       credentialsStore,
       depositAmountReturned,
@@ -193,6 +197,18 @@ export default {
     selectReturnAcceptingUser(event) {
       this.returnAcceptingUser = event.target.innerText;
       this.returnAcceptingUserSelected();
+    },
+    writeBikeDetailsToNfcTag() {
+      this.isInWriteMode = true;
+      nfc.writeBikeDetailsToNfcTag(this.bike).then(() => {
+        toast.success('Bike details written!', {timeout: 1000});
+      })
+        .catch((error) => {
+          toast.error(error.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isInWriteMode = false;
+        });
     },
   },
   props: {
@@ -341,14 +357,19 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
                 </div>
-                <div v-if="isUser" class="col-span-6 mt-auto">
+                <div v-if="isUser" class="col-span-4 mt-auto">
                   <DashButton class="w-full" @click="goToBike">
                     View Bike
                   </DashButton>
                 </div>
-                <div v-if="isUser" class="col-span-6 mt-auto">
+                <div v-if="isUser" class="col-span-4 mt-auto">
                   <DashButton class="w-full" @click="openEditBikeDetailsModal">
                     Edit Details
+                  </DashButton>
+                </div>
+                <div v-if="isUser" class="col-span-4 mt-auto">
+                  <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">
+                    Write To NFC
                   </DashButton>
                 </div>
               </div>

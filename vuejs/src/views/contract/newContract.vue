@@ -126,6 +126,11 @@
                       Enter the bike's details
                     </h4>
                   </div>
+                  <div class="col-span-full">
+                    <DashButton @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">
+                      Read From NFC Tag
+                    </DashButton>
+                  </div>
                   <div class="col-span-1">
                     <ComboboxTextInput
                         :field-model-value="make"
@@ -521,11 +526,14 @@ import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import {useRouter} from 'vue-router';
+import DashButton from '@/components/Button/index.vue';
+import nfc from '@/nfc';
 
 
 export default {
   name: 'newContract',
   components: {
+    DashButton,
     Checkbox,
     ErrorMessage,
     Card,
@@ -833,6 +841,7 @@ export default {
       bikePhotoTakenError,
       stickerOnBike,
       stickerOnBikeError,
+      bikeId,
 
       type,
       typeError,
@@ -881,6 +890,7 @@ export default {
       model_suggestions: [],
       colour_suggestions: [],
       serial_number_suggestions: [],
+      isNfcActive: false,
     };
   },
   created() {
@@ -959,6 +969,23 @@ export default {
     selectCheckingUser(event) {
       this.checkingUser = event.target.innerText;
       this.checkingUserSelected();
+    },
+    readBikeDetailsFromNfcTag() {
+      this.isNfcActive = true;
+      nfc.readBikeDetailsFromNfcTag().then((bike) => {
+        this.make = bike.make;
+        this.model = bike.model;
+        this.colour = bike.colour;
+        this.decals = bike.decals ? bike.decals : '';
+        this.serialNumber = bike.serialNumber;
+        this.bikeId = bike.id;
+      })
+        .catch((error) => {
+          toast.error(error.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isNfcActive = false;
+        });
     },
   },
   computed: {
