@@ -983,12 +983,12 @@ export default {
           const bike = response.data;
           console.log(bike);
           let allSame = true;
-          allSame &= bike.make === this.make;
-          allSame &= bike.model === this.model;
-          allSame &= bike.colour === this.colour;
-          allSame &= (bike.decals ? bike.decals : '') === this.decals;
-          allSame &= bike.serialNumber === this.serialNumber;
-          allSame &= bike.id === this.bikeId;
+          allSame &= bike.make.toLowerCase() === this.make.toLowerCase();
+          allSame &= bike.model.toLowerCase() === this.model.toLowerCase();
+          allSame &= bike.colour.toLowerCase() === this.colour.toLowerCase();
+          allSame &= (bike.decals ? bike.decals.toLowerCase() : '') === this.decals.toLowerCase();
+          allSame &= bike.serialNumber.toLowerCase() === this.serialNumber.toLowerCase();
+          allSame &= bike.id.toLowerCase() === this.bikeId.toLowerCase();
           if (!allSame) {
             toast.warning('Some of the bike details do not match with the recorded details', {timeout: 4000});
           }
@@ -1003,12 +1003,12 @@ export default {
         if (response.bike) {
           toast.success('Details read!', {timeout: 1000});
           const bike = response.bike;
-          this.make = bike.make;
-          this.model = bike.model;
-          this.colour = bike.colour;
-          this.decals = bike.decals ? bike.decals : '';
-          this.serialNumber = bike.serialNumber;
-          this.bikeId = bike.id;
+          this.make = bike.make.toLowerCase();
+          this.model = bike.model.toLowerCase();
+          this.colour = bike.colour.toLowerCase();
+          this.decals = bike.decals ? bike.decals.toLowerCase() : '';
+          this.serialNumber = bike.serialNumber.toLowerCase();
+          this.bikeId = bike.id.toLowerCase();
           console.log(bike);
           this.verifyBikeDetails(response.rfidTagSerialNumber);
         } else {
@@ -1022,46 +1022,55 @@ export default {
           this.isNfcActive = false;
         });
     },
-    actuallyWriteDetails(bike) {
-      this.isNfcActive = true;
-      nfc.writeBikeDetailsToNfcTag(bike)
-        .then((serialNumber) => {
-          bike.rfidTagSerialNumber = serialNumber;
-          requests.patchBikeChangeDetails(bike.id, bike)
+    ensureBikeExists() {
+      return new Promise((resolve, reject) => {
+        if (!this.bikeId || this.bikeId === '') {
+          requests.postNewBike(this.make, this.model, this.colour, this.decals, this.serialNumber)
             .then((response) => {
-              toast.success('Details Written', {timeout: 1000});
+              const bike = response.data;
+              this.bikeId = bike.id;
+              resolve(bike);
+            }).catch((error) => {
+              reject(error);
+            });
+        } else {
+          const bike = {
+            id: this.bikeId.toLowerCase(),
+            make: this.make.toLowerCase(),
+            model: this.model.toLowerCase(),
+            colour: this.colour.toLowerCase(),
+            decals: this.decals.toLowerCase(),
+            serialNumber: this.serialNumber.toLowerCase(),
+          };
+          resolve(bike);
+        }
+      });
+    },
+    writeBikeDetailsToNfcTag() {
+      this.ensureBikeExists()
+        .then((bike) => {
+          this.isNfcActive = true;
+          nfc.writeBikeDetailsToNfcTag(bike)
+            .then((serialNumber) => {
+              bike.rfidTagSerialNumber = serialNumber;
+              requests.patchBikeChangeDetails(bike.id, bike)
+                .then((response) => {
+                  toast.success('Details Written', {timeout: 1000});
+                })
+                .catch((error) => {
+                  toast.error(error.response.data.detail.description, {timeout: 1000});
+                });
             })
             .catch((error) => {
-              toast.error(error.response.data.detail.description, {timeout: 1000});
+              toast.error(error.message, {timeout: 1000});
+            })
+            .finally(() => {
+              this.isNfcActive = false;
             });
         })
         .catch((error) => {
-          toast.error(error.message, {timeout: 1000});
-        })
-        .finally(() => {
-          this.isNfcActive = false;
+          toast.error(error.response.data.detail.description, {timeout: 1000});
         });
-    },
-    writeBikeDetailsToNfcTag() {
-      if (!this.bikeId || this.bikeId === '') {
-        requests.postNewBike(this.make, this.model, this.colour, this.decals, this.serialNumber)
-          .then((response) => {
-            const bike = response.data;
-            this.bikeId = bike.id;
-            this.actuallyWriteDetails(bike);
-          }).catch((error) => {
-            toast.error(error.response.data.detail.description, {timeout: 1000});
-          });
-      } else {
-        this.actuallyWriteDetails({
-          id: this.bikeId,
-          make: this.make,
-          model: this.model,
-          colour: this.colour,
-          decals: this.decals,
-          serialNumber: this.serialNumber,
-        });
-      }
     },
   },
   computed: {
