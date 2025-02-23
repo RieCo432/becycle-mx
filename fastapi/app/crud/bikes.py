@@ -58,16 +58,12 @@ def get_all_bikes(db: Session) -> list[schemas.Bike]:
         select(models.Bike)
     )]
 
-def get_bike_by_rfid_tag_serial_number(db: Session, rfid_tag_serial_number: str) -> schemas.Bike:
-    bike = db.scalar(
+def get_bikes_by_rfid_tag_serial_number(db: Session, rfid_tag_serial_number: str) -> list[schemas.Bike]:
+    bikes = [_ for _ in db.scalars(
         select(models.Bike)
         .where(models.Bike.rfidTagSerialNumber == rfid_tag_serial_number)
-    )
-
-    if bike is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Bike not found"})
-
-    return bike
+    )]
+    return bikes
 
 
 def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
@@ -137,6 +133,11 @@ def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase)
         bike.serialNumber = updated_bike_data.serialNumber.lower()
     if updated_bike_data.rfidTagSerialNumber is not None:
         bike.rfidTagSerialNumber = updated_bike_data.rfidTagSerialNumber.lower()
+        bikes_with_this_tag = get_bikes_by_rfid_tag_serial_number(db=db, rfid_tag_serial_number=updated_bike_data.rfidTagSerialNumber)
+        for bike_with_this_tag in bikes_with_this_tag:
+            if bike_with_this_tag.id != bike_id:
+                bike_with_this_tag.rfidTagSerialNumber = "MOVED TO ANOTHER BIKE"
+
 
     db.commit()
 
