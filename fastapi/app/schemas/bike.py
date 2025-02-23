@@ -11,6 +11,7 @@ class BikeBase(BaseModel):
     colour: str
     decals: str | None = None
     serialNumber: str
+    rfidTagSerialNumber: str | None = None
 
 
 class BikeCreate(BikeBase):
