@@ -68,6 +68,19 @@
                       :error="emailAddressError"
                   />
                 </div>
+                <div class="col-span-full">
+                  <HFaceBookLogin
+                      v-slot="fbLogin"
+                      app-id="YOUR_FACEBOOK_APP_ID"
+                      @onSuccess="onSuccess"
+                      @onFailure="onFailure"
+                      scope="email,public_profile"
+                      fields="id,name,email,first_name,last_name,birthday"
+                  >
+                    <span @click="fbLogin.initFBLogin" class="fb-button">Login with facebook</span>
+                  </HFaceBookLogin>
+                  <GoogleLogin :callback="callback"/>
+                </div>
               </div>
             </div>
 
@@ -177,11 +190,50 @@ import Button from '@/components/Button/index.vue';
 import {useRouter, useRoute} from 'vue-router';
 import Icon from '@/components/Icon';
 import Tooltip from '@/components/Tooltip';
+import {HFaceBookLogin} from '@healerlab/vue3-facebook-login';
+import {GoogleLogin} from 'vue3-google-login';
+import {jwtDecode} from 'jwt-decode';
 
 const credentialsStore = useCredentialsStore();
 
 export default {
   setup() {
+    const onSuccess = (response) => {
+      // get your auth token and info
+      console.log(response);
+    };
+
+    const onFailure = () => {
+      // logic if auth failed
+    };
+
+    const callback = (response) => {
+      // This callback will be triggered when the user selects or login to
+      // his Google account from the popup
+      console.log('Handle the response', response);
+      const decoded = jwtDecode(response.credential);
+      if (false && decode.email_verified) {
+        requests.postNewClientGoogle({
+          emailAddress: decoded.email,
+          firstName: decoded.given_name,
+          lastName: decoded.family_name,
+        })
+          .then((response) => {
+            credentialsStore.login(response.data['access_token'], 'client');
+            requests.getClientMe().then((response) => {
+              credentialsStore.setName(response.data['firstName'] + ' ' + response.data['lastName']);
+              handleContinue();
+            });
+          });
+      } else {
+        emailAddress.value = decoded.email;
+        submit();
+        firstName.value = decoded.given_name;
+        lastName.value = decoded.family_name;
+        submit();
+      }
+    };
+
     const steps = [
       {
         id: 1,
@@ -321,6 +373,9 @@ export default {
     };
 
     return {
+      onSuccess,
+      onFailure,
+      callback,
       emailAddress,
       emailAddressError,
 
@@ -346,11 +401,13 @@ export default {
     };
   },
   components: {
+    GoogleLogin,
     Tooltip,
     Button,
     Card,
     Textinput,
     Icon,
+    HFaceBookLogin,
   },
 };
 
@@ -358,5 +415,13 @@ export default {
 
 
 <style scoped lang="scss">
-
+  .fb-button {
+    display: inline-block;
+    margin: 10px;
+    color: white;
+    background-color: #1967d2;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+  }
 </style>

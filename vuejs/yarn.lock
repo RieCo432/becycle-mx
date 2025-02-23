@@ -476,6 +476,14 @@
   dependencies:
     "@tanstack/vue-virtual" "^3.0.0-beta.60"
 
+"@healerlab/vue3-facebook-login@^0.1.6", "@healerlab/vue3-facebook-login@^0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@healerlab/vue3-facebook-login/-/vue3-facebook-login-0.1.7.tgz#95fbddeff035daa7640b669789ddb858ec60284d"
+  integrity sha512-10hW6ZUo3JS5qqXJ6t4oZzhi24I4COEBgNpGKSxExIzDMbg17y7C75Wj8faA2COjIJ/f+fYXh2Ry1GGrBj9quA==
+  dependencies:
+    "@healerlab/vue3-facebook-login" "^0.1.6"
+    axios "^1.6.2"
+
 "@humanfs/core@^0.19.1":
   version "0.19.1"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.1.tgz#17c55ca7d426733fe3c561906b8173c336b40a77"
@@ -1444,7 +1452,7 @@ axios@^1.2.2:
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
-axios@^1.7.4:
+axios@^1.6.2, axios@^1.7.4:
   version "1.7.9"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
   integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
@@ -3332,6 +3340,11 @@ json5@^2.2.3:
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.3.tgz#78cd6f1a19bdc12b73db5ad0c61efd66c1e29283"
   integrity sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==
 
+jwt-decode@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-4.0.0.tgz#2270352425fd413785b2faf11f6e755c5151bd4b"
+  integrity sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==
+
 keycode@^2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/keycode/-/keycode-2.2.1.tgz#09c23b2be0611d26117ea2501c2c391a01f39eff"
@@ -4862,6 +4875,11 @@ vue3-dropzone@^2.0.1:
   dependencies:
     attr-accept "^2.2.2"
     file-selector "^0.2.4"
+
+vue3-google-login@^2.0.33:
+  version "2.0.33"
+  resolved "https://registry.yarnpkg.com/vue3-google-login/-/vue3-google-login-2.0.33.tgz#0b3b3a653b6026cbb2d39b92fc1782f0057c1d43"
+  integrity sha512-Hx3JJUREXWCFOOB4AzZKy/x7C+X18kxmT0AquBekm0TRubp11nrWijOLEgmhuij48dQPNumyaAi5IQAeDKk7yw==
 
 vue@^3.2.13, vue@^3.2.25:
   version "3.5.4"

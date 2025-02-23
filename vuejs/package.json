@@ -19,6 +19,7 @@
     "@fullcalendar/timegrid": "6.0.3",
     "@fullcalendar/vue3": "6.0.3",
     "@headlessui/vue": "^1.6.4",
+    "@healerlab/vue3-facebook-login": "^0.1.7",
     "@popperjs/core": "^2.11.8",
     "@vee-validate/rules": "^4.12.5",
     "@videojs-player/vue": "^1.0.0",
@@ -34,6 +35,7 @@
     "dayjs": "^1.11.6",
     "dotenv": "^16.4.5",
     "gsap": "^3.11.3",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "lodash-es": "^4.17.21",
     "pinia": "^2.0.28",
@@ -64,6 +66,7 @@
     "vue3-apexcharts": "^1.4.1",
     "vue3-click-away": "^1.2.4",
     "vue3-dropzone": "^2.0.1",
+    "vue3-google-login": "^2.0.33",
     "vuedraggable": "^4.1.0",
     "yup": "^1.6.1"
   },

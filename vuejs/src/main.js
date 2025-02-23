@@ -17,7 +17,9 @@ import './assets/scss/auth.scss';
 import './assets/scss/tailwind.scss';
 import router from '@/router';
 import {createPinia} from 'pinia';
-import { setupCalendar } from 'v-calendar';
+import {setupCalendar} from 'v-calendar';
+import vue3GoogleLogin from 'vue3-google-login';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const pinia = createPinia();
 
@@ -35,9 +37,14 @@ app.use(VueSweetalert2)
   .use(VueFlatPickr)
   .use(VueGoodTablePlugin)
   .use(VueApexCharts)
-  .use(setupCalendar, {});
+  .use(setupCalendar, {})
+  .use(vue3GoogleLogin, {
+    clientId: GOOGLE_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/userinfo.email',
+  });
 
-app.component('')
+
+app.component('');
 
 app.config.globalProperties.$store = {};
 app.mount('#app');

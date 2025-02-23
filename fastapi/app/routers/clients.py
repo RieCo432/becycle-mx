@@ -66,6 +66,27 @@ async def create_client_temp(
 
     return client_temp
 
+@clients.post("/client/google")
+async def create_client_google(
+        client_data: schemas.ClientCreate,
+        google_token: str,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Token:
+
+    raise NotImplementedError("No verification of authenticity yet.")
+
+    client = crud.get_client_by_email(db=db, email_address=client_data.emailAddress)
+
+    if client is None:
+        client = crud.post_client(db=db, client_data=client_data)
+
+    access_token = auth.create_access_token(data={"sub": str(client.id)})
+
+    return schemas.Token(
+        access_token=access_token,
+        token_type="bearer"
+    )
+
 
 @clients.post("/client/temp/verify")
 async def verify_client_temp(

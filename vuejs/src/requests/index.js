@@ -100,6 +100,11 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  postNewClientGoogle(clientData) {
+    return axiosClient.post('/client/google', clientData, {
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
+    });
+  },
   getEmailAddressSuggestions(emailAddress) {
     return axiosClient.get('/clients/email-address-suggestions', {
       headers: credentialsStore.getApiRequestHeader(),
