@@ -210,6 +210,12 @@
                     </ComboboxTextInput>
                   </div>
 
+                  <div class="col-span-full">
+                    <DashButton @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">
+                      Write To NFC Tag
+                    </DashButton>
+                  </div>
+
                   <div class="col-start-1">
                     <Checkbox
                         label="Photo of bike taken?"
@@ -1015,6 +1021,47 @@ export default {
         .finally(() => {
           this.isNfcActive = false;
         });
+    },
+    actuallyWriteDetails(bike) {
+      this.isNfcActive = true;
+      nfc.writeBikeDetailsToNfcTag(bike)
+        .then((serialNumber) => {
+          bike.rfidTagSerialNumber = serialNumber;
+          requests.patchBikeChangeDetails(bike.id, bike)
+            .then((response) => {
+              toast.success('Details Written', {timeout: 1000});
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 1000});
+            });
+        })
+        .catch((error) => {
+          toast.error(error.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isNfcActive = false;
+        });
+    },
+    writeBikeDetailsToNfcTag() {
+      if (!this.bikeId || this.bikeId === '') {
+        requests.postNewBike(this.make, this.model, this.colour, this.decals, this.serialNumber)
+          .then((response) => {
+            const bike = response.data;
+            this.bikeId = bike.id;
+            this.actuallyWriteDetails(bike);
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 1000});
+          });
+      } else {
+        this.actuallyWriteDetails({
+          id: this.bikeId,
+          make: this.make,
+          model: this.model,
+          colour: this.colour,
+          decals: this.decals,
+          serialNumber: this.serialNumber,
+        });
+      }
     },
   },
   computed: {
