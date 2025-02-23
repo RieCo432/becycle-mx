@@ -123,8 +123,8 @@ export default {
     writeBikeDetailsToNfcTag() {
       this.isInWriteMode = true;
       nfc.writeBikeDetailsToNfcTag(this.bike)
-        .then(() => {
-          toast.success('Details written.', {timeout: 1000});
+        .then((tagSerialNumber) => {
+          toast.success('Details written.' + tagSerialNumber, {timeout: 1000});
         })
         .catch((err) => {
           toast.error(err.message, {timeout: 1000});

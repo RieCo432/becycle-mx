@@ -8,13 +8,39 @@ export default {
     return new Promise(async (resolve, reject) => {
       try {
         const encoder = new TextEncoder();
+        const jsonString = JSON.stringify(bike);
+        const encodedJsonString = encoder.encode(jsonString);
         const ndef = new NDEFReader();
         await ndef.write({
           records: [
-            {recordType: 'mime', mediaType: 'application/json', data: encoder.encode(JSON.stringify(bike))},
+            {recordType: 'mime', mediaType: 'application/json', data: encodedJsonString},
           ],
         }, {overwrite: true});
-        resolve();
+
+        const abortController = new AbortController();
+
+        await ndef.scan({signal: abortController.signal});
+
+        const event = await new Promise((resolve) => {
+          ndef.onreading = (event) => resolve(event);
+        });
+
+        const record = event.message.records[0];
+
+        if (record.recordType === 'mime' && record.mediaType === 'application/json') {
+          const textDecoder = new TextDecoder();
+          const text = textDecoder.decode(record.data);
+          if (text && (text === jsonString)) {
+            resolve(event.serialNumber);
+          } else {
+            reject(new Error('Correctness of written tag could not be verified.'));
+          }
+        } else {
+          reject(new Error('Something went wrong'));
+        }
+
+        await new Promise((r) => setTimeout(r, 3000));
+        abortController.abort();
       } catch (error) {
         reject(error);
       }
@@ -32,6 +58,7 @@ export default {
         });
 
         ndef.addEventListener('reading', ({message, serialNumber}) => {
+          console.log(serialNumber);
           const record = message.records[0];
           if (record.recordType === 'mime' && record.mediaType === 'application/json') {
             const textDecoder = new TextDecoder();
