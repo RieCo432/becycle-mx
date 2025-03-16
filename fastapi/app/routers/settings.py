@@ -130,3 +130,11 @@ async def update_expense_type(
         db: Session = Depends(dep.get_db)
 ) -> schemas.ExpenseType:
     return crud.update_expense_type(db=db, expense_type_id=expense_type_id, description=description)
+
+
+@settings.patch("/settings/about-us", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+async def update_about_us(
+        new_about_us: schemas.AboutUs,
+        db: Session = Depends(dep.get_db)
+) -> schemas.AboutUs:
+    return crud.set_about_us_html(db=db, new_about_us= new_about_us)

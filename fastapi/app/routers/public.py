@@ -75,3 +75,10 @@ async def get_upcoming_open_dates(
 ) -> list[datetime.date]:
     return crud.get_open_days_in_period(db=db, start_date=start_date, end_date=end_date)
 
+
+@public.get("/public/about-us")
+async def get_about_us(
+        db: Session = Depends(dep.get_db)
+) -> schemas.AboutUs:
+    return crud.get_about_us(db=db)
+

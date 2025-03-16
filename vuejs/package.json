@@ -24,7 +24,7 @@
     "@videojs-player/vue": "^1.0.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
-    "@vueup/vue-quill": "^1.0.0",
+    "@vueup/vue-quill": "^1.2.0",
     "animate.css": "^4.1.1",
     "apexcharts": "^3.35.5",
     "autoprefixer": "^10",

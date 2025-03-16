@@ -530,3 +530,19 @@ def get_opening_times(db: Session) -> list[schemas.DayOpeningTimes]:
             )
 
     return opening_times
+
+
+def get_about_us(db: Session) -> models.AboutUs:
+    return db.scalar(
+        select(models.AboutUs)
+        .where(models.AboutUs.id == 1)
+    )
+
+
+def set_about_us_html(db: Session, new_about_us: schemas.AboutUs) -> models.AboutUs:
+    about_us = get_about_us(db=db)
+
+    about_us.html = new_about_us.html
+    db.commit()
+
+    return about_us

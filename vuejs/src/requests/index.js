@@ -455,6 +455,11 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
+  getAboutUs() {
+    return axiosClient.get('/public/about-us', {
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
+    });
+  },
   getAppointments(startDate, endDate) {
     return axiosClient.get('/appointments/calendar', {
       params: {
@@ -837,6 +842,12 @@ export default {
   },
   putAddress(newAddress) {
     return axiosClient.put('/settings/address', newAddress, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchAboutUs(newAboutUs) {
+    return axiosClient.patch(`/settings/about-us`, {html: newAboutUs}, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
