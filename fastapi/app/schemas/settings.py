@@ -68,3 +68,6 @@ class ExpenseType(BaseModel):
 class ContractType(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
+
+class AboutUs(BaseModel):
+    html: str

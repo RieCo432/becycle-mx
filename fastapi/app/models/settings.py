@@ -87,6 +87,18 @@ class Address(Base):
         ])
 
 
+class AboutUs(Base):
+    __tablename__ = "aboutus"
+
+    id: Mapped[int] = mapped_column("id", Integer, primary_key=True, nullable=False, default=1, server_default=text("1"), index=True, quote=False)
+    html: Mapped[str] = mapped_column("html", Text, nullable=True, quote=False)
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.html) == str(other.get("number")),
+        ])
+
+
 class ContractType(Base):
     __tablename__ = "contracttypes"
 
