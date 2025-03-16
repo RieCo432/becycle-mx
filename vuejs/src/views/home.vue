@@ -1,7 +1,58 @@
 <template>
     <div class="grid grid-cols-12 gap-5">
+      <div class="lg:col-span-6 col-span-12 row-span-2" v-if="aboutUsHtml !== null || editAllowed">
+        <Card title="Welcome to BECYCLE">
+          <div class="h-full">
+            <div class="grid grid-cols-12 gap-5">
+              <div class="col-span-12">
+                <QuillEditor
+                    v-if="editorActive && editorHtmlMode"
+                    toolbar="full"
+                    v-model:content="quillContent"
+                    content-type="html"/>
+                <QuillEditor
+                    v-if="editorActive && !editorHtmlMode"
+                    toolbar="full"
+                    v-model:content="quillContent"
+                    content-type="text"/>
+                <div v-if="!editorActive" v-html="aboutUsHtml" class="dark:text-slate-300 text-slate-700 h-full"/>
+              </div>
+              <div v-if="!editorActive && editAllowed" class="col-span-2 col-end-13 mt-auto">
+                <DashButton class="w-full" @click="openEditor">Edit</DashButton>
+              </div>
+            </div>
+            <div v-if="editorActive && editAllowed" class="grid grid-cols-3 col-span-full gap-5 justify-items-stretch mt-20">
+              <div  class="justify-self-start">
+                <DashButton class="w-full btn-danger" @click="cancelEditor">Cancel</DashButton>
+              </div>
+              <div class="justify-self-center my-auto">
+                <div class="grid grid-cols-3">
+                  <div>
+                    <span class="text-slate-700 dark:text-slate-300 me-1">HTML</span>
+                  </div>
+                  <div>
+                    <Switch
+                        v-model:model-value="editorHtmlMode"
+                        class="w-full"
+                        badge
+                        icon
+                        prev-icon="heroicons-outline:document-text"
+                        next-icon="heroicons-outline:code-bracket"/>
+                  </div>
+                  <div>
+                    <span class="text-slate-700 dark:text-slate-300 ms-1">WYSIWYG</span>
+                  </div>
+                </div>
+              </div>
+              <div  class="justify-self-end mt-auto">
+                <DashButton class="w-full" @click="saveEditor">Save</DashButton>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
         <div class="lg:col-span-6 col-span-12">
-            <Card title="Welcome to BECYCLE">
+            <Card title="Quick Info">
                 <div class="grid grid-cols-12 h-full gap-5">
                   <div class="col-span-12">
                     <p class="text-base text-slate-700 dark:text-slate-300">
@@ -31,22 +82,10 @@
                                class="w-[32px] h-[32px] m-[16px] inline" alt="Instagram"/></a>
                     </p>
                   </div>
-                  <div v-if="isNotUser" class="md:col-span-4 col-span-6 mt-auto">
-                    <DashButton  @click="goToBookAppointment" class="mt-auto">Book Appointment</DashButton>
-                  </div>
-                  <div v-if="isNotUser && isNotClient" class="md:col-span-4 col-span-6 mt-auto">
-                    <DashButton  @click="goToClientLogin" class="mt-auto">Client Register/Login</DashButton>
-                  </div>
-                  <div v-if="!isNotUser" class="md:col-span-4 col-span-6 mt-auto">
-                    <DashButton  @click="goToNewContract" class="mt-auto">New Contract</DashButton>
-                  </div>
-                  <div v-if="!isNotUser" class="md:col-span-4 col-span-6 mt-auto">
-                    <DashButton  @click="goToFindClient" class="mt-auto">Find Client</DashButton>
-                  </div>
                 </div>
-
             </Card>
         </div>
+
         <div class="lg:col-span-6 col-span-12">
             <Card title="Opening Days and Times">
               <div class="grid grid-cols-12 gap-5">
@@ -78,6 +117,7 @@
               </div>
             </Card>
         </div>
+
     </div>
 </template>
 
@@ -91,9 +131,14 @@ import {Calendar} from 'v-calendar';
 import 'v-calendar/style.css';
 import {useScreens} from 'vue-screen-utils';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
+import {QuillEditor} from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import {useToast} from 'vue-toastification';
+import Switch from '@/components/Switch';
 
 const credentialsStore = useCredentialsStore();
 const themeSettingsStore = useThemeSettingsStore();
+const toast = useToast();
 const {mapCurrent} = useScreens({
   xs: '0px',
   sm: '640px',
@@ -105,10 +150,12 @@ const {mapCurrent} = useScreens({
 
 export default {
   components: {
+    Switch,
     TableSkeleton,
     DashButton,
     Card,
     Calendar,
+    QuillEditor,
   },
   data() {
     return {
@@ -118,6 +165,11 @@ export default {
       loadingAddress: true,
       openingTimes: null,
       address: null,
+      editAllowed: false,
+      editorActive: false,
+      editorHtmlMode: true,
+      aboutUsHtml: null,
+      quillContent: null,
       themeSettingsStore: themeSettingsStore,
       calendarAttributes: [],
       numCalendarColumns: mapCurrent({xs: 1, sm: 2, md: 2, lg: 1, xxl: 2}, 1),
@@ -137,29 +189,34 @@ export default {
       ],
     };
   },
-  computed: {
-    isNotUser() {
-      return credentialsStore.getTokenType() !== 'user';
-    },
-    isNotClient() {
-      return credentialsStore.getTokenType() !== 'client';
-    },
-  },
   methods: {
-    goToBookAppointment() {
-      this.$router.push({path: '/appointments/book'});
+
+    openEditor() {
+      this.quillContent = this.aboutUsHtml;
+      this.editorActive = true;
     },
-    goToClientLogin() {
-      this.$router.push({path: '/clients/login'});
+    cancelEditor() {
+      this.editorActive = false;
     },
-    goToNewContract() {
-      this.$router.push({path: '/contracts/new'});
-    },
-    goToFindClient() {
-      this.$router.push({path: '/clients'});
+    saveEditor() {
+      requests.patchAboutUs(this.quillContent).then((response) => {
+        this.aboutUsHtml = response.data.html;
+        this.editorActive = false;
+        toast.success('About Us Updated!', {timeout: 1000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     },
   },
   mounted() {
+    if (credentialsStore.getTokenType() === 'user') {
+      requests.getUserMe().then((response) => {
+        this.editAllowed = response.data.appointmentManager;
+      });
+    }
+    requests.getAboutUs().then((response) => {
+      this.aboutUsHtml = response.data.html;
+    });
     requests.getOpeningTimes().then((response) => {
       this.openingTimes = response.data;
       this.loadingOpeningTimes = false;
