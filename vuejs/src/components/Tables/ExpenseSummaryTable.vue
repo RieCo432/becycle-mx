@@ -36,6 +36,10 @@
           disableSelectinfo: true, // disable the select info-500 panel on top
           selectAllByGroup: true,
         }"
+                      :sort-options="{
+          enabled: true,
+          initialSortBy: {field: 'expenseDate', type: 'desc'},
+                      }"
       >
         <template #pagination-top="props">
           <div class="py-4 px-3">
