@@ -1,8 +1,10 @@
 from datetime import date, time
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, HTTPException
 from sqlalchemy.orm import Session
+from starlette import status
 
 import app.crud as crud
 import app.dependencies as dep
@@ -138,3 +140,30 @@ async def update_about_us(
         db: Session = Depends(dep.get_db)
 ) -> schemas.AboutUs:
     return crud.set_about_us_html(db=db, new_about_us= new_about_us)
+
+
+@settings.get("/settings/faq", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+async def get_all_faq(db: Session = Depends(dep.get_db)) -> list[schemas.Faq]:
+    return crud.get_all_faq(db=db)
+
+
+@settings.post("/settings/faq", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+async def post_faq(
+        new_faq: schemas.FaqBase,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Faq:
+    return crud.create_faq(db=db, new_faq=new_faq)
+
+
+@settings.patch("/settings/faq/{faq_id}", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+async def patch_faq(
+        faq_id: UUID,
+        updated_faq: schemas.UpdateFaq,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Faq:
+    if crud.get_faq(db=db, faq_id=faq_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Faq not found"})
+
+    return crud.update_faq(db=db, faq_id=faq_id, updated_faq=updated_faq)
+
+

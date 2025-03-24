@@ -1,4 +1,5 @@
 from datetime import time, date
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -71,3 +72,16 @@ class ContractType(BaseModel):
 
 class AboutUs(BaseModel):
     html: str
+
+
+class FaqBase(BaseModel):
+    question: str
+    answer: str
+
+class Faq(FaqBase):
+    id: UUID
+    active: bool
+    orderIndex: int
+
+class UpdateFaq(FaqBase):
+    active: bool
