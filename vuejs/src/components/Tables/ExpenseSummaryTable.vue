@@ -38,7 +38,10 @@
         }"
                       :sort-options="{
           enabled: true,
-          initialSortBy: {field: 'expenseDate', type: 'desc'},
+          initialSortBy: [
+              {field: 'status', type: 'desc'},
+              {field: 'expenseDate', type: 'desc'}
+          ],
                       }"
       >
         <template #pagination-top="props">
