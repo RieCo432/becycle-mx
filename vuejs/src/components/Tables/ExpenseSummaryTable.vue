@@ -15,28 +15,34 @@
       </div>
       <TableSkeleton v-if="loading" :num-columns="columns.length"></TableSkeleton>
       <vue-good-table v-else
-        :columns="columns"
-        styleClass=" vgt-table bordered centered"
-        :rows="data"
-        :pagination-options="{
-          enabled: true,
-          position: 'top',
-          perPage: perpage,
-        }"
-        :search-options="{
-          enabled: true,
-          externalQuery: searchTerm,
-        }"
-        :select-options="{
-          enabled: false,
-          selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
-          selectioninfoClass: 'custom-class',
-          selectionText: 'rows selected',
-          clearSelectionText: 'clear',
-          disableSelectinfo: true, // disable the select info-500 panel on top
-          selectAllByGroup: true,
-        }"
-      >
+                      :columns="columns"
+                      styleClass=" vgt-table bordered centered"
+                      :rows="data"
+                      :pagination-options="{
+                        enabled: true,
+                        position: 'top',
+                        perPage: perpage,
+                      }"
+                      :search-options="{
+                        enabled: true,
+                        externalQuery: searchTerm,
+                      }"
+                      :select-options="{
+                        enabled: false,
+                        selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
+                        // selectioninfoClass: 'custom-class',
+                        // selectionText: 'rows selected',
+                        // clearSelectionText: 'clear',
+                        // disableSelectinfo: true, // disable the select info-500 panel on top
+                        // selectAllByGroup: true,
+                      }"
+                      :sort-options="{
+                        enabled: true,
+                        initialSortBy: [
+                            {field: 'status', type: 'desc'},
+                            {field: 'expenseDate', type: 'desc'}
+                        ],
+                      }">
         <template #pagination-top="props">
           <div class="py-4 px-3">
             <Pagination
@@ -76,13 +82,13 @@
             <span
               class="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25"
               :class="`${
-                props.row.transferDate
+                props.row.status === 'Closed'
                   ? 'text-success-500 bg-success-500'
                   : 'text-danger-500 bg-danger-500'}
 
              `"
             >
-              {{ props.row.transferDate ? 'Closed' : 'Open' }}
+              {{ props.row.status }}
             </span>
           </span>
           <span v-if="props.column.field === 'actions'">
