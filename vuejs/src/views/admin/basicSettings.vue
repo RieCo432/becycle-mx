@@ -2,11 +2,12 @@
 import UpdateAddressCard from '@/components/Card/UpdateAddressCard.vue';
 import ManageContractTypesCard from '@/components/Card/ManageContractTypesCard.vue';
 import ManageExpenseTypesCard from '@/components/Card/ManageExpenseTypesCard.vue';
-import ManageExpenseTagsCard from "@/components/Card/ManageExpenseTagsCard.vue";
+import ManageExpenseTagsCard from '@/components/Card/ManageExpenseTagsCard.vue';
+import ManageFaqCard from '@/components/Card/ManageFaqCard.vue';
 
 export default {
   name: 'basicSettings',
-  components: {ManageExpenseTypesCard, ManageContractTypesCard, UpdateAddressCard, ManageExpenseTagsCard},
+  components: {ManageFaqCard, ManageExpenseTypesCard, ManageContractTypesCard, UpdateAddressCard, ManageExpenseTagsCard},
 };
 </script>
 
@@ -23,6 +24,9 @@ export default {
     </div>
     <div class="col-span-6">
       <ManageExpenseTagsCard></ManageExpenseTagsCard>
+    </div>
+    <div class="col-span-6">
+      <ManageFaqCard></ManageFaqCard>
     </div>
   </div>
 </template>

@@ -845,6 +845,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
+  getAllFaq() {
+    return axiosClient.get('/settings/faq', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   putAddress(newAddress) {
     return axiosClient.put('/settings/address', newAddress, {
       headers: credentialsStore.getApiRequestHeader(),
@@ -853,6 +859,18 @@ export default {
   },
   patchAboutUs(newAboutUs) {
     return axiosClient.patch(`/settings/about-us`, {html: newAboutUs}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchFaq(faqId, updatedFaq) {
+    return axiosClient.patch(`/settings/faq/${faqId}`, updatedFaq, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postFaq(newFaq) {
+    return axiosClient.post(`/settings/faq`, newFaq, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
