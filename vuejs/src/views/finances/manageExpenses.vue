@@ -98,7 +98,7 @@ export default {
       requests.patchExpenseTransferred(expenseId).then((response) => {
         toast.success('Expense Transferred', {timeout: 2000});
         const indexInArray = this.expenses.findIndex((e) => (e.id === response.data.id));
-        this.expenses.splice(indexInArray, 1, response.data);
+        this.expenses.splice(indexInArray, 1, this.setExpenseStatus(response.data));
         this.closeExpenseInfoModal();
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -118,7 +118,7 @@ export default {
     },
     getExpenses() {
       requests.getExpenses(this.filterByTag).then((response) => {
-        this.expenses = response.data;
+        this.expenses = response.data.map((expense) => this.setExpenseStatus(expense));
         this.loadingExpenses = false;
       });
     },
@@ -137,6 +137,9 @@ export default {
     expenseUpdated(updatedExpense) {
       const indexInArray = this.expenses.findIndex((e) => (e.id === updatedExpense.id));
       this.expenses.splice(indexInArray, 1, updatedExpense);
+    },
+    setExpenseStatus(expense) {
+      return {...expense, status: expense.transferDate ? 'Closed' : 'Open'};
     },
   },
   created() {

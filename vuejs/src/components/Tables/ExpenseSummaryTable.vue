@@ -80,13 +80,13 @@
             <span
               class="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25"
               :class="`${
-                props.row.transferDate
+                props.row.status === 'Closed'
                   ? 'text-success-500 bg-success-500'
                   : 'text-danger-500 bg-danger-500'}
 
              `"
             >
-              {{ props.row.transferDate ? 'Closed' : 'Open' }}
+              {{ props.row.status }}
             </span>
           </span>
           <span v-if="props.column.field === 'actions'">
