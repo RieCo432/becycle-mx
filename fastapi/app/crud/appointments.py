@@ -1,5 +1,6 @@
 import datetime
 import math
+import socket
 from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
 from uuid import UUID
 
@@ -275,6 +276,8 @@ def send_appointment_reminders(db: Session):
             print(appointment.client.emailAddress)
             print(e)
         except SMTPServerDisconnected as e:
+            print(e)
+        except socket.gaierror as e:
             print(e)
     db.commit()
 

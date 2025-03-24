@@ -1,3 +1,4 @@
+import socket
 from datetime import date, datetime
 from uuid import UUID
 
@@ -268,6 +269,8 @@ def send_expiry_emails(db: Session):
             print(contract.client.emailAddress)
             print(e)
         except SMTPServerDisconnected as e:
+            print(e)
+        except socket.gaierror as e:
             print(e)
 
     db.commit()
