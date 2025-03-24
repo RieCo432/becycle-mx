@@ -546,3 +546,10 @@ def set_about_us_html(db: Session, new_about_us: schemas.AboutUs) -> models.Abou
     db.commit()
 
     return about_us
+
+
+def get_active_faq(db: Session) -> list[models.Faq]:
+    return [_ for _ in db.scalars(
+        select(models.Faq)
+        .where(models.Faq.active == True))
+            ]
