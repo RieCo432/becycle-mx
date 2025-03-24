@@ -840,6 +840,11 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
+  getFaq() {
+    return axiosClient.get('/public/faq', {
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
+    });
+  },
   putAddress(newAddress) {
     return axiosClient.put('/settings/address', newAddress, {
       headers: credentialsStore.getApiRequestHeader(),
