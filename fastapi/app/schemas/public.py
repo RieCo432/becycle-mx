@@ -17,3 +17,9 @@ class ClosedPeriod(ClosedDay):
 class Closure(BaseModel):
     type: str
     item: ClosedDay | ClosedPeriod
+
+
+class FaqPublic(BaseModel):
+    question: str
+    answer: str
+    orderIndex: int

@@ -1,6 +1,7 @@
 import math
 from copy import copy
 from datetime import date, datetime, time, timedelta
+from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, DAILY
@@ -546,3 +547,63 @@ def set_about_us_html(db: Session, new_about_us: schemas.AboutUs) -> models.Abou
     db.commit()
 
     return about_us
+
+
+def get_active_faq(db: Session) -> list[models.Faq]:
+    return [_ for _ in db.scalars(
+        select(models.Faq)
+        .where(models.Faq.active == True))
+            ]
+
+def get_all_faq(db: Session) -> list[models.Faq]:
+    return [_ for _ in db.scalars(
+        select(models.Faq)
+    )]
+
+def get_faq(db: Session, faq_id: UUID) -> models.Faq:
+    return db.scalar(
+        select(models.Faq)
+        .where(models.Faq.id == faq_id)
+    )
+
+def update_faq(db: Session, faq_id: UUID, updated_faq: schemas.UpdateFaq) -> models.Faq:
+    faq = get_faq(db=db, faq_id=faq_id)
+
+    if faq is not None:
+        faq.question = updated_faq.question
+        faq.answer = updated_faq.answer
+        faq.active = updated_faq.active
+
+    db.commit()
+
+    return faq
+
+def create_faq(db: Session, new_faq: schemas.FaqBase) -> schemas.Faq:
+    faq = models.Faq(
+        question=new_faq.question,
+        answer=new_faq.answer,
+        active=True,
+    )
+    db.add(faq)
+    db.commit()
+    return faq
+
+
+def swap_faq_order(db: Session, faq1_id: UUID, faq2_id: UUID) -> list[models.Faq]:
+    faq1 = get_faq(db=db, faq_id=faq1_id)
+    faq2 = get_faq(db=db, faq_id=faq2_id)
+
+    faq1_old_order_index = faq1.orderIndex
+    faq2_old_order_index = faq2.orderIndex
+
+    try:
+        faq2.orderIndex = -1
+        db.commit()
+        faq1.orderIndex = faq2_old_order_index
+        db.commit()
+        faq2.orderIndex = faq1_old_order_index
+        db.commit()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": str(e)})
+
+    return [faq1, faq2]

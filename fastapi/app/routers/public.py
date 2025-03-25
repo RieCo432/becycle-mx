@@ -82,3 +82,9 @@ async def get_about_us(
 ) -> schemas.AboutUs:
     return crud.get_about_us(db=db)
 
+@public.get("/public/faq")
+async def get_active_faq(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.FaqPublic]:
+    return crud.get_active_faq(db=db)
+

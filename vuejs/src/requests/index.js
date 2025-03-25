@@ -840,6 +840,17 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
+  getFaq() {
+    return axiosClient.get('/public/faq', {
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
+    });
+  },
+  getAllFaq() {
+    return axiosClient.get('/settings/faq', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   putAddress(newAddress) {
     return axiosClient.put('/settings/address', newAddress, {
       headers: credentialsStore.getApiRequestHeader(),
@@ -851,6 +862,30 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
+  },
+  patchFaq(faqId, updatedFaq) {
+    return axiosClient.patch(`/settings/faq/${faqId}`, updatedFaq, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postFaq(newFaq) {
+    return axiosClient.post(`/settings/faq`, newFaq, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  swapFaq(faq1Id, faq2Id) {
+    return axiosClient.patch('/settings/faq/swap',
+      {
+        faq1_id: faq1Id,
+        faq2_id: faq2Id,
+      },
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
   },
   getDepositExchangeUsers() {
     return axiosClient.get('/deposit-exchanges/users', {

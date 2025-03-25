@@ -1,6 +1,7 @@
 from datetime import time, date
+from uuid import uuid4
 
-from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date, PrimaryKeyConstraint
+from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date, PrimaryKeyConstraint, UUID, Identity
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.db import Base
@@ -96,6 +97,27 @@ class AboutUs(Base):
     def __eq__(self, other: dict):
         return all([
             str(self.html) == str(other.get("number")),
+        ])
+
+
+class Faq(Base):
+    __tablename__ = "faqs"
+
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
+                                     server_default=text("uuid_generate_v4()"), index=True, quote=False)
+    question: Mapped[str] = mapped_column("question", String(256), nullable=False, quote=False)
+    answer: Mapped[str] = mapped_column("answer", Text, nullable=False, quote=False)
+    active: Mapped[bool] = mapped_column("active", Boolean, nullable=False, default=True, server_default=text("TRUE"),
+                                         quote=False)
+    orderIndex: Mapped[int] = mapped_column("orderindex", Integer, Identity(start=1, cycle=True), unique=True, index=True, nullable=False, quote=False)
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.active) == str(other.get("active")),
+            str(self.question) == str(other.get("question")),
+            str(self.answer) == str(other.get("answer")),
+            str(self.orderIndex) == str(other.get("orderIndex")),
         ])
 
 

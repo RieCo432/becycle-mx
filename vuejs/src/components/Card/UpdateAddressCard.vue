@@ -13,6 +13,12 @@ const toast = useToast();
 export default {
   name: 'UpdateAddressCard',
   components: {Card, Button, Textinput},
+  props: {
+    user: {
+      type: Object,
+      required: true,
+    },
+  },
   setup() {
     const newAddressSchema = yup.object().shape({
       number: yup.string().required('Street Number is required'),
@@ -86,6 +92,7 @@ export default {
               name="number"
               v-model="number"
               :error="numberError"
+              :disabled="!user.admin"
           />
         </div>
         <div class="md:col-span-6 col-span-12">
@@ -96,6 +103,7 @@ export default {
               name="street"
               v-model="street"
               :error="streetError"
+              :disabled="!user.admin"
           />
         </div>
         <div class="col-span-6">
@@ -106,6 +114,7 @@ export default {
               name="postcode"
               v-model="postcode"
               :error="postcodeError"
+              :disabled="!user.admin"
           />
         </div>
         <div class="col-span-6">
@@ -116,10 +125,11 @@ export default {
               name="city"
               v-model="city"
               :error="cityError"
+              :disabled="!user.admin"
           />
         </div>
         <div class="col-span-12">
-          <Button type="submit" class="btn btn-dark block w-full text-center">
+          <Button v-if="user.admin" type="submit" class="btn btn-dark block w-full text-center">
             Submit
           </Button>
         </div>
