@@ -583,7 +583,6 @@ def create_faq(db: Session, new_faq: schemas.FaqBase) -> schemas.Faq:
         question=new_faq.question,
         answer=new_faq.answer,
         active=True,
-        orderIndex=5,
     )
     db.add(faq)
     db.commit()

@@ -1,7 +1,7 @@
 from datetime import time, date
 from uuid import uuid4
 
-from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date, PrimaryKeyConstraint, UUID
+from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date, PrimaryKeyConstraint, UUID, Identity
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.db import Base
@@ -101,7 +101,7 @@ class AboutUs(Base):
 
 
 class Faq(Base):
-    __tablename__ = "faq"
+    __tablename__ = "faqs"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
                                      server_default=text("uuid_generate_v4()"), index=True, quote=False)
@@ -109,7 +109,7 @@ class Faq(Base):
     answer: Mapped[str] = mapped_column("answer", Text, nullable=False, quote=False)
     active: Mapped[bool] = mapped_column("active", Boolean, nullable=False, default=True, server_default=text("TRUE"),
                                          quote=False)
-    orderIndex: Mapped[int] = mapped_column("orderindex", Integer, nullable=False, quote=False)
+    orderIndex: Mapped[int] = mapped_column("orderindex", Integer, Identity(start=1, cycle=True), unique=True, index=True, nullable=False, quote=False)
 
     def __eq__(self, other: dict):
         return all([
