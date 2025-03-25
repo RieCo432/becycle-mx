@@ -8,12 +8,13 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import {useToast} from 'vue-toastification';
 import Checkbox from '@/components/Switch/index.vue';
+import {Icon} from '@iconify/vue';
 
 const toast = useToast();
 
 export default {
   name: 'ManageFaqCard',
-  components: {Card, Textinput, DashButton, Checkbox},
+  components: {Icon, Card, Textinput, DashButton, Checkbox},
   setup() {
     const faqs = ref([]);
     const editFaqId = ref(null);
@@ -34,21 +35,23 @@ export default {
     const {value: editFaqActive} = useField('editFaqActive');
 
     const submitEditFaq = handleEditFaqSubmit(() => {
-      requests.patchFaq(editFaqId.value,
-        {
-          question: editFaqQuestion.value,
-          answer: editFaqAnswer.value,
-          active: editFaqActive.value,
-        })
-        .then((response) => {
-          const indexInArray = faqs.value.findIndex((t) => (t.id === editFaqId.value));
-          faqs.value.splice(indexInArray, 1, response.data);
-          toast.success('FAQ updated', {timeout: 2000});
-          editFaqId.value = null;
-        })
-        .catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-        });
+      if (editFaqId.value) {
+        requests.patchFaq(editFaqId.value,
+          {
+            question: editFaqQuestion.value,
+            answer: editFaqAnswer.value,
+            active: editFaqActive.value,
+          })
+          .then((response) => {
+            const indexInArray = faqs.value.findIndex((t) => (t.id === editFaqId.value));
+            faqs.value.splice(indexInArray, 1, response.data);
+            toast.success('FAQ updated', {timeout: 2000});
+            editFaqId.value = null;
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+          });
+      }
     });
 
 
@@ -113,11 +116,32 @@ export default {
       this.editFaqAnswer = faqAnswer;
       this.editFaqActive = faqActive;
     },
+    swap(faqIndex1, faqIndex2) {
+      const faqIndex1InOriginalArray = this.faqs.findIndex((item) => (item.id === this.faqsSorted[faqIndex1].id));
+      const faqIndex2InOriginalArray = this.faqs.findIndex((item) => (item.id === this.faqsSorted[faqIndex2].id));
+
+      const faq1 = this.faqsSorted[faqIndex1];
+      const faq2 = this.faqsSorted[faqIndex2];
+
+      const tempOrderIndex = faq1.orderIndex;
+      faq1.orderIndex = faq2.orderIndex;
+      faq2.orderIndex = tempOrderIndex;
+
+      requests.swapFaq(faq1.id, faq2.id)
+        .then((response) => {
+          toast.success('FAQ order swapped.', {timeout: 2000});
+          this.faqs.splice(faqIndex1InOriginalArray, 1, faq1);
+          this.faqs.splice(faqIndex2InOriginalArray, 1, faq2);
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+    },
   },
   computed: {
     faqsSorted: {
       get() {
-        return this.faqs.toSorted((item) => item.orderIndex);
+        return this.faqs.toSorted((itemA, itemB) => itemA.orderIndex - itemB.orderIndex);
       },
     },
   },
@@ -134,15 +158,18 @@ export default {
         <div class="col-span-4">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Answer</span>
         </div>
-        <div class="col-span-2">
+        <div class="col-span-1">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Active</span>
         </div>
         <div class="col-span-2">
+          <span class="text-slate-700 dark:text-slate-300 text-xl">Order</span>
+        </div>
+        <div class="col-span-1">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Edit</span>
         </div>
 
 
-        <template v-for="faq in faqsSorted" :key="faq.id">
+        <template v-for="(faq, i) in faqsSorted" :key="faq.id">
           <template v-if="editFaqId == null || editFaqId !== faq.id">
             <div class="col-span-4">
               <span class="text-slate-700 dark:text-slate-300">{{faq.question}}</span>
@@ -150,18 +177,25 @@ export default {
             <div class="col-span-4">
               <span class="text-slate-700 dark:text-slate-300">{{faq.answer}}</span>
             </div>
-            <div class="col-span-2">
+            <div class="col-span-1">
               <Checkbox
                   name="editFaqActive"
                   disabled
                   v-model="faq.active">
               </Checkbox>
             </div>
-            <div  class="col-span-2">
+            <div class="col-span-1">
+              <DashButton v-if="i !== faqsSorted.length - 1" class="btn-sm mx-auto text-sm" icon="heroicons-outline:arrow-down" @click="() => swap(i, i+1)"></DashButton>
+            </div>
+            <div class="col-span-1">
+              <DashButton v-if="i !== 0" class="btn-sm mx-auto text-sm" icon="heroicons-outline:arrow-up" @click="() => swap(i, i-1)"></DashButton>
+            </div>
+            <div  class="col-span-1">
               <DashButton :is-disabled="editFaqId != null" @click="editFaq(faq.id, faq.question, faq.answer, faq.active)" class="btn-sm mx-auto block-btn">Edit</DashButton>
             </div>
           </template>
-          <template v-else-if="editFaqId === faq.id">
+
+          <template v-if="editFaqId === faq.id">
             <div class="col-span-4">
               <Textinput
                   type="text"
@@ -180,13 +214,13 @@ export default {
                   :error="editFaqAnswerError"
               />
             </div>
-            <div class="col-span-2">
+            <div class="col-span-1">
               <Checkbox
                   name="editFaqActive"
                   v-model="editFaqActive">
               </Checkbox>
             </div>
-            <div class="col-span-2">
+            <div class="col-span-1 col-start-12">
               <DashButton type="submit" class="btn-sm mx-auto block-btn">Submit</DashButton>
             </div>
           </template>
@@ -213,7 +247,7 @@ export default {
               :error="newFaqAnswerError"
           />
         </div>
-        <div class="col-span-2 col-start-11">
+        <div class="col-span-4 col-start-9">
           <DashButton type="submit" class="btn-sm mx-auto block-btn">Add</DashButton>
         </div>
       </div>

@@ -18,7 +18,7 @@ export default {
     getFaq() {
       requests.getFaq().then((response) => {
         this.faq = response.data
-          .sort((item) => item.orderIndex)
+          .sort((itemA, itemB) => itemA.orderIndex - itemB.orderIndex)
           .map((item) => (
             {
               title: item.question,

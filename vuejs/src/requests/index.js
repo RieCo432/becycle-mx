@@ -875,6 +875,18 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  swapFaq(faq1Id, faq2Id) {
+    return axiosClient.patch('/settings/faq/swap',
+      {
+        faq1_id: faq1Id,
+        faq2_id: faq2Id,
+      },
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
   getDepositExchangeUsers() {
     return axiosClient.get('/deposit-exchanges/users', {
       headers: credentialsStore.getApiRequestHeader(),
