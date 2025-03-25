@@ -13,6 +13,12 @@ const toast = useToast();
 export default {
   name: 'ManageExpenseTypesCard',
   components: {DashButton, Card, Textinput},
+  props: {
+    user: {
+      type: Object,
+      required: true,
+    },
+  },
   setup() {
     const expenseTypes = ref([]);
     const editExpenseTypeId = ref(null);
@@ -127,13 +133,13 @@ export default {
             />
           </div>
           <div v-if="editExpenseTypeId == null" class="col-span-1">
-            <DashButton @click="editExpenseType(expenseType.id, expenseType.description)" class="btn-sm mx-auto block-btn">Edit</DashButton>
+            <DashButton v-if="user.admin" @click="editExpenseType(expenseType.id, expenseType.description)" class="btn-sm mx-auto block-btn">Edit</DashButton>
           </div>
           <div v-if="editExpenseTypeId != null && editExpenseTypeId === expenseType.id" class="col-span-1">
             <DashButton type="submit" class="btn-sm mx-auto block-btn">Submit</DashButton>
           </div>
           <div class="col-span-1">
-            <DashButton @click="deleteExpenseType(expenseType.id)" class="bg-danger-600 btn-sm mx-auto block-btn">Delete</DashButton>
+            <DashButton v-if="user.admin"  @click="deleteExpenseType(expenseType.id)" class="bg-danger-600 btn-sm mx-auto block-btn">Delete</DashButton>
           </div>
         </template>
       </div>
@@ -147,6 +153,7 @@ export default {
               name="newExpenseTypeId"
               v-model="newExpenseTypeId"
               :error="newExpenseTypeIdError"
+              v-if="user.admin"
           />
         </div>
         <div class="col-span-4">
@@ -156,10 +163,11 @@ export default {
               name="newExpenseTypeDescription"
               v-model="newExpenseTypeDescription"
               :error="newExpenseTypeDescriptionError"
+              v-if="user.admin"
           />
         </div>
         <div class="col-span-2">
-          <DashButton type="submit" @click="submitNewExpenseType" class="btn-sm mx-auto block-btn">Add</DashButton>
+          <DashButton v-if="user.admin" type="submit" @click="submitNewExpenseType" class="btn-sm mx-auto block-btn">Add</DashButton>
         </div>
       </div>
     </form>

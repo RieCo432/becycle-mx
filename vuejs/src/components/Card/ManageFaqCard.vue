@@ -8,13 +8,18 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import {useToast} from 'vue-toastification';
 import Checkbox from '@/components/Switch/index.vue';
-import {Icon} from '@iconify/vue';
 
 const toast = useToast();
 
 export default {
   name: 'ManageFaqCard',
-  components: {Icon, Card, Textinput, DashButton, Checkbox},
+  components: {Card, Textinput, DashButton, Checkbox},
+  props: {
+    user: {
+      type: Object,
+      required: true,
+    },
+  },
   setup() {
     const faqs = ref([]);
     const editFaqId = ref(null);
@@ -179,13 +184,13 @@ export default {
               </Checkbox>
             </div>
             <div class="col-span-1">
-              <DashButton v-if="i !== faqsSorted.length - 1" class="btn-sm mx-auto text-sm" icon="heroicons-outline:arrow-down" @click="() => swap(i, i+1)"></DashButton>
+              <DashButton v-if="i !== faqsSorted.length - 1 && user.appointmentManager" class="btn-sm mx-auto text-sm" icon="heroicons-outline:arrow-down" @click="() => swap(i, i+1)"></DashButton>
             </div>
             <div class="col-span-1">
-              <DashButton v-if="i !== 0" class="btn-sm mx-auto text-sm" icon="heroicons-outline:arrow-up" @click="() => swap(i, i-1)"></DashButton>
+              <DashButton v-if="i !== 0 && user.appointmentManager" class="btn-sm mx-auto text-sm" icon="heroicons-outline:arrow-up" @click="() => swap(i, i-1)"></DashButton>
             </div>
             <div  class="col-span-1">
-              <DashButton :is-disabled="editFaqId != null" @click="editFaq(faq.id, faq.question, faq.answer, faq.active)" class="btn-sm mx-auto block-btn">Edit</DashButton>
+              <DashButton v-if="user.appointmentManager" :is-disabled="editFaqId != null" @click="editFaq(faq.id, faq.question, faq.answer, faq.active)" class="btn-sm mx-auto block-btn">Edit</DashButton>
             </div>
           </template>
 
@@ -221,7 +226,7 @@ export default {
         </template>
       </div>
     </form>
-    <form @submit.prevent="submitNewFaq">
+    <form v-if="user.appointmentManager" @submit.prevent="submitNewFaq">
       <div class="grid grid-cols-12 gap-2 mt-2">
         <div class="col-span-4">
           <Textinput

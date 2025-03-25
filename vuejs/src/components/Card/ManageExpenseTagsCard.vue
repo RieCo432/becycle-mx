@@ -14,6 +14,12 @@ const toast = useToast();
 export default {
   name: 'ManageExpenseTagsCard',
   components: {Checkbox, DashButton, Card, Textinput},
+  props: {
+    user: {
+      type: Object,
+      required: true,
+    },
+  },
   setup() {
     const expenseTags = ref([]);
     const editExpenseTagId = ref(null);
@@ -32,12 +38,16 @@ export default {
     const {value: editExpenseTagActive} = useField('editExpenseTagActive');
 
     const submitEditExpenseTag = handleEditExpenseTagSubmit(() => {
-      requests.patchExpenseTag(editExpenseTagId.value, editExpenseTagDescription.value, editExpenseTagActive.value).then((response) => {
-        const indexInArray = expenseTags.value.findIndex((t) => (t.id === editExpenseTagId.value));
-        expenseTags.value.splice(indexInArray, 1, response.data);
-        toast.success('Expense Tag updated', {timeout: 2000});
-        editExpenseTagId.value = null;
-      });
+      requests.patchExpenseTag(editExpenseTagId.value, editExpenseTagDescription.value, editExpenseTagActive.value)
+        .then((response) => {
+          const indexInArray = expenseTags.value.findIndex((t) => (t.id === editExpenseTagId.value));
+          expenseTags.value.splice(indexInArray, 1, response.data);
+          toast.success('Expense Tag updated', {timeout: 2000});
+          editExpenseTagId.value = null;
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     });
 
     const newExpenseTagSchema = yup.object().shape({
@@ -85,13 +95,6 @@ export default {
     });
   },
   methods: {
-    /* deleteExpenseType(expenseTypeId) {
-      requests.deleteExpenseType(expenseTypeId).then((response) => {
-        const indexInArray = this.expenseTypes.findIndex((t) => (t.id === response.data.id));
-        this.expenseTypes.splice(indexInArray, 1);
-        toast.success('Expense Type deleted', {timeout: 2000});
-      });
-    }, */
     editExpenseTag(expenseTagId, expenseTagDescription, expenseTagActive) {
       this.editExpenseTagId = expenseTagId;
       this.editExpenseTagDescription = expenseTagDescription;
@@ -148,7 +151,7 @@ export default {
             </Checkbox>
           </div>
           <div v-if="editExpenseTagId == null" class="col-span-2">
-            <DashButton @click="editExpenseTag(expenseTag.id, expenseTag.description, expenseTag.active)" class="btn-sm mx-auto block-btn">Edit</DashButton>
+            <DashButton v-if="user.admin" @click="editExpenseTag(expenseTag.id, expenseTag.description, expenseTag.active)" class="btn-sm mx-auto block-btn">Edit</DashButton>
           </div>
           <div v-if="editExpenseTagId != null && editExpenseTagId !== expenseTag.id" class="col-span-2"></div>
           <div v-if="editExpenseTagId != null && editExpenseTagId === expenseTag.id" class="col-span-2">
@@ -158,7 +161,7 @@ export default {
         </template>
       </div>
     </form>
-    <form @submit.prevent="submitNewExpenseTag">
+    <form v-if="user.admin" @submit.prevent="submitNewExpenseTag">
       <div class="grid grid-cols-8 gap-2 mt-2">
         <div class="col-span-2">
           <Textinput
