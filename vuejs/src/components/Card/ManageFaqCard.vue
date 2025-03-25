@@ -114,6 +114,13 @@ export default {
       this.editFaqActive = faqActive;
     },
   },
+  computed: {
+    faqsSorted: {
+      get() {
+        return this.faqs.toSorted((item) => item.orderIndex);
+      },
+    },
+  },
 };
 </script>
 
@@ -135,7 +142,7 @@ export default {
         </div>
 
 
-        <template v-for="faq in faqs" :key="faq.id">
+        <template v-for="faq in faqsSorted" :key="faq.id">
           <template v-if="editFaqId == null || editFaqId !== faq.id">
             <div class="col-span-4">
               <span class="text-slate-700 dark:text-slate-300">{{faq.question}}</span>
