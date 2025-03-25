@@ -117,21 +117,15 @@ export default {
       this.editFaqActive = faqActive;
     },
     swap(faqIndex1, faqIndex2) {
-      const faqIndex1InOriginalArray = this.faqs.findIndex((item) => (item.id === this.faqsSorted[faqIndex1].id));
-      const faqIndex2InOriginalArray = this.faqs.findIndex((item) => (item.id === this.faqsSorted[faqIndex2].id));
-
       const faq1 = this.faqsSorted[faqIndex1];
       const faq2 = this.faqsSorted[faqIndex2];
 
-      const tempOrderIndex = faq1.orderIndex;
-      faq1.orderIndex = faq2.orderIndex;
-      faq2.orderIndex = tempOrderIndex;
-
       requests.swapFaq(faq1.id, faq2.id)
-        .then((response) => {
+        .then(() => {
           toast.success('FAQ order swapped.', {timeout: 2000});
-          this.faqs.splice(faqIndex1InOriginalArray, 1, faq1);
-          this.faqs.splice(faqIndex2InOriginalArray, 1, faq2);
+          const tempOrderIndex = faq1.orderIndex;
+          faq1.orderIndex = faq2.orderIndex;
+          faq2.orderIndex = tempOrderIndex;
         })
         .catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});

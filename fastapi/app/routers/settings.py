@@ -142,7 +142,7 @@ async def update_about_us(
     return crud.set_about_us_html(db=db, new_about_us= new_about_us)
 
 
-@settings.get("/settings/faq", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+@settings.get("/settings/faq", dependencies=[Depends(dep.get_current_active_user)])
 async def get_all_faq(db: Session = Depends(dep.get_db)) -> list[schemas.Faq]:
     return crud.get_all_faq(db=db)
 
