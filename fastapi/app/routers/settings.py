@@ -154,6 +154,17 @@ async def post_faq(
 ) -> schemas.Faq:
     return crud.create_faq(db=db, new_faq=new_faq)
 
+@settings.patch("/settings/faq/swap", dependencies=[Depends(dep.get_current_appointment_manager_user)])
+async def patch_swap_faq(
+        faq1_id: Annotated[UUID, Body(embed=True)],
+        faq2_id: Annotated[UUID, Body(embed=True)],
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.Faq]:
+    if crud.get_faq(db=db, faq_id=faq1_id) is None or crud.get_faq(db=db, faq_id=faq2_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "One or more FAQ not found."})
+
+    return crud.swap_faq_order(db=db, faq1_id=faq1_id, faq2_id=faq2_id)
+
 
 @settings.patch("/settings/faq/{faq_id}", dependencies=[Depends(dep.get_current_appointment_manager_user)])
 async def patch_faq(

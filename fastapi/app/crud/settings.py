@@ -587,3 +587,23 @@ def create_faq(db: Session, new_faq: schemas.FaqBase) -> schemas.Faq:
     db.add(faq)
     db.commit()
     return faq
+
+
+def swap_faq_order(db: Session, faq1_id: UUID, faq2_id: UUID) -> list[models.Faq]:
+    faq1 = get_faq(db=db, faq_id=faq1_id)
+    faq2 = get_faq(db=db, faq_id=faq2_id)
+
+    faq1_old_order_index = faq1.orderIndex
+    faq2_old_order_index = faq2.orderIndex
+
+    try:
+        faq2.orderIndex = -1
+        db.commit()
+        faq1.orderIndex = faq2_old_order_index
+        db.commit()
+        faq2.orderIndex = faq1_old_order_index
+        db.commit()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": str(e)})
+
+    return [faq1, faq2]
