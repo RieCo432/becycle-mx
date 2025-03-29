@@ -75,25 +75,25 @@ export default {
 
 <template>
   <Card title="Manage Contract Types">
-      <div class="grid grid-cols-4 gap-2">
-        <div class="col-span-3">
+      <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-10">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Contract Type</span>
         </div>
-        <div class="col-span-1">
+        <div class="col-span-2">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Action</span>
         </div>
         <template v-for="contractType in contractTypes" :key="contractType.id">
-          <div class="col-span-3">
+          <div class="col-span-10">
             <span class="text-slate-700 dark:text-slate-300">{{contractType.id}}</span>
           </div>
-          <div class="col-span-1">
-            <DashButton v-if="user.admin" @click="deleteContractType(contractType.id)" class="bg-danger-600 btn-sm mx-auto block-btn">Delete</DashButton>
+          <div class="col-span-2">
+            <DashButton v-if="user.admin" @click="deleteContractType(contractType.id)" class="bg-danger-500 dark:bg-danger-600 btn-sm mx-auto block-btn" icon="heroicons-outline:trash"/>
           </div>
         </template>
       </div>
     <form v-if="user.admin" @submit.prevent="submitNewContractType">
-      <div class="grid grid-cols-4 gap-2 mt-2">
-          <div class="col-span-3">
+      <div class="grid grid-cols-12 gap-2 mt-2">
+          <div class="col-span-10">
             <Textinput
                 type="text"
                 placeholder="New Contract Type"
@@ -102,10 +102,8 @@ export default {
                 :error="newContractTypeIdError"
             />
           </div>
-          <div class="col-span-1">
-            <DashButton type="submit" class="btn-sm mx-auto block-btn">
-              Add
-            </DashButton>
+          <div class="col-span-2">
+            <DashButton type="submit" class="btn-sm mx-auto block-btn" icon="heroicons-outline:plus"/>
           </div>
       </div>
     </form>

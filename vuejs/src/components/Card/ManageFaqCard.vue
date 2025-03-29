@@ -154,26 +154,27 @@ export default {
         <div class="col-span-4">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Question</span>
         </div>
-        <div class="col-span-4">
+        <div class="col-span-5">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Answer</span>
         </div>
         <div class="col-span-1">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Active</span>
         </div>
-        <div class="col-span-2">
-          <span class="text-slate-700 dark:text-slate-300 text-xl">Order</span>
+        <div class="col-span-2 grid grid-cols-3">
+          <div class="col-span-2">
+            <span class="text-slate-700 dark:text-slate-300 text-xl">Order</span>
+          </div>
+          <div class="col-span-1">
+            <span class="text-slate-700 dark:text-slate-300 text-xl">Edit</span>
+          </div>
         </div>
-        <div class="col-span-1">
-          <span class="text-slate-700 dark:text-slate-300 text-xl">Edit</span>
-        </div>
-
 
         <template v-for="(faq, i) in faqsSorted" :key="faq.id">
           <template v-if="editFaqId == null || editFaqId !== faq.id">
             <div class="col-span-4">
               <span class="text-slate-700 dark:text-slate-300">{{faq.question}}</span>
             </div>
-            <div class="col-span-4">
+            <div class="col-span-5">
               <span class="text-slate-700 dark:text-slate-300">{{faq.answer}}</span>
             </div>
             <div class="col-span-1">
@@ -183,15 +184,20 @@ export default {
                   v-model="faq.active">
               </Checkbox>
             </div>
-            <div class="col-span-1">
-              <DashButton v-if="i !== faqsSorted.length - 1 && user.appointmentManager" class="btn-sm mx-auto text-sm" icon="heroicons-outline:arrow-down" @click="() => swap(i, i+1)"></DashButton>
+            <div class="col-span-2 grid grid-cols-3 gap-x-2">
+              <div class="col-span-1">
+                <DashButton v-if="i !== faqsSorted.length - 1 && user.appointmentManager" class="btn-sm block-btn" icon="heroicons-outline:arrow-down" @click="() => swap(i, i+1)"></DashButton>
+              </div>
+              <div class="col-span-1">
+                <DashButton v-if="i !== 0 && user.appointmentManager" class="btn-sm block-btn" icon="heroicons-outline:arrow-up" @click="() => swap(i, i-1)"></DashButton>
+              </div>
+              <div  class="col-span-1">
+                <DashButton v-if="user.appointmentManager" :is-disabled="editFaqId != null" @click="editFaq(faq.id, faq.question, faq.answer, faq.active)" class="btn-sm block-btn" icon="heroicons-outline:pencil"/>
+              </div>
+
             </div>
-            <div class="col-span-1">
-              <DashButton v-if="i !== 0 && user.appointmentManager" class="btn-sm mx-auto text-sm" icon="heroicons-outline:arrow-up" @click="() => swap(i, i-1)"></DashButton>
-            </div>
-            <div  class="col-span-1">
-              <DashButton v-if="user.appointmentManager" :is-disabled="editFaqId != null" @click="editFaq(faq.id, faq.question, faq.answer, faq.active)" class="btn-sm mx-auto block-btn">Edit</DashButton>
-            </div>
+
+
           </template>
 
           <template v-if="editFaqId === faq.id">
@@ -204,7 +210,7 @@ export default {
                   :error="editFaqQuestionError"
               />
             </div>
-            <div class="col-span-4">
+            <div class="col-span-5">
               <Textinput
                   type="text"
                   placeholder="New Answer"
@@ -219,8 +225,10 @@ export default {
                   v-model="editFaqActive">
               </Checkbox>
             </div>
-            <div class="col-span-1 col-start-12">
-              <DashButton type="submit" class="btn-sm mx-auto block-btn">Submit</DashButton>
+            <div class="col-span-2 col-start-11 grid grid-cols-3 gap-x-2">
+              <div class="col-span-1 col-start-3">
+                <DashButton type="submit" class="btn-sm mx-auto block-btn" icon="heroicons-outline:check"/>
+              </div>
             </div>
           </template>
         </template>
@@ -237,7 +245,7 @@ export default {
               :error="newFaqQuestionError"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6">
           <Textinput
               type="text"
               placeholder="New Answer"
@@ -246,8 +254,8 @@ export default {
               :error="newFaqAnswerError"
           />
         </div>
-        <div class="col-span-4 col-start-9">
-          <DashButton type="submit" class="btn-sm mx-auto block-btn">Add</DashButton>
+        <div class="col-span-2 col-start-11">
+          <DashButton type="submit" class="btn-sm mx-auto block-btn" icon="heroicons-outline:plus"/>
         </div>
       </div>
     </form>

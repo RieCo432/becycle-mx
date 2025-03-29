@@ -105,11 +105,11 @@ export default {
 <template>
   <Card title="Manage Expense Types">
     <form @submit.prevent="submitEditExpenseType">
-      <div class="grid grid-cols-8 gap-2">
-        <div class="col-span-2">
+      <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-4">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Expense Type</span>
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Description</span>
         </div>
         <div class="col-span-2">
@@ -117,13 +117,13 @@ export default {
         </div>
 
         <template v-for="expenseType in expenseTypes" :key="expenseType.id">
-          <div class="col-span-2">
+          <div class="col-span-4">
             <span class="text-slate-700 dark:text-slate-300">{{expenseType.id}}</span>
           </div>
-          <div v-if="editExpenseTypeId == null || editExpenseTypeId !== expenseType.id" class="col-span-4">
+          <div v-if="editExpenseTypeId == null || editExpenseTypeId !== expenseType.id" class="col-span-6">
             <span class="text-slate-700 dark:text-slate-300">{{expenseType.description}}</span>
           </div>
-          <div v-if="editExpenseTypeId === expenseType.id" class="col-span-4">
+          <div v-if="editExpenseTypeId === expenseType.id" class="col-span-6">
             <Textinput
                 type="text"
                 placeholder="New Description"
@@ -133,20 +133,20 @@ export default {
             />
           </div>
           <div v-if="editExpenseTypeId == null" class="col-span-1">
-            <DashButton v-if="user.admin" @click="editExpenseType(expenseType.id, expenseType.description)" class="btn-sm mx-auto block-btn">Edit</DashButton>
+            <DashButton v-if="user.admin" @click="editExpenseType(expenseType.id, expenseType.description)" class="btn-sm mx-auto block-btn" icon="heroicons-outline:pencil"/>
           </div>
           <div v-if="editExpenseTypeId != null && editExpenseTypeId === expenseType.id" class="col-span-1">
-            <DashButton type="submit" class="btn-sm mx-auto block-btn">Submit</DashButton>
+            <DashButton type="submit" class="btn-sm mx-auto block-btn" icon="heroicons-outline:check"/>
           </div>
           <div class="col-span-1">
-            <DashButton v-if="user.admin"  @click="deleteExpenseType(expenseType.id)" class="bg-danger-600 btn-sm mx-auto block-btn">Delete</DashButton>
+            <DashButton v-if="user.admin"  @click="deleteExpenseType(expenseType.id)" class="bg-danger-500 dark:bg-danger-600  btn-sm mx-auto block-btn" icon="heroicons-outline:trash"/>
           </div>
         </template>
       </div>
     </form>
     <form @submit.prevent="submitNewExpenseType">
-      <div class="grid grid-cols-8 gap-2 mt-2">
-        <div class="col-span-2">
+      <div class="grid grid-cols-12 gap-2 mt-2">
+        <div class="col-span-4">
           <Textinput
               type="text"
               placeholder="New Expense Type"
@@ -156,7 +156,7 @@ export default {
               v-if="user.admin"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6">
           <Textinput
               type="text"
               placeholder="Description"
@@ -167,7 +167,7 @@ export default {
           />
         </div>
         <div class="col-span-2">
-          <DashButton v-if="user.admin" type="submit" @click="submitNewExpenseType" class="btn-sm mx-auto block-btn">Add</DashButton>
+          <DashButton v-if="user.admin" type="submit" @click="submitNewExpenseType" class="btn-sm mx-auto block-btn" icon="heroicons-outline:plus"/>
         </div>
       </div>
     </form>
