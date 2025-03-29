@@ -120,8 +120,8 @@
                 </div>
               </div>
               <div v-if="stepNumber === 1">
-                <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="md:col-span-2 col-span-1">
+                <div class="grid grid-cols-12 gap-5">
+                  <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Enter the bike's details
                     </h4>
@@ -131,7 +131,7 @@
                       Read From NFC Tag
                     </DashButton>
                   </div>
-                  <div class="col-span-1">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :allow-new="makeNotInList"
                         :field-model-value="make"
@@ -148,14 +148,15 @@
                       />
                     </ComboboxTextInput>
                   </div>
-                  <div class="col-span-1">
+                  <div class="col-span-2 md:col-span-1">
                     <Checkbox
-                        label="Make Not In List"
+                        label="Add New Make"
                         name="makeNotInList"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="makeNotInList"/>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :allow-new="modelNotInList"
                         :field-model-value="model"
@@ -173,14 +174,15 @@
                     </ComboboxTextInput>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-2 md:col-span-1">
                     <Checkbox
-                        label="Model Not In List"
+                        label="Add New Model"
                         name="modelNotInList"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="modelNotInList"/>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-12 md:col-span-6">
                     <ComboboxTextInput
                         :field-model-value="colour"
                         :suggestions="filtered_colour_suggestions"
@@ -197,7 +199,7 @@
                     </ComboboxTextInput>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-12 md:col-span-6">
                     <Textinput
                         label="Decals"
                         type="text"
@@ -208,7 +210,7 @@
                     />
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-12 md:col-span-6">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
@@ -231,19 +233,21 @@
                     </DashButton>
                   </div>
 
-                  <div class="col-start-1">
+                  <div class="col-span-12 md:col-span-6">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="bikePhotoTaken"
                         :error="bikePhotoTakenError"/>
                     <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-12 md:col-span-6">
                     <Checkbox
                         label="Sticker on bike?"
                         name="stickerOnBike"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="stickerOnBike"
                         :error="stickerOnBikeError"/>
                     <ErrorMessage name="stickerOnBike" :error="stickerOnBikeError" class="text-danger-500"/>
@@ -502,6 +506,7 @@
                     <Checkbox
                         label="I confirm all details are correct and I agree to the terms of the loan!"
                         name="everythingCorrect"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="everythingCorrect"
                         :error="everythingCorrectError"/>
                     <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
@@ -545,7 +550,7 @@ import * as yup from 'yup';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
-import Checkbox from '@/components/Switch/index.vue';
+import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
