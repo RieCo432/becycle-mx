@@ -23,7 +23,7 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-12 gap-5">
+  <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
     <div class="col-span-6">
       <UpdateAddressCard v-if="user" :user="user"></UpdateAddressCard>
     </div>
@@ -36,7 +36,7 @@ export default {
     <div class="col-span-6">
       <ManageExpenseTagsCard v-if="user" :user="user"></ManageExpenseTagsCard>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-6 xl:col-span-12">
       <ManageFaqCard v-if="user" :user="user"></ManageFaqCard>
     </div>
   </div>

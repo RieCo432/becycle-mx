@@ -6,13 +6,14 @@ import requests from '@/requests';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import {useToast} from 'vue-toastification';
+import DashButton from '@/components/Button/index.vue';
 
 const toast = useToast();
 
 
 export default {
   name: 'UpdateAddressCard',
-  components: {Card, Button, Textinput},
+  components: {DashButton, Card, Button, Textinput},
   props: {
     user: {
       type: Object,
@@ -129,9 +130,7 @@ export default {
           />
         </div>
         <div class="col-span-12">
-          <Button v-if="user.admin" type="submit" class="btn btn-dark block w-full text-center">
-            Submit
-          </Button>
+          <DashButton v-if="user.admin" type="submit" class="btn btn-primary block w-full text-center" icon="heroicons-outline:check"/>
         </div>
       </div>
     </form>

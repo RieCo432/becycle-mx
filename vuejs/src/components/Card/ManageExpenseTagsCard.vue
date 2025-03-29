@@ -107,11 +107,11 @@ export default {
 <template>
   <Card title="Manage Expense Tags">
     <form @submit.prevent="submitEditExpenseTag">
-      <div class="grid grid-cols-10 gap-2">
-        <div class="col-span-2">
+      <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-3">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Expense Tag</span>
         </div>
-        <div class="col-span-4">
+        <div class="col-span-5">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Description</span>
         </div>
         <div class="col-span-2">
@@ -122,10 +122,10 @@ export default {
         </div>
 
         <template v-for="expenseTag in expenseTags" :key="expenseTag.id">
-          <div class="col-span-2">
+          <div class="col-span-3">
             <span class="text-slate-700 dark:text-slate-300">{{expenseTag.id}}</span>
           </div>
-          <div v-if="editExpenseTagId == null || editExpenseTagId !== expenseTag.id" class="col-span-4">
+          <div v-if="editExpenseTagId == null || editExpenseTagId !== expenseTag.id" class="col-span-5">
             <span class="text-slate-700 dark:text-slate-300">{{expenseTag.description}}</span>
           </div>
           <div v-if="editExpenseTagId == null || editExpenseTagId !== expenseTag.id" class="col-span-2">
@@ -151,19 +151,19 @@ export default {
             </Checkbox>
           </div>
           <div v-if="editExpenseTagId == null" class="col-span-2">
-            <DashButton v-if="user.admin" @click="editExpenseTag(expenseTag.id, expenseTag.description, expenseTag.active)" class="btn-sm mx-auto block-btn">Edit</DashButton>
+            <DashButton v-if="user.admin" @click="editExpenseTag(expenseTag.id, expenseTag.description, expenseTag.active)" class="btn-sm mx-auto block-btn" icon="heroicons-outline:pencil"/>
           </div>
           <div v-if="editExpenseTagId != null && editExpenseTagId !== expenseTag.id" class="col-span-2"></div>
           <div v-if="editExpenseTagId != null && editExpenseTagId === expenseTag.id" class="col-span-2">
-            <DashButton type="submit" class="btn-sm mx-auto block-btn">Submit</DashButton>
+            <DashButton type="submit" class="btn-sm mx-auto block-btn" icon="heroicons-outline:check"/>
           </div>
 
         </template>
       </div>
     </form>
     <form v-if="user.admin" @submit.prevent="submitNewExpenseTag">
-      <div class="grid grid-cols-8 gap-2 mt-2">
-        <div class="col-span-2">
+      <div class="grid grid-cols-12 gap-2 mt-2">
+        <div class="col-span-3">
           <Textinput
               type="text"
               placeholder="New Expense Tag"
@@ -172,7 +172,7 @@ export default {
               :error="newExpenseTagIdError"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-7">
           <Textinput
               type="text"
               placeholder="Description"
@@ -181,8 +181,8 @@ export default {
               :error="newExpenseTagDescriptionError"
           />
         </div>
-        <div class="col-span-2">
-          <DashButton type="submit" @click="submitNewExpenseTag" class="btn-sm mx-auto block-btn">Add</DashButton>
+        <div class="col-start-11 col-span-2">
+          <DashButton type="submit" @click="submitNewExpenseTag" class="btn-sm mx-auto block-btn" icon="heroicons-outline:plus"/>
         </div>
       </div>
     </form>
