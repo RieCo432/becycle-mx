@@ -133,6 +133,7 @@
                   </div>
                   <div class="col-span-1">
                     <ComboboxTextInput
+                        :allow-new="makeNotInList"
                         :field-model-value="make"
                         :suggestions="filtered_make_suggestions"
                         :selected-callback="selectMake">
@@ -147,9 +148,16 @@
                       />
                     </ComboboxTextInput>
                   </div>
+                  <div class="col-span-1">
+                    <Checkbox
+                        label="Make Not In List"
+                        name="makeNotInList"
+                        v-model="makeNotInList"/>
+                  </div>
 
                   <div class="col-span-1">
                     <ComboboxTextInput
+                        :allow-new="modelNotInList"
                         :field-model-value="model"
                         :suggestions="filtered_model_suggestions"
                         :selected-callback="selectModel">
@@ -163,6 +171,13 @@
                           @input="fetchBikeModelSuggestions"
                       />
                     </ComboboxTextInput>
+                  </div>
+
+                  <div class="col-span-1">
+                    <Checkbox
+                        label="Model Not In List"
+                        name="modelNotInList"
+                        v-model="modelNotInList"/>
                   </div>
 
                   <div class="col-span-1">
@@ -595,6 +610,9 @@ export default {
     const clientId = ref('');
     const bikeId = ref('');
 
+    const makeSuggestions = ref([]);
+    const modelSuggestions = ref([]);
+
     const depositBearers = ref([]);
     const rentalCheckers = ref([]);
     const activeUsers = ref([]);
@@ -617,8 +635,17 @@ export default {
     });
 
     const bikeSchema = yup.object().shape({
-      make: yup.string().required(' Make is required'),
-      model: yup.string().required(' Model is required '),
+      makeNotInList: yup.boolean(),
+      make: yup.string().required(' Make is required').when('makeNotInList', {
+        is: true,
+        then: (schema) => schema,
+        otherwise: (schema) => schema.oneOf(makeSuggestions.value),
+      }),
+      model: yup.string().required(' Model is required ').when('modelNotInList', {
+        is: true,
+        then: (schema) => schema,
+        otherwise: (schema) => schema.oneOf(modelSuggestions.value),
+      }),
       colour: yup.string().required(' Colour is required'),
       decals: yup.string(),
       serialNumber: yup.string().required(' Serial Number is required '),
@@ -687,7 +714,9 @@ export default {
     const {value: lastName, errorMessage: lastNameError} = useField('lastName');
 
     const {value: make, errorMessage: makeError} = useField('make');
+    const {value: makeNotInList} = useField('makeNotInList');
     const {value: model, errorMessage: modelError} = useField('model');
+    const {value: modelNotInList} = useField('modelNotInList');
     const {value: colour, errorMessage: colourError} = useField('colour');
     const {value: decals, errorMessage: decalsError} = useField('decals');
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
@@ -834,10 +863,14 @@ export default {
       activeUsers,
       rentalCheckers,
 
+      makeSuggestions,
       make,
       makeError,
+      makeNotInList,
+      modelSuggestions,
       model,
       modelError,
+      modelNotInList,
       colour,
       colourError,
       decals,
@@ -893,8 +926,6 @@ export default {
     return {
       emailTyped: '',
       clientSuggestions: [],
-      make_suggestions: [],
-      model_suggestions: [],
       colour_suggestions: [],
       serial_number_suggestions: [],
       isNfcActive: false,
@@ -928,12 +959,12 @@ export default {
     },
     fetchBikeMakeSuggestions() {
       requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {
-        this.make_suggestions = response.data;
+        this.makeSuggestions = response.data;
       });
     },
     fetchBikeModelSuggestions() {
       requests.getBikeModelSuggestions(this.model.toLowerCase()).then((response) => {
-        this.model_suggestions = response.data;
+        this.modelSuggestions = response.data;
       });
     },
     fetchSerialNumberSuggestions() {
@@ -1085,10 +1116,10 @@ export default {
       return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
     filtered_make_suggestions() {
-      return this.make_suggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
+      return this.makeSuggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
     },
     filtered_model_suggestions() {
-      return this.model_suggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
+      return this.modelSuggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
     },
     filtered_serial_number_suggestions() {
       return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber.toLowerCase()))).slice(0, 4);
