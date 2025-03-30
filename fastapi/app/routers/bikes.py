@@ -39,6 +39,7 @@ async def find_bikes(
         colour: str | None = None,
         serial_number: str | None = None,
         decals: str | None = None,
+        max_distance: int = 4,
         db: Session = Depends(dep.get_db)) -> list[schemas.Bike]:
     return crud.get_potential_bike_matches(
         make=make,
@@ -46,6 +47,7 @@ async def find_bikes(
         colour=colour,
         decals=decals,
         serialNumber=serial_number,
+        max_distance=max_distance,
         db=db)
 
 
@@ -102,33 +104,37 @@ async def create_bike(
 @bikes.get("/bikes/suggest/makes", dependencies=[Depends(dep.get_current_active_user)])
 async def get_make_suggestions(
         make: str,
+        max_distance: int = 4,
         db: Session = Depends(dep.get_db)
 ) -> list[str]:
-    return crud.get_similar_makes(db=db, make=make.lower())
+    return crud.get_similar_makes(db=db, make=make.lower(), max_distance=max_distance)
 
 
 @bikes.get("/bikes/suggest/models", dependencies=[Depends(dep.get_current_active_user)])
 async def get_model_suggestions(
         model: str,
+        max_distance: int = 4,
         db: Session = Depends(dep.get_db)
 ) -> list[str]:
-    return crud.get_similar_models(db=db, model=model.lower())
+    return crud.get_similar_models(db=db, model=model.lower(), max_distance=max_distance)
 
 
 @bikes.get("/bikes/suggest/serial-numbers", dependencies=[Depends(dep.get_current_active_user)])
 async def get_serial_number_suggestions(
         serial_number: str,
+        max_distance: int = 4,
         db: Session = Depends(dep.get_db)
 ) -> list[str]:
-    return crud.get_similar_serial_numbers(db=db, serial_number=serial_number.lower())
+    return crud.get_similar_serial_numbers(db=db, serial_number=serial_number.lower(), max_distance=max_distance)
 
 
 @bikes.get("/bikes/suggest/colours", dependencies=[Depends(dep.get_current_active_user)])
 async def get_colour_suggestions(
         colour: str,
+        max_distance: int = 4,
         db: Session = Depends(dep.get_db)
 ) -> list[str]:
-    return crud.get_similar_colours(db=db, colour=colour.lower())
+    return crud.get_similar_colours(db=db, colour=colour.lower(), max_distance=max_distance)
 
 
 @bikes.get("/bike/conditions", dependencies=[Depends(dep.get_current_active_user)])

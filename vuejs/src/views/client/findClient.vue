@@ -30,7 +30,7 @@ export default {
   methods: {
     fetchClients() {
       requests.findClient(this.selectedClient.firstName.toLowerCase(), this.selectedClient.lastName.toLowerCase(),
-        this.selectedClient.emailAddress.toLowerCase()).then((response) => {
+        this.selectedClient.emailAddress.toLowerCase(), 10).then((response) => {
         this.clientSuggestions = response.data;
       });
     },

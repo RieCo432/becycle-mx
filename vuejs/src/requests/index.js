@@ -118,39 +118,43 @@ export default {
       },
     });
   },
-  getBikeMakeSuggestions(make) {
+  getBikeMakeSuggestions(make, maxDistance = 4) {
     return axiosClient.get('/bikes/suggest/makes', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
         make: make,
+        max_distance: maxDistance,
       },
     });
   },
-  getBikeModelSuggestions(model) {
+  getBikeModelSuggestions(model, maxDistance = 4) {
     return axiosClient.get('/bikes/suggest/models', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
         model: model,
+        max_distance: maxDistance,
       },
     });
   },
-  getBikeSerialNumberSuggestions(serialNumber) {
+  getBikeSerialNumberSuggestions(serialNumber, maxDistance = 4) {
     return axiosClient.get('/bikes/suggest/serial-numbers', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
         serial_number: serialNumber,
+        max_distance: maxDistance,
       },
     });
   },
-  getBikeColourSuggestions(colour) {
+  getBikeColourSuggestions(colour, maxDistance = 4) {
     return axiosClient.get('/bikes/suggest/colours', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
         colour: colour,
+        max_distance: maxDistance,
       },
     });
   },
@@ -167,7 +171,7 @@ export default {
       },
     });
   },
-  findBikes(make, model, colour, serialNumber) {
+  findBikes(make, model, colour, serialNumber, maxDistance = 4) {
     return axiosClient.get('/bikes/find', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -176,6 +180,7 @@ export default {
         ...(model && {model: model.toLowerCase()}),
         ...(colour && {colour: colour.toLowerCase()}),
         ...(serialNumber && {serial_number: serialNumber.toLowerCase()}),
+        max_distance: maxDistance,
       },
     });
   },
@@ -277,7 +282,7 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  findClient(firstName, lastName, emailAddress) {
+  findClient(firstName, lastName, emailAddress, maxDistance = 10) {
     return axiosClient.get('/clients/find', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -285,6 +290,7 @@ export default {
         first_name: firstName,
         last_name: lastName,
         email_address: emailAddress,
+        max_distance: maxDistance,
       },
     });
   },

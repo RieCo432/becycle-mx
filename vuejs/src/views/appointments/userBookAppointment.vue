@@ -182,7 +182,8 @@ export default {
       requests.findClient(
         this.firstName ? this.firstName.toLowerCase() : '',
         this.lastName ? this.lastName.toLowerCase() : '',
-        this.emailAddress ? this.emailAddress.toLowerCase() :'')
+        this.emailAddress ? this.emailAddress.toLowerCase() :'',
+        10)
         .then((response) => {
           this.clientSuggestions = response.data;
         });

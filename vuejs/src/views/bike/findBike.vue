@@ -42,7 +42,8 @@ export default {
         this.selectedBike.make,
         this.selectedBike.model,
         this.selectedBike.colour,
-        this.selectedBike.serialNumber).then((response) => {
+        this.selectedBike.serialNumber,
+        4).then((response) => {
         this.bikeSuggestions = response.data;
       });
     },

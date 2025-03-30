@@ -560,6 +560,7 @@ import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
+import levenshtein from '@/util/levenshtein';
 
 const toast = useToast();
 
@@ -963,28 +964,29 @@ export default {
       requests.findClient(
         this.firstName ? this.firstName.toLowerCase() : '',
         this.lastName ? this.lastName.toLowerCase() : '',
-        this.emailAddress ? this.emailAddress.toLowerCase() :'')
+        this.emailAddress ? this.emailAddress.toLowerCase() :'',
+        10)
         .then((response) => {
           this.clientSuggestions = response.data;
         });
     },
     fetchBikeMakeSuggestions() {
-      requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {
+      requests.getBikeMakeSuggestions(this.make.toLowerCase(), 4).then((response) => {
         this.makeSuggestions = response.data;
       });
     },
     fetchBikeModelSuggestions() {
-      requests.getBikeModelSuggestions(this.model.toLowerCase()).then((response) => {
+      requests.getBikeModelSuggestions(this.model.toLowerCase(), 4).then((response) => {
         this.modelSuggestions = response.data;
       });
     },
     fetchSerialNumberSuggestions() {
-      requests.getBikeSerialNumberSuggestions(this.serialNumber.toLowerCase()).then((response) => {
+      requests.getBikeSerialNumberSuggestions(this.serialNumber.toLowerCase(), 4).then((response) => {
         this.serial_number_suggestions = response.data;
       });
     },
     fetchColourSuggestions() {
-      requests.getBikeColourSuggestions(this.colour.toLowerCase()).then((response) => {
+      requests.getBikeColourSuggestions(this.colour.toLowerCase(), 4).then((response) => {
         this.colour_suggestions = response.data;
       });
     },
@@ -1117,26 +1119,27 @@ export default {
   },
   computed: {
     filtered_client_suggestions() {
-      return this.clientSuggestions.filter((client) => (
-        (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
-          (this.lastName && client.lastName.startsWith(this.lastName.toLowerCase())) ||
-          (this.emailAddress && client.emailAddress.startsWith(this.emailAddress.toLowerCase()))
-      ));
+      const client = {
+        firstName: this.firstName ? this.firstName : '',
+        lastName: this.lastName ? this.lastName : '',
+        emailAddress: this.emailAddress ? this.emailAddress : '',
+      };
+      return levenshtein.filterSortClientObject(this.clientSuggestions, client, 10);
     },
     filteredClientSuggestionsLegible() {
       return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
     filtered_make_suggestions() {
-      return this.makeSuggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
+      return levenshtein.filterSort(this.makeSuggestions, this.make).slice(0, 6);
     },
     filtered_model_suggestions() {
-      return this.modelSuggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
+      return levenshtein.filterSort(this.modelSuggestions, this.model).slice(0, 6);
     },
     filtered_serial_number_suggestions() {
-      return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber.toLowerCase()))).slice(0, 4);
+      return levenshtein.filterSort(this.serial_number_suggestions, this.serialNumber).slice(0, 6);
     },
     filtered_colour_suggestions() {
-      return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour.toLowerCase()))).slice(0, 4);
+      return levenshtein.filterSort(this.colour_suggestions, this.colour).slice(0, 6);
     },
     filtered_deposit_collecting_user_suggestions() {
       return this.depositBearers
