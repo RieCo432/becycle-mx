@@ -120,19 +120,20 @@
                 </div>
               </div>
               <div v-if="stepNumber === 1">
-                <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="md:col-span-2 col-span-1">
+                <div class="grid grid-cols-12 gap-5">
+                  <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Enter the bike's details
                     </h4>
                   </div>
                   <div class="col-span-full">
-                    <DashButton @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">
+                    <DashButton class="block-btn" @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">
                       Read From NFC Tag
                     </DashButton>
                   </div>
-                  <div class="col-span-1">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
+                        :allow-new="makeNotInList"
                         :field-model-value="make"
                         :suggestions="filtered_make_suggestions"
                         :selected-callback="selectMake">
@@ -147,9 +148,20 @@
                       />
                     </ComboboxTextInput>
                   </div>
+                  <div class="col-span-2 md:col-span-1">
+                    <label
+                        class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+                      Add New
+                    </label>
+                    <DashButton
+                        :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
+                        @click="() => {makeNotInList = !makeNotInList}"/>
+                  </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
+                        :allow-new="modelNotInList"
                         :field-model-value="model"
                         :suggestions="filtered_model_suggestions"
                         :selected-callback="selectModel">
@@ -165,7 +177,18 @@
                     </ComboboxTextInput>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-2 md:col-span-1">
+                    <label
+                        class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+                      Add New
+                    </label>
+                    <DashButton
+                        :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
+                        @click="() => {modelNotInList = !modelNotInList}"/>
+                  </div>
+
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :field-model-value="colour"
                         :suggestions="filtered_colour_suggestions"
@@ -182,7 +205,7 @@
                     </ComboboxTextInput>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-10 md:col-span-5 md:col-start-7">
                     <Textinput
                         label="Decals"
                         type="text"
@@ -193,7 +216,7 @@
                     />
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
@@ -211,24 +234,26 @@
                   </div>
 
                   <div class="col-span-full">
-                    <DashButton @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">
+                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">
                       Write To NFC Tag
                     </DashButton>
                   </div>
 
-                  <div class="col-start-1">
+                  <div class="col-span-12 md:col-span-6">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="bikePhotoTaken"
                         :error="bikePhotoTakenError"/>
                     <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-12 md:col-span-6">
                     <Checkbox
                         label="Sticker on bike?"
                         name="stickerOnBike"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="stickerOnBike"
                         :error="stickerOnBikeError"/>
                     <ErrorMessage name="stickerOnBike" :error="stickerOnBikeError" class="text-danger-500"/>
@@ -487,6 +512,7 @@
                     <Checkbox
                         label="I confirm all details are correct and I agree to the terms of the loan!"
                         name="everythingCorrect"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="everythingCorrect"
                         :error="everythingCorrectError"/>
                     <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
@@ -530,7 +556,7 @@ import * as yup from 'yup';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
-import Checkbox from '@/components/Switch/index.vue';
+import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
@@ -595,6 +621,9 @@ export default {
     const clientId = ref('');
     const bikeId = ref('');
 
+    const makeSuggestions = ref([]);
+    const modelSuggestions = ref([]);
+
     const depositBearers = ref([]);
     const rentalCheckers = ref([]);
     const activeUsers = ref([]);
@@ -617,8 +646,17 @@ export default {
     });
 
     const bikeSchema = yup.object().shape({
-      make: yup.string().required(' Make is required'),
-      model: yup.string().required(' Model is required '),
+      makeNotInList: yup.boolean(),
+      make: yup.string().required(' Make is required').when('makeNotInList', {
+        is: true,
+        then: (schema) => schema,
+        otherwise: (schema) => schema.oneOf(makeSuggestions.value, 'Please choose a value from the list, or add a new make.'),
+      }),
+      model: yup.string().required(' Model is required ').when('modelNotInList', {
+        is: true,
+        then: (schema) => schema,
+        otherwise: (schema) => schema.oneOf(modelSuggestions.value, 'Please choose a value from the list, or add a new model.'),
+      }),
       colour: yup.string().required(' Colour is required'),
       decals: yup.string(),
       serialNumber: yup.string().required(' Serial Number is required '),
@@ -687,7 +725,9 @@ export default {
     const {value: lastName, errorMessage: lastNameError} = useField('lastName');
 
     const {value: make, errorMessage: makeError} = useField('make');
+    const {value: makeNotInList} = useField('makeNotInList');
     const {value: model, errorMessage: modelError} = useField('model');
+    const {value: modelNotInList} = useField('modelNotInList');
     const {value: colour, errorMessage: colourError} = useField('colour');
     const {value: decals, errorMessage: decalsError} = useField('decals');
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
@@ -834,10 +874,14 @@ export default {
       activeUsers,
       rentalCheckers,
 
+      makeSuggestions,
       make,
       makeError,
+      makeNotInList,
+      modelSuggestions,
       model,
       modelError,
+      modelNotInList,
       colour,
       colourError,
       decals,
@@ -893,8 +937,6 @@ export default {
     return {
       emailTyped: '',
       clientSuggestions: [],
-      make_suggestions: [],
-      model_suggestions: [],
       colour_suggestions: [],
       serial_number_suggestions: [],
       isNfcActive: false,
@@ -928,12 +970,12 @@ export default {
     },
     fetchBikeMakeSuggestions() {
       requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {
-        this.make_suggestions = response.data;
+        this.makeSuggestions = response.data;
       });
     },
     fetchBikeModelSuggestions() {
       requests.getBikeModelSuggestions(this.model.toLowerCase()).then((response) => {
-        this.model_suggestions = response.data;
+        this.modelSuggestions = response.data;
       });
     },
     fetchSerialNumberSuggestions() {
@@ -1085,10 +1127,10 @@ export default {
       return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
     filtered_make_suggestions() {
-      return this.make_suggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
+      return this.makeSuggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
     },
     filtered_model_suggestions() {
-      return this.model_suggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
+      return this.modelSuggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
     },
     filtered_serial_number_suggestions() {
       return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber.toLowerCase()))).slice(0, 4);
