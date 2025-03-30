@@ -127,7 +127,7 @@
                     </h4>
                   </div>
                   <div class="col-span-full">
-                    <DashButton @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">
+                    <DashButton class="block-btn" @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">
                       Read From NFC Tag
                     </DashButton>
                   </div>
@@ -188,7 +188,7 @@
                         @click="() => {modelNotInList = !modelNotInList}"/>
                   </div>
 
-                  <div class="col-span-12 md:col-span-6">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :field-model-value="colour"
                         :suggestions="filtered_colour_suggestions"
@@ -205,7 +205,7 @@
                     </ComboboxTextInput>
                   </div>
 
-                  <div class="col-span-12 md:col-span-6">
+                  <div class="col-span-10 md:col-span-5 md:col-start-7">
                     <Textinput
                         label="Decals"
                         type="text"
@@ -216,7 +216,7 @@
                     />
                   </div>
 
-                  <div class="col-span-12 md:col-span-6">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
@@ -234,7 +234,7 @@
                   </div>
 
                   <div class="col-span-full">
-                    <DashButton @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">
+                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">
                       Write To NFC Tag
                     </DashButton>
                   </div>
@@ -650,12 +650,12 @@ export default {
       make: yup.string().required(' Make is required').when('makeNotInList', {
         is: true,
         then: (schema) => schema,
-        otherwise: (schema) => schema.oneOf(makeSuggestions.value),
+        otherwise: (schema) => schema.oneOf(makeSuggestions.value, 'Please choose a value from the list, or add a new make.'),
       }),
       model: yup.string().required(' Model is required ').when('modelNotInList', {
         is: true,
         then: (schema) => schema,
-        otherwise: (schema) => schema.oneOf(modelSuggestions.value),
+        otherwise: (schema) => schema.oneOf(modelSuggestions.value, 'Please choose a value from the list, or add a new model.'),
       }),
       colour: yup.string().required(' Colour is required'),
       decals: yup.string(),
