@@ -58,6 +58,19 @@
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Confirmed: {{appointment.confirmed ? 'Yes' : 'No'}}</p>
                 <p>Notes: {{appointment.notes}}</p>
               </div>
+              <div>
+                <AppointmentSummaryTable
+                    title="Appointments"
+                    :is-client="false"
+                    :user-is-appointment-manager="userIsAppointmentManager"
+                    :loading="clientAppointmentsLoading"
+                    :reschedule-appointment="() => {}"
+                    :edit-appointment-notes="() => {}"
+                    :cancel-appointment="() => {}"
+                    :actions="[]"
+                    :columns="appointmentColumns"
+                    :advanced-table="clientAppointmentSummaries"/>
+              </div>
               <div v-if="appointment.typeTitle !== 'Closed Day'"
                    class="px-4 justify-end py-3 flex space-x-3 border-t border-slate-100 dark:border-slate-700">
                 <DashButton
@@ -102,6 +115,7 @@ import {
   Dialog,
   DialogPanel,
 } from '@headlessui/vue';
+import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
 
 const toast = useToast();
 
@@ -114,6 +128,7 @@ export default {
     Dialog,
     DialogPanel,
     DashButton,
+    AppointmentSummaryTable,
   },
   methods: {
     confirmAppointment() {
@@ -192,6 +207,36 @@ export default {
       type: Boolean,
       required: true,
     },
+    clientAppointmentSummaries: {
+      type: Array,
+      required: true,
+    },
+    clientAppointmentsLoading: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      appointmentColumns: [
+        {
+          label: 'Status',
+          field: 'status',
+        },
+        {
+          label: 'Date and Time',
+          field: 'startDateTime',
+        },
+        {
+          label: 'Type',
+          field: 'type',
+        },
+        {
+          label: 'Notes',
+          field: 'notes',
+        },
+      ],
+    };
   },
   setup(props, {emit}) {
     const close = () => {

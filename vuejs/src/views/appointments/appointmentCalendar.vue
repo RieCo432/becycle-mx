@@ -49,6 +49,7 @@ export default {
   methods: {
     showEventDetail(eventClickInfo) {
       this.showAppointmentModal = !this.showAppointmentModal;
+      this.getClientAppointmentSummaries(eventClickInfo.event.extendedProps.client.id);
       this.appointmentModalInfo = {
         title: eventClickInfo.event.title,
         startDateTime: eventClickInfo.event.start,
@@ -119,8 +120,41 @@ export default {
                 classNames: 'bg-success-500 dark:bg-success-500',
                 notes: closedDay['note'],
               })));
-          console.log(appointmentSummaries);
           successCallback(appointmentSummaries);
+        });
+    },
+    getClientAppointmentSummaries(clientId) {
+      this.clientAppointmentsLoading = true;
+      requests.getClientAppointments(clientId, true, true)
+        .then((response) => {
+          const appointments = response.data;
+          this.clientAppointmentSummaries = appointments.map((appointment) => {
+            let status = 'past';
+            if (appointment.cancelled) {
+              status = 'cancelled';
+            } else if (new Date(Date.parse(appointment.startDateTime)) > new Date()) {
+              if (appointment['confirmed']) {
+                status = 'confirmed';
+              } else {
+                status = 'pending';
+              }
+            }
+
+            return {
+              id: appointment.id,
+              status: status,
+              startDateTime: appointment.startDateTime,
+              type: appointment.type.title,
+              duration: appointment.type.duration,
+              notes: appointment.notes,
+            };
+          });
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        })
+        .finally(() => {
+          this.clientAppointmentsLoading = false;
         });
     },
   },
@@ -129,6 +163,8 @@ export default {
       userIsAppointmentManager: false,
       calendarApi: null,
       isLoading: true,
+      clientAppointmentsLoading: true,
+      clientAppointmentSummaries: [],
       calendarOptions: {
         headerToolbar: {
           left: 'prev,next today',
@@ -213,6 +249,9 @@ export default {
         :appointment="appointmentModalInfo"
         @appointments-updated="calendarApi.getEventSourceById('main').refetch()"
         :user-is-appointment-manager="userIsAppointmentManager"
+        :client-appointments-loading="clientAppointmentsLoading"
+        :client-appointment-summaries="clientAppointmentSummaries"
+        size-class="max-w-4xl"
     >
     </AppointmentInfoModal>
     <Modal :active-modal="showAddClosedDayModal" @close="showAddClosedDayModal = !showAddClosedDayModal"
