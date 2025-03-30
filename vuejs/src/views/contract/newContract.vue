@@ -1124,7 +1124,7 @@ export default {
         lastName: this.lastName ? this.lastName : '',
         emailAddress: this.emailAddress ? this.emailAddress : '',
       };
-      return levenshtein.filterSortClientObject(this.clientSuggestions, client, 10);
+      return levenshtein.filterSortObject(this.clientSuggestions, client, 10);
     },
     filteredClientSuggestionsLegible() {
       return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));

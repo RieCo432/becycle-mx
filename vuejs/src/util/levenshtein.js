@@ -18,57 +18,52 @@ export default {
     return arr[string2.length][string1.length];
   },
   filterSort(array, input) {
-    input = input.toLowerCase();
-    array = array.map((item) => item.toLowerCase());
+    input = input ? input.toLowerCase() : '';
+    array = array.map((item) => item ? item.toLowerCase() : '');
     return array
       .filter((item) => (
         this.distance(input, item) <= 4 ||
             item.includes(input)))
       .sort((a, b) => this.distance(input, a) - this.distance(input, b));
   },
-  filterSortClientObject(array, input, maxDistance) {
-    const client = {
-      firstName: input.firstName.toLowerCase(),
-      lastName: input.lastName.toLowerCase(),
-      emailAddress: input.emailAddress.toLowerCase(),
-    };
-    const targetArray = array.map((item) => ({
-      firstName: item.firstName.toLowerCase(),
-      lastName: item.lastName.toLowerCase(),
-      emailAddress: item.emailAddress.toLowerCase(),
-    }));
-    return targetArray
-      .filter((item) => (
-        (
-          client.firstName.length === 0 ?
-            (this.distance(client.firstName, item.firstName) <= maxDistance || item.firstName.includes(client.firstName)) :
-            true
-        ) &&
-        (
-          client.lastName.length === 0 ?
-            (this.distance(client.lastName, item.lastName) <= maxDistance || item.lastName.includes(client.lastName)) :
-            true
-        ) &&
-        (
-          client.emailAddress.length === 0 ?
-            (this.distance(client.emailAddress, item.emailAddress) <= maxDistance || item.emailAddress.includes(client.emailAddress)) :
-            true
-        )
-      ))
-      .sort((a, b) => (
-        (
-          (client.firstName.length > 0 ?
-            this.distance(client.firstName, a.firstName) - this.distance(client.firstName, b.firstName) :
-            0
-          ) +
-            (client.lastName.length > 0 ?
-              this.distance(client.lastName, a.lastName) - this.distance(client.lastName, b.lastName) :
-              0
-            ) +
-            (client.emailAddress.length > 0 ?
-              this.distance(client.emailAddress, a.emailAddress) - this.distance(client.emailAddress, b.emailAddress) :
-              0)
-        )
-      ));
+  filterSortObject(array, input, maxDistance) {
+    return array
+      .filter((item) => Object.entries(item).map(([prop, _]) => {
+        if (
+          prop !== 'id' &&
+            Object.prototype.hasOwnProperty.call(item, prop) &&
+            Object.prototype.hasOwnProperty.call(input, prop)) {
+          const itemProp = item[prop].toLowerCase();
+          const inputProp = input[prop].toLowerCase();
+          const result = inputProp.length === 0 || (
+            this.distance(inputProp, itemProp) <= maxDistance || itemProp.includes(inputProp)
+          );
+          console.log(itemProp, inputProp, result);
+          return result;
+        } else {
+          return true;
+        }
+      }).reduce((acc, item) => acc && item), true)
+      .sort((a, b) => Object.entries(a).map(([prop, _]) => {
+        if (
+          prop !== 'id' &&
+            Object.prototype.hasOwnProperty.call(a, prop) &&
+            Object.prototype.hasOwnProperty.call(b, prop) &&
+            Object.prototype.hasOwnProperty.call(input, prop)
+        ) {
+          console.log(prop);
+          const inputProp = input[prop].toLowerCase();
+          const aProp = a[prop].toLowerCase();
+          const bProp = b[prop].toLowerCase();
+          return aProp.length > 0 ?
+            this.distance(inputProp, aProp) -
+              this.distance(inputProp, bProp) -
+              (aProp.includes(inputProp) ? aProp.length : 0) +
+              (bProp.includes(inputProp) ? bProp.length : 0) :
+            0;
+        } else {
+          return 0;
+        }
+      }).reduce((x, y) => x + y, 0));
   },
 };
