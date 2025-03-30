@@ -149,11 +149,14 @@
                     </ComboboxTextInput>
                   </div>
                   <div class="col-span-2 md:col-span-1">
-                    <Checkbox
-                        label="Add New Make"
-                        name="makeNotInList"
-                        activeClass="ring-primary-500 bg-primary-500"
-                        v-model="makeNotInList"/>
+                    <label
+                        class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+                      Add New
+                    </label>
+                    <DashButton
+                        :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
+                        @click="() => {makeNotInList = !makeNotInList}"/>
                   </div>
 
                   <div class="col-span-10 md:col-span-5">
@@ -175,11 +178,14 @@
                   </div>
 
                   <div class="col-span-2 md:col-span-1">
-                    <Checkbox
-                        label="Add New Model"
-                        name="modelNotInList"
-                        activeClass="ring-primary-500 bg-primary-500"
-                        v-model="modelNotInList"/>
+                    <label
+                        class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+                      Add New
+                    </label>
+                    <DashButton
+                        :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
+                        @click="() => {modelNotInList = !modelNotInList}"/>
                   </div>
 
                   <div class="col-span-12 md:col-span-6">
