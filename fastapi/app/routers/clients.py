@@ -235,5 +235,5 @@ async def get_client_contracts(
 @clients.get("/clients/{client_id}/appointments", dependencies=[Depends(dep.get_current_active_user)])
 async def get_client_appointments(
         client_id: UUID,
-        db: Session = Depends(dep.get_db)) -> list[schemas.Appointment]:
+        db: Session = Depends(dep.get_db)) -> list[schemas.AppointmentFull]:
     return crud.get_appointments(db=db, client_id=client_id)
