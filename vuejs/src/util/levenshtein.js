@@ -38,7 +38,6 @@ export default {
           const result = inputProp.length === 0 || (
             this.distance(inputProp, itemProp) <= maxDistance || itemProp.includes(inputProp)
           );
-          console.log(itemProp, inputProp, result);
           return result;
         } else {
           return true;
@@ -51,7 +50,6 @@ export default {
             Object.prototype.hasOwnProperty.call(b, prop) &&
             Object.prototype.hasOwnProperty.call(input, prop)
         ) {
-          console.log(prop);
           const inputProp = input[prop].toLowerCase();
           const aProp = a[prop].toLowerCase();
           const bProp = b[prop].toLowerCase();
