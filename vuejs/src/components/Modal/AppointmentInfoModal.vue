@@ -75,7 +75,7 @@
                    class="px-4 justify-end py-3 flex space-x-3 border-t border-slate-100 dark:border-slate-700">
                 <DashButton
                     class="mr-auto"
-                    @click="$router.push({path: `/clients/${appointment.client.id}`})"
+                    @click="viewClient"
                 >View Client</DashButton>
                 <template v-if="appointment.startDateTime > new Date() && userIsAppointmentManager">
                   <DashButton
@@ -158,6 +158,10 @@ export default {
         this.$emit('appointmentsUpdated');
       });
       this.close();
+    },
+    viewClient() {
+      const routeData = this.$router.resolve({path: `/clients/${this.appointment.client.id}`});
+      window.open(routeData.href, '_blank');
     },
   },
   emits: ['appointmentsUpdated'],
