@@ -8,6 +8,7 @@ import Button from '@/components/Button/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
+import levenshtein from '@/util/levenshtein';
 
 const toast = useToast();
 
@@ -42,7 +43,8 @@ export default {
         this.selectedBike.make,
         this.selectedBike.model,
         this.selectedBike.colour,
-        this.selectedBike.serialNumber).then((response) => {
+        this.selectedBike.serialNumber,
+        4).then((response) => {
         this.bikeSuggestions = response.data;
       });
     },
@@ -91,12 +93,13 @@ export default {
   },
   computed: {
     filtered_bike_suggestions() {
-      return this.bikeSuggestions.filter((bike) => (
-        (!this.selectedBike.make || bike.make.startsWith(this.selectedBike.make.toLowerCase())) &&
-        (!this.selectedBike.model || bike.model.startsWith(this.selectedBike.model.toLowerCase())) &&
-        (!this.selectedBike.colour || bike.colour.startsWith(this.selectedBike.colour.toLowerCase())) &&
-        (!this.selectedBike.serialNumber || bike.serialNumber.startsWith(this.selectedBike.serialNumber.toLowerCase()))
-      ));
+      const bike = {
+        make: this.selectedBike.make ? this.selectedBike.make : '',
+        model: this.selectedBike.model ? this.selectedBike.model : '',
+        colour: this.selectedBike.colour ? this.selectedBike.colour : '',
+        serialNumber: this.selectedBike.serialNumber ? this.selectedBike.serialNumber : '',
+      };
+      return levenshtein.filterSortObject(this.bikeSuggestions, bike, 4);
     },
     filteredBikeSuggestionsLegible() {
       return this.filtered_bike_suggestions.map((bike) => (`${bike.make} ${bike.model} ${bike.colour} ${bike.serialNumber}`));

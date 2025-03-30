@@ -5,6 +5,7 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import Button from '@/components/Button/index.vue';
+import levenshtein from '@/util/levenshtein';
 
 export default {
   name: 'findClient',
@@ -30,7 +31,7 @@ export default {
   methods: {
     fetchClients() {
       requests.findClient(this.selectedClient.firstName.toLowerCase(), this.selectedClient.lastName.toLowerCase(),
-        this.selectedClient.emailAddress.toLowerCase()).then((response) => {
+        this.selectedClient.emailAddress.toLowerCase(), 10).then((response) => {
         this.clientSuggestions = response.data;
       });
     },
@@ -40,13 +41,12 @@ export default {
   },
   computed: {
     filtered_client_suggestions() {
-      return this.clientSuggestions.filter((client) => (
-        (client.firstName.startsWith(this.selectedClient.firstName.toLowerCase()) && (this.selectedClient.firstName.toLowerCase())) ||
-          (client.lastName.startsWith(this.selectedClient.lastName.toLowerCase()) && (this.selectedClient.lastName.toLowerCase())) ||
-          (client.emailAddress.startsWith(
-            this.selectedClient.emailAddress.toLowerCase()) &&
-              (this.selectedClient.emailAddress.toLowerCase()))
-      ));
+      const client = {
+        firstName: this.selectedClient.firstName ? this.selectedClient.firstName : '',
+        lastName: this.selectedClient.lastName ? this.selectedClient.lastName : '',
+        emailAddress: this.selectedClient.emailAddress ? this.selectedClient.emailAddress : '',
+      };
+      return levenshtein.filterSortObject(this.clientSuggestions, client, 10);
     },
     filteredClientSuggestionsLegible() {
       return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
