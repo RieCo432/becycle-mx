@@ -8,6 +8,7 @@ import requests from '@/requests';
 import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Switch from '@/components/Switch';
+import {onBeforeMount} from 'vue';
 const toast = useToast();
 
 export default {
