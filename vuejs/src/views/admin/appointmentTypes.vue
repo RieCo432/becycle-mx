@@ -7,7 +7,7 @@ import Modal from '@/components/Modal/Modal.vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import Button from '@/components/Button/index.vue';
 import CreateNewAppointmentTypeCard from '@/components/Card/CreateNewAppointmentTypeCard.vue';
@@ -20,7 +20,7 @@ export default {
     CreateNewAppointmentTypeCard,
     Button,
     Checkbox,
-    Textinput,
+    TextInput,
     AppointmentTypesTable,
     Card,
     Modal,
@@ -192,7 +192,7 @@ export default {
               <div class="grid grid-cols-12">
                 <div class="col-span-12">
                   <form @submit.prevent="patchEditAppointmentTypeSubmit" class="space-y-4">
-                    <Textinput
+                    <TextInput
                         label="Appointment Type Title"
                         type="text"
                         placeholder="Small Repair"
@@ -200,7 +200,7 @@ export default {
                         v-model="editAppointmentTypeTitle"
                         :error="editAppointmentTypeTitleError"
                     />
-                    <Textinput
+                    <TextInput
                         label="Appointment Type Description"
                         type="text"
                         placeholder="Fix something small, like tighten brakes"
@@ -208,7 +208,7 @@ export default {
                         v-model="editAppointmentTypeDescription"
                         :error="editAppointmentTypeDescriptionError"
                     />
-                    <Textinput
+                    <TextInput
                         label="Appointment Type Duration"
                         type="text"
                         placeholder="15"

@@ -107,7 +107,7 @@ export default {
     deleteExpense(expenseId) {
       const confirmed = confirm('Are you sure you want to delete this expense?');
       if (confirmed) {
-        requests.deleteExpense(expenseId).then((response) => {
+        requests.deleteExpense(expenseId).then(() => {
           toast.warning('Expense Deleted', {timeout: 2000});
           const indexInArray = this.expenses.findIndex((e) => (e.id === expenseId));
           this.expenses.splice(indexInArray, 1);

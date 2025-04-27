@@ -1,5 +1,5 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import requests from '@/requests';
@@ -12,7 +12,7 @@ const toast = useToast();
 
 export default {
   name: 'ManageExpenseTypesCard',
-  components: {DashButton, Card, Textinput},
+  components: {DashButton, Card, TextInput},
   props: {
     user: {
       type: Object,
@@ -124,7 +124,7 @@ export default {
             <span class="text-slate-700 dark:text-slate-300">{{expenseType.description}}</span>
           </div>
           <div v-if="editExpenseTypeId === expenseType.id" class="col-span-6">
-            <Textinput
+            <TextInput
                 type="text"
                 placeholder="New Description"
                 name="editExpenseTypeDescription"
@@ -133,13 +133,21 @@ export default {
             />
           </div>
           <div v-if="editExpenseTypeId == null" class="col-span-1">
-            <DashButton v-if="user.admin" @click="editExpenseType(expenseType.id, expenseType.description)" class="btn-sm mx-auto block-btn" icon="heroicons-outline:pencil"/>
+            <DashButton
+                v-if="user.admin"
+                @click="editExpenseType(expenseType.id, expenseType.description)"
+                class="btn-sm mx-auto block-btn"
+                icon="heroicons-outline:pencil"/>
           </div>
           <div v-if="editExpenseTypeId != null && editExpenseTypeId === expenseType.id" class="col-span-1">
             <DashButton type="submit" class="btn-sm mx-auto block-btn" icon="heroicons-outline:check"/>
           </div>
           <div class="col-span-1">
-            <DashButton v-if="user.admin"  @click="deleteExpenseType(expenseType.id)" class="bg-danger-500 dark:bg-danger-600  btn-sm mx-auto block-btn" icon="heroicons-outline:trash"/>
+            <DashButton
+                v-if="user.admin"
+                @click="deleteExpenseType(expenseType.id)"
+                class="bg-danger-500 dark:bg-danger-600 btn-sm mx-auto block-btn"
+                icon="heroicons-outline:trash"/>
           </div>
         </template>
       </div>
@@ -147,7 +155,7 @@ export default {
     <form @submit.prevent="submitNewExpenseType">
       <div class="grid grid-cols-12 gap-2 mt-2">
         <div class="col-span-4">
-          <Textinput
+          <TextInput
               type="text"
               placeholder="New Expense Type"
               name="newExpenseTypeId"
@@ -157,7 +165,7 @@ export default {
           />
         </div>
         <div class="col-span-6">
-          <Textinput
+          <TextInput
               type="text"
               placeholder="Description"
               name="newExpenseTypeDescription"
@@ -167,7 +175,12 @@ export default {
           />
         </div>
         <div class="col-span-2">
-          <DashButton v-if="user.admin" type="submit" @click="submitNewExpenseType" class="btn-sm mx-auto block-btn" icon="heroicons-outline:plus"/>
+          <DashButton
+              v-if="user.admin"
+              type="submit"
+              @click="submitNewExpenseType"
+              class="btn-sm mx-auto block-btn"
+              icon="heroicons-outline:plus"/>
         </div>
       </div>
     </form>

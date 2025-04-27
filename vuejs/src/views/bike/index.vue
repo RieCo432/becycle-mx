@@ -127,7 +127,7 @@ export default {
           toast.success('Details written.');
           this.bike.rfidTagSerialNumber = tagSerialNumber;
           requests.patchBikeChangeDetails(this.bike.id, this.bike)
-            .then((response) => {
+            .then(() => {
               toast.success('RFID Tag Serial Number recorded.', {timeout: 1000});
             })
             .catch((error) => {

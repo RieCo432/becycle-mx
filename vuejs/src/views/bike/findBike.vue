@@ -1,6 +1,6 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
@@ -16,7 +16,7 @@ export default {
   components: {
     DashButton,
     Button,
-    ComboboxTextInput, Textinput,
+    ComboboxTextInput, TextInput,
     Card,
   },
   data() {
@@ -117,7 +117,7 @@ export default {
                 :selected-callback="selectBike"
                 :allow-new=false
             >
-              <Textinput
+              <TextInput
                   label="Make"
                   type="text"
                   placeholder="Raleigh"
@@ -135,7 +135,7 @@ export default {
                 :selected-callback="selectBike"
                 :allow-new=false
             >
-              <Textinput
+              <TextInput
                   label="Model"
                   type="text"
                   placeholder="Chloe"
@@ -153,7 +153,7 @@ export default {
                 :selected-callback="selectBike"
                 :allow-new=false
             >
-              <Textinput
+              <TextInput
                   label="Colour"
                   type="text"
                   placeholder="Pink"
@@ -171,7 +171,7 @@ export default {
                 :selected-callback="selectBike"
                 :allow-new=false
             >
-              <Textinput
+              <TextInput
                   label="Serial Number"
                   type="text"
                   placeholder="ABCD 1234"

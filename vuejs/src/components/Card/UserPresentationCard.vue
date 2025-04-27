@@ -5,13 +5,13 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import {ref, toRef} from 'vue';
 import DashButton from '@/components/Button/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import {useDropzone} from 'vue3-dropzone';
 import {Icon} from '@iconify/vue';
 
 export default {
   name: 'UserPresentationCard',
-  components: {Icon, Textinput, DashButton, Card},
+  components: {Icon, TextInput, DashButton, Card},
   data() {
     return {
       photoUrl: null,
@@ -146,6 +146,7 @@ export default {
               <img v-else
                   :src="files[0].preview"
                   class="object-cover h-full w-full block rounded-3xl aspect-square"
+                   alt="Volunteer Presentation Photo"
               />
             </div>
           </div>
@@ -166,7 +167,7 @@ export default {
 
               </div>
               <div class="grid grid-cols-8" v-if="inEditMode">
-                <Textinput
+                <TextInput
                     class="col-span-6"
                     v-if="inEditMode"
                     label="Name"
@@ -183,7 +184,7 @@ export default {
             </div>
             <div class="col-span-1 p-3">
               <p v-if="!inEditMode" class="dark:text-slate-300 text-slate-700 inline-block">{{presentationCardDetails.bio}}</p>
-              <Textinput
+              <TextInput
                   v-if="inEditMode"
                   label="Biography"
                   type="text"

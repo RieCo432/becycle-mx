@@ -17,7 +17,7 @@ import './assets/scss/auth.scss';
 import './assets/scss/tailwind.scss';
 import router from '@/router';
 import {createPinia} from 'pinia';
-import { setupCalendar } from 'v-calendar';
+import {setupCalendar} from 'v-calendar';
 
 const pinia = createPinia();
 
@@ -37,7 +37,7 @@ app.use(VueSweetalert2)
   .use(VueApexCharts)
   .use(setupCalendar, {});
 
-app.component('')
+app.component('');
 
 app.config.globalProperties.$store = {};
 app.mount('#app');

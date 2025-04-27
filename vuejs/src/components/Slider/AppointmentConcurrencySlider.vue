@@ -41,7 +41,7 @@ export default {
           this.loadConcurrencyLimit();
         });
     },
-    setNewAfterTime(newAfterTime, newTimeAfterString, instance) {
+    setNewAfterTime(newAfterTime, newTimeAfterString) {
       if (newTimeAfterString !== this.concurrencyLimit.afterTime) {
         requests.patchAppointmentConcurrencyLimit(
           this.concurrencyLimit.weekDay,
@@ -78,7 +78,7 @@ export default {
       requests.deleteAppointmentConcurrencyLimit(
         this.concurrencyLimit.weekDay,
         this.concurrencyLimit.afterTime)
-        .then((response) => {
+        .then(() => {
           toast.success('Concurrency Limit removed', {timeout: 2000});
           this.$emit('concurrencyLimitDeleted');
         }).catch((error) => {

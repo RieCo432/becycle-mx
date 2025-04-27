@@ -53,38 +53,36 @@
         </template>
         <template v-slot:table-row="props">
           <span
-            v-if="props.column.field == 'startDate'"
+            v-if="props.column.field === 'startDate'"
             class="text-slate-500 dark:text-slate-300"
           >
             {{ new Date(Date.parse(props.row.startDate))
               .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span
-              v-if="props.column.field == 'endDate'"
+              v-if="props.column.field === 'endDate'"
               class="text-slate-500 dark:text-slate-300"
           >
             {{ new Date(Date.parse(props.row.endDate))
               .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span
-              v-if="props.column.field == 'returnedDate'"
+              v-if="props.column.field === 'returnedDate'"
               class="text-slate-500 dark:text-slate-300"
           >
             {{ props.row.returnedDate ? new Date(Date.parse(props.row.returnedDate))
               .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) : 'n/a' }}
           </span>
-          <span v-if="props.column.field == 'action'">
-            <div class="flex space-x-3 rtl:space-x-reverse">
-                <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
-                  <template #button>
-                    <div class="action-btn">
-                      <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
-                    </div>
-                  </template>
-                  <span>{{action.name}}</span>
-                </Tooltip>
-            </div>
-          </span>
+          <div v-if="props.column.field === 'action'" class="flex space-x-3 rtl:space-x-reverse">
+            <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
+              <template #button>
+                <div class="action-btn">
+                  <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
+                </div>
+              </template>
+              <span>{{action.name}}</span>
+            </Tooltip>
+          </div>
         </template>
       </vue-good-table>
     </Card>

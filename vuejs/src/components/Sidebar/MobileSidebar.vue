@@ -37,7 +37,7 @@
 <script>
 import Icon from '../Icon';
 import {defineComponent} from 'vue';
-import {topMenu} from '../../constant/data';
+import {topMenu} from '@/constant/data';
 import Navmenu from './Navmenu';
 import simplebar from 'simplebar-vue';
 import 'simplebar/dist/simplebar.min.css';

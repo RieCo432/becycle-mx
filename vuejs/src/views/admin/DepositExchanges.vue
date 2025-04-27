@@ -8,7 +8,7 @@ import {ref, computed} from 'vue';
 import {useRouter} from 'vue-router';
 import Button from '@/components/Button/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Select from '@/components/Select/index.vue';
 import Icon from '@/components/Icon';
 
@@ -17,7 +17,7 @@ export default {
   name: 'DepositExchanges',
   components: {
     Select,
-    Textinput,
+    TextInput,
     Checkbox,
     Button,
     Card,
@@ -82,7 +82,7 @@ export default {
         return reviewSchema;
       default:
         return amountSchema;
-      };
+      }
     });
 
     const {handleSubmit: handleDepositExchangeSubmit} = useForm({
@@ -102,10 +102,9 @@ export default {
 
     const submitDepositExchange = handleDepositExchangeSubmit(() => {
       if (stepNumber.value === steps.length - 1) {
-        stepNumber.value = totalSteps - 1;
         requests.postDepositExchange(amount.value, fromUsername.value, fromPassword.value,
           toUsername.value, toPassword.value)
-          .then((response) => {
+          .then(() => {
             toast.success('Deposit Exchange Recorded', {timeout: 2000});
             router.push({path: '/finances/deposits'});
           }).catch((error) => {
@@ -221,7 +220,7 @@ export default {
                       Deposit Collection
                     </h4>
                   </div>
-                  <Textinput
+                  <TextInput
                       label="Amount (&pound;)"
                       type="text"
                       placeholder="200"
@@ -247,7 +246,7 @@ export default {
                       :error="fromUsernameError"
                   />
 
-                  <Textinput
+                  <TextInput
                       label="Password"
                       type="password"
                       placeholder="Password"
@@ -273,7 +272,7 @@ export default {
                       :error="toUsernameError"
                   />
 
-                  <Textinput
+                  <TextInput
                       label="Password"
                       type="password"
                       placeholder="Password"
