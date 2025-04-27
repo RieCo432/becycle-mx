@@ -565,16 +565,18 @@ export default {
                         <table class="w-full text-base text-slate-800 dark:text-slate-300 border
                                       border-collapse border-slate-500 bg-slate-700">
                           <thead>
-                          <th colspan="2" class="border border-slate-500">Return Details</th>
+                          <tr class="border border-slate-500">Return Details</tr>
                           </thead>
-                          <tr>
-                            <td class="border border-slate-500">Return Date</td>
-                            <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                          </tr>
-                          <tr>
-                            <td class="border border-slate-500">Deposit Returned</td>
-                            <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
-                          </tr>
+                          <tbody>
+                            <tr>
+                              <td class="border border-slate-500">Return Date</td>
+                              <td class="border border-slate-500">{{new Date().toDateString()}}</td>
+                            </tr>
+                            <tr>
+                              <td class="border border-slate-500">Deposit Returned</td>
+                              <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
+                            </tr>
+                          </tbody>
                         </table>
                       </div>
                       <div class="col-span-1">

@@ -433,66 +433,72 @@
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h4>
                     <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
                       <thead>
-                        <th colspan="2" class="border border-slate-500">Lendee Details</th>
+                        <tr class="border border-slate-500">Lendee Details</tr>
                       </thead>
-                      <tr>
-                        <td class="border border-slate-500">Name</td>
-                        <td class="border border-slate-500">{{firstName}} {{lastName}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Email Address</td>
-                        <td class="border border-slate-500">{{emailAddress}}</td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td class="border border-slate-500">Name</td>
+                          <td class="border border-slate-500">{{firstName}} {{lastName}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Email Address</td>
+                          <td class="border border-slate-500">{{emailAddress}}</td>
+                        </tr>
+                      </tbody>
                       <thead>
-                        <th colspan="2" class="border border-slate-500">Bike Details</th>
+                        <tr class="border border-slate-500">Bike Details</tr>
                       </thead>
-                      <tr>
-                        <td class="border border-slate-500">Make</td>
-                        <td class="border border-slate-500">{{make}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Model</td>
-                        <td class="border border-slate-500">{{model}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Colour</td>
-                        <td class="border border-slate-500">{{colour}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Decals</td>
-                        <td class="border border-slate-500">{{decals}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Serial Number</td>
-                        <td class="border border-slate-500">{{serialNumber}}</td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td class="border border-slate-500">Make</td>
+                          <td class="border border-slate-500">{{make}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Model</td>
+                          <td class="border border-slate-500">{{model}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Colour</td>
+                          <td class="border border-slate-500">{{colour}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Decals</td>
+                          <td class="border border-slate-500">{{decals}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Serial Number</td>
+                          <td class="border border-slate-500">{{serialNumber}}</td>
+                        </tr>
+                      </tbody>
                       <thead>
-                      <th colspan="2" class="border border-slate-500">Additional Details</th>
+                      <tr class="border border-slate-500">Additional Details</tr>
                       </thead>
-                      <tr>
-                        <td class="border border-slate-500">Lease Start</td>
-                        <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Lease End</td>
-                        <td class="border border-slate-500">{{datePlusSixMonths().toDateString()}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Deposit</td>
-                        <td class="border border-slate-500">&#163;{{depositAmountCollected}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Contract Type</td>
-                        <td class="border border-slate-500">{{type}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Bike Condition</td>
-                        <td class="border border-slate-500">{{condition}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Notes</td>
-                        <td class="border border-slate-500">{{notes}}</td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td class="border border-slate-500">Lease Start</td>
+                          <td class="border border-slate-500">{{new Date().toDateString()}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Lease End</td>
+                          <td class="border border-slate-500">{{datePlusSixMonths().toDateString()}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Deposit</td>
+                          <td class="border border-slate-500">&#163;{{depositAmountCollected}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Contract Type</td>
+                          <td class="border border-slate-500">{{type}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Bike Condition</td>
+                          <td class="border border-slate-500">{{condition}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Notes</td>
+                          <td class="border border-slate-500">{{notes}}</td>
+                        </tr>
+                      </tbody>
                     </table>
                   </div>
                   <div class="col-span-1">
