@@ -1,7 +1,7 @@
 <script>
 import {ref} from 'vue';
 import requests from '@/requests';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
@@ -17,7 +17,7 @@ export default {
     DashButton,
     Card,
     Button,
-    Textinput,
+    TextInput,
     AppointmentTypeCardSkeleton,
     AppointmentDateCardSkeleton,
     Icon,
@@ -53,7 +53,7 @@ export default {
       if (stepNumber.value === steps.length - 1) {
         // handle submit
         requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(),
-          appointmentNotes.value).then((response) => {
+          appointmentNotes.value).then(() => {
           toast.success('Appointment Request submitted! Kindly wait for us to accept or deny your request.', {timeout: 2000});
           router.push('/clients/me');
         }).catch((error) => {
@@ -267,7 +267,7 @@ export default {
                   </div>
                   <div class="col-span-1">
 
-                    <Textinput
+                    <TextInput
                         label="Notes"
                         type="text"
                         placeholder="Any import things to note?"

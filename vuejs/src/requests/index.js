@@ -100,24 +100,6 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getEmailAddressSuggestions(emailAddress) {
-    return axiosClient.get('/clients/email-address-suggestions', {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-      params: {
-        email_address: emailAddress,
-      },
-    });
-  },
-  getClientIdEmailAddress(emailAddress) {
-    return axiosClient.get('/client/id-by-email', {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-      params: {
-        email_address: emailAddress,
-      },
-    });
-  },
   getBikeMakeSuggestions(make) {
     return axiosClient.get('/bikes/suggest/makes', {
       headers: credentialsStore.getApiRequestHeader(),
@@ -437,7 +419,7 @@ export default {
   getMyContract(contractId) {
     return axiosClient.get(`/clients/me/contracts/${contractId}`, {
       headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
     });
   },
   getOpeningDays() {
@@ -830,11 +812,6 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getNextClosedDay() {
-    return axiosClient.get('/public/next-closed-day', {
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
-    });
-  },
   getAddress() {
     return axiosClient.get('/public/address', {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
@@ -1070,7 +1047,7 @@ export default {
       responseType: 'blob',
     });
   },
-  getActualCashflow(interval, startDate, endDate, tag) {
+  getActualCashFlow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/actual', {
       params: {
         interval: interval,
@@ -1082,7 +1059,7 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getProvisionalCashflow(interval, startDate, endDate, tag) {
+  getProvisionalCashFlow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/provisional', {
       params: {
         interval: interval,
@@ -1094,7 +1071,7 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getTotalCashflow(interval, startDate, endDate, tag) {
+  getTotalCashFlow(interval, startDate, endDate, tag) {
     return axiosClient.get('/finances/cashflow/total', {
       params: {
         interval: interval,

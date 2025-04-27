@@ -203,7 +203,7 @@ export default {
       this.fetchContractsStatus();
       this.fetchActiveContractsSeries();
     },
-    handleSelection(chart, {xaxis, yaxis}) {
+    handleSelection(chart, {xaxis}) {
       if (xaxis.min) {
         const newStartDate = new Date(xaxis.min);
         this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}

@@ -1,7 +1,7 @@
 <script>
 import {computed, ref} from 'vue';
 import requests from '@/requests';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
@@ -22,7 +22,7 @@ export default {
     DashButton,
     Card,
     Button,
-    Textinput,
+    TextInput,
     AppointmentTypeCardSkeleton,
     AppointmentDateCardSkeleton,
     Icon,
@@ -61,23 +61,23 @@ export default {
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
       emailAddress: yup
-        .string()
-        .email('Email is not valid')
-        .required('Email is required'),
+          .string()
+          .email('Email is not valid')
+          .required('Email is required'),
       confirmEmailAddress: yup
-        .string()
-        .email('Email is not valid')
-        .required('Confirm Email is required')
-        .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
+          .string()
+          .email('Email is not valid')
+          .required('Confirm Email is required')
+          .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
     });
 
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-      case 0:
-        return clientSchema;
-      default:
-        return null;
+        case 0:
+          return clientSchema;
+        default:
+          return null;
       }
     });
 
@@ -96,7 +96,7 @@ export default {
       if (stepNumber.value === steps.length - 1) {
         // handle submit
         requests.postAppointment(clientId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
-          appointmentNotes.value, true).then(() => {
+            appointmentNotes.value, true).then(() => {
           toast.success('Appointment created.', {timeout: 2000});
           router.push(`/clients/${clientId.value}`);
         }).catch((error) => {
@@ -180,12 +180,12 @@ export default {
   methods: {
     fetchClientSuggestions() {
       requests.findClient(
-        this.firstName ? this.firstName.toLowerCase() : '',
-        this.lastName ? this.lastName.toLowerCase() : '',
-        this.emailAddress ? this.emailAddress.toLowerCase() :'')
-        .then((response) => {
-          this.clientSuggestions = response.data;
-        });
+          this.firstName ? this.firstName.toLowerCase() : '',
+          this.lastName ? this.lastName.toLowerCase() : '',
+          this.emailAddress ? this.emailAddress.toLowerCase() : '')
+          .then((response) => {
+            this.clientSuggestions = response.data;
+          });
     },
     selectClient(event, i) {
       const selectedClient = this.filtered_client_suggestions[i];
@@ -199,7 +199,7 @@ export default {
   computed: {
     filtered_client_suggestions() {
       return this.clientSuggestions.filter((client) => (
-        (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
+          (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
           (this.lastName && client.lastName.startsWith(this.lastName.toLowerCase())) ||
           (this.emailAddress && client.emailAddress.startsWith(this.emailAddress.toLowerCase()))
       ));
@@ -277,7 +277,7 @@ export default {
                         :field-model-value="emailAddress"
                         :suggestions="filteredClientSuggestionsLegible"
                         :selected-callback="selectClient">
-                      <Textinput label="Email" type="email" placeholder="Type your email"
+                      <TextInput label="Email" type="email" placeholder="Type your email"
                                  name="emailAddress"
                                  v-model="emailAddress"
                                  :error="emailAddressError"
@@ -287,7 +287,7 @@ export default {
                   </div>
 
                   <div class="col-span-1">
-                    <Textinput
+                    <TextInput
                         label="Confirm Email"
                         type="email"
                         placeholder="Confirm your email"
@@ -302,7 +302,7 @@ export default {
                         :field-model-value="firstName"
                         :suggestions="filteredClientSuggestionsLegible"
                         :selected-callback="selectClient">
-                      <Textinput
+                      <TextInput
                           label="First name"
                           type="text"
                           placeholder="First name"
@@ -319,7 +319,7 @@ export default {
                         :field-model-value="lastName"
                         :suggestions="filteredClientSuggestionsLegible"
                         :selected-callback="selectClient">
-                      <Textinput
+                      <TextInput
                           label="Last name"
                           type="text"
                           placeholder="Last name"
@@ -430,7 +430,7 @@ export default {
                   </div>
                   <div class="col-span-1">
 
-                    <Textinput
+                    <TextInput
                         label="Notes"
                         type="text"
                         placeholder="Any import things to note?"

@@ -1,6 +1,6 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
@@ -10,7 +10,7 @@ export default {
   name: 'findClient',
   components: {
     Button,
-    ComboboxTextInput, Textinput,
+    ComboboxTextInput, TextInput,
     Card,
   },
   data() {
@@ -67,7 +67,7 @@ export default {
                 :selected-callback="selectClient"
                 :allow-new=false
             >
-              <Textinput
+              <TextInput
                   label="First Name"
                   type="text"
                   placeholder="First Name"
@@ -85,7 +85,7 @@ export default {
                 :selected-callback="selectClient"
                 :allow-new=false
             >
-              <Textinput
+              <TextInput
                   label="Last Name"
                   type="text"
                   placeholder="Last Name"
@@ -103,7 +103,7 @@ export default {
                 :selected-callback="selectClient"
                 :allow-new=false
             >
-              <Textinput
+              <TextInput
                   label="Email Address"
                   type="text"
                   placeholder="Email Address"

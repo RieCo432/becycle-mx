@@ -1,6 +1,5 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
-import Button from '@/components/Button/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 import * as yup from 'yup';
@@ -13,7 +12,7 @@ const toast = useToast();
 
 export default {
   name: 'UpdateAddressCard',
-  components: {DashButton, Card, Button, Textinput},
+  components: {DashButton, Card, TextInput},
   props: {
     user: {
       type: Object,
@@ -45,7 +44,7 @@ export default {
           street: street.value,
           postcode: postcode.value,
           city: city.value,
-        }).then((response) => {
+        }).then(() => {
         toast.success('Address updated', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -86,7 +85,7 @@ export default {
     <form @submit.prevent="submitChangeDetails">
       <div class="grid grid-cols-12 gap-5">
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="Street Number"
               type="text"
               placeholder="21-23"
@@ -97,7 +96,7 @@ export default {
           />
         </div>
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="Street Name"
               type="text"
               placeholder="High Street"
@@ -108,7 +107,7 @@ export default {
           />
         </div>
         <div class="col-span-6">
-          <Textinput
+          <TextInput
               label="Post Code"
               type="text"
               placeholder="AB24 3EE"
@@ -119,7 +118,7 @@ export default {
           />
         </div>
         <div class="col-span-6">
-          <Textinput
+          <TextInput
               label="City"
               type="text"
               placeholder="Aberdeen"

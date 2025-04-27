@@ -1,7 +1,6 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
-import Select from '@/components/Select/index.vue';
 import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import {computed, ref, toRef} from 'vue';
@@ -24,10 +23,9 @@ export default {
   components: {
     ComboboxTextInput,
     Checkbox,
-    Select,
     Card,
     DashButton,
-    Textinput,
+    TextInput,
     ContractClientCardSkeleton,
     ContractBikeCardSkeleton,
     ContractCardSkeleton,
@@ -206,7 +204,7 @@ export default {
           const bikeCopy = this.bike;
           bikeCopy.rfidTagSerialNumber = tagSerialNumber;
           requests.patchBikeChangeDetails(this.bike.id, bikeCopy)
-            .then((response) => {
+            .then(() => {
               toast.success('RFID Tag Serial Number recorded.', {timeout: 1000});
             })
             .catch((error) => {
@@ -290,7 +288,7 @@ export default {
     },
     isUserAdmin: {
       type: Boolean,
-      required: true,
+      default: false,
     },
     openEditClientDetailsModal: {
       type: Function,
@@ -484,7 +482,7 @@ export default {
                           Deposit Return
                         </h4>
                       </div>
-                      <Textinput
+                      <TextInput
                           label="Deposit Amount (&pound;)"
                           type="number"
                           placeholder="40"
@@ -499,7 +497,7 @@ export default {
                           :selected-callback="selectDepositReturningUser"
                           :allow-new="false"
                           :open-by-default="true">
-                        <Textinput
+                        <TextInput
                             label="Deposit Returner"
                             type="text"
                             placeholder="workshop"
@@ -510,7 +508,7 @@ export default {
                         />
                       </ComboboxTextInput>
 
-                      <Textinput
+                      <TextInput
                           label="Deposit Returner Password"
                           type="password"
                           placeholder="Password"
@@ -535,7 +533,7 @@ export default {
                           :selected-callback="selectReturnAcceptingUser"
                           :allow-new="false"
                           :open-by-default="true">
-                        <Textinput
+                        <TextInput
                             label="Return Accepting Volunteer"
                             type="text"
                             placeholder="workshop"
@@ -546,7 +544,7 @@ export default {
                         />
                       </ComboboxTextInput>
 
-                      <Textinput
+                      <TextInput
                           label="Password or Pin"
                           type="password"
                           placeholder="Password or Pin"

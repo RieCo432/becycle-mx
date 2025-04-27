@@ -23,7 +23,7 @@ router.beforeEach((to, from, next) => {
   const words = titleText.split(' ');
   const wordslength = words.length;
   for (let i = 0; i < wordslength; i++) {
-    words[i] = words[i][0].toUpperCase() + words[i].substr(1);
+    words[i] = words[i][0].toUpperCase() + words[i].substring(1);
   }
 
   document.title = 'beCyCle  - ' + words;

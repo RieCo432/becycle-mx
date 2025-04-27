@@ -138,7 +138,7 @@ export default {
       this.fetchDepositsCollectedSeries();
       this.fetchDepositsReturnedSeries();
     },
-    handleSelection(chart, {xaxis, yaxis}) {
+    handleSelection(chart, {xaxis}) {
       if (xaxis.min) {
         const newStartDate = new Date(xaxis.min);
         this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString()

@@ -37,7 +37,7 @@
         }"
       >
         <template v-slot:table-row="props">
-          <span v-if="props.column.field == 'customer'" class="flex">
+          <span v-if="props.column.field === 'customer'" class="flex">
             <span class="w-7 h-7 rounded-full ltr:mr-3 rtl:ml-3 flex-none">
               <img
                 :src="props.row.customer.image"
@@ -51,27 +51,27 @@
             >
           </span>
           <span
-            v-if="props.column.field == 'startDate'"
+            v-if="props.column.field === 'startDate'"
             class="text-slate-500 dark:text-slate-300"
           >
             {{ new Date(Date.parse(props.row.startDate))
               .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span
-              v-if="props.column.field == 'endDate'"
+              v-if="props.column.field === 'endDate'"
               class="text-slate-500 dark:text-slate-300"
           >
             {{ new Date(Date.parse(props.row.endDate))
               .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
           </span>
           <span
-              v-if="props.column.field == 'returnedDate'"
+              v-if="props.column.field === 'returnedDate'"
               class="text-slate-500 dark:text-slate-300"
           >
             {{ props.row.returnedDate ? new Date(Date.parse(props.row.returnedDate))
               .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) : 'n/a' }}
           </span>
-          <span v-if="props.column.field == 'status'" class="block w-full">
+          <span v-if="props.column.field === 'status'" class="block w-full">
             <span
               class="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25"
               :class="`${
@@ -95,18 +95,16 @@
               {{ props.row.status }}
             </span>
           </span>
-          <span v-if="props.column.field == 'action'">
-            <div class="flex space-x-3 rtl:space-x-reverse">
-                <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
-                  <template #button>
-                    <div class="action-btn">
-                      <Icon :icon="action.icon" @click="viewContract(props.row.id)"/>
-                    </div>
-                  </template>
-                  <span>{{action.name}}</span>
-                </Tooltip>
-            </div>
-          </span>
+          <div v-if="props.column.field === 'action'" class="flex space-x-3 rtl:space-x-reverse">
+            <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
+              <template #button>
+                <div class="action-btn">
+                  <Icon :icon="action.icon" @click="viewContract(props.row.id)"/>
+                </div>
+              </template>
+              <span>{{action.name}}</span>
+            </Tooltip>
+          </div>
         </template>
         <template #pagination-bottom="props">
           <div class="py-4 px-3">

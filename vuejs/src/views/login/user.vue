@@ -3,7 +3,7 @@
     <div class="lg:col-span-6 col-span-12">
       <Card title="Volunteer Login">
         <form @submit.prevent="onSubmit" class="space-y-4">
-          <Textinput
+          <TextInput
             label="Username"
             type="username"
             placeholder="username"
@@ -11,7 +11,7 @@
             v-model="username"
             classInput="h-[48px]"
           />
-          <Textinput
+          <TextInput
             label="Password"
             type="password"
             placeholder="Password"
@@ -35,7 +35,7 @@
 <script>
 
 import requests from '@/requests';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Card from '@/components/Card/index.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
 import {useToast} from 'vue-toastification';
@@ -68,7 +68,7 @@ export default {
   },
   components: {
     Card,
-    Textinput,
+    TextInput,
   },
 };
 
