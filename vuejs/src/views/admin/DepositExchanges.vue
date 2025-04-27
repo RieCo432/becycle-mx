@@ -102,7 +102,6 @@ export default {
 
     const submitDepositExchange = handleDepositExchangeSubmit(() => {
       if (stepNumber.value === steps.length - 1) {
-        stepNumber.value = totalSteps - 1;
         requests.postDepositExchange(amount.value, fromUsername.value, fromPassword.value,
           toUsername.value, toPassword.value)
           .then(() => {
