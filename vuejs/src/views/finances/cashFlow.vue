@@ -271,7 +271,6 @@ export default {
                   fontFamily: 'Inter',
                   color: '#CBD5E1',
                   formatter: (w) => {
-                    console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
                       return a+b;
                     })}`;
@@ -333,7 +332,6 @@ export default {
                   fontFamily: 'Inter',
                   color: '#CBD5E1',
                   formatter: (w) => {
-                    console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
                       return a+b;
                     })}`;
@@ -395,7 +393,6 @@ export default {
                   fontFamily: 'Inter',
                   color: '#CBD5E1',
                   formatter: (w) => {
-                    console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
                       return a+b;
                     })}`;
@@ -536,13 +533,11 @@ export default {
   },
   watch: {
     startDate(newStartDate, oldStartDate) {
-      console.log(newStartDate, oldStartDate);
       if (oldStartDate !== null && newStartDate !== oldStartDate) {
         this.fetchAllSeries();
       }
     },
     endDate(newEndDate, oldEndDate) {
-      console.log(newEndDate, oldEndDate);
       if (oldEndDate !== null && newEndDate !== oldEndDate) {
         this.fetchAllSeries();
       }
