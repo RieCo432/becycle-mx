@@ -1,3 +1,4 @@
+@use "sass:meta";
 @tailwind base;
 
 @tailwind components;
@@ -128,14 +129,14 @@
   }
 }
 @layer components {
-  @import "components/button";
-  @import "components/typography";
-  @import "components/form";
-  @import "components/date-picker";
-  @import "components/widget";
-  @import "components/table";
-  @import "app/calander";
-  @import "components/animation";
+  @include meta.load-css("components/button");
+  @include meta.load-css("components/typography");
+  @include meta.load-css("components/form");
+  @include meta.load-css("components/date-picker");
+  @include meta.load-css("components/widget");
+  @include meta.load-css("components/table");
+  @include meta.load-css("app/calander");
+  @include meta.load-css("components/animation");
   .card-auto {
     .card {
       @apply h-auto;
