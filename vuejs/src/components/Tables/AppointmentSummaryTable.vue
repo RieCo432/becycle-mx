@@ -37,7 +37,7 @@
         }"
       >
         <template v-slot:table-row="props">
-          <span v-if="props.column.field == 'status'" class="block w-full">
+          <span v-if="props.column.field === 'status'" class="block w-full">
             <span
                 class="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25"
                 :class="`${
@@ -71,24 +71,22 @@
               .toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
                                            hour: "2-digit", minute: "2-digit", hour12: false, }) }}
           </span>
-          <span v-if="props.column.field === 'action'">
-            <div class="flex space-x-3 rtl:space-x-reverse">
-              <template v-for="action in actions">
-                <Tooltip placement="top" arrow theme="dark" :key="action.id"
-                         v-if="new Date(Date.parse(props.row.startDateTime)) > new Date() && (isClient || userIsAppointmentManager)">
-                  <template #button >
-                    <div class="action-btn">
-                      <Icon
-                          v-if="props.row.status !== 'cancelled' &&
-                          !(props.row.status === 'confirmed' && action.id === 'confirm')"
-                          :icon="action.icon" @click="action.func(props.row.id)"/>
-                    </div>
-                  </template>
-                  <span>{{action.label}}</span>
-                </Tooltip>
-              </template>
-            </div>
-          </span>
+          <div v-if="props.column.field === 'action'" class="flex space-x-3 rtl:space-x-reverse">
+            <template v-for="action in actions">
+              <Tooltip placement="top" arrow theme="dark" :key="action.id"
+                       v-if="new Date(Date.parse(props.row.startDateTime)) > new Date() && (isClient || userIsAppointmentManager)">
+                <template #button >
+                  <div class="action-btn">
+                    <Icon
+                        v-if="props.row.status !== 'cancelled' &&
+                         !(props.row.status === 'confirmed' && action.id === 'confirm')"
+                        :icon="action.icon" @click="action.func(props.row.id)"/>
+                  </div>
+                </template>
+                <span>{{action.label}}</span>
+              </Tooltip>
+            </template>
+          </div>
         </template>
         <template #pagination-bottom="props">
           <div class="py-4 px-3">

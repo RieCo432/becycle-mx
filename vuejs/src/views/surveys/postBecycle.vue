@@ -1,5 +1,5 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Checkbox';
@@ -14,7 +14,7 @@ import SurveyInfo from '@/components/SurveyInfo/index.vue';
 
 export default {
   name: 'postBecycle',
-  components: {ErrorMessage, Checkbox, Card, DashButton, Textinput, Icon, SurveyInfo},
+  components: {ErrorMessage, Checkbox, Card, DashButton, TextInput, Icon, SurveyInfo},
   setup() {
     const router = useRouter();
     const toast = useToast();
@@ -182,7 +182,7 @@ export default {
           improvementSurface: improvementSurface.value,
           improvementCleaner: improvementCleaner.value,
           improvementOther: improvementOther.value,
-        }).then((response) => {
+        }).then(() => {
           toast.success('Your response has been recorded.', {timeout: 2000});
           router.push({path: '/home'});
         }).catch((error) => {
@@ -316,7 +316,7 @@ export default {
               </div>
               <div class="grid grid-cols-1 gap-5">
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Becycle has helped me get a bike."
                       type="text"
                       placeholder="4"
@@ -326,7 +326,7 @@ export default {
                   />
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Becycle has helped me fix a bike."
                       type="text"
                       placeholder="4"
@@ -336,7 +336,7 @@ export default {
                   />
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Becycle has helped me learn about bike maintenance."
                       type="text"
                       placeholder="4"
@@ -433,7 +433,7 @@ export default {
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Other"
                       type="text"
                       placeholder="Any other reasons?"
@@ -539,7 +539,7 @@ export default {
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="!improvementNone">
-                  <Textinput
+                  <TextInput
                       label="Any other improvements you would like to see?"
                       type="text"
                       placeholder="Anything?"

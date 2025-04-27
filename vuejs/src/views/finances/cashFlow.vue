@@ -271,7 +271,6 @@ export default {
                   fontFamily: 'Inter',
                   color: '#CBD5E1',
                   formatter: (w) => {
-                    console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
                       return a+b;
                     })}`;
@@ -333,7 +332,6 @@ export default {
                   fontFamily: 'Inter',
                   color: '#CBD5E1',
                   formatter: (w) => {
-                    console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
                       return a+b;
                     })}`;
@@ -395,7 +393,6 @@ export default {
                   fontFamily: 'Inter',
                   color: '#CBD5E1',
                   formatter: (w) => {
-                    console.log(w);
                     return `\u00A3${w.globals.seriesTotals.reduce((a, b) => {
                       return a+b;
                     })}`;
@@ -464,7 +461,7 @@ export default {
       });
     },
     fetchActualCashflowSeries() {
-      requests.getActualCashflow(this.interval, this.startDate, this.endDate,
+      requests.getActualCashFlow(this.interval, this.startDate, this.endDate,
         this.expenseTagFilter !== '' ? this.expenseTagFilter : null).then((response) => {
         this.actualCashflowSeries = response.data;
         this.updateStartDate(this.actualCashflowSeries[0].data[0][0]);
@@ -472,7 +469,7 @@ export default {
       });
     },
     fetchProvisionalCashflowSeries() {
-      requests.getProvisionalCashflow(this.interval, this.startDate, this.endDate,
+      requests.getProvisionalCashFlow(this.interval, this.startDate, this.endDate,
         this.expenseTagFilter !== '' ? this.expenseTagFilter : null).then((response) => {
         this.provisionalCashflowSeries = response.data;
         this.updateStartDate(this.provisionalCashflowSeries[0].data[0][0]);
@@ -480,7 +477,7 @@ export default {
       });
     },
     fetchTotalCashflowSeries() {
-      requests.getTotalCashflow(this.interval, this.startDate, this.endDate,
+      requests.getTotalCashFlow(this.interval, this.startDate, this.endDate,
         this.expenseTagFilter !== '' ? this.expenseTagFilter : null).then((response) => {
         this.totalCashflowSeries = response.data;
         this.updateStartDate(this.totalCashflowSeries[0].data[0][0]);
@@ -501,7 +498,7 @@ export default {
       this.fetchDepositsStatus();
       this.fetchRealisticRequiredDepositFloatSeries();
     },
-    handleSelection(chart, {xaxis, yaxis}) {
+    handleSelection(chart, {xaxis}) {
       if (xaxis.min) {
         const newStartDate = new Date(xaxis.min);
         this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString()
@@ -536,13 +533,11 @@ export default {
   },
   watch: {
     startDate(newStartDate, oldStartDate) {
-      console.log(newStartDate, oldStartDate);
       if (oldStartDate !== null && newStartDate !== oldStartDate) {
         this.fetchAllSeries();
       }
     },
     endDate(newEndDate, oldEndDate) {
-      console.log(newEndDate, oldEndDate);
       if (oldEndDate !== null && newEndDate !== oldEndDate) {
         this.fetchAllSeries();
       }

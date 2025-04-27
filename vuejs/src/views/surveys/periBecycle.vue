@@ -1,5 +1,5 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Checkbox';
@@ -14,7 +14,7 @@ import SurveyInfo from '@/components/SurveyInfo/index.vue';
 
 export default {
   name: 'periBecycle',
-  components: {ErrorMessage, Checkbox, Card, DashButton, Textinput, Icon, SurveyInfo},
+  components: {ErrorMessage, Checkbox, Card, DashButton, TextInput, Icon, SurveyInfo},
   setup() {
     const router = useRouter();
     const toast = useToast();
@@ -207,7 +207,7 @@ export default {
           accidentsContact: accidentsContact.value,
           harassmentExperienced: harassmentExperienced.value,
           harassmentSuggestions: harassmentSuggestions.value,
-        }).then((response) => {
+        }).then(() => {
           toast.success('Your response has been recorded.', {timeout: 2000});
           router.push({path: '/home'});
         }).catch((error) => {
@@ -343,7 +343,7 @@ export default {
               </div>
               <div class="grid grid-cols-1 gap-5">
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Becycle has helped me get a bike."
                       type="text"
                       placeholder="4"
@@ -353,7 +353,7 @@ export default {
                   />
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Becycle has helped me fix a bike."
                       type="text"
                       placeholder="4"
@@ -363,7 +363,7 @@ export default {
                   />
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Becycle has helped me learn about bike maintenance."
                       type="text"
                       placeholder="4"
@@ -547,7 +547,7 @@ export default {
               </div>
               <div class="grid grid-cols-1 gap-5">
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       :label="'Roughly, how many near misses (close to accident, but no contact or injury) ' +
                               'have you experienced in the last year?'"
                       type="text"
@@ -558,7 +558,7 @@ export default {
                   />
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="'Roughly, how many accidents (contact with another road users, regardless of injury) ' +
                              'have you experienced in the last year?'"
                       type="text"
@@ -588,7 +588,7 @@ export default {
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1" v-if="harassmentExperienced">
-                  <Textinput
+                  <TextInput
                       label="Would you like to tell us more? You can also include suggestions on how to address this issue."
                       type="text"
                       placeholder="Say as much or as little as you want."

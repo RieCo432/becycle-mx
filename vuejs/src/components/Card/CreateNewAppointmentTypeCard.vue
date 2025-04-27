@@ -1,7 +1,7 @@
 <script>
 import Button from '@/components/Button/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 import {useField, useForm} from 'vee-validate';
@@ -12,7 +12,7 @@ const toast = useToast();
 
 export default {
   name: 'CreateNewAppointmentTypeCard',
-  components: {Card, Textinput, Checkbox, Button},
+  components: {Card, TextInput, Checkbox, Button},
   emits: [
     'newAppointmentTypeCreated',
   ],
@@ -79,7 +79,7 @@ export default {
       <div class="col-span-12">
         <div>
           <form @submit.prevent="postNewAppointmentTypeSubmit" class="space-y-4">
-            <Textinput
+            <TextInput
                 label="New Appointment Type ID"
                 type="text"
                 placeholder="srep"
@@ -87,7 +87,7 @@ export default {
                 v-model="newAppointmentTypeId"
                 :error="newAppointmentTypeIdError"
             />
-            <Textinput
+            <TextInput
                 label="New Appointment Type Title"
                 type="text"
                 placeholder="Small Repair"
@@ -95,7 +95,7 @@ export default {
                 v-model="newAppointmentTypeTitle"
                 :error="newAppointmentTypeTitleError"
             />
-            <Textinput
+            <TextInput
                 label="New Appointment Type Description"
                 type="text"
                 placeholder="Fix something small, like tighten brakes"
@@ -103,7 +103,7 @@ export default {
                 v-model="newAppointmentTypeDescription"
                 :error="newAppointmentTypeDescriptionError"
             />
-            <Textinput
+            <TextInput
                 label="New Appointment Type Duration"
                 type="text"
                 placeholder="15"

@@ -4,11 +4,11 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import Button from '@/components/Button/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 
 export default {
   name: 'findPaperContract',
-  components: {Textinput, Button, ComboboxTextInput, Card},
+  components: {TextInput, Button, ComboboxTextInput, Card},
   data() {
     return {
       paperId: null,
@@ -55,7 +55,7 @@ export default {
               :allow-new=false
               :selected-callback="selectPaperId"
             >
-              <Textinput
+              <TextInput
                   label="Paper ID"
                   type="text"
                   placeholder="656...."

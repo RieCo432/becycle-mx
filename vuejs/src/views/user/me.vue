@@ -42,7 +42,7 @@ export default {
       });
     },
     deleteMyCard() {
-      requests.deleteMyPresentationCard().then((response) => {
+      requests.deleteMyPresentationCard().then(() => {
         this.presentationCardDetails = {
           name: 'NOT SET',
           bio: 'NOT SET',

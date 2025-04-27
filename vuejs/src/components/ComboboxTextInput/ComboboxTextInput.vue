@@ -68,11 +68,9 @@
 
 <script>
 import {Combobox, ComboboxInput, ComboboxOptions, ComboboxOption} from '@headlessui/vue';
-import Textinput from '@/components/Textinput/index.vue';
 
 export default {
   components: {
-    Textinput,
     Combobox,
     ComboboxOptions,
     ComboboxOption,

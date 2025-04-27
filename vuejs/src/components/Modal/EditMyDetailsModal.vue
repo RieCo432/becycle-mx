@@ -1,7 +1,7 @@
 <script>
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
@@ -12,7 +12,7 @@ const toast = useToast();
 
 export default {
   name: 'EditMyDetailsModal',
-  components: {Textinput, Button, Modal},
+  components: {TextInput, Button, Modal},
   setup(props, context) {
     const closeModal = toRef(props, 'closeModal');
     const nameChangeSchema = yup.object().shape({
@@ -75,7 +75,7 @@ export default {
     <form @submit.prevent="submitChangeNames">
       <div class="grid grid-cols-12 gap-5">
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="First Name"
               type="text"
               placeholder="First Name"
@@ -85,7 +85,7 @@ export default {
           />
         </div>
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="Last Name"
               type="text"
               placeholder="Last Name"
