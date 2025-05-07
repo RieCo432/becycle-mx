@@ -1,5 +1,6 @@
 <template>
   <Combobox
+      @update:modelValue="selected"
       @click="isOpen = openByDefault">
     <div class="relative mt-0">
       <div
@@ -44,7 +45,6 @@
               :value="suggestion"
               v-slot="{ active }"
               as="template"
-              @mousedown="(event) => selected(event, i)"
           >
             <li
                 :class="{
@@ -102,8 +102,9 @@ export default {
     };
   },
   methods: {
-    selected(event, i) {
-      this.selectedCallback(event, i);
+    selected(value) {
+      const i = this.suggestions.indexOf(value);
+      this.selectedCallback(null, i);
       this.isOpen = false;
     },
   },
