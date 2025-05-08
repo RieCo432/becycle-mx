@@ -37,6 +37,7 @@ export default {
     const contractData = toRef(props, 'contract');
     const patchContractReturn = toRef(props, 'patchContractReturn');
     const isInWriteMode = ref(false);
+    const userSelectionOptionsStatic = ref(true);
 
     const steps = [
       {
@@ -128,6 +129,7 @@ export default {
           requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
             if (response.data) {
               stepNumber.value = 1;
+              userSelectionOptionsStatic.value = true;
             } else {
               depositReturningPasswordSetErrors('Wrong Password!');
             }
@@ -169,6 +171,7 @@ export default {
       everythingCorrectError,
 
       returnAcceptingUserSelected,
+      userSelectionOptionsStatic,
 
       submit,
       steps,
@@ -189,12 +192,18 @@ export default {
       if (user1.toLowerCase() < user2.toLowerCase()) return -1;
       return 0;
     },
-    selectDepositReturningUser(event) {
-      this.depositReturningUser = event.target.innerText;
+    selectDepositReturningUser(event, i) {
+      if (i !== -1) {
+        this.depositReturningUser = this.filtered_deposit_returning_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
     },
-    selectReturnAcceptingUser(event) {
-      this.returnAcceptingUser = event.target.innerText;
-      this.returnAcceptingUserSelected();
+    selectReturnAcceptingUser(event, i) {
+      if (i !== -1) {
+        this.returnAcceptingUser = this.filtered_return_accepting_user_suggestions[i];
+        this.returnAcceptingUserSelected();
+        this.userSelectionOptionsStatic = false;
+      }
     },
     writeBikeDetailsToNfcTag() {
       this.isInWriteMode = true;
@@ -496,17 +505,15 @@ export default {
                           :suggestions="filtered_deposit_returning_user_suggestions"
                           :selected-callback="selectDepositReturningUser"
                           :allow-new="false"
-                          :open-by-default="true">
-                        <TextInput
-                            label="Deposit Returner"
-                            type="text"
-                            placeholder="workshop"
-                            name="depositReturningUser"
-                            v-model="depositReturningUser"
-                            :error="depositReturningUserError"
-                            @input="() => {}"
-                        />
-                      </ComboboxTextInput>
+                          :open-by-default="userSelectionOptionsStatic"
+                          label="Deposit Returner"
+                          type="text"
+                          placeholder="workshop"
+                          name="depositReturningUser"
+                          v-model="depositReturningUser"
+                          :error="depositReturningUserError"
+                          @input="() => {}"
+                      />
 
                       <TextInput
                           label="Deposit Returner Password"
@@ -532,17 +539,15 @@ export default {
                           :suggestions="filtered_return_accepting_user_suggestions"
                           :selected-callback="selectReturnAcceptingUser"
                           :allow-new="false"
-                          :open-by-default="true">
-                        <TextInput
-                            label="Return Accepting Volunteer"
-                            type="text"
-                            placeholder="workshop"
-                            name="returnAcceptingUser"
-                            v-model="returnAcceptingUser"
-                            :error="returnAcceptingUserError"
-                            @input="() => {}"
-                        />
-                      </ComboboxTextInput>
+                          :open-by-default="userSelectionOptionsStatic"
+                          label="Return Accepting Volunteer"
+                          type="text"
+                          placeholder="workshop"
+                          name="returnAcceptingUser"
+                          v-model="returnAcceptingUser"
+                          :error="returnAcceptingUserError"
+                          @input="() => {}"
+                      />
 
                       <TextInput
                           label="Password or Pin"

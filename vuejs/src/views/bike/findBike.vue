@@ -116,16 +116,13 @@ export default {
                 :suggestions="filteredBikeSuggestionsLegible"
                 :selected-callback="selectBike"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Make"
-                  type="text"
-                  placeholder="Raleigh"
-                  name="make"
-                  v-model="selectedBike.make"
-                  @input="fetchBikes"
-              />
-            </ComboboxTextInput>
+                label="Make"
+                type="text"
+                placeholder="Raleigh"
+                name="make"
+                v-model="selectedBike.make"
+                @input="fetchBikes"
+            />
           </div>
 
           <div class="col-span-12 lg:col-span-6">
@@ -134,16 +131,13 @@ export default {
                 :suggestions="filteredBikeSuggestionsLegible"
                 :selected-callback="selectBike"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Model"
-                  type="text"
-                  placeholder="Chloe"
-                  name="model"
-                  v-model="selectedBike.model"
-                  @input="fetchBikes"
-              />
-            </ComboboxTextInput>
+                label="Model"
+                type="text"
+                placeholder="Chloe"
+                name="model"
+                v-model="selectedBike.model"
+                @input="fetchBikes"
+            />
           </div>
 
           <div class="col-span-12 lg:col-span-6">
@@ -152,16 +146,13 @@ export default {
                 :suggestions="filteredBikeSuggestionsLegible"
                 :selected-callback="selectBike"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Colour"
-                  type="text"
-                  placeholder="Pink"
-                  name="colour"
-                  v-model="selectedBike.colour"
-                  @input="fetchBikes"
-              />
-            </ComboboxTextInput>
+                label="Colour"
+                type="text"
+                placeholder="Pink"
+                name="colour"
+                v-model="selectedBike.colour"
+                @input="fetchBikes"
+            />
           </div>
 
           <div class="col-span-12 lg:col-span-6">
@@ -170,16 +161,13 @@ export default {
                 :suggestions="filteredBikeSuggestionsLegible"
                 :selected-callback="selectBike"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Serial Number"
-                  type="text"
-                  placeholder="ABCD 1234"
-                  name="serialNumber"
-                  v-model="selectedBike.serialNumber"
-                  @input="fetchBikes"
-              />
-            </ComboboxTextInput>
+                label="Serial Number"
+                type="text"
+                placeholder="ABCD 1234"
+                name="serialNumber"
+                v-model="selectedBike.serialNumber"
+                @input="fetchBikes"
+            />
           </div>
 
           <div class="col-span-6 mt-10">
