@@ -331,7 +331,8 @@
                       :suggestions="filtered_deposit_collecting_user_suggestions"
                       :selected-callback="selectDepositCollectingUser"
                       :allow-new="false"
-                      :open-by-default="true">
+                      :open-by-default="userSelectionOptionsStatic"
+                  >
                     <TextInput
                         label="Deposit Collector"
                         type="text"
@@ -367,7 +368,7 @@
                       :suggestions="filtered_working_user_suggestions"
                       :selected-callback="selectWorkingUser"
                       :allow-new="false"
-                      :open-by-default="true">
+                      :open-by-default="userSelectionOptionsStatic">
                     <TextInput
                         label="Working Volunteer"
                         type="text"
@@ -404,7 +405,7 @@
                       :suggestions="filtered_checking_user_suggestions"
                       :selected-callback="selectCheckingUser"
                       :allow-new="false"
-                      :open-by-default="true">
+                      :open-by-default="userSelectionOptionsStatic">
                     <TextInput
                         label="Safety Checking User"
                         type="text"
@@ -636,6 +637,8 @@ export default {
 
     const router = useRouter();
 
+    const userSelectionOptionsStatic = ref(true);
+
     // step by step yup schema
     const clientSchema = yup.object().shape({
       firstName: yup.string().required('First name is required'),
@@ -835,6 +838,7 @@ export default {
           requests.checkUserPassword(depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
             if (response.data) {
               stepNumber.value = 4;
+              userSelectionOptionsStatic.value = true;
             } else {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
@@ -845,6 +849,7 @@ export default {
           requests.checkUserPasswordOrPin(workingUser.value, workingPasswordOrPin.value).then((response) => {
             if (response.data) {
               stepNumber.value = 5;
+              userSelectionOptionsStatic.value = true;
             } else {
               workingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
@@ -934,6 +939,8 @@ export default {
 
       workingUserSelected,
       checkingUserSelected,
+      
+      userSelectionOptionsStatic,
 
       submit,
       steps,
@@ -1029,17 +1036,20 @@ export default {
     selectDepositCollectingUser(event, i) {
       if (i !== -1) {
         this.depositCollectingUser = this.filtered_deposit_collecting_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
       }
     },
     selectWorkingUser(event, i) {
       if (i !== -1) {
         this.workingUser = this.filtered_working_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
         this.workingUserSelected();
       }
     },
     selectCheckingUser(event, i) {
       if (i !== -1) {
         this.checkingUser = this.filtered_checking_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
         this.checkingUserSelected();
       }
     },

@@ -1,25 +1,21 @@
 <template>
   <Combobox
-      @update:modelValue="(value) => selected($event, value)"
-      @click="isOpen = openByDefault">
+      @update:modelValue="(value) => selected($event, value)">
     <div class="relative mt-0">
       <div
           class="relative w-full"
       >
         <ComboboxInput
             as="template"
-            @focusout="isOpen = false"
-            @input="isOpen = true"
             >
           <slot></slot>
         </ComboboxInput>
       </div>
-      <div v-show="isOpen">
         <ComboboxOptions
             class="absolute w-full mt-1 max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5
                  focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700
                  shadow-dropdown z-[9999]"
-            static
+            :static="openByDefault"
         >
           <ComboboxOption
               v-if="((suggestions.indexOf(fieldModelValue) === -1) && allowNew)"
@@ -60,8 +56,6 @@
           </ComboboxOption>
         </ComboboxOptions>
       </div>
-
-    </div>
   </Combobox>
 </template>
 
@@ -96,17 +90,10 @@ export default {
       default: false,
     },
   },
-  data() {
-    return {
-      isOpen: false,
-    };
-  },
   methods: {
     selected(event, value) {
-      // debugger;
       const i = this.suggestions.indexOf(value);
       this.selectedCallback(event, i);
-      this.isOpen = false;
     },
   },
 };
