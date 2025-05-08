@@ -1,6 +1,6 @@
 <template>
   <Combobox
-      @update:modelValue="selected"
+      @update:modelValue="(value) => selected($event, value)"
       @click="isOpen = openByDefault">
     <div class="relative mt-0">
       <div
@@ -102,9 +102,10 @@ export default {
     };
   },
   methods: {
-    selected(value) {
+    selected(event, value) {
+      // debugger;
       const i = this.suggestions.indexOf(value);
-      this.selectedCallback(null, i);
+      this.selectedCallback(event, i);
       this.isOpen = false;
     },
   },

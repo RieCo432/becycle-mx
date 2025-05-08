@@ -739,6 +739,8 @@ export default {
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
     const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
+    makeNotInList.value = false;
+    modelNotInList.value = false;
 
     const {value: type, errorMessage: typeError} = useField('type');
     const {value: condition, errorMessage: conditionError} = useField('condition');
@@ -995,35 +997,51 @@ export default {
       });
     },
     selectClient(event, i) {
-      const selectedClient = this.filtered_client_suggestions[i];
-      this.clientId = selectedClient.id;
-      this.emailAddress = selectedClient.emailAddress;
-      this.confirmEmailAddress = selectedClient.emailAddress;
-      this.firstName = selectedClient.firstName;
-      this.lastName = selectedClient.lastName;
+      if (i !== -1) {
+        const selectedClient = this.filtered_client_suggestions[i];
+        this.clientId = selectedClient.id;
+        this.emailAddress = selectedClient.emailAddress;
+        this.confirmEmailAddress = selectedClient.emailAddress;
+        this.firstName = selectedClient.firstName;
+        this.lastName = selectedClient.lastName;
+      }
     },
-    selectMake(event) {
-      this.make = event.target.innerText;
+    selectMake(event, i) {
+      if (i !== -1) {
+        this.make = this.makeSuggestions[i];
+      }
     },
-    selectModel(event) {
-      this.model = event.target.innerText;
+    selectModel(event, i) {
+      if (i !== -1) {
+        this.model = this.modelSuggestions[i];
+      }
     },
-    selectSerialNumber(event) {
-      this.serialNumber = event.target.innerText;
+    selectSerialNumber(event, i) {
+      if (i !== -1) {
+        this.serialNumber = this.serial_number_suggestions[i];
+      }
     },
-    selectColour(event) {
-      this.colour = event.target.innerText;
+    selectColour(event, i) {
+      if (i !== -1) {
+        this.colour = this.colour_suggestions[i];
+      }
     },
-    selectDepositCollectingUser(event) {
-      this.depositCollectingUser = event.target.innerText;
+    selectDepositCollectingUser(event, i) {
+      if (i !== -1) {
+        this.depositCollectingUser = this.filtered_deposit_collecting_user_suggestions[i];
+      }
     },
-    selectWorkingUser(event) {
-      this.workingUser = event.target.innerText;
-      this.workingUserSelected();
+    selectWorkingUser(event, i) {
+      if (i !== -1) {
+        this.workingUser = this.filtered_working_user_suggestions[i];
+        this.workingUserSelected();
+      }
     },
-    selectCheckingUser(event) {
-      this.checkingUser = event.target.innerText;
-      this.checkingUserSelected();
+    selectCheckingUser(event, i) {
+      if (i !== -1) {
+        this.checkingUser = this.filtered_checking_user_suggestions[i];
+        this.checkingUserSelected();
+      }
     },
     verifyBikeDetails(rfidTagSerialNumber) {
       requests.getBikeByRfidTagSerialNumber(rfidTagSerialNumber)
