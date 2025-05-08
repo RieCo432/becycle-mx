@@ -66,16 +66,13 @@ export default {
                 :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
-            >
-              <TextInput
-                  label="First Name"
-                  type="text"
-                  placeholder="First Name"
-                  name="firstName"
-                  v-model="selectedClient.firstName"
-                  @input="fetchClients"
-              />
-            </ComboboxTextInput>
+                label="First Name"
+                type="text"
+                placeholder="First Name"
+                name="firstName"
+                v-model="selectedClient.firstName"
+                @input="fetchClients"
+            />
           </div>
 
           <div class="col-span-12 lg:col-span-6">
@@ -84,16 +81,13 @@ export default {
                 :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Last Name"
-                  type="text"
-                  placeholder="Last Name"
-                  name="lastName"
-                  v-model="selectedClient.lastName"
-                  @input="fetchClients"
-              />
-            </ComboboxTextInput>
+                label="Last Name"
+                type="text"
+                placeholder="Last Name"
+                name="lastName"
+                v-model="selectedClient.lastName"
+                @input="fetchClients"
+            />
           </div>
 
           <div class="col-span-12">
@@ -102,16 +96,13 @@ export default {
                 :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Email Address"
-                  type="text"
-                  placeholder="Email Address"
-                  name="emailAddress"
-                  v-model="selectedClient.emailAddress"
-                  @input="fetchClients"
-              />
-            </ComboboxTextInput>
+                label="Email Address"
+                type="text"
+                placeholder="Email Address"
+                name="emailAddress"
+                v-model="selectedClient.emailAddress"
+                @input="fetchClients"
+            />
           </div>
 
           <div class="col-span-3 mt-10">

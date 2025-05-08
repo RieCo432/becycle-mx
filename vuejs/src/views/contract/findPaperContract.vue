@@ -54,16 +54,13 @@ export default {
               :suggestions="filteredPaperIdSuggestions"
               :allow-new=false
               :selected-callback="selectPaperId"
-            >
-              <TextInput
-                  label="Paper ID"
-                  type="text"
-                  placeholder="656...."
-                  name="paperId"
-                  v-model="paperId"
-                  @input="fetchPaperIdSuggestions"
-              />
-            </ComboboxTextInput>
+              label="Paper ID"
+              type="text"
+              placeholder="656...."
+              name="paperId"
+              v-model="paperId"
+              @input="fetchPaperIdSuggestions"
+            />
           </div>
           <div class="col-span-2">
             <Button

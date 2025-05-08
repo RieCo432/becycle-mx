@@ -63,14 +63,13 @@
                     <ComboboxTextInput
                         :field-model-value="emailAddress"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput label="Email" type="email" placeholder="Type your email"
-                                 name="emailAddress"
-                                 v-model="emailAddress"
-                                 :error="emailAddressError"
-                                 @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="Email" type="email" placeholder="Type your email"
+                        name="emailAddress"
+                        v-model="emailAddress"
+                        :error="emailAddressError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-1">
@@ -88,34 +87,30 @@
                     <ComboboxTextInput
                         :field-model-value="firstName"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput
-                          label="First name"
-                          type="text"
-                          placeholder="First name"
-                          name="firstname"
-                          v-model="firstName"
-                          :error="firstNameError"
-                          @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="First name"
+                        type="text"
+                        placeholder="First name"
+                        name="firstname"
+                        v-model="firstName"
+                        :error="firstNameError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-1">
                     <ComboboxTextInput
                         :field-model-value="lastName"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput
-                          label="Last name"
-                          type="text"
-                          placeholder="Last name"
-                          name="lastname"
-                          v-model="lastName"
-                          :error="lastNameError"
-                          @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="Last name"
+                        type="text"
+                        placeholder="Last name"
+                        name="lastname"
+                        v-model="lastName"
+                        :error="lastNameError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
                 </div>
               </div>
@@ -136,17 +131,15 @@
                         :allow-new="makeNotInList"
                         :field-model-value="make"
                         :suggestions="filtered_make_suggestions"
-                        :selected-callback="selectMake">
-                      <TextInput
-                          label="Make"
-                          type="text"
-                          placeholder="Make"
-                          name="make"
-                          v-model="make"
-                          :error="makeError"
-                          @input="fetchBikeMakeSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectMake"
+                        label="Make"
+                        type="text"
+                        placeholder="Make"
+                        name="make"
+                        v-model="make"
+                        :error="makeError"
+                        @input="fetchBikeMakeSuggestions"
+                    />
                   </div>
                   <div class="col-span-2 md:col-span-1">
                     <label
@@ -164,17 +157,15 @@
                         :allow-new="modelNotInList"
                         :field-model-value="model"
                         :suggestions="filtered_model_suggestions"
-                        :selected-callback="selectModel">
-                      <TextInput
-                          label="Model"
-                          type="text"
-                          placeholder="Model"
-                          name="model"
-                          v-model="model"
-                          :error="modelError"
-                          @input="fetchBikeModelSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectModel"
+                        label="Model"
+                        type="text"
+                        placeholder="Model"
+                        name="model"
+                        v-model="model"
+                        :error="modelError"
+                        @input="fetchBikeModelSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-2 md:col-span-1">
@@ -192,17 +183,15 @@
                     <ComboboxTextInput
                         :field-model-value="colour"
                         :suggestions="filtered_colour_suggestions"
-                        :selected-callback="selectColour">
-                      <TextInput
-                          label="Colour"
-                          type="text"
-                          placeholder="Colour"
-                          name="colour"
-                          v-model="colour"
-                          :error="colourError"
-                          @input="fetchColourSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectColour"
+                        label="Colour"
+                        type="text"
+                        placeholder="Colour"
+                        name="colour"
+                        v-model="colour"
+                        :error="colourError"
+                        @input="fetchColourSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-10 md:col-span-5 md:col-start-7">
@@ -220,17 +209,15 @@
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
-                        :selected-callback="selectSerialNumber">
-                      <TextInput
-                          label="Serial Number"
-                          type="text"
-                          placeholder="Serial Number"
-                          name="serialnumber"
-                          v-model="serialNumber"
-                          :error="serialNumberError"
-                          @input="fetchSerialNumberSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectSerialNumber"
+                        label="Serial Number"
+                        type="text"
+                        placeholder="Serial Number"
+                        name="serialnumber"
+                        v-model="serialNumber"
+                        :error="serialNumberError"
+                        @input="fetchSerialNumberSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-full">
@@ -332,17 +319,14 @@
                       :selected-callback="selectDepositCollectingUser"
                       :allow-new="false"
                       :open-by-default="userSelectionOptionsStatic"
-                  >
-                    <TextInput
-                        label="Deposit Collector"
-                        type="text"
-                        placeholder="workshop"
-                        name="depositCollectingUser"
-                        v-model="depositCollectingUser"
-                        :error="depositCollectingUserError"
-                        @input="() => {}"
-                    />
-                  </ComboboxTextInput>
+                      label="Deposit Collector"
+                      type="text"
+                      placeholder="workshop"
+                      name="depositCollectingUser"
+                      v-model="depositCollectingUser"
+                      :error="depositCollectingUserError"
+                      @input="() => {}"
+                  />
 
                   <TextInput
                       label="Deposit Collector Password"
@@ -368,17 +352,15 @@
                       :suggestions="filtered_working_user_suggestions"
                       :selected-callback="selectWorkingUser"
                       :allow-new="false"
-                      :open-by-default="userSelectionOptionsStatic">
-                    <TextInput
-                        label="Working Volunteer"
-                        type="text"
-                        placeholder="workshop"
-                        name="workingUser"
-                        v-model="workingUser"
-                        :error="workingUserError"
-                        @input="() => {}"
-                    />
-                  </ComboboxTextInput>
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Working Volunteer"
+                      type="text"
+                      placeholder="workshop"
+                      name="workingUser"
+                      v-model="workingUser"
+                      :error="workingUserError"
+                      @input="() => {}"
+                  />
 
                   <TextInput
                       label="Working User Password or Pin"
@@ -405,17 +387,15 @@
                       :suggestions="filtered_checking_user_suggestions"
                       :selected-callback="selectCheckingUser"
                       :allow-new="false"
-                      :open-by-default="userSelectionOptionsStatic">
-                    <TextInput
-                        label="Safety Checking User"
-                        type="text"
-                        placeholder="workshop"
-                        name="checkingUser"
-                        v-model="checkingUser"
-                        :error="checkingUserError"
-                        @input="() => {}"
-                    />
-                  </ComboboxTextInput>
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Safety Checking User"
+                      type="text"
+                      placeholder="workshop"
+                      name="checkingUser"
+                      v-model="checkingUser"
+                      :error="checkingUserError"
+                      @input="() => {}"
+                  />
 
                   <TextInput
                       label="Checking User Password or Pin"
@@ -939,7 +919,7 @@ export default {
 
       workingUserSelected,
       checkingUserSelected,
-      
+
       userSelectionOptionsStatic,
 
       submit,
