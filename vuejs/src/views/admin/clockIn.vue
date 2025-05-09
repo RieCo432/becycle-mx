@@ -75,6 +75,10 @@ export default defineComponent({
   <div class="grid grid-cols-12 gap-5">
     <div class="lg:col-span-6 lg:col-start-4 col-span-12">
       <Card title="Volunteer Clock-In">
+        <p class="dark:text-red-500 text-red-500">
+          Note: This page is only to record "last active" time.
+          This is also done every time you successfully enter your pin or password,
+          so this page is only necessary if you rarely log in, sign off on rentals, or collect deposits.</p><br>
         <form @submit.prevent="onSubmit" class="space-y-4">
           <ComboboxTextInput
               :field-model-value="username"
