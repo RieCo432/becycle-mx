@@ -60,7 +60,7 @@ class User(Base):
     appointmentManager: Mapped[bool] = mapped_column("appointmentmanager", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
     treasurer: Mapped[bool] = mapped_column("treasurer", Boolean, default=False, nullable=False, server_default=text("FALSE"), quote=False)
     softDeleted: Mapped[bool] = mapped_column("softdeleted", Boolean, default=False, nullable=False, server_default=text("FALSE"), quote=False)
-    lastAuthenticated: Mapped[datetime] = mapped_column("lastauthenticated", DateTime, nullable=True, quote=False)
+    lastAuthenticated: Mapped[datetime] = mapped_column("lastauthenticated", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=True, quote=False)
 
     workedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.workingUserId], back_populates="workingUser")
     checkedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.checkingUserId], back_populates="checkingUser")
