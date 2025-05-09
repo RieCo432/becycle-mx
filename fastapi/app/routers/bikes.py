@@ -1,7 +1,8 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from starlette import status
 
 import app.crud as crud
 import app.dependencies as dep
@@ -68,6 +69,18 @@ async def patch_bike(
         db: Session = Depends(dep.get_db)
 ) -> schemas.Bike:
     return crud.update_bike(db=db, bike_id=bike_id, updated_bike_data=updated_bike_data)
+
+
+@bikes.get("/bikes/tag/{rfid_tag_serial_number}", dependencies=[Depends(dep.get_current_active_user)])
+async def get_bike_by_tag(
+        rfid_tag_serial_number: str,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Bike:
+    bikes = crud.get_bikes_by_rfid_tag_serial_number(db=db, rfid_tag_serial_number=rfid_tag_serial_number)
+    if len(bikes) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Bike not found"})
+
+    return bikes[0]
 
 
 @bikes.get("/bikes/{bike_id}/contracts", dependencies=[Depends(dep.get_current_active_user)])

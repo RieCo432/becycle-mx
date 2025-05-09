@@ -48,10 +48,10 @@
                        ring-gray-500-500 dark:ring-light divide-y divide-gray-500-300 dark:divide-light"
               >
                 <div
-                  className="flex bg-white dark:bg-slate-800  px-3 rounded-md py-3 items-center"
+                  class="flex bg-white dark:bg-slate-800  px-3 rounded-md py-3 items-center"
                 >
                   <div
-                    className="flex-0  text-slate-700 dark:text-slate-300 ltr:pr-2 rtl:pl-2 text-lg"
+                    class="flex-0  text-slate-700 dark:text-slate-300 ltr:pr-2 rtl:pl-2 text-lg"
                   >
                     <Icon icon="heroicons-outline:search" />
                   </div>
@@ -72,9 +72,9 @@
                     class="max-h-40 overflow-y-auto text-sm py-2"
                   >
                     <div v-if="filteredsearchList.length === 0 && query !== ''">
-                      <div className=" text-base py-2 px-4">
+                      <div class=" text-base py-2 px-4">
                         <p
-                          className="text-slate-500-600 text-base dark:text-white"
+                          class="text-slate-500-600 text-base dark:text-white"
                         >
                           No result found
                         </p>

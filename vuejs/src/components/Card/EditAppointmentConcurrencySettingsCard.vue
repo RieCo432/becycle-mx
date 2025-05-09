@@ -6,8 +6,9 @@ import {useToast} from 'vue-toastification';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 import Button from '@/components/Button/index.vue';
-import ConcurrencyLimitsSkeleton from '@/components/Skeleton/ConcurrencyLimitsSkeleton.vue';
 import window from '@/mixins/window';
+import Select from '@/components/Select/index.vue';
+import {number} from 'yup';
 
 const toast = useToast();
 
@@ -15,57 +16,58 @@ export default {
   name: 'EditAppointmentConcurrencySettingsCard',
   mixins: [window],
   components: {
+    Select,
     Button,
     AppointmentConcurrencySlider,
     Card,
     VueSlider,
-    ConcurrencyLimitsSkeleton,
   },
   data() {
     return {
-      loadingConcurrencyLimits: true,
-      concurrencyLimits: [],
+      newWeekDay: this.weekDay,
       newAfterTime: null,
       newLimit: 0,
     };
   },
-  created() {
-    requests.getAppointmentConcurrencyLimits().then((response) => {
-      this.concurrencyLimits = response.data;
-      this.loadingConcurrencyLimits = false;
-    });
+  props: {
+    weekDay: {
+      type: number,
+      required: true,
+    },
+    weekDayOptions: {
+      type: Array,
+      required: true,
+    },
+    concurrencyLimits: {
+      type: Array,
+      required: true,
+    },
+    weekDayName: {
+      type: String,
+      required: true,
+    },
   },
+  emits: [
+    'concurrencyLimitAdjusted',
+    'concurrencyLimitDeleted',
+    'concurrencyLimitAdded',
+  ],
   methods: {
-    handleConcurrencyLimitAdjusted(originalAfterTime, updatedConcurrencyLimit) {
-      const indexInArray = this.concurrencyLimits.findIndex((concurrencyLimit) => concurrencyLimit.afterTime === originalAfterTime);
-      this.concurrencyLimits.splice(indexInArray, 1, updatedConcurrencyLimit);
-      this.concurrencyLimits.sort(this.sortConcurrencyLimits);
-    },
-    sortConcurrencyLimits(a, b) {
-      const [aH, aM] = a.afterTime.split(':');
-      const [bH, bM] = b.afterTime.split(':');
-
-      return 60 * (aH - bH) + (aM - bM);
-    },
-    removeConcurrencyLimit(afterTime) {
-      const indexInArray = this.concurrencyLimits.findIndex((concurrencyLimit) => concurrencyLimit.afterTime === afterTime);
-      this.concurrencyLimits.splice(indexInArray, 1);
-      this.concurrencyLimits.sort(this.sortConcurrencyLimits);
-    },
     postNewConcurrencyLimit() {
-      if (this.newAfterTime == null) {
-        toast.error('You must choose a time!', {timeout: 2000});
+      if (this.newWeekDay == null || this.newAfterTime == null) {
+        toast.error('You must choose a week day and time!', {timeout: 2000});
       } else {
         requests.postNewAppointmentConcurrencyLimit({
+          weekDay: parseInt(this.newWeekDay),
           afterTime: this.newAfterTime.concat(':00'),
           maxConcurrent: this.newLimit,
         }).then((response) => {
-          this.concurrencyLimits.push(response.data);
-          this.concurrencyLimits.sort(this.sortConcurrencyLimits);
+          this.$emit('concurrencyLimitAdded', response.data);
           toast.success('Appointment Concurrency Limit added', {timeout: 2000});
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         }).finally(() => {
+          this.newWeekDay = this.weekDay;
           this.newLimit = 0;
           this.newAfterTime = null;
         });
@@ -76,18 +78,19 @@ export default {
 </script>
 
 <template>
-  <Card title="Appointment Concurrency Settings">
-    <div v-if="!loadingConcurrencyLimits" class="grid grid-cols-12 gap-5 h-full">
+  <Card :title="`Appointment Limits for ${weekDayName}`">
+    <div class="grid grid-cols-12 2xl:grid-cols-8 gap-5 h-full">
         <AppointmentConcurrencySlider
             v-for="concurrencyLimit in concurrencyLimits"
             :concurrency-limit="concurrencyLimit"
-            :key="concurrencyLimit.afterTime"
+            :key="`${concurrencyLimit.weekDay}${concurrencyLimit.afterTime}`"
+            :week-day-options="weekDayOptions"
             @concurrency-limit-adjusted="(updatedConcurrencyLimit) =>
-              handleConcurrencyLimitAdjusted(concurrencyLimit.afterTime, updatedConcurrencyLimit)"
-            @concurrency-limit-deleted="() => removeConcurrencyLimit(concurrencyLimit.afterTime)"
+            $emit('concurrencyLimitAdjusted', concurrencyLimit.weekDay, concurrencyLimit.afterTime, updatedConcurrencyLimit)"
+            @concurrency-limit-deleted="$emit('concurrencyLimitDeleted', concurrencyLimit.weekDay, concurrencyLimit.afterTime)"
             class="h-full"
         ></AppointmentConcurrencySlider>
-      <div class="col-span-12 mt-20 2xl:mt-auto 2xl:col-span-1 h-full 2xl:col-end-13">
+      <div class="col-span-12 mt-20 2xl:mt-auto 2xl:col-span-1 h-full 2xl:col-end-9">
         <form @submit.prevent="postNewConcurrencyLimit">
           <div class="h-full grid grid-cols-12 2xl:grid-cols-1 gap-4">
             <div class="col-span-6 2xl:col-span-1 2xl:h-64 items-center my-auto">
@@ -104,7 +107,15 @@ export default {
                   class="m-auto 2xl:h-full"
               ></vue-slider>
             </div>
-            <div class="col-span-4 2xl:col-span-1 2xl:h-8 content-center">
+            <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
+              <Select
+                  placeholder="Day"
+                  :options="weekDayOptions"
+                  v-model="newWeekDay"
+                  name="weekDay"
+              />
+            </div>
+            <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
               <flat-pickr
                   class="form-control m-auto"
                   name="newAfterTime"
@@ -124,7 +135,6 @@ export default {
         </form>
       </div>
     </div>
-    <ConcurrencyLimitsSkeleton v-else :count="6"></ConcurrencyLimitsSkeleton>
   </Card>
 </template>
 

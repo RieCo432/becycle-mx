@@ -1,6 +1,7 @@
 from datetime import time, date
+from uuid import uuid4
 
-from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date
+from sqlalchemy import String, text, Boolean, Text, Integer, ARRAY, Time, Date, PrimaryKeyConstraint, UUID, Identity
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.db import Base
@@ -20,11 +21,18 @@ class AppointmentGeneralSettings(Base):
 class AppointmentConcurrencyLimit(Base):
     __tablename__ = "appointmentconcurrencylimits"
 
+    weekDay: Mapped[int] = mapped_column("weekday", Integer, primary_key=True, nullable=False, index=True, quote=False)
     afterTime: Mapped[time] = mapped_column("aftertime", Time, primary_key=True, nullable=False, index=True, quote=False)
     maxConcurrent: Mapped[int] = mapped_column("maxconcurrent", Integer, nullable=False, quote=False)
 
+    __table_args__ = (
+        PrimaryKeyConstraint(weekDay, afterTime),
+        {}
+    )
+
     def __eq__(self, other: dict):
         return all([
+            str(self.weekDay) == str(other["weekday"]),
             str(self.afterTime) == str(other.get("afterTime")),
             str(self.maxConcurrent) == str(other.get("maxConcurrent"))
         ])
@@ -77,6 +85,39 @@ class Address(Base):
             str(self.street) == str(other.get("street")),
             str(self.postcode) == str(other.get("postcode")),
             str(self.city) == str(other.get("city"))
+        ])
+
+
+class AboutUs(Base):
+    __tablename__ = "aboutus"
+
+    id: Mapped[int] = mapped_column("id", Integer, primary_key=True, nullable=False, default=1, server_default=text("1"), index=True, quote=False)
+    html: Mapped[str] = mapped_column("html", Text, nullable=True, quote=False)
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.html) == str(other.get("number")),
+        ])
+
+
+class Faq(Base):
+    __tablename__ = "faqs"
+
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4,
+                                     server_default=text("uuid_generate_v4()"), index=True, quote=False)
+    question: Mapped[str] = mapped_column("question", String(256), nullable=False, quote=False)
+    answer: Mapped[str] = mapped_column("answer", Text, nullable=False, quote=False)
+    active: Mapped[bool] = mapped_column("active", Boolean, nullable=False, default=True, server_default=text("TRUE"),
+                                         quote=False)
+    orderIndex: Mapped[int] = mapped_column("orderindex", Integer, Identity(start=1, cycle=True), unique=True, index=True, nullable=False, quote=False)
+
+    def __eq__(self, other: dict):
+        return all([
+            str(self.id) == str(other.get("id")),
+            str(self.active) == str(other.get("active")),
+            str(self.question) == str(other.get("question")),
+            str(self.answer) == str(other.get("answer")),
+            str(self.orderIndex) == str(other.get("orderIndex")),
         ])
 
 

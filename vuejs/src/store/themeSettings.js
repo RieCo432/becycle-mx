@@ -44,7 +44,6 @@ export const useThemeSettingsStore = defineStore('themeSettings', {
       }
       localStorage.setItem('monochrome', true);
       document.getElementsByTagName( 'html' )[0].classList.add('grayscale');
-      return;
     },
 
     toggleSettings() {

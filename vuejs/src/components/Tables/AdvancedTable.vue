@@ -40,18 +40,16 @@
                       }"
       >
         <template v-slot:table-row="props">
-          <span v-if="props.column.field === 'actions'">
-            <div class="flex space-x-3 rtl:space-x-reverse">
-                <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
-                  <template #button>
-                    <div class="action-btn">
-                      <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
-                    </div>
-                  </template>
-                  <span>{{action.label}}</span>
-                </Tooltip>
-            </div>
-          </span>
+          <div v-if="props.column.field === 'actions'" class="flex space-x-3 rtl:space-x-reverse">
+            <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
+              <template #button>
+                <div class="action-btn">
+                  <Icon :icon="action.icon" @click="action.func(props.row.id)"/>
+                </div>
+              </template>
+              <span>{{action.label}}</span>
+            </Tooltip>
+          </div>
         </template>
         <template #pagination-bottom="props">
           <div class="py-4 px-3">

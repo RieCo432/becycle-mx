@@ -16,9 +16,8 @@ import App from './App.vue';
 import './assets/scss/auth.scss';
 import './assets/scss/tailwind.scss';
 import router from '@/router';
-import VCalendar from 'v-calendar';
 import {createPinia} from 'pinia';
-import 'v-calendar/dist/style.css';
+import {setupCalendar} from 'v-calendar';
 
 const pinia = createPinia();
 
@@ -36,7 +35,9 @@ app.use(VueSweetalert2)
   .use(VueFlatPickr)
   .use(VueGoodTablePlugin)
   .use(VueApexCharts)
-  .use(VCalendar);
+  .use(setupCalendar, {});
+
+app.component('');
 
 app.config.globalProperties.$store = {};
 app.mount('#app');

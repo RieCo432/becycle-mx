@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session
+from starlette import status
 
 import app.models as models
 import app.schemas as schemas
@@ -28,7 +29,7 @@ def find_similar_bikes(db: Session, make: str | None = None, model: str | None =
     )]
 
     if len(bikes) == 0:
-        raise HTTPException(status_code=404, detail={"description": "No bikes found"})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "No bikes found"})
 
     return bikes
 
@@ -56,6 +57,13 @@ def get_all_bikes(db: Session) -> list[schemas.Bike]:
     return [_ for _ in db.scalars(
         select(models.Bike)
     )]
+
+def get_bikes_by_rfid_tag_serial_number(db: Session, rfid_tag_serial_number: str) -> list[schemas.Bike]:
+    bikes = [_ for _ in db.scalars(
+        select(models.Bike)
+        .where(models.Bike.rfidTagSerialNumber == rfid_tag_serial_number)
+    )]
+    return bikes
 
 
 def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
@@ -123,6 +131,13 @@ def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase)
         bike.decals = updated_bike_data.decals.lower()
     if updated_bike_data.serialNumber is not None:
         bike.serialNumber = updated_bike_data.serialNumber.lower()
+    if updated_bike_data.rfidTagSerialNumber is not None:
+        bike.rfidTagSerialNumber = updated_bike_data.rfidTagSerialNumber.lower()
+        bikes_with_this_tag = get_bikes_by_rfid_tag_serial_number(db=db, rfid_tag_serial_number=updated_bike_data.rfidTagSerialNumber)
+        for bike_with_this_tag in bikes_with_this_tag:
+            if bike_with_this_tag.id != bike_id:
+                bike_with_this_tag.rfidTagSerialNumber = "MOVED TO ANOTHER BIKE"
+
 
     db.commit()
 

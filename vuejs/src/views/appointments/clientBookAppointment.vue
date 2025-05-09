@@ -1,7 +1,7 @@
 <script>
 import {ref} from 'vue';
 import requests from '@/requests';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
@@ -17,7 +17,7 @@ export default {
     DashButton,
     Card,
     Button,
-    Textinput,
+    TextInput,
     AppointmentTypeCardSkeleton,
     AppointmentDateCardSkeleton,
     Icon,
@@ -50,13 +50,10 @@ export default {
 
     const submit = () => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         // handle submit
         requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(),
-          appointmentNotes.value).then((response) => {
+          appointmentNotes.value).then(() => {
           toast.success('Appointment Request submitted! Kindly wait for us to accept or deny your request.', {timeout: 2000});
           router.push('/clients/me');
         }).catch((error) => {
@@ -64,18 +61,18 @@ export default {
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
-          stepNumber.value--;
+          stepNumber.value = 1;
         });
       } else {
         if (stepNumber.value === 0) {
-          stepNumber.value++;
+          stepNumber.value = 1;
           availableSlots.value = null;
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
         } else if (stepNumber.value === 1) {
           // handle return accepting user
-          stepNumber.value++;
+          stepNumber.value = 2;
         }
       }
     };
@@ -251,24 +248,26 @@ export default {
                     <h5 class="text-base text-slate-800 dark:text-slate-300 mb-3">Please check all the details!</h5>
                     <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
                       <thead>
-                      <th colspan="2" class="border border-slate-500">Appointment Details</th>
+                      <tr class="border border-slate-500">Appointment Details</tr>
                       </thead>
-                      <tr>
-                        <td class="border border-slate-500">Appointment Type</td>
-                        <td class="border border-slate-500">{{appointmentTypes.find((type) => type.id === appointmentType).title}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Date and Time</td>
-                        <td class="border border-slate-500">
+                      <tbody>
+                        <tr>
+                          <td class="border border-slate-500">Appointment Type</td>
+                          <td class="border border-slate-500">{{appointmentTypes.find((type) => type.id === appointmentType).title}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Date and Time</td>
+                          <td class="border border-slate-500">
                             {{appointmentDatetime.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long',
                             year: 'numeric', hour: "2-digit", minute: "2-digit", hour12: false, timeZone: 'UTC'})}}
-                        </td>
-                      </tr>
+                          </td>
+                        </tr>
+                      </tbody>
                     </table>
                   </div>
                   <div class="col-span-1">
 
-                    <Textinput
+                    <TextInput
                         label="Notes"
                         type="text"
                         placeholder="Any import things to note?"

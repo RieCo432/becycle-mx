@@ -1,7 +1,7 @@
 <script>
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import {toRef} from 'vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
@@ -12,7 +12,7 @@ const toast = useToast();
 
 export default {
   name: 'EditBikeDetailsModal',
-  components: {Textinput, Button, Modal},
+  components: {TextInput, Button, Modal},
   setup(props, context) {
     const closeModal = toRef(props, 'closeModal');
     const bike = toRef(props, 'bike');
@@ -98,7 +98,7 @@ export default {
     <form @submit.prevent="submitChangeDetails">
       <div class="grid grid-cols-12 gap-5">
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="Make"
               type="text"
               placeholder="raleigh"
@@ -108,7 +108,7 @@ export default {
           />
         </div>
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="Model"
               type="text"
               placeholder="chloe"
@@ -118,7 +118,7 @@ export default {
           />
         </div>
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="Colour"
               type="text"
               placeholder="pink"
@@ -128,7 +128,7 @@ export default {
           />
         </div>
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="Decals"
               type="text"
               placeholder="some stickers"
@@ -138,7 +138,7 @@ export default {
           />
         </div>
         <div class="col-span-full">
-          <Textinput
+          <TextInput
               label="Serial Number"
               type="text"
               placeholder="abcd 1234"

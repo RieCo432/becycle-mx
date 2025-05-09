@@ -4,7 +4,7 @@
         <div class="text-slate-600 text-base dark:text-slate-300">Monochrome Mode</div>
         <div>
           <label
-            :class="monochrome==true ? 'bg-primary-500' : 'bg-secondary-500'"
+            :class="monochrome ? 'bg-primary-500' : 'bg-secondary-500'"
             class="relative inline-flex h-6 w-[46px] items-center rounded-full transition-all duration-150 cursor-pointer"
           >
             <input type="checkbox" @change="toggleMonochrome" v-model="monochrome" class="hidden" />

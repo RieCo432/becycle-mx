@@ -1,7 +1,6 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
-import Select from '@/components/Select/index.vue';
 import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import {computed, ref, toRef} from 'vue';
@@ -13,16 +12,20 @@ import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCard
 import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkeleton.vue';
 import ContractCardSkeleton from '@/components/Skeleton/ContractCardSkeleton.vue';
 import Icon from '@/components/Icon';
+import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
+import nfc from '@/nfc';
+import {useToast} from 'vue-toastification';
 
+const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    ComboboxTextInput,
     Checkbox,
-    Select,
     Card,
     DashButton,
-    Textinput,
+    TextInput,
     ContractClientCardSkeleton,
     ContractBikeCardSkeleton,
     ContractCardSkeleton,
@@ -33,7 +36,8 @@ export default {
     const credentialsStore = useCredentialsStore();
     const contractData = toRef(props, 'contract');
     const patchContractReturn = toRef(props, 'patchContractReturn');
-
+    const isInWriteMode = ref(false);
+    const userSelectionOptionsStatic = ref(true);
 
     const steps = [
       {
@@ -100,6 +104,9 @@ export default {
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
+    depositReturningUser.value = '';
+    returnAcceptingUser.value = '';
+
     function returnAcceptingUserSelected() {
       returnAcceptingPasswordOrPin.value = null;
       if (returnAcceptingUser.value === depositReturningUser.value) {
@@ -109,10 +116,7 @@ export default {
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         // handle submit
         patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value,
           returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
@@ -124,7 +128,8 @@ export default {
           }
           requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 1;
+              userSelectionOptionsStatic.value = true;
             } else {
               depositReturningPasswordSetErrors('Wrong Password!');
             }
@@ -133,7 +138,7 @@ export default {
           // handle return accepting user
           requests.checkUserPasswordOrPin(returnAcceptingUser.value, returnAcceptingPasswordOrPin.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 2;
             } else {
               returnAcceptingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
@@ -147,6 +152,7 @@ export default {
     };
 
     return {
+      isInWriteMode,
       contractData,
       credentialsStore,
       depositAmountReturned,
@@ -165,6 +171,7 @@ export default {
       everythingCorrectError,
 
       returnAcceptingUserSelected,
+      userSelectionOptionsStatic,
 
       submit,
       steps,
@@ -179,6 +186,46 @@ export default {
       } else {
         this.$router.push({path: '/me'});
       }
+    },
+    userSortingFunction(user1, user2) {
+      if (user1.toLowerCase() > user2.toLowerCase()) return 1;
+      if (user1.toLowerCase() < user2.toLowerCase()) return -1;
+      return 0;
+    },
+    selectDepositReturningUser(event, i) {
+      if (i !== -1) {
+        this.depositReturningUser = this.filtered_deposit_returning_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectReturnAcceptingUser(event, i) {
+      if (i !== -1) {
+        this.returnAcceptingUser = this.filtered_return_accepting_user_suggestions[i];
+        this.returnAcceptingUserSelected();
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    writeBikeDetailsToNfcTag() {
+      this.isInWriteMode = true;
+      nfc.writeBikeDetailsToNfcTag(this.bike)
+        .then((tagSerialNumber) => {
+          toast.success('Details written.');
+          const bikeCopy = this.bike;
+          bikeCopy.rfidTagSerialNumber = tagSerialNumber;
+          requests.patchBikeChangeDetails(this.bike.id, bikeCopy)
+            .then(() => {
+              toast.success('RFID Tag Serial Number recorded.', {timeout: 1000});
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 1000});
+            });
+        })
+        .catch((error) => {
+          toast.error(error.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isInWriteMode = false;
+        });
     },
   },
   props: {
@@ -250,7 +297,7 @@ export default {
     },
     isUserAdmin: {
       type: Boolean,
-      required: true,
+      default: false,
     },
     openEditClientDetailsModal: {
       type: Function,
@@ -267,6 +314,24 @@ export default {
     openEditContractDetailsModal: {
       type: Function,
       default: () => {},
+    },
+  },
+  computed: {
+    filtered_deposit_returning_user_suggestions() {
+      return this.depositBearers
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith(this.depositReturningUser.toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_return_accepting_user_suggestions() {
+      return this.activeUsers
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith(this.returnAcceptingUser.toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
     },
   },
 };
@@ -309,14 +374,19 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
                 </div>
-                <div v-if="isUser" class="col-span-6 mt-auto">
+                <div v-if="isUser" class="col-span-4 mt-auto">
                   <DashButton class="w-full" @click="goToBike">
                     View Bike
                   </DashButton>
                 </div>
-                <div v-if="isUser" class="col-span-6 mt-auto">
+                <div v-if="isUser" class="col-span-4 mt-auto">
                   <DashButton class="w-full" @click="openEditBikeDetailsModal">
                     Edit Details
+                  </DashButton>
+                </div>
+                <div v-if="isUser" class="col-span-4 mt-auto">
+                  <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">
+                    Write To NFC
                   </DashButton>
                 </div>
               </div>
@@ -421,7 +491,7 @@ export default {
                           Deposit Return
                         </h4>
                       </div>
-                      <Textinput
+                      <TextInput
                           label="Deposit Amount (&pound;)"
                           type="number"
                           placeholder="40"
@@ -430,15 +500,22 @@ export default {
                           :error="depositAmountReturnedError"
                       />
 
-                      <Select
-                          :options="depositBearers"
+                      <ComboboxTextInput
+                          :field-model-value="depositReturningUser"
+                          :suggestions="filtered_deposit_returning_user_suggestions"
+                          :selected-callback="selectDepositReturningUser"
+                          :allow-new="false"
+                          :open-by-default="userSelectionOptionsStatic"
                           label="Deposit Returner"
-                          v-model="depositReturningUser"
+                          type="text"
+                          placeholder="workshop"
                           name="depositReturningUser"
+                          v-model="depositReturningUser"
                           :error="depositReturningUserError"
+                          @input="() => {}"
                       />
 
-                      <Textinput
+                      <TextInput
                           label="Deposit Returner Password"
                           type="password"
                           placeholder="Password"
@@ -457,16 +534,22 @@ export default {
                         </h4>
                       </div>
 
-                      <Select
-                          :options="activeUsers"
+                      <ComboboxTextInput
+                          :field-model-value="returnAcceptingUser"
+                          :suggestions="filtered_return_accepting_user_suggestions"
+                          :selected-callback="selectReturnAcceptingUser"
+                          :allow-new="false"
+                          :open-by-default="userSelectionOptionsStatic"
                           label="Return Accepting Volunteer"
-                          v-model="returnAcceptingUser"
+                          type="text"
+                          placeholder="workshop"
                           name="returnAcceptingUser"
+                          v-model="returnAcceptingUser"
                           :error="returnAcceptingUserError"
-                          @change="returnAcceptingUserSelected"
+                          @input="() => {}"
                       />
 
-                      <Textinput
+                      <TextInput
                           label="Password or Pin"
                           type="password"
                           placeholder="Password or Pin"
@@ -485,16 +568,18 @@ export default {
                         <table class="w-full text-base text-slate-800 dark:text-slate-300 border
                                       border-collapse border-slate-500 bg-slate-700">
                           <thead>
-                          <th colspan="2" class="border border-slate-500">Return Details</th>
+                          <tr class="border border-slate-500">Return Details</tr>
                           </thead>
-                          <tr>
-                            <td class="border border-slate-500">Return Date</td>
-                            <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                          </tr>
-                          <tr>
-                            <td class="border border-slate-500">Deposit Returned</td>
-                            <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
-                          </tr>
+                          <tbody>
+                            <tr>
+                              <td class="border border-slate-500">Return Date</td>
+                              <td class="border border-slate-500">{{new Date().toDateString()}}</td>
+                            </tr>
+                            <tr>
+                              <td class="border border-slate-500">Deposit Returned</td>
+                              <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
+                            </tr>
+                          </tbody>
                         </table>
                       </div>
                       <div class="col-span-1">

@@ -1,3 +1,4 @@
+import socket
 from datetime import date, datetime
 from uuid import UUID
 
@@ -27,7 +28,7 @@ def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | No
             & (
                 ((models.Contract.returnedDate != None) & closed)
                 | ((models.Contract.returnedDate == None) & (models.Contract.endDate < datetime.utcnow().date()) & expired)
-                | ((models.Contract.returnedDate == None) & (models.Contract.endDate > datetime.utcnow().date()) & open)
+                | ((models.Contract.returnedDate == None) & (models.Contract.endDate >= datetime.utcnow().date()) & open)
             )
         )
     )]
@@ -103,6 +104,16 @@ def create_contract(
     db.add(contract)
     db.commit()
     return contract
+
+
+def does_contract_exist(db: Session, contract_data: schemas.ContractCreate):
+    contracts = get_contracts(db=db, client_id=contract_data.clientId, bike_id=contract_data.bikeId, open=True, closed=True, expired=True)
+
+    for contract in contracts:
+        if contract.startDate == datetime.utcnow().date():
+            return True
+
+    return False
 
 
 def return_contract(
@@ -258,6 +269,8 @@ def send_expiry_emails(db: Session):
             print(contract.client.emailAddress)
             print(e)
         except SMTPServerDisconnected as e:
+            print(e)
+        except socket.gaierror as e:
             print(e)
 
     db.commit()

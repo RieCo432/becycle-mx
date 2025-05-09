@@ -27,9 +27,9 @@ def get_opening_days(db: Session = Depends(dep.get_db)) -> list[int]:
     return crud.get_opening_week_days(db=db)
 
 
-@public.get("/public/opening-hours")
-def get_opening_hours(db: Session = Depends(dep.get_db)) -> dict[str, time]:
-    return crud.get_opening_hours(db=db)
+@public.get("/public/calendar-time-range")
+def get_calendar_time_range(db: Session = Depends(dep.get_db)) -> dict[str, time]:
+    return crud.get_calendar_time_range(db=db)
 
 
 @public.get("/public/slot-duration")
@@ -40,6 +40,11 @@ def get_slot_duration(db: Session = Depends(dep.get_db)) -> int:
 @public.get("/public/next-closed-day")
 def get_next_closed_day(db: Session = Depends(dep.get_db)) -> schemas.ClosedDay:
     return crud.get_closed_days(db=db, start_date=datetime.datetime.utcnow().date())[0]
+
+
+@public.get("/public/upcoming-closures")
+def get_upcoming_closures(db: Session = Depends(dep.get_db)) -> list[schemas.Closure]:
+    return crud.get_upcoming_closures(db=db, start_date=datetime.datetime.utcnow().date())
 
 
 @public.get("/public/address")
@@ -60,3 +65,26 @@ async def get_user_presentation_card_photo(
         db: Session = Depends(dep.get_db)
 ) -> FileResponse:
     return FileResponse(**crud.get_user_presentation_card_photo(db=db, card_id=card_id))
+
+
+@public.get("/public/upcoming-open-dates")
+async def get_upcoming_open_dates(
+        start_date: datetime.date | None = None,
+        end_date: datetime.date | None = None,
+        db:Session = Depends(dep.get_db)
+) -> list[datetime.date]:
+    return crud.get_open_days_in_period(db=db, start_date=start_date, end_date=end_date)
+
+
+@public.get("/public/about-us")
+async def get_about_us(
+        db: Session = Depends(dep.get_db)
+) -> schemas.AboutUs:
+    return crud.get_about_us(db=db)
+
+@public.get("/public/faq")
+async def get_active_faq(
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.FaqPublic]:
+    return crud.get_active_faq(db=db)
+

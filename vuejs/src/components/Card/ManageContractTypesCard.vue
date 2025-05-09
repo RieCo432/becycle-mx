@@ -1,5 +1,5 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import requests from '@/requests';
@@ -12,7 +12,13 @@ const toast = useToast();
 
 export default {
   name: 'ManageContractTypesCard',
-  components: {DashButton, Card, Textinput},
+  components: {DashButton, Card, TextInput},
+  props: {
+    user: {
+      type: Object,
+      required: true,
+    },
+  },
   setup() {
     const contractTypes = ref([]);
 
@@ -48,11 +54,15 @@ export default {
   },
   methods: {
     deleteContractType(contractTypeId) {
-      requests.deleteContractType(contractTypeId).then((response) => {
-        const indexInArray = this.contractTypes.findIndex((t) => (t.id === response.data.id));
-        this.contractTypes.splice(indexInArray, 1);
-        toast.success('Contract Type deleted', {timeout: 2000});
-      });
+      requests.deleteContractType(contractTypeId)
+        .then((response) => {
+          const indexInArray = this.contractTypes.findIndex((t) => (t.id === response.data.id));
+          this.contractTypes.splice(indexInArray, 1);
+          toast.success('Contract Type deleted', {timeout: 2000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     },
   },
   mounted() {
@@ -65,36 +75,40 @@ export default {
 
 <template>
   <Card title="Manage Contract Types">
-    <form @submit.prevent="submitNewContractType">
-      <div class="grid grid-cols-4 gap-2">
-        <div class="col-span-3">
+      <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-10">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Contract Type</span>
         </div>
-        <div class="col-span-1">
+        <div class="col-span-2">
           <span class="text-slate-700 dark:text-slate-300 text-xl">Action</span>
         </div>
         <template v-for="contractType in contractTypes" :key="contractType.id">
-          <div class="col-span-3">
+          <div class="col-span-10">
             <span class="text-slate-700 dark:text-slate-300">{{contractType.id}}</span>
           </div>
-          <div class="col-span-1">
-            <DashButton @click="deleteContractType(contractType.id)" class="bg-danger-600 btn-sm mx-auto block-btn">Delete</DashButton>
+          <div class="col-span-2">
+            <DashButton
+                v-if="user.admin"
+                @click="deleteContractType(contractType.id)"
+                class="bg-danger-500 dark:bg-danger-600 btn-sm mx-auto block-btn"
+                icon="heroicons-outline:trash"/>
           </div>
         </template>
-        <div class="col-span-3">
-          <Textinput
-              type="text"
-              placeholder="New Contract Type"
-              name="newContractType"
-              v-model="newContractTypeId"
-              :error="newContractTypeIdError"
-          />
-        </div>
-        <div class="col-span-1">
-          <DashButton type="submit" class="btn-sm mx-auto block-btn">
-            Add
-          </DashButton>
-        </div>
+      </div>
+    <form v-if="user.admin" @submit.prevent="submitNewContractType">
+      <div class="grid grid-cols-12 gap-2 mt-2">
+          <div class="col-span-10">
+            <TextInput
+                type="text"
+                placeholder="New Contract Type"
+                name="newContractType"
+                v-model="newContractTypeId"
+                :error="newContractTypeIdError"
+            />
+          </div>
+          <div class="col-span-2">
+            <DashButton type="submit" class="btn-sm mx-auto block-btn" icon="heroicons-outline:plus"/>
+          </div>
       </div>
     </form>
   </Card>

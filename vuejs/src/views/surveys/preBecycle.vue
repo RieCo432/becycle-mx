@@ -1,5 +1,5 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import Select from '@/components/Select/index.vue';
 import Card from '@/components/Card/index.vue';
@@ -15,7 +15,7 @@ import surveyInfo from '@/components/SurveyInfo/index.vue';
 
 export default {
   name: 'preBecycle',
-  components: {ErrorMessage, Checkbox, Card, DashButton, Textinput, Select, Icon, surveyInfo},
+  components: {ErrorMessage, Checkbox, Card, DashButton, TextInput, Select, Icon, surveyInfo},
   setup() {
     const router = useRouter();
     const toast = useToast();
@@ -235,10 +235,7 @@ export default {
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         // handle submit
         requests.postPreBecycleSurvey({
           hurdleSafety: hurdleSafety.value,
@@ -463,7 +460,7 @@ export default {
                   />
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Other"
                       type="text"
                       placeholder="Other reasons"
@@ -507,7 +504,7 @@ export default {
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Other"
                       type="text"
                       placeholder="Other reasons"
@@ -567,7 +564,7 @@ export default {
                       activeClass="ring-info-500 bg-info-500"/>
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Other"
                       type="text"
                       placeholder="Other options"
@@ -596,7 +593,7 @@ export default {
                   />
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       :label="'On a scale from 0 (not confident at all) to 10 (completely confident), ' +
                               'how confident are in your ability to cycle on the roads in Aberdeen?'"
                       type="text"

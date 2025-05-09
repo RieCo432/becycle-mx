@@ -63,18 +63,17 @@
                     <ComboboxTextInput
                         :field-model-value="emailAddress"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <Textinput label="Email" type="email" placeholder="Type your email"
-                                 name="emailAddress"
-                                 v-model="emailAddress"
-                                 :error="emailAddressError"
-                                 @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="Email" type="email" placeholder="Type your email"
+                        name="emailAddress"
+                        v-model="emailAddress"
+                        :error="emailAddressError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-1">
-                    <Textinput
+                    <TextInput
                         label="Confirm Email"
                         type="email"
                         placeholder="Confirm your email"
@@ -88,97 +87,115 @@
                     <ComboboxTextInput
                         :field-model-value="firstName"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <Textinput
-                          label="First name"
-                          type="text"
-                          placeholder="First name"
-                          name="firstname"
-                          v-model="firstName"
-                          :error="firstNameError"
-                          @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="First name"
+                        type="text"
+                        placeholder="First name"
+                        name="firstname"
+                        v-model="firstName"
+                        :error="firstNameError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-1">
                     <ComboboxTextInput
                         :field-model-value="lastName"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <Textinput
-                          label="Last name"
-                          type="text"
-                          placeholder="Last name"
-                          name="lastname"
-                          v-model="lastName"
-                          :error="lastNameError"
-                          @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="Last name"
+                        type="text"
+                        placeholder="Last name"
+                        name="lastname"
+                        v-model="lastName"
+                        :error="lastNameError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
                 </div>
               </div>
               <div v-if="stepNumber === 1">
-                <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="md:col-span-2 col-span-1">
+                <div class="grid grid-cols-12 gap-5">
+                  <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Enter the bike's details
                     </h4>
                   </div>
-                  <div class="col-span-1">
+                  <div class="col-span-full">
+                    <DashButton class="block-btn" @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">
+                      Read From NFC Tag
+                    </DashButton>
+                  </div>
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
+                        :allow-new="makeNotInList"
                         :field-model-value="make"
                         :suggestions="filtered_make_suggestions"
-                        :selected-callback="selectMake">
-                      <Textinput
-                          label="Make"
-                          type="text"
-                          placeholder="Make"
-                          name="make"
-                          v-model="make"
-                          :error="makeError"
-                          @input="fetchBikeMakeSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectMake"
+                        label="Make"
+                        type="text"
+                        placeholder="Make"
+                        name="make"
+                        v-model="make"
+                        :error="makeError"
+                        @input="fetchBikeMakeSuggestions"
+                    />
+                  </div>
+                  <div class="col-span-2 md:col-span-1">
+                    <label
+                        class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+                      Add New
+                    </label>
+                    <DashButton
+                        :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
+                        @click="() => {makeNotInList = !makeNotInList}"/>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
+                        :allow-new="modelNotInList"
                         :field-model-value="model"
                         :suggestions="filtered_model_suggestions"
-                        :selected-callback="selectModel">
-                      <Textinput
-                          label="Model"
-                          type="text"
-                          placeholder="Model"
-                          name="model"
-                          v-model="model"
-                          :error="modelError"
-                          @input="fetchBikeModelSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectModel"
+                        label="Model"
+                        type="text"
+                        placeholder="Model"
+                        name="model"
+                        v-model="model"
+                        :error="modelError"
+                        @input="fetchBikeModelSuggestions"
+                    />
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-2 md:col-span-1">
+                    <label
+                        class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+                      Add New
+                    </label>
+                    <DashButton
+                        :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
+                        @click="() => {modelNotInList = !modelNotInList}"/>
+                  </div>
+
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :field-model-value="colour"
                         :suggestions="filtered_colour_suggestions"
-                        :selected-callback="selectColour">
-                      <Textinput
-                          label="Colour"
-                          type="text"
-                          placeholder="Colour"
-                          name="colour"
-                          v-model="colour"
-                          :error="colourError"
-                          @input="fetchColourSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectColour"
+                        label="Colour"
+                        type="text"
+                        placeholder="Colour"
+                        name="colour"
+                        v-model="colour"
+                        :error="colourError"
+                        @input="fetchColourSuggestions"
+                    />
                   </div>
 
-                  <div class="col-span-1">
-                    <Textinput
+                  <div class="col-span-10 md:col-span-5 md:col-start-7">
+                    <TextInput
                         label="Decals"
                         type="text"
                         placeholder="Decals"
@@ -188,36 +205,42 @@
                     />
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
-                        :selected-callback="selectSerialNumber">
-                      <Textinput
-                          label="Serial Number"
-                          type="text"
-                          placeholder="Serial Number"
-                          name="serialnumber"
-                          v-model="serialNumber"
-                          :error="serialNumberError"
-                          @input="fetchSerialNumberSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectSerialNumber"
+                        label="Serial Number"
+                        type="text"
+                        placeholder="Serial Number"
+                        name="serialnumber"
+                        v-model="serialNumber"
+                        :error="serialNumberError"
+                        @input="fetchSerialNumberSuggestions"
+                    />
                   </div>
 
-                  <div class="col-start-1">
+                  <div class="col-span-full">
+                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">
+                      Write To NFC Tag
+                    </DashButton>
+                  </div>
+
+                  <div class="col-span-12 md:col-span-6">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="bikePhotoTaken"
                         :error="bikePhotoTakenError"/>
                     <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
                   </div>
 
-                  <div class="col-span-1">
+                  <div class="col-span-12 md:col-span-6">
                     <Checkbox
                         label="Sticker on bike?"
                         name="stickerOnBike"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="stickerOnBike"
                         :error="stickerOnBikeError"/>
                     <ErrorMessage name="stickerOnBike" :error="stickerOnBikeError" class="text-danger-500"/>
@@ -281,7 +304,7 @@
                   </div>
 
 
-                  <Textinput
+                  <TextInput
                       label="Deposit Amount (&pound;)"
                       type="number"
                       placeholder="40"
@@ -290,15 +313,22 @@
                       :error="depositAmountCollectedError"
                   />
 
-                  <Select
-                      :options="depositBearers"
+                  <ComboboxTextInput
+                      :field-model-value="depositCollectingUser"
+                      :suggestions="filtered_deposit_collecting_user_suggestions"
+                      :selected-callback="selectDepositCollectingUser"
+                      :allow-new="false"
+                      :open-by-default="userSelectionOptionsStatic"
                       label="Deposit Collector"
-                      v-model="depositCollectingUser"
+                      type="text"
+                      placeholder="workshop"
                       name="depositCollectingUser"
+                      v-model="depositCollectingUser"
                       :error="depositCollectingUserError"
+                      @input="() => {}"
                   />
 
-                  <Textinput
+                  <TextInput
                       label="Deposit Collector Password"
                       type="password"
                       placeholder="Password"
@@ -317,16 +347,22 @@
                     </h4>
                   </div>
 
-                  <Select
-                      :options="activeUsers"
+                  <ComboboxTextInput
+                      :field-model-value="workingUser"
+                      :suggestions="filtered_working_user_suggestions"
+                      :selected-callback="selectWorkingUser"
+                      :allow-new="false"
+                      :open-by-default="userSelectionOptionsStatic"
                       label="Working Volunteer"
-                      v-model="workingUser"
+                      type="text"
+                      placeholder="workshop"
                       name="workingUser"
+                      v-model="workingUser"
                       :error="workingUserError"
-                      @change="workingUserSelected"
+                      @input="() => {}"
                   />
 
-                  <Textinput
+                  <TextInput
                       label="Working User Password or Pin"
                       type="password"
                       placeholder="Password or Pin"
@@ -346,16 +382,22 @@
                     </h4>
                   </div>
 
-                  <Select
-                      :options="rentalCheckers"
+                  <ComboboxTextInput
+                      :field-model-value="checkingUser"
+                      :suggestions="filtered_checking_user_suggestions"
+                      :selected-callback="selectCheckingUser"
+                      :allow-new="false"
+                      :open-by-default="userSelectionOptionsStatic"
                       label="Safety Checking User"
-                      v-model="checkingUser"
+                      type="text"
+                      placeholder="workshop"
                       name="checkingUser"
+                      v-model="checkingUser"
                       :error="checkingUserError"
-                      @change="checkingUserSelected"
+                      @input="() => {}"
                   />
 
-                  <Textinput
+                  <TextInput
                       label="Checking User Password or Pin"
                       type="password"
                       placeholder="Password Or Pin"
@@ -372,66 +414,72 @@
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h4>
                     <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
                       <thead>
-                        <th colspan="2" class="border border-slate-500">Lendee Details</th>
+                        <tr class="border border-slate-500">Lendee Details</tr>
                       </thead>
-                      <tr>
-                        <td class="border border-slate-500">Name</td>
-                        <td class="border border-slate-500">{{firstName}} {{lastName}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Email Address</td>
-                        <td class="border border-slate-500">{{emailAddress}}</td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td class="border border-slate-500">Name</td>
+                          <td class="border border-slate-500">{{firstName}} {{lastName}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Email Address</td>
+                          <td class="border border-slate-500">{{emailAddress}}</td>
+                        </tr>
+                      </tbody>
                       <thead>
-                        <th colspan="2" class="border border-slate-500">Bike Details</th>
+                        <tr class="border border-slate-500">Bike Details</tr>
                       </thead>
-                      <tr>
-                        <td class="border border-slate-500">Make</td>
-                        <td class="border border-slate-500">{{make}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Model</td>
-                        <td class="border border-slate-500">{{model}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Colour</td>
-                        <td class="border border-slate-500">{{colour}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Decals</td>
-                        <td class="border border-slate-500">{{decals}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Serial Number</td>
-                        <td class="border border-slate-500">{{serialNumber}}</td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td class="border border-slate-500">Make</td>
+                          <td class="border border-slate-500">{{make}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Model</td>
+                          <td class="border border-slate-500">{{model}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Colour</td>
+                          <td class="border border-slate-500">{{colour}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Decals</td>
+                          <td class="border border-slate-500">{{decals}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Serial Number</td>
+                          <td class="border border-slate-500">{{serialNumber}}</td>
+                        </tr>
+                      </tbody>
                       <thead>
-                      <th colspan="2" class="border border-slate-500">Additional Details</th>
+                      <tr class="border border-slate-500">Additional Details</tr>
                       </thead>
-                      <tr>
-                        <td class="border border-slate-500">Lease Start</td>
-                        <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Lease End</td>
-                        <td class="border border-slate-500">{{datePlusSixMonths().toDateString()}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Deposit</td>
-                        <td class="border border-slate-500">&#163;{{depositAmountCollected}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Contract Type</td>
-                        <td class="border border-slate-500">{{type}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Bike Condition</td>
-                        <td class="border border-slate-500">{{condition}}</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-500">Notes</td>
-                        <td class="border border-slate-500">{{notes}}</td>
-                      </tr>
+                      <tbody>
+                        <tr>
+                          <td class="border border-slate-500">Lease Start</td>
+                          <td class="border border-slate-500">{{new Date().toDateString()}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Lease End</td>
+                          <td class="border border-slate-500">{{datePlusSixMonths().toDateString()}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Deposit</td>
+                          <td class="border border-slate-500">&#163;{{depositAmountCollected}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Contract Type</td>
+                          <td class="border border-slate-500">{{type}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Bike Condition</td>
+                          <td class="border border-slate-500">{{condition}}</td>
+                        </tr>
+                        <tr>
+                          <td class="border border-slate-500">Notes</td>
+                          <td class="border border-slate-500">{{notes}}</td>
+                        </tr>
+                      </tbody>
                     </table>
                   </div>
                   <div class="col-span-1">
@@ -451,6 +499,7 @@
                     <Checkbox
                         label="I confirm all details are correct and I agree to the terms of the loan!"
                         name="everythingCorrect"
+                        activeClass="ring-primary-500 bg-primary-500"
                         v-model="everythingCorrect"
                         :error="everythingCorrectError"/>
                     <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
@@ -485,7 +534,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Icon from '@/components/Icon';
 import Textarea from '@/components/Textarea';
-import Textinput from '@/components/Textinput';
+import TextInput from '@/components/TextInput';
 import Radio from '@/components/Radio/index.vue';
 import {ErrorMessage, useField, useForm} from 'vee-validate';
 import {computed, ref} from 'vue';
@@ -494,24 +543,26 @@ import * as yup from 'yup';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
-import Select from '@/components/Select';
-import Checkbox from '@/components/Switch/index.vue';
+import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
+import DashButton from '@/components/Button/index.vue';
+import nfc from '@/nfc';
 
+const toast = useToast();
 
 export default {
   name: 'newContract',
   components: {
+    DashButton,
     Checkbox,
     ErrorMessage,
     Card,
     Button,
     Icon,
-    Textinput,
+    TextInput,
     Textarea,
     ComboboxTextInput,
     Radio,
-    Select,
   },
   setup() {
     const steps = [
@@ -557,7 +608,16 @@ export default {
     const clientId = ref('');
     const bikeId = ref('');
 
+    const makeSuggestions = ref([]);
+    const modelSuggestions = ref([]);
+
+    const depositBearers = ref([]);
+    const rentalCheckers = ref([]);
+    const activeUsers = ref([]);
+
     const router = useRouter();
+
+    const userSelectionOptionsStatic = ref(true);
 
     // step by step yup schema
     const clientSchema = yup.object().shape({
@@ -575,8 +635,17 @@ export default {
     });
 
     const bikeSchema = yup.object().shape({
-      make: yup.string().required(' Make is required'),
-      model: yup.string().required(' Model is required '),
+      makeNotInList: yup.boolean(),
+      make: yup.string().required(' Make is required').when('makeNotInList', {
+        is: true,
+        then: (schema) => schema,
+        otherwise: (schema) => schema.oneOf(makeSuggestions.value, 'Please choose a value from the list, or add a new make.'),
+      }),
+      model: yup.string().required(' Model is required ').when('modelNotInList', {
+        is: true,
+        then: (schema) => schema,
+        otherwise: (schema) => schema.oneOf(modelSuggestions.value, 'Please choose a value from the list, or add a new model.'),
+      }),
       colour: yup.string().required(' Colour is required'),
       decals: yup.string(),
       serialNumber: yup.string().required(' Serial Number is required '),
@@ -645,12 +714,16 @@ export default {
     const {value: lastName, errorMessage: lastNameError} = useField('lastName');
 
     const {value: make, errorMessage: makeError} = useField('make');
+    const {value: makeNotInList} = useField('makeNotInList');
     const {value: model, errorMessage: modelError} = useField('model');
+    const {value: modelNotInList} = useField('modelNotInList');
     const {value: colour, errorMessage: colourError} = useField('colour');
     const {value: decals, errorMessage: decalsError} = useField('decals');
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
     const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
+    makeNotInList.value = false;
+    modelNotInList.value = false;
 
     const {value: type, errorMessage: typeError} = useField('type');
     const {value: condition, errorMessage: conditionError} = useField('condition');
@@ -671,6 +744,10 @@ export default {
 
     const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
+    depositCollectingUser.value = '';
+    workingUser.value = '';
+    checkingUser.value = '';
+
     function workingUserSelected() {
       workingPasswordOrPin.value = null;
       if (workingUser.value === depositCollectingUser.value) {
@@ -685,24 +762,23 @@ export default {
     }
 
     const submit = handleSubmit(() => {
-      // next step until last step . if last step then submit form
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      // next step until last step. if last step then submit form
+      if (stepNumber.value === steps.length - 1) {
         requests.postNewContract(clientId.value, bikeId.value, depositAmountCollected.value, condition.value,
           type.value, notes.value, workingUser.value, workingPasswordOrPin.value, checkingUser.value,
           checkingPasswordOrPin.value, depositCollectingUser.value, depositCollectingPassword.value)
           .then((response) => {
             toast.success('Contract Recorded!', {timeout: 1000});
             router.push({path: `/contracts/${response.data.id}`});
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 5000});
           });
       } else {
         if (stepNumber.value === 0) {
           // Client details processing
           requests.getClientByEmail(emailAddress.value).then((response) => {
             clientId.value = response.data[0]['id'];
-            stepNumber.value++;
+            stepNumber.value = 1;
           }).catch((error) => {
             if (error.response.status === 404) {
               requests.postNewClient({
@@ -712,7 +788,7 @@ export default {
               }).then((response) => {
                 toast.success('New Client Created!', {timeout: 1000});
                 clientId.value = response.data['id'];
-                stepNumber.value++;
+                stepNumber.value = 1;
               });
             }
           });
@@ -721,43 +797,49 @@ export default {
           requests.findBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
             .then((response) => {
               bikeId.value = response.data['id'];
-              stepNumber.value++;
+              stepNumber.value = 2;
             }).catch((error) => {
               if (error.response.status === 404) {
                 requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
                   .then((response) => {
                     toast.success('New Bike Created!', {timeout: 1000});
                     bikeId.value = response.data['id'];
-                    stepNumber.value++;
+                    stepNumber.value = 2;
                   });
               }
             });
         } else if (stepNumber.value === 2) {
+          requests.getDepositBearers().then((response) =>
+            (depositBearers.value = response.data.map((user) => (user.username))));
           // Nothing to process
-          stepNumber.value++;
+          stepNumber.value = 3;
         } else if (stepNumber.value === 3) {
           // Check password of deposit collector
           requests.checkUserPassword(depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 4;
+              userSelectionOptionsStatic.value = true;
             } else {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
           });
+          requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
         } else if (stepNumber.value === 4) {
           // check password or pin of working volunteer
           requests.checkUserPasswordOrPin(workingUser.value, workingPasswordOrPin.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 5;
+              userSelectionOptionsStatic.value = true;
             } else {
               workingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
           });
+          requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.map((user) => (user.username))));
         } else if (stepNumber.value === 5) {
           // check password or pin of checking volunteer
           requests.checkUserPasswordOrPin(checkingUser.value, checkingPasswordOrPin.value).then((response) => {
             if (response.data) {
-              stepNumber.value++;
+              stepNumber.value = 6;
             } else {
               checkingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
@@ -781,10 +863,18 @@ export default {
       lastNameError,
       clientId,
 
+      depositBearers,
+      activeUsers,
+      rentalCheckers,
+
+      makeSuggestions,
       make,
       makeError,
+      makeNotInList,
+      modelSuggestions,
       model,
       modelError,
+      modelNotInList,
       colour,
       colourError,
       decals,
@@ -795,6 +885,7 @@ export default {
       bikePhotoTakenError,
       stickerOnBike,
       stickerOnBikeError,
+      bikeId,
 
       type,
       typeError,
@@ -829,6 +920,8 @@ export default {
       workingUserSelected,
       checkingUserSelected,
 
+      userSelectionOptionsStatic,
+
       submit,
       steps,
       stepNumber,
@@ -839,13 +932,9 @@ export default {
     return {
       emailTyped: '',
       clientSuggestions: [],
-      make_suggestions: [],
-      model_suggestions: [],
       colour_suggestions: [],
       serial_number_suggestions: [],
-      depositBearers: [],
-      rentalCheckers: [],
-      activeUsers: [],
+      isNfcActive: false,
     };
   },
   created() {
@@ -857,8 +946,8 @@ export default {
   },
   methods: {
     userSortingFunction(user1, user2) {
-      if (user1.username.toLowerCase() < user2.username.toLowerCase()) return -1;
-      if (user1.username.toLowerCase() > user2.username.toLowerCase()) return 1;
+      if (user1.toLowerCase() > user2.toLowerCase()) return 1;
+      if (user1.toLowerCase() < user2.toLowerCase()) return -1;
       return 0;
     },
     datePlusSixMonths() {
@@ -876,12 +965,12 @@ export default {
     },
     fetchBikeMakeSuggestions() {
       requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {
-        this.make_suggestions = response.data;
+        this.makeSuggestions = response.data;
       });
     },
     fetchBikeModelSuggestions() {
       requests.getBikeModelSuggestions(this.model.toLowerCase()).then((response) => {
-        this.model_suggestions = response.data;
+        this.modelSuggestions = response.data;
       });
     },
     fetchSerialNumberSuggestions() {
@@ -895,24 +984,149 @@ export default {
       });
     },
     selectClient(event, i) {
-      const selectedClient = this.filtered_client_suggestions[i];
-      this.clientId = selectedClient.id;
-      this.emailAddress = selectedClient.emailAddress;
-      this.confirmEmailAddress = selectedClient.emailAddress;
-      this.firstName = selectedClient.firstName;
-      this.lastName = selectedClient.lastName;
+      if (i !== -1) {
+        const selectedClient = this.filtered_client_suggestions[i];
+        this.clientId = selectedClient.id;
+        this.emailAddress = selectedClient.emailAddress;
+        this.confirmEmailAddress = selectedClient.emailAddress;
+        this.firstName = selectedClient.firstName;
+        this.lastName = selectedClient.lastName;
+      }
     },
-    selectMake(event) {
-      this.make = event.target.innerText;
+    selectMake(event, i) {
+      if (i !== -1) {
+        this.make = this.makeSuggestions[i];
+      }
     },
-    selectModel(event) {
-      this.model = event.target.innerText;
+    selectModel(event, i) {
+      if (i !== -1) {
+        this.model = this.modelSuggestions[i];
+      }
     },
-    selectSerialNumber(event) {
-      this.serialNumber = event.target.innerText;
+    selectSerialNumber(event, i) {
+      if (i !== -1) {
+        this.serialNumber = this.serial_number_suggestions[i];
+      }
     },
-    selectColour(event) {
-      this.colour = event.target.innerText;
+    selectColour(event, i) {
+      if (i !== -1) {
+        this.colour = this.colour_suggestions[i];
+      }
+    },
+    selectDepositCollectingUser(event, i) {
+      if (i !== -1) {
+        this.depositCollectingUser = this.filtered_deposit_collecting_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectWorkingUser(event, i) {
+      if (i !== -1) {
+        this.workingUser = this.filtered_working_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+        this.workingUserSelected();
+      }
+    },
+    selectCheckingUser(event, i) {
+      if (i !== -1) {
+        this.checkingUser = this.filtered_checking_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+        this.checkingUserSelected();
+      }
+    },
+    verifyBikeDetails(rfidTagSerialNumber) {
+      requests.getBikeByRfidTagSerialNumber(rfidTagSerialNumber)
+        .then((response) => {
+          const bike = response.data;
+          console.log(bike);
+          let allSame = true;
+          allSame &= bike.make.toLowerCase() === this.make.toLowerCase();
+          allSame &= bike.model.toLowerCase() === this.model.toLowerCase();
+          allSame &= bike.colour.toLowerCase() === this.colour.toLowerCase();
+          allSame &= (bike.decals ? bike.decals.toLowerCase() : '') === this.decals.toLowerCase();
+          allSame &= bike.serialNumber.toLowerCase() === this.serialNumber.toLowerCase();
+          allSame &= bike.id.toLowerCase() === this.bikeId.toLowerCase();
+          if (!allSame) {
+            toast.warning('Some of the bike details do not match with the recorded details', {timeout: 4000});
+          }
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 1000});
+        });
+    },
+    readBikeDetailsFromNfcTag() {
+      this.isNfcActive = true;
+      nfc.readBikeDetailsFromNfcTag().then((response) => {
+        if (response.bike) {
+          toast.success('Details read!', {timeout: 1000});
+          const bike = response.bike;
+          this.make = bike.make.toLowerCase();
+          this.model = bike.model.toLowerCase();
+          this.colour = bike.colour.toLowerCase();
+          this.decals = bike.decals ? bike.decals.toLowerCase() : '';
+          this.serialNumber = bike.serialNumber.toLowerCase();
+          this.bikeId = bike.id.toLowerCase();
+          console.log(bike);
+          this.verifyBikeDetails(response.rfidTagSerialNumber);
+        } else {
+          toast.error('Some error occurred!', {timeout: 1000});
+        }
+      })
+        .catch((error) => {
+          toast.error(error.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isNfcActive = false;
+        });
+    },
+    ensureBikeExists() {
+      return new Promise((resolve, reject) => {
+        if (!this.bikeId || this.bikeId === '') {
+          requests.postNewBike(this.make, this.model, this.colour, this.decals, this.serialNumber)
+            .then((response) => {
+              const bike = response.data;
+              this.bikeId = bike.id;
+              resolve(bike);
+            }).catch((error) => {
+              reject(error);
+            });
+        } else {
+          const bike = {
+            id: this.bikeId.toLowerCase(),
+            make: this.make.toLowerCase(),
+            model: this.model.toLowerCase(),
+            colour: this.colour.toLowerCase(),
+            decals: this.decals.toLowerCase(),
+            serialNumber: this.serialNumber.toLowerCase(),
+          };
+          resolve(bike);
+        }
+      });
+    },
+    writeBikeDetailsToNfcTag() {
+      this.ensureBikeExists()
+        .then((bike) => {
+          this.isNfcActive = true;
+          nfc.writeBikeDetailsToNfcTag(bike)
+            .then((serialNumber) => {
+              bike.rfidTagSerialNumber = serialNumber;
+              requests.patchBikeChangeDetails(bike.id, bike)
+                .then(() => {
+                  toast.success('Details Written', {timeout: 1000});
+                })
+                .catch((error) => {
+                  toast.error(error.response.data.detail.description, {timeout: 1000});
+                });
+            })
+            .catch((error) => {
+              toast.error(error.message, {timeout: 1000});
+            })
+            .finally(() => {
+              this.isNfcActive = false;
+            });
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 1000});
+        });
     },
   },
   computed: {
@@ -927,10 +1141,10 @@ export default {
       return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
     filtered_make_suggestions() {
-      return this.make_suggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
+      return this.makeSuggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
     },
     filtered_model_suggestions() {
-      return this.model_suggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
+      return this.modelSuggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
     },
     filtered_serial_number_suggestions() {
       return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber.toLowerCase()))).slice(0, 4);
@@ -938,26 +1152,31 @@ export default {
     filtered_colour_suggestions() {
       return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour.toLowerCase()))).slice(0, 4);
     },
-  },
-  mounted() {
-    requests.getDepositBearers().then((response) => (this.depositBearers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
-    requests.getActiveUsers().then((response) => (this.activeUsers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
-    requests.getRentalCheckers().then((response) => (this.rentalCheckers = response.data.sort(this.userSortingFunction).map((user) =>
-      ({
-        label: user.username,
-        value: user.username,
-      }),
-    )));
+    filtered_deposit_collecting_user_suggestions() {
+      return this.depositBearers
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith(this.depositCollectingUser.toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_working_user_suggestions() {
+      return this.activeUsers
+        .filter((suggestion) =>
+          suggestion
+            .toLowerCase()
+            .startsWith(this.workingUser.toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_checking_user_suggestions() {
+      return this.rentalCheckers
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith(this.checkingUser.toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
   },
 };
 </script>

@@ -56,6 +56,15 @@ const routes = [
         component: () => import('@/views/ourVolunteers.vue'),
       },
       {
+        path: '/faq',
+        name: 'FAQ',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/faq',
+        },
+        component: () => import('@/views/Faq.vue'),
+      },
+      {
         path: '/users/login',
         name: 'Volunteer Login',
         meta: {
@@ -138,6 +147,16 @@ const routes = [
           selectNavPath: '/clients',
         },
         component: () => import('@/views/client/findClient.vue'),
+      },
+
+      {
+        path: '/appointments/cancel',
+        name: 'Cancel Appointment',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/home',
+        },
+        component: () => import('@/views/appointments/cancel.vue'),
       },
       {
         path: '/appointments/book',

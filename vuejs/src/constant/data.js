@@ -224,6 +224,12 @@ export const topMenu = [
     show: ['always'],
   },
   {
+    title: 'FAQ',
+    icon: 'heroicons-outline:question-mark-circle',
+    link: '/faq',
+    show: ['always'],
+  },
+  {
     title: 'Privacy Policy',
     icon: 'heroicons-outline:shield-check',
     link: '/privacy-policy',

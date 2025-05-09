@@ -63,8 +63,10 @@ import 'tippy.js/animations/shift-toward-subtle.css';
 import 'tippy.js/animations/shift-toward.css';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
+import {Tippy} from 'vue-tippy';
 
 export default {
+  components: {Tippy},
   props: {
     title: {
       type: String,
@@ -167,116 +169,116 @@ export default {
   }
 }
 
-.tippy-box[data-theme~="custom-light"][data-placement^="top"]
+.tippy-box[data-theme~="custom-light"][data-placement^="top"],
   > .tippy-arrow::before {
   @apply border-t-white dark:border-t-slate-700;
 }
-.tippy-box[data-theme~="custom-light"][data-placement^="bottom"]
+.tippy-box[data-theme~="custom-light"][data-placement^="bottom"],
   > .tippy-arrow::before {
   @apply border-b-white dark:border-b-slate-700;
 }
-.tippy-box[data-theme~="custom-light"][data-placement^="left"]
+.tippy-box[data-theme~="custom-light"][data-placement^="left"],
   > .tippy-arrow::before {
   @apply border-l-white dark:border-l-slate-700;
 }
-.tippy-box[data-theme~="custom-light"][data-placement^="right"]
+.tippy-box[data-theme~="custom-light"][data-placement^="right"],
   > .tippy-arrow::before {
   @apply border-r-white dark:border-r-slate-700;
 }
 
-.tippy-box[data-theme~="primary-500"][data-placement^="top"]
+.tippy-box[data-theme~="primary-500"][data-placement^="top"],
   > .tippy-arrow::before {
   @apply border-t-primary-500;
 }
-.tippy-box[data-theme~="primary-500"][data-placement^="bottom"]
+.tippy-box[data-theme~="primary-500"][data-placement^="bottom"],
   > .tippy-arrow::before {
   @apply border-b-primary-500;
 }
-.tippy-box[data-theme~="primary-500"][data-placement^="left"]
+.tippy-box[data-theme~="primary-500"][data-placement^="left"],
   > .tippy-arrow::before {
   @apply border-l-primary-500;
 }
-.tippy-box[data-theme~="primary-500"][data-placement^="right"]
+.tippy-box[data-theme~="primary-500"][data-placement^="right"],
   > .tippy-arrow::before {
   @apply border-r-primary-500;
 }
-.tippy-box[data-theme~="secondary-500"][data-placement^="top"]
+.tippy-box[data-theme~="secondary-500"][data-placement^="top"],
   > .tippy-arrow::before {
   @apply border-t-secondary-500;
 }
-.tippy-box[data-theme~="secondary-500"][data-placement^="bottom"]
+.tippy-box[data-theme~="secondary-500"][data-placement^="bottom"],
   > .tippy-arrow::before {
   @apply border-b-secondary-500;
 }
-.tippy-box[data-theme~="secondary-500"][data-placement^="left"]
+.tippy-box[data-theme~="secondary-500"][data-placement^="left"],
   > .tippy-arrow::before {
   @apply border-l-secondary-500;
 }
-.tippy-box[data-theme~="secondary-500"][data-placement^="right"]
+.tippy-box[data-theme~="secondary-500"][data-placement^="right"],
   > .tippy-arrow::before {
   @apply border-r-secondary-500;
 }
-.tippy-box[data-theme~="success-500"][data-placement^="top"]
+.tippy-box[data-theme~="success-500"][data-placement^="top"],
   > .tippy-arrow::before {
   @apply border-t-success-500;
 }
-.tippy-box[data-theme~="success-500"][data-placement^="bottom"]
+.tippy-box[data-theme~="success-500"][data-placement^="bottom"],
   > .tippy-arrow::before {
   @apply border-b-success-500;
 }
-.tippy-box[data-theme~="success-500"][data-placement^="left"]
+.tippy-box[data-theme~="success-500"][data-placement^="left"],
   > .tippy-arrow::before {
   @apply border-l-success-500;
 }
-.tippy-box[data-theme~="success-500"][data-placement^="right"]
+.tippy-box[data-theme~="success-500"][data-placement^="right"],
   > .tippy-arrow::before {
   @apply border-r-success-500;
 }
-.tippy-box[data-theme~="info-500"][data-placement^="top"]
+.tippy-box[data-theme~="info-500"][data-placement^="top"],
   > .tippy-arrow::before {
   @apply border-t-info-500;
 }
-.tippy-box[data-theme~="info-500"][data-placement^="bottom"]
+.tippy-box[data-theme~="info-500"][data-placement^="bottom"],
   > .tippy-arrow::before {
   @apply border-b-info-500;
 }
-.tippy-box[data-theme~="info-500"][data-placement^="left"]
+.tippy-box[data-theme~="info-500"][data-placement^="left"],
   > .tippy-arrow::before {
   @apply border-l-info-500;
 }
-.tippy-box[data-theme~="info-500"][data-placement^="right"]
+.tippy-box[data-theme~="info-500"][data-placement^="right"],
   > .tippy-arrow::before {
   @apply border-r-info-500;
 }
-.tippy-box[data-theme~="warning-500"][data-placement^="top"]
+.tippy-box[data-theme~="warning-500"][data-placement^="top"],
   > .tippy-arrow::before {
   @apply border-t-warning-500;
 }
-.tippy-box[data-theme~="warning-500"][data-placement^="bottom"]
+.tippy-box[data-theme~="warning-500"][data-placement^="bottom"],
   > .tippy-arrow::before {
   @apply border-b-warning-500;
 }
-.tippy-box[data-theme~="warning-500"][data-placement^="left"]
+.tippy-box[data-theme~="warning-500"][data-placement^="left"],
   > .tippy-arrow::before {
   @apply border-l-warning-500;
 }
-.tippy-box[data-theme~="warning-500"][data-placement^="right"]
+.tippy-box[data-theme~="warning-500"][data-placement^="right"],
   > .tippy-arrow::before {
   @apply border-r-warning-500;
 }
-.tippy-box[data-theme~="danger-500"][data-placement^="top"]
+.tippy-box[data-theme~="danger-500"][data-placement^="top"],
   > .tippy-arrow::before {
   @apply border-t-danger-500;
 }
-.tippy-box[data-theme~="danger-500"][data-placement^="bottom"]
+.tippy-box[data-theme~="danger-500"][data-placement^="bottom"],
   > .tippy-arrow::before {
   @apply border-b-danger-500;
 }
-.tippy-box[data-theme~="danger-500"][data-placement^="left"]
+.tippy-box[data-theme~="danger-500"][data-placement^="left"],
   > .tippy-arrow::before {
   @apply border-l-danger-500;
 }
-.tippy-box[data-theme~="danger-500"][data-placement^="right"]
+.tippy-box[data-theme~="danger-500"][data-placement^="right"],
   > .tippy-arrow::before {
   @apply border-r-danger-500;
 }
@@ -284,7 +286,7 @@ export default {
 .tippy-box[data-theme~="dark"][data-placement^="top"] > .tippy-arrow::before {
   @apply border-t-black-500 dark:border-t-slate-900;
 }
-.tippy-box[data-theme~="dark"][data-placement^="bottom"]
+.tippy-box[data-theme~="dark"][data-placement^="bottom"],
   > .tippy-arrow::before {
   @apply border-b-black-500 dark:border-b-slate-900;
 }

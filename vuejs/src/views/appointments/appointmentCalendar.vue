@@ -7,7 +7,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import AppointmentInfoModal from '@/components/Modal/AppointmentInfoModal.vue';
 import requests from '@/requests';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import {useToast} from 'vue-toastification';
@@ -22,7 +22,7 @@ export default {
   components: {
     BounceLoader,
     Button,
-    Textinput,
+    TextInput,
     AppointmentInfoModal,
     FullCalendar,
     Card,
@@ -49,6 +49,7 @@ export default {
   methods: {
     showEventDetail(eventClickInfo) {
       this.showAppointmentModal = !this.showAppointmentModal;
+      this.getClientAppointmentSummaries(eventClickInfo.event.extendedProps.client.id);
       this.appointmentModalInfo = {
         title: eventClickInfo.event.title,
         startDateTime: eventClickInfo.event.start,
@@ -70,7 +71,7 @@ export default {
       requests.postClosedDay({
         date: this.addClosedDayDate,
         note: this.addClosedDayNotes,
-      }).then((response) => {
+      }).then(() => {
         toast.success('Closed Day added!', {timeout: 2000});
         this.calendarApi.getEventSourceById('main').refetch();
       }).catch((error) => {
@@ -82,20 +83,18 @@ export default {
       });
     },
     getAppointments(fetchInfo, successCallback) {
-      requests.getAppointments(fetchInfo.start, fetchInfo.end).then((response) => {
-        Promise.all(response.data.filter((appointment) => !appointment['cancelled']).map((appointment) => {
-          if (appointment['typeId'] !== 'closedDay') {
-            return Promise.all([
-              requests.getClient(appointment['clientId']),
-              requests.getAppointmentType(appointment['typeId']),
-            ]).then(([getClientResponse, getAppointmentTypeResponse]) => {
-              const client = getClientResponse.data;
-              const clientName = `${client['firstName']} ${client['lastName']}`;
-              const appointmentType = getAppointmentTypeResponse.data;
-              const appointmentTypeTitle = appointmentType['title'];
-              return {
+      Promise.all([
+        requests.getAppointments(fetchInfo.start, fetchInfo.end),
+        requests.getClosedDays(fetchInfo.start, fetchInfo.end),
+      ])
+        .then(([responseAppointment, responseClosedDays]) => {
+          const appointmentSummaries = [];
+          appointmentSummaries.push(...responseAppointment.data
+            .filter((appointment) => !appointment['cancelled'])
+            .map((appointment) => (
+              {
                 id: appointment['id'],
-                title: `${clientName} for ${appointmentTypeTitle}`,
+                title: `${appointment['client']['firstName']} ${appointment['client']['lastName']} for ${appointment['type']['title']}`,
                 start: appointment['startDateTime'],
                 end: appointment['endDateTime'],
                 classNames: [
@@ -105,26 +104,58 @@ export default {
                 notes: appointment['notes'],
                 confirmed: appointment['confirmed'],
                 cancelled: appointment['cancelled'],
-                typeTitle: appointmentTypeTitle,
-                client: client,
-                clientName: clientName,
-              };
-            });
-          } else {
-            return {
-              id: appointment['startDateTime'],
-              typeTitle: 'Closed Day',
-              title: 'Closed Day',
-              start: appointment['startDateTime'],
-              end: appointment['endDateTime'],
-              classNames: 'bg-success-500 dark:bg-success-500',
-              notes: appointment['notes'],
-            };
-          }
-        })).then((appointmentSummaries) => {
+                typeTitle: appointment['type']['title'],
+                client: appointment['client'],
+                clientName: `${appointment['client']['firstName']} ${appointment['client']['lastName']}`,
+              })));
+
+          appointmentSummaries.push(...responseClosedDays.data
+            .map((closedDay) => (
+              {
+                id: closedDay['date'],
+                typeTitle: 'Closed Day',
+                title: 'Closed Day',
+                start: new Date(closedDay['date'] + ' 00:00:00'),
+                end: new Date(closedDay['date'] + ' 23:59:59'),
+                classNames: 'bg-success-500 dark:bg-success-500',
+                notes: closedDay['note'],
+              })));
           successCallback(appointmentSummaries);
         });
-      });
+    },
+    getClientAppointmentSummaries(clientId) {
+      this.clientAppointmentsLoading = true;
+      requests.getClientAppointments(clientId, true, true)
+        .then((response) => {
+          const appointments = response.data;
+          this.clientAppointmentSummaries = appointments.map((appointment) => {
+            let status = 'past';
+            if (appointment.cancelled) {
+              status = 'cancelled';
+            } else if (new Date(Date.parse(appointment.startDateTime)) > new Date()) {
+              if (appointment['confirmed']) {
+                status = 'confirmed';
+              } else {
+                status = 'pending';
+              }
+            }
+
+            return {
+              id: appointment.id,
+              status: status,
+              startDateTime: appointment.startDateTime,
+              type: appointment.type.title,
+              duration: appointment.type.duration,
+              notes: appointment.notes,
+            };
+          });
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        })
+        .finally(() => {
+          this.clientAppointmentsLoading = false;
+        });
     },
   },
   data() {
@@ -132,12 +163,15 @@ export default {
       userIsAppointmentManager: false,
       calendarApi: null,
       isLoading: true,
+      clientAppointmentsLoading: true,
+      clientAppointmentSummaries: [],
       calendarOptions: {
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
           right: 'timeGridWeek,timeGridDay,listWeek',
         },
+        timeZone: 'UTC',
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
         initialView: window.width > 768 ? 'timeGridWeek' : 'timeGridDay',
         themeSystem: 'bootstrap',
@@ -215,6 +249,9 @@ export default {
         :appointment="appointmentModalInfo"
         @appointments-updated="calendarApi.getEventSourceById('main').refetch()"
         :user-is-appointment-manager="userIsAppointmentManager"
+        :client-appointments-loading="clientAppointmentsLoading"
+        :client-appointment-summaries="clientAppointmentSummaries"
+        size-class="max-w-4xl"
     >
     </AppointmentInfoModal>
     <Modal :active-modal="showAddClosedDayModal" @close="showAddClosedDayModal = !showAddClosedDayModal"
@@ -222,7 +259,7 @@ export default {
       <form @submit.prevent="submitAddClosedDay">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12">
-            <Textinput
+            <TextInput
                 label="Notes"
                 type="text"
                 placeholder="Any notes?"
@@ -269,7 +306,7 @@ export default {
   line-height: 14px !important;
   height: auto !important;
   text-transform: capitalize !important;
-  font-family: Inter !important;
+  font-family: Inter,serif !important;
   padding: 12px 20px 12px 20px !important;
 }
 .fc .fc-button-primary {

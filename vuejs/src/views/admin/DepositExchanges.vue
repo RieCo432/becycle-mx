@@ -8,7 +8,7 @@ import {ref, computed} from 'vue';
 import {useRouter} from 'vue-router';
 import Button from '@/components/Button/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Select from '@/components/Select/index.vue';
 import Icon from '@/components/Icon';
 
@@ -17,7 +17,7 @@ export default {
   name: 'DepositExchanges',
   components: {
     Select,
-    Textinput,
+    TextInput,
     Checkbox,
     Button,
     Card,
@@ -82,7 +82,7 @@ export default {
         return reviewSchema;
       default:
         return amountSchema;
-      };
+      }
     });
 
     const {handleSubmit: handleDepositExchangeSubmit} = useForm({
@@ -101,25 +101,21 @@ export default {
     const {value: reviewed, errorMessage: reviewedError} = useField('reviewed');
 
     const submitDepositExchange = handleDepositExchangeSubmit(() => {
-      console.log('Next');
-      const totalSteps = steps.length;
-      const isLastStep = stepNumber.value === totalSteps - 1;
-      if (isLastStep) {
-        stepNumber.value = totalSteps - 1;
+      if (stepNumber.value === steps.length - 1) {
         requests.postDepositExchange(amount.value, fromUsername.value, fromPassword.value,
           toUsername.value, toPassword.value)
-          .then((response) => {
+          .then(() => {
             toast.success('Deposit Exchange Recorded', {timeout: 2000});
             router.push({path: '/finances/deposits'});
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
           });
       } else if (stepNumber.value === 0) {
-        stepNumber.value++;
+        stepNumber.value = 1;
       } else if (stepNumber.value === 1) {
         requests.checkUserPassword(fromUsername.value, fromPassword.value).then((response) => {
           if (response.data) {
-            stepNumber.value++;
+            stepNumber.value = 2;
           } else {
             setErrorsFromPassword('Wrong Password');
           }
@@ -127,7 +123,7 @@ export default {
       } else if (stepNumber.value === 2) {
         requests.checkUserPassword(toUsername.value, toPassword.value).then((response) => {
           if (response.data) {
-            stepNumber.value++;
+            stepNumber.value = 3;
           } else {
             setErrorsToPassword('Wrong Password');
           }
@@ -224,7 +220,7 @@ export default {
                       Deposit Collection
                     </h4>
                   </div>
-                  <Textinput
+                  <TextInput
                       label="Amount (&pound;)"
                       type="text"
                       placeholder="200"
@@ -250,7 +246,7 @@ export default {
                       :error="fromUsernameError"
                   />
 
-                  <Textinput
+                  <TextInput
                       label="Password"
                       type="password"
                       placeholder="Password"
@@ -276,7 +272,7 @@ export default {
                       :error="toUsernameError"
                   />
 
-                  <Textinput
+                  <TextInput
                       label="Password"
                       type="password"
                       placeholder="Password"

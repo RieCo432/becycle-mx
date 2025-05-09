@@ -6,8 +6,11 @@ import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
 import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkeleton.vue';
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
+import nfc from '@/nfc';
+import {useToast} from 'vue-toastification';
 
 const credentialsStore = useCredentialsStore();
+const toast = useToast();
 
 export default {
   name: 'clientView',
@@ -25,6 +28,7 @@ export default {
       loadingContracts: true,
       loadingBikeDetails: true,
       showEditBikeDetailsModal: false,
+      isInWriteMode: false,
       contractActions: [
         {
           name: 'View',
@@ -116,6 +120,27 @@ export default {
     openEditBikeDetailsModal() {
       this.showEditBikeDetailsModal = true;
     },
+    writeBikeDetailsToNfcTag() {
+      this.isInWriteMode = true;
+      nfc.writeBikeDetailsToNfcTag(this.bike)
+        .then((tagSerialNumber) => {
+          toast.success('Details written.');
+          this.bike.rfidTagSerialNumber = tagSerialNumber;
+          requests.patchBikeChangeDetails(this.bike.id, this.bike)
+            .then(() => {
+              toast.success('RFID Tag Serial Number recorded.', {timeout: 1000});
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 1000});
+            });
+        })
+        .catch((err) => {
+          toast.error(err.message, {timeout: 1000});
+        })
+        .finally(() => {
+          this.isInWriteMode = false;
+        });
+    },
   },
 };
 </script>
@@ -132,6 +157,11 @@ export default {
               <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+            </div>
+            <div class="col-span-6 mt-auto">
+              <DashButton class="w-full" :is-disabled="isInWriteMode" @click="writeBikeDetailsToNfcTag">
+                Write To NFC Tag
+              </DashButton>
             </div>
             <div class="col-span-6 mt-auto">
               <DashButton class="w-full" @click="openEditBikeDetailsModal">

@@ -5,7 +5,7 @@ import {ErrorMessage, useField, useForm} from 'vee-validate';
 import {useToast} from 'vue-toastification';
 import Select from '@/components/Select/index.vue';
 import Textarea from '@/components/Textarea/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
@@ -19,7 +19,7 @@ export default {
     Modal,
     Checkbox,
     Button,
-    Textinput,
+    TextInput,
     Textarea,
     Select,
     ErrorMessage,
@@ -209,7 +209,7 @@ export default {
           <h3 class="text-danger-500 dark:text-danger-600">BE CAREFUL! NO VALIDATION IS DONE ON THESE INPUTS</h3>
         </div>
         <div class="col-span-6">
-          <Textinput
+          <TextInput
               label="Amount (&pound;)"
               type="text"
               placeholder="12.34"

@@ -1,14 +1,13 @@
 <script>
 import requests from '@/requests';
 import {useDropzone} from 'vue3-dropzone';
-import {ref} from 'vue';
 import Card from '@/components/Card/index.vue';
 import * as yup from 'yup';
 import {ErrorMessage, useField, useForm} from 'vee-validate';
 import {useToast} from 'vue-toastification';
 import Select from '@/components/Select/index.vue';
 import Textarea from '@/components/Textarea/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 
 const toast = useToast();
@@ -17,14 +16,13 @@ export default {
   name: 'newExpense',
   components: {
     Button,
-    Textinput,
+    TextInput,
     Textarea,
     Select,
     Card,
     ErrorMessage,
   },
   setup() {
-    const files = ref([]);
     function onDrop(acceptFiles) {
       files.value = acceptFiles.map((file) =>
         Object.assign(file, {
@@ -41,32 +39,34 @@ export default {
       tagId: yup.string().required(),
       notes: yup.string().required(),
       amount: yup.number().required(),
-      expenseDate: yup.date().required(),
+      expenseDate: yup.date().nullable(),
+      file: yup.array().length(1),
     });
 
-    const {handleSubmit} = useForm({
+    const {handleSubmit, handleReset: resetExpenseForm} = useForm({
       validationSchema: newExpenseSchemas,
       keepValuesOnUnmount: true,
     });
 
-    const {value: inOrOut, errorMessage: inOrOutError, resetField: resetInOrOut} = useField('inOrOut');
-    const {value: type, errorMessage: typeError, resetField: resetType} = useField('type');
-    const {value: tagId, errorMessage: tagError, resetField: resetTag} = useField('tagId');
-    const {value: notes, errorMessage: notesError, resetField: resetNotes} = useField('notes');
-    const {value: amount, errorMessage: amountError, resetField: resetAmount} = useField('amount');
-    const {value: expenseDate, errorMessage: expenseDateError, resetField: resetExpenseDate} = useField('expenseDate');
+    const {value: inOrOut, errorMessage: inOrOutError} = useField('inOrOut');
+    const {value: type, errorMessage: typeError} = useField('type');
+    const {value: tagId, errorMessage: tagError} = useField('tagId');
+    const {value: notes, errorMessage: notesError} = useField('notes');
+    const {value: amount, errorMessage: amountError} = useField('amount');
+    const {value: expenseDate, errorMessage: expenseDateError, setErrors: setExpenseDateErrors} = useField('expenseDate');
+    const {value: files, errorMessage: fileError} = useField('file', undefined, {initialValue: []});
+
 
     const submitNewExpense = handleSubmit(() => {
-      requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value, type.value, tagId.value, notes.value, expenseDate.value, files.value[0])
-        .then((response) => {
+      if (!expenseDate.value || !expenseDate.value.length) {
+        setExpenseDateErrors('This field is required');
+        return;
+      }
+      requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value,
+        type.value, tagId.value, notes.value, expenseDate.value, files.value[0])
+        .then(() => {
           toast.success('Expense Submitted', {timeout: 2000});
-          resetInOrOut();
-          resetType();
-          resetTag();
-          resetNotes();
-          resetAmount();
-          resetExpenseDate();
-          files.value = [];
+          resetExpenseForm();
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 5000});
         });
@@ -89,6 +89,7 @@ export default {
       amountError,
       expenseDate,
       expenseDateError,
+      fileError,
       submitNewExpense,
     };
   },
@@ -137,7 +138,7 @@ export default {
         <form @submit.prevent="submitNewExpense">
           <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
             <div class="col-span-6">
-              <Textinput
+              <TextInput
                   label="Amount (&pound;)"
                   type="text"
                   placeholder="12.34"
@@ -185,24 +186,25 @@ export default {
             </div>
             <div class="col-span-6 content-center">
               <label class="text-slate-700 dark:text-slate-300">Date of Expense</label>
-              <flat-pickr
-                  class="form-control m-auto"
-                  name="expenseDate"
-                  id="d3"
-                  placeholder="dd-mm-yyyy"
-                  v-model="expenseDate"
-                  :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
-              >
-              </flat-pickr>
+              <div :class="(expenseDateError ? 'border border-solid border-danger-500 rounded ' : '')">
+                <flat-pickr
+                    class="form-control m-auto"
+                    name="expenseDate"
+                    v-model="expenseDate"
+                    :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+                >
+                </flat-pickr>
+              </div>
               <ErrorMessage name="expenseDate" :error="expenseDateError" class="text-danger-500"/>
             </div>
             <div class="col-span-full">
               <div @click="files = []">
                 <div
                     v-bind="getRootProps()"
-                    class="w-full text-center border-dashed border border-secondary-500 rounded-md
-                           py-[52px] flex flex-col justify-center items-center"
-                    :class="files.length === 0 ? 'cursor-pointer' : ' pointer-events-none'"
+                    :class="'w-full text-center border rounded py-[52px] flex flex-col justify-center items-center '
+                    + (files.length === 0 ? 'cursor-pointer' : ' pointer-events-none') + ' '
+                    + (fileError ? 'border-danger-500 border-solid' : 'border-secondary-500 border-dashed')
+                    "
                 >
                   <div v-if="files.length === 0" class="w-full">
                     <input v-bind="getInputProps()" class="hidden" />
@@ -222,10 +224,12 @@ export default {
                         v-if="files.length === 1"
                         :src="files[0].preview"
                         class="object-contain block rounded-md"
+                        alt="Rceipt photo"
                     />
                   </div>
                 </div>
               </div>
+              <ErrorMessage name="file" :error="fileError" class="text-danger-500"/>
             </div>
             <div class="col-span-full">
               <Button type="submit" class="btn block w-full text-center">

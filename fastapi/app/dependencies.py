@@ -2,6 +2,7 @@ import os
 from typing import Annotated
 from uuid import UUID
 
+import sqlalchemy.exc
 from fastapi import Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -29,6 +30,8 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except sqlalchemy.exc.TimeoutError:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail={"description": "Service Temporarily Unavailable. Please try again later."})
     finally:
         db.close()
 
@@ -129,6 +132,12 @@ async def get_working_user(
         working_username: str = Body("working_username"),
         working_user_password_or_pin: str = Body("working_user_password_or_pin"),
         db: Session = Depends(get_db)) -> models.User:
+    if len(working_username) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail={"description": "No Working Volunteer provided."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     working_user = crud.validate_user_signature(username=working_username, password_or_pin=working_user_password_or_pin, db=db)
     if working_user is None:
         raise HTTPException(
@@ -143,6 +152,12 @@ async def get_checking_user(
         checking_username: str = Body("checking_username"),
         checking_user_password_or_pin: str = Body("checking_user_password_or_pin"),
         db: Session = Depends(get_db)) -> models.User:
+    if len(checking_username) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail={"description": "No Checking Volunteer provided."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     checking_user = crud.validate_user_signature(username=checking_username, password_or_pin=checking_user_password_or_pin, db=db)
     if checking_user is None:
         raise HTTPException(
@@ -163,6 +178,12 @@ async def get_deposit_receiving_user(
         deposit_receiving_username: Annotated[str, Body()],
         deposit_receiving_user_password: Annotated[str, Body()],
         db: Session = Depends(get_db)) -> models.User:
+    if len(deposit_receiving_username) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail={"description": "No Deposit Bearer Volunteer provided."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     deposit_receiving_user = crud.authenticate_user(username=deposit_receiving_username, password_cleartext=deposit_receiving_user_password, db=db)
     if deposit_receiving_user is None:
         raise HTTPException(

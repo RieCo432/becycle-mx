@@ -403,7 +403,9 @@ def get_percentages_of_deposit_returned_by_contract_age(db: Session, start_date:
 
     for contract in all_returned_contracts_in_period:
         days_after_contract_end = (contract.returnedDate - contract.endDate).days
-
+        # Since a percentage cannot be determined for contracts on a 0 deposit, exclude them from the statistics
+        if contract.depositAmountCollected == 0:
+            continue
         percentages_of_deposit_returned_by_contract_age.append([int(days_after_contract_end),
                                                                 int(100 * contract.depositAmountReturned / contract.depositAmountCollected)])
 
@@ -413,6 +415,13 @@ def get_percentages_of_deposit_returned_by_contract_age(db: Session, start_date:
 def get_deposit_return_percentage_trendline(percentages_of_deposit_returned_by_contract_age: list[list[int]]) -> dict[str, float]:
     x_raw = np.array([xy[0] for xy in percentages_of_deposit_returned_by_contract_age])
     y_raw = np.array([xy[1] for xy in percentages_of_deposit_returned_by_contract_age])
+
+    if len(y_raw) == 0 or len(x_raw) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "No data to generate a trendline from."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
     X = x_raw[:, np.newaxis]
     y = y_raw[:, np.newaxis]

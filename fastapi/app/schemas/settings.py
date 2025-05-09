@@ -1,4 +1,5 @@
 from datetime import time, date
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -35,11 +36,13 @@ class PatchAppointmentGeneralSettings(BaseModel):
 
 
 class AppointmentConcurrencyLimit(BaseModel):
+    weekDay: int
     afterTime: time
     maxConcurrent: int
 
 
 class PatchAppointmentConcurrencyLimit(BaseModel):
+    weekDay: int | None = None
     afterTime: time | None = None
     maxConcurrent: int | None = None
 
@@ -66,3 +69,19 @@ class ExpenseType(BaseModel):
 class ContractType(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
+
+class AboutUs(BaseModel):
+    html: str
+
+
+class FaqBase(BaseModel):
+    question: str
+    answer: str
+
+class Faq(FaqBase):
+    id: UUID
+    active: bool
+    orderIndex: int
+
+class UpdateFaq(FaqBase):
+    active: bool
