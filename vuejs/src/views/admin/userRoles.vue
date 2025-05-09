@@ -215,6 +215,10 @@ export default {
           field: 'softDeleted',
         },
         {
+          label: 'Last Authenticated',
+          field: 'lastAuthenticated',
+        },
+        {
           label: 'Actions',
           field: 'actions',
         },
