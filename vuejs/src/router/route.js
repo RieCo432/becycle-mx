@@ -240,6 +240,15 @@ const routes = [
         component: () => import('@/views/admin/userRoles.vue'),
       },
       {
+        path: '/admin/clock-in',
+        name: 'Clock-In',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/clock-in',
+        },
+        component: () => import('@/views/admin/clockIn.vue'),
+      },
+      {
         path: '/admin/appointment-types',
         name: 'Appointment Types',
         meta: {
