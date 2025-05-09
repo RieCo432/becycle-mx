@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from uuid import UUID
 
 import bcrypt
@@ -29,31 +30,40 @@ def get_user(db: Session, user_id: UUID) -> models.User | None:
 
 def authenticate_user(username: str, password_cleartext: str, db: Session) -> models.User | None:
     user = get_user_by_username(username=username, db=db)
-    if user is None:
+    if not _is_user_active(user):
         return None
-    if user.softDeleted:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User has been soft-deleted"})
-    if not bcrypt.checkpw(password_cleartext, user.password):
-        return None
-    else:
+    if _validate_password_or_pin(password_cleartext, user.password):
+        user.lastAuthenticated = datetime.utcnow()
+        db.commit()
         return user
-
+    return None
 
 def validate_user_signature(username: str, password_or_pin, db: Session) -> models.User | None:
     user = get_user_by_username(username=username, db=db)
-    if user is None:
+    if not _is_user_active(user):
         return None
-    if user.softDeleted:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User has been soft-deleted"})
-    if bcrypt.checkpw(password_or_pin, user.password):
-        return user
-    if user.pin is None:
-        return None
-    if bcrypt.checkpw(password_or_pin, user.pin):
+    if (_validate_password_or_pin(password_or_pin, user.password) or
+        _validate_password_or_pin(password_or_pin, user.pin)):
+        user.lastAuthenticated = datetime.utcnow()
+        db.commit()
         return user
 
     return None
 
+def _is_user_active(user):
+    if user is None:
+        return False
+    if user.softDeleted:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User has been soft-deleted"})
+    return True
+
+
+
+
+def _validate_password_or_pin(password_or_pin, actual):
+    if (actual is None):
+        return False
+    return bcrypt.checkpw(password_or_pin, actual)
 
 def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
     user = models.User(
