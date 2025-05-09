@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from uuid import UUID
 
 import bcrypt
@@ -32,6 +33,8 @@ def authenticate_user(username: str, password_cleartext: str, db: Session) -> mo
     if not _is_user_active(user):
         return None
     if _validate_password_or_pin(password_cleartext, user.password):
+        user.lastAuthenticated = datetime.utcnow()
+        db.commit()
         return user
     return None
 
@@ -41,6 +44,8 @@ def validate_user_signature(username: str, password_or_pin, db: Session) -> mode
         return None
     if (_validate_password_or_pin(password_or_pin, user.password) or
         _validate_password_or_pin(password_or_pin, user.pin)):
+        user.lastAuthenticated = datetime.utcnow()
+        db.commit()
         return user
 
     return None
