@@ -5,10 +5,10 @@ import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
-import {ref, onBeforeMount} from 'vue';
 import Switch from '@/components/Switch';
+import {onBeforeMount} from 'vue';
 const toast = useToast();
 
 export default {
@@ -16,7 +16,7 @@ export default {
   components: {
     Switch,
     Button,
-    Textinput,
+    TextInput,
     Card,
     VueSelect,
   },
@@ -118,7 +118,7 @@ export default {
             />
           </div>
           <div class="col-span-6">
-            <Textinput
+            <TextInput
                 label="Minimum Booking Ahead"
                 type="text"
                 placeholder="2"
@@ -128,7 +128,7 @@ export default {
             />
           </div>
           <div class="col-span-6">
-            <Textinput
+            <TextInput
                 label="Maximum Booking Ahead"
                 type="text"
                 placeholder="60"
@@ -138,7 +138,7 @@ export default {
             />
           </div>
           <div class="col-span-6">
-            <Textinput
+            <TextInput
                 label="Slot Duration"
                 type="text"
                 placeholder="15"

@@ -138,11 +138,7 @@ export default {
         return true;
       } else if (item.show.includes('loggedout') && credentialsStore.getTokenType() == null) {
         return true;
-      } else if (credentialsStore.getTokenType() != null && item.show.includes(credentialsStore.getTokenType())) {
-        return true;
-      } else {
-        return false;
-      }
+      } else return (credentialsStore.getTokenType() != null && item.show.includes(credentialsStore.getTokenType()));
     },
     beforeEnter(element) {
       requestAnimationFrame(() => {

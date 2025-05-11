@@ -7,7 +7,7 @@ import {ErrorMessage, useField, useForm} from 'vee-validate';
 import {useToast} from 'vue-toastification';
 import Select from '@/components/Select/index.vue';
 import Textarea from '@/components/Textarea/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 
 const toast = useToast();
@@ -16,7 +16,7 @@ export default {
   name: 'newExpense',
   components: {
     Button,
-    Textinput,
+    TextInput,
     Textarea,
     Select,
     Card,
@@ -64,7 +64,7 @@ export default {
       }
       requests.postNewExpense((inOrOut.value === 'out' ? -1 : 1) * amount.value,
         type.value, tagId.value, notes.value, expenseDate.value, files.value[0])
-        .then((response) => {
+        .then(() => {
           toast.success('Expense Submitted', {timeout: 2000});
           resetExpenseForm();
         }).catch((error) => {
@@ -138,7 +138,7 @@ export default {
         <form @submit.prevent="submitNewExpense">
           <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
             <div class="col-span-6">
-              <Textinput
+              <TextInput
                   label="Amount (&pound;)"
                   type="text"
                   placeholder="12.34"
@@ -224,6 +224,7 @@ export default {
                         v-if="files.length === 1"
                         :src="files[0].preview"
                         class="object-contain block rounded-md"
+                        alt="Rceipt photo"
                     />
                   </div>
                 </div>

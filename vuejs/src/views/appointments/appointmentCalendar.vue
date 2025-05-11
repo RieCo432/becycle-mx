@@ -7,7 +7,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import AppointmentInfoModal from '@/components/Modal/AppointmentInfoModal.vue';
 import requests from '@/requests';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import {useToast} from 'vue-toastification';
@@ -22,7 +22,7 @@ export default {
   components: {
     BounceLoader,
     Button,
-    Textinput,
+    TextInput,
     AppointmentInfoModal,
     FullCalendar,
     Card,
@@ -71,7 +71,7 @@ export default {
       requests.postClosedDay({
         date: this.addClosedDayDate,
         note: this.addClosedDayNotes,
-      }).then((response) => {
+      }).then(() => {
         toast.success('Closed Day added!', {timeout: 2000});
         this.calendarApi.getEventSourceById('main').refetch();
       }).catch((error) => {
@@ -259,7 +259,7 @@ export default {
       <form @submit.prevent="submitAddClosedDay">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12">
-            <Textinput
+            <TextInput
                 label="Notes"
                 type="text"
                 placeholder="Any notes?"
@@ -306,7 +306,7 @@ export default {
   line-height: 14px !important;
   height: auto !important;
   text-transform: capitalize !important;
-  font-family: Inter !important;
+  font-family: Inter,serif !important;
   padding: 12px 20px 12px 20px !important;
 }
 .fc .fc-button-primary {

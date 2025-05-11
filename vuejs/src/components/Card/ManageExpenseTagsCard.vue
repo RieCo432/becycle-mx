@@ -1,5 +1,5 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import requests from '@/requests';
@@ -13,7 +13,7 @@ const toast = useToast();
 
 export default {
   name: 'ManageExpenseTagsCard',
-  components: {Checkbox, DashButton, Card, Textinput},
+  components: {Checkbox, DashButton, Card, TextInput},
   props: {
     user: {
       type: Object,
@@ -136,7 +136,7 @@ export default {
             </Checkbox>
           </div>
           <div v-if="editExpenseTagId === expenseTag.id" class="col-span-4">
-            <Textinput
+            <TextInput
                 type="text"
                 placeholder="New Description"
                 name="editExpenseTagDescription"
@@ -151,7 +151,10 @@ export default {
             </Checkbox>
           </div>
           <div v-if="editExpenseTagId == null" class="col-span-2">
-            <DashButton v-if="user.admin" @click="editExpenseTag(expenseTag.id, expenseTag.description, expenseTag.active)" class="btn-sm mx-auto block-btn" icon="heroicons-outline:pencil"/>
+            <DashButton
+                v-if="user.admin"
+                @click="editExpenseTag(expenseTag.id, expenseTag.description, expenseTag.active)"
+                class="btn-sm mx-auto block-btn" icon="heroicons-outline:pencil"/>
           </div>
           <div v-if="editExpenseTagId != null && editExpenseTagId !== expenseTag.id" class="col-span-2"></div>
           <div v-if="editExpenseTagId != null && editExpenseTagId === expenseTag.id" class="col-span-2">
@@ -164,7 +167,7 @@ export default {
     <form v-if="user.admin" @submit.prevent="submitNewExpenseTag">
       <div class="grid grid-cols-12 gap-2 mt-2">
         <div class="col-span-3">
-          <Textinput
+          <TextInput
               type="text"
               placeholder="New Expense Tag"
               name="newExpenseTagId"
@@ -173,7 +176,7 @@ export default {
           />
         </div>
         <div class="col-span-7">
-          <Textinput
+          <TextInput
               type="text"
               placeholder="Description"
               name="newExpenseTypeDescription"

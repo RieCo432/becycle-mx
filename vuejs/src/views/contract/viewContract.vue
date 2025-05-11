@@ -1,7 +1,6 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
-import Select from '@/components/Select/index.vue';
 import Card from '@/components/Card/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import {computed, ref, toRef} from 'vue';
@@ -24,10 +23,9 @@ export default {
   components: {
     ComboboxTextInput,
     Checkbox,
-    Select,
     Card,
     DashButton,
-    Textinput,
+    TextInput,
     ContractClientCardSkeleton,
     ContractBikeCardSkeleton,
     ContractCardSkeleton,
@@ -39,6 +37,7 @@ export default {
     const contractData = toRef(props, 'contract');
     const patchContractReturn = toRef(props, 'patchContractReturn');
     const isInWriteMode = ref(false);
+    const userSelectionOptionsStatic = ref(true);
 
     const steps = [
       {
@@ -130,6 +129,7 @@ export default {
           requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
             if (response.data) {
               stepNumber.value = 1;
+              userSelectionOptionsStatic.value = true;
             } else {
               depositReturningPasswordSetErrors('Wrong Password!');
             }
@@ -171,6 +171,7 @@ export default {
       everythingCorrectError,
 
       returnAcceptingUserSelected,
+      userSelectionOptionsStatic,
 
       submit,
       steps,
@@ -191,12 +192,18 @@ export default {
       if (user1.toLowerCase() < user2.toLowerCase()) return -1;
       return 0;
     },
-    selectDepositReturningUser(event) {
-      this.depositReturningUser = event.target.innerText;
+    selectDepositReturningUser(event, i) {
+      if (i !== -1) {
+        this.depositReturningUser = this.filtered_deposit_returning_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
     },
-    selectReturnAcceptingUser(event) {
-      this.returnAcceptingUser = event.target.innerText;
-      this.returnAcceptingUserSelected();
+    selectReturnAcceptingUser(event, i) {
+      if (i !== -1) {
+        this.returnAcceptingUser = this.filtered_return_accepting_user_suggestions[i];
+        this.returnAcceptingUserSelected();
+        this.userSelectionOptionsStatic = false;
+      }
     },
     writeBikeDetailsToNfcTag() {
       this.isInWriteMode = true;
@@ -206,7 +213,7 @@ export default {
           const bikeCopy = this.bike;
           bikeCopy.rfidTagSerialNumber = tagSerialNumber;
           requests.patchBikeChangeDetails(this.bike.id, bikeCopy)
-            .then((response) => {
+            .then(() => {
               toast.success('RFID Tag Serial Number recorded.', {timeout: 1000});
             })
             .catch((error) => {
@@ -290,7 +297,7 @@ export default {
     },
     isUserAdmin: {
       type: Boolean,
-      required: true,
+      default: false,
     },
     openEditClientDetailsModal: {
       type: Function,
@@ -484,7 +491,7 @@ export default {
                           Deposit Return
                         </h4>
                       </div>
-                      <Textinput
+                      <TextInput
                           label="Deposit Amount (&pound;)"
                           type="number"
                           placeholder="40"
@@ -498,19 +505,17 @@ export default {
                           :suggestions="filtered_deposit_returning_user_suggestions"
                           :selected-callback="selectDepositReturningUser"
                           :allow-new="false"
-                          :open-by-default="true">
-                        <Textinput
-                            label="Deposit Returner"
-                            type="text"
-                            placeholder="workshop"
-                            name="depositReturningUser"
-                            v-model="depositReturningUser"
-                            :error="depositReturningUserError"
-                            @input="() => {}"
-                        />
-                      </ComboboxTextInput>
+                          :open-by-default="userSelectionOptionsStatic"
+                          label="Deposit Returner"
+                          type="text"
+                          placeholder="workshop"
+                          name="depositReturningUser"
+                          v-model="depositReturningUser"
+                          :error="depositReturningUserError"
+                          @input="() => {}"
+                      />
 
-                      <Textinput
+                      <TextInput
                           label="Deposit Returner Password"
                           type="password"
                           placeholder="Password"
@@ -534,19 +539,17 @@ export default {
                           :suggestions="filtered_return_accepting_user_suggestions"
                           :selected-callback="selectReturnAcceptingUser"
                           :allow-new="false"
-                          :open-by-default="true">
-                        <Textinput
-                            label="Return Accepting Volunteer"
-                            type="text"
-                            placeholder="workshop"
-                            name="returnAcceptingUser"
-                            v-model="returnAcceptingUser"
-                            :error="returnAcceptingUserError"
-                            @input="() => {}"
-                        />
-                      </ComboboxTextInput>
+                          :open-by-default="userSelectionOptionsStatic"
+                          label="Return Accepting Volunteer"
+                          type="text"
+                          placeholder="workshop"
+                          name="returnAcceptingUser"
+                          v-model="returnAcceptingUser"
+                          :error="returnAcceptingUserError"
+                          @input="() => {}"
+                      />
 
-                      <Textinput
+                      <TextInput
                           label="Password or Pin"
                           type="password"
                           placeholder="Password or Pin"
@@ -565,16 +568,18 @@ export default {
                         <table class="w-full text-base text-slate-800 dark:text-slate-300 border
                                       border-collapse border-slate-500 bg-slate-700">
                           <thead>
-                          <th colspan="2" class="border border-slate-500">Return Details</th>
+                          <tr class="border border-slate-500">Return Details</tr>
                           </thead>
-                          <tr>
-                            <td class="border border-slate-500">Return Date</td>
-                            <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                          </tr>
-                          <tr>
-                            <td class="border border-slate-500">Deposit Returned</td>
-                            <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
-                          </tr>
+                          <tbody>
+                            <tr>
+                              <td class="border border-slate-500">Return Date</td>
+                              <td class="border border-slate-500">{{new Date().toDateString()}}</td>
+                            </tr>
+                            <tr>
+                              <td class="border border-slate-500">Deposit Returned</td>
+                              <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
+                            </tr>
+                          </tbody>
                         </table>
                       </div>
                       <div class="col-span-1">

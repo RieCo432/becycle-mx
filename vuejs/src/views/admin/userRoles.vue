@@ -3,7 +3,7 @@ import UserRolesTable from '@/components/Tables/UserRolesTable.vue';
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Checkbox from '@/components/Switch/index.vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
@@ -15,7 +15,7 @@ const toast = useToast();
 
 export default {
   name: 'userRoles',
-  components: {Checkbox, Textinput, Card, UserRolesTable, Button, SetNewPasswordModal},
+  components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal},
   setup() {
     const userData = ref([]);
     const showSetNewPasswordModal = ref(false);
@@ -215,6 +215,10 @@ export default {
           field: 'softDeleted',
         },
         {
+          label: 'Last Authenticated',
+          field: 'lastAuthenticated',
+        },
+        {
           label: 'Actions',
           field: 'actions',
         },
@@ -223,15 +227,21 @@ export default {
   },
   methods: {
     patchUser(userId, patchData) {
+      const indexInArray = this.userData.findIndex((user) => (user.id === userId));
       requests.patchUser(userId, patchData)
         .then((response) => {
-          const indexInArray = this.userData.findIndex((user) => (user.id === userId));
           this.userData.splice(indexInArray, 1, response.data);
           toast.success('User Role updated', {timeout: 1000});
         })
         .catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
-          // failureCallback();
+          const user = {...this.userData[indexInArray]};
+          for (const prop in patchData) {
+            if (patchData.hasOwnProperty(prop) && user.hasOwnProperty(prop)) {
+              user[prop] = !patchData[prop];
+            }
+          }
+          this.userData.splice(indexInArray, 1, user);
         });
     },
     getUserData() {
@@ -274,7 +284,7 @@ export default {
                                  :user-info="setNewPasswordModalInfo" @close="showSetNewPasswordModal = !showSetNewPasswordModal">
               <div>
                 <form @submit.prevent="patchNewPassword" class="space-y-4">
-                  <Textinput
+                  <TextInput
                       label="New Password"
                       type="password"
                       placeholder="New Password"
@@ -284,7 +294,7 @@ export default {
                       hasicon
                       classInput="h-[48px]"
                   />
-                  <Textinput
+                  <TextInput
                       label="Confirm New Password"
                       type="password"
                       placeholder="Confirm New Password"
@@ -305,7 +315,7 @@ export default {
                                  title="Set new PIN" @close="showSetNewPinModal = !showSetNewPinModal">
               <div>
                 <form @submit.prevent="patchNewPin" class="space-y-4">
-                  <Textinput
+                  <TextInput
                       label="New 4-digit PIN"
                       type="password"
                       placeholder="0000"
@@ -315,7 +325,7 @@ export default {
                       hasicon
                       classInput="h-[48px]"
                   />
-                  <Textinput
+                  <TextInput
                       label="Confirm PIN"
                       type="password"
                       placeholder="0000"
@@ -341,7 +351,7 @@ export default {
         <div class="grid grid-cols-12">
           <div class="col-span-12">
             <form @submit.prevent="postNewUser" class="space-y-4">
-              <Textinput
+              <TextInput
                   label="Username"
                   type="username"
                   placeholder="username"
@@ -350,7 +360,7 @@ export default {
                   :error="usernameError"
                   classInput="h-[48px]"
               />
-              <Textinput
+              <TextInput
                   label="Password"
                   type="password"
                   placeholder="Password"
@@ -360,7 +370,7 @@ export default {
                   hasicon
                   classInput="h-[48px]"
               />
-              <Textinput
+              <TextInput
                   label="Confirm Password"
                   type="password"
                   placeholder="Confirm Password"
@@ -370,7 +380,7 @@ export default {
                   hasicon
                   classInput="h-[48px]"
               />
-              <Textinput
+              <TextInput
                   label="4-digit PIN"
                   type="password"
                   placeholder="0000"
@@ -380,7 +390,7 @@ export default {
                   hasicon
                   classInput="h-[48px]"
               />
-              <Textinput
+              <TextInput
                   label="Confirm PIN"
                   type="password"
                   placeholder="0000"

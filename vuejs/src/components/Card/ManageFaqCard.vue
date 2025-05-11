@@ -1,6 +1,6 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import requests from '@/requests';
 import {ref} from 'vue';
@@ -13,7 +13,7 @@ const toast = useToast();
 
 export default {
   name: 'ManageFaqCard',
-  components: {Card, Textinput, DashButton, Checkbox},
+  components: {Card, TextInput, DashButton, Checkbox},
   props: {
     user: {
       type: Object,
@@ -186,13 +186,26 @@ export default {
             </div>
             <div class="col-span-2 grid grid-cols-3 gap-x-2">
               <div class="col-span-1">
-                <DashButton v-if="i !== faqsSorted.length - 1 && user.appointmentManager" class="btn-sm block-btn" icon="heroicons-outline:arrow-down" @click="() => swap(i, i+1)"></DashButton>
+                <DashButton
+                    v-if="i !== faqsSorted.length - 1 && user.appointmentManager"
+                    class="btn-sm block-btn"
+                    icon="heroicons-outline:arrow-down"
+                    @click="() => swap(i, i+1)"/>
               </div>
               <div class="col-span-1">
-                <DashButton v-if="i !== 0 && user.appointmentManager" class="btn-sm block-btn" icon="heroicons-outline:arrow-up" @click="() => swap(i, i-1)"></DashButton>
+                <DashButton
+                    v-if="i !== 0 && user.appointmentManager"
+                    class="btn-sm block-btn"
+                    icon="heroicons-outline:arrow-up"
+                    @click="() => swap(i, i-1)"/>
               </div>
-              <div  class="col-span-1">
-                <DashButton v-if="user.appointmentManager" :is-disabled="editFaqId != null" @click="editFaq(faq.id, faq.question, faq.answer, faq.active)" class="btn-sm block-btn" icon="heroicons-outline:pencil"/>
+              <div class="col-span-1">
+                <DashButton
+                    v-if="user.appointmentManager"
+                    :is-disabled="editFaqId != null"
+                    @click="editFaq(faq.id, faq.question, faq.answer, faq.active)"
+                    class="btn-sm block-btn"
+                    icon="heroicons-outline:pencil"/>
               </div>
 
             </div>
@@ -202,7 +215,7 @@ export default {
 
           <template v-if="editFaqId === faq.id">
             <div class="col-span-4">
-              <Textinput
+              <TextInput
                   type="text"
                   placeholder="New Question"
                   name="editFaqQuestion"
@@ -211,7 +224,7 @@ export default {
               />
             </div>
             <div class="col-span-5">
-              <Textinput
+              <TextInput
                   type="text"
                   placeholder="New Answer"
                   name="editFaqAnswer"
@@ -237,7 +250,7 @@ export default {
     <form v-if="user.appointmentManager" @submit.prevent="submitNewFaq">
       <div class="grid grid-cols-12 gap-2 mt-2">
         <div class="col-span-4">
-          <Textinput
+          <TextInput
               type="text"
               placeholder="New Question"
               name="newFaqQuestion"
@@ -246,7 +259,7 @@ export default {
           />
         </div>
         <div class="col-span-6">
-          <Textinput
+          <TextInput
               type="text"
               placeholder="New Answer"
               name="newFaqAnswer"

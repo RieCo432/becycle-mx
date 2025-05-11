@@ -59,7 +59,7 @@
                   </h4>
                 </div>
                 <div class="col-span-full">
-                  <Textinput
+                  <TextInput
                       label="Email Address"
                       type="text"
                       placeholder="your.email@example.com"
@@ -79,7 +79,7 @@
                   </h4>
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="First Name"
                       type="text"
                       placeholder="John"
@@ -88,7 +88,7 @@
                       :error="firstNameError"/>
                 </div>
                 <div class="col-span-1">
-                  <Textinput
+                  <TextInput
                       label="Last Name"
                       type="text"
                       placeholder="Smith"
@@ -106,7 +106,7 @@
                   </h4>
                 </div>
                 <div class="col-span-full">
-                  <Textinput
+                  <TextInput
                       :label="`Enter the 6-digit code sent to ${emailAddress}`"
                       type="integer"
                       placeholder="123456"
@@ -166,7 +166,7 @@
 <script>
 
 import Card from '@/components/Card/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import requests from '@/requests';
 import {useCredentialsStore} from '@/store/credentialsStore';
 import {useToast} from 'vue-toastification';
@@ -349,7 +349,7 @@ export default {
     Tooltip,
     Button,
     Card,
-    Textinput,
+    TextInput,
     Icon,
   },
 };

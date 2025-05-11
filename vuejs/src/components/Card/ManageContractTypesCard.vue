@@ -1,5 +1,5 @@
 <script>
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import requests from '@/requests';
@@ -12,7 +12,7 @@ const toast = useToast();
 
 export default {
   name: 'ManageContractTypesCard',
-  components: {DashButton, Card, Textinput},
+  components: {DashButton, Card, TextInput},
   props: {
     user: {
       type: Object,
@@ -87,14 +87,18 @@ export default {
             <span class="text-slate-700 dark:text-slate-300">{{contractType.id}}</span>
           </div>
           <div class="col-span-2">
-            <DashButton v-if="user.admin" @click="deleteContractType(contractType.id)" class="bg-danger-500 dark:bg-danger-600 btn-sm mx-auto block-btn" icon="heroicons-outline:trash"/>
+            <DashButton
+                v-if="user.admin"
+                @click="deleteContractType(contractType.id)"
+                class="bg-danger-500 dark:bg-danger-600 btn-sm mx-auto block-btn"
+                icon="heroicons-outline:trash"/>
           </div>
         </template>
       </div>
     <form v-if="user.admin" @submit.prevent="submitNewContractType">
       <div class="grid grid-cols-12 gap-2 mt-2">
           <div class="col-span-10">
-            <Textinput
+            <TextInput
                 type="text"
                 placeholder="New Contract Type"
                 name="newContractType"

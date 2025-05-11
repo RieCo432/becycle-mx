@@ -174,6 +174,12 @@ export const topMenu = [
     show: ['user'],
     child: [
       {
+        childtitle: 'Clock-In',
+        childicon: 'heroicons-outline:clock',
+        childlink: '/admin/clock-in',
+        show: ['user'],
+      },
+      {
         childtitle: 'Basic Settings',
         childicon: 'heroicons-outline:cog-6-tooth',
         childlink: '/admin/basic-settings',

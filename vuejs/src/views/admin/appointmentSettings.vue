@@ -2,11 +2,9 @@
 import EditAppointmentGeneralSettingsCard from '@/components/Card/EditAppointmentGeneralSettingsCard.vue';
 import EditAppointmentConcurrencySettingsCard from '@/components/Card/EditAppointmentConcurrencySettingsCard.vue';
 import requests from '@/requests';
-import AppointmentConcurrencySlider from '@/components/Slider/AppointmentConcurrencySlider.vue';
 export default {
   name: 'appointmentSettings',
   components: {
-    AppointmentConcurrencySlider,
     EditAppointmentGeneralSettingsCard,
     EditAppointmentConcurrencySettingsCard,
   },

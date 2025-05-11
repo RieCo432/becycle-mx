@@ -1,7 +1,7 @@
 <script>
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import {toRef} from 'vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
@@ -12,7 +12,7 @@ const toast = useToast();
 
 export default {
   name: 'EditClientDetailsModal',
-  components: {Textinput, Button, Modal},
+  components: {TextInput, Button, Modal},
   setup(props, context) {
     const closeModal = toRef(props, 'closeModal');
     const client = toRef(props, 'client');
@@ -98,7 +98,7 @@ export default {
     <form @submit.prevent="submitChangeDetails">
       <div class="grid grid-cols-12 gap-5">
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="First Name"
               type="text"
               placeholder="First Name"
@@ -108,7 +108,7 @@ export default {
           />
         </div>
         <div class="md:col-span-6 col-span-12">
-          <Textinput
+          <TextInput
               label="Last Name"
               type="text"
               placeholder="Last Name"
@@ -118,7 +118,7 @@ export default {
           />
         </div>
         <div class="col-span-full">
-          <Textinput
+          <TextInput
               label="Email Address"
               type="text"
               placeholder="email@exmaple.com"
@@ -128,7 +128,7 @@ export default {
           />
         </div>
         <div class="col-span-full">
-          <Textinput
+          <TextInput
               label="Confirm Email Address"
               type="text"
               placeholder="email@exmaple.com"

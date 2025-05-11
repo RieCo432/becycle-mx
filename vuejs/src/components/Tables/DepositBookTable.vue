@@ -76,18 +76,16 @@
               {{ props.row.type }}
             </span>
           </span>
-          <span v-if="props.column.field == 'actions'">
-            <div class="flex space-x-3 rtl:space-x-reverse">
-                <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
-                  <template #button>
-                    <div class="action-btn">
-                      <Icon :icon="action.icon" @click="viewContract(props.row.id)"/>
-                    </div>
-                  </template>
-                  <span>{{action.name}}</span>
-                </Tooltip>
-            </div>
-          </span>
+          <div v-if="props.column.field === 'actions'"class="flex space-x-3 rtl:space-x-reverse">
+            <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
+              <template #button>
+                <div class="action-btn">
+                  <Icon :icon="action.icon" @click="viewContract(props.row.id)"/>
+                </div>
+              </template>
+              <span>{{action.name}}</span>
+            </Tooltip>
+          </div>
         </template>
       </vue-good-table>
     </Card>

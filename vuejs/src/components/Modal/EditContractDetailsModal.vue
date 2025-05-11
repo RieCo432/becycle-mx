@@ -1,7 +1,7 @@
 <script>
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import {toRef} from 'vue';
 import * as yup from 'yup';
 import {ErrorMessage, useField, useForm} from 'vee-validate';
@@ -15,7 +15,7 @@ const toast = useToast();
 
 export default {
   name: 'EditContractDetailsModal',
-  components: {Checkbox, ErrorMessage, Select, Textarea, Textinput, Button, Modal},
+  components: {Checkbox, ErrorMessage, Select, Textarea, TextInput, Button, Modal},
   setup(props, context) {
     const closeModal = toRef(props, 'closeModal');
     const contract = toRef(props, 'contract');
@@ -73,7 +73,7 @@ export default {
         returnAcceptingUserId: returnAcceptingUserId.value,
         depositAmountReturned: depositAmountReturned.value,
         depositReturningUserId: depositReturningUserId.value,
-      }).then((response) => {
+      }).then(() => {
         toast.success('Contract Details updated', {timeout: 2000});
         context.emit('contractDetailsUpdated');
       }).catch((error) => {
@@ -257,7 +257,7 @@ export default {
           />
         </div>
         <div class="col-span-6">
-          <Textinput
+          <TextInput
               label="Deposit Amount Collected (&pound;)"
               type="number"
               placeholder="40"
@@ -305,7 +305,7 @@ export default {
             />
           </div>
           <div class="col-span-6">
-            <Textinput
+            <TextInput
                 label="Deposit Amount returned (&pound;)"
                 type="number"
                 placeholder="40"

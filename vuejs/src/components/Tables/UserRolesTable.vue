@@ -37,7 +37,7 @@
         }"
       >
         <template v-slot:table-row="props">
-          <span v-if="props.column.field == 'username'" class="block w-full">
+          <span v-if="props.column.field === 'username'" class="block w-full">
             <span
                 class="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25"
                 :class="props.row.softDeleted
@@ -87,6 +87,11 @@
                 @update="(newValue) => patchUser(props.row.id, {treasurer: newValue})"
             />
           </span>
+          <span v-if="props.column.field === 'lastAuthenticated' && props.row.lastAuthenticated !== null">
+            {{ new Date(Date.parse(props.row.lastAuthenticated))
+              .toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+                hour: "2-digit", minute: "2-digit", hour12: false, }) }}
+          </span>
           <span v-if="props.column.field === 'softDeleted'" class="flex">
             <Switch
                 :disabled="!userIsAdmin"
@@ -95,8 +100,7 @@
                 @update="(newValue) => patchUser(props.row.id, {softDeleted: newValue})"
             />
           </span>
-          <span v-if="props.column.field == 'actions'">
-            <div class="flex space-x-3 rtl:space-x-reverse">
+            <div v-if="props.column.field === 'actions'" class="flex space-x-3 rtl:space-x-reverse">
                 <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
                   <template #button>
                     <div class="action-btn">
@@ -106,7 +110,6 @@
                   <span>{{action.label}}</span>
                 </Tooltip>
             </div>
-          </span>
         </template>
         <template #pagination-bottom="props">
           <div class="py-4 px-3">

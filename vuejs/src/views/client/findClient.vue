@@ -1,6 +1,6 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import Textinput from '@/components/Textinput/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
@@ -11,7 +11,7 @@ export default {
   name: 'findClient',
   components: {
     Button,
-    ComboboxTextInput, Textinput,
+    ComboboxTextInput, TextInput,
     Card,
   },
   data() {
@@ -66,16 +66,13 @@ export default {
                 :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
-            >
-              <Textinput
-                  label="First Name"
-                  type="text"
-                  placeholder="First Name"
-                  name="firstName"
-                  v-model="selectedClient.firstName"
-                  @input="fetchClients"
-              />
-            </ComboboxTextInput>
+                label="First Name"
+                type="text"
+                placeholder="First Name"
+                name="firstName"
+                v-model="selectedClient.firstName"
+                @input="fetchClients"
+            />
           </div>
 
           <div class="col-span-12 lg:col-span-6">
@@ -84,16 +81,13 @@ export default {
                 :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
-            >
-              <Textinput
-                  label="Last Name"
-                  type="text"
-                  placeholder="Last Name"
-                  name="lastName"
-                  v-model="selectedClient.lastName"
-                  @input="fetchClients"
-              />
-            </ComboboxTextInput>
+                label="Last Name"
+                type="text"
+                placeholder="Last Name"
+                name="lastName"
+                v-model="selectedClient.lastName"
+                @input="fetchClients"
+            />
           </div>
 
           <div class="col-span-12">
@@ -102,16 +96,13 @@ export default {
                 :suggestions="filteredClientSuggestionsLegible"
                 :selected-callback="selectClient"
                 :allow-new=false
-            >
-              <Textinput
-                  label="Email Address"
-                  type="text"
-                  placeholder="Email Address"
-                  name="emailAddress"
-                  v-model="selectedClient.emailAddress"
-                  @input="fetchClients"
-              />
-            </ComboboxTextInput>
+                label="Email Address"
+                type="text"
+                placeholder="Email Address"
+                name="emailAddress"
+                v-model="selectedClient.emailAddress"
+                @input="fetchClients"
+            />
           </div>
 
           <div class="col-span-3 mt-10">
