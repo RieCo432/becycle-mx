@@ -1,16 +1,16 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import TextInput from '@/components/TextInput/index.vue';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import Button from '@/components/Button/index.vue';
+import levenshtein from '@/util/levenshtein';
 
 export default {
   name: 'findClient',
   components: {
     Button,
-    ComboboxTextInput, TextInput,
+    ComboboxTextInput,
     Card,
   },
   data() {
@@ -22,32 +22,46 @@ export default {
         emailAddress: '',
         id: null,
       },
+      filtered_client_suggestions: [],
     };
   },
   created() {
-    this.fetchClients = debounce(this.fetchClients, 500, {leading: true, trailing: true});
+    this.fetchClients = debounce(this.fetchClients, 500, {leading: false, trailing: true});
+    this.run_filter = debounce(this.run_filter, 200, {leading: false, trailing: true});
   },
   methods: {
     fetchClients() {
-      requests.findClient(this.selectedClient.firstName.toLowerCase(), this.selectedClient.lastName.toLowerCase(),
-        this.selectedClient.emailAddress.toLowerCase()).then((response) => {
-        this.clientSuggestions = response.data;
-      });
+      if ((
+          (this.selectedClient.firstName ? this.selectedClient.firstName.length : 0) +
+          (this.selectedClient.lastName ? this.selectedClient.lastName.length : 0) +
+          (this.selectedClient.emailAddress ? this.selectedClient.emailAddress.length : 0)
+      ) > 2) {
+        requests.findClient(this.selectedClient.firstName.toLowerCase(), this.selectedClient.lastName.toLowerCase(),
+          this.selectedClient.emailAddress.toLowerCase(), 5).then((response) => {
+          this.clientSuggestions = response.data;
+          this.run_filter();
+        });
+      }
     },
     selectClient(event, i) {
       this.selectedClient = this.filtered_client_suggestions[i];
     },
+    async run_filter() {
+      const client = {
+        firstName: this.selectedClient.firstName ? this.selectedClient.firstName : '',
+        lastName: this.selectedClient.lastName ? this.selectedClient.lastName : '',
+        emailAddress: this.selectedClient.emailAddress ? this.selectedClient.emailAddress : '',
+      };
+      levenshtein.filterSortObject(this.clientSuggestions, client, 4).then((result) => {
+        this.filtered_client_suggestions = result;
+      });
+    },
+    handleInput() {
+      this.fetchClients();
+      this.run_filter();
+    },
   },
   computed: {
-    filtered_client_suggestions() {
-      return this.clientSuggestions.filter((client) => (
-        (client.firstName.startsWith(this.selectedClient.firstName.toLowerCase()) && (this.selectedClient.firstName.toLowerCase())) ||
-          (client.lastName.startsWith(this.selectedClient.lastName.toLowerCase()) && (this.selectedClient.lastName.toLowerCase())) ||
-          (client.emailAddress.startsWith(
-            this.selectedClient.emailAddress.toLowerCase()) &&
-              (this.selectedClient.emailAddress.toLowerCase()))
-      ));
-    },
     filteredClientSuggestionsLegible() {
       return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
@@ -71,7 +85,7 @@ export default {
                 placeholder="First Name"
                 name="firstName"
                 v-model="selectedClient.firstName"
-                @input="fetchClients"
+                @input="handleInput"
             />
           </div>
 
@@ -86,7 +100,7 @@ export default {
                 placeholder="Last Name"
                 name="lastName"
                 v-model="selectedClient.lastName"
-                @input="fetchClients"
+                @input="handleInput"
             />
           </div>
 
@@ -101,7 +115,7 @@ export default {
                 placeholder="Email Address"
                 name="emailAddress"
                 v-model="selectedClient.emailAddress"
-                @input="fetchClients"
+                @input="handleInput"
             />
           </div>
 

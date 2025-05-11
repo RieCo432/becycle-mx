@@ -180,12 +180,13 @@ export default {
   methods: {
     fetchClientSuggestions() {
       requests.findClient(
-          this.firstName ? this.firstName.toLowerCase() : '',
-          this.lastName ? this.lastName.toLowerCase() : '',
-          this.emailAddress ? this.emailAddress.toLowerCase() : '')
-          .then((response) => {
-            this.clientSuggestions = response.data;
-          });
+        this.firstName ? this.firstName.toLowerCase() : '',
+        this.lastName ? this.lastName.toLowerCase() : '',
+        this.emailAddress ? this.emailAddress.toLowerCase() :'',
+        10)
+        .then((response) => {
+          this.clientSuggestions = response.data;
+        });
     },
     selectClient(event, i) {
       if (i !== -1) {

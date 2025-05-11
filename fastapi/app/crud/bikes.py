@@ -34,16 +34,16 @@ def find_similar_bikes(db: Session, make: str | None = None, model: str | None =
     return bikes
 
 
-def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None) -> list[schemas.Bike]:
+def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None, max_distance: int = 4) -> list[schemas.Bike]:
     query_filter = []
     if make is not None:
-        query_filter.append(models.Bike.make.startswith(make.lower()))
+        query_filter.append(models.Bike.make.contains(make.lower()) | (func.levenshtein(models.Bike.make, make) <= max_distance))
     if model is not None:
-        query_filter.append(models.Bike.model.startswith(model.lower()))
+        query_filter.append(models.Bike.model.contains(model.lower()) | (func.levenshtein(models.Bike.model, model) <= max_distance))
     if colour is not None:
-        query_filter.append(models.Bike.colour.startswith(colour.lower()))
+        query_filter.append(models.Bike.colour.contains(colour.lower()) | (func.levenshtein(models.Bike.colour, colour) <= max_distance))
     if serialNumber is not None:
-        query_filter.append(models.Bike.serialNumber.startswith(serialNumber.lower()))
+        query_filter.append(models.Bike.serialNumber.contains(serialNumber.lower()) | (func.levenshtein(models.Bike.serialNumber, serialNumber) <= max_distance))
 
     bikes = [bike for bike in db.scalars(
         select(models.Bike)
@@ -79,40 +79,40 @@ def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
     return bike
 
 
-def get_similar_makes(db: Session, make: str) -> list[str]:
+def get_similar_makes(db: Session, make: str, max_distance: int = 4) -> list[str]:
     similar_makes = [_ for _ in db.scalars(
         select(models.Bike.make)
-        .where(models.Bike.make.contains(make))
+        .where(models.Bike.make.contains(make) | (func.levenshtein(models.Bike.make, make) <= max_distance))
         .distinct()
     )]
 
     return similar_makes
 
 
-def get_similar_models(db: Session, model: str) -> list[str]:
+def get_similar_models(db: Session, model: str, max_distance: int = 4) -> list[str]:
     similar_models = [_ for _ in db.scalars(
         select(models.Bike.model)
-        .where(models.Bike.model.contains(model))
+        .where(models.Bike.model.contains(model) | (func.levenshtein(models.Bike.model, model) <= max_distance))
         .distinct()
     )]
 
     return similar_models
 
 
-def get_similar_serial_numbers(db: Session, serial_number: str) -> list[str]:
+def get_similar_serial_numbers(db: Session, serial_number: str, max_distance: int = 4) -> list[str]:
     similar_serial_numbers = [_ for _ in db.scalars(
         select(models.Bike.serialNumber)
-        .where(models.Bike.serialNumber.contains(serial_number))
+        .where(models.Bike.serialNumber.contains(serial_number) | (func.levenshtein(models.Bike.serialNumber, serial_number) <= max_distance))
         .distinct()
     )]
 
     return similar_serial_numbers
 
 
-def get_similar_colours(db: Session, colour: str) -> list[str]:
+def get_similar_colours(db: Session, colour: str, max_distance: int = 4) -> list[str]:
     similar_colours = [_ for _ in db.scalars(
         select(models.Bike.colour)
-        .where(models.Bike.colour.contains(colour))
+        .where(models.Bike.colour.contains(colour) | (func.levenshtein(models.Bike.colour, colour) <= max_distance))
         .distinct()
     )]
 

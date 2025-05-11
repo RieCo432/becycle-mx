@@ -547,6 +547,7 @@ import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
+import levenshtein from '@/util/levenshtein';
 
 const toast = useToast();
 
@@ -935,14 +936,20 @@ export default {
       colour_suggestions: [],
       serial_number_suggestions: [],
       isNfcActive: false,
+      filtered_client_suggestions: [],
+      filtered_make_suggestions: [],
+      filtered_model_suggestions: [],
+      filtered_colour_suggestions: [],
+      filtered_serial_number_suggestions: [],
     };
   },
   created() {
-    this.fetchClientSuggestions = debounce(this.fetchClientSuggestions, 500, {leading: true, trailing: true});
+    this.fetchClientSuggestions = debounce(this.fetchClientSuggestions, 500, {leading: false, trailing: true});
     this.fetchBikeMakeSuggestions = debounce(this.fetchBikeMakeSuggestions, 500, {leading: true, trailing: true});
     this.fetchBikeModelSuggestions = debounce(this.fetchBikeModelSuggestions, 500, {leading: true, trailing: true});
     this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500, {leading: true, trailing: true});
     this.fetchColourSuggestions = debounce(this.fetchColourSuggestions, 500, {leading: true, trailing: true});
+    this.run_filter = debounce(this.run_filter, 200, {leading: false, trailing: true});
   },
   methods: {
     userSortingFunction(user1, user2) {
@@ -955,31 +962,39 @@ export default {
       return new Date(date.setMonth(date.getMonth() + 6));
     },
     fetchClientSuggestions() {
-      requests.findClient(
-        this.firstName ? this.firstName.toLowerCase() : '',
-        this.lastName ? this.lastName.toLowerCase() : '',
-        this.emailAddress ? this.emailAddress.toLowerCase() :'')
-        .then((response) => {
-          this.clientSuggestions = response.data;
-        });
+      if ((
+        (this.firstName ? this.firstName.length : 0) +
+          (this.lastName ? this.lastName.length : 0) +
+          (this.emailAddress ? this.emailAddress.length : 0)
+      ) > 2) {
+         requests.findClient(
+          this.firstName ? this.firstName.toLowerCase() : '',
+          this.lastName ? this.lastName.toLowerCase() : '',
+          this.emailAddress ? this.emailAddress.toLowerCase() :'',
+          5)
+          .then((response) => {
+            this.clientSuggestions = response.data;
+            this.run_filter();
+          });
+      }
     },
     fetchBikeMakeSuggestions() {
-      requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {
+      requests.getBikeMakeSuggestions(this.make.toLowerCase(), 4).then((response) => {
         this.makeSuggestions = response.data;
       });
     },
     fetchBikeModelSuggestions() {
-      requests.getBikeModelSuggestions(this.model.toLowerCase()).then((response) => {
+      requests.getBikeModelSuggestions(this.model.toLowerCase(), 4).then((response) => {
         this.modelSuggestions = response.data;
       });
     },
     fetchSerialNumberSuggestions() {
-      requests.getBikeSerialNumberSuggestions(this.serialNumber.toLowerCase()).then((response) => {
+      requests.getBikeSerialNumberSuggestions(this.serialNumber.toLowerCase(), 4).then((response) => {
         this.serial_number_suggestions = response.data;
       });
     },
     fetchColourSuggestions() {
-      requests.getBikeColourSuggestions(this.colour.toLowerCase()).then((response) => {
+      requests.getBikeColourSuggestions(this.colour.toLowerCase(), 4).then((response) => {
         this.colour_suggestions = response.data;
       });
     },
@@ -995,22 +1010,22 @@ export default {
     },
     selectMake(event, i) {
       if (i !== -1) {
-        this.make = this.makeSuggestions[i];
+        this.make = this.filtered_make_suggestions[i];
       }
     },
     selectModel(event, i) {
       if (i !== -1) {
-        this.model = this.modelSuggestions[i];
+        this.model = this.filtered_model_suggestions[i];
       }
     },
     selectSerialNumber(event, i) {
       if (i !== -1) {
-        this.serialNumber = this.serial_number_suggestions[i];
+        this.serialNumber = this.filtered_serial_number_suggestions[i];
       }
     },
     selectColour(event, i) {
       if (i !== -1) {
-        this.colour = this.colour_suggestions[i];
+        this.colour = this.filtered_colour_suggestions[i];
       }
     },
     selectDepositCollectingUser(event, i) {
@@ -1128,30 +1143,49 @@ export default {
           toast.error(error.response.data.detail.description, {timeout: 1000});
         });
     },
+    async run_filter() {
+      const client = {
+        firstName: this.firstName ? this.firstName : '',
+        lastName: this.lastName ? this.lastName : '',
+        emailAddress: this.emailAddress ? this.emailAddress : '',
+      };
+      levenshtein.filterSortObject(this.clientSuggestions, client, 4).then((result) => {
+        this.filtered_client_suggestions = result;
+      });
+    },
+  },
+  watch: {
+    emailAddress() {
+      this.run_filter();
+    },
+    firstName() {
+      this.run_filter();
+    },
+    lastName() {
+      this.run_filter();
+    },
+    make() {
+      levenshtein.filterSort(this.makeSuggestions, this.make, 4).then((result) => {
+        this.filtered_make_suggestions = result.slice(0, 6);
+      });
+    },
+    model() {
+      levenshtein.filterSort(this.modelSuggestions, this.model, 4).then((result) => {
+        this.filtered_model_suggestions = result.slice(0, 6);
+      });
+    },
+    colour() {
+      levenshtein.filterSort(this.colour_suggestions, this.colour, 4).then((result) => {
+        this.filtered_colour_suggestions = result.slice(0, 6);
+      });
+    },
+    serialNumber() {
+      levenshtein.filterSort(this.serial_number_suggestions, this.serialNumber, 4).then((result) => {
+        this.filtered_serial_number_suggestions = result.slice(0, 6);
+      });
+    },
   },
   computed: {
-    filtered_client_suggestions() {
-      return this.clientSuggestions.filter((client) => (
-        (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
-          (this.lastName && client.lastName.startsWith(this.lastName.toLowerCase())) ||
-          (this.emailAddress && client.emailAddress.startsWith(this.emailAddress.toLowerCase()))
-      ));
-    },
-    filteredClientSuggestionsLegible() {
-      return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
-    },
-    filtered_make_suggestions() {
-      return this.makeSuggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
-    },
-    filtered_model_suggestions() {
-      return this.modelSuggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
-    },
-    filtered_serial_number_suggestions() {
-      return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber.toLowerCase()))).slice(0, 4);
-    },
-    filtered_colour_suggestions() {
-      return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour.toLowerCase()))).slice(0, 4);
-    },
     filtered_deposit_collecting_user_suggestions() {
       return this.depositBearers
         .filter((suggestion) => suggestion
@@ -1176,6 +1210,9 @@ export default {
           .startsWith(this.checkingUser.toLowerCase()))
         .sort(this.userSortingFunction)
         .slice(0, 10);
+    },
+    filteredClientSuggestionsLegible() {
+      return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
   },
 };

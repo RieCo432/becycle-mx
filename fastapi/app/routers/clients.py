@@ -1,3 +1,4 @@
+import datetime
 import os
 from datetime import timedelta
 from typing import Annotated
@@ -123,8 +124,9 @@ async def find_client(
         first_name: str = None,
         last_name: str = None,
         email_address: str = None,
+        max_distance: int = 10,
         db: Session = Depends(dep.get_db)) -> list[schemas.Client]:
-    return crud.get_potential_client_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
+    return crud.get_potential_client_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address, max_distance=max_distance)
 
 
 @clients.get("/clients/me")
