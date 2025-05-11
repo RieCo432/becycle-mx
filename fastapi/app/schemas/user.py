@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -20,6 +21,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: UUID
     softDeleted: bool
+    lastAuthenticated: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

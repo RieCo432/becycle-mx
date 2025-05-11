@@ -1,6 +1,5 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import TextInput from '@/components/TextInput/index.vue';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import requests from '@/requests';
 import {debounce} from 'lodash-es';
@@ -8,6 +7,7 @@ import Button from '@/components/Button/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
+import levenshtein from '@/util/levenshtein';
 
 const toast = useToast();
 
@@ -16,7 +16,7 @@ export default {
   components: {
     DashButton,
     Button,
-    ComboboxTextInput, TextInput,
+    ComboboxTextInput,
     Card,
   },
   data() {
@@ -31,20 +31,31 @@ export default {
         decals: null,
         id: null,
       },
+      filtered_bike_suggestions: [],
     };
   },
   created() {
-    this.fetchBikes = debounce(this.fetchBikes, 500, {leading: true, trailing: true});
+    this.fetchBikes = debounce(this.fetchBikes, 500, {leading: false, trailing: true});
+    this.run_filter = debounce(this.run_filter, 200, {leading: true, trailing: true});
   },
   methods: {
     fetchBikes() {
-      requests.findBikes(
-        this.selectedBike.make,
-        this.selectedBike.model,
-        this.selectedBike.colour,
-        this.selectedBike.serialNumber).then((response) => {
-        this.bikeSuggestions = response.data;
-      });
+      if ((
+        (this.selectedBike.make ? this.selectedBike.make.length : 0) +
+          (this.selectedBike.model ? this.selectedBike.model.length : 0) +
+          (this.selectedBike.colour ? this.selectedBike.colour.length : 0) +
+          (this.selectedBike.serialNumber ? this.selectedBike.serialNumber.length : 0)
+      ) > 2) {
+        requests.findBikes(
+          this.selectedBike.make,
+          this.selectedBike.model,
+          this.selectedBike.colour,
+          this.selectedBike.serialNumber,
+          4).then((response) => {
+          this.bikeSuggestions = response.data;
+          this.run_filter();
+        });
+      }
     },
     selectBike(event, i) {
       this.selectedBike = this.filtered_bike_suggestions[i];
@@ -88,16 +99,23 @@ export default {
           this.isInReadMode = false;
         });
     },
+    run_filter() {
+      const bike = {
+        make: this.selectedBike.make ? this.selectedBike.make : '',
+        model: this.selectedBike.model ? this.selectedBike.model : '',
+        colour: this.selectedBike.colour ? this.selectedBike.colour : '',
+        serialNumber: this.selectedBike.serialNumber ? this.selectedBike.serialNumber : '',
+      };
+      levenshtein.filterSortObject(this.bikeSuggestions, bike, 4).then((result) => {
+        this.filtered_bike_suggestions = result;
+      });
+    },
+    handleInput() {
+      this.fetchBikes();
+      this.run_filter();
+    },
   },
   computed: {
-    filtered_bike_suggestions() {
-      return this.bikeSuggestions.filter((bike) => (
-        (!this.selectedBike.make || bike.make.startsWith(this.selectedBike.make.toLowerCase())) &&
-        (!this.selectedBike.model || bike.model.startsWith(this.selectedBike.model.toLowerCase())) &&
-        (!this.selectedBike.colour || bike.colour.startsWith(this.selectedBike.colour.toLowerCase())) &&
-        (!this.selectedBike.serialNumber || bike.serialNumber.startsWith(this.selectedBike.serialNumber.toLowerCase()))
-      ));
-    },
     filteredBikeSuggestionsLegible() {
       return this.filtered_bike_suggestions.map((bike) => (`${bike.make} ${bike.model} ${bike.colour} ${bike.serialNumber}`));
     },
@@ -116,16 +134,13 @@ export default {
                 :suggestions="filteredBikeSuggestionsLegible"
                 :selected-callback="selectBike"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Make"
-                  type="text"
-                  placeholder="Raleigh"
-                  name="make"
-                  v-model="selectedBike.make"
-                  @input="fetchBikes"
-              />
-            </ComboboxTextInput>
+                label="Make"
+                type="text"
+                placeholder="Raleigh"
+                name="make"
+                v-model="selectedBike.make"
+                @input="handleInput"
+            />
           </div>
 
           <div class="col-span-12 lg:col-span-6">
@@ -134,16 +149,13 @@ export default {
                 :suggestions="filteredBikeSuggestionsLegible"
                 :selected-callback="selectBike"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Model"
-                  type="text"
-                  placeholder="Chloe"
-                  name="model"
-                  v-model="selectedBike.model"
-                  @input="fetchBikes"
-              />
-            </ComboboxTextInput>
+                label="Model"
+                type="text"
+                placeholder="Chloe"
+                name="model"
+                v-model="selectedBike.model"
+                @input="handleInput"
+            />
           </div>
 
           <div class="col-span-12 lg:col-span-6">
@@ -152,16 +164,13 @@ export default {
                 :suggestions="filteredBikeSuggestionsLegible"
                 :selected-callback="selectBike"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Colour"
-                  type="text"
-                  placeholder="Pink"
-                  name="colour"
-                  v-model="selectedBike.colour"
-                  @input="fetchBikes"
-              />
-            </ComboboxTextInput>
+                label="Colour"
+                type="text"
+                placeholder="Pink"
+                name="colour"
+                v-model="selectedBike.colour"
+                @input="handleInput"
+            />
           </div>
 
           <div class="col-span-12 lg:col-span-6">
@@ -170,16 +179,13 @@ export default {
                 :suggestions="filteredBikeSuggestionsLegible"
                 :selected-callback="selectBike"
                 :allow-new=false
-            >
-              <TextInput
-                  label="Serial Number"
-                  type="text"
-                  placeholder="ABCD 1234"
-                  name="serialNumber"
-                  v-model="selectedBike.serialNumber"
-                  @input="fetchBikes"
-              />
-            </ComboboxTextInput>
+                label="Serial Number"
+                type="text"
+                placeholder="ABCD 1234"
+                name="serialNumber"
+                v-model="selectedBike.serialNumber"
+                @input="handleInput"
+            />
           </div>
 
           <div class="col-span-6 mt-10">

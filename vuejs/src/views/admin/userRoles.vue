@@ -215,6 +215,10 @@ export default {
           field: 'softDeleted',
         },
         {
+          label: 'Last Authenticated',
+          field: 'lastAuthenticated',
+        },
+        {
           label: 'Actions',
           field: 'actions',
         },
@@ -223,15 +227,21 @@ export default {
   },
   methods: {
     patchUser(userId, patchData) {
+      const indexInArray = this.userData.findIndex((user) => (user.id === userId));
       requests.patchUser(userId, patchData)
         .then((response) => {
-          const indexInArray = this.userData.findIndex((user) => (user.id === userId));
           this.userData.splice(indexInArray, 1, response.data);
           toast.success('User Role updated', {timeout: 1000});
         })
         .catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
-          // failureCallback();
+          const user = {...this.userData[indexInArray]};
+          for (const prop in patchData) {
+            if (patchData.hasOwnProperty(prop) && user.hasOwnProperty(prop)) {
+              user[prop] = !patchData[prop];
+            }
+          }
+          this.userData.splice(indexInArray, 1, user);
         });
     },
     getUserData() {

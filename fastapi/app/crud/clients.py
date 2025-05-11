@@ -2,7 +2,7 @@ import datetime
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, or_
+from sqlalchemy import select, func, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -154,18 +154,19 @@ def get_similar_email_addresses(db: Session, email_address: str) -> list[str]:
     return similar_email_addresses
 
 
-def get_potential_client_matches(db: Session, first_name: str | None, last_name: str | None, email_address: str | None) -> list[models.Client]:
+def get_potential_client_matches(db: Session, first_name: str | None, last_name: str | None, email_address: str | None, max_distance: int = 10) -> list[models.Client]:
     query_filter = []
-    if first_name is not None:
-        query_filter.append(models.Client.firstName.startswith(first_name))
-    if last_name is not None:
-        query_filter.append(models.Client.lastName.startswith(last_name))
-    if email_address is not None:
-        query_filter.append(models.Client.emailAddress.startswith(email_address))
+    if first_name is not None and first_name != "":
+        query_filter.append(models.Client.firstName.contains(first_name) | (func.levenshtein(models.Client.firstName, first_name) <= max_distance))
+    if last_name is not None and last_name != "":
+        query_filter.append(models.Client.lastName.contains(last_name) | (func.levenshtein(models.Client.lastName, last_name) <= max_distance))
+    if email_address is not None and email_address != "":
+        query_filter.append(models.Client.emailAddress.contains(email_address) | (func.levenshtein(models.Client.emailAddress, email_address) <= max_distance))
+
     potential_matches = [_ for _ in db.scalars(
-        select(models.Client)
-        .where(or_(*query_filter))
-    )]
+            select(models.Client)
+            .where(and_(*query_filter))
+        )]
 
     return potential_matches
 

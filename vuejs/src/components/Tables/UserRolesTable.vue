@@ -87,6 +87,11 @@
                 @update="(newValue) => patchUser(props.row.id, {treasurer: newValue})"
             />
           </span>
+          <span v-if="props.column.field === 'lastAuthenticated' && props.row.lastAuthenticated !== null">
+            {{ new Date(Date.parse(props.row.lastAuthenticated))
+              .toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+                hour: "2-digit", minute: "2-digit", hour12: false, }) }}
+          </span>
           <span v-if="props.column.field === 'softDeleted'" class="flex">
             <Switch
                 :disabled="!userIsAdmin"

@@ -15,6 +15,8 @@ sudo docker exec becycle-mx_postgres_1 psql -U becycleAdmin becycledb -c "delete
 
 sudo docker exec becycle-mx_postgres_1 psql -U becycleAdmin becycledb -c "delete from clientstemp where expirationdatetime<current_timestamp;"
 
+sudo docker exec becycle-mx_postgres_1 psql -U becycleAdmin becycledb -c "update users set softdeleted=true where lastauthenticated < current_timestamp at time zone 'utc' - interval '6 months';"
+
 with cron, this can be used to run the command every hour:
 0 * * * *
 

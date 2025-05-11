@@ -63,14 +63,13 @@
                     <ComboboxTextInput
                         :field-model-value="emailAddress"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput label="Email" type="email" placeholder="Type your email"
-                                 name="emailAddress"
-                                 v-model="emailAddress"
-                                 :error="emailAddressError"
-                                 @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="Email" type="email" placeholder="Type your email"
+                        name="emailAddress"
+                        v-model="emailAddress"
+                        :error="emailAddressError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-1">
@@ -88,34 +87,30 @@
                     <ComboboxTextInput
                         :field-model-value="firstName"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput
-                          label="First name"
-                          type="text"
-                          placeholder="First name"
-                          name="firstname"
-                          v-model="firstName"
-                          :error="firstNameError"
-                          @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="First name"
+                        type="text"
+                        placeholder="First name"
+                        name="firstname"
+                        v-model="firstName"
+                        :error="firstNameError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-1">
                     <ComboboxTextInput
                         :field-model-value="lastName"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput
-                          label="Last name"
-                          type="text"
-                          placeholder="Last name"
-                          name="lastname"
-                          v-model="lastName"
-                          :error="lastNameError"
-                          @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="Last name"
+                        type="text"
+                        placeholder="Last name"
+                        name="lastname"
+                        v-model="lastName"
+                        :error="lastNameError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
                 </div>
               </div>
@@ -136,17 +131,15 @@
                         :allow-new="makeNotInList"
                         :field-model-value="make"
                         :suggestions="filtered_make_suggestions"
-                        :selected-callback="selectMake">
-                      <TextInput
-                          label="Make"
-                          type="text"
-                          placeholder="Make"
-                          name="make"
-                          v-model="make"
-                          :error="makeError"
-                          @input="fetchBikeMakeSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectMake"
+                        label="Make"
+                        type="text"
+                        placeholder="Make"
+                        name="make"
+                        v-model="make"
+                        :error="makeError"
+                        @input="fetchBikeMakeSuggestions"
+                    />
                   </div>
                   <div class="col-span-2 md:col-span-1">
                     <label
@@ -164,17 +157,15 @@
                         :allow-new="modelNotInList"
                         :field-model-value="model"
                         :suggestions="filtered_model_suggestions"
-                        :selected-callback="selectModel">
-                      <TextInput
-                          label="Model"
-                          type="text"
-                          placeholder="Model"
-                          name="model"
-                          v-model="model"
-                          :error="modelError"
-                          @input="fetchBikeModelSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectModel"
+                        label="Model"
+                        type="text"
+                        placeholder="Model"
+                        name="model"
+                        v-model="model"
+                        :error="modelError"
+                        @input="fetchBikeModelSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-2 md:col-span-1">
@@ -192,17 +183,15 @@
                     <ComboboxTextInput
                         :field-model-value="colour"
                         :suggestions="filtered_colour_suggestions"
-                        :selected-callback="selectColour">
-                      <TextInput
-                          label="Colour"
-                          type="text"
-                          placeholder="Colour"
-                          name="colour"
-                          v-model="colour"
-                          :error="colourError"
-                          @input="fetchColourSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectColour"
+                        label="Colour"
+                        type="text"
+                        placeholder="Colour"
+                        name="colour"
+                        v-model="colour"
+                        :error="colourError"
+                        @input="fetchColourSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-10 md:col-span-5 md:col-start-7">
@@ -220,17 +209,15 @@
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
-                        :selected-callback="selectSerialNumber">
-                      <TextInput
-                          label="Serial Number"
-                          type="text"
-                          placeholder="Serial Number"
-                          name="serialnumber"
-                          v-model="serialNumber"
-                          :error="serialNumberError"
-                          @input="fetchSerialNumberSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectSerialNumber"
+                        label="Serial Number"
+                        type="text"
+                        placeholder="Serial Number"
+                        name="serialnumber"
+                        v-model="serialNumber"
+                        :error="serialNumberError"
+                        @input="fetchSerialNumberSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-full">
@@ -331,17 +318,15 @@
                       :suggestions="filtered_deposit_collecting_user_suggestions"
                       :selected-callback="selectDepositCollectingUser"
                       :allow-new="false"
-                      :open-by-default="true">
-                    <TextInput
-                        label="Deposit Collector"
-                        type="text"
-                        placeholder="workshop"
-                        name="depositCollectingUser"
-                        v-model="depositCollectingUser"
-                        :error="depositCollectingUserError"
-                        @input="() => {}"
-                    />
-                  </ComboboxTextInput>
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Deposit Collector"
+                      type="text"
+                      placeholder="workshop"
+                      name="depositCollectingUser"
+                      v-model="depositCollectingUser"
+                      :error="depositCollectingUserError"
+                      @input="() => {}"
+                  />
 
                   <TextInput
                       label="Deposit Collector Password"
@@ -367,17 +352,15 @@
                       :suggestions="filtered_working_user_suggestions"
                       :selected-callback="selectWorkingUser"
                       :allow-new="false"
-                      :open-by-default="true">
-                    <TextInput
-                        label="Working Volunteer"
-                        type="text"
-                        placeholder="workshop"
-                        name="workingUser"
-                        v-model="workingUser"
-                        :error="workingUserError"
-                        @input="() => {}"
-                    />
-                  </ComboboxTextInput>
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Working Volunteer"
+                      type="text"
+                      placeholder="workshop"
+                      name="workingUser"
+                      v-model="workingUser"
+                      :error="workingUserError"
+                      @input="() => {}"
+                  />
 
                   <TextInput
                       label="Working User Password or Pin"
@@ -404,17 +387,15 @@
                       :suggestions="filtered_checking_user_suggestions"
                       :selected-callback="selectCheckingUser"
                       :allow-new="false"
-                      :open-by-default="true">
-                    <TextInput
-                        label="Safety Checking User"
-                        type="text"
-                        placeholder="workshop"
-                        name="checkingUser"
-                        v-model="checkingUser"
-                        :error="checkingUserError"
-                        @input="() => {}"
-                    />
-                  </ComboboxTextInput>
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Safety Checking User"
+                      type="text"
+                      placeholder="workshop"
+                      name="checkingUser"
+                      v-model="checkingUser"
+                      :error="checkingUserError"
+                      @input="() => {}"
+                  />
 
                   <TextInput
                       label="Checking User Password or Pin"
@@ -566,6 +547,7 @@ import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
+import levenshtein from '@/util/levenshtein';
 
 const toast = useToast();
 
@@ -635,6 +617,8 @@ export default {
     const activeUsers = ref([]);
 
     const router = useRouter();
+
+    const userSelectionOptionsStatic = ref(true);
 
     // step by step yup schema
     const clientSchema = yup.object().shape({
@@ -739,6 +723,8 @@ export default {
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
     const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
+    makeNotInList.value = false;
+    modelNotInList.value = false;
 
     const {value: type, errorMessage: typeError} = useField('type');
     const {value: condition, errorMessage: conditionError} = useField('condition');
@@ -833,6 +819,7 @@ export default {
           requests.checkUserPassword(depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
             if (response.data) {
               stepNumber.value = 4;
+              userSelectionOptionsStatic.value = true;
             } else {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
@@ -843,6 +830,7 @@ export default {
           requests.checkUserPasswordOrPin(workingUser.value, workingPasswordOrPin.value).then((response) => {
             if (response.data) {
               stepNumber.value = 5;
+              userSelectionOptionsStatic.value = true;
             } else {
               workingPasswordOrPinSetErrors('Wrong Password or Pin!');
             }
@@ -933,6 +921,8 @@ export default {
       workingUserSelected,
       checkingUserSelected,
 
+      userSelectionOptionsStatic,
+
       submit,
       steps,
       stepNumber,
@@ -946,14 +936,20 @@ export default {
       colour_suggestions: [],
       serial_number_suggestions: [],
       isNfcActive: false,
+      filtered_client_suggestions: [],
+      filtered_make_suggestions: [],
+      filtered_model_suggestions: [],
+      filtered_colour_suggestions: [],
+      filtered_serial_number_suggestions: [],
     };
   },
   created() {
-    this.fetchClientSuggestions = debounce(this.fetchClientSuggestions, 500, {leading: true, trailing: true});
+    this.fetchClientSuggestions = debounce(this.fetchClientSuggestions, 500, {leading: false, trailing: true});
     this.fetchBikeMakeSuggestions = debounce(this.fetchBikeMakeSuggestions, 500, {leading: true, trailing: true});
     this.fetchBikeModelSuggestions = debounce(this.fetchBikeModelSuggestions, 500, {leading: true, trailing: true});
     this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500, {leading: true, trailing: true});
     this.fetchColourSuggestions = debounce(this.fetchColourSuggestions, 500, {leading: true, trailing: true});
+    this.run_filter = debounce(this.run_filter, 200, {leading: false, trailing: true});
   },
   methods: {
     userSortingFunction(user1, user2) {
@@ -966,64 +962,91 @@ export default {
       return new Date(date.setMonth(date.getMonth() + 6));
     },
     fetchClientSuggestions() {
-      requests.findClient(
-        this.firstName ? this.firstName.toLowerCase() : '',
-        this.lastName ? this.lastName.toLowerCase() : '',
-        this.emailAddress ? this.emailAddress.toLowerCase() :'')
-        .then((response) => {
-          this.clientSuggestions = response.data;
-        });
+      if ((
+        (this.firstName ? this.firstName.length : 0) +
+          (this.lastName ? this.lastName.length : 0) +
+          (this.emailAddress ? this.emailAddress.length : 0)
+      ) > 2) {
+         requests.findClient(
+          this.firstName ? this.firstName.toLowerCase() : '',
+          this.lastName ? this.lastName.toLowerCase() : '',
+          this.emailAddress ? this.emailAddress.toLowerCase() :'',
+          5)
+          .then((response) => {
+            this.clientSuggestions = response.data;
+            this.run_filter();
+          });
+      }
     },
     fetchBikeMakeSuggestions() {
-      requests.getBikeMakeSuggestions(this.make.toLowerCase()).then((response) => {
+      requests.getBikeMakeSuggestions(this.make.toLowerCase(), 4).then((response) => {
         this.makeSuggestions = response.data;
       });
     },
     fetchBikeModelSuggestions() {
-      requests.getBikeModelSuggestions(this.model.toLowerCase()).then((response) => {
+      requests.getBikeModelSuggestions(this.model.toLowerCase(), 4).then((response) => {
         this.modelSuggestions = response.data;
       });
     },
     fetchSerialNumberSuggestions() {
-      requests.getBikeSerialNumberSuggestions(this.serialNumber.toLowerCase()).then((response) => {
+      requests.getBikeSerialNumberSuggestions(this.serialNumber.toLowerCase(), 4).then((response) => {
         this.serial_number_suggestions = response.data;
       });
     },
     fetchColourSuggestions() {
-      requests.getBikeColourSuggestions(this.colour.toLowerCase()).then((response) => {
+      requests.getBikeColourSuggestions(this.colour.toLowerCase(), 4).then((response) => {
         this.colour_suggestions = response.data;
       });
     },
     selectClient(event, i) {
-      const selectedClient = this.filtered_client_suggestions[i];
-      this.clientId = selectedClient.id;
-      this.emailAddress = selectedClient.emailAddress;
-      this.confirmEmailAddress = selectedClient.emailAddress;
-      this.firstName = selectedClient.firstName;
-      this.lastName = selectedClient.lastName;
+      if (i !== -1) {
+        const selectedClient = this.filtered_client_suggestions[i];
+        this.clientId = selectedClient.id;
+        this.emailAddress = selectedClient.emailAddress;
+        this.confirmEmailAddress = selectedClient.emailAddress;
+        this.firstName = selectedClient.firstName;
+        this.lastName = selectedClient.lastName;
+      }
     },
-    selectMake(event) {
-      this.make = event.target.innerText;
+    selectMake(event, i) {
+      if (i !== -1) {
+        this.make = this.filtered_make_suggestions[i];
+      }
     },
-    selectModel(event) {
-      this.model = event.target.innerText;
+    selectModel(event, i) {
+      if (i !== -1) {
+        this.model = this.filtered_model_suggestions[i];
+      }
     },
-    selectSerialNumber(event) {
-      this.serialNumber = event.target.innerText;
+    selectSerialNumber(event, i) {
+      if (i !== -1) {
+        this.serialNumber = this.filtered_serial_number_suggestions[i];
+      }
     },
-    selectColour(event) {
-      this.colour = event.target.innerText;
+    selectColour(event, i) {
+      if (i !== -1) {
+        this.colour = this.filtered_colour_suggestions[i];
+      }
     },
-    selectDepositCollectingUser(event) {
-      this.depositCollectingUser = event.target.innerText;
+    selectDepositCollectingUser(event, i) {
+      if (i !== -1) {
+        this.depositCollectingUser = this.filtered_deposit_collecting_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
     },
-    selectWorkingUser(event) {
-      this.workingUser = event.target.innerText;
-      this.workingUserSelected();
+    selectWorkingUser(event, i) {
+      if (i !== -1) {
+        this.workingUser = this.filtered_working_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+        this.workingUserSelected();
+      }
     },
-    selectCheckingUser(event) {
-      this.checkingUser = event.target.innerText;
-      this.checkingUserSelected();
+    selectCheckingUser(event, i) {
+      if (i !== -1) {
+        this.checkingUser = this.filtered_checking_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+        this.checkingUserSelected();
+      }
     },
     verifyBikeDetails(rfidTagSerialNumber) {
       requests.getBikeByRfidTagSerialNumber(rfidTagSerialNumber)
@@ -1120,30 +1143,49 @@ export default {
           toast.error(error.response.data.detail.description, {timeout: 1000});
         });
     },
+    async run_filter() {
+      const client = {
+        firstName: this.firstName ? this.firstName : '',
+        lastName: this.lastName ? this.lastName : '',
+        emailAddress: this.emailAddress ? this.emailAddress : '',
+      };
+      levenshtein.filterSortObject(this.clientSuggestions, client, 4).then((result) => {
+        this.filtered_client_suggestions = result;
+      });
+    },
+  },
+  watch: {
+    emailAddress() {
+      this.run_filter();
+    },
+    firstName() {
+      this.run_filter();
+    },
+    lastName() {
+      this.run_filter();
+    },
+    make() {
+      levenshtein.filterSort(this.makeSuggestions, this.make, 4).then((result) => {
+        this.filtered_make_suggestions = result.slice(0, 6);
+      });
+    },
+    model() {
+      levenshtein.filterSort(this.modelSuggestions, this.model, 4).then((result) => {
+        this.filtered_model_suggestions = result.slice(0, 6);
+      });
+    },
+    colour() {
+      levenshtein.filterSort(this.colour_suggestions, this.colour, 4).then((result) => {
+        this.filtered_colour_suggestions = result.slice(0, 6);
+      });
+    },
+    serialNumber() {
+      levenshtein.filterSort(this.serial_number_suggestions, this.serialNumber, 4).then((result) => {
+        this.filtered_serial_number_suggestions = result.slice(0, 6);
+      });
+    },
   },
   computed: {
-    filtered_client_suggestions() {
-      return this.clientSuggestions.filter((client) => (
-        (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
-          (this.lastName && client.lastName.startsWith(this.lastName.toLowerCase())) ||
-          (this.emailAddress && client.emailAddress.startsWith(this.emailAddress.toLowerCase()))
-      ));
-    },
-    filteredClientSuggestionsLegible() {
-      return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
-    },
-    filtered_make_suggestions() {
-      return this.makeSuggestions.filter((suggestion) => (suggestion.startsWith(this.make.toLowerCase()))).slice(0, 4);
-    },
-    filtered_model_suggestions() {
-      return this.modelSuggestions.filter((suggestion) => (suggestion.startsWith(this.model.toLowerCase()))).slice(0, 4);
-    },
-    filtered_serial_number_suggestions() {
-      return this.serial_number_suggestions.filter((suggestion) => (suggestion.startsWith(this.serialNumber.toLowerCase()))).slice(0, 4);
-    },
-    filtered_colour_suggestions() {
-      return this.colour_suggestions.filter((suggestion) => (suggestion.startsWith(this.colour.toLowerCase()))).slice(0, 4);
-    },
     filtered_deposit_collecting_user_suggestions() {
       return this.depositBearers
         .filter((suggestion) => suggestion
@@ -1168,6 +1210,9 @@ export default {
           .startsWith(this.checkingUser.toLowerCase()))
         .sort(this.userSortingFunction)
         .slice(0, 10);
+    },
+    filteredClientSuggestionsLegible() {
+      return this.filtered_client_suggestions.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
     },
   },
 };

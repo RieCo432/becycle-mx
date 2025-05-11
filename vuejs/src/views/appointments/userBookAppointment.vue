@@ -180,20 +180,23 @@ export default {
   methods: {
     fetchClientSuggestions() {
       requests.findClient(
-          this.firstName ? this.firstName.toLowerCase() : '',
-          this.lastName ? this.lastName.toLowerCase() : '',
-          this.emailAddress ? this.emailAddress.toLowerCase() : '')
-          .then((response) => {
-            this.clientSuggestions = response.data;
-          });
+        this.firstName ? this.firstName.toLowerCase() : '',
+        this.lastName ? this.lastName.toLowerCase() : '',
+        this.emailAddress ? this.emailAddress.toLowerCase() :'',
+        10)
+        .then((response) => {
+          this.clientSuggestions = response.data;
+        });
     },
     selectClient(event, i) {
-      const selectedClient = this.filtered_client_suggestions[i];
-      this.clientId = selectedClient.id;
-      this.emailAddress = selectedClient.emailAddress;
-      this.confirmEmailAddress = selectedClient.emailAddress;
-      this.firstName = selectedClient.firstName;
-      this.lastName = selectedClient.lastName;
+      if (i !== -1) {
+        const selectedClient = this.filtered_client_suggestions[i];
+        this.clientId = selectedClient.id;
+        this.emailAddress = selectedClient.emailAddress;
+        this.confirmEmailAddress = selectedClient.emailAddress;
+        this.firstName = selectedClient.firstName;
+        this.lastName = selectedClient.lastName;
+      }
     },
   },
   computed: {
@@ -276,14 +279,15 @@ export default {
                     <ComboboxTextInput
                         :field-model-value="emailAddress"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput label="Email" type="email" placeholder="Type your email"
-                                 name="emailAddress"
-                                 v-model="emailAddress"
-                                 :error="emailAddressError"
-                                 @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="Email"
+                        type="email"
+                        placeholder="Type your email"
+                        name="emailAddress"
+                        v-model="emailAddress"
+                        :error="emailAddressError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-1">
@@ -301,34 +305,30 @@ export default {
                     <ComboboxTextInput
                         :field-model-value="firstName"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput
-                          label="First name"
-                          type="text"
-                          placeholder="First name"
-                          name="firstname"
-                          v-model="firstName"
-                          :error="firstNameError"
-                          @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="First name"
+                        type="text"
+                        placeholder="First name"
+                        name="firstname"
+                        v-model="firstName"
+                        :error="firstNameError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
 
                   <div class="col-span-1">
                     <ComboboxTextInput
                         :field-model-value="lastName"
                         :suggestions="filteredClientSuggestionsLegible"
-                        :selected-callback="selectClient">
-                      <TextInput
-                          label="Last name"
-                          type="text"
-                          placeholder="Last name"
-                          name="lastname"
-                          v-model="lastName"
-                          :error="lastNameError"
-                          @input="fetchClientSuggestions"
-                      />
-                    </ComboboxTextInput>
+                        :selected-callback="selectClient"
+                        label="Last name"
+                        type="text"
+                        placeholder="Last name"
+                        name="lastname"
+                        v-model="lastName"
+                        :error="lastNameError"
+                        @input="fetchClientSuggestions"
+                    />
                   </div>
                 </div>
               </div>
