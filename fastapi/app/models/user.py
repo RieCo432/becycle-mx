@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 from uuid import uuid4
 
+from pypdf.constants import UserAccessPermissions
 from sqlalchemy import String, UUID, Boolean, text, Text, ForeignKey, LargeBinary, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -9,6 +10,7 @@ from app.database.db import Base
 from .contract import Contract
 from .depositExchange import DepositExchange
 from .expense import Expense
+from .userPermission import UserPermission
 
 
 class UserPhoto(Base):
@@ -76,6 +78,9 @@ class User(Base):
                                                      back_populates="treasurerUser")
 
     presentationCard: Mapped["UserPresentationCard"] = relationship("UserPresentationCard", foreign_keys=[UserPresentationCard.userId],
+                                                             back_populates="user")
+
+    userPermissions: Mapped[List["UserPermission"]] = relationship("UserPermission", foreign_keys=[UserPermission.userId],
                                                              back_populates="user")
 
     def __eq_dict__(self, other: dict):
