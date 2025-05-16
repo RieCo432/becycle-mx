@@ -84,3 +84,9 @@ async def get_contracts_takeout_excel(db: Session = Depends(dep.get_db)):
 @admin.get("/admin/takeout/contracts.pdf")
 async def get_contracts_takeout_pdf(db: Session = Depends(dep.get_db)):
     return FileResponse(crud.get_contracts_takeout_pdf(db=db))
+
+
+@admin.get("/admin/permission-scopes")
+async def get_permission_scopes(db: Session = Depends(dep.get_db)) -> schemas.PermissionScopeNode:
+    result = crud.get_permission_scopes(db=db)
+    return result

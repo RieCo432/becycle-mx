@@ -34,3 +34,23 @@ def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
                     )
                     db.add(new_permission_scope)
                     db.commit()
+
+def get_permission_scopes(db: Session, route_prefix: str = "", level: int = 0) -> schemas.PermissionScopeNode:
+
+    current_route = route_prefix + "/"
+    descendant_routes = [route for route in db.scalars(
+        select(models.PermissionScope.route)
+        .distinct()
+        .where(models.PermissionScope.route.startswith(current_route))
+    )]
+
+    child_routes = list(set(["/".join(route.split("/")[:level+2]) for route in descendant_routes if route != current_route] ) )
+
+    return schemas.PermissionScopeNode(
+        route=route_prefix,
+        permissionIds={permission.method: permission.id for permission in db.scalars(
+            select(models.PermissionScope)
+            .where(models.PermissionScope.route == current_route)
+        )},
+        child_nodes=[get_permission_scopes(db=db, route_prefix=child_route, level=level + 1) for child_route in child_routes]
+    )

@@ -14,3 +14,4 @@ from .tokens import *
 from .user import *
 from .expenses import *
 from .appointmentsFull import *
+from .permissionScope import *
