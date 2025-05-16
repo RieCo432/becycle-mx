@@ -47,7 +47,7 @@ def get_permission_scopes(db: Session, route_prefix: str = "", level: int = 0) -
     child_routes = list(set(["/".join(route.split("/")[:level+2]) for route in descendant_routes if route != current_route] ) )
 
     return schemas.PermissionScopeNode(
-        route=route_prefix,
+        route=route_prefix if route_prefix != "" else "/",
         permissionIds={permission.method: permission.id for permission in db.scalars(
             select(models.PermissionScope)
             .where(models.PermissionScope.route == current_route)
