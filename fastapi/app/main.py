@@ -3,6 +3,7 @@ import os
 import uvicorn
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
 
 import app.routers as routers
 from app.database.db import engine, Base, SessionLocal
@@ -47,6 +48,10 @@ if os.environ["PRODUCTION"] == "true":
     crud.send_expiry_emails(db=db)
     crud.send_appointment_reminders(db=db)
     db.close()
+
+db = SessionLocal()
+crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
+db.close()
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
