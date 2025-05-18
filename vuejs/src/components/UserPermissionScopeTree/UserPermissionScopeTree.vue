@@ -1,14 +1,12 @@
 <script lang="ts">
-import {defineComponent} from 'vue';
 import Checkbox from '@/components/Checkbox/index.vue';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import DashButton from '@/components/Button/index.vue';
-import {exp} from '@amcharts/amcharts5/.internal/core/util/Ease';
 
 const toast = useToast();
 
-export default defineComponent({
+export default {
   name: 'UserPermissionScopeTree',
   components: {DashButton, Checkbox},
   emits: [
@@ -22,32 +20,33 @@ export default defineComponent({
         return {};
       },
     },
-    userPermissions: {
-      type: Array,
-      default: () => [],
-    },
     userId: {
       type: String,
       required: true,
     },
+    userPermissions: {
+      type: Array,
+      required: true,
+    },
     userPermissionsAtPredecessor: {
       type: Object,
-      default: () => ({
-        'GET': false,
-        'POST': false,
-        'PUT': false,
-        'PATCH': false,
-        'DELETE': false,
-      }),
+      default: () => {
+        return {
+          GET: false,
+          POST: false,
+          PUT: false,
+          PATCH: false,
+          DELETE: false,
+        };
+      },
     },
   },
   methods: {
-    exp,
     toggleUserPermission(event, method) {
-      console.log(event, method);
-      const granted = this.userHasPermissionModelValues[method] !== null && !this.userHasPermissionModelValues[method];
-      console.log(granted);
-      console.log(this.tree);
+      console.log('current state', this.userHasPermissionModelValues);
+      const granted = this.userHasPermissionModelValues[method];
+      console.log('setting', granted, method, this.tree.route);
+
       if (granted) {
         requests.addUserPermission(this.userId, this.tree.permissionIds[method])
           .then((response) => {
@@ -78,6 +77,20 @@ export default defineComponent({
       }
       return false;
     },
+    getModelValueForMethod(method) {
+      let result = false;
+      if (!Object.hasOwn(this.tree.permissionIds, method)) {
+        result = false;
+      }
+      if (this.userPermissions.includes(this.tree.permissionIds[method]) ||
+          this.userPermissionsAtPredecessor[method] === true) {
+        result = true;
+      }
+      if (this.anyChildrenHavePermission(this.tree, method)) {
+        result = null;
+      }
+      return result;
+    },
   },
   data() {
     return {
@@ -88,26 +101,18 @@ export default defineComponent({
   computed: {
     userHasPermissionModelValues: {
       get() {
-        console.log('permissions', this.userPermissions);
-        console.log(this.userPermissions.includes(this.tree.permissionIds['GET']));
         const result = {
-          'GET': this.userPermissions.includes(this.tree.permissionIds['GET']) || this.userPermissionsAtPredecessor['GET'] === true,
-          'POST': this.userPermissions.includes(this.tree.permissionIds['POST']) || this.userPermissionsAtPredecessor['POST'] === true,
-          'PUT': this.userPermissions.includes(this.tree.permissionIds['PUT']) || this.userPermissionsAtPredecessor['PUT'] === true,
-          'PATCH': this.userPermissions.includes(this.tree.permissionIds['PATCH']) || this.userPermissionsAtPredecessor['PATCH'] === true,
-          'DELETE': this.userPermissions.includes(this.tree.permissionIds['DELETE']) || this.userPermissionsAtPredecessor['DELETE'] === true,
+          GET: this.getModelValueForMethod('GET'),
+          POST: this.getModelValueForMethod('POST'),
+          PUT: this.getModelValueForMethod('PUT'),
+          PATCH: this.getModelValueForMethod('PATCH'),
+          DELETE: this.getModelValueForMethod('DELETE'),
         };
-        this.methods.forEach((method) => {
-          if (!result[method] && this.anyChildrenHavePermission(this.tree, method)) {
-            result[method] = null;
-          }
-        });
-        console.log('result', result);
         return result;
       },
     },
   },
-});
+};
 </script>
 
 <template>
@@ -124,28 +129,73 @@ export default defineComponent({
             @click="expandChildren = !expandChildren"/>
       </div>
       <div class="col-span-6">{{tree.route}}</div>
-      <div class="col-span-1" v-for="method in methods" :key="method">
+      <div class="col-span-1">
         <Checkbox
-            v-if="Object.hasOwn(tree.permissionIds, method)"
-            :disabled="userPermissionsAtPredecessor[method]"
-            :name="tree.route + method"
+            v-if="Object.hasOwn(tree.permissionIds, 'GET')"
+            :name="tree.route + 'GET'"
             activeClass="ring-primary-500 bg-primary-500"
-            :checked="userHasPermissionModelValues[method]"
+            v-model="userHasPermissionModelValues.GET"
             allow-null
-            @change="(event) => toggleUserPermission(event, method)"
+            :disabled="userPermissionsAtPredecessor['GET'] === true"
+            @change="(event) => toggleUserPermission(event, 'GET')"
         />
       </div>
+      <div class="col-span-1">
+        <Checkbox
+            v-if="Object.hasOwn(tree.permissionIds, 'POST')"
+            :name="tree.route + 'POST'"
+            activeClass="ring-primary-500 bg-primary-500"
+            v-model="userHasPermissionModelValues.POST"
+            allow-null
+            :disabled="userPermissionsAtPredecessor['POST'] === true"
+            @change="(event) => toggleUserPermission(event, 'POST')"
+        />
+      </div>
+      <div class="col-span-1">
+        <Checkbox
+            v-if="Object.hasOwn(tree.permissionIds, 'PUT')"
+            :name="tree.route + 'PUT'"
+            activeClass="ring-primary-500 bg-primary-500"
+            v-model="userHasPermissionModelValues.PUT"
+            allow-null
+            :disabled="userPermissionsAtPredecessor['PUT'] === true"
+            @change="(event) => toggleUserPermission(event, 'PUT')"
+        />
+      </div>
+      <div class="col-span-1">
+        <Checkbox
+            v-if="Object.hasOwn(tree.permissionIds, 'PATCH')"
+            :name="tree.route + 'PATCH'"
+            activeClass="ring-primary-500 bg-primary-500"
+            v-model="userHasPermissionModelValues.PATCH"
+            allow-null
+            :disabled="userPermissionsAtPredecessor['PATCH'] === true"
+            @change="(event) => toggleUserPermission(event, 'PATCH')"
+        />
+      </div>
+      <div class="col-span-1">
+        <Checkbox
+            v-if="Object.hasOwn(tree.permissionIds, 'DELETE')"
+            :name="tree.route + 'DELETE'"
+            activeClass="ring-primary-500 bg-primary-500"
+            v-model="userHasPermissionModelValues.DELETE"
+            allow-null
+            :disabled="userPermissionsAtPredecessor['DELETE'] === true"
+            @change="(event) => toggleUserPermission(event, 'DELETE')"
+        />
+      </div>
+
       <template v-if="expandChildren">
         <template  v-for="subTree in tree.childNodes" :key="subTree.route">
           <div class="col-span-1"></div>
           <div class="col-span-11">
             <UserPermissionScopeTree
                 :tree="subTree"
-                :user-permissions="userPermissions"
                 :user-id="userId"
+                :user-permissions-at-predecessor="userHasPermissionModelValues"
+                :user-permissions="userPermissions"
                 @user-permission-added="(permissionScopeId) => $emit('userPermissionAdded', permissionScopeId)"
                 @user-permission-removed="(permissionScopeId) => $emit('userPermissionRemoved', permissionScopeId)"
-                :user-permissions-at-predecessor="userHasPermissionModelValues"
             ></UserPermissionScopeTree>
           </div>
         </template>

@@ -9,9 +9,8 @@
         class="hidden"
         :disabled="disabled"
         :name="name"
-        @change="onChange"
-        :value="value"
-        v-model="localValue"
+        @change="onInput"
+        :value="modelValue"
         v-bind="$attrs"
       />
 
@@ -19,7 +18,7 @@
         class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex
                ltr:mr-3 rtl:ml-3 relative transition-all duration-150"
         :class="
-          ck || ck === null
+          modelValue || modelValue === null
             ? activeClass + ' ring-2 ring-offset-2 dark:ring-offset-slate-800 '
             : 'bg-slate-100 dark:bg-slate-600 dark:border-slate-600'
         "
@@ -28,7 +27,7 @@
           src="@/assets/images/icon/ck-white.svg"
           alt=""
           class="h-[10px] w-[10px] block m-auto"
-          v-if="ck"
+          v-if="modelValue"
         />
       </span>
       <span
@@ -41,17 +40,14 @@
   </div>
 </template>
 <script>
-import {computed, defineComponent, ref} from 'vue';
+import {defineComponent} from 'vue';
+import {bool} from "yup";
 export default defineComponent({
   name: 'Checkbox',
   inheritAttrs: false,
   props: {
     label: {
       type: String,
-    },
-    checked: {
-      type: Boolean,
-      default: false,
     },
     disabled: {
       type: Boolean,
@@ -66,11 +62,9 @@ export default defineComponent({
       default:
         ' ring-black-500  bg-slate-900 dark:bg-slate-700 dark:ring-slate-700 ',
     },
-    value: {
-      type: null,
-    },
     modelValue: {
-      type: null,
+      type: bool,
+      allowNull: true,
     },
     allowNull: {
       type: Boolean,
@@ -81,28 +75,16 @@ export default defineComponent({
     'update:modelValue': (newValue) => ({
       modelValue: newValue,
     }),
-    // use newValue
-    // "update:checked": (newValue) => true,
+    'update': (newValue) => ({
+      newValue: newValue,
+    }),
   },
-
-  setup(props, context) {
-    const ck = ref(props.checked);
-
-    // on change event
-    const onChange = () => {
-      if (props.allowNull && ck.value === null) {
-        ck.value = false;
-      } else {
-        ck.value = !ck.value;
-      }
-    };
-
-    const localValue = computed({
-      get: () => props.modelValue,
-      set: (newValue) => context.emit('update:modelValue', newValue),
-    });
-
-    return {localValue, ck, onChange};
+  methods: {
+    onInput() {
+      const newValue = this.modelValue === null ? false : !this.modelValue;
+      this.$emit('update:modelValue', newValue);
+      this.$emit('update', newValue);
+    },
   },
 });
 </script>

@@ -11,11 +11,17 @@ import {ref} from 'vue';
 import Button from '@/components/Button';
 import SetNewPasswordModal from '@/components/Modal/SetNewPasswordModal.vue';
 import UserPermissionScopeTree from '@/components/UserPermissionScopeTree/UserPermissionScopeTree.vue';
+import userPermissionScopeTree from "@/components/UserPermissionScopeTree/UserPermissionScopeTree.vue";
 
 const toast = useToast();
 
 export default {
   name: 'userRoles',
+  computed: {
+    userPermissionScopeTree() {
+      return userPermissionScopeTree
+    }
+  },
   components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal, UserPermissionScopeTree},
   setup() {
     const userData = ref([]);
@@ -37,6 +43,14 @@ export default {
       username: null,
     });
     const userPermissions = ref([]);
+
+    const addUserPermission = (permissionScopeId) => {
+      userPermissions.value.push(permissionScopeId);
+    };
+
+    const removeUserPermission = (permissionScopeId) => {
+      userPermissions.value.splice(userPermissions.value.indexOf(permissionScopeId), 1);
+    };
 
     const newUserSchema = yup.object().shape({
       username: yup.string().required('Username is required')
@@ -177,6 +191,8 @@ export default {
       confirmNewPin,
       confirmNewPinError,
       patchNewPin,
+      addUserPermission,
+      removeUserPermission,
     };
   },
   data() {
@@ -280,13 +296,14 @@ export default {
     },
     openEditUserPermissionsModal(userId) {
       requests.getUserPermissions(userId).then((response) => {
+
         this.userPermissions.splice(0, this.userPermissions.length);
         response.data.forEach((userPermission) => {
           this.userPermissions.push(userPermission.permissionScopeId);
         });
-        console.log(this.userPermissions);
         this.showEditUserPermissionsModal = !this.showEditUserPermissionsModal;
         this.editUserPermissionsModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
+        console.log('pulled permissions', this.userPermissions);
       });
     },
   },
@@ -375,14 +392,18 @@ export default {
                 </form>
               </div>
             </SetNewPasswordModal>
-            <SetNewPasswordModal size-class="max-w-[1000px]" :active-modal="showEditUserPermissionsModal" :user-info="editUserPermissionsModalInfo"
-                                 title="Edit User Permissions" @close="showEditUserPermissionsModal = !showEditUserPermissionsModal">
+            <SetNewPasswordModal
+                size-class="max-w-[1000px]"
+                :active-modal="showEditUserPermissionsModal"
+                :user-info="editUserPermissionsModalInfo"
+                title="Edit User Permissions"
+                @close="showEditUserPermissionsModal = !showEditUserPermissionsModal">
               <UserPermissionScopeTree
                   :tree="permissionScopes"
                   :user-permissions="userPermissions"
                   :user-id="editUserPermissionsModalInfo.id"
-                  @user-permission-added="(permissionScopeId) => userPermissions.push(permissionScopeId)"
-                  @user-permission-removed="userPermissions.splice(userPermissions.indexOf(permissionScopeId), 1)"
+                  @user-permission-added="addUserPermission"
+                  @user-permission-removed="removeUserPermission"
               ></UserPermissionScopeTree>
             </SetNewPasswordModal>
           </div>
