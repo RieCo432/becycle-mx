@@ -85,7 +85,7 @@ async def grant_user_permission(user_id: UUID, permission_scope: schemas.NewUser
 
 
 @users.delete("/users/{user_id}/permissions/{permission_scope_id}", dependencies=[Depends(dep.get_current_admin_user)])
-async def revoke_user_permission(user_id: UUID, permission_scope_id: UUID, db: Session = Depends(dep.get_db)) -> None:
+async def revoke_user_permission(user_id: UUID, permission_scope_id: UUID, db: Session = Depends(dep.get_db)) -> list[UUID]:
     user = crud.get_user(db=db, user_id=user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User not found"})
@@ -96,7 +96,7 @@ async def revoke_user_permission(user_id: UUID, permission_scope_id: UUID, db: S
     # if not crud.get_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id):
     #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User does not have permission"})
 
-    crud.delete_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id)
+    return crud.delete_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id)
 
 @users.get("/users/{user_id}/permissions", dependencies=[Depends(dep.get_current_active_user)])
 async def get_user_permissions(user_id: UUID, db: Session = Depends(dep.get_db)) -> list[schemas.UserPermission]:

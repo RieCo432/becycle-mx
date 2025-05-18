@@ -60,7 +60,7 @@ export default {
         requests.removeUserPermission(this.userId, this.tree.permissionIds[method])
           .then((response) => {
             toast.success('Permission revoked', {timeout: 2000});
-            this.$emit('userPermissionRemoved', this.tree.permissionIds[method]);
+            this.$emit('userPermissionRemoved', response.data);
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
           });

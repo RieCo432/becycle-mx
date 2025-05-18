@@ -48,8 +48,13 @@ export default {
       userPermissions.value.push(permissionScopeId);
     };
 
-    const removeUserPermission = (permissionScopeId) => {
-      userPermissions.value.splice(userPermissions.value.indexOf(permissionScopeId), 1);
+    const removeUserPermission = (permissionScopeIds) => {
+      permissionScopeIds.forEach((permissionScopeId) => {
+        const indexInArray = userPermissions.value.indexOf(permissionScopeId);
+        if (indexInArray !== -1) {
+          userPermissions.value.splice(indexInArray, 1);
+        }
+      });
     };
 
     const newUserSchema = yup.object().shape({

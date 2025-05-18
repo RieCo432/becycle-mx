@@ -80,7 +80,9 @@ def add_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -
 
     return user_permission
 
-def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -> None:
+def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -> list[UUID]:
+
+    delete_permission_scope_ids = []
 
     permission_scope = db.scalar(
         select(models.PermissionScope)
@@ -96,6 +98,7 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
     )
 
     if user_permission is not None:
+        delete_permission_scope_ids.append(user_permission.permissionScopeId)
         db.delete(user_permission)
         db.commit()
 
@@ -118,8 +121,11 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
             )
         )
         if user_permission_child is not None:
+            delete_permission_scope_ids.append(user_permission_child.permissionScopeId)
             db.delete(user_permission_child)
             db.commit()
+
+    return delete_permission_scope_ids
 
 
 def get_user_permissions(db: Session, user_id: UUID) -> list[models.UserPermission]:
