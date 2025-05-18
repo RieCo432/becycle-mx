@@ -121,70 +121,73 @@ export default {
             :icon="expandChildren ? 'heroicons-outline:chevron-down' : 'heroicons-outline:chevron-right'"
             @click="expandChildren = !expandChildren"/>
       </div>
-      <div class="col-span-6">{{tree.route}}</div>
-      <div class="col-span-1">
-        <Checkbox
-            v-if="Object.hasOwn(tree.permissionIds, 'GET')"
-            :name="tree.route + 'GET'"
-            activeClass="ring-primary-500 bg-primary-500"
-            v-model="userHasPermissionModelValues.GET"
-            allow-null
-            :disabled="userPermissionsAtPredecessor['GET'] === true"
-            @change="(event) => toggleUserPermission(event, 'GET')"
-        />
+      <div class="col-span-8">{{tree.route}}</div>
+      <div class="col-span-3 grid grid-cols-5">
+        <div class="col-span-1 justify-items-center">
+          <Checkbox
+              v-if="Object.hasOwn(tree.permissionIds, 'GET')"
+              :name="tree.route + 'GET'"
+              activeClass="ring-primary-500 bg-primary-500"
+              v-model="userHasPermissionModelValues.GET"
+              allow-null
+              :disabled="userPermissionsAtPredecessor['GET'] === true"
+              @change="(event) => toggleUserPermission(event, 'GET')"
+          />
+        </div>
+        <div class="col-span-1 justify-items-center">
+          <Checkbox
+              v-if="Object.hasOwn(tree.permissionIds, 'POST')"
+              :name="tree.route + 'POST'"
+              activeClass="ring-primary-500 bg-primary-500"
+              v-model="userHasPermissionModelValues.POST"
+              allow-null
+              :disabled="userPermissionsAtPredecessor['POST'] === true"
+              @change="(event) => toggleUserPermission(event, 'POST')"
+          />
+        </div>
+        <div class="col-span-1 justify-items-center">
+          <Checkbox
+              v-if="Object.hasOwn(tree.permissionIds, 'PUT')"
+              :name="tree.route + 'PUT'"
+              activeClass="ring-primary-500 bg-primary-500"
+              v-model="userHasPermissionModelValues.PUT"
+              allow-null
+              :disabled="userPermissionsAtPredecessor['PUT'] === true"
+              @change="(event) => toggleUserPermission(event, 'PUT')"
+          />
+        </div>
+        <div class="col-span-1 justify-items-center">
+          <Checkbox
+              v-if="Object.hasOwn(tree.permissionIds, 'PATCH')"
+              :name="tree.route + 'PATCH'"
+              activeClass="ring-primary-500 bg-primary-500"
+              v-model="userHasPermissionModelValues.PATCH"
+              allow-null
+              :disabled="userPermissionsAtPredecessor['PATCH'] === true"
+              @change="(event) => toggleUserPermission(event, 'PATCH')"
+          />
+        </div>
+        <div class="col-span-1 justify-items-center">
+          <Checkbox
+              v-if="Object.hasOwn(tree.permissionIds, 'DELETE')"
+              :name="tree.route + 'DELETE'"
+              activeClass="ring-primary-500 bg-primary-500"
+              v-model="userHasPermissionModelValues.DELETE"
+              allow-null
+              :disabled="userPermissionsAtPredecessor['DELETE'] === true"
+              @change="(event) => toggleUserPermission(event, 'DELETE')"
+          />
+        </div>
       </div>
-      <div class="col-span-1">
-        <Checkbox
-            v-if="Object.hasOwn(tree.permissionIds, 'POST')"
-            :name="tree.route + 'POST'"
-            activeClass="ring-primary-500 bg-primary-500"
-            v-model="userHasPermissionModelValues.POST"
-            allow-null
-            :disabled="userPermissionsAtPredecessor['POST'] === true"
-            @change="(event) => toggleUserPermission(event, 'POST')"
-        />
-      </div>
-      <div class="col-span-1">
-        <Checkbox
-            v-if="Object.hasOwn(tree.permissionIds, 'PUT')"
-            :name="tree.route + 'PUT'"
-            activeClass="ring-primary-500 bg-primary-500"
-            v-model="userHasPermissionModelValues.PUT"
-            allow-null
-            :disabled="userPermissionsAtPredecessor['PUT'] === true"
-            @change="(event) => toggleUserPermission(event, 'PUT')"
-        />
-      </div>
-      <div class="col-span-1">
-        <Checkbox
-            v-if="Object.hasOwn(tree.permissionIds, 'PATCH')"
-            :name="tree.route + 'PATCH'"
-            activeClass="ring-primary-500 bg-primary-500"
-            v-model="userHasPermissionModelValues.PATCH"
-            allow-null
-            :disabled="userPermissionsAtPredecessor['PATCH'] === true"
-            @change="(event) => toggleUserPermission(event, 'PATCH')"
-        />
-      </div>
-      <div class="col-span-1">
-        <Checkbox
-            v-if="Object.hasOwn(tree.permissionIds, 'DELETE')"
-            :name="tree.route + 'DELETE'"
-            activeClass="ring-primary-500 bg-primary-500"
-            v-model="userHasPermissionModelValues.DELETE"
-            allow-null
-            :disabled="userPermissionsAtPredecessor['DELETE'] === true"
-            @change="(event) => toggleUserPermission(event, 'DELETE')"
-        />
-      </div>
-
       <template v-if="expandChildren">
         <div class="col-span-1"></div>
         <div class="col-span-11">
-          <div class="grid grid-cols-12">
+          <div class="grid grid-cols-12 border-solid border-slate-300 border">
             <div class="col-span-1"></div>
-            <div class="col-span-6">Route</div>
-            <div class="col-span-1" v-for="method in methods" :key="method">{{method}}</div>
+            <div class="col-span-8">Route</div>
+            <div class="col-span-3 grid grid-cols-5">
+              <div class="col-span-1 text-center" v-for="method in methods" :key="method">{{method}}</div>
+            </div>
             <template  v-for="subTree in tree.childNodes" :key="subTree.route">
                 <UserPermissionScopeTree
                     :tree="subTree"

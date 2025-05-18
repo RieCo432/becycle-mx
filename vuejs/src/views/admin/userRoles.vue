@@ -398,15 +398,17 @@ export default {
               </div>
             </SetNewPasswordModal>
             <SetNewPasswordModal
-                size-class="max-w-[1000px]"
+                size-class="w-3/4"
                 :active-modal="showEditUserPermissionsModal"
                 :user-info="editUserPermissionsModalInfo"
                 title="Edit User Permissions"
                 @close="showEditUserPermissionsModal = !showEditUserPermissionsModal">
               <div class="grid grid-cols-12">
                 <div class="col-span-1"></div>
-                <div class="col-span-6">Route</div>
-                <div class="col-span-1" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
+                <div class="col-span-8">Route</div>
+                <div class="col-span-3 grid grid-cols-5">
+                  <div class="col-span-1 text-center" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
+                </div>
                 <UserPermissionScopeTree
                     :tree="permissionScopes"
                     :user-permissions="userPermissions"
