@@ -19,7 +19,7 @@
         class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex
                ltr:mr-3 rtl:ml-3 relative transition-all duration-150"
         :class="
-          ck
+          ck || ck === null
             ? activeClass + ' ring-2 ring-offset-2 dark:ring-offset-slate-800 '
             : 'bg-slate-100 dark:bg-slate-600 dark:border-slate-600'
         "
@@ -72,6 +72,10 @@ export default defineComponent({
     modelValue: {
       type: null,
     },
+    allowNull: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: {
     'update:modelValue': (newValue) => ({
@@ -86,7 +90,11 @@ export default defineComponent({
 
     // on change event
     const onChange = () => {
-      ck.value = !ck.value;
+      if (props.allowNull && ck.value === null) {
+        ck.value = false;
+      } else {
+        ck.value = !ck.value;
+      }
     };
 
     const localValue = computed({

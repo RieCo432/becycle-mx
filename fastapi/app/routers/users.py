@@ -93,8 +93,8 @@ async def revoke_user_permission(user_id: UUID, permission_scope_id: UUID, db: S
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User is soft-deleted"})
     if crud.get_permission_scope(db=db, permission_scope_id=permission_scope_id) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Permission scope not found"})
-    if not crud.get_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User does not have permission"})
+    # if not crud.get_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id):
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User does not have permission"})
 
     crud.delete_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id)
 

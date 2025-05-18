@@ -81,15 +81,46 @@ def add_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -
     return user_permission
 
 def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -> None:
+
+    permission_scope = db.scalar(
+        select(models.PermissionScope)
+        .where(models.PermissionScope.id == permission_scope_id)
+    )
+
     user_permission = db.scalar(
         select(models.UserPermission)
         .where(
             (models.UserPermission.userId == user_id)
-            & (models.UserPermission.permissionScopeId == permission_scope_id)
+            & (models.UserPermission.permissionScopeId == permission_scope.id)
         )
     )
-    db.delete(user_permission)
-    db.commit()
+
+    if user_permission is not None:
+        db.delete(user_permission)
+        db.commit()
+
+    child_routes_starts_with = permission_scope.route + ("/" if not permission_scope.route.endswith("/") else "")
+
+    permission_scope_children = [_ for _ in db.scalars(
+        select(models.PermissionScope)
+        .where(
+            (models.PermissionScope.route.startswith(child_routes_starts_with))
+            & (models.PermissionScope.method == permission_scope.method)
+        )
+    )]
+
+    for child in permission_scope_children:
+        user_permission_child = db.scalar(
+            select(models.UserPermission)
+            .where(
+                (models.UserPermission.userId == user_id)
+                & (models.UserPermission.permissionScopeId == child.id)
+            )
+        )
+        if user_permission_child is not None:
+            db.delete(user_permission_child)
+            db.commit()
+
 
 def get_user_permissions(db: Session, user_id: UUID) -> list[models.UserPermission]:
     return [_ for _ in db.scalars(
