@@ -52,5 +52,41 @@ def get_permission_scopes(db: Session, route_prefix: str = "", level: int = 0) -
             select(models.PermissionScope)
             .where(models.PermissionScope.route == "/" + route_prefix)
         )},
-        child_nodes=[get_permission_scopes(db=db, route_prefix=child_route, level=level + 1) for child_route in child_routes]
+        childNodes=[get_permission_scopes(db=db, route_prefix=child_route, level=level + 1) for child_route in child_routes]
     )
+
+def get_permission_scope(db: Session, permission_scope_id: UUID) -> models.PermissionScope:
+    return db.scalar(
+        select(models.PermissionScope)
+        .where(models.PermissionScope.id == permission_scope_id)
+    )
+
+def get_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -> models.UserPermission:
+    return db.scalar(
+        select(models.UserPermission)
+        .where(
+            (models.UserPermission.userId == user_id)
+            & (models.UserPermission.permissionScopeId == permission_scope_id)
+        )
+    )
+
+def add_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -> models.UserPermission:
+    user_permission = models.UserPermission(
+        userId=user_id,
+        permissionScopeId=permission_scope_id
+    )
+    db.add(user_permission)
+    db.commit()
+
+    return user_permission
+
+def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -> None:
+    user_permission = db.scalar(
+        select(models.UserPermission)
+        .where(
+            (models.UserPermission.userId == user_id)
+            & (models.UserPermission.permissionScopeId == permission_scope_id)
+        )
+    )
+    db.delete(user_permission)
+    db.commit()

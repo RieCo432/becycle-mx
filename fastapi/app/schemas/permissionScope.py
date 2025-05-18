@@ -11,6 +11,11 @@ class PermissionScopeRoute(BaseModel):
 class PermissionScopeNode(BaseModel):
     route: str
     permissionIds: dict[str, UUID]
-    child_nodes: list[PermissionScopeNode] | None
+    childNodes: list[PermissionScopeNode] | None
+
+class UserPermission(BaseModel):
+    id: UUID
+    userId: UUID
+    permissionScopeId: UUID
 
 
