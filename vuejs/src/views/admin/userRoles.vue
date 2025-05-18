@@ -10,14 +10,16 @@ import {useField, useForm} from 'vee-validate';
 import {ref} from 'vue';
 import Button from '@/components/Button';
 import SetNewPasswordModal from '@/components/Modal/SetNewPasswordModal.vue';
+import UserPermissionScopeTree from '@/components/UserPermissionScopeTree/UserPermissionScopeTree.vue';
 
 const toast = useToast();
 
 export default {
   name: 'userRoles',
-  components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal},
+  components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal, UserPermissionScopeTree},
   setup() {
     const userData = ref([]);
+    const permissionScopes = ref({});
     const showSetNewPasswordModal = ref(false);
     const setNewPasswordModalInfo = ref({
       id: null,
@@ -28,6 +30,13 @@ export default {
       id: null,
       username: null,
     });
+
+    const showEditUserPermissionsModal = ref(false);
+    const editUserPermissionsModalInfo = ref({
+      id: null,
+      username: null,
+    });
+    const userPermissions = ref([]);
 
     const newUserSchema = yup.object().shape({
       username: yup.string().required('Username is required')
@@ -161,6 +170,10 @@ export default {
       newPinError,
       setNewPinModalInfo,
       showSetNewPinModal,
+      showEditUserPermissionsModal,
+      editUserPermissionsModalInfo,
+      permissionScopes,
+      userPermissions,
       confirmNewPin,
       confirmNewPinError,
       patchNewPin,
@@ -183,6 +196,12 @@ export default {
           id: 'newPin',
           icon: 'heroicons:finger-print',
           func: this.openSetNewPinModal,
+        },
+        {
+          label: 'Edit Permissions',
+          id: 'editPermissions',
+          icon: 'heroicons:lock-open',
+          func: this.openEditUserPermissionsModal,
         },
       ],
       userColumns: [
@@ -259,6 +278,17 @@ export default {
       this.showSetNewPinModal = !this.showSetNewPinModal;
       this.setNewPinModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
     },
+    openEditUserPermissionsModal(userId) {
+      requests.getUserPermissions(userId).then((response) => {
+        this.userPermissions.splice(0, this.userPermissions.length);
+        response.data.forEach((userPermission) => {
+          this.userPermissions.push(userPermission.permissionScopeId);
+        });
+        console.log(this.userPermissions);
+        this.showEditUserPermissionsModal = !this.showEditUserPermissionsModal;
+        this.editUserPermissionsModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
+      });
+    },
   },
   created() {
     this.getUserData();
@@ -267,6 +297,9 @@ export default {
       if (this.userMe.admin) {
         this.userActions = this.userActionsIfAdmin;
       }
+    });
+    requests.getPermissionScopes().then((response) => {
+      this.permissionScopes = response.data;
     });
   },
 };
@@ -341,6 +374,16 @@ export default {
                   </Button>
                 </form>
               </div>
+            </SetNewPasswordModal>
+            <SetNewPasswordModal size-class="max-w-[1000px]" :active-modal="showEditUserPermissionsModal" :user-info="editUserPermissionsModalInfo"
+                                 title="Edit User Permissions" @close="showEditUserPermissionsModal = !showEditUserPermissionsModal">
+              <UserPermissionScopeTree
+                  :tree="permissionScopes"
+                  :user-permissions="userPermissions"
+                  :user-id="editUserPermissionsModalInfo.id"
+                  @user-permission-added="(permissionScopeId) => userPermissions.push(permissionScopeId)"
+                  @user-permission-removed="userPermissions.splice(userPermissions.indexOf(permissionScopeId), 1)"
+              ></UserPermissionScopeTree>
             </SetNewPasswordModal>
           </div>
         </div>

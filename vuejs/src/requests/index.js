@@ -1225,4 +1225,33 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
+  getPermissionScopes() {
+    return axiosClient.get('/admin/permission-scopes', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  addUserPermission(userId, permissionScopeId) {
+    return axiosClient.post(`/users/${userId}/permissions`, {permissionScopeId: permissionScopeId},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  removeUserPermission(userId, permissionScopeId) {
+    return axiosClient.delete(`/users/${userId}/permissions/${permissionScopeId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  getUserPermissions(userId) {
+    return axiosClient.get(`/users/${userId}/permissions`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
 };
