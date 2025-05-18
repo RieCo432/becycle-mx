@@ -2,13 +2,13 @@
 import Checkbox from '@/components/Checkbox/index.vue';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
-import DashButton from '@/components/Button/index.vue';
+import {Icon} from '@iconify/vue';
 
 const toast = useToast();
 
 export default {
   name: 'UserPermissionScopeTree',
-  components: {DashButton, Checkbox},
+  components: {Icon, Checkbox},
   emits: [
     'userPermissionAdded',
     'userPermissionRemoved',
@@ -101,14 +101,13 @@ export default {
   computed: {
     userHasPermissionModelValues: {
       get() {
-        const result = {
+        return {
           GET: this.getModelValueForMethod('GET'),
           POST: this.getModelValueForMethod('POST'),
           PUT: this.getModelValueForMethod('PUT'),
           PATCH: this.getModelValueForMethod('PATCH'),
           DELETE: this.getModelValueForMethod('DELETE'),
         };
-        return result;
       },
     },
   },
@@ -116,16 +115,10 @@ export default {
 </script>
 
 <template>
-  <div>
-    <div class="grid grid-cols-12 gap-2">
-      <div class="col-span-1"></div>
-      <div class="col-span-6">Route</div>
-      <div class="col-span-1" v-for="method in methods" :key="method">{{method}}</div>
       <div class="col-span-1">
-        <DashButton
+        <Icon
             v-if="tree.childNodes.length > 0"
-            class="btn-sm"
-            :icon="expandChildren ? 'heroicons-outline:arrow-down' : 'heroicons-outline:arrow-right'"
+            :icon="expandChildren ? 'heroicons-outline:chevron-down' : 'heroicons-outline:chevron-right'"
             @click="expandChildren = !expandChildren"/>
       </div>
       <div class="col-span-6">{{tree.route}}</div>
@@ -186,22 +179,25 @@ export default {
       </div>
 
       <template v-if="expandChildren">
-        <template  v-for="subTree in tree.childNodes" :key="subTree.route">
-          <div class="col-span-1"></div>
-          <div class="col-span-11">
-            <UserPermissionScopeTree
-                :tree="subTree"
-                :user-id="userId"
-                :user-permissions-at-predecessor="userHasPermissionModelValues"
-                :user-permissions="userPermissions"
-                @user-permission-added="(permissionScopeId) => $emit('userPermissionAdded', permissionScopeId)"
-                @user-permission-removed="(permissionScopeId) => $emit('userPermissionRemoved', permissionScopeId)"
-            ></UserPermissionScopeTree>
+        <div class="col-span-1"></div>
+        <div class="col-span-11">
+          <div class="grid grid-cols-12">
+            <div class="col-span-1"></div>
+            <div class="col-span-6">Route</div>
+            <div class="col-span-1" v-for="method in methods" :key="method">{{method}}</div>
+            <template  v-for="subTree in tree.childNodes" :key="subTree.route">
+                <UserPermissionScopeTree
+                    :tree="subTree"
+                    :user-id="userId"
+                    :user-permissions-at-predecessor="userHasPermissionModelValues"
+                    :user-permissions="userPermissions"
+                    @user-permission-added="(permissionScopeId) => $emit('userPermissionAdded', permissionScopeId)"
+                    @user-permission-removed="(permissionScopeId) => $emit('userPermissionRemoved', permissionScopeId)"
+                ></UserPermissionScopeTree>
+            </template>
           </div>
-        </template>
+        </div>
       </template>
-    </div>
-  </div>
 </template>
 
 <style scoped lang="scss">

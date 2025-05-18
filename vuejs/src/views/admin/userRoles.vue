@@ -403,13 +403,18 @@ export default {
                 :user-info="editUserPermissionsModalInfo"
                 title="Edit User Permissions"
                 @close="showEditUserPermissionsModal = !showEditUserPermissionsModal">
-              <UserPermissionScopeTree
-                  :tree="permissionScopes"
-                  :user-permissions="userPermissions"
-                  :user-id="editUserPermissionsModalInfo.id"
-                  @user-permission-added="addUserPermission"
-                  @user-permission-removed="removeUserPermission"
-              ></UserPermissionScopeTree>
+              <div class="grid grid-cols-12">
+                <div class="col-span-1"></div>
+                <div class="col-span-6">Route</div>
+                <div class="col-span-1" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
+                <UserPermissionScopeTree
+                    :tree="permissionScopes"
+                    :user-permissions="userPermissions"
+                    :user-id="editUserPermissionsModalInfo.id"
+                    @user-permission-added="addUserPermission"
+                    @user-permission-removed="removeUserPermission"
+                ></UserPermissionScopeTree>
+              </div>
             </SetNewPasswordModal>
           </div>
         </div>
