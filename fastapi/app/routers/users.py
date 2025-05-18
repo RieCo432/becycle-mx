@@ -69,22 +69,22 @@ async def patch_user(user_id: UUID,
                             updated_user_data=updated_user_data)
 
 
-@users.post("/users/{user_id}/{permission_scope_id}", dependencies=[Depends(dep.get_current_admin_user)])
-async def grant_user_permission(user_id: UUID, permission_scope_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.UserPermission:
+@users.post("/users/{user_id}/permissions", dependencies=[Depends(dep.get_current_admin_user)])
+async def grant_user_permission(user_id: UUID, permission_scope: schemas.NewUserPermission, db: Session = Depends(dep.get_db)) -> schemas.UserPermission:
     user = crud.get_user(db=db, user_id=user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User not found"})
     elif user.softDeleted:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User is soft-deleted"})
-    if crud.get_permission_scope(db=db, permission_scope_id=permission_scope_id) is None:
+    if crud.get_permission_scope(db=db, permission_scope_id=permission_scope.permissionScopeId) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Permission scope not found"})
-    if crud.get_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id):
+    if crud.get_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope.permissionScopeId):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User already has permission"})
 
-    return crud.add_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id)
+    return crud.add_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope.permissionScopeId)
 
 
-@users.delete("/users/{user_id}/{permission_scope_id}", dependencies=[Depends(dep.get_current_admin_user)])
+@users.delete("/users/{user_id}/permissions/{permission_scope_id}", dependencies=[Depends(dep.get_current_admin_user)])
 async def revoke_user_permission(user_id: UUID, permission_scope_id: UUID, db: Session = Depends(dep.get_db)) -> None:
     user = crud.get_user(db=db, user_id=user_id)
     if user is None:
@@ -97,6 +97,15 @@ async def revoke_user_permission(user_id: UUID, permission_scope_id: UUID, db: S
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User does not have permission"})
 
     crud.delete_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id)
+
+@users.get("/users/{user_id}/permissions", dependencies=[Depends(dep.get_current_active_user)])
+async def get_user_permissions(user_id: UUID, db: Session = Depends(dep.get_db)) -> list[schemas.UserPermission]:
+    user = crud.get_user(db=db, user_id=user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User not found"})
+    elif user.softDeleted:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "User is soft-deleted"})
+    return crud.get_user_permissions(db=db, user_id=user_id)
 
 
 @users.get("/users/me/deposit_balance")

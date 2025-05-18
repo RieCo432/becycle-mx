@@ -18,4 +18,6 @@ class UserPermission(BaseModel):
     userId: UUID
     permissionScopeId: UUID
 
+class NewUserPermission(BaseModel):
+    permissionScopeId: UUID
 

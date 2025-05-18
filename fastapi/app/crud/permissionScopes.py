@@ -90,3 +90,9 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
     )
     db.delete(user_permission)
     db.commit()
+
+def get_user_permissions(db: Session, user_id: UUID) -> list[models.UserPermission]:
+    return [_ for _ in db.scalars(
+        select(models.UserPermission)
+        .where(models.UserPermission.userId == user_id)
+    )]
