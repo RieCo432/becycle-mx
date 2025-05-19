@@ -12,7 +12,7 @@ import app.schemas as schemas
 admin = APIRouter(
     tags=["admin"],
     responses={404: {"description": "Not Found"}},
-    dependencies=[Depends(dep.get_current_admin_user)]
+    dependencies=[Depends(dep.check_permissions)]
 )
 
 

@@ -49,12 +49,12 @@ async def get_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
     return crud.get_users(db=db)
 
 
-@users.get("/users/{user_id}/", dependencies=[Depends(dep.get_current_active_user)])
+@users.get("/users/{user_id}", dependencies=[Depends(dep.check_permissions)])
 async def get_user(user_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.User:
     return crud.get_user(db=db, user_id=user_id)
 
 
-@users.patch("/users/{user_id}/")
+@users.patch("/users/{user_id}")
 async def patch_user(user_id: UUID,
                      updated_user_data: schemas.UserUpdate,
                      current_user: models.User = Depends(dep.get_current_admin_user),
@@ -69,7 +69,7 @@ async def patch_user(user_id: UUID,
                             updated_user_data=updated_user_data)
 
 
-@users.post("/users/{user_id}/permissions", dependencies=[Depends(dep.get_current_admin_user)])
+@users.post("/users/{user_id}/permissions", dependencies=[Depends(dep.check_permissions)])
 async def grant_user_permission(user_id: UUID, permission_scope: schemas.NewUserPermission, db: Session = Depends(dep.get_db)) -> schemas.UserPermission:
     user = crud.get_user(db=db, user_id=user_id)
     if user is None:
@@ -84,7 +84,7 @@ async def grant_user_permission(user_id: UUID, permission_scope: schemas.NewUser
     return crud.add_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope.permissionScopeId)
 
 
-@users.delete("/users/{user_id}/permissions/{permission_scope_id}", dependencies=[Depends(dep.get_current_admin_user)])
+@users.delete("/users/{user_id}/permissions/{permission_scope_id}", dependencies=[Depends(dep.check_permissions)])
 async def revoke_user_permission(user_id: UUID, permission_scope_id: UUID, db: Session = Depends(dep.get_db)) -> list[UUID]:
     user = crud.get_user(db=db, user_id=user_id)
     if user is None:

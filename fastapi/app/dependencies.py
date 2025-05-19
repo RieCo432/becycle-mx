@@ -3,7 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 import sqlalchemy.exc
-from fastapi import Depends, HTTPException, status, Body
+from fastapi import Depends, HTTPException, status, Body, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
@@ -117,6 +117,18 @@ async def get_current_admin_user(current_user: Annotated[models.User, Depends(ge
         )
     return current_user
 
+async def check_permissions(request: Request, current_user: Annotated[models.User, Depends(get_current_active_user)], db: Session = Depends(get_db)) -> None:
+    route = request.url.path
+    for key in request.path_params.keys():
+        route = route.replace(str(request.path_params[key]), "{" + key + "}")
+
+    method = request.method
+    if not crud.check_user_permission(db=db, user_id=current_user.id, route=route, method=method):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"description": "User does not have permissions for this endpoint."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
 async def get_current_treasurer_user(current_user: Annotated[models.User, Depends(get_current_active_user)]) -> models.User:
     if not current_user.treasurer:

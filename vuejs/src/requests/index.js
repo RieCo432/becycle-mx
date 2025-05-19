@@ -316,13 +316,13 @@ export default {
     });
   },
   getContract(contractId) {
-    return axiosClient.get(`/contracts/${contractId}/`, {
+    return axiosClient.get(`/contracts/${contractId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
   getUser(userId) {
-    return axiosClient.get(`/users/${userId}/`, {
+    return axiosClient.get(`/users/${userId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -483,7 +483,7 @@ export default {
     });
   },
   patchUser(userId, patchData) {
-    return axiosClient.patch(`/users/${userId}/`, patchData, {
+    return axiosClient.patch(`/users/${userId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

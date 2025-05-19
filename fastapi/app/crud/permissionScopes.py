@@ -133,3 +133,21 @@ def get_user_permissions(db: Session, user_id: UUID) -> list[models.UserPermissi
         select(models.UserPermission)
         .where(models.UserPermission.userId == user_id)
     )]
+
+def check_user_permission(db: Session, user_id: UUID, route: str, method: str) -> bool:
+    permission_scope = db.scalar(
+        select(models.PermissionScope)
+        .where(models.PermissionScope.route == route)
+        .where(models.PermissionScope.method == method)
+    )
+
+    if permission_scope is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No permission scope found for this route and method"})
+    user_permission = db.scalar(
+        select(models.UserPermission)
+        .where(
+            (models.UserPermission.userId == user_id)
+            & (models.UserPermission.permissionScopeId == permission_scope.id)
+        )
+    )
+    return user_permission is not None
