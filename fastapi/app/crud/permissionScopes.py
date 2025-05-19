@@ -21,39 +21,79 @@ def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
             for i in range(len(path_parts)):
                 permission_scope = "/" + "/".join(path_parts[1:i+1])
 
+                if permission_scope == route.path:
+                    existing_permission_scope = db.scalar(
+                        select(models.PermissionScope)
+                        .where(models.PermissionScope.route == permission_scope)
+                        .where(models.PermissionScope.method == method)
+                        .where(models.PermissionScope.isEndpoint == True)
+                    )
+
+                    if existing_permission_scope is None:
+                        db.add(models.PermissionScope(
+                            route=permission_scope,
+                            method=method,
+                            isEndpoint=True
+                        ))
+                        db.commit()
+
                 existing_permission_scope = db.scalar(
                     select(models.PermissionScope)
                     .where(models.PermissionScope.route == permission_scope)
                     .where(models.PermissionScope.method == method)
+                    .where(models.PermissionScope.isEndpoint == False)
                 )
 
                 if existing_permission_scope is None:
-                    new_permission_scope = models.PermissionScope(
+                    db.add(models.PermissionScope(
                         route=permission_scope,
-                        method=method
-                    )
-                    db.add(new_permission_scope)
+                        method=method,
+                        isEndpoint=False
+                    ))
                     db.commit()
 
 def get_permission_scopes(db: Session, route_prefix: str = "", level: int = 0) -> schemas.PermissionScopeNode:
 
     descendant_routes_start_with = "/" + route_prefix + ("/" if route_prefix != "" else "")
-    descendant_routes = [route for route in db.scalars(
-        select(models.PermissionScope.route)
+    descendant_permissions = [route for route in db.scalars(
+        select(models.PermissionScope)
         .distinct()
         .where(models.PermissionScope.route.startswith(descendant_routes_start_with))
     )]
 
-    child_routes = list(set(["/".join(route.split("/")[1:level+2]) for route in descendant_routes if route != "/" + route_prefix] ) )
+    child_routes = list(set(["/".join(permission.route.split("/")[1:level+2]) for permission in descendant_permissions if permission.route != "/" + route_prefix] ) )
+
+    endpoint_permission_scopes = [_ for _ in db.scalars(
+        select(models.PermissionScope)
+        .where(models.PermissionScope.route == "/" + route_prefix)
+        .where(models.PermissionScope.isEndpoint == True)
+    )]
+
+    current_permission_scope_non_endpoint = db.scalars(
+        select(models.PermissionScope)
+        .where(models.PermissionScope.route == "/" + route_prefix)
+        .where(models.PermissionScope.isEndpoint == False)
+    )
+
+    endpoint_items = [
+                       schemas.PermissionScopeNode(
+                           route="/" + route_prefix,
+                           permissionIds={permission.method: permission.id for permission in
+                                          endpoint_permission_scopes},
+                           childNodes=[]
+                       )
+                   ] if len(endpoint_permission_scopes) > 0 else []
+
 
     return schemas.PermissionScopeNode(
         route="/" + route_prefix,
-        permissionIds={permission.method: permission.id for permission in db.scalars(
-            select(models.PermissionScope)
-            .where(models.PermissionScope.route == "/" + route_prefix)
-        )},
-        childNodes=[get_permission_scopes(db=db, route_prefix=child_route, level=level + 1) for child_route in child_routes]
+        permissionIds={permission.method: permission.id for permission in current_permission_scope_non_endpoint},
+        childNodes= endpoint_items + [get_permission_scopes(db=db, route_prefix=child_route, level=level + 1) for child_route
+                        in child_routes]
     )
+
+
+
 
 def get_permission_scope(db: Session, permission_scope_id: UUID) -> models.PermissionScope:
     return db.scalar(
