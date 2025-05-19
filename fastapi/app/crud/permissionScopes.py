@@ -52,6 +52,26 @@ def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
                     ))
                     db.commit()
 
+def prune_permissions_tree(db: Session, tree: schemas.PermissionScopeNode | None = None):
+    if tree is None:
+        tree = get_permission_scopes(db=db)
+
+
+    if len(tree.childNodes) == 1 and tree.childNodes[0].route == tree.route:
+        redundant_permission_scope_ids = tree.permissionIds.values()
+        for redundant_permission_scope_id in redundant_permission_scope_ids:
+            redundant_permission_scope = db.scalar(
+                select(models.PermissionScope)
+                .where(models.PermissionScope.id == redundant_permission_scope_id)
+            )
+            if redundant_permission_scope is not None:
+                db.delete(redundant_permission_scope)
+                db.commit()
+
+    else:
+        for child_node in tree.childNodes:
+            prune_permissions_tree(db=db, tree=child_node)
+
 def get_permission_scopes(db: Session, route_prefix: str = "", level: int = 0) -> schemas.PermissionScopeNode:
 
     descendant_routes_start_with = "/" + route_prefix + ("/" if route_prefix != "" else "")
@@ -69,11 +89,16 @@ def get_permission_scopes(db: Session, route_prefix: str = "", level: int = 0) -
         .where(models.PermissionScope.isEndpoint == True)
     )]
 
-    current_permission_scope_non_endpoint = db.scalars(
+    current_permission_scope_non_endpoint = [_ for _ in db.scalars(
         select(models.PermissionScope)
         .where(models.PermissionScope.route == "/" + route_prefix)
         .where(models.PermissionScope.isEndpoint == False)
-    )
+    )]
+
+    if len(current_permission_scope_non_endpoint) == 0:
+        current_permission_scope_non_endpoint = endpoint_permission_scopes
+        endpoint_permission_scopes = []
+
 
     endpoint_items = [
                        schemas.PermissionScopeNode(

@@ -51,6 +51,7 @@ if os.environ["PRODUCTION"] == "true":
 
 db = SessionLocal()
 crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
+crud.prune_permissions_tree(db=db)
 db.close()
 
 if __name__ == "__main__":
