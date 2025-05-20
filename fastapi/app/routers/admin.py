@@ -88,5 +88,5 @@ async def get_contracts_takeout_pdf(db: Session = Depends(dep.get_db)):
 
 @admin.get("/admin/permission-scopes")
 async def get_permission_scopes(db: Session = Depends(dep.get_db)) -> schemas.PermissionScopeNode:
-    result = crud.get_permission_scopes(db=db)
+    result = crud.get_permissions_tree(db=db)
     return result

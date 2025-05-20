@@ -1,14 +1,9 @@
-﻿import os
-from datetime import datetime
-from uuid import UUID
+﻿from uuid import UUID
 
-import bcrypt
-from fastapi import HTTPException, status, UploadFile
+from fastapi import HTTPException, status
 from fastapi.routing import APIRoute
-from sqlalchemy import select, func
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-from starlette.routing import BaseRoute
 
 import app.models as models
 import app.schemas as schemas
@@ -54,7 +49,7 @@ def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
 
 def prune_permissions_tree(db: Session, tree: schemas.PermissionScopeNode | None = None):
     if tree is None:
-        tree = get_permission_scopes(db=db)
+        tree = get_permissions_tree(db=db)
 
 
     if len(tree.childNodes) == 1 and tree.childNodes[0].route == tree.route:
@@ -72,7 +67,7 @@ def prune_permissions_tree(db: Session, tree: schemas.PermissionScopeNode | None
         for child_node in tree.childNodes:
             prune_permissions_tree(db=db, tree=child_node)
 
-def get_permission_scopes(db: Session, route_prefix: str = "", level: int = 0) -> schemas.PermissionScopeNode:
+def get_permissions_tree(db: Session, route_prefix: str = "", level: int = 0) -> schemas.PermissionScopeNode:
 
     descendant_routes_start_with = "/" + route_prefix + ("/" if route_prefix != "" else "")
     descendant_permissions = [route for route in db.scalars(
@@ -113,8 +108,8 @@ def get_permission_scopes(db: Session, route_prefix: str = "", level: int = 0) -
     return schemas.PermissionScopeNode(
         route="/" + route_prefix,
         permissionIds={permission.method: permission.id for permission in current_permission_scope_non_endpoint},
-        childNodes= endpoint_items + [get_permission_scopes(db=db, route_prefix=child_route, level=level + 1) for child_route
-                        in child_routes]
+        childNodes= endpoint_items + [get_permissions_tree(db=db, route_prefix=child_route, level=level + 1) for child_route
+                                      in child_routes]
     )
 
 
@@ -124,6 +119,13 @@ def get_permission_scope(db: Session, permission_scope_id: UUID) -> models.Permi
     return db.scalar(
         select(models.PermissionScope)
         .where(models.PermissionScope.id == permission_scope_id)
+    )
+
+def get_permission_scope_by_route_and_method(db: Session, route: str, method: str) -> models.PermissionScope:
+    return db.scalar(
+        select(models.PermissionScope)
+        .where(models.PermissionScope.route == route)
+        .where(models.PermissionScope.method == method)
     )
 
 def get_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID) -> models.UserPermission:
@@ -154,14 +156,7 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
         .where(models.PermissionScope.id == permission_scope_id)
     )
 
-    user_permission = db.scalar(
-        select(models.UserPermission)
-        .where(
-            (models.UserPermission.userId == user_id)
-            & (models.UserPermission.permissionScopeId == permission_scope.id)
-        )
-    )
-
+    user_permission = get_user_permission(db=db, user_id=user_id, permission_scope_id=permission_scope_id)
     if user_permission is not None:
         delete_permission_scope_ids.append(user_permission.permissionScopeId)
         db.delete(user_permission)
@@ -178,13 +173,7 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
     )]
 
     for child in permission_scope_children:
-        user_permission_child = db.scalar(
-            select(models.UserPermission)
-            .where(
-                (models.UserPermission.userId == user_id)
-                & (models.UserPermission.permissionScopeId == child.id)
-            )
-        )
+        user_permission_child = get_user_permission(db=db, user_id=user_id, permission_scope_id=child.id)
         if user_permission_child is not None:
             delete_permission_scope_ids.append(user_permission_child.permissionScopeId)
             db.delete(user_permission_child)
