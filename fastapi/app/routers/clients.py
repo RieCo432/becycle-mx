@@ -31,7 +31,7 @@ async def get_clients(
     return crud.get_clients(db=db, first_name=first_name, last_name=last_name, email_address=email_address)
 
 
-@clients.get("/client/id-by-email", dependencies=[Depends(dep.get_current_active_user)])
+@clients.get("/clients/id-by-email", dependencies=[Depends(dep.get_current_active_user)])
 async def get_client_id_by_email(
         email_address: str,
         db: Session = Depends(dep.get_db)) -> dict[str, UUID]:
@@ -47,7 +47,7 @@ async def get_client_email_address_suggestions(
     return crud.get_similar_email_addresses(email_address=email_address, db=db)
 
 
-@clients.post("/client", dependencies=[Depends(dep.get_current_active_user)])
+@clients.post("/clients", dependencies=[Depends(dep.get_current_active_user)])
 async def create_client(
         client_data: schemas.ClientCreate,
         db: Session = Depends(dep.get_db)) -> schemas.Client:
@@ -55,7 +55,7 @@ async def create_client(
     return crud.post_client(db=db, client_data=client_data)
 
 
-@clients.post("/client/temp")
+@clients.post("/clients/temp")
 async def create_client_temp(
         client_data: schemas.ClientCreate,
         email_tasks: BackgroundTasks,
@@ -68,7 +68,7 @@ async def create_client_temp(
     return client_temp
 
 
-@clients.post("/client/temp/verify")
+@clients.post("/clients/temp/verify")
 async def verify_client_temp(
         client_temp_id: Annotated[UUID, Form()],
         verification_code: Annotated[str, Form()],
@@ -84,7 +84,7 @@ async def verify_client_temp(
     )
 
 
-@clients.get("/client/login-code")
+@clients.get("/clients/login-code")
 async def get_client_login_code(
         email_address: str,
         email_tasks: BackgroundTasks,

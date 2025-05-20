@@ -49,6 +49,35 @@ async def get_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
     return crud.get_users(db=db)
 
 
+@users.post("/users", dependencies=[Depends(dep.get_current_admin_user)])
+async def create_user(
+        user_data: schemas.UserCreate,
+        db: Session = Depends(dep.get_db),
+) -> schemas.User:
+    created_user = crud.create_user(user_data=user_data, db=db)
+    return created_user
+
+
+@users.post("/users/check/password")
+async def post_user_password_check(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: Session = Depends(dep.get_db)
+) -> bool:
+    user = crud.authenticate_user(db=db, username=form_data.username, password_cleartext=form_data.password)
+
+    return user is not None
+
+
+@users.post("/users/check/password-or-pin")
+async def post_user_password_or_pin_check(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: Session = Depends(dep.get_db)
+) -> bool:
+    user = crud.validate_user_signature(db=db, username=form_data.username, password_or_pin=form_data.password)
+
+    return user is not None
+
+
 @users.get("/users/{user_id}", dependencies=[Depends(dep.check_permissions)])
 async def get_user(user_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.User:
     return crud.get_user(db=db, user_id=user_id)
@@ -113,35 +142,6 @@ async def get_my_deposit_balance(
         current_user: Annotated[models.User, Depends(dep.get_current_deposit_bearer_user)]
 ) -> int:
     return current_user.get_deposit_bearer_balance()
-
-
-@users.post("/user/check/password")
-async def post_user_password_check(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-        db: Session = Depends(dep.get_db)
-) -> bool:
-    user = crud.authenticate_user(db=db, username=form_data.username, password_cleartext=form_data.password)
-
-    return user is not None
-
-
-@users.post("/user/check/password-or-pin")
-async def post_user_password_or_pin_check(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-        db: Session = Depends(dep.get_db)
-) -> bool:
-    user = crud.validate_user_signature(db=db, username=form_data.username, password_or_pin=form_data.password)
-
-    return user is not None
-
-
-@users.post("/user", dependencies=[Depends(dep.get_current_admin_user)])
-async def create_user(
-        user_data: schemas.UserCreate,
-        db: Session = Depends(dep.get_db),
-) -> schemas.User:
-    created_user = crud.create_user(user_data=user_data, db=db)
-    return created_user
 
 
 @users.get("/users/active-users", dependencies=[Depends(dep.get_current_active_user)])

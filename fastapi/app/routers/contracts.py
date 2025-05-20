@@ -29,7 +29,7 @@ async def get_contracts(open: bool = True,
     return crud.get_contracts(db=db, open=open, closed=closed, expired=expired)
 
 
-@contracts.post("/contract", dependencies=[Depends(dep.get_current_active_user)])
+@contracts.post("/contracts", dependencies=[Depends(dep.get_current_active_user)])
 async def create_contract(
         contract_data: schemas.ContractCreate,
         email_tasks: BackgroundTasks,
@@ -119,7 +119,7 @@ async def extend_contract(
     return contract
 
 
-@contracts.get("/contract/types", dependencies=[Depends(dep.get_current_active_user)])
+@contracts.get("/contracts/types", dependencies=[Depends(dep.get_current_active_user)])
 async def get_contract_types(db: Session = Depends(dep.get_db)) -> list[schemas.ContractType]:
     return crud.get_contract_types(db=db)
 

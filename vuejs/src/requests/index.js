@@ -61,7 +61,7 @@ export default {
     });
   },
   getClientLoginCode(emailAddress) {
-    return axiosClient.get('/client/login-code', {
+    return axiosClient.get('/clients/login-code', {
       params: {
         email_address: emailAddress,
       },
@@ -95,7 +95,7 @@ export default {
     });
   },
   postNewClient(clientData) {
-    return axiosClient.post('/client', clientData, {
+    return axiosClient.post('/clients', clientData, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -141,7 +141,7 @@ export default {
     });
   },
   findBike(make, model, colour, decals, serialNumber) {
-    return axiosClient.get('/bike/find', {
+    return axiosClient.get('/bikes/first-match', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
@@ -179,7 +179,7 @@ export default {
     });
   },
   postNewBike(make, model, colour, decals, serialNumber) {
-    return axiosClient.post('/bike', {
+    return axiosClient.post('/bikes', {
       make: make,
       model: model,
       colour: colour,
@@ -191,13 +191,13 @@ export default {
     });
   },
   getContractTypes() {
-    return axiosClient.get('/contract/types', {
+    return axiosClient.get('/contracts/types', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
   getBikeConditions() {
-    return axiosClient.get('/bike/conditions', {
+    return axiosClient.get('/bikes/conditions', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -221,7 +221,7 @@ export default {
     });
   },
   checkUserPassword(username, password) {
-    return axiosClient.post('/user/check/password', {
+    return axiosClient.post('/users/check/password', {
       'username': username,
       'password': password,
     }, {
@@ -232,7 +232,7 @@ export default {
     });
   },
   checkUserPasswordOrPin(username, password) {
-    return axiosClient.post('/user/check/password-or-pin', {
+    return axiosClient.post('/users/check/password-or-pin', {
       'username': username,
       'password': password,
     }, {
@@ -244,7 +244,7 @@ export default {
   },
   postNewContract(clientId, bikeId, depositAmountCollected, conditionOfBike, contractType, notes, workingUser,
     workingPasswordOrPin, checkingUser, checkingPasswordOrPin, depositCollectingUser, depositCollectingPassword) {
-    return axiosClient.post('/contract', {
+    return axiosClient.post('/contracts', {
       contract_data: {
         clientId: clientId,
         bikeId: bikeId,
@@ -347,7 +347,7 @@ export default {
     });
   },
   postNewTempClient(firstName, lastName, emailAddress) {
-    return axiosClient.post('/client/temp', {
+    return axiosClient.post('/clients/temp', {
       firstName: firstName,
       lastName: lastName,
       emailAddress: emailAddress,
@@ -356,7 +356,7 @@ export default {
     });
   },
   postTempClientVerificationCode(clientTempId, verificationCode) {
-    return axiosClient.post('/client/temp/verify', {
+    return axiosClient.post('/clients/temp/verify', {
       client_temp_id: clientTempId,
       verification_code: verificationCode,
     }, {

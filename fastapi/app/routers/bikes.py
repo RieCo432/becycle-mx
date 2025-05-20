@@ -15,7 +15,7 @@ bikes = APIRouter(
 )
 
 
-@bikes.get("/bike/find", dependencies=[Depends(dep.get_current_active_user)])
+@bikes.get("/bikes/first-match", dependencies=[Depends(dep.get_current_active_user)])
 async def find_bike(
         make: str,
         model: str,
@@ -93,7 +93,7 @@ async def get_bike_contracts(
     return crud.get_contracts(db=db, bike_id=bike_id)
 
 
-@bikes.post("/bike", dependencies=[Depends(dep.get_current_active_user)])
+@bikes.post("/bikes", dependencies=[Depends(dep.get_current_active_user)])
 async def create_bike(
         bike_data: schemas.BikeCreate,
         db: Session = Depends(dep.get_db)
@@ -137,6 +137,6 @@ async def get_colour_suggestions(
     return crud.get_similar_colours(db=db, colour=colour.lower(), max_distance=max_distance)
 
 
-@bikes.get("/bike/conditions", dependencies=[Depends(dep.get_current_active_user)])
+@bikes.get("/bikes/conditions", dependencies=[Depends(dep.get_current_active_user)])
 async def get_bike_conditions() -> list[str]:
     return ["poor", "fair", "good", "excellent"]

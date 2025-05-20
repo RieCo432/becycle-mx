@@ -77,6 +77,7 @@ def get_permissions_tree(db: Session, route_prefix: str = "", level: int = 0) ->
     )]
 
     child_routes = list(set(["/".join(permission.route.split("/")[1:level+2]) for permission in descendant_permissions if permission.route != "/" + route_prefix] ) )
+    child_routes.sort()
 
     endpoint_permission_scopes = [_ for _ in db.scalars(
         select(models.PermissionScope)
