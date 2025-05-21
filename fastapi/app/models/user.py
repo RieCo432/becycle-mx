@@ -84,7 +84,7 @@ class User(Base):
     userPermissions: Mapped[List["UserPermission"]] = relationship("UserPermission", foreign_keys=[UserPermission.userId],
                                                              back_populates="user")
 
-    userGroupsUsers: Mapped[List["UserGroupUser"]] = relationship("UserGroupUser",
+    groups: Mapped[List["UserGroupUser"]] = relationship("UserGroupUser",
                                                                    foreign_keys=[UserGroupUser.userId],
                                                                    back_populates="user")
 

@@ -7,7 +7,7 @@ from app.database.db import Base
 
 
 class UserGroupUser(Base):
-    __tablename__ = "usergoupusers"
+    __tablename__ = "usergroupusers"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 

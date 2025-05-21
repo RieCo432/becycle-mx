@@ -26,7 +26,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_usergroups_id'), 'usergroups', ['id'], unique=False)
-    op.create_table('usergoupusers',
+    op.create_table('usergroupusers',
     sa.Column('id', sa.UUID(), server_default=sa.text('uuid_generate_v4()'), nullable=False),
     sa.Column('userid', sa.UUID(), nullable=False),
     sa.Column('usergroupid', sa.UUID(), nullable=False),
@@ -34,7 +34,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['userid'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_usergoupusers_id'), 'usergoupusers', ['id'], unique=False)
+    op.create_index(op.f('ix_usergroupusers_id'), 'usergroupusers', ['id'], unique=False)
     op.create_table('usergrouppermissions',
     sa.Column('id', sa.UUID(), server_default=sa.text('uuid_generate_v4()'), nullable=False),
     sa.Column('usergroupid', sa.UUID(), nullable=False),
