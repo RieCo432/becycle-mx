@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
 
 from .userPermission import UserPermission
+from .userGroupPermission import UserGroupPermission
 
 
 class PermissionScope(Base):
@@ -25,6 +26,9 @@ class PermissionScope(Base):
                                                                    foreign_keys=[UserPermission.permissionScopeId],
                                                                    back_populates="permissionScope")
 
+    userGroupPermissions: Mapped[List["UserGroupPermission"]] = relationship("UserGroupPermission",
+                                                                  foreign_keys=[UserGroupPermission.permissionScopeId],
+                                                                  back_populates="permissionScope")
 
     def __eq__(self, other: dict):
         return all([
