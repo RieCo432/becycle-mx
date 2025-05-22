@@ -214,6 +214,12 @@ async def delete_my_presentation_card(
 ) -> schemas.UserPresentationCard:
     return crud.delete_user_presentation_card(db=db, user=user)
 
+@users.get("/users/me/groups", dependencies=[Depends(dep.get_current_active_user)])
+async def get_user_groups(
+        user: models.User = Depends(dep.get_current_active_user),
+) -> list[schemas.Group]:
+    return user.groups
+
 
 @users.get("/users/{user_id}/presentation-card", dependencies=[Depends(dep.get_current_active_user)])
 async def get_user_presentation_card(
@@ -222,3 +228,13 @@ async def get_user_presentation_card(
 ) -> schemas.UserPresentationCard:
     user = crud.get_user(db=db, user_id=user_id)
     return crud.get_user_presentation_card(db=db, user=user)
+
+@users.get("/users/{user_id}/groups", dependencies=[Depends(dep.get_current_active_user)])
+async def get_user_groups(
+        user_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.Group]:
+    user = crud.get_user(db=db, user_id=user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User not found"})
+    return user.groups

@@ -1,4 +1,5 @@
-﻿import os
+﻿from __future__ import annotations
+import os
 from datetime import datetime, date
 from typing import List
 from uuid import uuid4
@@ -10,6 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
 
 from .userPermission import UserPermission
+from .groupPermission import group_permission_association_table
 
 
 class PermissionScope(Base):
@@ -25,10 +27,18 @@ class PermissionScope(Base):
                                                                    foreign_keys=[UserPermission.permissionScopeId],
                                                                    back_populates="permissionScope")
 
+    groups: Mapped[List["Group"]] = relationship(secondary=group_permission_association_table, back_populates="permissions")
 
-    def __eq__(self, other: dict):
+    def __eq__(self, other: PermissionScope):
         return all([
-            str(self.id) == str(other.get("id")),
-            str(self.route) == str(other.get("route")),
-            str(self.method) == str(other.get("method"))
+            self.id == other.id,
+            self.route == other.route,
+            self.method == other.method
         ])
+
+    # def __eq__(self, other: dict):
+    #     return all([
+    #         str(self.id) == str(other.get("id")),
+    #         str(self.route) == str(other.get("route")),
+    #         str(self.method) == str(other.get("method"))
+    #     ])

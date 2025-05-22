@@ -1052,7 +1052,6 @@ export default {
       requests.getBikeByRfidTagSerialNumber(rfidTagSerialNumber)
         .then((response) => {
           const bike = response.data;
-          console.log(bike);
           let allSame = true;
           allSame &= bike.make.toLowerCase() === this.make.toLowerCase();
           allSame &= bike.model.toLowerCase() === this.model.toLowerCase();
@@ -1080,7 +1079,6 @@ export default {
           this.decals = bike.decals ? bike.decals.toLowerCase() : '';
           this.serialNumber = bike.serialNumber.toLowerCase();
           this.bikeId = bike.id.toLowerCase();
-          console.log(bike);
           this.verifyBikeDetails(response.rfidTagSerialNumber);
         } else {
           toast.error('Some error occurred!', {timeout: 1000});

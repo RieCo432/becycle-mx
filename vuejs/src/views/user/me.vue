@@ -62,7 +62,6 @@ export default {
       this.presentationCardDetails = response.data;
     }).catch((error) => {
       if (error.status !== 404) {
-        console.log(error);
       }
       this.presentationCardDetails = {
         name: 'NOT SET',

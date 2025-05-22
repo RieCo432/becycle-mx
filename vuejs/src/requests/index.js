@@ -1246,8 +1246,77 @@ export default {
       },
     );
   },
+  addGroupPermission(groupId, permissionScopeId) {
+    return axiosClient.post(`/groups/${groupId}/permissions`, {permission_scope_id: permissionScopeId},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  removeGroupPermission(groupId, permissionScopeId) {
+    return axiosClient.delete(`/groups/${groupId}/permissions/${permissionScopeId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  addGroupUser(groupId, userId) {
+    return axiosClient.post(`/groups/${groupId}/users`, {user_id: userId},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  removeGroupUser(groupId, userId) {
+    return axiosClient.delete(`/groups/${groupId}/users/${userId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
   getUserPermissions(userId) {
     return axiosClient.get(`/users/${userId}/permissions`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  getGroupPermissions(groupId) {
+    return axiosClient.get(`/groups/${groupId}/permissions`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  getUserGroups() {
+    return axiosClient.get('/groups',
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  postUserGroup(name) {
+    return axiosClient.post('/groups', {name: name},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  deleteUserGroup(groupId) {
+    return axiosClient.delete(`/groups/${groupId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  getGroupUsers(groupId) {
+    return axiosClient.get(`/groups/${groupId}/users`,
       {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),

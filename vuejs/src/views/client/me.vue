@@ -82,10 +82,10 @@ export default {
       });
     },
     editMyAppointmentNotes(appointmentId) {
-      console.log('edit notes');
+      // TODO
     },
     rescheduleMyAppointment(appointmentId) {
-      console.log('reschedule');
+      // TODO
     },
     viewContract(contractId) {
       this.$router.push(`/clients/me/contracts/${contractId}`);

@@ -65,10 +65,10 @@ export default {
       });
     },
     editAppointmentNotes(appointmentId) {
-      console.log('edit notes');
+      // TODO
     },
     rescheduleAppointment(appointmentId) {
-      console.log('reschedule');
+      // TODO
     },
     viewContract(contractId) {
       this.$router.push(`/contracts/${contractId}`);
