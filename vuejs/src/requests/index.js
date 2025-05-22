@@ -1254,4 +1254,27 @@ export default {
       },
     );
   },
+  getUserGroups() {
+    return axiosClient.get('/groups',
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  postUserGroup(name) {
+    return axiosClient.post('/groups', {name: name},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  deleteUserGroup(groupId) {
+    return axiosClient.delete(`/groups/${groupId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
 };

@@ -396,7 +396,7 @@ const routes = [
         path: '/admin/duplicates/clients',
         name: 'Manage Potential Duplicate Clients',
         meta: {
-          restrictTo: null,
+          restrictTo: ['user'],
           selectNavPath: '/admin/duplicates/clients',
         },
         component: () => import('@/views/admin/duplicates/clients.vue'),
@@ -405,10 +405,19 @@ const routes = [
         path: '/admin/duplicates/bikes',
         name: 'Manage Potential Duplicate Bikes',
         meta: {
-          restrictTo: null,
+          restrictTo: ['user'],
           selectNavPath: '/admin/duplicates/bikes',
         },
         component: () => import('@/views/admin/duplicates/bikes.vue'),
+      },
+      {
+        path: '/admin/user-groups',
+        name: 'Manage User Groups',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/user-groups',
+        },
+        component: () => import('@/views/admin/userGroups.vue'),
       },
     ],
   },

@@ -204,6 +204,12 @@ export const topMenu = [
         show: ['user'],
       },
       {
+        childtitle: 'User Groups',
+        childicon: 'heroicons-outline:user-group',
+        childlink: '/admin/user-groups',
+        show: ['user'],
+      },
+      {
         childtitle: 'Duplicate Clients',
         childicon: 'heroicons-outline:users',
         childlink: '/admin/duplicates/clients',
