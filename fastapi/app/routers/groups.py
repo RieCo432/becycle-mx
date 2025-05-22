@@ -64,7 +64,7 @@ async def remove_user_from_group(
 
 
 @groups.get("/groups/{group_id}/permissions", dependencies=[Depends(dep.get_current_active_user)])
-async def get_group_permissions(group_id: UUID, db: Session = Depends(dep.get_db)) -> list[schemas.PermissionScope]:
+async def get_group_permissions(group_id: UUID, db: Session = Depends(dep.get_db)) -> list[schemas.Permission]:
     group = crud.get_group(db=db, group_id=group_id)
     if group is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Group not found"})

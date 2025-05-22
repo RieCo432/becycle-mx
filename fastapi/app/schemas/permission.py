@@ -4,26 +4,25 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
 
-class PermissionScopeRoute(BaseModel):
+class PermissionRoute(BaseModel):
     routePart: str
-    methods: list[PermissionScopeNode]
+    methods: list[PermissionNode]
 
-class PermissionScopeNode(BaseModel):
+class PermissionNode(BaseModel):
     route: str
     permissionIds: dict[str, UUID]
-    childNodes: list[PermissionScopeNode] | None
+    childNodes: list[PermissionNode] | None
 
 class UserPermission(BaseModel):
-    id: UUID
     userId: UUID
-    permissionScopeId: UUID
+    permissionId: UUID
 
-class PermissionScope(BaseModel):
+class Permission(BaseModel):
     id: UUID
     method: str
     route: str
     isEndpoint: bool
 
 class NewUserPermission(BaseModel):
-    permissionScopeId: UUID
+    permissionId: UUID
 

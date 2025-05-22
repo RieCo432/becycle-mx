@@ -10,12 +10,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
 
-from .userPermission import UserPermission
+from .userPermission import user_permission_association_table
 from .groupPermission import group_permission_association_table
 
 
-class PermissionScope(Base):
-    __tablename__ = "permissionscopes"
+class Permission(Base):
+    __tablename__ = "permissions"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
@@ -23,13 +23,10 @@ class PermissionScope(Base):
     method: Mapped[str] = mapped_column("method", Text, nullable=False, quote=False)
     isEndpoint: Mapped[bool] = mapped_column("isendpoint", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
 
-    userPermissions: Mapped[List["UserPermission"]] = relationship("UserPermission",
-                                                                   foreign_keys=[UserPermission.permissionScopeId],
-                                                                   back_populates="permissionScope")
-
+    users: Mapped[List["User"]] = relationship(secondary=user_permission_association_table, back_populates="permissions")
     groups: Mapped[List["Group"]] = relationship(secondary=group_permission_association_table, back_populates="permissions")
 
-    def __eq__(self, other: PermissionScope):
+    def __eq__(self, other: Permission):
         return all([
             self.id == other.id,
             self.route == other.route,

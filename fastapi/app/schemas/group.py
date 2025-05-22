@@ -12,7 +12,7 @@ class GroupCreate(BaseModel):
 
 
 class GroupPermission(BaseModel):
-    permissionScopeId: UUID
+    permissionId: UUID
     groupId: UUID
 
 

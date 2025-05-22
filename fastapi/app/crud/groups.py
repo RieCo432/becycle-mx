@@ -7,7 +7,7 @@ from starlette import status
 
 import app.models as models
 import app.schemas as schemas
-from .permissionScopes import get_permission_scope
+from .permissions import get_permission
 from .users import get_user
 
 
@@ -27,13 +27,13 @@ def add_permission_to_group(db: Session, group_id: UUID, permission_scope_id: UU
     group = get_group(db=db, group_id=group_id)
     if group is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Group not found"})
-    permission_scope = get_permission_scope(db=db, permission_scope_id=permission_scope_id)
+    permission_scope = get_permission(db=db, permission_id=permission_scope_id)
     if permission_scope is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Permission scope not found"})
     group.permissions.append(permission_scope)
     db.commit()
     return schemas.GroupPermission(
-        permissionScopeId=permission_scope.id,
+        permissionId=permission_scope.id,
         groupId=group.id
     )
 
@@ -42,7 +42,7 @@ def remove_permission_from_group(db: Session, group_id: UUID, permission_scope_i
     group = get_group(db=db, group_id=group_id)
     if group is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Group not found"})
-    permission_scope = get_permission_scope(db=db, permission_scope_id=permission_scope_id)
+    permission_scope = get_permission(db=db, permission_id=permission_scope_id)
     if permission_scope is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Permission scope not found"})
 
@@ -56,10 +56,10 @@ def remove_permission_from_group(db: Session, group_id: UUID, permission_scope_i
     child_routes_starts_with = permission_scope.route + ("/" if not permission_scope.route.endswith("/") else "")
 
     permission_scope_children = [_ for _ in db.scalars(
-        select(models.PermissionScope)
+        select(models.Permission)
         .where(
-            (models.PermissionScope.route.startswith(child_routes_starts_with))
-            & (models.PermissionScope.method == permission_scope.method)
+            (models.Permission.route.startswith(child_routes_starts_with))
+            & (models.Permission.method == permission_scope.method)
         )
     )]
 

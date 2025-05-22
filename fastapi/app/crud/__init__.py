@@ -11,5 +11,5 @@ from .statistics import *
 from .surveys import *
 from .users import *
 from .expenses import *
-from .permissionScopes import *
+from .permissions import *
 from .groups import *

@@ -6,5 +6,5 @@ group_permission_association_table = Table(
     "grouppermissions",
     Base.metadata,
     Column("groupid", ForeignKey("groups.id"), primary_key=True),
-    Column("permissionscopeid", ForeignKey("permissionscopes.id"), primary_key=True),
+    Column("permissionid", ForeignKey("permissions.id"), primary_key=True),
 )
