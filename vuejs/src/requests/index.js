@@ -1261,6 +1261,21 @@ export default {
       },
     );
   },
+  addGroupUser(groupId, userId) {
+    return axiosClient.post(`/groups/${groupId}/users`, {user_id: userId},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  removeGroupUser(groupId, userId) {
+    return axiosClient.delete(`/groups/${groupId}/users/${userId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
   getUserPermissions(userId) {
     return axiosClient.get(`/users/${userId}/permissions`,
       {
@@ -1299,5 +1314,13 @@ export default {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       });
+  },
+  getGroupUsers(groupId) {
+    return axiosClient.get(`/groups/${groupId}/users`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
   },
 };
