@@ -41,6 +41,7 @@ app.include_router(routers.maps)
 app.include_router(routers.surveys)
 app.include_router(routers.admin)
 app.include_router(routers.expenses)
+app.include_router(routers.groups)
 
 
 if os.environ["PRODUCTION"] == "true":

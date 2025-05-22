@@ -12,3 +12,4 @@ from .statistics import statistics
 from .surveys import surveys
 from .users import users
 from .expenses import expenses
+from .groups import groups

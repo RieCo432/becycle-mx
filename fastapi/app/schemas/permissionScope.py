@@ -18,6 +18,12 @@ class UserPermission(BaseModel):
     userId: UUID
     permissionScopeId: UUID
 
+class PermissionScope(BaseModel):
+    id: UUID
+    method: str
+    route: str
+    isEndpoint: bool
+
 class NewUserPermission(BaseModel):
     permissionScopeId: UUID
 
