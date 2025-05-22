@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import List
 from uuid import uuid4
 
-from pypdf.constants import UserAccessPermissions
 from sqlalchemy import String, UUID, Boolean, text, Text, ForeignKey, LargeBinary, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -11,7 +10,7 @@ from .contract import Contract
 from .depositExchange import DepositExchange
 from .expense import Expense
 from .userPermission import UserPermission
-from .userGroupUser import UserGroupUser
+from .groupUser import group_user_association_table
 
 
 class UserPhoto(Base):
@@ -84,9 +83,8 @@ class User(Base):
     userPermissions: Mapped[List["UserPermission"]] = relationship("UserPermission", foreign_keys=[UserPermission.userId],
                                                              back_populates="user")
 
-    groups: Mapped[List["UserGroupUser"]] = relationship("UserGroupUser",
-                                                                   foreign_keys=[UserGroupUser.userId],
-                                                                   back_populates="user")
+    groups: Mapped[List["Group"]] = relationship(secondary=group_user_association_table, back_populates="users")
+
 
     def __eq_dict__(self, other: dict):
         return all([

@@ -11,6 +11,6 @@ from .admin import *
 from .expense import *
 from .permissionScope import *
 from .userPermission import *
-from .userGroup import *
-from .userGroupUser import *
-from .userGroupPermission import *
+from .group import *
+from .groupUser import *
+from .groupPermission import *
