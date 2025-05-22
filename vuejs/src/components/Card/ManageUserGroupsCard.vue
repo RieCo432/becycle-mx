@@ -121,7 +121,6 @@ export default defineComponent({
           id: group.id,
           username: group.name,
         };
-        console.log('pulled permissions', this.groupPermissions);
       });
     },
     openEditGroupUsersModal(groupId) {
@@ -136,11 +135,9 @@ export default defineComponent({
           username: group.name,
         };
         this.showEditGroupUsersModal = !this.showEditGroupUsersModal;
-        console.log('pulled users', this.usersInGroup);
       });
     },
     changeGroupUserMembership(userId) {
-      console.log(this.groupUsers[userId]);
       if (!this.groupUsers[userId]) {
         requests.removeGroupUser(this.editGroupModalInfo.id, userId)
           .then((response) => {
@@ -171,7 +168,6 @@ export default defineComponent({
       this.users.forEach((user) => {
         result[user.id] = this.usersInGroup.includes(user.id);
       });
-      console.log(result);
       return result;
     },
   },

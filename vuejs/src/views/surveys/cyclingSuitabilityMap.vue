@@ -104,9 +104,7 @@ export default {
       optionsStyle: (feature) => {
         const score = feature.properties.reports.map((report) => (report.scoreModifier)).reduce((a, b) => a+b, 0);
         if (score !== 0) {
-          console.log(feature);
           const indexInFeatures = this.geojson.features.findIndex((f) => f.properties.id === feature.properties.id);
-          console.log(indexInFeatures);
         }
         const r = Math.round(255 * Math.max(Math.min(-score + 5, 5), 0) / 5);
         const g = Math.round(255 * Math.max(Math.min(score + 5, 5), 0) / 5);

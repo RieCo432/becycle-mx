@@ -49,9 +49,7 @@ export default {
   },
   methods: {
     toggleUserPermission(event, method) {
-      console.log('current state', this.userHasPermissionModelValues);
       const granted = this.userHasPermissionModelValues[method];
-      console.log('setting', granted, method, this.tree.route);
 
       if (granted) {
         let request = null;

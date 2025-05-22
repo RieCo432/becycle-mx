@@ -85,8 +85,6 @@ export default {
 
 
     const postNewUser = handleNewUserSubmit(() => {
-      console.log(username.value, password.value, pin.value, admin.value, depositBearer.value,
-        rentalChecker.value, appointmentManager.value, treasurer.value);
       requests.postNewUser(username.value, password.value, pin.value, admin.value, depositBearer.value,
         rentalChecker.value, appointmentManager.value, treasurer.value).then((response) => {
         toast.success('User created!', {timeout: 2000});
@@ -303,7 +301,6 @@ export default {
         });
         this.showEditUserPermissionsModal = !this.showEditUserPermissionsModal;
         this.editUserPermissionsModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
-        console.log('pulled permissions', this.userPermissions);
       });
     },
   },
