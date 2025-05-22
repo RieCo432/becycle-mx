@@ -47,8 +47,8 @@ async def get_group_users(group_id: UUID, db: Session = Depends(dep.get_db)) -> 
 
 @groups.post("/groups/{group_id}/users", dependencies=[Depends(dep.get_current_admin_user)])
 async def add_user_to_group(
-        user_id: UUID,
         group_id: UUID,
+        user_id: Annotated[UUID, Body(embed=True)],
         db: Session = Depends(dep.get_db)
 ) -> schemas.GroupUser:
     return crud.add_user_to_group(db=db, user_id=user_id, group_id=group_id)
@@ -74,7 +74,7 @@ async def get_group_permissions(group_id: UUID, db: Session = Depends(dep.get_db
 @groups.post("/groups/{group_id}/permissions", dependencies=[Depends(dep.get_current_admin_user)])
 async def add_permission_to_group(
         group_id: UUID,
-        permission_scope_id: UUID,
+        permission_scope_id: Annotated[UUID, Body(embed=True)],
         db: Session = Depends(dep.get_db)
 ) -> schemas.GroupPermission:
     return crud.add_permission_to_group(db=db, group_id=group_id, permission_scope_id=permission_scope_id)

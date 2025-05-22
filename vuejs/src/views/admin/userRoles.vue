@@ -17,11 +17,6 @@ const toast = useToast();
 
 export default {
   name: 'userRoles',
-  computed: {
-    userPermissionScopeTree() {
-      return userPermissionScopeTree
-    }
-  },
   components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal, UserPermissionScopeTree},
   setup() {
     const userData = ref([]);

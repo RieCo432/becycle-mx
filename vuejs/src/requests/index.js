@@ -1246,8 +1246,31 @@ export default {
       },
     );
   },
+  addGroupPermission(groupId, permissionScopeId) {
+    return axiosClient.post(`/groups/${groupId}/permissions`, {permission_scope_id: permissionScopeId},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  removeGroupPermission(groupId, permissionScopeId) {
+    return axiosClient.delete(`/groups/${groupId}/permissions/${permissionScopeId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
   getUserPermissions(userId) {
     return axiosClient.get(`/users/${userId}/permissions`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  getGroupPermissions(groupId) {
+    return axiosClient.get(`/groups/${groupId}/permissions`,
       {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),

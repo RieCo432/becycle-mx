@@ -22,7 +22,13 @@ export default {
     },
     userId: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
+    },
+    groupId: {
+      type: String,
+      required: false,
+      default: null,
     },
     userPermissions: {
       type: Array,
@@ -48,22 +54,40 @@ export default {
       console.log('setting', granted, method, this.tree.route);
 
       if (granted) {
-        requests.addUserPermission(this.userId, this.tree.permissionIds[method])
-          .then((response) => {
+        let request = null;
+
+        if (this.userId !== null) {
+          request = requests.addUserPermission(this.userId, this.tree.permissionIds[method]);
+        } else if (this.groupId !== null) {
+          request = requests.addGroupPermission(this.groupId, this.tree.permissionIds[method]);
+        }
+
+        if (request !== null) {
+          request.then((response) => {
             toast.success('Permission granted', {timeout: 2000});
             this.$emit('userPermissionAdded', response.data.permissionScopeId);
           })
-          .catch((error) => {
-            toast.error(error.response.data.detail.description, {timeout: 2000});
-          });
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 2000});
+            });
+        }
       } else {
-        requests.removeUserPermission(this.userId, this.tree.permissionIds[method])
-          .then((response) => {
+        let request = null;
+
+        if (this.userId !== null) {
+          request = requests.removeUserPermission(this.userId, this.tree.permissionIds[method]);
+        } else if (this.groupId !== null) {
+          request = requests.removeGroupPermission(this.groupId, this.tree.permissionIds[method]);
+        }
+
+        if (request !== null) {
+          request.then((response) => {
             toast.success('Permission revoked', {timeout: 2000});
             this.$emit('userPermissionRemoved', response.data);
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 2000});
           });
+        }
       }
     },
     anyChildrenHavePermission(tree, method) {
@@ -192,6 +216,7 @@ export default {
                 <UserPermissionScopeTree
                     :tree="subTree"
                     :user-id="userId"
+                    :group-id="groupId"
                     :user-permissions-at-predecessor="userHasPermissionModelValues"
                     :user-permissions="userPermissions"
                     @user-permission-added="(permissionScopeId) => $emit('userPermissionAdded', permissionScopeId)"
