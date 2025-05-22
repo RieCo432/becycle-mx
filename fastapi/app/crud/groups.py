@@ -46,7 +46,30 @@ def remove_permission_from_group(db: Session, group_id: UUID, permission_scope_i
     if permission_scope is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Permission scope not found"})
 
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail={"description": "This functionality is not yet implemented. Please contact the administrator. Thank you."})
+    delete_permission_scope_ids = []
+
+    if permission_scope in group.permissions:
+        group.permissions.remove(permission_scope)
+        delete_permission_scope_ids.append(permission_scope.id)
+        db.commit()
+
+    child_routes_starts_with = permission_scope.route + ("/" if not permission_scope.route.endswith("/") else "")
+
+    permission_scope_children = [_ for _ in db.scalars(
+        select(models.PermissionScope)
+        .where(
+            (models.PermissionScope.route.startswith(child_routes_starts_with))
+            & (models.PermissionScope.method == permission_scope.method)
+        )
+    )]
+
+    for child in permission_scope_children:
+        if child in group.permissions:
+            delete_permission_scope_ids.append(child.id)
+            group.permissions.remove(child)
+            db.commit()
+
+    return delete_permission_scope_ids
 
 
 def remove_user_from_group(db: Session, group_id: UUID, user_id: UUID) -> schemas.User:

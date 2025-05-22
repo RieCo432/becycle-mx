@@ -29,9 +29,16 @@ class PermissionScope(Base):
 
     groups: Mapped[List["Group"]] = relationship(secondary=group_permission_association_table, back_populates="permissions")
 
-    def __eq__(self, other: dict):
+    def __eq__(self, other: PermissionScope):
         return all([
-            str(self.id) == str(other.get("id")),
-            str(self.route) == str(other.get("route")),
-            str(self.method) == str(other.get("method"))
+            self.id == other.id,
+            self.route == other.route,
+            self.method == other.method
         ])
+
+    # def __eq__(self, other: dict):
+    #     return all([
+    #         str(self.id) == str(other.get("id")),
+    #         str(self.route) == str(other.get("route")),
+    #         str(self.method) == str(other.get("method"))
+    #     ])
