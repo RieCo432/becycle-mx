@@ -27,6 +27,16 @@ async def get_groups(db: Session = Depends(dep.get_db)) -> list[schemas.Group]:
     return crud.get_groups(db=db)
 
 
+@groups.post("/groups", dependencies=[Depends(dep.get_current_admin_user)])
+async def create_new_group(group_data: schemas.GroupCreate, db: Session = Depends(dep.get_db)) -> schemas.Group:
+    return crud.create_group(db=db, group_name=group_data.name)
+
+
+@groups.delete("/groups/{group_id}", dependencies=[Depends(dep.get_current_admin_user)])
+async def delete_group(group_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.Group:
+    return crud.delete_group(db=db, group_id=group_id)
+
+
 @groups.get("/groups/{group_id}/users", dependencies=[Depends(dep.get_current_active_user)])
 async def get_group_users(group_id: UUID, db: Session = Depends(dep.get_db)) -> list[schemas.User]:
     group = crud.get_group(db=db, group_id=group_id)

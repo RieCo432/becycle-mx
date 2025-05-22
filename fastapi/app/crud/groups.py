@@ -97,3 +97,23 @@ def add_user_to_group(db: Session, group_id: UUID, user_id: UUID) -> schemas.Gro
         userId=user.id,
         groupId=group.id
     )
+
+def create_group(db: Session, group_name: str) -> schemas.Group:
+    group = models.Group(
+        name=group_name
+    )
+    db.add(group)
+    db.commit()
+    return group
+
+def delete_group(db: Session, group_id: UUID) -> schemas.Group:
+    group = get_group(db=db, group_id=group_id)
+    if group is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Group not found"})
+    schema = schemas.Group(
+        id=group.id,
+        name=group.name
+    )
+    db.delete(group)
+    db.commit()
+    return schema
