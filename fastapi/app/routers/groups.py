@@ -74,10 +74,10 @@ async def get_group_permissions(group_id: UUID, db: Session = Depends(dep.get_db
 @groups.post("/groups/{group_id}/permissions", dependencies=[Depends(dep.get_current_admin_user)])
 async def add_permission_to_group(
         group_id: UUID,
-        permission_scope_id: Annotated[UUID, Body(embed=True)],
+        permission: schemas.NewUserPermission,
         db: Session = Depends(dep.get_db)
 ) -> schemas.GroupPermission:
-    return crud.add_permission_to_group(db=db, group_id=group_id, permission_scope_id=permission_scope_id)
+    return crud.add_permission_to_group(db=db, group_id=group_id, permission_id=permission.permissionId)
 
 
 @groups.delete("/groups/{group_id}/permissions/{permission_scope_id}", dependencies=[Depends(dep.get_current_admin_user)])
@@ -86,4 +86,4 @@ async def remove_permission_from_group(
         permission_scope_id: UUID,
         db: Session = Depends(dep.get_db)
 ) -> list[UUID]:
-    return crud.remove_permission_from_group(db=db, group_id=group_id, permission_scope_id=permission_scope_id)
+    return crud.remove_permission_from_group(db=db, group_id=group_id, permission_id=permission_scope_id)

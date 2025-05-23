@@ -294,10 +294,9 @@ export default {
     },
     openEditUserPermissionsModal(userId) {
       requests.getUserPermissions(userId).then((response) => {
-
         this.userPermissions.splice(0, this.userPermissions.length);
         response.data.forEach((userPermission) => {
-          this.userPermissions.push(userPermission.permissionScopeId);
+          this.userPermissions.push(userPermission.id);
         });
         this.showEditUserPermissionsModal = !this.showEditUserPermissionsModal;
         this.editUserPermissionsModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
@@ -312,7 +311,7 @@ export default {
         this.userActions = this.userActionsIfAdmin;
       }
     });
-    requests.getPermissionScopes().then((response) => {
+    requests.getPermissions().then((response) => {
       this.permissionScopes = response.data;
     });
   },

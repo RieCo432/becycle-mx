@@ -23,11 +23,11 @@ def get_groups(db: Session) -> list[models.Group]:
     )]
 
 
-def add_permission_to_group(db: Session, group_id: UUID, permission_scope_id: UUID) -> schemas.GroupPermission:
+def add_permission_to_group(db: Session, group_id: UUID, permission_id: UUID) -> schemas.GroupPermission:
     group = get_group(db=db, group_id=group_id)
     if group is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Group not found"})
-    permission_scope = get_permission(db=db, permission_id=permission_scope_id)
+    permission_scope = get_permission(db=db, permission_id=permission_id)
     if permission_scope is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Permission scope not found"})
     group.permissions.append(permission_scope)
@@ -38,38 +38,38 @@ def add_permission_to_group(db: Session, group_id: UUID, permission_scope_id: UU
     )
 
 
-def remove_permission_from_group(db: Session, group_id: UUID, permission_scope_id: UUID) -> list[UUID]:
+def remove_permission_from_group(db: Session, group_id: UUID, permission_id: UUID) -> list[UUID]:
     group = get_group(db=db, group_id=group_id)
     if group is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Group not found"})
-    permission_scope = get_permission(db=db, permission_id=permission_scope_id)
-    if permission_scope is None:
+    permission = get_permission(db=db, permission_id=permission_id)
+    if permission is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Permission scope not found"})
 
-    delete_permission_scope_ids = []
+    delete_permission_ids = []
 
-    if permission_scope in group.permissions:
-        group.permissions.remove(permission_scope)
-        delete_permission_scope_ids.append(permission_scope.id)
+    if permission in group.permissions:
+        group.permissions.remove(permission)
+        delete_permission_ids.append(permission.id)
         db.commit()
 
-    child_routes_starts_with = permission_scope.route + ("/" if not permission_scope.route.endswith("/") else "")
+    child_routes_starts_with = permission.route + ("/" if not permission.route.endswith("/") else "")
 
-    permission_scope_children = [_ for _ in db.scalars(
+    permission_children = [_ for _ in db.scalars(
         select(models.Permission)
         .where(
             (models.Permission.route.startswith(child_routes_starts_with))
-            & (models.Permission.method == permission_scope.method)
+            & (models.Permission.method == permission.method)
         )
     )]
 
-    for child in permission_scope_children:
+    for child in permission_children:
         if child in group.permissions:
-            delete_permission_scope_ids.append(child.id)
+            delete_permission_ids.append(child.id)
             group.permissions.remove(child)
             db.commit()
 
-    return delete_permission_scope_ids
+    return delete_permission_ids
 
 
 def remove_user_from_group(db: Session, group_id: UUID, user_id: UUID) -> schemas.User:

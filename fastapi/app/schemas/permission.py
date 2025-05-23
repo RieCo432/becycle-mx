@@ -26,3 +26,6 @@ class Permission(BaseModel):
 class NewUserPermission(BaseModel):
     permissionId: UUID
 
+
+class NewGroupPermission(BaseModel):
+    permissionId: UUID

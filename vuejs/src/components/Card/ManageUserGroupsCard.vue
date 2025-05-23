@@ -175,7 +175,7 @@ export default defineComponent({
     requests.getUserGroups().then((response) => {
       this.userGroups = response.data;
     });
-    requests.getPermissionScopes().then((response) => {
+    requests.getPermissions().then((response) => {
       this.permissionScopes = response.data;
     });
     requests.getUsers().then((response) => {

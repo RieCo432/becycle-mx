@@ -1225,36 +1225,36 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
-  getPermissionScopes() {
-    return axiosClient.get('/admin/permission-scopes', {
+  getPermissions() {
+    return axiosClient.get('/admin/permissions', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  addUserPermission(userId, permissionScopeId) {
-    return axiosClient.post(`/users/${userId}/permissions`, {permissionScopeId: permissionScopeId},
+  addUserPermission(userId, permissionId) {
+    return axiosClient.post(`/users/${userId}/permissions`, {permissionId: permissionId},
       {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       });
   },
-  removeUserPermission(userId, permissionScopeId) {
-    return axiosClient.delete(`/users/${userId}/permissions/${permissionScopeId}`,
+  removeUserPermission(userId, permissionId) {
+    return axiosClient.delete(`/users/${userId}/permissions/${permissionId}`,
       {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       },
     );
   },
-  addGroupPermission(groupId, permissionScopeId) {
-    return axiosClient.post(`/groups/${groupId}/permissions`, {permission_scope_id: permissionScopeId},
+  addGroupPermission(groupId, permissionId) {
+    return axiosClient.post(`/groups/${groupId}/permissions`, {permissionId: permissionId},
       {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       });
   },
-  removeGroupPermission(groupId, permissionScopeId) {
-    return axiosClient.delete(`/groups/${groupId}/permissions/${permissionScopeId}`,
+  removeGroupPermission(groupId, permissionId) {
+    return axiosClient.delete(`/groups/${groupId}/permissions/${permissionId}`,
       {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),

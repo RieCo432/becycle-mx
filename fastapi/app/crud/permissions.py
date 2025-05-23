@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 import app.models as models
 import app.schemas as schemas
-from app.crud import get_user
+from .users import get_user
+from app.models import User, Permission, Group
 
 
 def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
@@ -196,18 +197,25 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
     return deleted_permission_ids
 
 
-def check_user_permission(db: Session, user_id: UUID, route: str, method: str) -> bool:
-    permission = db.scalar(
-        select(models.Permission)
-        .where(models.Permission.route == route)
-        .where(models.Permission.method == method)
-    )
-
-    if permission is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "No permission scope found for this route and method"})
-
-    user = get_user(db=db, user_id=user_id)
-    if user is not None:
-        return permission in user.permissions
+def check_user_permission(user: User, permission: Permission) -> bool:
+    while permission is not None:
+        if permission in user.permissions:
+            return True
+        else:
+            permission = permission.parentPermission
 
     return False
+
+
+def check_group_permission(group: Group, permission: Permission) -> bool:
+    while permission is not None:
+        if permission in group.permissions:
+            return True
+        else:
+            permission = permission.parentPermission
+
+    return False
+
+
+def check_permission(db: Session, user: User, permission: Permission) -> bool:
+    return check_user_permission(user=user, permission=permission) or any([check_group_permission(group=group, permission=permission) for group in user.groups])

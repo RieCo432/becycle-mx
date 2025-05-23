@@ -123,7 +123,16 @@ async def check_permissions(request: Request, current_user: Annotated[models.Use
         route = route.replace(str(request.path_params[key]), "{" + key + "}")
 
     method = request.method
-    if not crud.check_user_permission(db=db, user_id=current_user.id, route=route, method=method):
+
+    permission = crud.get_permission_by_route_and_method(db=db, route=route, method=method)
+    if permission is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Permission not found"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    if not crud.check_permission(db=db, user=current_user, permission=permission):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"description": "User does not have permissions for this endpoint."},
