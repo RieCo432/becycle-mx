@@ -10,14 +10,13 @@ import {useField, useForm} from 'vee-validate';
 import {ref} from 'vue';
 import Button from '@/components/Button';
 import SetNewPasswordModal from '@/components/Modal/SetNewPasswordModal.vue';
-import UserPermissionScopeTree from '@/components/UserPermissionScopeTree/UserPermissionScopeTree.vue';
-import userPermissionScopeTree from "@/components/UserPermissionScopeTree/UserPermissionScopeTree.vue";
+import PermissionTree from '@/components/PermissionTree/PermissionTree.vue';
 
 const toast = useToast();
 
 export default {
   name: 'userRoles',
-  components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal, UserPermissionScopeTree},
+  components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal, PermissionTree},
   setup() {
     const userData = ref([]);
     const permissionScopes = ref({});
@@ -400,13 +399,13 @@ export default {
                 <div class="col-span-3 grid grid-cols-5">
                   <div class="col-span-1 text-center" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
                 </div>
-                <UserPermissionScopeTree
+                <PermissionTree
                     :tree="permissionScopes"
                     :user-permissions="userPermissions"
                     :user-id="editUserPermissionsModalInfo.id"
                     @user-permission-added="addUserPermission"
                     @user-permission-removed="removeUserPermission"
-                ></UserPermissionScopeTree>
+                ></PermissionTree>
               </div>
             </SetNewPasswordModal>
           </div>

@@ -168,10 +168,10 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User not found"})
 
-    if permission not in user.permissions:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User does not have permission"})
-    user.permissions.remove(permission)
-    db.commit()
+    if permission in user.permissions:
+        deleted_permission_ids.append(permission.id)
+        user.permissions.remove(permission)
+        db.commit()
 
     deleted_permission_ids.append(permission.id)
 

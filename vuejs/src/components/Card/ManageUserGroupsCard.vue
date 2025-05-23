@@ -7,7 +7,7 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
-import UserPermissionScopeTree from '@/components/UserPermissionScopeTree/UserPermissionScopeTree.vue';
+import PermissionTree from '@/components/PermissionTree/PermissionTree.vue';
 import SetNewPasswordModal from '@/components/Modal/SetNewPasswordModal.vue';
 import Checkbox from '@/components/Checkbox/index.vue';
 
@@ -15,7 +15,7 @@ const toast = useToast();
 
 export default defineComponent({
   name: 'ManageUserGroupsCard',
-  components: {Checkbox, SetNewPasswordModal, UserPermissionScopeTree, TextInput, Card, DashButton},
+  components: {Checkbox, SetNewPasswordModal, PermissionTree, TextInput, Card, DashButton},
   props: {
     user: {
       type: Object,
@@ -250,13 +250,13 @@ export default defineComponent({
       <div class="col-span-3 grid grid-cols-5">
         <div class="col-span-1 text-center" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
       </div>
-      <UserPermissionScopeTree
+      <PermissionTree
           :tree="permissionScopes"
           :user-permissions="groupPermissions"
           :group-id="editGroupModalInfo.id"
           @user-permission-added="addGroupPermission"
           @user-permission-removed="removeGroupPermission"
-      ></UserPermissionScopeTree>
+      ></PermissionTree>
     </div>
   </SetNewPasswordModal>
   <SetNewPasswordModal

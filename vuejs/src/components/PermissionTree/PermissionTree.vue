@@ -7,7 +7,7 @@ import {Icon} from '@iconify/vue';
 const toast = useToast();
 
 export default {
-  name: 'UserPermissionScopeTree',
+  name: 'PermissionTree',
   components: {Icon, Checkbox},
   emits: [
     'userPermissionAdded',
@@ -63,7 +63,7 @@ export default {
         if (request !== null) {
           request.then((response) => {
             toast.success('Permission granted', {timeout: 2000});
-            this.$emit('userPermissionAdded', response.data.permissionScopeId);
+            this.$emit('userPermissionAdded', response.data.permissionId);
           })
             .catch((error) => {
               toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -211,7 +211,7 @@ export default {
               <div class="col-span-1 text-center" v-for="method in methods" :key="method">{{method}}</div>
             </div>
             <template  v-for="subTree in tree.childNodes" :key="subTree.route">
-                <UserPermissionScopeTree
+                <PermissionTree
                     :tree="subTree"
                     :user-id="userId"
                     :group-id="groupId"
@@ -219,7 +219,7 @@ export default {
                     :user-permissions="userPermissions"
                     @user-permission-added="(permissionScopeId) => $emit('userPermissionAdded', permissionScopeId)"
                     @user-permission-removed="(permissionScopeId) => $emit('userPermissionRemoved', permissionScopeId)"
-                ></UserPermissionScopeTree>
+                ></PermissionTree>
             </template>
           </div>
         </div>
