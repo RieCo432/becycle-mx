@@ -22,6 +22,8 @@ class Permission(Base):
     route: Mapped[str] = mapped_column("route", Text, nullable=False, quote=False)
     method: Mapped[str] = mapped_column("method", Text, nullable=False, quote=False)
     isEndpoint: Mapped[bool] = mapped_column("isendpoint", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+    parentPermissionId = mapped_column("parentpermissionid", ForeignKey("permissions.id"), nullable=True, quote=False)
+    parentPermission: Mapped[Permission] = relationship("Permission", foreign_keys=[parentPermissionId])
 
     users: Mapped[List["User"]] = relationship(secondary=user_permission_association_table, back_populates="permissions")
     groups: Mapped[List["Group"]] = relationship(secondary=group_permission_association_table, back_populates="permissions")
