@@ -18,35 +18,33 @@ def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
             for i in range(len(path_parts)):
                 permission_scope = "/" + "/".join(path_parts[1:i+1])
 
-                existing_permission_scope = db.scalar(
+                parent_permission = db.scalar(
                     select(models.Permission)
                     .where(models.Permission.route == permission_scope)
                     .where(models.Permission.method == method)
                     .where(models.Permission.isEndpoint == False)
                 )
 
-                if existing_permission_scope is None:
-                    new_permission = models.Permission(
+                if parent_permission is None:
+                    parent_permission = models.Permission(
                         route=permission_scope,
                         method=method,
                         isEndpoint=False,
                         parentPermissionId=parent_permission_id,
                     )
-                    db.add(new_permission)
+                    db.add(parent_permission)
                     db.commit()
-                    parent_permission_id = new_permission.id
-                else:
-                    parent_permission_id = existing_permission_scope.id
+
 
                 if permission_scope == route.path:
-                    existing_permission_scope = db.scalar(
+                    parent_permission = db.scalar(
                         select(models.Permission)
                         .where(models.Permission.route == permission_scope)
                         .where(models.Permission.method == method)
                         .where(models.Permission.isEndpoint == True)
                     )
 
-                    if existing_permission_scope is None:
+                    if parent_permission is None:
                         db.add(models.Permission(
                             route=permission_scope,
                             method=method,
@@ -54,6 +52,9 @@ def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
                             parentPermissionId=parent_permission_id,
                         ))
                         db.commit()
+                
+                else:
+                    parent_permission_id = parent_permission.id
 
 def prune_permissions_tree(db: Session, tree: schemas.PermissionNode | None = None):
     if tree is None:
