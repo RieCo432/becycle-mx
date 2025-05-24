@@ -274,7 +274,7 @@ export default defineComponent({
               @change="() => changeGroupUserMembership(user.id)"
           />
         </div>
-        <div class="col-span-11">{{user.username}}</div>
+        <div class="col-span-11 dark:text-slate-300">{{user.username}}</div>
       </template>
     </div>
 
