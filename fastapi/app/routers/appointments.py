@@ -57,16 +57,6 @@ async def cancel_appointment(
     return appointment
 
 
-@appointments.get("/appointments")
-async def get_appointment_via_hyperlink(
-        appointment_id: UUID,
-        client_id: UUID,
-        db: Session = Depends(dep.get_db)
-) -> schemas.AppointmentFull:
-    crud.verify_appointment_hyperlink_parameters(db=db, appointment_id=appointment_id, client_id=client_id)
-    return crud.get_appointment(db=db, appointment_id=appointment_id)
-
-
 @appointments.post("/appointments/types")
 async def create_appointment_type(new_appointment_type: schemas.AppointmentType, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
     return crud.create_appointment_type(db=db, appointment_type_data=new_appointment_type)
