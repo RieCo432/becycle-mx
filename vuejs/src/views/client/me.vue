@@ -82,10 +82,10 @@ export default {
       });
     },
     editMyAppointmentNotes(appointmentId) {
-      console.log('edit notes');
+      // TODO
     },
     rescheduleMyAppointment(appointmentId) {
-      console.log('reschedule');
+      // TODO
     },
     viewContract(contractId) {
       this.$router.push(`/clients/me/contracts/${contractId}`);
@@ -103,7 +103,7 @@ export default {
 
 
     this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
-      const bike = (await requests.getBike(contract.bikeId)).data;
+      const bike = (await requests.getClientBike(contract.bikeId)).data;
       let status = 'open';
       if (contract.returnedDate != null) {
         status = 'closed';

@@ -1,9 +1,7 @@
 from typing import Annotated
 from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
 from sqlalchemy.orm import Session
-
 import app.crud as crud
 import app.dependencies as dep
 import app.models as models
@@ -11,14 +9,9 @@ import app.schemas as schemas
 
 contracts = APIRouter(
     tags=["contracts"],
-    dependencies=[Depends(dep.get_db), Depends(dep.get_current_active_user)],
+    dependencies=[Depends(dep.get_db), Depends(dep.check_permissions)],
     responses={404: {"description": "Not Found"}}
 )
-
-
-@contracts.get("/contracts/{contract_id}/", dependencies=[Depends(dep.get_current_active_user)])
-async def get_contract(contract_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.Contract:
-    return crud.get_contract(db=db, contract_id=contract_id)
 
 
 @contracts.get("/contracts")
@@ -29,7 +22,7 @@ async def get_contracts(open: bool = True,
     return crud.get_contracts(db=db, open=open, closed=closed, expired=expired)
 
 
-@contracts.post("/contract", dependencies=[Depends(dep.get_current_active_user)])
+@contracts.post("/contracts")
 async def create_contract(
         contract_data: schemas.ContractCreate,
         email_tasks: BackgroundTasks,
@@ -64,14 +57,37 @@ async def create_contract(
     return contract
 
 
-@contracts.delete("/contracts/{contract_id}", dependencies=[Depends(dep.get_current_admin_user)])
+@contracts.get("/contracts/types")
+async def get_contract_types(db: Session = Depends(dep.get_db)) -> list[schemas.ContractType]:
+    return crud.get_contract_types(db=db)
+
+
+@contracts.get("/contracts/paper")
+async def get_paper_contract(paper_id: str, db: Session = Depends(dep.get_db)) -> UUID:
+    return crud.get_paper_contract(db=db, paper_id=paper_id)
+
+
+@contracts.get("/contracts/paper/suggestions")
+async def get_paper_contract_suggestions(old_id: str | None = None, db: Session = Depends(dep.get_db)) -> list[str]:
+    if old_id is not None:
+        return crud.get_paper_contract_suggestions(db=db, old_id=old_id)
+    else:
+        return []
+
+
+@contracts.get("/contracts/{contract_id}")
+async def get_contract(contract_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.Contract:
+    return crud.get_contract(db=db, contract_id=contract_id)
+
+
+@contracts.delete("/contracts/{contract_id}")
 async def delete_contract(
         contract_id: UUID,
         db: Session = Depends(dep.get_db)):
     crud.delete_contract(db=db, contract_id=contract_id)
 
 
-@contracts.patch("/contracts/{contract_id}", dependencies=[Depends(dep.get_current_admin_user)])
+@contracts.patch("/contracts/{contract_id}")
 async def patch_contract(
         contract_id: UUID,
         contract_patch_data: schemas.ContractPatch,
@@ -106,7 +122,7 @@ async def return_bike(
     return contract
 
 
-@contracts.patch("/contracts/{contract_id}/extend", dependencies=[Depends(dep.get_current_active_user)])
+@contracts.patch("/contracts/{contract_id}/extend")
 async def extend_contract(
         contract_id: UUID,
         email_tasks: BackgroundTasks,
@@ -117,21 +133,3 @@ async def extend_contract(
     email_tasks.add_task(contract.send_creation_email)
     
     return contract
-
-
-@contracts.get("/contract/types", dependencies=[Depends(dep.get_current_active_user)])
-async def get_contract_types(db: Session = Depends(dep.get_db)) -> list[schemas.ContractType]:
-    return crud.get_contract_types(db=db)
-
-
-@contracts.get("/contracts/paper", dependencies=[Depends(dep.get_current_active_user)])
-async def get_paper_contract(paper_id: str, db: Session = Depends(dep.get_db)) -> UUID:
-    return crud.get_paper_contract(db=db, paper_id=paper_id)
-
-
-@contracts.get("/contracts/paper/suggestions", dependencies=[Depends(dep.get_current_active_user)])
-async def get_paper_contract_suggestions(old_id: str | None = None, db: Session = Depends(dep.get_db)) -> list[str]:
-    if old_id is not None:
-        return crud.get_paper_contract_suggestions(db=db, old_id=old_id)
-    else:
-        return []

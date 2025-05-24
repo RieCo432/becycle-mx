@@ -1,11 +1,9 @@
 import datetime
 from datetime import time
 from uuid import UUID
-
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
@@ -87,4 +85,5 @@ async def get_active_faq(
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.FaqPublic]:
     return crud.get_active_faq(db=db)
+
 

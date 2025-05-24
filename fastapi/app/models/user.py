@@ -9,6 +9,8 @@ from app.database.db import Base
 from .contract import Contract
 from .depositExchange import DepositExchange
 from .expense import Expense
+from .userPermission import user_permission_association_table
+from .groupUser import group_user_association_table
 
 
 class UserPhoto(Base):
@@ -77,6 +79,10 @@ class User(Base):
 
     presentationCard: Mapped["UserPresentationCard"] = relationship("UserPresentationCard", foreign_keys=[UserPresentationCard.userId],
                                                              back_populates="user")
+
+    permissions: Mapped[List["Permission"]] = relationship(secondary=user_permission_association_table, back_populates="users")
+    groups: Mapped[List["Group"]] = relationship(secondary=group_user_association_table, back_populates="users")
+
 
     def __eq_dict__(self, other: dict):
         return all([

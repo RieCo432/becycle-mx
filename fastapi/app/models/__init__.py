@@ -9,3 +9,8 @@ from .surveys import *
 from .roadSegment import *
 from .admin import *
 from .expense import *
+from .permission import *
+from .userPermission import *
+from .group import *
+from .groupUser import *
+from .groupPermission import *

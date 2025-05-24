@@ -1,24 +1,18 @@
-from collections.abc import Callable
 from datetime import date
-
 from fastapi import APIRouter, Depends, UploadFile, Body, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-
 from typing import Annotated, List
-
 from starlette import status
-
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
 import app.models as models
-
 from uuid import UUID
 
 expenses = APIRouter(
     tags=["expenses"],
-    dependencies=[Depends(dep.get_db), Depends(dep.get_current_active_user)],
+    dependencies=[Depends(dep.get_db), Depends(dep.check_permissions)],
     responses={404: {"description": "Not Found"}}
 )
 
@@ -74,7 +68,6 @@ async def get_expenses(
 @expenses.delete("/expenses/{expense_id}")
 async def delete_expense(
         expense_id: UUID,
-        user: Annotated[models.User, Depends(dep.get_current_admin_user)],
         db: Session = Depends(dep.get_db)
 ) -> None:
     crud.delete_expense(db=db, expense_id=expense_id)
@@ -84,17 +77,16 @@ async def delete_expense(
 async def patch_expense_transferred(
         expense_id: UUID,
         db: Session = Depends(dep.get_db),
-        treasurer_user: models.User = Depends(dep.get_current_treasurer_user)
+        user: models.User = Depends(dep.get_current_active_user)
 ) -> schemas.Expense:
-    return crud.patch_expense_transferred(db=db, expense_id=expense_id, treasurer_user=treasurer_user)
+    return crud.patch_expense_transferred(db=db, expense_id=expense_id, treasurer_user=user)
 
 
 @expenses.patch("/expenses/{expense_id}")
 async def patch_expense(
         updated_expense_data: schemas.ExpenseUpdate,
         expense_id: UUID,
-        db: Session = Depends(dep.get_db),
-        treasurer_user: models.User = Depends(dep.get_current_admin_user)
+        db: Session = Depends(dep.get_db)
 ) -> schemas.Expense:
     return crud.update_expense(db=db, expense_id=expense_id, updated_expense_data=updated_expense_data)
 
@@ -105,13 +97,13 @@ async def get_expense_tags(
         db: Session = Depends(dep.get_db)) -> List[schemas.ExpenseTag]:
     return crud.get_expense_tags(db=db, inactive=inactive)
 
-@expenses.post("/expenses/tags", dependencies=[Depends(dep.get_current_admin_user)])
+@expenses.post("/expenses/tags")
 async def post_expense_tag(
         new_expense_tag: schemas.ExpenseTag,
         db: Session = Depends(dep.get_db)) -> schemas.ExpenseTag:
     return crud.create_expense_tag(db=db, expense_tag=new_expense_tag)
 
-@expenses.patch("/expenses/tags/{expense_tag_id}", dependencies=[Depends(dep.get_current_admin_user)])
+@expenses.patch("/expenses/tags/{expense_tag_id}")
 async def patch_expense_tag(
         expense_tag_id: str,
         expense_tag_update: schemas.ExpenseTagUpdate,

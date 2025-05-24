@@ -12,3 +12,9 @@ from .statistics import statistics
 from .surveys import surveys
 from .users import users
 from .expenses import expenses
+from .groups import groups
+from .clientsMe import clients_me
+from .clientsPublic import public_clients
+from .appointmentsPublic import appointments_public
+from .usersPublic import users_public
+

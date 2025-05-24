@@ -10,14 +10,16 @@ import {useField, useForm} from 'vee-validate';
 import {ref} from 'vue';
 import Button from '@/components/Button';
 import SetNewPasswordModal from '@/components/Modal/SetNewPasswordModal.vue';
+import PermissionTree from '@/components/PermissionTree/PermissionTree.vue';
 
 const toast = useToast();
 
 export default {
   name: 'userRoles',
-  components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal},
+  components: {Checkbox, TextInput, Card, UserRolesTable, Button, SetNewPasswordModal, PermissionTree},
   setup() {
     const userData = ref([]);
+    const permissionScopes = ref({});
     const showSetNewPasswordModal = ref(false);
     const setNewPasswordModalInfo = ref({
       id: null,
@@ -28,6 +30,26 @@ export default {
       id: null,
       username: null,
     });
+
+    const showEditUserPermissionsModal = ref(false);
+    const editUserPermissionsModalInfo = ref({
+      id: null,
+      username: null,
+    });
+    const userPermissions = ref([]);
+
+    const addUserPermission = (permissionScopeId) => {
+      userPermissions.value.push(permissionScopeId);
+    };
+
+    const removeUserPermission = (permissionScopeIds) => {
+      permissionScopeIds.forEach((permissionScopeId) => {
+        const indexInArray = userPermissions.value.indexOf(permissionScopeId);
+        if (indexInArray !== -1) {
+          userPermissions.value.splice(indexInArray, 1);
+        }
+      });
+    };
 
     const newUserSchema = yup.object().shape({
       username: yup.string().required('Username is required')
@@ -62,8 +84,6 @@ export default {
 
 
     const postNewUser = handleNewUserSubmit(() => {
-      console.log(username.value, password.value, pin.value, admin.value, depositBearer.value,
-        rentalChecker.value, appointmentManager.value, treasurer.value);
       requests.postNewUser(username.value, password.value, pin.value, admin.value, depositBearer.value,
         rentalChecker.value, appointmentManager.value, treasurer.value).then((response) => {
         toast.success('User created!', {timeout: 2000});
@@ -161,9 +181,15 @@ export default {
       newPinError,
       setNewPinModalInfo,
       showSetNewPinModal,
+      showEditUserPermissionsModal,
+      editUserPermissionsModalInfo,
+      permissionScopes,
+      userPermissions,
       confirmNewPin,
       confirmNewPinError,
       patchNewPin,
+      addUserPermission,
+      removeUserPermission,
     };
   },
   data() {
@@ -183,6 +209,12 @@ export default {
           id: 'newPin',
           icon: 'heroicons:finger-print',
           func: this.openSetNewPinModal,
+        },
+        {
+          label: 'Edit Permissions',
+          id: 'editPermissions',
+          icon: 'heroicons:lock-open',
+          func: this.openEditUserPermissionsModal,
         },
       ],
       userColumns: [
@@ -259,6 +291,16 @@ export default {
       this.showSetNewPinModal = !this.showSetNewPinModal;
       this.setNewPinModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
     },
+    openEditUserPermissionsModal(userId) {
+      requests.getUserPermissions(userId).then((response) => {
+        this.userPermissions.splice(0, this.userPermissions.length);
+        response.data.forEach((userPermission) => {
+          this.userPermissions.push(userPermission.id);
+        });
+        this.showEditUserPermissionsModal = !this.showEditUserPermissionsModal;
+        this.editUserPermissionsModalInfo = this.userData[this.userData.findIndex((user) => user.id === userId)];
+      });
+    },
   },
   created() {
     this.getUserData();
@@ -267,6 +309,9 @@ export default {
       if (this.userMe.admin) {
         this.userActions = this.userActionsIfAdmin;
       }
+    });
+    requests.getPermissions().then((response) => {
+      this.permissionScopes = response.data;
     });
   },
 };
@@ -340,6 +385,27 @@ export default {
                     Submit
                   </Button>
                 </form>
+              </div>
+            </SetNewPasswordModal>
+            <SetNewPasswordModal
+                size-class="w-3/4"
+                :active-modal="showEditUserPermissionsModal"
+                :user-info="editUserPermissionsModalInfo"
+                title="Edit User Permissions"
+                @close="showEditUserPermissionsModal = !showEditUserPermissionsModal">
+              <div class="grid grid-cols-12">
+                <div class="col-span-1"></div>
+                <div class="col-span-8 dark:text-slate-300">Route</div>
+                <div class="col-span-3 grid grid-cols-5">
+                  <div class="col-span-1 text-center dark:text-slate-300" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
+                </div>
+                <PermissionTree
+                    :tree="permissionScopes"
+                    :user-permissions="userPermissions"
+                    :user-id="editUserPermissionsModalInfo.id"
+                    @user-permission-added="addUserPermission"
+                    @user-permission-removed="removeUserPermission"
+                ></PermissionTree>
               </div>
             </SetNewPasswordModal>
           </div>
