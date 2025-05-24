@@ -27,6 +27,11 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+app.include_router(routers.clients_me)
+app.include_router(routers.public_clients)
+app.include_router(routers.appointments_public)
+app.include_router(routers.users_public)
+app.include_router(routers.public)
 app.include_router(routers.clients)
 app.include_router(routers.users)
 app.include_router(routers.bikes)
@@ -35,13 +40,13 @@ app.include_router(routers.settings)
 app.include_router(routers.appointments)
 app.include_router(routers.deposit_exchanges)
 app.include_router(routers.finances)
-app.include_router(routers.public)
 app.include_router(routers.statistics)
-app.include_router(routers.maps)
-app.include_router(routers.surveys)
+# app.include_router(routers.maps)
+# app.include_router(routers.surveys)
 app.include_router(routers.admin)
 app.include_router(routers.expenses)
 app.include_router(routers.groups)
+
 
 
 if os.environ["PRODUCTION"] == "true":

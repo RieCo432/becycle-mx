@@ -30,7 +30,7 @@ export default {
   mounted() {
     requests.getMyContract(this.$route.params.contractId).then((response) => {
       this.contract = response.data;
-      requests.getBike(this.contract.bikeId).then((response) => {
+      requests.getClientBike(this.contract.bikeId).then((response) => {
         this.bike = response.data;
         this.loadingBike = false;
       });

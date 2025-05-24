@@ -38,7 +38,7 @@ export default {
     return axiosClient.get('/public/opening-times');
   },
   getUserToken(username, password) {
-    return axiosClient.post('/users/token', {
+    return axiosClient.post('/public/users/token', {
       'username': username,
       'password': password,
     }, {
@@ -61,7 +61,7 @@ export default {
     });
   },
   getClientLoginCode(emailAddress) {
-    return axiosClient.get('/clients/login-code', {
+    return axiosClient.get('/public/clients/login-code', {
       params: {
         email_address: emailAddress,
       },
@@ -69,7 +69,7 @@ export default {
     });
   },
   getClientToken(clientId, code) {
-    return axiosClient.post('/clients/token', {
+    return axiosClient.post('/public/clients/token', {
       'username': clientId,
       'password': code,
     }, {
@@ -172,6 +172,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getClientBike(bikeId) {
+    return axiosClient.get(`/clients/me/bikes/${bikeId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
+    });
+  },
   getBikeByRfidTagSerialNumber(rfidTagSerialNumber) {
     return axiosClient.get(`/bikes/tag/${rfidTagSerialNumber}`, {
       headers: credentialsStore.getApiRequestHeader(),
@@ -227,6 +233,7 @@ export default {
     }, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        ...credentialsStore.getApiRequestHeader(),
       },
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
@@ -238,6 +245,7 @@ export default {
     }, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        ...credentialsStore.getApiRequestHeader(),
       },
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
@@ -347,7 +355,7 @@ export default {
     });
   },
   postNewTempClient(firstName, lastName, emailAddress) {
-    return axiosClient.post('/clients/temp', {
+    return axiosClient.post('/public/clients/temp', {
       firstName: firstName,
       lastName: lastName,
       emailAddress: emailAddress,
@@ -356,7 +364,7 @@ export default {
     });
   },
   postTempClientVerificationCode(clientTempId, verificationCode) {
-    return axiosClient.post('/clients/temp/verify', {
+    return axiosClient.post('/public/clients/temp/verify', {
       client_temp_id: clientTempId,
       verification_code: verificationCode,
     }, {
@@ -384,7 +392,7 @@ export default {
     });
   },
   postAppointmentRequest(typeId, startDateTime, notes) {
-    return axiosClient.post('/appointments/request', {
+    return axiosClient.post('/clients/me/appointments/request', {
       typeId: typeId,
       startDateTime: startDateTime,
       notes: notes,
@@ -489,7 +497,7 @@ export default {
     });
   },
   postNewUser(username, password, pin, admin, depositBearer, rentalChecker, appointmentManager, treasurer) {
-    return axiosClient.post('/user', {
+    return axiosClient.post('/users', {
       username: username,
       password_cleartext: password,
       pin_cleartext: pin,

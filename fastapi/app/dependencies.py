@@ -18,11 +18,11 @@ API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
 
 
 user_oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="users/token",
+    tokenUrl="public/users/token",
     scheme_name="user_oauth2_scheme")
 
 client_oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="clients/token",
+    tokenUrl="public/clients/token",
     scheme_name="client_oauth2_scheme")
 
 
@@ -118,10 +118,7 @@ async def get_current_admin_user(current_user: Annotated[models.User, Depends(ge
     return current_user
 
 async def check_permissions(request: Request, current_user: Annotated[models.User, Depends(get_current_active_user)], db: Session = Depends(get_db)) -> None:
-    route = request.url.path
-    for key in request.path_params.keys():
-        route = route.replace(str(request.path_params[key]), "{" + key + "}")
-
+    route = request.scope["route"].path
     method = request.method
 
     permission = crud.get_permission_by_route_and_method(db=db, route=route, method=method)

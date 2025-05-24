@@ -1,10 +1,8 @@
 from typing import Annotated
 from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
