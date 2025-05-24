@@ -139,11 +139,12 @@ export default {
 <template>
       <div class="col-span-1">
         <Icon
+            class="dark:text-slate-300"
             v-if="tree.childNodes.length > 0"
             :icon="expandChildren ? 'heroicons-outline:chevron-down' : 'heroicons-outline:chevron-right'"
             @click="expandChildren = !expandChildren"/>
       </div>
-      <div class="col-span-8">{{tree.route}}</div>
+      <div class="col-span-8 text-base dark:text-slate-300">{{tree.route}}</div>
       <div class="col-span-3 grid grid-cols-5">
         <div class="col-span-1 justify-items-center">
           <Checkbox
@@ -204,11 +205,11 @@ export default {
       <template v-if="expandChildren">
         <div class="col-span-1"></div>
         <div class="col-span-11">
-          <div class="grid grid-cols-12 border-solid border-slate-300 border">
+          <div class="grid grid-cols-12 rounded-lg border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 p-2 gap-3">
             <div class="col-span-1"></div>
-            <div class="col-span-8">Route</div>
+            <div class="col-span-8 dark:text-slate-300">Route</div>
             <div class="col-span-3 grid grid-cols-5">
-              <div class="col-span-1 text-center" v-for="method in methods" :key="method">{{method}}</div>
+              <div class="col-span-1 text-center dark:text-slate-300" v-for="method in methods" :key="method">{{method}}</div>
             </div>
             <template  v-for="subTree in tree.childNodes" :key="subTree.route">
                 <PermissionTree

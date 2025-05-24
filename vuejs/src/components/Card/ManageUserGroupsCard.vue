@@ -246,9 +246,9 @@ export default defineComponent({
       @close="showEditGroupPermissionsModal = !showEditGroupPermissionsModal">
     <div class="grid grid-cols-12">
       <div class="col-span-1"></div>
-      <div class="col-span-8">Route</div>
+      <div class="col-span-8 dark:text-slate-300">Route</div>
       <div class="col-span-3 grid grid-cols-5">
-        <div class="col-span-1 text-center" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
+        <div class="col-span-1 text-center dark:text-slate-300" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
       </div>
       <PermissionTree
           :tree="permissionScopes"
