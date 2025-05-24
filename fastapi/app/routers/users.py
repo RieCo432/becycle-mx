@@ -76,13 +76,6 @@ async def get_deposit_bearers(
     return deposit_bearers
 
 
-@users.get("/users/me/deposit_balance")
-async def get_my_deposit_balance(
-        current_user: Annotated[models.User, Depends(dep.get_current_deposit_bearer_user)]
-) -> int:
-    return current_user.get_deposit_bearer_balance()
-
-
 @users.get("/users/rental-checkers")
 async def get_rental_checkers(
         db: Session = Depends(dep.get_db)
@@ -152,7 +145,7 @@ async def get_user(user_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.
 @users.patch("/users/{user_id}")
 async def patch_user(user_id: UUID,
                      updated_user_data: schemas.UserUpdate,
-                     current_user: models.User = Depends(dep.get_current_admin_user),
+                     current_user: models.User = Depends(dep.get_current_active_user),
                      db: Session = Depends(dep.get_db)) -> schemas.User:
     if current_user.id == user_id and updated_user_data.roles_change():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "You cannot modify your own roles!"})

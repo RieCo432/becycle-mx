@@ -33,7 +33,7 @@ async def create_deposit_exchange(
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"description": "Only Treasurer can transfer deposits to the BANK"}
+            detail={"description": "Only Treasurer can transfer deposits to ro from the BANK"}
         )
 
     if amount > from_user.get_deposit_bearer_balance() and from_user.username != "BANK":

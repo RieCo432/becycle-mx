@@ -117,54 +117,6 @@ async def test_get_current_appointment_manager_user_not(users):
 
 
 @pytest.mark.asyncio
-async def test_get_current_deposit_bearer_user(users):
-    auth_user = await get_current_deposit_bearer_user(users[0])
-
-    assert auth_user == users[0]
-
-
-@pytest.mark.asyncio
-async def test_get_current_deposit_bearer_user_not(users):
-    with pytest.raises(HTTPException) as excinfo:
-        await get_current_deposit_bearer_user(users[1])
-
-    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
-    assert excinfo.value.detail.get("description") == "This page can only be viewed by deposit bearers!"
-
-
-@pytest.mark.asyncio
-async def test_get_current_admin_user(users):
-    auth_user = await get_current_admin_user(users[0])
-
-    assert auth_user == users[0]
-
-
-@pytest.mark.asyncio
-async def test_get_current_admin_user_not(users, user_auth_tokens):
-    with pytest.raises(HTTPException) as excinfo:
-        await get_current_admin_user(users[1])
-
-    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
-    assert excinfo.value.detail.get("description") == "Admin privileges are required for this action!"
-
-
-@pytest.mark.asyncio
-async def test_get_current_treasurer_user(users):
-    auth_user = await get_current_treasurer_user(users[0])
-
-    assert auth_user == users[0]
-
-
-@pytest.mark.asyncio
-async def test_get_current_treasurer_user_not(users):
-    with pytest.raises(HTTPException) as excinfo:
-        await get_current_treasurer_user(users[1])
-
-    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
-    assert excinfo.value.detail.get("description") == "Treasurer privileges are required for this action!"
-
-
-@pytest.mark.asyncio
 async def test_get_working_user_password(users):
     auth_user = await get_working_user(
         working_username=users[0].username,
