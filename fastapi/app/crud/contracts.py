@@ -372,8 +372,28 @@ def submit_contract(db: Session, contract_draft_id: UUID) -> models.Contract:
     db.commit()
     return contract
 
+
 def get_contract_drafts(db: Session) -> list[models.ContractDraft]:
     return [_ for _ in db.scalars(
         select(models.ContractDraft)
     )]
+
+
+def get_contract_draft_start_dates(db: Session) -> list[date]:
+    return [_ for _ in db.scalars(
+        select(models.ContractDraft.startDate)
+        .distinct()
+    )]
+
+
+def get_contract_drafts_by_start_date(db: Session, start_date: date) -> list[models.ContractDraft]:
+    return [_ for _ in db.scalars(
+        select(models.ContractDraft)
+        .where(models.ContractDraft.startDate == start_date)
+    )]
+
+
+def get_contract_drafts_grouped_by_start_date(db: Session) -> dict[date, list[models.ContractDraft]]:
+    contract_drafts_by_start_date = {start_date: get_contract_drafts_by_start_date(db=db, start_date=start_date) for start_date in get_contract_draft_start_dates(db=db)}
+    return contract_drafts_by_start_date
 

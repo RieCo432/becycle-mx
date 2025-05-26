@@ -9,7 +9,7 @@ from sklearn import linear_model
 
 import app.models as models
 import app.schemas as schemas
-from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date
+from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date, get_contract_drafts_grouped_by_start_date
 from .depositExchanges import get_deposit_exchanges_grouped_by_date
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -21,12 +21,21 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
     contracts_grouped_by_start_date = get_contracts_grouped_by_start_date(db=db)
     contracts_grouped_by_returned_date = get_contracts_grouped_by_returned_date(db=db)
 
+    # contract_drafts_grouped_by_start_date = get_contract_drafts_grouped_by_start_date(db=db)
+
     deposit_exchanges_grouped_by_date = get_deposit_exchanges_grouped_by_date(db=db)
 
     deposit_transaction_dates = sorted(list(
         contracts_grouped_by_start_date.keys()
         | contracts_grouped_by_returned_date.keys()
         | deposit_exchanges_grouped_by_date.keys()))
+
+
+    # deposit_transaction_dates = sorted(list(
+    #     contracts_grouped_by_start_date.keys()
+    #     | contracts_grouped_by_returned_date.keys()
+    #     | deposit_exchanges_grouped_by_date.keys()
+    #     | contract_drafts_grouped_by_start_date.keys()))
 
     deposit_balances_book = {}
     previous_balances = {}
@@ -41,6 +50,14 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
                 type="deposit",
                 diff_by_username={contract.depositCollectingUser.username: contract.depositAmountCollected}
             ))
+
+        # for contract_draft in contract_drafts_grouped_by_start_date.get(deposit_transaction_date, []):
+        #     if contract_draft.depositAmountCollected is not None:
+        #         deposit_balances_book[deposit_transaction_date].transactions.append(schemas.DepositTransaction(
+        #             title="{} {} (draft)".format(contract_draft.client.firstName, contract_draft.client.lastName),
+        #             type="deposit",
+        #             diff_by_username={contract_draft.depositCollectingUser.username: contract_draft.depositAmountCollected}
+        #         ))
 
         for contract in contracts_grouped_by_returned_date.get(deposit_transaction_date, []):
             deposit_balances_book[deposit_transaction_date].transactions.append(schemas.DepositTransaction(
