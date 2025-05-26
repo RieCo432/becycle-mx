@@ -14,3 +14,4 @@ from .userPermission import *
 from .group import *
 from .groupUser import *
 from .groupPermission import *
+from .contractDraft import *

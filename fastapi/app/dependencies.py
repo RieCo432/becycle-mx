@@ -177,7 +177,7 @@ async def get_deposit_receiving_user(
     deposit_receiving_user = crud.authenticate_user(username=deposit_receiving_username, password_cleartext=deposit_receiving_user_password, db=db)
     if deposit_receiving_user is None:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"description": "Deposit receiving user wrong password"},
             headers={"WWW-Authenticate": "Bearer"}
         )

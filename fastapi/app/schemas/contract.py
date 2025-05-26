@@ -19,6 +19,7 @@ class ContractCreate(ContractBase):
     pass
 
 
+
 class ContractPublic(ContractBase):
     id: UUID
 
@@ -41,6 +42,12 @@ class Contract(ContractPublic):
     depositReturningUserId: UUID | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ContractDraftDetails(BaseModel):
+    conditionOfBike: str
+    contractType: str
+    notes: str | None = None
 
 
 class ContractRestricted(ContractPublic):

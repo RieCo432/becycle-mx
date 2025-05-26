@@ -56,6 +56,36 @@
                 <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
                   <div class="lg:col-span-2 md:col-span-2 col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                      Create a New Contract or choose a draft to continue.
+                    </h4>
+                  </div>
+                  <div class="col-span-full">
+                    <DashButton @click="startNewDraft">Create New</DashButton>
+                  </div>
+                  <div class="col-span-full grid grid-cols-6 dark:text-slate-300 gap-5">
+                    <div class="col-span-1">Client</div>
+                    <div class="col-span-1">Bike</div>
+                    <div class="col-span-1">Deposit Collector</div>
+                    <div class="col-span-1">Working Volunteer</div>
+                    <div class="col-span-1">Checking Volunteer</div>
+                    <template v-for="draft in contractDrafts" :key="draft.id">
+                      <div class="col-span-1 col-start-1" v-if="draft.client !== null">{{`${draft.client.firstName} ${draft.client.lastName} ${draft.client.emailAddress}`}}</div>
+                      <div class="col-span-1" v-if="draft.bike !== null">{{`${draft.bike.make} ${draft.bike.model} ${draft.bike.colour} ${draft.bike.serialNumber}`}}</div>
+                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">{{`${draft.depositCollectingUser.username} &#163${draft.depositAmountCollected}`}}</div>
+                      <div class="col-span-1" v-if="draft.workingUser !== null">{{draft.workingUser.username}}</div>
+                      <div class="col-span-1" v-if="draft.checkingUser !== null">{{draft.checkingUser.username}}</div>
+                      <div class="col-span-1 col-start-6">
+                        <DashButton @click="() => continueDraft(draft.id)">Continue</DashButton>
+                      </div>
+                    </template>
+
+                  </div>
+                </div>
+              </div>
+              <div v-if="stepNumber === 1">
+                <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="lg:col-span-2 md:col-span-2 col-span-1">
+                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Enter the Lendee's Information
                     </h4>
                   </div>
@@ -114,7 +144,7 @@
                   </div>
                 </div>
               </div>
-              <div v-if="stepNumber === 1">
+              <div v-if="stepNumber === 2">
                 <div class="grid grid-cols-12 gap-5">
                   <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -247,7 +277,7 @@
                   </div>
                 </div>
               </div>
-              <div v-if="stepNumber === 2">
+              <div v-if="stepNumber === 3">
                 <div class="grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-5">
                   <div class="lg:col-span-6 md:col-span-4 col-span-2">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -295,7 +325,7 @@
                   </div>
                 </div>
               </div>
-              <div v-if="stepNumber === 3">
+              <div v-if="stepNumber === 4">
                 <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
                   <div class="lg:col-span-3 md:col-span-2 col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -325,7 +355,7 @@
                       name="depositCollectingUser"
                       v-model="depositCollectingUser"
                       :error="depositCollectingUserError"
-                      @input="() => {}"
+                      @change="() => {}"
                   />
 
                   <TextInput
@@ -339,7 +369,7 @@
                 </div>
               </div>
 
-              <div v-if="stepNumber === 4">
+              <div v-if="stepNumber === 5">
                 <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
                   <div class="md:col-span-2 col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -359,7 +389,7 @@
                       name="workingUser"
                       v-model="workingUser"
                       :error="workingUserError"
-                      @input="() => {}"
+                      @change="() => {}"
                   />
 
                   <TextInput
@@ -374,7 +404,7 @@
               </div>
 
 
-              <div v-if="stepNumber === 5">
+              <div v-if="stepNumber === 6">
                 <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
                   <div class="md:col-span-2 col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -394,7 +424,7 @@
                       name="checkingUser"
                       v-model="checkingUser"
                       :error="checkingUserError"
-                      @input="() => {}"
+                      @change="() => {}"
                   />
 
                   <TextInput
@@ -408,7 +438,7 @@
                 </div>
               </div>
 
-              <div v-if="stepNumber === 6">
+              <div v-if="stepNumber === 7">
                 <div class="grid lg:grid-cols-2 grid-cols-1 gap-5">
                   <div class="col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h4>
@@ -518,6 +548,7 @@
                     v-if="this.stepNumber !== 0"
                 />
                 <Button
+                    v-if="stepNumber !== 0"
                     :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                     btnClass="btn-dark"
                 />
@@ -537,7 +568,7 @@ import Textarea from '@/components/Textarea';
 import TextInput from '@/components/TextInput';
 import Radio from '@/components/Radio/index.vue';
 import {ErrorMessage, useField, useForm} from 'vee-validate';
-import {computed, ref} from 'vue';
+import {computed, nextTick, onUpdated, ref} from 'vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import requests from '@/requests';
@@ -569,30 +600,34 @@ export default {
     const steps = [
       {
         id: 1,
-        title: 'Client Details',
+        title: 'Start',
       },
       {
         id: 2,
-        title: 'Bike Details',
+        title: 'Client Details',
       },
       {
         id: 3,
-        title: 'Contract Details',
+        title: 'Bike Details',
       },
       {
         id: 4,
-        title: 'Deposit',
+        title: 'Contract Details',
       },
       {
         id: 5,
-        title: 'Mechanic',
+        title: 'Deposit',
       },
       {
         id: 6,
-        title: 'Safety Check',
+        title: 'Mechanic',
       },
       {
         id: 7,
+        title: 'Safety Check',
+      },
+      {
+        id: 8,
         title: 'Summary',
       },
     ];
@@ -603,6 +638,9 @@ export default {
     const bikeConditions = ref([]);
     requests.getBikeConditions().then((response) => (bikeConditions.value = response.data));
 
+    const contractDrafts = ref([]);
+    const activeDraft = ref({});
+
     const toast = useToast();
     const stepNumber = ref(0);
 
@@ -611,6 +649,8 @@ export default {
 
     const makeSuggestions = ref([]);
     const modelSuggestions = ref([]);
+    const colourSuggestions = ref([]);
+    const serialNumberSuggestions = ref([]);
 
     const depositBearers = ref([]);
     const rentalCheckers = ref([]);
@@ -648,7 +688,7 @@ export default {
         otherwise: (schema) => schema.oneOf(modelSuggestions.value, 'Please choose a value from the list, or add a new model.'),
       }),
       colour: yup.string().required(' Colour is required'),
-      decals: yup.string(),
+      decals: yup.string().nullable(),
       serialNumber: yup.string().required(' Serial Number is required '),
       bikePhotoTaken: yup.boolean().oneOf([true], 'Must take a photo of the bike').required('Must take a photo of the bike'),
       stickerOnBike: yup.boolean().oneOf([true], 'Must put a Becycle sticker on bike').required('Must put a Becycle sticker on bike'),
@@ -657,7 +697,7 @@ export default {
     const contractSchema = yup.object().shape({
       type: yup.string().required(' Type is required'),
       condition: yup.string().required(' Condition is required '),
-      notes: yup.string(),
+      notes: yup.string().nullable(),
     });
 
     const depositCollectionSchema = yup.object().shape({
@@ -685,19 +725,19 @@ export default {
     // find current step schema
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-      case 0:
-        return clientSchema;
       case 1:
-        return bikeSchema;
+        return clientSchema;
       case 2:
-        return contractSchema;
+        return bikeSchema;
       case 3:
-        return depositCollectionSchema;
+        return contractSchema;
       case 4:
-        return workingUserSchema;
+        return depositCollectionSchema;
       case 5:
-        return checkingUserSchema;
+        return workingUserSchema;
       case 6:
+        return checkingUserSchema;
+      case 7:
         return reviewSchema;
       default:
         return clientSchema;
@@ -709,18 +749,18 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: emailAddress, errorMessage: emailAddressError} = useField('emailAddress');
-    const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError} = useField('confirmEmailAddress');
-    const {value: firstName, errorMessage: firstNameError} = useField('firstName');
-    const {value: lastName, errorMessage: lastNameError} = useField('lastName');
+    const {value: emailAddress, errorMessage: emailAddressError, setValue: emailAddressSetValue} = useField('emailAddress');
+    const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError, setValue: confirmEmailAddressSetValue} = useField('confirmEmailAddress');
+    const {value: firstName, errorMessage: firstNameError, setValue: firstNameSetValue} = useField('firstName');
+    const {value: lastName, errorMessage: lastNameError, setValue: lastNameSetValue} = useField('lastName');
 
-    const {value: make, errorMessage: makeError} = useField('make');
+    const {value: make, errorMessage: makeError, setValue: makeSetValue} = useField('make');
     const {value: makeNotInList} = useField('makeNotInList');
-    const {value: model, errorMessage: modelError} = useField('model');
+    const {value: model, errorMessage: modelError, setValue: modelSetValue} = useField('model');
     const {value: modelNotInList} = useField('modelNotInList');
-    const {value: colour, errorMessage: colourError} = useField('colour');
-    const {value: decals, errorMessage: decalsError} = useField('decals');
-    const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
+    const {value: colour, errorMessage: colourError, setValue: colourSetValue} = useField('colour');
+    const {value: decals, errorMessage: decalsError, setValue: decalsSetValue} = useField('decals');
+    const {value: serialNumber, errorMessage: serialNumberError, setValue: serialNumberSetValue} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
     const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
     makeNotInList.value = false;
@@ -765,9 +805,7 @@ export default {
     const submit = handleSubmit(() => {
       // next step until last step. if last step then submit form
       if (stepNumber.value === steps.length - 1) {
-        requests.postNewContract(clientId.value, bikeId.value, depositAmountCollected.value, condition.value,
-          type.value, notes.value, workingUser.value, workingPasswordOrPin.value, checkingUser.value,
-          checkingPasswordOrPin.value, depositCollectingUser.value, depositCollectingPassword.value)
+        requests.postSubmitDraftContract(activeDraft.value.id)
           .then((response) => {
             toast.success('Contract Recorded!', {timeout: 1000});
             router.push({path: `/contracts/${response.data.id}`});
@@ -775,76 +813,163 @@ export default {
             toast.error(error.response.data.detail.description, {timeout: 5000});
           });
       } else {
-        if (stepNumber.value === 0) {
+        if (stepNumber.value === 1) {
           // Client details processing
-          requests.getClientByEmail(emailAddress.value).then((response) => {
-            clientId.value = response.data[0]['id'];
-            stepNumber.value = 1;
-          }).catch((error) => {
-            if (error.response.status === 404) {
-              requests.postNewClient({
-                firstName: firstName.value,
-                lastName: lastName.value,
-                emailAddress: emailAddress.value,
-              }).then((response) => {
-                toast.success('New Client Created!', {timeout: 1000});
-                clientId.value = response.data['id'];
-                stepNumber.value = 1;
-              });
-            }
-          });
-        } else if (stepNumber.value === 1) {
+          requests.getClientByEmail(emailAddress.value)
+            .then((response) => {
+              clientId.value = response.data[0]['id'];
+            })
+            .catch((error) => {
+              if (error.response.status === 404) {
+                requests.postNewClient({
+                  firstName: firstName.value,
+                  lastName: lastName.value,
+                  emailAddress: emailAddress.value,
+                }).then((response) => {
+                  toast.success('New Client Created!', {timeout: 1000});
+                  clientId.value = response.data['id'];
+                });
+              }
+            })
+            .finally(() => {
+              if (clientId.value !== null && clientId.value !== '') {
+                requests.putDraftContractClient(activeDraft.value.id, clientId.value)
+                  .then((response) => {
+                    stepNumber.value = 2;
+                    activeDraft.value = response.data;
+                    toast.success('Client Updated!', {timeout: 1000});
+                    console.log('active draft', activeDraft.value);
+                    console.log('bike id', bikeId.value);
+                    if (bikeId.value !== null && bikeId.value !== '') {
+                      makeSuggestions.value.push(activeDraft.value.bike.make);
+                      modelSuggestions.value.push(activeDraft.value.bike.model);
+                      colourSuggestions.value.push(activeDraft.value.bike.colour);
+                      serialNumberSuggestions.value.push(activeDraft.value.bike.serialNumber);
+
+                      nextTick().then(() => {
+                        make.value = activeDraft.value.bike.make;
+                        model.value = activeDraft.value.bike.model;
+                        colour.value = activeDraft.value.bike.colour;
+                        decals.value = activeDraft.value.bike.decals;
+                        serialNumber.value = activeDraft.value.bike.serialNumber;
+                        bikePhotoTaken.value = true;
+                        stickerOnBike.value = true;
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    toast.error(error.response.data.detail.description, {timeout: 5000});
+                  });
+              }
+            });
+        } else if (stepNumber.value === 2) {
           // Bike details processing
           requests.findBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
             .then((response) => {
               bikeId.value = response.data['id'];
-              stepNumber.value = 2;
-            }).catch((error) => {
+            })
+            .catch((error) => {
               if (error.response.status === 404) {
                 requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
                   .then((response) => {
                     toast.success('New Bike Created!', {timeout: 1000});
                     bikeId.value = response.data['id'];
-                    stepNumber.value = 2;
+                  });
+              }
+            })
+            .finally(() => {
+              if (bikeId.value !== null && bikeId.value !== '') {
+                requests.putDraftContractBike(activeDraft.value.id, bikeId.value)
+                  .then((response) => {
+                    console.log(response.data);
+                    activeDraft.value = response.data;
+                    toast.success('Bike Updated!', {timeout: 1000});
+                    stepNumber.value = 3;
+                    console.log('active draft', activeDraft.value);
+                    type.value = activeDraft.value.contractType;
+                    condition.value = activeDraft.value.conditionOfBike;
+                    notes.value = activeDraft.value.notes;
+                  })
+                  .catch((error) => {
+                    toast.error(error.response.data.detail.description, {timeout: 5000});
                   });
               }
             });
-        } else if (stepNumber.value === 2) {
-          requests.getDepositBearers().then((response) =>
-            (depositBearers.value = response.data.map((user) => (user.username))));
-          // Nothing to process
-          stepNumber.value = 3;
         } else if (stepNumber.value === 3) {
-          // Check password of deposit collector
-          requests.checkUserPassword(depositCollectingUser.value, depositCollectingPassword.value).then((response) => {
-            if (response.data) {
+          requests.putDraftContractDetails(activeDraft.value.id, type.value, condition.value, notes.value)
+            .then((response) => {
+              activeDraft.value = response.data;
+              toast.success('Contract Details Updated!', {timeout: 1000});
               stepNumber.value = 4;
-              userSelectionOptionsStatic.value = true;
-            } else {
-              depositCollectingPasswordSetErrors('Wrong Password!');
-            }
-          });
-          requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
+              requests.getDepositBearers().then((response) =>
+                (depositBearers.value = response.data.map((user) => (user.username))));
+              if (activeDraft.value.depositCollectingUser !== null && activeDraft.value.depositAmountCollected !== null) {
+                stepNumber.value = 5;
+              }
+              if (activeDraft.value.workingUser !== null) {
+                stepNumber.value = 6;
+              }
+              if (activeDraft.value.checkingUser !== null) {
+                stepNumber.value = 7;
+              }
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            });
         } else if (stepNumber.value === 4) {
-          // check password or pin of working volunteer
-          requests.checkUserPasswordOrPin(workingUser.value, workingPasswordOrPin.value).then((response) => {
-            if (response.data) {
+          // Check password of deposit collector
+          requests.putDraftContractDeposit(
+            activeDraft.value.id,
+            depositAmountCollected.value,
+            depositCollectingUser.value,
+            depositCollectingPassword.value)
+            .then((response) => {
+              activeDraft.value = response.data;
+              toast.success('Deposit Details Updated!', {timeout: 1000});
               stepNumber.value = 5;
+              requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
               userSelectionOptionsStatic.value = true;
-            } else {
-              workingPasswordOrPinSetErrors('Wrong Password or Pin!');
-            }
-          });
-          requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.map((user) => (user.username))));
+            })
+            .catch((error) => {
+              if (error.response.status === 401) {
+                depositCollectingPasswordSetErrors('Wrong Password!');
+              } else {
+                toast.error(error.response.data.detail.description, {timeout: 5000});
+              }
+            });
         } else if (stepNumber.value === 5) {
-          // check password or pin of checking volunteer
-          requests.checkUserPasswordOrPin(checkingUser.value, checkingPasswordOrPin.value).then((response) => {
-            if (response.data) {
+          // check password or pin of working volunteer
+          requests.putDraftContractWorkingUser(activeDraft.value.id, workingUser.value, workingPasswordOrPin.value)
+            .then((response) => {
+              activeDraft.value = response.data;
+              toast.success('Working Volunteer Updated!', {timeout: 1000});
               stepNumber.value = 6;
-            } else {
-              checkingPasswordOrPinSetErrors('Wrong Password or Pin!');
-            }
-          });
+              requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.map((user) => (user.username))));
+              userSelectionOptionsStatic.value = true;
+            })
+            .catch((error) => {
+              if (error.response.status === 401) {
+                workingPasswordOrPinSetErrors('Wrong Password!');
+              } else {
+                toast.error(error.response.data.detail.description, {timeout: 5000});
+              }
+            });
+        } else if (stepNumber.value === 6) {
+          // check password or pin of checking volunteer
+          requests.putDraftContractCheckingUser(activeDraft.value.id, checkingUser.value, checkingPasswordOrPin.value)
+            .then((response) => {
+              activeDraft.value = response.data;
+              toast.success('Checking Volunteer Updated!', {timeout: 1000});
+              userSelectionOptionsStatic.value = true;
+              stepNumber.value = 7;
+            })
+            .catch((error) => {
+              if (error.response.status === 401) {
+                checkingPasswordOrPinSetErrors('Wrong Password!');
+              } else {
+                toast.error(error.response.data.detail.description, {timeout: 5000});
+              }
+            });
         }
       }
     });
@@ -854,14 +979,20 @@ export default {
     };
 
     return {
+      contractDrafts,
+      activeDraft,
       emailAddress,
       emailAddressError,
+      emailAddressSetValue,
       confirmEmailAddress,
       confirmEmailAddressError,
+      confirmEmailAddressSetValue,
       firstName,
       firstNameError,
+      firstNameSetValue,
       lastName,
       lastNameError,
+      lastNameSetValue,
       clientId,
 
       depositBearers,
@@ -878,10 +1009,12 @@ export default {
       modelNotInList,
       colour,
       colourError,
+      colourSuggestions,
       decals,
       decalsError,
       serialNumber,
       serialNumberError,
+      serialNumberSuggestions,
       bikePhotoTaken,
       bikePhotoTakenError,
       stickerOnBike,
@@ -931,10 +1064,7 @@ export default {
   },
   data() {
     return {
-      emailTyped: '',
       clientSuggestions: [],
-      colour_suggestions: [],
-      serial_number_suggestions: [],
       isNfcActive: false,
       filtered_client_suggestions: [],
       filtered_make_suggestions: [],
@@ -950,6 +1080,13 @@ export default {
     this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500, {leading: true, trailing: true});
     this.fetchColourSuggestions = debounce(this.fetchColourSuggestions, 500, {leading: true, trailing: true});
     this.run_filter = debounce(this.run_filter, 200, {leading: false, trailing: true});
+    requests.getContractDrafts()
+      .then((response) => {
+        this.contractDrafts = response.data;
+      })
+      .catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 5000});
+      });
   },
   methods: {
     userSortingFunction(user1, user2) {
@@ -967,7 +1104,7 @@ export default {
           (this.lastName ? this.lastName.length : 0) +
           (this.emailAddress ? this.emailAddress.length : 0)
       ) > 2) {
-         requests.findClient(
+        requests.findClient(
           this.firstName ? this.firstName.toLowerCase() : '',
           this.lastName ? this.lastName.toLowerCase() : '',
           this.emailAddress ? this.emailAddress.toLowerCase() :'',
@@ -990,12 +1127,12 @@ export default {
     },
     fetchSerialNumberSuggestions() {
       requests.getBikeSerialNumberSuggestions(this.serialNumber.toLowerCase(), 4).then((response) => {
-        this.serial_number_suggestions = response.data;
+        this.serialNumberSuggestions = response.data;
       });
     },
     fetchColourSuggestions() {
       requests.getBikeColourSuggestions(this.colour.toLowerCase(), 4).then((response) => {
-        this.colour_suggestions = response.data;
+        this.colourSuggestions = response.data;
       });
     },
     selectClient(event, i) {
@@ -1009,6 +1146,7 @@ export default {
       }
     },
     selectMake(event, i) {
+      console.log('filtered suggestion', this.filtered_make_suggestions);
       if (i !== -1) {
         this.make = this.filtered_make_suggestions[i];
       }
@@ -1151,6 +1289,40 @@ export default {
         this.filtered_client_suggestions = result;
       });
     },
+    continueDraft(draftId) {
+      requests.getContractDraft(draftId)
+        .then((response) => {
+          this.activeDraft = response.data;
+
+          this.clientId = this.activeDraft.clientId;
+          this.bikeId = this.activeDraft.bikeId;
+
+          this.stepNumber = 1;
+          this.clientSuggestions.push(this.activeDraft.client);
+          nextTick(() => {
+            if (this.activeDraft.client !== null) {
+
+              this.emailAddress = this.activeDraft.client.emailAddress;
+              this.confirmEmailAddress = this.activeDraft.client.emailAddress;
+              this.firstName = this.activeDraft.client.firstName;
+              this.lastName = this.activeDraft.client.lastName;
+            }
+          });
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 5000});
+        });
+    },
+    startNewDraft() {
+      requests.postNewContractDraft()
+        .then((response) => {
+          this.activeDraft = response.data;
+          this.stepNumber = 1;
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 5000});
+        });
+    },
   },
   watch: {
     emailAddress() {
@@ -1163,22 +1335,27 @@ export default {
       this.run_filter();
     },
     make() {
+      console.log(this.make);
+      console.log(this.makeSuggestions);
       levenshtein.filterSort(this.makeSuggestions, this.make, 4).then((result) => {
         this.filtered_make_suggestions = result.slice(0, 6);
       });
     },
     model() {
+      console.log(this.model);
       levenshtein.filterSort(this.modelSuggestions, this.model, 4).then((result) => {
         this.filtered_model_suggestions = result.slice(0, 6);
       });
     },
     colour() {
-      levenshtein.filterSort(this.colour_suggestions, this.colour, 4).then((result) => {
+      console.log(this.colour);
+      levenshtein.filterSort(this.colourSuggestions, this.colour, 4).then((result) => {
         this.filtered_colour_suggestions = result.slice(0, 6);
       });
     },
     serialNumber() {
-      levenshtein.filterSort(this.serial_number_suggestions, this.serialNumber, 4).then((result) => {
+      console.log(this.serialNumber);
+      levenshtein.filterSort(this.serialNumberSuggestions, this.serialNumber, 4).then((result) => {
         this.filtered_serial_number_suggestions = result.slice(0, 6);
       });
     },

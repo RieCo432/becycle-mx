@@ -42,11 +42,11 @@ export default {
     const steps = [
       {
         id: 1,
-        title: 'Deposit Return',
+        title: 'Accepting Volunteer',
       },
       {
         id: 2,
-        title: 'Accepting Volunteer',
+        title: 'Deposit Return',
       },
       {
         id: 3,
@@ -76,9 +76,9 @@ export default {
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
       case 0:
-        return depositReturningSchema;
-      case 1:
         return returnAcceptingUserSchema;
+      case 1:
+        return depositReturningSchema;
       case 2:
         return reviewSchema;
       default:
@@ -120,30 +120,28 @@ export default {
         // handle submit
         patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value,
           returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
-      } else {
-        if (stepNumber.value === 0) {
-          if (depositAmountReturned.value > contractData.value.depositAmountCollected) {
-            depositAmountReturnedSetErrors('Must not be larger than the deposit collected!');
-            return;
+      } else if (stepNumber.value === 0) {
+        // handle return accepting user
+        requests.checkUserPasswordOrPin(returnAcceptingUser.value, returnAcceptingPasswordOrPin.value).then((response) => {
+          if (response.data) {
+            stepNumber.value = 1;
+          } else {
+            returnAcceptingPasswordOrPinSetErrors('Wrong Password or Pin!');
           }
-          requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
-            if (response.data) {
-              stepNumber.value = 1;
-              userSelectionOptionsStatic.value = true;
-            } else {
-              depositReturningPasswordSetErrors('Wrong Password!');
-            }
-          });
-        } else if (stepNumber.value === 1) {
-          // handle return accepting user
-          requests.checkUserPasswordOrPin(returnAcceptingUser.value, returnAcceptingPasswordOrPin.value).then((response) => {
-            if (response.data) {
-              stepNumber.value = 2;
-            } else {
-              returnAcceptingPasswordOrPinSetErrors('Wrong Password or Pin!');
-            }
-          });
+        });
+      } else if (stepNumber.value === 1) {
+        if (depositAmountReturned.value > contractData.value.depositAmountCollected) {
+          depositAmountReturnedSetErrors('Must not be larger than the deposit collected!');
+          return;
         }
+        requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
+          if (response.data) {
+            stepNumber.value = 2;
+            userSelectionOptionsStatic.value = true;
+          } else {
+            depositReturningPasswordSetErrors('Wrong Password!');
+          }
+        });
       }
     });
 
@@ -485,6 +483,39 @@ export default {
               >
                 <form @submit.prevent="submit"  @keydown.enter="submit">
                   <div v-if="stepNumber === 0">
+                    <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
+                      <div class="md:col-span-2 col-span-1">
+                        <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                          Return Accepting Volunteer
+                        </h4>
+                      </div>
+
+                      <ComboboxTextInput
+                          :field-model-value="returnAcceptingUser"
+                          :suggestions="filtered_return_accepting_user_suggestions"
+                          :selected-callback="selectReturnAcceptingUser"
+                          :allow-new="false"
+                          :open-by-default="userSelectionOptionsStatic"
+                          label="Return Accepting Volunteer"
+                          type="text"
+                          placeholder="workshop"
+                          name="returnAcceptingUser"
+                          v-model="returnAcceptingUser"
+                          :error="returnAcceptingUserError"
+                          @input="() => {}"
+                      />
+
+                      <TextInput
+                          label="Password or Pin"
+                          type="password"
+                          placeholder="Password or Pin"
+                          name="returnAcceptingUserPasswordOrPin"
+                          v-model="returnAcceptingPasswordOrPin"
+                          :error="returnAcceptingPasswordOrPinError"
+                          hasicon/>
+                    </div>
+                  </div>
+                  <div v-if="stepNumber === 1">
                     <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
                       <div class="lg:col-span-3 md:col-span-2 col-span-1">
                         <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
@@ -522,40 +553,6 @@ export default {
                           name="depositReturningPassword"
                           v-model="depositReturningPassword"
                           :error="depositReturningPasswordError"
-                          hasicon/>
-                    </div>
-                  </div>
-
-                  <div v-if="stepNumber === 1">
-                    <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
-                      <div class="md:col-span-2 col-span-1">
-                        <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                          Return Accepting Volunteer
-                        </h4>
-                      </div>
-
-                      <ComboboxTextInput
-                          :field-model-value="returnAcceptingUser"
-                          :suggestions="filtered_return_accepting_user_suggestions"
-                          :selected-callback="selectReturnAcceptingUser"
-                          :allow-new="false"
-                          :open-by-default="userSelectionOptionsStatic"
-                          label="Return Accepting Volunteer"
-                          type="text"
-                          placeholder="workshop"
-                          name="returnAcceptingUser"
-                          v-model="returnAcceptingUser"
-                          :error="returnAcceptingUserError"
-                          @input="() => {}"
-                      />
-
-                      <TextInput
-                          label="Password or Pin"
-                          type="password"
-                          placeholder="Password or Pin"
-                          name="returnAcceptingUserPasswordOrPin"
-                          v-model="returnAcceptingPasswordOrPin"
-                          :error="returnAcceptingPasswordOrPinError"
                           hasicon/>
                     </div>
                   </div>
