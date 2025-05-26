@@ -14,25 +14,25 @@ from typing import Self
 CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
 
-class Contract(Base):
+class ContractDraft(Base):
     __tablename__ = "contractdrafts"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
     clientId: Mapped[UUID] = mapped_column("clientid", ForeignKey("clients.id"), nullable=True, quote=False)
-    # client: Mapped["Client"] = relationship("Client", back_populates="contracts")
+    client: Mapped["Client"] = relationship("Client", foreign_keys=[clientId])
 
     bikeId: Mapped[UUID] = mapped_column("bikeid", ForeignKey("bikes.id"), nullable=True, quote=False)
-    # bike: Mapped["Bike"] = relationship("Bike", back_populates="contracts")
+    bike: Mapped["Bike"] = relationship("Bike", foreign_keys=[bikeId])
 
     workingUserId: Mapped[UUID] = mapped_column("workinguserid", ForeignKey("users.id"), nullable=True, quote=False)
-    # workingUser: Mapped["User"] = relationship("User", foreign_keys=[workingUserId], back_populates="workedContracts")
+    workingUser: Mapped["User"] = relationship("User", foreign_keys=[workingUserId])
 
     checkingUserId: Mapped[UUID] = mapped_column("checkinguserid", ForeignKey("users.id"), nullable=True, quote=False)
-    # checkingUser: Mapped["User"] = relationship("User", foreign_keys=[checkingUserId], back_populates="checkedContracts")
+    checkingUser: Mapped["User"] = relationship("User", foreign_keys=[checkingUserId])
 
     depositCollectingUserId: Mapped[UUID] = mapped_column("depositcollectinguserid", ForeignKey("users.id"), nullable=True, quote=False)
-    # depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")
+    depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId])
 
 
     startDate: Mapped[date] = mapped_column("startdate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, index=True, quote=False)

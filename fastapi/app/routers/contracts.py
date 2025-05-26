@@ -57,6 +57,149 @@ async def create_contract(
     return contract
 
 
+@contracts.get("/contracts/drafts")
+async def get_contract_drafts(db: Session = Depends(dep.get_db)) -> list[schemas.ContractDraft]:
+    return crud.get_contract_drafts(db=db)
+
+
+@contracts.get("/contracts/drafts/{contract_draft_id}")
+async def get_contract_draft(contract_draft_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.ContractDraft:
+    return crud.get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+
+
+@contracts.post("/contracts/drafts")
+async def new_contract_draft(
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractDraft:
+
+    contract = crud.start_new_contract(db=db)
+
+    return contract
+
+
+@contracts.put("/contracts/drafts/{contract_draft_id}/client")
+async def update_contract_draft_client(
+        contract_draft_id: UUID,
+        client_id: Annotated[UUID, Body(embed=True)],
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractDraft:
+    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Contract draft not found."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return crud.update_contract_draft_client(db=db, contract_draft_id=contract_draft_id, client_id=client_id)
+
+
+@contracts.put("/contracts/drafts/{contract_draft_id}/bike")
+async def update_contract_draft_bike(
+        contract_draft_id: UUID,
+        bike_id: Annotated[UUID, Body(embed=True)],
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractDraft:
+    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Contract draft not found."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return crud.update_contract_draft_bike(db=db, contract_draft_id=contract_draft_id, bike_id=bike_id)
+
+
+@contracts.put("/contracts/drafts/{contract_draft_id}/details")
+async def update_contract_draft_details(
+        contract_draft_id: UUID,
+        contract_draft_details: schemas.ContractDraftDetails,
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractDraft:
+    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Contract draft not found."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return crud.update_contract_draft_details(db=db, contract_draft_id=contract_draft_id, contract_draft_details=contract_draft_details)
+
+
+@contracts.put("/contracts/drafts/{contract_draft_id}/deposit")
+async def update_contract_draft_deposit(
+        contract_draft_id: UUID,
+        deposit_amount: Annotated[int, Body(embed=True)],
+        deposit_collecting_user: models.User = Depends(dep.get_deposit_receiving_user),
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractDraft:
+    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Contract draft not found."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return crud.update_contract_draft_deposit(db=db, contract_draft_id=contract_draft_id, deposit_amount=deposit_amount, deposit_collecting_user=deposit_collecting_user)
+
+
+@contracts.put("/contracts/drafts/{contract_draft_id}/working-user")
+async def update_contract_draft_working_user(
+        contract_draft_id: UUID,
+        working_user: models.User = Depends(dep.get_working_user),
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractDraft:
+    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Contract draft not found."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return crud.update_contract_draft_working_user(db=db, contract_draft_id=contract_draft_id, working_user=working_user)
+
+
+@contracts.put("/contracts/drafts/{contract_draft_id}/checking-user")
+async def update_contract_draft_checking_user(
+        contract_draft_id: UUID,
+        checking_user: models.User = Depends(dep.get_checking_user),
+        db: Session = Depends(dep.get_db)
+) -> schemas.ContractDraft:
+    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Contract draft not found."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if crud.is_checking_user_same_as_working_user(db=db, contract_draft_id=contract_draft_id, checking_user=checking_user):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Checking user cannot be the same as working user!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return crud.update_contract_draft_checking_user(db=db, contract_draft_id=contract_draft_id,
+                                                    checking_user=checking_user)
+
+
+@contracts.post("/contracts/drafts/{contract_draft_id}/submit")
+async def submit_contract(
+        contract_draft_id: UUID,
+        email_tasks: BackgroundTasks,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Contract:
+    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Contract draft not found."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if crud.does_contract_exist_already(db=db, contract_draft_id=contract_draft_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"description": "Contract already exists!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    contract = crud.submit_contract(db=db, contract_draft_id=contract_draft_id)
+
+    email_tasks.add_task(contract.send_creation_email)
+
+    return contract
+
+
 @contracts.get("/contracts/types")
 async def get_contract_types(db: Session = Depends(dep.get_db)) -> list[schemas.ContractType]:
     return crud.get_contract_types(db=db)

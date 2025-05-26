@@ -272,6 +272,84 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getContractDrafts() {
+    return axiosClient.get('/contracts/drafts', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getContractDraft(draftContractId) {
+    return axiosClient.get(`/contracts/drafts/${draftContractId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postNewContractDraft() {
+    return axiosClient.post('/contracts/drafts', null, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractClient(draftContractId, clientId) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/client`, {
+      client_id: clientId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractBike(draftContractId, bikeId) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/bike`, {
+      bike_id: bikeId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractDetails(draftContractId, contractType, conditionOfBike, notes) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/details`, {
+      conditionOfBike: conditionOfBike,
+      contractType: contractType,
+      notes: notes,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractDeposit(draftContractId, depositAmont, depositCollectingUser, depositCollectingPassword) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/deposit`, {
+      deposit_amount: depositAmont,
+      deposit_receiving_username: depositCollectingUser,
+      deposit_receiving_user_password: depositCollectingPassword,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractWorkingUser(draftContractId, workingUser, workingPasswordOrPin) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/working-user`, {
+      working_username: workingUser,
+      working_user_password_or_pin: workingPasswordOrPin,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractCheckingUser(draftContractId, checkingUser, checkingPasswordOrPin) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/checking-user`, {
+      checking_username: checkingUser,
+      checking_user_password_or_pin: checkingPasswordOrPin,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postSubmitDraftContract(draftContractId) {
+    return axiosClient.post(`/contracts/drafts/${draftContractId}/submit`, null, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   findClient(firstName, lastName, emailAddress, maxDistance = 10) {
     return axiosClient.get('/clients/find', {
       headers: credentialsStore.getApiRequestHeader(),
