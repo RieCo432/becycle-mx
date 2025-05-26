@@ -38,7 +38,7 @@ export default {
     return axiosClient.get('/public/opening-times');
   },
   getUserToken(username, password) {
-    return axiosClient.post('/users/token', {
+    return axiosClient.post('/public/users/token', {
       'username': username,
       'password': password,
     }, {
@@ -61,7 +61,7 @@ export default {
     });
   },
   getClientLoginCode(emailAddress) {
-    return axiosClient.get('/client/login-code', {
+    return axiosClient.get('/public/clients/login-code', {
       params: {
         email_address: emailAddress,
       },
@@ -69,7 +69,7 @@ export default {
     });
   },
   getClientToken(clientId, code) {
-    return axiosClient.post('/clients/token', {
+    return axiosClient.post('/public/clients/token', {
       'username': clientId,
       'password': code,
     }, {
@@ -95,7 +95,7 @@ export default {
     });
   },
   postNewClient(clientData) {
-    return axiosClient.post('/client', clientData, {
+    return axiosClient.post('/clients', clientData, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -141,7 +141,7 @@ export default {
     });
   },
   findBike(make, model, colour, decals, serialNumber) {
-    return axiosClient.get('/bike/find', {
+    return axiosClient.get('/bikes/first-match', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
@@ -172,6 +172,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getClientBike(bikeId) {
+    return axiosClient.get(`/clients/me/bikes/${bikeId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
+    });
+  },
   getBikeByRfidTagSerialNumber(rfidTagSerialNumber) {
     return axiosClient.get(`/bikes/tag/${rfidTagSerialNumber}`, {
       headers: credentialsStore.getApiRequestHeader(),
@@ -179,7 +185,7 @@ export default {
     });
   },
   postNewBike(make, model, colour, decals, serialNumber) {
-    return axiosClient.post('/bike', {
+    return axiosClient.post('/bikes', {
       make: make,
       model: model,
       colour: colour,
@@ -191,13 +197,13 @@ export default {
     });
   },
   getContractTypes() {
-    return axiosClient.get('/contract/types', {
+    return axiosClient.get('/contracts/types', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
   getBikeConditions() {
-    return axiosClient.get('/bike/conditions', {
+    return axiosClient.get('/bikes/conditions', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -221,30 +227,32 @@ export default {
     });
   },
   checkUserPassword(username, password) {
-    return axiosClient.post('/user/check/password', {
+    return axiosClient.post('/users/check/password', {
       'username': username,
       'password': password,
     }, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        ...credentialsStore.getApiRequestHeader(),
       },
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
   checkUserPasswordOrPin(username, password) {
-    return axiosClient.post('/user/check/password-or-pin', {
+    return axiosClient.post('/users/check/password-or-pin', {
       'username': username,
       'password': password,
     }, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        ...credentialsStore.getApiRequestHeader(),
       },
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
   postNewContract(clientId, bikeId, depositAmountCollected, conditionOfBike, contractType, notes, workingUser,
     workingPasswordOrPin, checkingUser, checkingPasswordOrPin, depositCollectingUser, depositCollectingPassword) {
-    return axiosClient.post('/contract', {
+    return axiosClient.post('/contracts', {
       contract_data: {
         clientId: clientId,
         bikeId: bikeId,
@@ -260,6 +268,84 @@ export default {
       deposit_receiving_username: depositCollectingUser,
       deposit_receiving_user_password: depositCollectingPassword,
     }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getContractDrafts() {
+    return axiosClient.get('/contracts/drafts', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getContractDraft(draftContractId) {
+    return axiosClient.get(`/contracts/drafts/${draftContractId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postNewContractDraft() {
+    return axiosClient.post('/contracts/drafts', null, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractClient(draftContractId, clientId) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/client`, {
+      client_id: clientId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractBike(draftContractId, bikeId) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/bike`, {
+      bike_id: bikeId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractDetails(draftContractId, contractType, conditionOfBike, notes) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/details`, {
+      conditionOfBike: conditionOfBike,
+      contractType: contractType,
+      notes: notes,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractDeposit(draftContractId, depositAmont, depositCollectingUser, depositCollectingPassword) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/deposit`, {
+      deposit_amount: depositAmont,
+      deposit_receiving_username: depositCollectingUser,
+      deposit_receiving_user_password: depositCollectingPassword,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractWorkingUser(draftContractId, workingUser, workingPasswordOrPin) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/working-user`, {
+      working_username: workingUser,
+      working_user_password_or_pin: workingPasswordOrPin,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractCheckingUser(draftContractId, checkingUser, checkingPasswordOrPin) {
+    return axiosClient.put(`/contracts/drafts/${draftContractId}/checking-user`, {
+      checking_username: checkingUser,
+      checking_user_password_or_pin: checkingPasswordOrPin,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postSubmitDraftContract(draftContractId) {
+    return axiosClient.post(`/contracts/drafts/${draftContractId}/submit`, null, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -316,13 +402,13 @@ export default {
     });
   },
   getContract(contractId) {
-    return axiosClient.get(`/contracts/${contractId}/`, {
+    return axiosClient.get(`/contracts/${contractId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
   getUser(userId) {
-    return axiosClient.get(`/users/${userId}/`, {
+    return axiosClient.get(`/users/${userId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -347,7 +433,7 @@ export default {
     });
   },
   postNewTempClient(firstName, lastName, emailAddress) {
-    return axiosClient.post('/client/temp', {
+    return axiosClient.post('/public/clients/temp', {
       firstName: firstName,
       lastName: lastName,
       emailAddress: emailAddress,
@@ -356,7 +442,7 @@ export default {
     });
   },
   postTempClientVerificationCode(clientTempId, verificationCode) {
-    return axiosClient.post('/client/temp/verify', {
+    return axiosClient.post('/public/clients/temp/verify', {
       client_temp_id: clientTempId,
       verification_code: verificationCode,
     }, {
@@ -384,7 +470,7 @@ export default {
     });
   },
   postAppointmentRequest(typeId, startDateTime, notes) {
-    return axiosClient.post('/appointments/request', {
+    return axiosClient.post('/clients/me/appointments/request', {
       typeId: typeId,
       startDateTime: startDateTime,
       notes: notes,
@@ -483,13 +569,13 @@ export default {
     });
   },
   patchUser(userId, patchData) {
-    return axiosClient.patch(`/users/${userId}/`, patchData, {
+    return axiosClient.patch(`/users/${userId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
   postNewUser(username, password, pin, admin, depositBearer, rentalChecker, appointmentManager, treasurer) {
-    return axiosClient.post('/user', {
+    return axiosClient.post('/users', {
       username: username,
       password_cleartext: password,
       pin_cleartext: pin,
@@ -1224,5 +1310,103 @@ export default {
       },
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
+  },
+  getPermissions() {
+    return axiosClient.get('/admin/permissions', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  addUserPermission(userId, permissionId) {
+    return axiosClient.post(`/users/${userId}/permissions`, {permissionId: permissionId},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  removeUserPermission(userId, permissionId) {
+    return axiosClient.delete(`/users/${userId}/permissions/${permissionId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  addGroupPermission(groupId, permissionId) {
+    return axiosClient.post(`/groups/${groupId}/permissions`, {permissionId: permissionId},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  removeGroupPermission(groupId, permissionId) {
+    return axiosClient.delete(`/groups/${groupId}/permissions/${permissionId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  addGroupUser(groupId, userId) {
+    return axiosClient.post(`/groups/${groupId}/users`, {user_id: userId},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  removeGroupUser(groupId, userId) {
+    return axiosClient.delete(`/groups/${groupId}/users/${userId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  getUserPermissions(userId) {
+    return axiosClient.get(`/users/${userId}/permissions`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  getGroupPermissions(groupId) {
+    return axiosClient.get(`/groups/${groupId}/permissions`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  getUserGroups() {
+    return axiosClient.get('/groups',
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  postUserGroup(name) {
+    return axiosClient.post('/groups', {name: name},
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
+  deleteUserGroup(groupId) {
+    return axiosClient.delete(`/groups/${groupId}`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  getGroupUsers(groupId) {
+    return axiosClient.get(`/groups/${groupId}/users`,
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
   },
 };

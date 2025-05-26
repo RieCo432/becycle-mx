@@ -274,3 +274,126 @@ def send_expiry_emails(db: Session):
             print(e)
 
     db.commit()
+
+
+def start_new_contract(db: Session) -> models.ContractDraft:
+    contract_draft = models.ContractDraft()
+
+    db.add(contract_draft)
+    db.commit()
+
+    return contract_draft
+
+def get_contract_draft(db: Session, contract_draft_id: UUID) -> models.ContractDraft:
+    return db.scalar(
+        select(models.ContractDraft)
+        .where(models.ContractDraft.id == contract_draft_id)
+    )
+
+
+def does_contract_draft_exist(db: Session, contract_draft_id: UUID) -> bool:
+    return get_contract_draft(db=db, contract_draft_id=contract_draft_id) is not None
+
+
+def update_contract_draft_client(db: Session, contract_draft_id: UUID, client_id: UUID) -> models.ContractDraft:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    contract_draft.clientId = client_id
+    db.commit()
+    return contract_draft
+
+def update_contract_draft_bike(db: Session, contract_draft_id: UUID, bike_id: UUID) -> models.ContractDraft:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    contract_draft.bikeId = bike_id
+    db.commit()
+    return contract_draft
+
+def update_contract_draft_details(db: Session, contract_draft_id: UUID, contract_draft_details: schemas.ContractDraftDetails) -> models.ContractDraft:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    contract_draft.conditionOfBike = contract_draft_details.conditionOfBike
+    contract_draft.contractType = contract_draft_details.contractType
+    contract_draft.notes = contract_draft_details.notes
+    db.commit()
+    return contract_draft
+
+def update_contract_draft_deposit(db: Session, contract_draft_id: UUID, deposit_amount: int, deposit_collecting_user: models.User) -> models.ContractDraft:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    contract_draft.depositAmountCollected = deposit_amount
+    contract_draft.depositCollectingUserId = deposit_collecting_user.id
+    db.commit()
+    return contract_draft
+
+def update_contract_draft_working_user(db: Session, contract_draft_id: UUID, working_user: models.User) -> models.ContractDraft:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    contract_draft.workingUserId = working_user.id
+    db.commit()
+    return contract_draft
+
+def is_checking_user_same_as_working_user(db: Session, contract_draft_id: UUID, checking_user: models.User) -> bool:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    return contract_draft.workingUserId == checking_user.id
+
+def update_contract_draft_checking_user(db: Session, contract_draft_id: UUID, checking_user: models.User) -> models.ContractDraft:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    contract_draft.checkingUserId = checking_user.id
+    db.commit()
+    return contract_draft
+
+def does_contract_exist_already(db: Session, contract_draft_id: UUID) -> bool:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+
+    matching_contract = db.scalar(
+        select(models.Contract)
+        .where(
+            (models.Contract.clientId == contract_draft.clientId)
+            & (models.Contract.bikeId == contract_draft.bikeId)
+            & (models.Contract.startDate == contract_draft.startDate)
+        )
+    )
+
+    return matching_contract is not None
+
+def submit_contract(db: Session, contract_draft_id: UUID) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    contract = create_contract(
+        contract_data=schemas.ContractCreate(
+            clientId=contract_draft.clientId,
+            bikeId=contract_draft.bikeId,
+            depositAmountCollected=contract_draft.depositAmountCollected,
+            conditionOfBike=contract_draft.conditionOfBike,
+            contractType=contract_draft.contractType,
+            notes=contract_draft.notes
+        ),
+        working_user_id=contract_draft.workingUserId,
+        checking_user_id=contract_draft.checkingUserId,
+        deposit_collecting_user_id=contract_draft.depositCollectingUserId,
+        db=db
+    )
+    db.delete(contract_draft)
+    db.commit()
+    return contract
+
+
+def get_contract_drafts(db: Session) -> list[models.ContractDraft]:
+    return [_ for _ in db.scalars(
+        select(models.ContractDraft)
+    )]
+
+
+def get_contract_draft_start_dates(db: Session) -> list[date]:
+    return [_ for _ in db.scalars(
+        select(models.ContractDraft.startDate)
+        .distinct()
+    )]
+
+
+def get_contract_drafts_by_start_date(db: Session, start_date: date) -> list[models.ContractDraft]:
+    return [_ for _ in db.scalars(
+        select(models.ContractDraft)
+        .where(models.ContractDraft.startDate == start_date)
+    )]
+
+
+def get_contract_drafts_grouped_by_start_date(db: Session) -> dict[date, list[models.ContractDraft]]:
+    contract_drafts_by_start_date = {start_date: get_contract_drafts_by_start_date(db=db, start_date=start_date) for start_date in get_contract_draft_start_dates(db=db)}
+    return contract_drafts_by_start_date
+

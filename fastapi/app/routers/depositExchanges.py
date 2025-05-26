@@ -1,8 +1,6 @@
 from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
-
 import app.crud as crud
 import app.dependencies as dep
 import app.models as models
@@ -10,11 +8,12 @@ import app.schemas as schemas
 
 deposit_exchanges = APIRouter(
     tags=["deposit exchanges"],
+    dependencies=[Depends(dep.get_db), Depends(dep.check_permissions)],
     responses={404: {"description": "Not Found"}}
 )
 
 
-@deposit_exchanges.post("/deposit-exchanges", dependencies=[Depends(dep.get_current_active_user)])
+@deposit_exchanges.post("/deposit-exchanges")
 async def create_deposit_exchange(
         amount: Annotated[int, Body()],
         from_user: models.User = Depends(dep.get_deposit_exchange_from_user),
@@ -34,7 +33,7 @@ async def create_deposit_exchange(
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"description": "Only Treasurer can transfer deposits to the BANK"}
+            detail={"description": "Only Treasurer can transfer deposits to ro from the BANK"}
         )
 
     if amount > from_user.get_deposit_bearer_balance() and from_user.username != "BANK":
@@ -47,6 +46,6 @@ async def create_deposit_exchange(
     return crud.create_deposit_exchange(db=db, amount=amount, from_user_id=from_user.id, to_user_id=to_user.id)
 
 
-@deposit_exchanges.get("/deposit-exchanges/users", dependencies=[Depends(dep.get_current_active_user)])
+@deposit_exchanges.get("/deposit-exchanges/users")
 async def get_deposit_exchange_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
     return crud.get_deposit_exchange_users(db=db)

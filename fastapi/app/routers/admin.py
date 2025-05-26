@@ -1,10 +1,8 @@
 from typing import Annotated
 from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
@@ -12,7 +10,7 @@ import app.schemas as schemas
 admin = APIRouter(
     tags=["admin"],
     responses={404: {"description": "Not Found"}},
-    dependencies=[Depends(dep.get_current_admin_user)]
+    dependencies=[Depends(dep.check_permissions)]
 )
 
 
@@ -84,3 +82,9 @@ async def get_contracts_takeout_excel(db: Session = Depends(dep.get_db)):
 @admin.get("/admin/takeout/contracts.pdf")
 async def get_contracts_takeout_pdf(db: Session = Depends(dep.get_db)):
     return FileResponse(crud.get_contracts_takeout_pdf(db=db))
+
+
+@admin.get("/admin/permissions")
+async def get_permissions(db: Session = Depends(dep.get_db)) -> schemas.PermissionNode:
+    result = crud.get_permissions_tree(db=db)
+    return result

@@ -3,7 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 import sqlalchemy.exc
-from fastapi import Depends, HTTPException, status, Body
+from fastapi import Depends, HTTPException, status, Body, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
@@ -18,11 +18,11 @@ API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
 
 
 user_oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="users/token",
+    tokenUrl="public/users/token",
     scheme_name="user_oauth2_scheme")
 
 client_oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="clients/token",
+    tokenUrl="public/clients/token",
     scheme_name="client_oauth2_scheme")
 
 
@@ -98,34 +98,24 @@ async def get_current_appointment_manager_user(current_user: Annotated[models.Us
     return current_user
 
 
-async def get_current_deposit_bearer_user(current_user: Annotated[models.User, Depends(get_current_active_user)]) -> models.User:
-    if not current_user.depositBearer:
+async def check_permissions(request: Request, current_user: Annotated[models.User, Depends(get_current_active_user)], db: Session = Depends(get_db)) -> None:
+    route = request.scope["route"].path
+    method = request.method
+
+    permission = crud.get_permission_by_route_and_method(db=db, route=route, method=method)
+    if permission is None:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"description": "This page can only be viewed by deposit bearers!"},
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Permission not found"},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    return current_user
 
-
-async def get_current_admin_user(current_user: Annotated[models.User, Depends(get_current_active_user)]) -> models.User:
-    if not current_user.admin:
+    if not crud.check_permission(db=db, user=current_user, permission=permission):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"description": "Admin privileges are required for this action!"},
+            detail={"description": "User does not have permissions for this endpoint."},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    return current_user
-
-
-async def get_current_treasurer_user(current_user: Annotated[models.User, Depends(get_current_active_user)]) -> models.User:
-    if not current_user.treasurer:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"description": "Treasurer privileges are required for this action!"},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    return current_user
 
 
 async def get_working_user(
@@ -187,7 +177,7 @@ async def get_deposit_receiving_user(
     deposit_receiving_user = crud.authenticate_user(username=deposit_receiving_username, password_cleartext=deposit_receiving_user_password, db=db)
     if deposit_receiving_user is None:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"description": "Deposit receiving user wrong password"},
             headers={"WWW-Authenticate": "Bearer"}
         )

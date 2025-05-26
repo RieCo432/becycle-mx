@@ -1,12 +1,10 @@
-from os import path
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
 from app.services import distance
+
 
 maps = APIRouter(
     tags=["maps"],

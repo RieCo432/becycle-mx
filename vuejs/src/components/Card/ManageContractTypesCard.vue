@@ -36,7 +36,6 @@ export default {
 
     const submitNewContractType = handleNewContractTypeSubmit(() => {
       requests.postContractType(newContractTypeId.value).then((response) => {
-        console.log(response);
         contractTypes.value.push(response.data);
         resetNewContractTypeId();
         toast.success('Contract Type created', {timeout: 2000});

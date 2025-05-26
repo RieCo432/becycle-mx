@@ -62,7 +62,7 @@
 import Icon from '@/components/Icon';
 import {defineComponent} from 'vue';
 export default defineComponent({
-  name: 'Checkbox',
+  name: 'Switch',
   inheritAttrs: false,
   components: {
     Icon,

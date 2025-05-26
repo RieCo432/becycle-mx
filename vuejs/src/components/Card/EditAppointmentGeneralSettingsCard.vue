@@ -59,7 +59,6 @@ export default {
     };
 
     const patchAppointmentGeneralSettings = handleAppointmentGeneralSettingsSubmit(() => {
-      console.log('Update');
       requests.patchAppointmentGeneralSettings({
         openingDays: openingDays.value.map((option) => (option.value)),
         minBookAhead: parseInt(minBookAhead.value),
