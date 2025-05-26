@@ -976,7 +976,6 @@ export default {
 
     const prev = () => {
       stepNumber.value--;
-      firstNameKey.value += 1;
     };
 
     return {
