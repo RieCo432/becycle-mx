@@ -71,7 +71,7 @@
                     <template v-for="draft in contractDrafts" :key="draft.id">
                       <div class="col-span-1 col-start-1" v-if="draft.client !== null">{{`${draft.client.firstName} ${draft.client.lastName} ${draft.client.emailAddress}`}}</div>
                       <div class="col-span-1" v-if="draft.bike !== null">{{`${draft.bike.make} ${draft.bike.model} ${draft.bike.colour} ${draft.bike.serialNumber}`}}</div>
-                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">{{draft.depositCollectingUser.username}}</div>
+                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">{{`${draft.depositCollectingUser.username} &#163${draft.depositAmountCollected}`}}</div>
                       <div class="col-span-1" v-if="draft.workingUser !== null">{{draft.workingUser.username}}</div>
                       <div class="col-span-1" v-if="draft.checkingUser !== null">{{draft.checkingUser.username}}</div>
                       <div class="col-span-1 col-start-6">
