@@ -23,6 +23,8 @@ def delete_all(db: Session):
     db.query(models.RoadSegmentReportType).delete()
     db.query(models.RoadSegment).delete()
 
+    db.query(models.ContractDraft).delete()
+
     db.query(models.PaperContract).delete()
     db.query(models.Contract).delete()
 
