@@ -2,6 +2,9 @@ import datetime
 import os
 import bcrypt
 from dateutil.relativedelta import relativedelta
+from fastapi.routing import APIRoute
+from sqlalchemy import select
+
 import app.models as models
 from sqlalchemy.orm import Session
 
@@ -27,6 +30,14 @@ def delete_all(db: Session):
     db.query(models.ExpenseReceipt).delete()
 
     db.query(models.DepositExchange).delete()
+
+    db.query(models.group_permission_association_table).delete()
+    db.query(models.group_user_association_table).delete()
+    db.query(models.Group).delete()
+
+    db.query(models.user_permission_association_table).delete()
+
+    db.query(models.Permission).delete()
 
     db.query(models.UserPresentationCard).delete()
     db.query(models.UserPhoto).delete()
@@ -1463,6 +1474,41 @@ def add_road_segment_reports(db: Session, road_segment_report_types: list[models
     return road_segment_reports
 
 
+def add_permissions(db: Session) -> list[models.Permission]:
+    from main import app
+    import crud
+    crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
+    crud.prune_permissions_tree(db=db)
+
+    return [_ for _ in db.scalars(
+        select(models.Permission)
+    )]
+
+
+def add_admin_group(db: Session, permissions: list[models.Permission], users: list[models.User]) -> list[models.Group]:
+    groups = [
+        models.Group(
+            name="admin",
+        )
+    ]
+
+    db.add_all(groups)
+    db.commit()
+
+    for group in groups:
+        for permission in permissions:
+            if group.name == "admin" and permission.route == "/":
+                group.permissions.append(permission)
+                db.commit()
+
+        for user in users:
+            if user.username == "elaine":
+                user.groups.append(group)
+                db.commit()
+
+    return groups
+
+
 if __name__ == "__main__":
     from app.database.db import Base, engine, SessionLocal
 
@@ -1493,3 +1539,5 @@ if __name__ == "__main__":
     demo_road_segments = add_road_segments(db=demo_db)
     demo_road_segment_report_types = add_road_segment_report_types(db=demo_db)
     demo_road_segment_reports = add_road_segment_reports(db=demo_db, road_segments=demo_road_segments, road_segment_report_types=demo_road_segment_report_types)
+    demo_permissions = add_permissions(db=demo_db)
+    demo_groups = add_admin_group(db=demo_db, permissions=demo_permissions, users=demo_users)
