@@ -106,25 +106,28 @@ def get_permissions_tree(db: Session, route: str = "/", is_leaf: bool = False) -
 
     permissions = [_ for _ in db.scalars(query)]
 
-    child_routes = []
+    child_elements = []
 
     for permission in permissions:
         for child in permission.childPermissions:
-            if child.route not in child_routes:
-                child_routes.append(child.route)
+            if child.route not in [e["route"] for e in child_elements]:
+                child_elements.append({"is_leaf": child.isEndpoint, "route": child.route})
 
-    child_routes.sort()
+    child_elements.sort(key=lambda element: element["route"])
 
     child_nodes = []
 
-    for child_route in child_routes:
-        child_tree = get_permissions_tree(db=db, route=child_route, is_leaf=child_route == route)
+    for child_element in child_elements:
+        child_tree = get_permissions_tree(db=db, route=child_element["route"], is_leaf=(child_element["route"] == route) or child_element["is_leaf"])
         child_nodes.append(child_tree)
+
+
+    permission_ids = {permission.method: permission.id for permission in permissions if permission.isEndpoint == is_leaf}
 
 
     return schemas.PermissionNode(
         route=permissions[0].route,
-        permissionIds={permission.method: permission.id for permission in permissions},
+        permissionIds=permission_ids,
         childNodes=child_nodes
     )
 
