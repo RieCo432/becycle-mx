@@ -58,6 +58,17 @@ def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
                 db.commit()
 
 
+def get_num_permissions(db: Session) -> int:
+    return len([_ for _ in db.scalars(select(models.Permission))])
+
+
+def fully_prune_tree(db: Session) -> None:
+    num_permissions = get_num_permissions(db=db)
+    prune_permissions_tree(db=db, tree=get_permissions_tree(db=db))
+    while num_permissions > (num_permissions := get_num_permissions(db=db)):
+        prune_permissions_tree(db=db, tree=get_permissions_tree(db=db))
+
+
 def prune_permissions_tree(db: Session, tree: schemas.PermissionNode) -> None:
     if tree is None:
         return
