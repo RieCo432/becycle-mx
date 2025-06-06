@@ -1478,9 +1478,9 @@ def add_road_segment_reports(db: Session, road_segment_report_types: list[models
 
 def add_permissions(db: Session) -> list[models.Permission]:
     from main import app
-    import crud
-    crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
-    crud.prune_permissions_tree(db=db)
+    # import crud
+    # crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
+    # crud.prune_permissions_tree(db=db)
 
     return [_ for _ in db.scalars(
         select(models.Permission)
