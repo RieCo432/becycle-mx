@@ -15,115 +15,121 @@ def ensure_all_permissions_exist(db: Session, routes: list[APIRoute]) -> None:
     for route in routes:
         for method in route.methods:
             path_parts = route.path.split("/")
-            parent_permission_id = None
-            for i in range(len(path_parts)):
-                permission_scope = "/" + "/".join(path_parts[1:i+1])
+            parent_permission = None
 
-                parent_permission = db.scalar(
-                    select(models.Permission)
-                    .where(models.Permission.route == permission_scope)
-                    .where(models.Permission.method == method)
-                    .where(models.Permission.isEndpoint == False)
-                )
+            endpoint_permission = db.scalar(
+                select(models.Permission)
+                .where(models.Permission.route == route.path)
+                .where(models.Permission.method == method)
+                .where(models.Permission.isEndpoint == True)
+            )
 
-                if parent_permission is None:
-                    parent_permission = models.Permission(
-                        route=permission_scope,
-                        method=method,
-                        isEndpoint=False,
-                        parentPermissionId=parent_permission_id,
-                    )
-                    db.add(parent_permission)
-                    db.commit()
+            if endpoint_permission is None:
 
+                for i in range(len(path_parts)):
+                    permission_scope = "/" + "/".join(path_parts[1:i+1])
 
-                if permission_scope == route.path:
-                    parent_permission = db.scalar(
+                    existing_permission = db.scalar(
                         select(models.Permission)
                         .where(models.Permission.route == permission_scope)
                         .where(models.Permission.method == method)
-                        .where(models.Permission.isEndpoint == True)
+                        .where(models.Permission.isEndpoint == False)
                     )
 
-                    if parent_permission is None:
-                        db.add(models.Permission(
+                    if existing_permission is None:
+                        existing_permission = models.Permission(
                             route=permission_scope,
                             method=method,
-                            isEndpoint=True,
-                            parentPermissionId=parent_permission_id,
-                        ))
+                            isEndpoint=False,
+                            parentPermissionId=parent_permission.id if parent_permission is not None else None,
+                        )
+                        db.add(existing_permission)
                         db.commit()
-                
-                else:
-                    parent_permission_id = parent_permission.id
 
-def prune_permissions_tree(db: Session, tree: schemas.PermissionNode | None = None):
-    if tree is None:
-        tree = get_permissions_tree(db=db)
+                    parent_permission = existing_permission
 
 
-    if len(tree.childNodes) == 1 and tree.childNodes[0].route == tree.route:
-        redundant_permission_scope_ids = tree.permissionIds.values()
-        for redundant_permission_scope_id in redundant_permission_scope_ids:
-            redundant_permission_scope = db.scalar(
-                select(models.Permission)
-                .where(models.Permission.id == redundant_permission_scope_id)
-            )
-            if redundant_permission_scope is not None:
-                db.delete(redundant_permission_scope)
+                db.add(models.Permission(
+                    route=route.path,
+                    method=method,
+                    isEndpoint=True,
+                    parentPermissionId=parent_permission.id,
+                ))
                 db.commit()
 
-    else:
-        for child_node in tree.childNodes:
-            prune_permissions_tree(db=db, tree=child_node)
 
-def get_permissions_tree(db: Session, route_prefix: str = "", level: int = 0) -> schemas.PermissionNode:
-
-    descendant_routes_start_with = "/" + route_prefix + ("/" if route_prefix != "" else "")
-    descendant_permissions = [route for route in db.scalars(
-        select(models.Permission)
-        .distinct()
-        .where(models.Permission.route.startswith(descendant_routes_start_with))
-    )]
-
-    child_routes = list(set(["/".join(permission.route.split("/")[1:level+2]) for permission in descendant_permissions if permission.route != "/" + route_prefix] ) )
-    child_routes.sort()
-
-    endpoint_permission = [_ for _ in db.scalars(
-        select(models.Permission)
-        .where(models.Permission.route == "/" + route_prefix)
-        .where(models.Permission.isEndpoint == True)
-    )]
-
-    current_permission_non_endpoint = [_ for _ in db.scalars(
-        select(models.Permission)
-        .where(models.Permission.route == "/" + route_prefix)
-        .where(models.Permission.isEndpoint == False)
-    )]
-
-    if len(current_permission_non_endpoint) == 0:
-        current_permission_non_endpoint = endpoint_permission
-        endpoint_permission = []
+def get_num_permissions(db: Session) -> int:
+    return len([_ for _ in db.scalars(select(models.Permission))])
 
 
-    endpoint_items = [
-                       schemas.PermissionNode(
-                           route="/" + route_prefix,
-                           permissionIds={permission.method: permission.id for permission in
-                                          endpoint_permission},
-                           childNodes=[]
-                       )
-                   ] if len(endpoint_permission) > 0 else []
+def fully_prune_tree(db: Session) -> None:
+    num_permissions = get_num_permissions(db=db)
+    prune_permissions_tree(db=db, tree=get_permissions_tree(db=db))
+    while num_permissions > (num_permissions := get_num_permissions(db=db)):
+        prune_permissions_tree(db=db, tree=get_permissions_tree(db=db))
+
+
+def prune_permissions_tree(db: Session, tree: schemas.PermissionNode) -> None:
+    if tree is None:
+        return
+
+    if len(tree.childNodes) == 0:
+        return
+
+    permissions = [db.scalar(select(models.Permission).where(models.Permission.id == permission_id)) for permission_id in tree.permissionIds.values()]
+
+    if len(tree.childNodes) == 1:
+        if not any([permission.isEndpoint for permission in permissions]):
+            child_node = tree.childNodes[0]
+            child_permissions = [db.scalar(select(models.Permission).where(models.Permission.id == child_permission_id)) for child_permission_id in child_node.permissionIds.values()]
+            if all([child_permission.isEndpoint for child_permission in child_permissions]):
+                for child_permission in child_permissions:
+                    parent_permission = child_permission.parentPermission
+                    grandparent_permission = parent_permission.parentPermission
+                    child_permission.parentPermissionId = grandparent_permission.id
+                    db.commit()
+                    db.delete(parent_permission)
+                    db.commit()
+
+    for child_node in tree.childNodes:
+        prune_permissions_tree(db=db, tree=child_node)
+
+    return
+
+
+def get_permissions_tree(db: Session, route: str = "/", is_leaf: bool = False) -> schemas.PermissionNode:
+
+    query = select(models.Permission).where(models.Permission.route == route)
+
+    if is_leaf:
+        query = query.where(models.Permission.isEndpoint == True)
+
+    permissions = [_ for _ in db.scalars(query)]
+
+    child_elements = []
+
+    for permission in permissions:
+        for child in permission.childPermissions:
+            if child.route not in [e["route"] for e in child_elements]:
+                child_elements.append({"is_leaf": child.isEndpoint, "route": child.route})
+
+    child_elements.sort(key=lambda element: element["route"])
+
+    child_nodes = []
+
+    for child_element in child_elements:
+        child_tree = get_permissions_tree(db=db, route=child_element["route"], is_leaf=(child_element["route"] == route) or child_element["is_leaf"])
+        child_nodes.append(child_tree)
+
+
+    permission_ids = {permission.method: permission.id for permission in permissions if permission.isEndpoint == is_leaf}
 
 
     return schemas.PermissionNode(
-        route="/" + route_prefix,
-        permissionIds={permission.method: permission.id for permission in current_permission_non_endpoint},
-        childNodes= endpoint_items + [get_permissions_tree(db=db, route_prefix=child_route, level=level + 1) for child_route
-                                      in child_routes]
+        route=permissions[0].route,
+        permissionIds=permission_ids,
+        childNodes=child_nodes
     )
-
-
 
 
 def get_permission(db: Session, permission_id: UUID) -> models.Permission:
@@ -133,6 +139,16 @@ def get_permission(db: Session, permission_id: UUID) -> models.Permission:
     )
 
 def get_permission_by_route_and_method(db: Session, route: str, method: str) -> models.Permission:
+    endpoint_permission = db.scalar(
+        select(models.Permission)
+        .where(models.Permission.route == route)
+        .where(models.Permission.method == method)
+        .where(models.Permission.isEndpoint == True)
+    )
+
+    if endpoint_permission is not None:
+        return endpoint_permission
+
     return db.scalar(
         select(models.Permission)
         .where(models.Permission.route == route)
