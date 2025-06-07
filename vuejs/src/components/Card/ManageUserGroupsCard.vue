@@ -161,6 +161,11 @@ export default defineComponent({
           });
       }
     },
+    userSortingFunction(user1, user2) {
+      if (user1.username.toLowerCase() < user2.username.toLowerCase()) return -1;
+      if (user1.username.toLowerCase() > user2.username.toLowerCase()) return 1;
+      return 0;
+    },
   },
   computed: {
     groupUsers() {
@@ -179,7 +184,7 @@ export default defineComponent({
       this.permissionScopes = response.data;
     });
     requests.getUsers().then((response) => {
-      this.users = response.data;
+      this.users = response.data.filter((user) => (!user.softDeleted)).sort(this.userSortingFunction);
     });
   },
 });
