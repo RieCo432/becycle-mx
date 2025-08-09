@@ -90,11 +90,14 @@ export default {
       returnAcceptingUser, returnAcceptingPasswordOrPin) {
       requests.patchReturnContract(this.contract.id, depositAmountReturned,
         depositReturningUser, depositReturningPassword,
-        returnAcceptingUser, returnAcceptingPasswordOrPin).then((response) => {
-        toast.success('Contract Returned!', {timeout: 1000});
-        this.contract = response.data;
-        this.loadReturnUserDetails();
-      });
+        returnAcceptingUser, returnAcceptingPasswordOrPin)
+        .then((response) => {
+          toast.success('Contract Returned!', {timeout: 1000});
+          this.contract = response.data;
+          this.loadReturnUserDetails();
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     },
     patchContractExtend() {
       requests.patchExtendContract(this.contract.id).then((response) => {
