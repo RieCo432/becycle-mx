@@ -69,9 +69,15 @@
                     <div class="col-span-1">Working Volunteer</div>
                     <div class="col-span-1">Checking Volunteer</div>
                     <template v-for="draft in contractDrafts" :key="draft.id">
-                      <div class="col-span-1 col-start-1" v-if="draft.client !== null">{{`${draft.client.firstName} ${draft.client.lastName} ${draft.client.emailAddress}`}}</div>
-                      <div class="col-span-1" v-if="draft.bike !== null">{{`${draft.bike.make} ${draft.bike.model} ${draft.bike.colour} ${draft.bike.serialNumber}`}}</div>
-                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">{{`${draft.depositCollectingUser.username} &#163${draft.depositAmountCollected}`}}</div>
+                      <div class="col-span-1 col-start-1" v-if="draft.client !== null">
+                        {{`${draft.client.firstName} ${draft.client.lastName} ${draft.client.emailAddress}`}}
+                      </div>
+                      <div class="col-span-1" v-if="draft.bike !== null">
+                        {{`${draft.bike.make} ${draft.bike.model} ${draft.bike.colour} ${draft.bike.serialNumber}`}}
+                      </div>
+                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">
+                        {{`${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}`}}
+                      </div>
                       <div class="col-span-1" v-if="draft.workingUser !== null">{{draft.workingUser.username}}</div>
                       <div class="col-span-1" v-if="draft.checkingUser !== null">{{draft.checkingUser.username}}</div>
                       <div class="col-span-1 col-start-6">
@@ -568,7 +574,7 @@ import Textarea from '@/components/Textarea';
 import TextInput from '@/components/TextInput';
 import Radio from '@/components/Radio/index.vue';
 import {ErrorMessage, useField, useForm} from 'vee-validate';
-import {computed, nextTick, onUpdated, ref} from 'vue';
+import {computed, nextTick, ref} from 'vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import requests from '@/requests';
@@ -750,17 +756,18 @@ export default {
     });
 
     const {value: emailAddress, errorMessage: emailAddressError, setValue: emailAddressSetValue} = useField('emailAddress');
-    const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError, setValue: confirmEmailAddressSetValue} = useField('confirmEmailAddress');
+    const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError, setValue: confirmEmailAddressSetValue} =
+        useField('confirmEmailAddress');
     const {value: firstName, errorMessage: firstNameError, setValue: firstNameSetValue} = useField('firstName');
     const {value: lastName, errorMessage: lastNameError, setValue: lastNameSetValue} = useField('lastName');
 
-    const {value: make, errorMessage: makeError, setValue: makeSetValue} = useField('make');
+    const {value: make, errorMessage: makeError} = useField('make');
     const {value: makeNotInList} = useField('makeNotInList');
-    const {value: model, errorMessage: modelError, setValue: modelSetValue} = useField('model');
+    const {value: model, errorMessage: modelError} = useField('model');
     const {value: modelNotInList} = useField('modelNotInList');
-    const {value: colour, errorMessage: colourError, setValue: colourSetValue} = useField('colour');
-    const {value: decals, errorMessage: decalsError, setValue: decalsSetValue} = useField('decals');
-    const {value: serialNumber, errorMessage: serialNumberError, setValue: serialNumberSetValue} = useField('serialNumber');
+    const {value: colour, errorMessage: colourError} = useField('colour');
+    const {value: decals, errorMessage: decalsError} = useField('decals');
+    const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
     const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
     makeNotInList.value = false;
@@ -1301,7 +1308,6 @@ export default {
           this.clientSuggestions.push(this.activeDraft.client);
           nextTick(() => {
             if (this.activeDraft.client !== null) {
-
               this.emailAddress = this.activeDraft.client.emailAddress;
               this.confirmEmailAddress = this.activeDraft.client.emailAddress;
               this.firstName = this.activeDraft.client.firstName;
