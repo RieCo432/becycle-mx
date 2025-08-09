@@ -12,10 +12,10 @@ class DetectedPotentialClientDuplicates(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
-    client1Id: Mapped[UUID] = mapped_column("client1id", ForeignKey(Client.id), nullable=False, quote=False)
+    client1Id: Mapped[UUID] = mapped_column("client1id", ForeignKey(Client.id, ondelete="CASCADE"), nullable=False, quote=False)
     client1: Mapped[Client] = relationship(Client, foreign_keys=[client1Id])
 
-    client2Id: Mapped[UUID] = mapped_column("client2id", ForeignKey(Client.id), nullable=False, quote=False)
+    client2Id: Mapped[UUID] = mapped_column("client2id", ForeignKey(Client.id, ondelete="CASCADE"), nullable=False, quote=False)
     client2: Mapped[Client] = relationship(Client, foreign_keys=[client2Id])
 
     similarityScore: Mapped[int] = mapped_column("similarityscore", Integer, nullable=False, quote=False,
@@ -39,10 +39,10 @@ class DetectedPotentialBikeDuplicates(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
-    bike1Id: Mapped[UUID] = mapped_column("bike1id", ForeignKey(Bike.id), nullable=False, quote=False)
+    bike1Id: Mapped[UUID] = mapped_column("bike1id", ForeignKey(Bike.id, ondelete="CASCADE"), nullable=False, quote=False)
     bike1: Mapped[Bike] = relationship(Bike, foreign_keys=[bike1Id])
 
-    bike2Id: Mapped[UUID] = mapped_column("bike2id", ForeignKey(Bike.id), nullable=False, quote=False)
+    bike2Id: Mapped[UUID] = mapped_column("bike2id", ForeignKey(Bike.id, ondelete="CASCADE"), nullable=False, quote=False)
     bike2: Mapped[Bike] = relationship(Bike, foreign_keys=[bike2Id])
 
     similarityScore: Mapped[int] = mapped_column("similarityscore", Integer, nullable=False, quote=False,
