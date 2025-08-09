@@ -47,9 +47,12 @@ class Client(Base):
                                                              nullable=False,
                                                              quote=False)
 
+    createdOn: Mapped[DateTime] = mapped_column("createdon", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=False, quote=False)
+
     def __eq_dict__(self, other: dict):
         return all([
             str(self.id) == str(other.get("id")),
+            str(self.createdOn) == str(other.get("createdOn")),
             str(self.firstName) == str(other.get("firstName")),
             str(self.lastName) == str(other.get("lastName")),
             str(self.emailAddress) == str(other.get("emailAddress"))
@@ -61,6 +64,7 @@ class Client(Base):
         else:
             return all([
                 self.id == other.id,
+                self.createdOn == other.createdOn,
                 self.firstName == other.firstName,
                 self.lastName == other.lastName,
                 self.emailAddress == other.emailAddress,
