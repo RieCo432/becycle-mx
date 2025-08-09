@@ -1,13 +1,10 @@
 <template>
-  <Combobox
-      @update:modelValue="(value) => selected($event, value)">
-    <div class="relative mt-0">
-      <div
-          class="relative w-full"
-      >
-
-
-
+  <div>
+    <div class="relative mt-0"
+         @focusin="() => (showSuggestions = true)"
+         @focusout="() => delay(() => (showSuggestions = false), 100)"
+    >
+      <div class="relative w-full">
         <div
             class="fromGroup relative"
             :class="`${error ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
@@ -25,8 +22,7 @@
           >
           <div class="relative" :class="horizontal ? 'flex-1' : ''">
 
-            <ComboboxInput
-                as="template"
+            <div
             >
               <input
                   :type="types"
@@ -36,6 +32,10 @@
           hasicon ? 'ltr:pr-10 rtl:pl-10' : ''
         } `"
                   :value="modelValue"
+                  @keydown.esc="() => (showSuggestions = false)"
+                  @keydown.down="() => (activeIndex = (activeIndex + 1) % suggestions.length)"
+                  @keydown.up="() => (activeIndex = (activeIndex + suggestions.length - 1) % suggestions.length)"
+                  @keydown.enter="() => (activeIndex === -1 ? selected(null, fieldModelValue) : selected(null, suggestions[activeIndex]))"
                   @input="$emit('update:modelValue', $event.target.value)"
                   :error="error"
                   :id="name"
@@ -44,7 +44,7 @@
                   :validate="validate"
                   v-if="!isMask"
               />
-            </ComboboxInput>
+            </div>
             <cleave
                 :class="`${classInput} cleave input-control block w-full focus:outline-none h-[40px] `"
                 :name="name"
@@ -61,9 +61,7 @@
                 modelValue="modelValue"
             />
 
-            <div
-                class="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2"
-            >
+            <div class="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2">
         <span
             v-if="hasicon"
             @click="toggleType"
@@ -111,65 +109,54 @@
         </div>
 
       </div>
-        <ComboboxOptions
+        <div
             class="absolute w-full mt-1 max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5
                  focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700
                  shadow-dropdown z-[9999]"
-            :static="openByDefault"
+            v-if="openByDefault || showSuggestions"
         >
-          <ComboboxOption
-              v-if="((suggestions.indexOf(fieldModelValue) === -1) && allowNew)"
-              :value="fieldModelValue"
-              v-slot="{ active }"
-              as="template"
-          >
+          <ul>
             <li
+                v-if="((suggestions.indexOf(fieldModelValue) === -1) && allowNew)"
                 :class="{
-                      'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': active,
-                      'text-slate-600 dark:text-slate-300': !active,
+                      'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': activeIndex === -1,
+                      'text-slate-600 dark:text-slate-300': activeIndex !== -1,
                       }"
                 class="relative w-full cursor-default select-none py-2 px-4"
+                @mouseenter="() => (activeIndex = -1)"
             >
                       <span class="block">
                         Create {{ fieldModelValue }}
                       </span>
             </li>
-          </ComboboxOption>
-          <ComboboxOption
-              v-for="(suggestion, i) in suggestions"
-              :key="i"
-              :value="suggestion"
-              v-slot="{ active }"
-              as="template"
-          >
             <li
+                v-for="(suggestion, i) in suggestions"
+                :key="i"
                 :class="{
-                      'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': active,
-                      'text-slate-600 dark:text-slate-300': !active,
+                      'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': activeIndex === i,
+                      'text-slate-600 dark:text-slate-300': !activeIndex !== i,
                       }"
                 class="relative cursor-default select-none py-2 px-4"
+                @mouseenter="() => (activeIndex = i)"
+                @click.prevent="() => selected($event, suggestion)"
             >
                       <span class="block">
                         {{ suggestion }}
                       </span>
             </li>
-          </ComboboxOption>
-        </ComboboxOptions>
+          </ul>
+        </div>
       </div>
-  </Combobox>
+  </div>
 </template>
 
 
 <script>
-import {Combobox, ComboboxInput, ComboboxOptions, ComboboxOption} from '@headlessui/vue';
 import Icon from '@/components/Icon';
 import Cleave from 'vue-cleave-component';
+import {delay} from 'lodash-es';
 export default {
   components: {
-    Combobox,
-    ComboboxOptions,
-    ComboboxOption,
-    ComboboxInput,
     Icon,
     Cleave,
   },
@@ -263,10 +250,14 @@ export default {
   data() {
     return {
       types: this.type,
+      showSuggestions: false,
+      activeIndex: -1,
     };
   },
   methods: {
+    delay,
     selected(event, value) {
+      this.showSuggestions = false;
       const i = this.suggestions.indexOf(value);
       this.selectedCallback(event, i);
     },
