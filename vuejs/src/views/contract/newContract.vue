@@ -69,9 +69,15 @@
                     <div class="col-span-1">Working Volunteer</div>
                     <div class="col-span-1">Checking Volunteer</div>
                     <template v-for="draft in contractDrafts" :key="draft.id">
-                      <div class="col-span-1 col-start-1" v-if="draft.client !== null">{{`${draft.client.firstName} ${draft.client.lastName} ${draft.client.emailAddress}`}}</div>
-                      <div class="col-span-1" v-if="draft.bike !== null">{{`${draft.bike.make} ${draft.bike.model} ${draft.bike.colour} ${draft.bike.serialNumber}`}}</div>
-                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">{{`${draft.depositCollectingUser.username} &#163${draft.depositAmountCollected}`}}</div>
+                      <div class="col-span-1 col-start-1" v-if="draft.client !== null">
+                        {{`${draft.client.firstName} ${draft.client.lastName} ${draft.client.emailAddress}`}}
+                      </div>
+                      <div class="col-span-1" v-if="draft.bike !== null">
+                        {{`${draft.bike.make} ${draft.bike.model} ${draft.bike.colour} ${draft.bike.serialNumber}`}}
+                      </div>
+                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">
+                        {{`${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}`}}
+                      </div>
                       <div class="col-span-1" v-if="draft.workingUser !== null">{{draft.workingUser.username}}</div>
                       <div class="col-span-1" v-if="draft.checkingUser !== null">{{draft.checkingUser.username}}</div>
                       <div class="col-span-1 col-start-6">
@@ -568,7 +574,7 @@ import Textarea from '@/components/Textarea';
 import TextInput from '@/components/TextInput';
 import Radio from '@/components/Radio/index.vue';
 import {ErrorMessage, useField, useForm} from 'vee-validate';
-import {computed, nextTick, onUpdated, ref} from 'vue';
+import {computed, nextTick, ref} from 'vue';
 import {useToast} from 'vue-toastification';
 import * as yup from 'yup';
 import requests from '@/requests';
@@ -750,17 +756,18 @@ export default {
     });
 
     const {value: emailAddress, errorMessage: emailAddressError, setValue: emailAddressSetValue} = useField('emailAddress');
-    const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError, setValue: confirmEmailAddressSetValue} = useField('confirmEmailAddress');
+    const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError, setValue: confirmEmailAddressSetValue} =
+        useField('confirmEmailAddress');
     const {value: firstName, errorMessage: firstNameError, setValue: firstNameSetValue} = useField('firstName');
     const {value: lastName, errorMessage: lastNameError, setValue: lastNameSetValue} = useField('lastName');
 
-    const {value: make, errorMessage: makeError, setValue: makeSetValue} = useField('make');
+    const {value: make, errorMessage: makeError} = useField('make');
     const {value: makeNotInList} = useField('makeNotInList');
-    const {value: model, errorMessage: modelError, setValue: modelSetValue} = useField('model');
+    const {value: model, errorMessage: modelError} = useField('model');
     const {value: modelNotInList} = useField('modelNotInList');
-    const {value: colour, errorMessage: colourError, setValue: colourSetValue} = useField('colour');
-    const {value: decals, errorMessage: decalsError, setValue: decalsSetValue} = useField('decals');
-    const {value: serialNumber, errorMessage: serialNumberError, setValue: serialNumberSetValue} = useField('serialNumber');
+    const {value: colour, errorMessage: colourError} = useField('colour');
+    const {value: decals, errorMessage: decalsError} = useField('decals');
+    const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
     const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
     makeNotInList.value = false;
@@ -802,6 +809,53 @@ export default {
       }
     }
 
+    function setClient() {
+      if (clientId.value !== null && clientId.value !== '') {
+        requests.putDraftContractClient(activeDraft.value.id, clientId.value)
+          .then((response) => {
+            stepNumber.value = 2;
+            activeDraft.value = response.data;
+            toast.success('Client Updated!', {timeout: 1000});
+            if (bikeId.value !== null && bikeId.value !== '') {
+              makeSuggestions.value.push(activeDraft.value.bike.make);
+              modelSuggestions.value.push(activeDraft.value.bike.model);
+              colourSuggestions.value.push(activeDraft.value.bike.colour);
+              serialNumberSuggestions.value.push(activeDraft.value.bike.serialNumber);
+
+              nextTick().then(() => {
+                make.value = activeDraft.value.bike.make;
+                model.value = activeDraft.value.bike.model;
+                colour.value = activeDraft.value.bike.colour;
+                decals.value = activeDraft.value.bike.decals;
+                serialNumber.value = activeDraft.value.bike.serialNumber;
+                bikePhotoTaken.value = true;
+                stickerOnBike.value = true;
+              });
+            }
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 5000});
+          });
+      }
+    }
+
+    function setBike() {
+      if (bikeId.value !== null && bikeId.value !== '') {
+        requests.putDraftContractBike(activeDraft.value.id, bikeId.value)
+          .then((response) => {
+            activeDraft.value = response.data;
+            toast.success('Bike Updated!', {timeout: 1000});
+            stepNumber.value = 3;
+            type.value = activeDraft.value.contractType;
+            condition.value = activeDraft.value.conditionOfBike;
+            notes.value = activeDraft.value.notes;
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 5000});
+          });
+      }
+    }
+
     const submit = handleSubmit(() => {
       // next step until last step. if last step then submit form
       if (stepNumber.value === steps.length - 1) {
@@ -818,6 +872,7 @@ export default {
           requests.getClientByEmail(emailAddress.value)
             .then((response) => {
               clientId.value = response.data[0]['id'];
+              setClient();
             })
             .catch((error) => {
               if (error.response.status === 404) {
@@ -828,38 +883,8 @@ export default {
                 }).then((response) => {
                   toast.success('New Client Created!', {timeout: 1000});
                   clientId.value = response.data['id'];
+                  setClient();
                 });
-              }
-            })
-            .finally(() => {
-              if (clientId.value !== null && clientId.value !== '') {
-                requests.putDraftContractClient(activeDraft.value.id, clientId.value)
-                  .then((response) => {
-                    stepNumber.value = 2;
-                    activeDraft.value = response.data;
-                    toast.success('Client Updated!', {timeout: 1000});
-                    console.log('active draft', activeDraft.value);
-                    console.log('bike id', bikeId.value);
-                    if (bikeId.value !== null && bikeId.value !== '') {
-                      makeSuggestions.value.push(activeDraft.value.bike.make);
-                      modelSuggestions.value.push(activeDraft.value.bike.model);
-                      colourSuggestions.value.push(activeDraft.value.bike.colour);
-                      serialNumberSuggestions.value.push(activeDraft.value.bike.serialNumber);
-
-                      nextTick().then(() => {
-                        make.value = activeDraft.value.bike.make;
-                        model.value = activeDraft.value.bike.model;
-                        colour.value = activeDraft.value.bike.colour;
-                        decals.value = activeDraft.value.bike.decals;
-                        serialNumber.value = activeDraft.value.bike.serialNumber;
-                        bikePhotoTaken.value = true;
-                        stickerOnBike.value = true;
-                      });
-                    }
-                  })
-                  .catch((error) => {
-                    toast.error(error.response.data.detail.description, {timeout: 5000});
-                  });
               }
             });
         } else if (stepNumber.value === 2) {
@@ -867,6 +892,7 @@ export default {
           requests.findBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
             .then((response) => {
               bikeId.value = response.data['id'];
+              setBike();
             })
             .catch((error) => {
               if (error.response.status === 404) {
@@ -874,24 +900,7 @@ export default {
                   .then((response) => {
                     toast.success('New Bike Created!', {timeout: 1000});
                     bikeId.value = response.data['id'];
-                  });
-              }
-            })
-            .finally(() => {
-              if (bikeId.value !== null && bikeId.value !== '') {
-                requests.putDraftContractBike(activeDraft.value.id, bikeId.value)
-                  .then((response) => {
-                    console.log(response.data);
-                    activeDraft.value = response.data;
-                    toast.success('Bike Updated!', {timeout: 1000});
-                    stepNumber.value = 3;
-                    console.log('active draft', activeDraft.value);
-                    type.value = activeDraft.value.contractType;
-                    condition.value = activeDraft.value.conditionOfBike;
-                    notes.value = activeDraft.value.notes;
-                  })
-                  .catch((error) => {
-                    toast.error(error.response.data.detail.description, {timeout: 5000});
+                    setBike();
                   });
               }
             });
@@ -1146,7 +1155,6 @@ export default {
       }
     },
     selectMake(event, i) {
-      console.log('filtered suggestion', this.filtered_make_suggestions);
       if (i !== -1) {
         this.make = this.filtered_make_suggestions[i];
       }
@@ -1301,7 +1309,6 @@ export default {
           this.clientSuggestions.push(this.activeDraft.client);
           nextTick(() => {
             if (this.activeDraft.client !== null) {
-
               this.emailAddress = this.activeDraft.client.emailAddress;
               this.confirmEmailAddress = this.activeDraft.client.emailAddress;
               this.firstName = this.activeDraft.client.firstName;
@@ -1335,26 +1342,21 @@ export default {
       this.run_filter();
     },
     make() {
-      console.log(this.make);
-      console.log(this.makeSuggestions);
       levenshtein.filterSort(this.makeSuggestions, this.make, 4).then((result) => {
         this.filtered_make_suggestions = result.slice(0, 6);
       });
     },
     model() {
-      console.log(this.model);
       levenshtein.filterSort(this.modelSuggestions, this.model, 4).then((result) => {
         this.filtered_model_suggestions = result.slice(0, 6);
       });
     },
     colour() {
-      console.log(this.colour);
       levenshtein.filterSort(this.colourSuggestions, this.colour, 4).then((result) => {
         this.filtered_colour_suggestions = result.slice(0, 6);
       });
     },
     serialNumber() {
-      console.log(this.serialNumber);
       levenshtein.filterSort(this.serialNumberSuggestions, this.serialNumber, 4).then((result) => {
         this.filtered_serial_number_suggestions = result.slice(0, 6);
       });
