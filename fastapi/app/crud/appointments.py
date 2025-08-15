@@ -68,7 +68,7 @@ def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment
     return appointment
 
 
-def cancel_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
+def cancel_appointment(db: Session, appointment_id: UUID, cancellation_detail: schemas.AppointmentCancellationDetail) -> models.Appointment:
     appointment = db.scalar(
         select(models.Appointment)
         .where(
@@ -82,6 +82,7 @@ def cancel_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
                             detail={"description": "This appointment does not exist or is in the past."})
 
     appointment.cancelled = True
+    appointment.cancellationReason = cancellation_detail.reason
 
     db.commit()
 

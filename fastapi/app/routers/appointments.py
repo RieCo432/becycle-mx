@@ -44,10 +44,11 @@ async def confirm_appointment(
 @appointments.patch("/appointments/{appointment_id}/cancel")
 async def cancel_appointment(
         appointment_id: UUID,
+        cancellation_detail: schemas.AppointmentCancellationDetail,
         email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    appointment = crud.cancel_appointment(db=db, appointment_id=appointment_id)
+    appointment = crud.cancel_appointment(db=db, appointment_id=appointment_id, cancellation_detail=cancellation_detail)
 
     if appointment.confirmed:
         email_tasks.add_task(appointment.send_cancellation_email)
