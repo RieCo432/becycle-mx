@@ -86,7 +86,7 @@
                   <DashButton
                       class="bg-danger-500 dark:bg-danger-500"
                       v-if="!appointment.cancelled"
-                      @click="cancelAppointment"
+                      @click="showCancellationModal = true"
                   >{{ appointment.confirmed ? 'Cancel' : 'Deny'}} Appointment</DashButton>
                 </template>
               </div>
@@ -96,6 +96,11 @@
                     @click="deleteClosedDay()"
                 >Remove Closed Day</DashButton>
               </div>
+              <AppointmentCancellationModal
+                  @appointment-cancelled="appointmentCancelled"
+                  @close="showCancellationModal = false"
+                  :show-modal="showCancellationModal"
+                  :appointment="appointment"/>
             </DialogPanel>
           </TransitionChild>
         </div>
@@ -116,12 +121,14 @@ import {
   DialogPanel,
 } from '@headlessui/vue';
 import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
+import AppointmentCancellationModal from "@/components/Modal/AppointmentCancellationModal.vue";
 
 const toast = useToast();
 
 export default {
   name: 'appointmentInfoModal',
   components: {
+    AppointmentCancellationModal,
     Icon,
     TransitionRoot,
     TransitionChild,
@@ -140,13 +147,9 @@ export default {
       });
       this.close();
     },
-    cancelAppointment() {
-      requests.cancelAppointment(this.appointment.id).then(() => {
-        toast.warning('Appointment Denied/Cancelled', {timeout: 2000});
-        this.$emit('appointmentsUpdated');
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+    appointmentCancelled() {
+      this.showCancellationModal = false;
+      this.$emit('appointmentsUpdated');
       this.close();
     },
     deleteClosedDay() {
@@ -240,6 +243,7 @@ export default {
           field: 'notes',
         },
       ],
+      showCancellationModal: false,
     };
   },
   setup(props, {emit}) {
