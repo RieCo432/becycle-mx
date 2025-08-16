@@ -21,6 +21,8 @@ sudo docker exec becycle-mx_postgres_1 psql -U becycleAdmin becycledb -c "delete
 
 sudo docker exec becycle-mx_postgres_1 psql -U becycleAdmin becycledb -c "delete from bikes where id in (select id from orphanedbikes) and createdon < (current_timestamp at time zone 'utc') - interval '7 days';"
 
+sudo docker exec becycle-mx_postgres_1 psql -U becycleAdmin becycledb -c "delete from contractdrafts where clientid is null and startDate < (current_date at time zone 'UTC') - interval '1 day';"
+
 with cron, this can be used to run the command every hour:
 0 * * * *
 
