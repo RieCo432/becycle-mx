@@ -114,6 +114,17 @@ export default {
       this.fetchBikes();
       this.run_filter();
     },
+    resetComboBoxes() {
+      this.selectedBike = {
+        make: '',
+        model: '',
+        colour: '',
+        serialNumber: '',
+        decals: '',
+        id: '',
+      };
+      this.filtered_bike_suggestions = [];
+    },
   },
   computed: {
     filteredBikeSuggestionsLegible() {
@@ -140,6 +151,7 @@ export default {
                 name="make"
                 v-model="selectedBike.make"
                 @input="handleInput"
+                @emptied="resetComboBoxes"
             />
           </div>
 
@@ -155,6 +167,7 @@ export default {
                 name="model"
                 v-model="selectedBike.model"
                 @input="handleInput"
+                @emptied="resetComboBoxes"
             />
           </div>
 
@@ -170,6 +183,7 @@ export default {
                 name="colour"
                 v-model="selectedBike.colour"
                 @input="handleInput"
+                @emptied="resetComboBoxes"
             />
           </div>
 
@@ -185,6 +199,7 @@ export default {
                 name="serialNumber"
                 v-model="selectedBike.serialNumber"
                 @input="handleInput"
+                @emptied="resetComboBoxes"
             />
           </div>
 

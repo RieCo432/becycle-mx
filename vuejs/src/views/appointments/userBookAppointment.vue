@@ -61,23 +61,23 @@ export default {
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
       emailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Email is required'),
+        .string()
+        .email('Email is not valid')
+        .required('Email is required'),
       confirmEmailAddress: yup
-          .string()
-          .email('Email is not valid')
-          .required('Confirm Email is required')
-          .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
+        .string()
+        .email('Email is not valid')
+        .required('Confirm Email is required')
+        .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
     });
 
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return clientSchema;
-        default:
-          return null;
+      case 0:
+        return clientSchema;
+      default:
+        return null;
       }
     });
 
@@ -96,7 +96,7 @@ export default {
       if (stepNumber.value === steps.length - 1) {
         // handle submit
         requests.postAppointment(clientId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
-            appointmentNotes.value, true).then(() => {
+          appointmentNotes.value, true).then(() => {
           toast.success('Appointment created.', {timeout: 2000});
           router.push(`/clients/${clientId.value}`);
         }).catch((error) => {
@@ -198,11 +198,18 @@ export default {
         this.lastName = selectedClient.lastName;
       }
     },
+    resetComboBoxes() {
+      this.emailAddress = '';
+      this.confirmEmailAddress = '';
+      this.firstName = '';
+      this.lastName = '';
+      this.clientSuggestions = [];
+    },
   },
   computed: {
     filtered_client_suggestions() {
       return this.clientSuggestions.filter((client) => (
-          (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
+        (this.firstName && client.firstName.startsWith(this.firstName.toLowerCase())) ||
           (this.lastName && client.lastName.startsWith(this.lastName.toLowerCase())) ||
           (this.emailAddress && client.emailAddress.startsWith(this.emailAddress.toLowerCase()))
       ));
@@ -287,6 +294,7 @@ export default {
                         v-model="emailAddress"
                         :error="emailAddressError"
                         @input="fetchClientSuggestions"
+                        @emptied="resetComboBoxes"
                     />
                   </div>
 
@@ -313,6 +321,7 @@ export default {
                         v-model="firstName"
                         :error="firstNameError"
                         @input="fetchClientSuggestions"
+                        @emptied="resetComboBoxes"
                     />
                   </div>
 
@@ -328,6 +337,7 @@ export default {
                         v-model="lastName"
                         :error="lastNameError"
                         @input="fetchClientSuggestions"
+                        @emptied="resetComboBoxes"
                     />
                   </div>
                 </div>
