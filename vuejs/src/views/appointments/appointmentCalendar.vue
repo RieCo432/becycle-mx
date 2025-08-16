@@ -171,7 +171,7 @@ export default {
           center: 'title',
           right: 'timeGridWeek,timeGridDay,listWeek',
         },
-        timeZone: 'UTC',
+        timeZone: 'GMT',
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
         initialView: window.width > 768 ? 'timeGridWeek' : 'timeGridDay',
         themeSystem: 'bootstrap',
