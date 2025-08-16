@@ -28,6 +28,8 @@ class Appointment(Base):
 
     reminderSent: Mapped[bool] = mapped_column("remindersent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
+    cancellationReason: Mapped[str] = mapped_column("cancellationreason", Text, nullable=True, quote=False)
+
     _rental_note = "<p>Please note that the rental deposit must be paid in <span style=\"color:#ff0000\">CASH ONLY</span>. This is because we cannot return money via card.</p>"
 
 
@@ -80,7 +82,7 @@ class Appointment(Base):
         )
 
     def send_request_denied_email(self):
-        email_html_content = services.email_helpers.build_appointment_request_denied_email(self.type.title, self.startDateTime)
+        email_html_content = services.email_helpers.build_appointment_request_denied_email(self.type.title, self.startDateTime, self.cancellationReason)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Apoointment Request has been denied",
@@ -88,7 +90,7 @@ class Appointment(Base):
         )
 
     def send_cancellation_email(self):
-        email_html_content = services.email_helpers.build_appointment_cancellation_email(self.type.title, self.startDateTime)
+        email_html_content = services.email_helpers.build_appointment_cancellation_email(self.type.title, self.startDateTime, self.cancellationReason)
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment has been cancelled",

@@ -550,8 +550,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  cancelAppointment(appointmentId) {
-    return axiosClient.patch(`/appointments/${appointmentId}/cancel`, {}, {
+  cancelAppointment(appointmentId, data) {
+    return axiosClient.patch(`/appointments/${appointmentId}/cancel`, data, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
