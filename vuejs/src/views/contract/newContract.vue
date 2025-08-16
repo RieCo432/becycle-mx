@@ -105,6 +105,7 @@
                         v-model="emailAddress"
                         :error="emailAddressError"
                         @input="fetchClientSuggestions"
+                        @emptied="resetClientComboBoxes"
                     />
                   </div>
 
@@ -131,6 +132,7 @@
                         v-model="firstName"
                         :error="firstNameError"
                         @input="fetchClientSuggestions"
+                        @emptied="resetClientComboBoxes"
                     />
                   </div>
 
@@ -146,6 +148,7 @@
                         v-model="lastName"
                         :error="lastNameError"
                         @input="fetchClientSuggestions"
+                        @emptied="resetClientComboBoxes"
                     />
                   </div>
                 </div>
@@ -1464,6 +1467,14 @@ export default {
         .catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 5000});
         });
+    },
+    resetClientComboBoxes() {
+      this.filtered_client_suggestions = [];
+      this.firstName = '';
+      this.lastName = '';
+      this.emailAddress = '';
+      this.confirmEmailAddress = '';
+      this.clientId = '';
     },
   },
   watch: {

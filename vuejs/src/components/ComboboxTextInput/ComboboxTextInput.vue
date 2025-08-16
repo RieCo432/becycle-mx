@@ -36,7 +36,7 @@
                   @keydown.down="() => (activeIndex = (activeIndex + 1) % suggestions.length)"
                   @keydown.up="() => (activeIndex = (activeIndex + suggestions.length - 1) % suggestions.length)"
                   @keydown.enter="() => (activeIndex === -1 ? selected(null, fieldModelValue) : selected(null, suggestions[activeIndex]))"
-                  @input="$emit('update:modelValue', $event.target.value)"
+                  @input="(event) => {$emit('update:modelValue', event.target.value); if (event.target.value === '') $emit('emptied')}"
                   :error="error"
                   :id="name"
                   :readonly="isReadonly"
@@ -160,6 +160,7 @@ export default {
     Icon,
     Cleave,
   },
+  emits: ['emptied'],
   props: {
     suggestions: {
       type: Array,
