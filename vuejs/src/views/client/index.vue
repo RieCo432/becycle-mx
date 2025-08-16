@@ -57,12 +57,8 @@ export default {
       });
     },
     cancelAppointment(appointmentId) {
-      requests.cancelAppointment(appointmentId).then((response) => {
-        toast.warning('Appointment cancelled!', {timeout: 2000});
-        this.updateAppointmentInSummaries(response.data);
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      const indexInArray = this.appointmentSummaries.findIndex((originalAppointment) => originalAppointment.id === appointmentId);
+      this.appointmentSummaries[indexInArray].status = 'cancelled';
     },
     editAppointmentNotes(appointmentId) {
       // TODO
