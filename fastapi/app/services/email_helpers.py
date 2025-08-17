@@ -129,12 +129,12 @@ def build_appointment_request_received_email(appointment_title: str, appointment
             ))
 
 
-def build_appointment_cancellation_email(appointment_title: str, appointment_start_datetime: datetime):
+def build_appointment_cancellation_email(appointment_title: str, appointment_start_datetime: datetime, cancellation_reason: str | None = None):
     return ("<html>"
             "   <body>"
             "       <h2>Your Appointment has been cancelled!</h2>"
             "       <p>We are sorry to inform you that your {:s} appointment on {:s}, the {:d} {:s} {:d} at {:02d}:{:02d} has been cancelled.<br>"
-            "This is usually due to an unexpected shortage of volunteers.</p>"
+            "{:s}</p>"  
             "       <p>If you wish to book a new appointment, please head to <a href='https://becycle.uk/'>becycle.uk</a> and book a new appointment.</p>"
             "       <p>We apologise for any inconvenience this may cause.</p>"
             "   </body>"
@@ -145,16 +145,18 @@ def build_appointment_cancellation_email(appointment_title: str, appointment_sta
                 months[appointment_start_datetime.month],
                 appointment_start_datetime.year,
                 appointment_start_datetime.hour,
-                appointment_start_datetime.minute
+                appointment_start_datetime.minute,
+                "This is usually due to an unexpected shortage of volunteers." if cancellation_reason is None else (
+                            "Reason: " + cancellation_reason)
             ))
 
 
-def build_appointment_request_denied_email(appointment_title: str, appointment_start_datetime: datetime):
+def build_appointment_request_denied_email(appointment_title: str, appointment_start_datetime: datetime, cancellation_reason: str | None = None):
     return ("<html>"
             "   <body>"
             "       <h2>Your Appointment request has been denied!</h2>"
             "       <p>We are sorry to inform you that we could not accept your request for a {:s} appointment on {:s}, the {:d} {:s} {:d} at {:02d}:{:02d}.<br>"
-            "This is usually due to us expecting a lower number of volunteers than usual for the day in question.</p>"
+            "{:s}</p>"
             "       <p>If you wish to book a new appointment, please head to <a href='https://becycle.uk/'>becycle.uk</a> and book a new appointment.</p>"
             "       <p>We apologise for any inconvenience this may cause.</p>"
             "   </body>"
@@ -165,7 +167,9 @@ def build_appointment_request_denied_email(appointment_title: str, appointment_s
                 months[appointment_start_datetime.month],
                 appointment_start_datetime.year,
                 appointment_start_datetime.hour,
-                appointment_start_datetime.minute
+                appointment_start_datetime.minute,
+                "This is usually due to us expecting a lower number of volunteers than usual for the day in question." if cancellation_reason is None else (
+                            "Reason: " + cancellation_reason)
             ))
 
 

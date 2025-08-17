@@ -7,12 +7,14 @@ import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
 import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
 import Modal from '@/components/Modal/Modal.vue';
+import AppointmentCancellationModal from "@/components/Modal/AppointmentCancellationModal.vue";
 
 const credentialsStore = useCredentialsStore();
 
 export default {
   name: 'clientView',
   components: {
+    AppointmentCancellationModal,
     ContractClientCardSkeleton,
     DashButton,
     AppointmentSummaryTable,
@@ -255,6 +257,7 @@ export default {
                   title="Appointments">
               </AppointmentSummaryTable>
               <Modal
+                  v-if="isClient"
                   :active-modal="showCancelAppointmentModal"
                   title="Are you sure you want to cancel this appointment?"
                   @close="showCancelAppointmentModal = false">
@@ -278,6 +281,16 @@ export default {
                 </template>
 
               </Modal>
+              <AppointmentCancellationModal
+                  v-else
+                  :show-modal="showCancelAppointmentModal"
+                  :appointment="cancelAppointmentModalInfo"
+                  @close="showCancelAppointmentModal = false"
+                  @appointment-cancelled="() => {
+                    cancelAppointment(cancelAppointmentModalId);
+                    showCancelAppointmentModal = false;
+                   cancelAppointmentModalId = null;
+                  }"></AppointmentCancellationModal>
             </div>
           </div>
         </Card>

@@ -60,6 +60,15 @@ export default {
       this.fetchClients();
       this.run_filter();
     },
+    resetComboBoxes() {
+      this.selectedClient = {
+        firstName: '',
+        lastName: '',
+        emailAddress: '',
+        id: null,
+      };
+      this.filtered_client_suggestions = [];
+    }
   },
   computed: {
     filteredClientSuggestionsLegible() {
@@ -86,6 +95,7 @@ export default {
                 name="firstName"
                 v-model="selectedClient.firstName"
                 @input="handleInput"
+                @emptied="resetComboBoxes"
             />
           </div>
 
@@ -101,6 +111,7 @@ export default {
                 name="lastName"
                 v-model="selectedClient.lastName"
                 @input="handleInput"
+                @emptied="resetComboBoxes"
             />
           </div>
 
@@ -116,6 +127,7 @@ export default {
                 name="emailAddress"
                 v-model="selectedClient.emailAddress"
                 @input="handleInput"
+                @emptied="resetComboBoxes"
             />
           </div>
 
