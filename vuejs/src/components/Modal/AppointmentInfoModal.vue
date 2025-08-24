@@ -58,7 +58,7 @@
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Confirmed: {{appointment.confirmed ? 'Yes' : 'No'}}</p>
                 <p>Notes: {{appointment.notes}}</p>
               </div>
-              <div>
+              <div v-if="appointment.typeTitle !== 'Closed Day'">
                 <AppointmentSummaryTable
                     title="Appointments"
                     :is-client="false"

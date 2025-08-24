@@ -48,20 +48,36 @@ export default {
   },
   methods: {
     showEventDetail(eventClickInfo) {
-      this.showAppointmentModal = !this.showAppointmentModal;
-      this.getClientAppointmentSummaries(eventClickInfo.event.extendedProps.client.id);
-      this.appointmentModalInfo = {
-        title: eventClickInfo.event.title,
-        startDateTime: eventClickInfo.event.start,
-        notes: eventClickInfo.event.extendedProps.notes,
-        id: eventClickInfo.event.id,
-        client: eventClickInfo.event.extendedProps.client,
-        endDateTime: eventClickInfo.event.end,
-        confirmed: eventClickInfo.event.extendedProps.confirmed,
-        cancelled: eventClickInfo.event.extendedProps.cancelled,
-        clientName: eventClickInfo.event.extendedProps.clientName,
-        typeTitle: eventClickInfo.event.extendedProps.typeTitle,
-      };
+      console.log(eventClickInfo);
+      if (eventClickInfo.event.extendedProps.typeTitle === 'Closed Day') {
+        this.appointmentModalInfo = {
+          title: eventClickInfo.event.title,
+          startDateTime: eventClickInfo.event.start,
+          notes: eventClickInfo.event.extendedProps.notes,
+          id: eventClickInfo.event.id,
+          client: {},
+          endDateTime: eventClickInfo.event.end,
+          confirmed: true,
+          cancelled: false,
+          clientName: 'Workshop',
+          typeTitle: eventClickInfo.event.extendedProps.typeTitle,
+        };
+      } else {
+        this.getClientAppointmentSummaries(eventClickInfo.event.extendedProps.client.id);
+        this.appointmentModalInfo = {
+          title: eventClickInfo.event.title,
+          startDateTime: eventClickInfo.event.start,
+          notes: eventClickInfo.event.extendedProps.notes,
+          id: eventClickInfo.event.id,
+          client: eventClickInfo.event.extendedProps.client,
+          endDateTime: eventClickInfo.event.end,
+          confirmed: eventClickInfo.event.extendedProps.confirmed,
+          cancelled: eventClickInfo.event.extendedProps.cancelled,
+          clientName: eventClickInfo.event.extendedProps.clientName,
+          typeTitle: eventClickInfo.event.extendedProps.typeTitle,
+        };
+      }
+      this.showAppointmentModal = true;
     },
     openAddClosedDayModal(info) {
       this.addClosedDayDate = info.dateStr;
