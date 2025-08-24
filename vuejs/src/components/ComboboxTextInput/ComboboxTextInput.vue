@@ -2,7 +2,7 @@
   <div>
     <div class="relative mt-0"
          @focusin="() => (showSuggestions = true)"
-         @focusout="() => delay(() => (showSuggestions = false), 100)"
+         @focusout="() => (showSuggestions = false)"
     >
       <div class="relative w-full">
         <div
@@ -138,7 +138,7 @@
                       }"
                 class="relative cursor-default select-none py-2 px-4"
                 @mouseenter="() => (activeIndex = i)"
-                @click.prevent="() => selected($event, suggestion)"
+                @mousedown.prevent="(event) => selected(event, suggestion)"
             >
                       <span class="block">
                         {{ suggestion }}
