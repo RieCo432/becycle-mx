@@ -1,7 +1,22 @@
-from datetime import date
+from datetime import date, datetime
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+
+
+class CrimeReportBase(BaseModel):
+    crimeNumber: str
+    contractId: UUID
+
+
+class CrimeReportCreate(CrimeReportBase):
+    pass
+
+class CrimeReport(CrimeReportBase):
+    id: UUID
+    createdOn: datetime
+    closedOn: datetime | None = None
 
 
 class ContractBase(BaseModel):
@@ -31,6 +46,7 @@ class ContractPublic(ContractBase):
     detailsSent: bool = False
     expiryReminderSent: bool = False
     returnDetailsSent: bool = False
+    crimeReports: List[CrimeReport] | None = None
 
 
 class Contract(ContractPublic):

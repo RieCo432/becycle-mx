@@ -17,4 +17,5 @@ from .clientsMe import clients_me
 from .clientsPublic import public_clients
 from .appointmentsPublic import appointments_public
 from .usersPublic import users_public
+from .crimeReports import crime_reports
 

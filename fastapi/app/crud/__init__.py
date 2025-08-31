@@ -13,3 +13,4 @@ from .users import *
 from .expenses import *
 from .permissions import *
 from .groups import *
+from .crimeReports import *
