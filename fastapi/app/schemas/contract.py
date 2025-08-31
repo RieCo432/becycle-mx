@@ -46,7 +46,7 @@ class ContractPublic(ContractBase):
     detailsSent: bool = False
     expiryReminderSent: bool = False
     returnDetailsSent: bool = False
-    crimeReports: List[CrimeReport] | None = None
+    crimeReports: List[CrimeReport] = []
 
 
 class Contract(ContractPublic):

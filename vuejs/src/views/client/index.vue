@@ -86,6 +86,8 @@ export default {
         let status = 'open';
         if (contract.returnedDate != null) {
           status = 'closed';
+        } else if (contract.crimeReports.filter((report) => report.closedOn !== null).length > 0) {
+          status = 'stolen'
         } else {
           if (new Date(contract.endDate).getTime() < new Date().getTime()) {
             status = 'expired';
