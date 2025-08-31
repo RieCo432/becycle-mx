@@ -115,6 +115,17 @@ export default {
         this.depositReturnedByUser = response.data;
       });
     },
+    patchCloseCrimeReport(crimeReportId) {
+      requests.patchCloseCrimeReport(crimeReportId)
+        .then((response) => {
+          const indexInArray = this.contract.crimeReports.findIndex((report) => (report.id === crimeReportId));
+          this.contract.crimeReports.splice(indexInArray, 1, response.data);
+          toast.success('Crime Report Closed!', {timeout: 1000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+    },
   },
   mounted() {
     this.getContract();
@@ -155,6 +166,8 @@ export default {
         :is-user="true"
         :is-user-admin="isUserAdmin"
         :open-edit-contract-details-modal="() => showEditContractDetailsModal = true"
+        :patch-close-crime-report="patchCloseCrimeReport"
+        @crime-report-added="(crimeReport) => (contract.crimeReports.push(crimeReport))"
     ></view-contract>
     <EditClientDetailsModal v-if="!loadingClient"
                             :close-modal="() => showEditClientDetailsModal = false"
