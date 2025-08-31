@@ -16,7 +16,7 @@ class CrimeReport(Base):
     contractId: Mapped[UUID] = mapped_column("contractid", ForeignKey("contracts.id"), nullable=False, quote=False)
     contract: Mapped["Contract"] = relationship("Contract", back_populates="crimeReports")
     createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
-    closed: Mapped[bool] = mapped_column("closed", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+    closedOn: Mapped[datetime] = mapped_column("closedon", DateTime, nullable=True, quote=False)
 
 
     def __eq__(self, other: dict):
