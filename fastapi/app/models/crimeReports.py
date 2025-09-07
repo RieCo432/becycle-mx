@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app import services
 from app.database.db import Base
 
 
@@ -26,3 +27,18 @@ class CrimeReport(Base):
             str(self.crimeNumber) == str(other.get("crimeNumber", None)),
             str(self.createdOn) == str(other.get("createdOn", None))
         ])
+
+    def send_crime_report_added_email(self):
+        email_html_content = services.email_helpers.build_crime_report_added_email(crime_report=self)
+        services.email_helpers.send_email(
+            destination=self.contract.client.emailAddress,
+            subject="Your Stolen Bike",
+            content=email_html_content)
+
+    def send_crime_report_closed_email(self):
+        email_html_content = services.email_helpers.build_crime_report_closed_email(crime_report=self)
+        services.email_helpers.send_email(
+            destination=self.contract.client.emailAddress,
+            subject="Your Stolen Bike",
+            content=email_html_content
+        )
