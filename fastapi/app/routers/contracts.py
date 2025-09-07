@@ -254,6 +254,10 @@ async def return_bike(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    crime_reports = crud.get_crime_reports(db=db, contract_id=contract_id)
+    if len([report for report in crime_reports if report.closedOn is None]) > 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "You cannot return a contract while there is an open crime report!"})
+
     contract = crud.return_contract(db=db,
                                     contract_id=contract_id,
                                     deposit_amount_returned=deposit_amount_returned,

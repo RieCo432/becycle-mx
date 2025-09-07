@@ -47,6 +47,8 @@ app.include_router(routers.admin)
 app.include_router(routers.expenses)
 app.include_router(routers.groups)
 
+app.include_router(routers.crime_reports)
+
 
 
 if os.environ["PRODUCTION"] == "true":
