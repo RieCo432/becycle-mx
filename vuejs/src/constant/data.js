@@ -66,6 +66,12 @@ export const topMenu = [
     show: ['user'],
   },
   {
+    title: 'Find Crime Report',
+    icon: 'heroicons-outline:magnifying-glass',
+    link: '/crimereports',
+    show: ['user'],
+  },
+  {
     title: 'Appointments',
     icon: 'heroicons-outline:calendar',
     link: '/appointments',

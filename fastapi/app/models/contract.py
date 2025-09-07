@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 import app.services as services
 from app.database.db import Base
 
-from typing import Self
+from typing import Self, List
 
 CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
@@ -56,6 +56,8 @@ class Contract(Base):
     detailsSent: Mapped[bool] = mapped_column("detailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     expiryReminderSent: Mapped[bool] = mapped_column("expiryremindersent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returndetailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+
+    crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
 
     def __eq__dict(self, other: dict):
         return all([

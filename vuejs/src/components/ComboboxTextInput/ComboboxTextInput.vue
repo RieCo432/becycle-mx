@@ -3,7 +3,6 @@
     <div class="relative mt-0"
          @focusin="() => (showSuggestions = true)"
          @focusout="(evt) => {
-           console.log('focusout', evt);
            showSuggestions = false;
          }"
     >
@@ -261,7 +260,6 @@ export default {
   methods: {
     delay,
     selected(event, value) {
-      console.log('selected', event);
       this.showSuggestions = false;
       const i = this.suggestions.indexOf(value);
       this.selectedCallback(event, i);

@@ -15,12 +15,14 @@ import Icon from '@/components/Icon';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
+import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
 
 const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    SubmitCrimeReportCard,
     ComboboxTextInput,
     Checkbox,
     Card,
@@ -32,7 +34,7 @@ export default {
     ErrorMessage,
     Icon,
   },
-  setup(props) {
+  setup(props, context) {
     const credentialsStore = useCredentialsStore();
     const contractData = toRef(props, 'contract');
     const patchContractReturn = toRef(props, 'patchContractReturn');
@@ -175,6 +177,8 @@ export default {
       steps,
       stepNumber,
       prev,
+
+
     };
   },
   methods: {
@@ -313,6 +317,10 @@ export default {
       type: Function,
       default: () => {},
     },
+    patchCloseCrimeReport: {
+      type: Function,
+      default: () => {},
+    },
   },
   computed: {
     filtered_deposit_returning_user_suggestions() {
@@ -332,6 +340,7 @@ export default {
         .slice(0, 10);
     },
   },
+  emits: ['crimeReportAdded'],
 };
 </script>
 
@@ -430,7 +439,10 @@ export default {
             </template>
           </Card>
         </div>
-        <div class="col-span-12 gap-5" v-if="((contract.returnedDate == null) && isUser) || (contract.returnedDate != null)">
+        <div class="col-span-12 gap-5" v-if="
+        !loadingContract &&
+        (((contract.returnedDate == null) && isUser) || (contract.returnedDate != null)) &&
+        contract.crimeReports.filter((report) => (report.closedOn === null)).length === 0">
           <Card title="Return">
             <div v-if="(contract.returnedDate == null) && isUser">
               <div class="flex z-[5] items-center relative justify-center md:mx-8">
@@ -495,7 +507,7 @@ export default {
                           :suggestions="filtered_return_accepting_user_suggestions"
                           :selected-callback="selectReturnAcceptingUser"
                           :allow-new="false"
-                          :open-by-default="userSelectionOptionsStatic"
+                          :open-by-default="false"
                           label="Return Accepting Volunteer"
                           type="text"
                           placeholder="workshop"
@@ -621,6 +633,51 @@ export default {
             </div>
           </Card>
         </div>
+        <template v-if="!loadingContract">
+          <template v-if="
+          isUser &&
+          contractData.returnedDate == null &&
+          contractData.crimeReports.filter((report) => (report.closedOn === null)).length === 0">
+            <div class="col-span-12 lg:col-span-4 gap-5">
+              <SubmitCrimeReportCard
+              :contract-id="contract.id"
+              @crime-report-added="(report) => $emit('crimeReportAdded', report)"/>
+            </div>
+          </template>
+          <div
+              v-for="crimeReport in contract.crimeReports.toSorted((report) => (report.createdOn)).reverse()"
+              :key="crimeReport.id"
+              class="col-span-12 lg:col-span-4 gap-5" >
+            <Card
+                :key="crimeReport.id"
+                  title="Crime Report">
+              <div class="flex flex-col h-full">
+                <div class="flex-1">
+                  <p class="text-slate-600 dark:text-slate-300">
+                    Created: {{new Date(Date.parse(crimeReport.createdOn))
+                      .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                  </p>
+                  <p class="text-slate-600 dark:text-slate-300">
+                    Crime Number: {{crimeReport.crimeNumber}}
+                  </p>
+                  <p
+                      v-if="crimeReport.closedOn !== null"
+                      class="text-slate-600 dark:text-slate-300">
+                    Closed: {{new Date(Date.parse(crimeReport.closedOn))
+                      .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                  </p>
+                </div>
+                <DashButton
+                    v-if="isUser && crimeReport.closedOn === null"
+                    class="mt-5"
+                    @click="() => patchCloseCrimeReport(crimeReport.id)">
+                  Close Crime Report
+                </DashButton>
+              </div>
+
+            </Card>
+          </div>
+        </template>
       </div>
     </div>
   </div>

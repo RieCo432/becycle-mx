@@ -68,7 +68,16 @@ async def get_my_contract(
         depositAmountCollected=contract.depositAmountCollected,
         conditionOfBike=contract.conditionOfBike,
         contractType=contract.contractType,
-        notes=contract.notes
+        notes=contract.notes,
+        crimeReports=[
+            schemas.CrimeReport(
+                id=report.id,
+                crimeNumber=report.crimeNumber,
+                createdOn=report.createdOn,
+                closedOn=report.closedOn,
+                contractId=report.contractId
+            ) for report in contract.crimeReports
+        ]
     )
 
 

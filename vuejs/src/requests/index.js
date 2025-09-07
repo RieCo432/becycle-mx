@@ -1409,4 +1409,25 @@ export default {
       },
     );
   },
+  postCrimeReport(data) {
+    return axiosClient.post('/crimereports', data, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchCloseCrimeReport(crimeReportId) {
+    return axiosClient.patch(`/crimereports/${crimeReportId}/close`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  findCrimeReport(crimeNumber) {
+    return axiosClient.get('/crimereports/find', {
+      params: {
+        crime_number: crimeNumber,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

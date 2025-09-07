@@ -15,3 +15,4 @@ from .group import *
 from .groupUser import *
 from .groupPermission import *
 from .contractDraft import *
+from .crimeReports import *
