@@ -57,7 +57,7 @@ class Contract(Base):
     expiryReminderSent: Mapped[bool] = mapped_column("expiryremindersent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returndetailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
 
-    crimeReports: Mapped[List["Contract"]] = relationship("CrimeReport", back_populates="contract")
+    crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
 
     def __eq__dict(self, other: dict):
         return all([
