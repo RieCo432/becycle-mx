@@ -40,6 +40,16 @@ async def create_crime_report(
     return crud.create_crime_report(crime_report_data=crime_report_data, db=db)
 
 
+@crime_reports.get("/crimereports/find")
+async def get_crime_number_suggestions(
+        crime_number: str,
+        max_distance: int = 4,
+        db: Session = Depends(dep.get_db),
+) -> List[schemas.CrimeReportFull]:
+    crime_reports =  crud.find_crime_reports(db=db, crime_number=crime_number.lower().replace(" ", "").replace(" ", ""), max_distance=max_distance)
+    return crime_reports
+
+
 @crime_reports.patch("/crimereports/{crime_report_id}/close")
 async def close_crime_report(
         crime_report_id: UUID,

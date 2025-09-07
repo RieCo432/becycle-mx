@@ -1421,4 +1421,13 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  findCrimeReport(crimeNumber) {
+    return axiosClient.get('/crimereports/find', {
+      params: {
+        crime_number: crimeNumber,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };
