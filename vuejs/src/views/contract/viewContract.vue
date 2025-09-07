@@ -633,8 +633,7 @@ export default {
             </div>
           </Card>
         </div>
-        <template v-if="!loadingContract && (((contract.returnedDate == null) && isUser) || (contract.returnedDate != null))">
-
+        <template v-if="!loadingContract">
           <template v-if="
           isUser &&
           contractData.returnedDate == null &&
