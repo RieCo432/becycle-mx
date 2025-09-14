@@ -1234,6 +1234,26 @@ export default {
       .catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 5000});
       });
+    if (this.$route.query.bikeId) {
+      requests.getBike(this.$route.query.bikeId)
+        .then((response) => {
+          this.bike = response.data;
+          this.bikeId = response.data.id;
+          this.make = response.data.make;
+          this.model = response.data.model;
+          this.colour = response.data.colour;
+          this.decals = response.data.decals;
+          this.serialNumber = response.data.serialNumber;
+          this.startNewDraft();
+          this.fetchBikeMakeSuggestions(this.make);
+          this.fetchBikeModelSuggestions(this.model);
+          this.fetchColourSuggestions(this.colour);
+          this.fetchSerialNumberSuggestions(this.serialNumber);
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 5000});
+        });
+    }
   },
   methods: {
     userSortingFunction(user1, user2) {

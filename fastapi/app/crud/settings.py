@@ -607,3 +607,23 @@ def swap_faq_order(db: Session, faq1_id: UUID, faq2_id: UUID) -> list[models.Faq
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": str(e)})
 
     return [faq1, faq2]
+
+
+def swap_appointment_type_order(db: Session, type1_id: str, type2_id: str) -> list[models.AppointmentType]:
+    type1 = get_appointment_type(db=db, appointment_type_id=type1_id)
+    type2 = get_appointment_type(db=db, appointment_type_id=type2_id)
+
+    type1_old_order_index = type1.orderIndex
+    type2_old_order_index = type2.orderIndex
+
+    try:
+        type2.orderIndex = -1
+        db.commit()
+        type1.orderIndex = type2_old_order_index
+        db.commit()
+        type2.orderIndex = type1_old_order_index
+        db.commit()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": str(e)})
+
+    return [type1, type2]
