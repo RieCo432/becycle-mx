@@ -231,7 +231,8 @@ export default {
 
                   <template v-else>
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Sorry, there are no appointments available at this time. Please check again later.
+                      Unfortunately, there are currently no available slots for this appointment type due to high demand.
+                      More slots will be added in a few days. Please try again in a few days.
                     </h4>
                   </template>
 
