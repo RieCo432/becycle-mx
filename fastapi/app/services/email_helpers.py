@@ -351,7 +351,7 @@ def build_crime_report_added_email(crime_report: schemas.CrimeReportFull):
             "</p>"
             "   </body>"
             "</html>".format(crime_report.crimeNumber,
-                             crime_report.createdOn.strftime("%dd/%mmm/%YYYY"),
+                             crime_report.createdOn.strftime("%d %B %Y"),
         crime_report.contract.client.firstName, crime_report.contract.client.lastName,
                              crime_report.contract.bike.make, crime_report.contract.bike.model,
                              crime_report.contract.bike.colour,
@@ -391,8 +391,8 @@ def build_crime_report_closed_email(crime_report: schemas.CrimeReportFull):
             "</p>"
             "   </body>"
             "</html>".format(crime_report.crimeNumber,
-                             crime_report.createdOn.strftime("%dd/%mmm/%YYYY"),
-                             crime_report.closedOn.strftime("%dd/%mmm/%YYYY"),
+                             crime_report.createdOn.strftime("%d %B %Y"),
+                             crime_report.closedOn.strftime("%d %B %Y"),
         crime_report.contract.client.firstName, crime_report.contract.client.lastName,
                              crime_report.contract.bike.make, crime_report.contract.bike.model,
                              crime_report.contract.bike.colour,
