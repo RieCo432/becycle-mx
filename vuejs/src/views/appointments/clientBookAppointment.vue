@@ -102,7 +102,7 @@ export default {
   created() {
     requests.getClientMe(); // if this returns 401 the client will get redirected to login page
     requests.getAppointmentTypes().then((response) => {
-      this.appointmentTypes = response.data;
+      this.appointmentTypes = response.data.sort((a, b) => (a.orderIndex - b.orderIndex));
     });
   },
 };

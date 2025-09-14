@@ -233,7 +233,7 @@ def update_appointment_type(db: Session, appointment_type: models.AppointmentTyp
     return appointment_type
 
 
-def create_appointment_type(db: Session, appointment_type_data: schemas.AppointmentType) -> models.AppointmentType:
+def create_appointment_type(db: Session, appointment_type_data: schemas.AppointmentTypeCreate) -> models.AppointmentType:
     new_appointment_type = models.AppointmentType(
         id=appointment_type_data.id,
         title=appointment_type_data.title,

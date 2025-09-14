@@ -1,8 +1,11 @@
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 from dateutil import relativedelta
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, Body, HTTPException
 from sqlalchemy.orm import Session
+from starlette import status
+
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
@@ -59,8 +62,20 @@ async def cancel_appointment(
 
 
 @appointments.post("/appointments/types")
-async def create_appointment_type(new_appointment_type: schemas.AppointmentType, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
+async def create_appointment_type(new_appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
     return crud.create_appointment_type(db=db, appointment_type_data=new_appointment_type)
+
+
+@appointments.patch("/settings/appointments/swap")
+async def patch_swap_faq(
+        appointment_type_1_id: Annotated[str, Body(embed=True)],
+        appointment_type_2_id: Annotated[str, Body(embed=True)],
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.AppointmentType]:
+    if crud.get_appointment_type(db=db, appointment_type_id=appointment_type_1_id) is None or crud.get_appointment_type(db=db, appointment_type_id=appointment_type_2_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "One or more Appointment Types not found."})
+
+    return crud.swap_appointment_type_order(db=db, type1_id=appointment_type_1_id, type2_id=appointment_type_2_id)
 
 
 @appointments.patch("/appointments/types/{type_id}")
