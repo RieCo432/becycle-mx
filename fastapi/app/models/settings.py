@@ -47,6 +47,9 @@ class AppointmentType(Base):
     description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
     duration: Mapped[int] = mapped_column("duration", Integer, nullable=False, quote=False)
 
+    orderIndex: Mapped[int] = mapped_column("orderindex", Integer, Identity(start=1, cycle=True), unique=True,
+                                            index=True, nullable=False, quote=False)
+
     def __eq__(self, other: dict):
         return all([
             str(self.id) == str(other.get("id")),

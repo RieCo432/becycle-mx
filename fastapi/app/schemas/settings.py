@@ -10,6 +10,7 @@ class AppointmentType(BaseModel):
     title: str
     description: str
     duration: int
+    orderIndex: int
 
 
 class PatchAppointmentType(BaseModel):
