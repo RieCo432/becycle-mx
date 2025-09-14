@@ -141,6 +141,9 @@ export default {
           this.isInWriteMode = false;
         });
     },
+    createNewRentalWithBike() {
+      this.$router.push({path: '/contracts/new', query: {bikeId: this.bike.id}});
+    },
   },
 };
 </script>
@@ -158,14 +161,19 @@ export default {
               <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
             </div>
-            <div class="col-span-6 mt-auto">
+            <div class="col-span-4 mt-auto">
               <DashButton class="w-full" :is-disabled="isInWriteMode" @click="writeBikeDetailsToNfcTag">
                 Write To NFC Tag
               </DashButton>
             </div>
-            <div class="col-span-6 mt-auto">
+            <div class="col-span-4 mt-auto">
               <DashButton class="w-full" @click="openEditBikeDetailsModal">
                 Edit Details
+              </DashButton>
+            </div>
+            <div class="col-span-4 mt-auto">
+              <DashButton class="w-full" @click="createNewRentalWithBike">
+                New Rental
               </DashButton>
             </div>
           </div>
