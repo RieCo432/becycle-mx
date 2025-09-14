@@ -62,7 +62,7 @@ async def cancel_appointment(
 
 
 @appointments.post("/appointments/types")
-async def create_appointment_type(new_appointment_type: schemas.AppointmentType, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
+async def create_appointment_type(new_appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
     return crud.create_appointment_type(db=db, appointment_type_data=new_appointment_type)
 
 

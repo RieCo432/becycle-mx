@@ -114,6 +114,42 @@ export default {
         },
       );
     },
+    moveUpAppointmentType(appointmentTypeId) {
+      const indexInArray = this.appointmentTypes.findIndex((appointmentType) => (appointmentType.id === appointmentTypeId));
+      if (indexInArray === 0) {
+        toast.error('This is the first appointment type', {timeout: 2000});
+        return;
+      }
+      const appointmentTypeToMoveUp = this.appointmentTypes[indexInArray];
+      const appointmentTypeToMoveDown = this.appointmentTypes[indexInArray - 1];
+      requests.swapAppointmentTypes(appointmentTypeToMoveUp.id, appointmentTypeToMoveDown.id)
+        .then((response) => {
+          this.appointmentTypes.splice(indexInArray - 1, 2, response.data[0], response.data[1]);
+          this.appointmentTypes.sort((a, b) => (a.orderIndex - b.orderIndex));
+          toast.success('Appointment Type moved', {timeout: 2000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+    },
+    moveDownAppointmentType(appointmentTypeId) {
+      const indexInArray = this.appointmentTypes.findIndex((appointmentType) => (appointmentType.id === appointmentTypeId));
+      if (indexInArray === this.appointmentTypes.length - 1) {
+        toast.error('This is the last appointment type', {timeout: 2000});
+        return;
+      }
+      const appointmentTypeToMoveDown = this.appointmentTypes[indexInArray];
+      const appointmentTypeToMoveUp = this.appointmentTypes[indexInArray + 1];
+      requests.swapAppointmentTypes(appointmentTypeToMoveDown.id, appointmentTypeToMoveUp.id)
+        .then((response) => {
+          this.appointmentTypes.splice(indexInArray, 2, response.data[0], response.data[1]);
+          this.appointmentTypes.sort((a, b) => (a.orderIndex - b.orderIndex));
+          toast.success('Appointment Type moved', {timeout: 2000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+    },
     patchAppointmentType(appointmentTypeId, patchData) {
       requests.patchAppointmentType(appointmentTypeId, patchData)
         .then((response) => {
@@ -135,6 +171,16 @@ export default {
           label: 'Edit',
           icon: 'heroicons-outline:pencil-square',
           func: this.openEditAppointmentTypeModal,
+        },
+        {
+          label: 'Move Up',
+          icon: 'heroicons-outline:arrow-up',
+          func: this.moveUpAppointmentType,
+        },
+        {
+          label: 'Move Down',
+          icon: 'heroicons-outline:arrow-down',
+          func: this.moveDownAppointmentType,
         },
       ],
       appointmentTypesColumns: [
@@ -167,7 +213,7 @@ export default {
   },
   created() {
     requests.getAppointmentTypes(true).then((response) => {
-      this.appointmentTypes = response.data;
+      this.appointmentTypes = response.data.sort((a, b) => (a.orderIndex - b.orderIndex));
       this.loadingAppointmentTypes = false;
     });
   },

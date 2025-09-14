@@ -1430,4 +1430,16 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  swapAppointmentTypes(type1Id, type2Id) {
+    return axiosClient.patch('/settings/appointments/swap',
+      {
+        appointment_type_1_id: type1Id,
+        appointment_type_2_id: type2Id,
+      },
+      {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      },
+    );
+  },
 };

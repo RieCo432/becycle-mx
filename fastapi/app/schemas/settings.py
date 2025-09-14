@@ -3,13 +3,14 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-
-class AppointmentType(BaseModel):
+class AppointmentTypeCreate(BaseModel):
     id: str
     active: bool
     title: str
     description: str
     duration: int
+
+class AppointmentType(AppointmentTypeCreate):
     orderIndex: int
 
 
