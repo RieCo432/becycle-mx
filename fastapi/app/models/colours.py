@@ -8,7 +8,7 @@ from app.database.db import Base
 from app.models import bike_colour_association_table
 
 
-class Faq(Base):
+class Colour(Base):
     __tablename__ = "colours"
 
     id: Mapped[int] = mapped_column("id", Integer, primary_key=True, nullable=False, default=0,
