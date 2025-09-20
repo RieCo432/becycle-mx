@@ -3,6 +3,7 @@ import os
 import bcrypt
 from dateutil.relativedelta import relativedelta
 from fastapi.routing import APIRoute
+from scipy.signal import cascade
 from sqlalchemy import select
 
 import app.models as models
@@ -25,6 +26,7 @@ def delete_all(db: Session):
 
     db.query(models.ContractDraft).delete()
 
+    db.query(models.CrimeReport).delete()
     db.query(models.PaperContract).delete()
     db.query(models.Contract).delete()
 
@@ -33,11 +35,16 @@ def delete_all(db: Session):
 
     db.query(models.DepositExchange).delete()
 
-    db.query(models.group_permission_association_table).delete()
-    db.query(models.group_user_association_table).delete()
+    for g in db.scalars(select(models.Group)):
+        [g.users.remove(gu) for gu in g.users]
+        [g.permissions.remove(gp) for gp in g.permissions]
+
+    db.commit()
     db.query(models.Group).delete()
 
-    db.query(models.user_permission_association_table).delete()
+    for u in db.scalars(select(models.User)):
+        [u.permissions.remove(p) for p in u.permissions]
+
 
     db.query(models.Permission).delete()
 
@@ -299,6 +306,17 @@ def add_bikes(db: Session) -> list[models.Bike]:
         models.Bike(make="revolution", model="cuillin sport", colour="black", decals=None, serialNumber="qrst7890"),
         models.Bike(make="elephantbike", model="heavy af", colour="blue", decals=None, serialNumber="ijkl9012")
     ]
+
+    db.add_all(bikes)
+    db.commit()
+
+    return bikes
+
+def add_bikes_for_all_colours(db: Session) -> list[models.Bike]:
+    bikes = []
+    with open("data/all_colours.txt", "r") as f:
+        for line in f:
+            bikes.append(models.Bike(make="NOTPROVIDED", model="NOTPROVIDED", colour=line.strip(), decals=None, serialNumber="NOTPROVIDED"))
 
     db.add_all(bikes)
     db.commit()
@@ -1520,7 +1538,8 @@ if __name__ == "__main__":
     delete_all(db=demo_db)
 
     demo_users = add_users(db=demo_db)
-    demo_bikes = add_bikes(db=demo_db)
+    #demo_bikes = add_bikes(db=demo_db)
+    demo_bikes = add_bikes_for_all_colours(db=demo_db)
     demo_clients = add_clients(db=demo_db)
     demo_user_photos = add_user_photos(db=demo_db, users=demo_users)
     demo_user_presentation_cards = add_user_presentation_cards(db=demo_db, users=demo_users, user_photos=demo_user_photos)
