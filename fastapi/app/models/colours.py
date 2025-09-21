@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Any
 from uuid import uuid4
 
 from sqlalchemy import UUID, text, String, Text, Identity, Integer, Boolean
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
@@ -17,6 +18,21 @@ class Colour(Base):
 
     bikes: Mapped[List["Bike"]] = relationship(secondary=bike_colour_association_table,
                                                  back_populates="colours")
+
+    @hybrid_property
+    def hex(self) -> str:
+        """Convert the integer ID to a 6-character hex string."""
+        return f"#{self.id:06X}"
+
+    @hex.expression
+    def hex(cls):
+        # This allows querying: session.query(Colour).filter(Colour.hex == "FF0000")
+        from sqlalchemy import func
+        return func.concat("#", func.upper(func.lpad(func.to_hex(cls.id), 6, '0')))
+
+    @staticmethod
+    def getintvalue(hex_value: str)-> int:
+        return int(hex_value.lstrip('#'), 16)
 
     def __eq__(self, other: dict):
         return all([
