@@ -56,7 +56,7 @@ export default {
           this.selectedBike.make,
           this.selectedBike.model,
           this.selectedBike.colour,
-          this.selectedBike.colours,
+          this.selectedBike.colours ? this.selectedBike.colours.map((colour) => colour.hex) : null,
           this.selectedBike.serialNumber,
           4).then((response) => {
           this.bikeSuggestions = response.data;
@@ -164,6 +164,25 @@ export default {
             </ComboboxTextInput>
           </div>
 
+          <div class="col-span-12 lg:col-span-6 lg:row-span-3">
+            <ComboboxColourPicker
+                :suggestions="filtered_bike_suggestions"
+                :selected-callback="selectBike"
+                :allow-new=false
+                label="Colour"
+                name="colour"
+                v-model="selectedBike.colours"
+                @update:modelValue="handleInput"
+                @emptied="resetComboBoxes"
+            >
+              <template #suggestion="{ suggestion, active }">
+                <BikeSuggestion
+                    :suggestion="suggestion"
+                    :active="active"/>
+              </template>
+            </ComboboxColourPicker>
+          </div>
+
           <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedBike.model"
@@ -186,42 +205,7 @@ export default {
             </ComboboxTextInput>
           </div>
 
-<!--          <div class="col-span-12 lg:col-span-6">-->
-<!--            <ComboboxTextInput-->
-<!--                :field-model-value="selectedBike.colour"-->
-<!--                :suggestions="filtered_bike_suggestions"-->
-<!--                :pretty-print-function="makeBikeLegible"-->
-<!--                :selected-callback="selectBike"-->
-<!--                :allow-new=false-->
-<!--                label="Colour"-->
-<!--                type="text"-->
-<!--                placeholder="Pink"-->
-<!--                name="colour"-->
-<!--                v-model="selectedBike.colour"-->
-<!--                @input="handleInput"-->
-<!--                @emptied="resetComboBoxes"-->
-<!--            />-->
-<!--          </div>-->
-
-          <div class="col-span-12 lg:col-span-6">
-            <ComboboxColourPicker
-              :suggestions="filtered_bike_suggestions"
-              :selected-callback="selectBike"
-              :allow-new=false
-              label="Colour"
-              name="colour"
-              v-model="selectedBike.colours"
-              @update:modelValue="handleInput"
-              @emptied="resetComboBoxes">
-              <template #suggestion="{ suggestion, active }">
-                <BikeSuggestion
-                    :suggestion="suggestion"
-                    :active="active"/>
-              </template>
-            </ComboboxColourPicker>
-          </div>
-
-          <div class="col-span-12 lg:col-span-6">
+          <div class="col-span-12">
             <ComboboxTextInput
                 :field-model-value="selectedBike.serialNumber"
                 :suggestions="filtered_bike_suggestions"

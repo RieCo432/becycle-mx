@@ -45,6 +45,10 @@ def get_potential_bike_matches(db: Session, make: str | None = None, model: str 
     if serialNumber is not None:
         query_filter.append(models.Bike.serialNumber.contains(serialNumber.lower()) | (func.levenshtein(models.Bike.serialNumber, serialNumber) <= max_distance))
 
+    if colours is not None:
+        colour_values = [models.Colour.getintvalue(colour) for colour in colours]
+        query_filter.append(models.Bike.colours.any(models.Colour.id.in_(colour_values)))
+
     bikes = [bike for bike in db.scalars(
         select(models.Bike)
         .where(and_(*query_filter))

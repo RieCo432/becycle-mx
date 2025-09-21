@@ -41,12 +41,12 @@ async def find_bikes(
         max_distance: int = 4,
         db: Session = Depends(dep.get_db)) -> list[schemas.Bike]:
     return crud.get_potential_bike_matches(
-        make=make,
-        model=model,
-        colour=colour,
-        colours=colours.split("|"),
-        decals=decals,
-        serialNumber=serial_number,
+        make=make.lower() if make is not None else None,
+        model=model.lower() if model is not None else None,
+        colour=colour.lower() if colour is not None else None,
+        colours=colours.split("|") if colours is not None else None,
+        decals=decals.lower() if decals is not None else None,
+        serialNumber=serial_number.lower() if serial_number is not None else None,
         max_distance=max_distance,
         db=db)
 

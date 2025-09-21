@@ -161,7 +161,7 @@ export default {
         ...(make && {make: make.toLowerCase()}),
         ...(model && {model: model.toLowerCase()}),
         ...(colour && {colour: colour.toLowerCase()}),
-        ...(colours && {colours: colours.join('|')}),
+        ...(colours && colours.length >= 0 && {colours: colours.join('|')}),
         ...(serialNumber && {serial_number: serialNumber.toLowerCase()}),
         max_distance: maxDistance,
       },

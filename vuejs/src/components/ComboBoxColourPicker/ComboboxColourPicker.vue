@@ -1,17 +1,21 @@
 <template>
-  <div>
-    <div class="relative mt-0"
-         @focusin="() => (showSuggestions = true)"
-         @focusout="(evt) => {
+  <div
+      @mouseleave="(evt) => {
            showSuggestions = false;
-         }">
+         }"
+      @mouseenter="() => (showSuggestions = true)">
+    <div class="relative mt-0">
       <div class="relative w-full">
         <div
             class="fromGroup relative"
             :class="`${error ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${validate ? 'is-valid' : ''} `">
           <label
               v-if="label"
-              :class="`${classLabel} ${horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''}  ltr:inline-block rtl:block input-label `"
+              :class="`${classLabel} ${
+                horizontal
+                ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words'
+                : ''}
+                ltr:inline-block rtl:block input-label `"
               :for="name">
             {{ label }}
           </label>
@@ -21,16 +25,19 @@
                 <Tooltip placement="top" arrow theme="dark">
                   <template #button>
                     <div>
-                      <Icon v-if="internalModelValue.map((c) => (c.hex)).includes(colour.hex)" icon="heroicons-outline:check" class="text-white px-0 py-0 absolute bg-blue-500 rounded-full" />
+                      <Icon
+                          v-if="internalModelValue.map((c) => (c.hex)).includes(colour.hex)"
+                          icon="heroicons-outline:check"
+                          class="text-white px-0 py-0 absolute bg-blue-500 rounded-full" />
                       <div
-                          :class="['w-10', 'h-10', 'rounded-full', 'border-2', internalModelValue.map((c) => (c.hex)).includes(colour.hex) ? 'border-blue-500' : ' border-transparent']"
+                          :class="[
+                              'w-10', 'h-10', 'rounded-full', 'border-2',
+                              internalModelValue.map((c) => (c.hex)).includes(colour.hex)
+                              ? 'border-blue-500'
+                              : ' border-transparent']"
                           :style="{backgroundColor: colour.hex}"
-                          @click="colourClick(colour.hex)"
-                      >
-                    </div>
-
-
-
+                          @click="colourClick(colour)"
+                      />
                     </div>
                   </template>
                   <span>{{ colour.name }} ({{ colour.hex }})</span>
@@ -77,10 +84,12 @@
         </div>
       </div>
         <div
-            class="absolute w-full mt-1 max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5
+            class="absolute w-full max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5
                  focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700
                  shadow-dropdown z-[9999]"
-            v-if="openByDefault || showSuggestions">
+            v-if="openByDefault || showSuggestions"
+            @mouseenter="() => (showSuggestions = true)"
+        >
           <ul>
             <li
                 v-if="((suggestions.indexOf(fieldModelValue) === -1) && allowNew)"
@@ -119,7 +128,6 @@
 
 <script>
 import Icon from '@/components/Icon';
-import Cleave from 'vue-cleave-component';
 import {delay} from 'lodash-es';
 import requests from '@/requests';
 import Tooltip from '@/components/Tooltip/index.vue';
@@ -127,7 +135,6 @@ export default {
   components: {
     Tooltip,
     Icon,
-    Cleave,
   },
   emits: ['emptied'],
   props: {
@@ -243,15 +250,18 @@ export default {
         this.allColours = response.data;
       });
     },
-    colourClick(hexCode) {
-      if (this.internalModelValue.map((colour) => colour.hex).includes(hexCode)) {
-        const indexInArray = this.internalModelValue.findIndex((colour) => colour.hex === hexCode);
+    colourClick(colour) {
+      const hexMap = this.internalModelValue.map((c) => c.hex);
+      if (hexMap.includes(colour.hex)) {
+        const indexInArray = hexMap.findIndex((hexCode) => colour.hex === hexCode);
         this.internalModelValue.splice(indexInArray, 1);
       } else {
-        this.internalModelValue.push(this.allColours.find((colour) => colour.hex === hexCode));
+        this.internalModelValue.push(colour);
       }
       this.$emit('update:modelValue', this.internalModelValue);
-      console.log(this.internalModelValue);
+      if (this.internalModelValue.length === 0) {
+        this.$emit('emptied');
+      };
     },
   },
   created() {
@@ -261,8 +271,7 @@ export default {
     modelValue: {
       immediate: true,
       handler(value) {
-        console.log(value);
-        this.internalModelValue = value ?? [];
+        this.internalModelValue = value ? value : [];
       },
     },
   },
