@@ -34,7 +34,7 @@ def find_similar_bikes(db: Session, make: str | None = None, model: str | None =
     return bikes
 
 
-def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None, max_distance: int = 4) -> list[schemas.Bike]:
+def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, colours: list[str] | None = None, decals: str | None = None, serialNumber: str | None = None, max_distance: int = 4) -> list[schemas.Bike]:
     query_filter = []
     if make is not None:
         query_filter.append(models.Bike.make.contains(make.lower()) | (func.levenshtein(models.Bike.make, make) <= max_distance))

@@ -153,7 +153,7 @@ export default {
       },
     });
   },
-  findBikes(make, model, colour, serialNumber, maxDistance = 4) {
+  findBikes(make, model, colour, colours, serialNumber, maxDistance = 4) {
     return axiosClient.get('/bikes/find', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -161,6 +161,7 @@ export default {
         ...(make && {make: make.toLowerCase()}),
         ...(model && {model: model.toLowerCase()}),
         ...(colour && {colour: colour.toLowerCase()}),
+        ...(colours && {colours: colours.join('|')}),
         ...(serialNumber && {serial_number: serialNumber.toLowerCase()}),
         max_distance: maxDistance,
       },
@@ -1441,5 +1442,11 @@ export default {
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       },
     );
+  },
+  getColours() {
+    return axiosClient.get('/colours', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
   },
 };

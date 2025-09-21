@@ -9,12 +9,14 @@ import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import levenshtein from '@/util/levenshtein';
 import BikeSuggestion from '@/components/ComboboxTextInput/BikeSuggestion.vue';
+import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
 
 const toast = useToast();
 
 export default {
   name: 'findBike',
   components: {
+    ComboboxColourPicker,
     DashButton,
     Button,
     ComboboxTextInput,
@@ -29,6 +31,7 @@ export default {
         make: null,
         model: null,
         colour: null,
+        colours: null,
         serialNumber: null,
         decals: null,
         id: null,
@@ -42,16 +45,18 @@ export default {
   },
   methods: {
     fetchBikes() {
+      console.log('fetchBikes', this.selectedBike);
       if ((
         (this.selectedBike.make ? this.selectedBike.make.length : 0) +
         (this.selectedBike.model ? this.selectedBike.model.length : 0) +
-        (this.selectedBike.colour ? this.selectedBike.colour.length : 0) +
+        (this.selectedBike.colours ? this.selectedBike.colours.length : 0) +
         (this.selectedBike.serialNumber ? this.selectedBike.serialNumber.length : 0)
       ) > 2) {
         requests.findBikes(
           this.selectedBike.make,
           this.selectedBike.model,
           this.selectedBike.colour,
+          this.selectedBike.colours,
           this.selectedBike.serialNumber,
           4).then((response) => {
           this.bikeSuggestions = response.data;
@@ -113,6 +118,7 @@ export default {
       });
     },
     handleInput() {
+      console.log('handleInput', this.selectedBike);
       this.fetchBikes();
       this.run_filter();
     },
@@ -197,7 +203,25 @@ export default {
 <!--            />-->
 <!--          </div>-->
 
-          <div class="col-span-12 lg:col-span-12">
+          <div class="col-span-12 lg:col-span-6">
+            <ComboboxColourPicker
+              :suggestions="filtered_bike_suggestions"
+              :selected-callback="selectBike"
+              :allow-new=false
+              label="Colour"
+              name="colour"
+              v-model="selectedBike.colours"
+              @update:modelValue="handleInput"
+              @emptied="resetComboBoxes">
+              <template #suggestion="{ suggestion, active }">
+                <BikeSuggestion
+                    :suggestion="suggestion"
+                    :active="active"/>
+              </template>
+            </ComboboxColourPicker>
+          </div>
+
+          <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedBike.serialNumber"
                 :suggestions="filtered_bike_suggestions"
