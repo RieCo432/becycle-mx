@@ -142,9 +142,11 @@
                 @mouseenter="() => (activeIndex = i)"
                 @mousedown.prevent="(event) => selected(event, suggestion)"
             >
-                      <span class="block">
-                        {{ suggestion }}
-                      </span>
+              <slot name="suggestion" :suggestion="suggestion" :index="i" :active="activeIndex === i">
+                <span class="block">
+                  {{ prettyPrintFunction(suggestion) }}
+                </span>
+              </slot>
             </li>
           </ul>
         </div>
@@ -248,6 +250,10 @@ export default {
         creditCard: true,
         delimiter: '-',
       }),
+    },
+    prettyPrintFunction: {
+      type: Function,
+      default: (value) => value,
     },
   },
   data() {
