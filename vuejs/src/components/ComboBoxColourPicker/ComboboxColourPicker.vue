@@ -52,9 +52,6 @@
                 <Icon icon="heroicons-outline:eye" v-if="types === 'password'" />
                 <Icon icon="heroicons-outline:eye-off" v-else />
               </span>
-              <span v-if="error" class="text-danger-500">
-                <Icon icon="heroicons-outline:information-circle" />
-              </span>
               <span v-if="validate" class="text-success-500">
                 <Icon icon="bi:check-lg" />
               </span>
@@ -65,7 +62,7 @@
               class="mt-2"
               :class="msgTooltip
               ? ' inline-block bg-danger-500 text-white text-[10px] px-2 py-1 rounded'
-              : ' text-danger-500 block text-sm'">{{ error }}
+              : ' text-danger-500 block text-sm'"><Icon icon="heroicons-outline:information-circle" class="inline-block" />  {{ error }}
           </span>
           <span
               v-if="validate"

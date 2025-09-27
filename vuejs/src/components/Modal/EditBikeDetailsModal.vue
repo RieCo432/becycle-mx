@@ -20,7 +20,7 @@ export default {
     const newDetailsSchema = yup.object().shape({
       make: yup.string().required('Make is required'),
       model: yup.string().required('Modal is required'),
-      colours: yup.array().required('Colour is required'),
+      colours: yup.array().required('Colour is required').max(3, 'Maximum of 3 colours.').min(1, 'Minimum of 1 colour.'),
       decals: yup.string().nullable(),
       serialNumber: yup.string().required('Serial Number is required'),
     });
@@ -124,6 +124,7 @@ export default {
               :suggestions="[]"
               :selected-callback="() => {}"
               :allow-new=false
+              :error="coloursError"
               label="Colours"
               name="colours"
               @update:modelValue="(newValue) => {colours = newValue}"
