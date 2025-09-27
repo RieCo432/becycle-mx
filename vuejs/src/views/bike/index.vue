@@ -155,18 +155,33 @@ export default {
       <Card title="Details">
         <ContractBikeCardSkeleton v-if="loadingBikeDetails"></ContractBikeCardSkeleton>
         <template v-else>
-          <div class="grid grid-cols-12 h-full gap-5">
-            <div class="col-span-12" >
+          <div class="grid xl:grid-cols-12 lg:grid-cols-8 grid-cols-4 h-full gap-5">
+            <div class="col-span-4 col-start-1">
               <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
             </div>
-            <div class="col-span-4 mt-auto">
-              <DashButton class="w-full" :is-disabled="isInWriteMode" @click="writeBikeDetailsToNfcTag">
-                Write To NFC Tag
-              </DashButton>
+            <div class="col-span-4 col-start-1">
+              <div class="h-10 rounded-full overflow-hidden">
+                <div class="w-full h-full flex rounded-full overflow-hidden">
+                  <div
+                      v-for="c in bike.colours"
+                      :key="c.name"
+                      class="h-full"
+                      :style="{
+                      backgroundColor: c.hex,
+                      width: (100 / bike.colours.length) + '%'
+                    }"
+                  ></div>
+                </div>
+              </div>
             </div>
-            <div class="col-span-4 mt-auto">
+<!--            <div class="col-span-4 col-start-1 mt-auto">-->
+<!--              <DashButton class="w-full" :is-disabled="isInWriteMode" @click="writeBikeDetailsToNfcTag">-->
+<!--                Write To NFC Tag-->
+<!--              </DashButton>-->
+<!--            </div>-->
+            <div class="col-span-4 col-start-1 mt-auto">
               <DashButton class="w-full" @click="openEditBikeDetailsModal">
                 Edit Details
               </DashButton>
