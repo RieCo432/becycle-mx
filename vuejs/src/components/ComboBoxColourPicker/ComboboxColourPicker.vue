@@ -87,7 +87,7 @@
             class="absolute w-full max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5
                  focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700
                  shadow-dropdown z-[9999]"
-            v-if="openByDefault || showSuggestions"
+            v-if="(openByDefault || showSuggestions) && (allowNew || suggestions.length > 0)"
             @mouseenter="() => (showSuggestions = true)"
         >
           <ul>

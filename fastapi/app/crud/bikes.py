@@ -131,6 +131,13 @@ def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase)
         bike.model = updated_bike_data.model.lower()
     if updated_bike_data.colour is not None:
         bike.colour = updated_bike_data.colour.lower()
+    if updated_bike_data.colours is not None:
+        colour_ids = [models.Colour.getintvalue(c.hex) for c in updated_bike_data.colours]
+        colours = [_ for _ in db.scalars(
+            select(models.Colour)
+            .where(models.Colour.id.in_(colour_ids))
+        )]
+        bike.colours = colours
     if updated_bike_data.decals is not None:
         bike.decals = updated_bike_data.decals.lower()
     if updated_bike_data.serialNumber is not None:

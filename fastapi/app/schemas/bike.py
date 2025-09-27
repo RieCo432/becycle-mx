@@ -9,8 +9,8 @@ from .colours import Colour
 class BikeBase(BaseModel):
     make: str
     model: str
-    colour: str = ""
-    colours: list[Colour] = []
+    colour: str = None
+    colours: list[Colour] | None = None
     decals: str | None = None
     serialNumber: str
     rfidTagSerialNumber: str | None = None
