@@ -165,23 +165,18 @@ export default {
             </div>
             <div class="col-span-4 col-start-1">
               <div class="h-10 rounded-full overflow-hidden">
-                <div class="w-full h-full flex rounded-full overflow-hidden">
-                  <div
+                <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${bike.colours.length}`">
+                  <template
                       v-for="c in bike.colours"
                       :key="c.name"
-                      class="h-full relative"
-                      :style="{
-                      backgroundColor: c.hex,
-                      width: (100 / bike.colours.length) + '%'
-                    }"
                   >
-                    <Tooltip placement="top" arrow theme="dark">
+                    <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
                       <template #button>
-                        <div class="w-full h-full absolute inset-0"></div>
+                        <div class="w-full h-full"></div>
                       </template>
                       <span>{{ c.name }} ({{ c.hex }})</span>
                     </Tooltip>
-                  </div>
+                  </template>
                 </div>
               </div>
             </div>
