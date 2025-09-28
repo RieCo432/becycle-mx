@@ -8,6 +8,7 @@ import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkel
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
+import Tooltip from '@/components/Tooltip/index.vue';
 
 const credentialsStore = useCredentialsStore();
 const toast = useToast();
@@ -15,6 +16,7 @@ const toast = useToast();
 export default {
   name: 'clientView',
   components: {
+    Tooltip,
     EditBikeDetailsModal,
     ContractBikeCardSkeleton,
     DashButton,
@@ -167,12 +169,19 @@ export default {
                   <div
                       v-for="c in bike.colours"
                       :key="c.name"
-                      class="h-full"
+                      class="h-full relative"
                       :style="{
                       backgroundColor: c.hex,
                       width: (100 / bike.colours.length) + '%'
                     }"
-                  ></div>
+                  >
+                    <Tooltip placement="top" arrow theme="dark">
+                      <template #button>
+                        <div class="w-full h-full absolute inset-0"></div>
+                      </template>
+                      <span>{{ c.name }} ({{ c.hex }})</span>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
             </div>
