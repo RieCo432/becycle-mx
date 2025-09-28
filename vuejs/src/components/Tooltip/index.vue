@@ -36,6 +36,7 @@
     :distance="distance"
     :offset="offset"
     v-if="$slots.default"
+    class="z-[99999]"
   >
     <button class="btn" :class="btnClass" v-if="!$slots.button">
       {{ title }}
