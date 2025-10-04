@@ -123,6 +123,16 @@ def get_similar_colours(db: Session, colour: str, max_distance: int = 4) -> list
     return similar_colours
 
 
+def get_similar_colour_sets(db: Session, colours: list[str], max_distance: int = 2) -> list[list[models.Colour]]:
+    all_bikes = [_ for _ in db.scalars(
+        select(models.Bike)
+    )]
+    # TODO: These need to be unique
+    result = [bike.colours for bike in all_bikes if sum([0 if colour in colours else 1 for colour in [c.hex for c in bike.colours]]) <= max_distance]
+    
+    return result
+
+
 def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase) -> models.Bike:
     bike = get_bike(db=db, bike_id=bike_id)
     if updated_bike_data.make is not None:

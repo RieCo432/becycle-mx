@@ -140,6 +140,16 @@ export default {
       },
     });
   },
+  getBikeColoursSuggestions(colours, maxDistance = 2) {
+    return axiosClient.get('/bikes/suggest/colours', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      params: {
+        colours: colours,
+        max_distance: maxDistance,
+      },
+    });
+  },
   findBike(make, model, colour, decals, serialNumber) {
     return axiosClient.get('/bikes/first-match', {
       headers: credentialsStore.getApiRequestHeader(),

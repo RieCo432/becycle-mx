@@ -105,11 +105,11 @@ async def get_serial_number_suggestions(
 
 @bikes.get("/bikes/suggest/colours")
 async def get_colour_suggestions(
-        colour: str,
-        max_distance: int = 4,
+        colours: str,
+        max_distance: int = 2,
         db: Session = Depends(dep.get_db)
-) -> list[str]:
-    return crud.get_similar_colours(db=db, colour=colour.lower(), max_distance=max_distance)
+) -> list[list[schemas.Colour]]:
+    return crud.get_similar_colour_sets(db=db, colours=colours.split("|"), max_distance=max_distance)
 
 
 @bikes.get("/bikes/conditions")
