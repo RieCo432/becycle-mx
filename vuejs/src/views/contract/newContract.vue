@@ -160,11 +160,11 @@
                       Enter the bike's details
                     </h4>
                   </div>
-                  <div class="col-span-full">
-                    <DashButton class="block-btn" @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">
-                      Read From NFC Tag
-                    </DashButton>
-                  </div>
+<!--                  <div class="col-span-full">-->
+<!--                    <DashButton class="block-btn" @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">-->
+<!--                      Read From NFC Tag-->
+<!--                    </DashButton>-->
+<!--                  </div>-->
                   <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :allow-new="makeNotInList"
@@ -218,19 +218,25 @@
                         @click="() => {modelNotInList = !modelNotInList}"/>
                   </div>
 
+                  <!-- TODO: colour suggestions should be shown as coloured dots -->
                   <div class="col-span-10 md:col-span-5">
-                    <ComboboxTextInput
-                        :field-model-value="colour"
-                        :suggestions="filtered_colour_suggestions"
-                        :selected-callback="selectColour"
-                        label="Colour"
-                        type="text"
-                        placeholder="Colour"
-                        name="colour"
-                        v-model="colour"
-                        :error="colourError"
-                        @input="fetchColourSuggestions"
-                    />
+                    <ComboboxColourPicker
+                        :suggestions="filtered_colours_suggestions"
+                        :selected-callback="selectColours"
+                        :allow-new=true
+                        :error="coloursError"
+                        label="Colours"
+                        name="colours"
+                        @update:modelValue="(newValue) => {fetchColoursSuggestions(); }"
+                        v-model="colours"
+                        @click.prevent="() => {}"
+                    >
+                      <template #suggestion="{ suggestion, active }">
+                        <ColourSetSuggestion
+                            :suggestion="suggestion"
+                            :active="active"/>
+                      </template>
+                    </ComboboxColourPicker>
                   </div>
 
                   <div class="col-span-10 md:col-span-5 md:col-start-7">
@@ -259,13 +265,13 @@
                     />
                   </div>
 
-                  <div class="col-span-full">
-                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">
-                      Write To NFC Tag
-                    </DashButton>
-                  </div>
+<!--                  <div class="col-span-full">-->
+<!--                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">-->
+<!--                      Write To NFC Tag-->
+<!--                    </DashButton>-->
+<!--                  </div>-->
 
-                  <div class="col-span-12 md:col-span-6">
+                  <div class="col-span-12 md:col-span-6 md:col-start-1">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"
@@ -561,7 +567,23 @@
                         </tr>
                         <tr>
                           <td class="border border-slate-500">Colour</td>
-                          <td class="border border-slate-500">{{colour}}</td>
+                          <td class="border border-slate-500">
+                            <div class="h-10 rounded-full overflow-hidden">
+                              <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${colours.length}`">
+                                <template
+                                    v-for="c in colours"
+                                    :key="c.name"
+                                >
+                                  <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
+                                    <template #button>
+                                      <div class="w-full h-full"></div>
+                                    </template>
+                                    <span>{{ c.name }} ({{ c.hex }})</span>
+                                  </Tooltip>
+                                </template>
+                              </div>
+                            </div>
+                          </td>
                         </tr>
                         <tr>
                           <td class="border border-slate-500">Decals</td>
@@ -668,14 +690,21 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
-import nfc from '@/nfc';
+// import nfc from '@/nfc';
 import levenshtein from '@/util/levenshtein';
+import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
+import Tooltip from '@/components/Tooltip/index.vue';
+import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSuggestion.vue';
+import colourSuggestionSort from '@/util/colourSuggestionSort';
 
 const toast = useToast();
 
 export default {
   name: 'newContract',
   components: {
+    ColourSetSuggestion,
+    Tooltip,
+    ComboboxColourPicker,
     DashButton,
     Checkbox,
     ErrorMessage,
@@ -741,6 +770,7 @@ export default {
     const makeSuggestions = ref([]);
     const modelSuggestions = ref([]);
     const colourSuggestions = ref([]);
+    const coloursSuggestions = ref([]);
     const serialNumberSuggestions = ref([]);
 
     const depositBearers = ref([]);
@@ -778,7 +808,7 @@ export default {
         then: (schema) => schema,
         otherwise: (schema) => schema.oneOf(modelSuggestions.value, 'Please choose a value from the list, or add a new model.'),
       }),
-      colour: yup.string().required(' Colour is required'),
+      colours: yup.array().required('Colour is required').max(3, 'Maximum of 3 colours.').min(1, 'Minimum of 1 colour.'),
       decals: yup.string().nullable(),
       serialNumber: yup.string().required(' Serial Number is required '),
       bikePhotoTaken: yup.boolean().oneOf([true], 'Must take a photo of the bike').required('Must take a photo of the bike'),
@@ -876,7 +906,7 @@ export default {
     const {value: makeNotInList} = useField('makeNotInList');
     const {value: model, errorMessage: modelError} = useField('model');
     const {value: modelNotInList} = useField('modelNotInList');
-    const {value: colour, errorMessage: colourError} = useField('colour');
+    const {value: colours, errorMessage: coloursError} = useField('colours');
     const {value: decals, errorMessage: decalsError} = useField('decals');
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
@@ -939,13 +969,13 @@ export default {
             if (bikeId.value !== null && bikeId.value !== '') {
               makeSuggestions.value.push(activeDraft.value.bike.make);
               modelSuggestions.value.push(activeDraft.value.bike.model);
-              colourSuggestions.value.push(activeDraft.value.bike.colour);
+              coloursSuggestions.value.push(activeDraft.value.bike.colours);
               serialNumberSuggestions.value.push(activeDraft.value.bike.serialNumber);
 
               nextTick().then(() => {
                 make.value = activeDraft.value.bike.make;
                 model.value = activeDraft.value.bike.model;
-                colour.value = activeDraft.value.bike.colour;
+                colours.value = activeDraft.value.bike.colours;
                 decals.value = activeDraft.value.bike.decals;
                 serialNumber.value = activeDraft.value.bike.serialNumber;
                 bikePhotoTaken.value = true;
@@ -1009,14 +1039,14 @@ export default {
             });
         } else if (stepNumber.value === 2) {
           // Bike details processing
-          requests.findBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
+          requests.findBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), serialNumber.value)
             .then((response) => {
               bikeId.value = response.data['id'];
               setBike();
             })
             .catch((error) => {
               if (error.response.status === 404) {
-                requests.postNewBike(make.value, model.value, colour.value, decals.value, serialNumber.value)
+                requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
                   .then((response) => {
                     toast.success('New Bike Created!', {timeout: 1000});
                     bikeId.value = response.data['id'];
@@ -1136,9 +1166,9 @@ export default {
       model,
       modelError,
       modelNotInList,
-      colour,
-      colourError,
-      colourSuggestions,
+      colours,
+      coloursError,
+      coloursSuggestions,
       decals,
       decalsError,
       serialNumber,
@@ -1216,7 +1246,7 @@ export default {
       filtered_client_suggestions: [],
       filtered_make_suggestions: [],
       filtered_model_suggestions: [],
-      filtered_colour_suggestions: [],
+      filtered_colours_suggestions: [],
       filtered_serial_number_suggestions: [],
     };
   },
@@ -1225,7 +1255,7 @@ export default {
     this.fetchBikeMakeSuggestions = debounce(this.fetchBikeMakeSuggestions, 500, {leading: true, trailing: true});
     this.fetchBikeModelSuggestions = debounce(this.fetchBikeModelSuggestions, 500, {leading: true, trailing: true});
     this.fetchSerialNumberSuggestions = debounce(this.fetchSerialNumberSuggestions, 500, {leading: true, trailing: true});
-    this.fetchColourSuggestions = debounce(this.fetchColourSuggestions, 500, {leading: true, trailing: true});
+    this.fetchColoursSuggestions = debounce(this.fetchColoursSuggestions, 500, {leading: true, trailing: true});
     this.run_filter = debounce(this.run_filter, 200, {leading: false, trailing: true});
     requests.getContractDrafts()
       .then((response) => {
@@ -1241,13 +1271,13 @@ export default {
           this.bikeId = response.data.id;
           this.make = response.data.make;
           this.model = response.data.model;
-          this.colour = response.data.colour;
+          this.colours = response.data.colours;
           this.decals = response.data.decals;
           this.serialNumber = response.data.serialNumber;
           this.startNewDraft();
           this.fetchBikeMakeSuggestions(this.make);
           this.fetchBikeModelSuggestions(this.model);
-          this.fetchColourSuggestions(this.colour);
+          this.fetchColoursSuggestions(this.colours);
           this.fetchSerialNumberSuggestions(this.serialNumber);
         })
         .catch((error) => {
@@ -1297,10 +1327,12 @@ export default {
         this.serialNumberSuggestions = response.data;
       });
     },
-    fetchColourSuggestions() {
-      requests.getBikeColourSuggestions(this.colour.toLowerCase(), 4).then((response) => {
-        this.colourSuggestions = response.data;
-      });
+    fetchColoursSuggestions() {
+      if (this.colours && this.colours.length > 0) {
+        requests.getBikeColoursSuggestions(this.colours.map((c) => c.hex).join('|'), 2).then((response) => {
+          this.coloursSuggestions = response.data;
+        });
+      }
     },
     selectClient(event, i) {
       if (i !== -1) {
@@ -1327,9 +1359,9 @@ export default {
         this.serialNumber = this.filtered_serial_number_suggestions[i];
       }
     },
-    selectColour(event, i) {
+    selectColours(event, i) {
       if (i !== -1) {
-        this.colour = this.filtered_colour_suggestions[i];
+        this.colours.splice(0, this.colours.length, ...this.filtered_colours_suggestions[i]);
       }
     },
     selectDepositCollectingUser(event, i) {
@@ -1352,99 +1384,99 @@ export default {
         this.checkingUserSelected();
       }
     },
-    verifyBikeDetails(rfidTagSerialNumber) {
-      requests.getBikeByRfidTagSerialNumber(rfidTagSerialNumber)
-        .then((response) => {
-          const bike = response.data;
-          let allSame = true;
-          allSame &= bike.make.toLowerCase() === this.make.toLowerCase();
-          allSame &= bike.model.toLowerCase() === this.model.toLowerCase();
-          allSame &= bike.colour.toLowerCase() === this.colour.toLowerCase();
-          allSame &= (bike.decals ? bike.decals.toLowerCase() : '') === this.decals.toLowerCase();
-          allSame &= bike.serialNumber.toLowerCase() === this.serialNumber.toLowerCase();
-          allSame &= bike.id.toLowerCase() === this.bikeId.toLowerCase();
-          if (!allSame) {
-            toast.warning('Some of the bike details do not match with the recorded details', {timeout: 4000});
-          }
-        })
-        .catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 1000});
-        });
-    },
-    readBikeDetailsFromNfcTag() {
-      this.isNfcActive = true;
-      nfc.readBikeDetailsFromNfcTag().then((response) => {
-        if (response.bike) {
-          toast.success('Details read!', {timeout: 1000});
-          const bike = response.bike;
-          this.make = bike.make.toLowerCase();
-          this.model = bike.model.toLowerCase();
-          this.colour = bike.colour.toLowerCase();
-          this.decals = bike.decals ? bike.decals.toLowerCase() : '';
-          this.serialNumber = bike.serialNumber.toLowerCase();
-          this.bikeId = bike.id.toLowerCase();
-          this.verifyBikeDetails(response.rfidTagSerialNumber);
-        } else {
-          toast.error('Some error occurred!', {timeout: 1000});
-        }
-      })
-        .catch((error) => {
-          toast.error(error.message, {timeout: 1000});
-        })
-        .finally(() => {
-          this.isNfcActive = false;
-        });
-    },
-    ensureBikeExists() {
-      return new Promise((resolve, reject) => {
-        if (!this.bikeId || this.bikeId === '') {
-          requests.postNewBike(this.make, this.model, this.colour, this.decals, this.serialNumber)
-            .then((response) => {
-              const bike = response.data;
-              this.bikeId = bike.id;
-              resolve(bike);
-            }).catch((error) => {
-              reject(error);
-            });
-        } else {
-          const bike = {
-            id: this.bikeId.toLowerCase(),
-            make: this.make.toLowerCase(),
-            model: this.model.toLowerCase(),
-            colour: this.colour.toLowerCase(),
-            decals: this.decals.toLowerCase(),
-            serialNumber: this.serialNumber.toLowerCase(),
-          };
-          resolve(bike);
-        }
-      });
-    },
-    writeBikeDetailsToNfcTag() {
-      this.ensureBikeExists()
-        .then((bike) => {
-          this.isNfcActive = true;
-          nfc.writeBikeDetailsToNfcTag(bike)
-            .then((serialNumber) => {
-              bike.rfidTagSerialNumber = serialNumber;
-              requests.patchBikeChangeDetails(bike.id, bike)
-                .then(() => {
-                  toast.success('Details Written', {timeout: 1000});
-                })
-                .catch((error) => {
-                  toast.error(error.response.data.detail.description, {timeout: 1000});
-                });
-            })
-            .catch((error) => {
-              toast.error(error.message, {timeout: 1000});
-            })
-            .finally(() => {
-              this.isNfcActive = false;
-            });
-        })
-        .catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 1000});
-        });
-    },
+    // verifyBikeDetails(rfidTagSerialNumber) {
+    //   requests.getBikeByRfidTagSerialNumber(rfidTagSerialNumber)
+    //     .then((response) => {
+    //       const bike = response.data;
+    //       let allSame = true;
+    //       allSame &= bike.make.toLowerCase() === this.make.toLowerCase();
+    //       allSame &= bike.model.toLowerCase() === this.model.toLowerCase();
+    //       allSame &= bike.colour.toLowerCase() === this.colour.toLowerCase();
+    //       allSame &= (bike.decals ? bike.decals.toLowerCase() : '') === this.decals.toLowerCase();
+    //       allSame &= bike.serialNumber.toLowerCase() === this.serialNumber.toLowerCase();
+    //       allSame &= bike.id.toLowerCase() === this.bikeId.toLowerCase();
+    //       if (!allSame) {
+    //         toast.warning('Some of the bike details do not match with the recorded details', {timeout: 4000});
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       toast.error(error.response.data.detail.description, {timeout: 1000});
+    //     });
+    // },
+    // readBikeDetailsFromNfcTag() {
+    //   this.isNfcActive = true;
+    //   nfc.readBikeDetailsFromNfcTag().then((response) => {
+    //     if (response.bike) {
+    //       toast.success('Details read!', {timeout: 1000});
+    //       const bike = response.bike;
+    //       this.make = bike.make.toLowerCase();
+    //       this.model = bike.model.toLowerCase();
+    //       this.colour = bike.colour.toLowerCase();
+    //       this.decals = bike.decals ? bike.decals.toLowerCase() : '';
+    //       this.serialNumber = bike.serialNumber.toLowerCase();
+    //       this.bikeId = bike.id.toLowerCase();
+    //       this.verifyBikeDetails(response.rfidTagSerialNumber);
+    //     } else {
+    //       toast.error('Some error occurred!', {timeout: 1000});
+    //     }
+    //   })
+    //     .catch((error) => {
+    //       toast.error(error.message, {timeout: 1000});
+    //     })
+    //     .finally(() => {
+    //       this.isNfcActive = false;
+    //     });
+    // },
+    // ensureBikeExists() {
+    //   return new Promise((resolve, reject) => {
+    //     if (!this.bikeId || this.bikeId === '') {
+    //       requests.postNewBike(this.make, this.model, this.colours, this.decals, this.serialNumber)
+    //         .then((response) => {
+    //           const bike = response.data;
+    //           this.bikeId = bike.id;
+    //           resolve(bike);
+    //         }).catch((error) => {
+    //           reject(error);
+    //         });
+    //     } else {
+    //       const bike = {
+    //         id: this.bikeId.toLowerCase(),
+    //         make: this.make.toLowerCase(),
+    //         model: this.model.toLowerCase(),
+    //         colours: this.colours,
+    //         decals: this.decals.toLowerCase(),
+    //         serialNumber: this.serialNumber.toLowerCase(),
+    //       };
+    //       resolve(bike);
+    //     }
+    //   });
+    // },
+    // writeBikeDetailsToNfcTag() {
+    //   this.ensureBikeExists()
+    //     .then((bike) => {
+    //       this.isNfcActive = true;
+    //       nfc.writeBikeDetailsToNfcTag(bike)
+    //         .then((serialNumber) => {
+    //           bike.rfidTagSerialNumber = serialNumber;
+    //           requests.patchBikeChangeDetails(bike.id, bike)
+    //             .then(() => {
+    //               toast.success('Details Written', {timeout: 1000});
+    //             })
+    //             .catch((error) => {
+    //               toast.error(error.response.data.detail.description, {timeout: 1000});
+    //             });
+    //         })
+    //         .catch((error) => {
+    //           toast.error(error.message, {timeout: 1000});
+    //         })
+    //         .finally(() => {
+    //           this.isNfcActive = false;
+    //         });
+    //     })
+    //     .catch((error) => {
+    //       toast.error(error.response.data.detail.description, {timeout: 1000});
+    //     });
+    // },
     async run_filter() {
       const client = {
         firstName: this.firstName ? this.firstName : '',
@@ -1496,6 +1528,10 @@ export default {
       this.confirmEmailAddress = '';
       this.clientId = '';
     },
+    filterAndSortColourSuggestions() {
+      this.filtered_colours_suggestions = this.coloursSuggestions
+        .toSorted((a, b) => colourSuggestionSort.colourSuggestionSort(a, b, this.colours)).slice(0, 6);
+    },
   },
   watch: {
     emailAddress() {
@@ -1521,6 +1557,13 @@ export default {
       levenshtein.filterSort(this.colourSuggestions, this.colour, 4).then((result) => {
         this.filtered_colour_suggestions = result.slice(0, 6);
       });
+    },
+    // TODO: could these watchers be combined?
+    colours() {
+      this.filterAndSortColourSuggestions();
+    },
+    coloursSuggestions() {
+      this.filterAndSortColourSuggestions();
     },
     serialNumber() {
       levenshtein.filterSort(this.serialNumberSuggestions, this.serialNumber, 4).then((result) => {

@@ -14,3 +14,4 @@ from .expenses import *
 from .permissions import *
 from .groups import *
 from .crimeReports import *
+from .colours import *

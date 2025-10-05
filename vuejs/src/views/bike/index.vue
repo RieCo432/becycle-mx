@@ -8,6 +8,7 @@ import ContractBikeCardSkeleton from '@/components/Skeleton/ContractBikeCardSkel
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
+import Tooltip from '@/components/Tooltip/index.vue';
 
 const credentialsStore = useCredentialsStore();
 const toast = useToast();
@@ -15,6 +16,7 @@ const toast = useToast();
 export default {
   name: 'clientView',
   components: {
+    Tooltip,
     EditBikeDetailsModal,
     ContractBikeCardSkeleton,
     DashButton,
@@ -155,18 +157,35 @@ export default {
       <Card title="Details">
         <ContractBikeCardSkeleton v-if="loadingBikeDetails"></ContractBikeCardSkeleton>
         <template v-else>
-          <div class="grid grid-cols-12 h-full gap-5">
-            <div class="col-span-12" >
+          <div class="grid xl:grid-cols-12 lg:grid-cols-8 grid-cols-4 h-full gap-5">
+            <div class="col-span-4 col-start-1">
               <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
             </div>
-            <div class="col-span-4 mt-auto">
-              <DashButton class="w-full" :is-disabled="isInWriteMode" @click="writeBikeDetailsToNfcTag">
-                Write To NFC Tag
-              </DashButton>
+            <div class="col-span-4 col-start-1">
+              <div class="h-10 rounded-full overflow-hidden">
+                <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${bike.colours.length}`">
+                  <template
+                      v-for="c in bike.colours"
+                      :key="c.name"
+                  >
+                    <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
+                      <template #button>
+                        <div class="w-full h-full"></div>
+                      </template>
+                      <span>{{ c.name }} ({{ c.hex }})</span>
+                    </Tooltip>
+                  </template>
+                </div>
+              </div>
             </div>
-            <div class="col-span-4 mt-auto">
+<!--            <div class="col-span-4 col-start-1 mt-auto">-->
+<!--              <DashButton class="w-full" :is-disabled="isInWriteMode" @click="writeBikeDetailsToNfcTag">-->
+<!--                Write To NFC Tag-->
+<!--              </DashButton>-->
+<!--            </div>-->
+            <div class="col-span-4 col-start-1 mt-auto">
               <DashButton class="w-full" @click="openEditBikeDetailsModal">
                 Edit Details
               </DashButton>

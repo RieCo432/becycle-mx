@@ -16,12 +16,14 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
+import Tooltip from "@/components/Tooltip/index.vue";
 
 const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    Tooltip,
     SubmitCrimeReportCard,
     ComboboxTextInput,
     Checkbox,
@@ -376,26 +378,43 @@ export default {
             <ContractBikeCardSkeleton v-if="loadingBike"></ContractBikeCardSkeleton>
             <template v-else>
               <div class="grid grid-cols-12 h-full gap-5">
-                <div class="col-span-12" >
+                <div class="col-span-12 col-start-1">
                   <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
                 </div>
-                <div v-if="isUser" class="col-span-4 mt-auto">
+                <div class="col-span-12 col-start-1">
+                  <div class="h-10 rounded-full overflow-hidden">
+                    <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${bike.colours.length}`">
+                      <template
+                          v-for="c in bike.colours"
+                          :key="c.name"
+                      >
+                        <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
+                          <template #button>
+                            <div class="w-full h-full"></div>
+                          </template>
+                          <span>{{ c.name }} ({{ c.hex }})</span>
+                        </Tooltip>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="isUser" class="col-span-6 col-start-1 mt-auto">
                   <DashButton class="w-full" @click="goToBike">
                     View Bike
                   </DashButton>
                 </div>
-                <div v-if="isUser" class="col-span-4 mt-auto">
+                <div v-if="isUser" class="col-span-6 mt-auto">
                   <DashButton class="w-full" @click="openEditBikeDetailsModal">
                     Edit Details
                   </DashButton>
                 </div>
-                <div v-if="isUser" class="col-span-4 mt-auto">
-                  <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">
-                    Write To NFC
-                  </DashButton>
-                </div>
+<!--                <div v-if="isUser" class="col-span-4 mt-auto">-->
+<!--                  <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">-->
+<!--                    Write To NFC-->
+<!--                  </DashButton>-->
+<!--                </div>-->
               </div>
             </template>
           </Card>

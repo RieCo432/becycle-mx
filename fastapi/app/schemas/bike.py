@@ -3,12 +3,14 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
 from .contract import Contract
+from .colours import Colour
 
 
 class BikeBase(BaseModel):
     make: str
     model: str
-    colour: str
+    colour: str = None
+    colours: list[Colour] | None = None
     decals: str | None = None
     serialNumber: str
     rfidTagSerialNumber: str | None = None
