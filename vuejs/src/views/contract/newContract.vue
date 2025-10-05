@@ -227,10 +227,16 @@
                         :error="coloursError"
                         label="Colours"
                         name="colours"
-                        @update:modelValue="(newValue) => { console.log('newValue', newValue); colours = newValue; console.log('newValue colours', colours); fetchColoursSuggestions()}"
+                        @update:modelValue="(newValue) => {fetchColoursSuggestions(); }"
+                        v-model="colours"
                         @click.prevent="() => {}"
-                        :pretty-print-function="(x) => (x.map(c => c.name).join(', '))"
-                    />
+                    >
+                      <template #suggestion="{ suggestion, active }">
+                        <ColourSetSuggestion
+                            :suggestion="suggestion"
+                            :active="active"/>
+                      </template>
+                    </ComboboxColourPicker>
                   </div>
 
                   <div class="col-span-10 md:col-span-5 md:col-start-7">
@@ -688,12 +694,14 @@ import DashButton from '@/components/Button/index.vue';
 import levenshtein from '@/util/levenshtein';
 import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
+import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSuggestion.vue';
 
 const toast = useToast();
 
 export default {
   name: 'newContract',
   components: {
+    ColourSetSuggestion,
     Tooltip,
     ComboboxColourPicker,
     DashButton,
@@ -1030,14 +1038,15 @@ export default {
             });
         } else if (stepNumber.value === 2) {
           // Bike details processing
-          requests.findBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), decals.value, serialNumber.value)
+          console.log('serial number', serialNumber.value);
+          requests.findBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), serialNumber.value)
             .then((response) => {
               bikeId.value = response.data['id'];
               setBike();
             })
             .catch((error) => {
               if (error.response.status === 404) {
-                requests.postNewBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), decals.value, serialNumber.value)
+                requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
                   .then((response) => {
                     toast.success('New Bike Created!', {timeout: 1000});
                     bikeId.value = response.data['id'];
@@ -1351,9 +1360,14 @@ export default {
       }
     },
     selectColours(event, i) {
+      console.log('i', i);
+      console.log('this.colours', this.colours);
+      console.log('this.coloursSuggestions', this.coloursSuggestions);
+      console.log('this.coloursSuggestions[i]', this.coloursSuggestions[i]);
       if (i !== -1) {
-        this.colours = this.filtered_colours_suggestions[i];
+        this.colours.splice(0, this.colours.length, ...this.filtered_colours_suggestions[i]);
       }
+      console.log('this.colours', this.colours);
     },
     selectDepositCollectingUser(event, i) {
       if (i !== -1) {
@@ -1522,7 +1536,7 @@ export default {
     filterAndSortColourSuggestions() {
       // TODO: this filter seems to work okay, but a review of how it should score matching colours vs non-matching colours is needed
       // this.filtered_colours_suggestions = this.coloursSuggestions;
-      console.log('colours suggestions', this.coloursSuggestions);
+      // console.log('colours suggestions', this.coloursSuggestions);
       this.filtered_colours_suggestions = this.coloursSuggestions.toSorted((a, b) => {
         const aHex = a.map((c) => c.hex);
         const bHex = b.map((c) => c.hex);

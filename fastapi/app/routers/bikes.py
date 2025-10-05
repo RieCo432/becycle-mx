@@ -17,15 +17,13 @@ bikes = APIRouter(
 async def find_bike(
         make: str,
         model: str,
-        colour: str,
         serial_number: str,
-        decals: str = None,
+        colours: str,
         db: Session = Depends(dep.get_db)) -> schemas.Bike:
     return crud.find_similar_bikes(
         make=make.lower() if make is not None else None,
         model=model.lower() if model is not None else None,
-        colour=colour.lower() if colour is not None else None,
-        decals=decals.lower() if decals is not None else None,
+        colours=colours.split("|") if colours is not None else None,
         serialNumber=serial_number.lower() if serial_number is not None else None,
         db=db)[0]
 

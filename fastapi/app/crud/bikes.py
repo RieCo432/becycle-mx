@@ -16,17 +16,38 @@ def get_bike(db: Session, bike_id: UUID) -> models.Bike:
     )
 
 
-def find_similar_bikes(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None) -> list[schemas.Bike]:
-    bikes = [bike for bike in db.scalars(
-        select(models.Bike)
-        .where(
+def find_similar_bikes(db: Session, make: str, model: str, colours: list[str], serialNumber: str) -> list[schemas.Bike]:
+    query = select(models.Bike).join(models.Bike.colours).where(
             (func.levenshtein(models.Bike.make, make) <= 2)
             & (func.levenshtein(models.Bike.model, model) <= 2)
-            & (func.levenshtein(models.Bike.colour, colour) <= 2)
             & (func.levenshtein(models.Bike.serialNumber, serialNumber) <= 2)
         )
-        .order_by(func.levenshtein(models.Bike.serialNumber, serialNumber))
+
+    bike_candidates = [bike for bike in db.scalars(
+        query
+        .order_by(
+            func.levenshtein(models.Bike.serialNumber, serialNumber),
+            func.levenshtein(models.Bike.make, make), 
+            func.levenshtein(models.Bike.model, model)
+        )
     )]
+    
+    bikes = []
+    for bike_candidate in bike_candidates:
+        bike_colours = [c.hex for c in bike_candidate.colours]
+        query_colours = [c for c in colours]
+        
+        if set(bike_colours) == set(query_colours):
+            bikes.append(bike_candidate)
+            continue
+        else:
+            for colour in query_colours+bike_colours:
+                if colour in bike_colours and colour in query_colours:
+                    bike_colours.remove(colour)
+                    query_colours.remove(colour)
+            if len(bike_colours) + len(query_colours) == 1:
+                bikes.append(bike_candidate)
+                continue
 
     if len(bikes) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "No bikes found"})
@@ -71,10 +92,16 @@ def get_bikes_by_rfid_tag_serial_number(db: Session, rfid_tag_serial_number: str
 
 
 def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
+    colour_values = [models.Colour.getintvalue(colour.hex) for colour in bike_data.colours]
+    colours = [_ for _ in db.scalars(
+        select(models.Colour)
+        .where(models.Colour.id.in_(colour_values))
+    )]
     bike = models.Bike(
         make=bike_data.make.lower(),
         model=bike_data.model.lower(),
-        colour=bike_data.colour.lower(),
+        colour=str.join(', ', [c.name for c in colours]),
+        colours=colours,
         decals=bike_data.decals.lower() if bike_data.decals is not None else None,
         serialNumber=bike_data.serialNumber.lower()
     )
