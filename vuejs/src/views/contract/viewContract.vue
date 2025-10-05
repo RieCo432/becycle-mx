@@ -400,21 +400,21 @@ export default {
                     </div>
                   </div>
                 </div>
-                <div v-if="isUser" class="col-span-4 col-start-1 mt-auto">
+                <div v-if="isUser" class="col-span-6 col-start-1 mt-auto">
                   <DashButton class="w-full" @click="goToBike">
                     View Bike
                   </DashButton>
                 </div>
-                <div v-if="isUser" class="col-span-4 mt-auto">
+                <div v-if="isUser" class="col-span-6 mt-auto">
                   <DashButton class="w-full" @click="openEditBikeDetailsModal">
                     Edit Details
                   </DashButton>
                 </div>
-                <div v-if="isUser" class="col-span-4 mt-auto">
-                  <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">
-                    Write To NFC
-                  </DashButton>
-                </div>
+<!--                <div v-if="isUser" class="col-span-4 mt-auto">-->
+<!--                  <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">-->
+<!--                    Write To NFC-->
+<!--                  </DashButton>-->
+<!--                </div>-->
               </div>
             </template>
           </Card>

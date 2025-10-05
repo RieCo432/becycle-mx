@@ -160,11 +160,11 @@
                       Enter the bike's details
                     </h4>
                   </div>
-                  <div class="col-span-full">
-                    <DashButton class="block-btn" @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">
-                      Read From NFC Tag
-                    </DashButton>
-                  </div>
+<!--                  <div class="col-span-full">-->
+<!--                    <DashButton class="block-btn" @click="readBikeDetailsFromNfcTag" :is-disabled="isNfcActive">-->
+<!--                      Read From NFC Tag-->
+<!--                    </DashButton>-->
+<!--                  </div>-->
                   <div class="col-span-10 md:col-span-5">
                     <ComboboxTextInput
                         :allow-new="makeNotInList"
@@ -265,11 +265,11 @@
                     />
                   </div>
 
-                  <div class="col-span-full">
-                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">
-                      Write To NFC Tag
-                    </DashButton>
-                  </div>
+<!--                  <div class="col-span-full">-->
+<!--                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">-->
+<!--                      Write To NFC Tag-->
+<!--                    </DashButton>-->
+<!--                  </div>-->
 
                   <div class="col-span-12 md:col-span-6">
                     <Checkbox
