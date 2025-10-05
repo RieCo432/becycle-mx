@@ -1,4 +1,5 @@
 import {distance} from 'fastest-levenshtein';
+import colourSuggestionSort from '@/util/colourSuggestionSort';
 
 export default {
   filterSort(array, input) {
@@ -25,11 +26,14 @@ export default {
             prop !== 'id' &&
                 Object.prototype.hasOwnProperty.call(item, prop) &&
                 Object.prototype.hasOwnProperty.call(input, prop)) {
-            const itemProp = item[prop].toLowerCase();
-            const inputProp = input[prop].toLowerCase();
-            return inputProp.length === 0 || (
-              distance(inputProp, itemProp) <= maxDistance || itemProp.includes(inputProp)
-            );
+            if (prop !== 'colours') {
+              const itemProp = item[prop].toLowerCase();
+              const inputProp = input[prop].toLowerCase();
+              return inputProp.length === 0 || (
+                distance(inputProp, itemProp) <= maxDistance || itemProp.includes(inputProp)
+              );
+            };
+            return true;
           } else {
             return true;
           }
@@ -41,15 +45,19 @@ export default {
                 Object.prototype.hasOwnProperty.call(b, prop) &&
                 Object.prototype.hasOwnProperty.call(input, prop)
           ) {
-            const inputProp = input[prop].toLowerCase();
-            const aProp = a[prop].toLowerCase();
-            const bProp = b[prop].toLowerCase();
-            return aProp.length > 0 ?
-              distance(inputProp, aProp) -
-                  distance(inputProp, bProp) -
-                  (aProp.includes(inputProp) ? aProp.length : 0) +
-                  (bProp.includes(inputProp) ? bProp.length : 0) :
-              0;
+            if (prop !== 'colours') {
+              const inputProp = input[prop].toLowerCase();
+              const aProp = a[prop].toLowerCase();
+              const bProp = b[prop].toLowerCase();
+              return aProp.length > 0 ?
+                distance(inputProp, aProp) -
+                      distance(inputProp, bProp) -
+                      (aProp.includes(inputProp) ? aProp.length : 0) +
+                      (bProp.includes(inputProp) ? bProp.length : 0) :
+                0;
+            } else {
+              return colourSuggestionSort.colourSuggestionSort(a[prop], b[prop], input[prop]);
+            }
           } else {
             return 0;
           }

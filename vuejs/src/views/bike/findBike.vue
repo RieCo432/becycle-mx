@@ -30,7 +30,6 @@ export default {
       selectedBike: {
         make: null,
         model: null,
-        colour: null,
         colours: null,
         serialNumber: null,
         decals: null,
@@ -45,11 +44,10 @@ export default {
   },
   methods: {
     fetchBikes() {
-      console.log('fetchBikes', this.selectedBike);
       if ((
         (this.selectedBike.make ? this.selectedBike.make.length : 0) +
         (this.selectedBike.model ? this.selectedBike.model.length : 0) +
-        (this.selectedBike.colours ? this.selectedBike.colours.length : 0) +
+        (this.selectedBike.colours ? 3 : 0) +
         (this.selectedBike.serialNumber ? this.selectedBike.serialNumber.length : 0)
       ) > 2) {
         requests.findBikes(
@@ -110,7 +108,7 @@ export default {
       const bike = {
         make: this.selectedBike.make ? this.selectedBike.make : '',
         model: this.selectedBike.model ? this.selectedBike.model : '',
-        colour: this.selectedBike.colour ? this.selectedBike.colour : '',
+        colours: this.selectedBike.colours ? this.selectedBike.colours : [],
         serialNumber: this.selectedBike.serialNumber ? this.selectedBike.serialNumber : '',
       };
       levenshtein.filterSortObject(this.bikeSuggestions, bike, 4).then((result) => {
@@ -118,7 +116,6 @@ export default {
       });
     },
     handleInput() {
-      console.log('handleInput', this.selectedBike);
       this.fetchBikes();
       this.run_filter();
     },

@@ -695,6 +695,7 @@ import levenshtein from '@/util/levenshtein';
 import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSuggestion.vue';
+import colourSuggestionSort from '@/util/colourSuggestionSort';
 
 const toast = useToast();
 
@@ -1038,7 +1039,6 @@ export default {
             });
         } else if (stepNumber.value === 2) {
           // Bike details processing
-          console.log('serial number', serialNumber.value);
           requests.findBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), serialNumber.value)
             .then((response) => {
               bikeId.value = response.data['id'];
@@ -1360,14 +1360,9 @@ export default {
       }
     },
     selectColours(event, i) {
-      console.log('i', i);
-      console.log('this.colours', this.colours);
-      console.log('this.coloursSuggestions', this.coloursSuggestions);
-      console.log('this.coloursSuggestions[i]', this.coloursSuggestions[i]);
       if (i !== -1) {
         this.colours.splice(0, this.colours.length, ...this.filtered_colours_suggestions[i]);
       }
-      console.log('this.colours', this.colours);
     },
     selectDepositCollectingUser(event, i) {
       if (i !== -1) {
@@ -1534,21 +1529,8 @@ export default {
       this.clientId = '';
     },
     filterAndSortColourSuggestions() {
-      // TODO: this filter seems to work okay, but a review of how it should score matching colours vs non-matching colours is needed
-      // this.filtered_colours_suggestions = this.coloursSuggestions;
-      // console.log('colours suggestions', this.coloursSuggestions);
-      this.filtered_colours_suggestions = this.coloursSuggestions.toSorted((a, b) => {
-        const aHex = a.map((c) => c.hex);
-        const bHex = b.map((c) => c.hex);
-        const selectedHex = this.colours.map((c) => c.hex);
-        const aContainsSelected = aHex.map((c) => selectedHex.includes(c) ? 1 : -0.5);
-        const bContainsSelected = bHex.map((c) => selectedHex.includes(c) ? 1 : -0.5);
-        const aScore = aContainsSelected.reduce((a, b) => a + b, 0);
-        const bScore = bContainsSelected.reduce((a, b) => a + b, 0);
-        if (aScore > bScore) return -1;
-        if (aScore < bScore) return 1;
-        return 0;
-      }).slice(0, 6);
+      this.filtered_colours_suggestions = this.coloursSuggestions
+        .toSorted((a, b) => colourSuggestionSort.colourSuggestionSort(a, b, this.colours)).slice(0, 6);
     },
   },
   watch: {
