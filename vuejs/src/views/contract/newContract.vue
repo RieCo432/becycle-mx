@@ -271,7 +271,7 @@
 <!--                    </DashButton>-->
 <!--                  </div>-->
 
-                  <div class="col-span-12 md:col-span-6">
+                  <div class="col-span-12 md:col-span-6 md:col-start-1">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"

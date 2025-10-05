@@ -89,16 +89,32 @@
         >
           <ul>
             <li
-                v-if="((suggestions.indexOf(fieldModelValue) === -1) && allowNew)"
+                v-if="((indexOfSelectionInSuggestions() === -1) && allowNew)"
                 :class="{
                       'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50': activeIndex === -1,
                       'text-slate-600 dark:text-slate-300': activeIndex !== -1,
                       }"
                 class="relative w-full cursor-default select-none py-2 px-4"
-                @mouseenter="() => (activeIndex = -1)">
-              <span class="block">
-                Create {{ fieldModelValue }}
-              </span>
+                @mouseenter="() => (activeIndex = -1)"
+                @mousedown="() => {this.showSuggestions = false;}"
+            >
+              <div class="grid grid-cols-4 lg:grid-cols-6 2xl:grid-cols-10 gap-2">
+                <div class="col-span-1">Create</div>
+                <div v-if="internalModelValue && internalModelValue.length > 0 && internalModelValue.length < 3" :class="`col-span-${3-internalModelValue.length}`"></div>
+                <template v-for="c in internalModelValue" v-bind:key="c.name">
+                  <div :class="['col-span-1']">
+                    <Tooltip placement="top" arrow theme="dark">
+                      <template #button>
+          <span
+              class="inline-block w-10 h-10 rounded-full"
+              :style="`background-color:${c.hex}`"
+          ></span>
+                      </template>
+                      <span>{{ c.name }} ({{ c.hex }})</span>
+                    </Tooltip>
+                  </div>
+                </template>
+              </div>
             </li>
             <li
                 v-for="(suggestion, i) in suggestions"
@@ -259,6 +275,22 @@ export default {
       if (this.internalModelValue.length === 0) {
         this.$emit('emptied');
       };
+    },
+    indexOfSelectionInSuggestions() {
+      let index = -1;
+      const selectedHex = this.internalModelValue.map((c) => c.hex);
+      for (let i = 0; i < this.suggestions.length; i += 1) {
+        if (this.suggestions[i].length !== this.internalModelValue.length) {
+          continue;
+        }
+        const suggestionHex = this.suggestions[i].map((c) => c.hex);
+        
+        if (selectedHex.every((hex) => suggestionHex.includes(hex))) {
+          index = i;
+        }
+
+        return index;
+      }
     },
   },
   created() {
