@@ -35,17 +35,11 @@ def delete_all(db: Session):
 
     db.query(models.DepositExchange).delete()
 
-    for g in db.scalars(select(models.Group)):
-        [g.users.remove(gu) for gu in g.users]
-        [g.permissions.remove(gp) for gp in g.permissions]
-
-    db.commit()
+    db.query(models.group_permission_association_table).delete()
+    db.query(models.group_user_association_table).delete()
     db.query(models.Group).delete()
 
-    for u in db.scalars(select(models.User)):
-        [u.permissions.remove(p) for p in u.permissions]
-
-
+    db.query(models.user_permission_association_table).delete()
     db.query(models.Permission).delete()
 
     db.query(models.UserPresentationCard).delete()

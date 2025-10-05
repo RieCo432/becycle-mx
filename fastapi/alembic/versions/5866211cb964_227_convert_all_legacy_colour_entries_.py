@@ -34,7 +34,7 @@ def upgrade() -> None:
 
         "green": int("00FF00", 16),
         "hulk": int("008000", 16),
-        "light green": int("80FF80", 16),
+        "bright mint": int("A0FFA0", 16),
 
         "blue": int("0000FF", 16),
         "navy blue": int("000080", 16),
@@ -42,11 +42,11 @@ def upgrade() -> None:
 
         "yellow": int("FFFF00", 16),
         "drably olive": int("808000", 16),
-        "butter": int("FFFF80", 16),
+        "calamansi": int("FFFFA0", 16),
 
         "cyan": int("00FFFF", 16),
         "teal": int("008080", 16),
-        "electric blue": int("80FFFF", 16),
+        "celeste": int("B0FFFF", 16),
 
         "magenta": int("FF00FF", 16),
         "purple": int("800080", 16),
@@ -70,16 +70,16 @@ def upgrade() -> None:
         "light red": "light red",
         "green": "green",
         "hulk": "hulk",
-        "light green": "light green",
+        "bright mint": "bright mint",
         "blue": "blue",
         "navy blue": "navy blue",
         "blue party parrot": "blue party parrot",
         "yellow": "yellow",
         "drably olive ": "drably olive ",
-        "butter": "butter",
+        "calamansi": "calamansi",
         "cyan": "cyan",
         "teal": "teal",
-        "electric blue": "electric blue",
+        "celeste": "celeste",
         "magenta": "magenta",
         "purple": "purple",
         "hottest of pinks": "hottest of pinks",
@@ -98,11 +98,14 @@ def upgrade() -> None:
         "dark magenta": "purple",
         "silver": "grey",
         "gun metal": "grey",
-        "bright blue": "electric blue",
+        "bright blue": "celeste",
         "beige": "buttery",
         "burg": "maroon",
         "red wine": "maroon",
-        "light blue": "electric blue",
+        "butter": "calamansi", 
+        "light blue": "celeste",
+        "light green": "bright mint",
+        "electric blue": "celeste",
         "cream red": "light red",
         "midnight blue": "navy blue",
         "cream": "buttery",
@@ -110,7 +113,7 @@ def upgrade() -> None:
         "fools gold": "drably olive",
         "torkoyz": "cyan",
         "turquoise": "cyan",
-        "bright green": "light green",
+        "bright green": "bright mint",
         "gold": "drably olive",
         "copper": "beasty brown",
         "pink": "hottest of pinks",
@@ -169,7 +172,7 @@ def upgrade() -> None:
                                {"bikeid": row[0], "colourid": c})]) == 0:
                 op.execute(f"INSERT INTO bikecolours (bikeid, colourid) VALUES ('{row[0]}', '{c}');")
 
-        print("colour remains", typed_colours)
+        # print("colour remains", typed_colours)
 
     # ### end Alembic commands ###
 
