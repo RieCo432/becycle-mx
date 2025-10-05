@@ -36,6 +36,7 @@
     :distance="distance"
     :offset="offset"
     v-if="$slots.default"
+    :style="btnStyle"
   >
     <button class="btn" :class="btnClass" v-if="!$slots.button">
       {{ title }}
@@ -127,6 +128,11 @@ export default {
     offset: {
       type: Array,
       default: () => [0, 0],
+    },
+    btnStyle: {
+      type: Object,
+      default: () => {
+      },
     },
   },
 };

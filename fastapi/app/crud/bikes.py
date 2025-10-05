@@ -16,17 +16,38 @@ def get_bike(db: Session, bike_id: UUID) -> models.Bike:
     )
 
 
-def find_similar_bikes(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None) -> list[schemas.Bike]:
-    bikes = [bike for bike in db.scalars(
-        select(models.Bike)
-        .where(
+def find_similar_bikes(db: Session, make: str, model: str, colours: list[str], serialNumber: str) -> list[schemas.Bike]:
+    query = select(models.Bike).join(models.Bike.colours).where(
             (func.levenshtein(models.Bike.make, make) <= 2)
             & (func.levenshtein(models.Bike.model, model) <= 2)
-            & (func.levenshtein(models.Bike.colour, colour) <= 2)
             & (func.levenshtein(models.Bike.serialNumber, serialNumber) <= 2)
         )
-        .order_by(func.levenshtein(models.Bike.serialNumber, serialNumber))
+
+    bike_candidates = [bike for bike in db.scalars(
+        query
+        .order_by(
+            func.levenshtein(models.Bike.serialNumber, serialNumber),
+            func.levenshtein(models.Bike.make, make), 
+            func.levenshtein(models.Bike.model, model)
+        )
     )]
+    
+    bikes = []
+    for bike_candidate in bike_candidates:
+        bike_colours = [c.hex for c in bike_candidate.colours]
+        query_colours = [c for c in colours]
+        
+        if set(bike_colours) == set(query_colours):
+            bikes.append(bike_candidate)
+            continue
+        else:
+            for colour in query_colours+bike_colours:
+                if colour in bike_colours and colour in query_colours:
+                    bike_colours.remove(colour)
+                    query_colours.remove(colour)
+            if len(bike_colours) + len(query_colours) == 1:
+                bikes.append(bike_candidate)
+                continue
 
     if len(bikes) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "No bikes found"})
@@ -34,7 +55,7 @@ def find_similar_bikes(db: Session, make: str | None = None, model: str | None =
     return bikes
 
 
-def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, decals: str | None = None, serialNumber: str | None = None, max_distance: int = 4) -> list[schemas.Bike]:
+def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, colours: list[str] | None = None, decals: str | None = None, serialNumber: str | None = None, max_distance: int = 4) -> list[schemas.Bike]:
     query_filter = []
     if make is not None:
         query_filter.append(models.Bike.make.contains(make.lower()) | (func.levenshtein(models.Bike.make, make) <= max_distance))
@@ -44,6 +65,10 @@ def get_potential_bike_matches(db: Session, make: str | None = None, model: str 
         query_filter.append(models.Bike.colour.contains(colour.lower()) | (func.levenshtein(models.Bike.colour, colour) <= max_distance))
     if serialNumber is not None:
         query_filter.append(models.Bike.serialNumber.contains(serialNumber.lower()) | (func.levenshtein(models.Bike.serialNumber, serialNumber) <= max_distance))
+
+    if colours is not None:
+        colour_values = [models.Colour.getintvalue(colour) for colour in colours]
+        query_filter.append(models.Bike.colours.any(models.Colour.id.in_(colour_values)))
 
     bikes = [bike for bike in db.scalars(
         select(models.Bike)
@@ -67,10 +92,16 @@ def get_bikes_by_rfid_tag_serial_number(db: Session, rfid_tag_serial_number: str
 
 
 def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
+    colour_values = [models.Colour.getintvalue(colour.hex) for colour in bike_data.colours]
+    colours = [_ for _ in db.scalars(
+        select(models.Colour)
+        .where(models.Colour.id.in_(colour_values))
+    )]
     bike = models.Bike(
         make=bike_data.make.lower(),
         model=bike_data.model.lower(),
-        colour=bike_data.colour.lower(),
+        colour=str.join(', ', [c.name for c in colours]),
+        colours=colours,
         decals=bike_data.decals.lower() if bike_data.decals is not None else None,
         serialNumber=bike_data.serialNumber.lower()
     )
@@ -119,6 +150,25 @@ def get_similar_colours(db: Session, colour: str, max_distance: int = 4) -> list
     return similar_colours
 
 
+def get_similar_colour_sets(db: Session, colours: list[str], max_distance: int = 2) -> list[list[models.Colour]]:
+    all_bikes = [_ for _ in db.scalars(
+        select(models.Bike)
+    )]
+    colour_sets_roughly_matching_query = [bike.colours for bike in all_bikes if sum([0 if colour in colours else 1 for colour in [c.hex for c in bike.colours]]) <= max_distance]
+    colour_sets_result = []
+    
+    for colour_set_to_be_added in colour_sets_roughly_matching_query:
+        should_be_added = True
+        for colour_set_already_added in colour_sets_result:
+            if set([c.hex for c in colour_set_to_be_added]) == set([c.hex for c in colour_set_already_added]):
+                should_be_added = False
+                break
+        if should_be_added:
+            colour_sets_result.append(colour_set_to_be_added)
+    
+    return colour_sets_result
+
+
 def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase) -> models.Bike:
     bike = get_bike(db=db, bike_id=bike_id)
     if updated_bike_data.make is not None:
@@ -127,6 +177,13 @@ def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase)
         bike.model = updated_bike_data.model.lower()
     if updated_bike_data.colour is not None:
         bike.colour = updated_bike_data.colour.lower()
+    if updated_bike_data.colours is not None:
+        colour_ids = [models.Colour.getintvalue(c.hex) for c in updated_bike_data.colours]
+        colours = [_ for _ in db.scalars(
+            select(models.Colour)
+            .where(models.Colour.id.in_(colour_ids))
+        )]
+        bike.colours = colours
     if updated_bike_data.decals is not None:
         bike.decals = updated_bike_data.decals.lower()
     if updated_bike_data.serialNumber is not None:

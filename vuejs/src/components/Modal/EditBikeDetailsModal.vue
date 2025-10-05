@@ -7,19 +7,20 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
+import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
 
 const toast = useToast();
 
 export default {
   name: 'EditBikeDetailsModal',
-  components: {TextInput, Button, Modal},
+  components: {ComboboxColourPicker, TextInput, Button, Modal},
   setup(props, context) {
     const closeModal = toRef(props, 'closeModal');
     const bike = toRef(props, 'bike');
     const newDetailsSchema = yup.object().shape({
       make: yup.string().required('Make is required'),
       model: yup.string().required('Modal is required'),
-      colour: yup.string().required('Colour is required'),
+      colours: yup.array().required('Colour is required').max(3, 'Maximum of 3 colours.').min(1, 'Minimum of 1 colour.'),
       decals: yup.string().nullable(),
       serialNumber: yup.string().required('Serial Number is required'),
     });
@@ -31,7 +32,7 @@ export default {
 
     const {value: make, errorMessage: makeError} = useField('make');
     const {value: model, errorMessage: modelError} = useField('model');
-    const {value: colour, errorMessage: colourError} = useField('colour');
+    const {value: colours, errorMessage: coloursError} = useField('colours');
     const {value: decals, errorMessage: decalsError} = useField('decals');
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
 
@@ -39,7 +40,7 @@ export default {
       requests.patchBikeChangeDetails(bike.value.id, {
         make: make.value,
         model: model.value,
-        colour: colour.value,
+        colours: colours.value,
         decals: decals.value,
         serialNumber: serialNumber.value,
       }).then((response) => {
@@ -57,8 +58,8 @@ export default {
       makeError,
       model,
       modelError,
-      colour,
-      colourError,
+      colours,
+      coloursError,
       decals,
       decalsError,
       serialNumber,
@@ -86,7 +87,8 @@ export default {
   mounted() {
     this.make = this.bike.make;
     this.model = this.bike.model;
-    this.colour = this.bike.colour;
+    this.colours = this.bike.colours;
+    this.colour = this.bike.colours;
     this.decals = this.bike.decals;
     this.serialNumber = this.bike.serialNumber;
   },
@@ -117,17 +119,20 @@ export default {
               :error="modelError"
           />
         </div>
-        <div class="md:col-span-6 col-span-12">
-          <TextInput
-              label="Colour"
-              type="text"
-              placeholder="pink"
-              name="colour"
-              v-model="colour"
-              :error="colourError"
+        <div class="col-span-12">
+          <ComboboxColourPicker
+              :suggestions="[]"
+              :selected-callback="() => {}"
+              :allow-new=false
+              :error="coloursError"
+              label="Colours"
+              name="colours"
+              @update:modelValue="(newValue) => {colours = newValue}"
+              v-model="colours"
+              @click.prevent="() => {}"
           />
         </div>
-        <div class="md:col-span-6 col-span-12">
+        <div class="col-span-12">
           <TextInput
               label="Decals"
               type="text"

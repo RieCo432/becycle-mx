@@ -48,6 +48,7 @@ app.include_router(routers.expenses)
 app.include_router(routers.groups)
 
 app.include_router(routers.crime_reports)
+app.include_router(routers.colours)
 
 
 

@@ -17,15 +17,13 @@ bikes = APIRouter(
 async def find_bike(
         make: str,
         model: str,
-        colour: str,
         serial_number: str,
-        decals: str = None,
+        colours: str,
         db: Session = Depends(dep.get_db)) -> schemas.Bike:
     return crud.find_similar_bikes(
         make=make.lower() if make is not None else None,
         model=model.lower() if model is not None else None,
-        colour=colour.lower() if colour is not None else None,
-        decals=decals.lower() if decals is not None else None,
+        colours=colours.split("|") if colours is not None else None,
         serialNumber=serial_number.lower() if serial_number is not None else None,
         db=db)[0]
 
@@ -35,16 +33,18 @@ async def find_bikes(
         make: str | None = None,
         model: str | None = None,
         colour: str | None = None,
+        colours: str | None = None,
         serial_number: str | None = None,
         decals: str | None = None,
         max_distance: int = 4,
         db: Session = Depends(dep.get_db)) -> list[schemas.Bike]:
     return crud.get_potential_bike_matches(
-        make=make,
-        model=model,
-        colour=colour,
-        decals=decals,
-        serialNumber=serial_number,
+        make=make.lower() if make is not None else None,
+        model=model.lower() if model is not None else None,
+        colour=colour.lower() if colour is not None else None,
+        colours=colours.split("|") if colours is not None else None,
+        decals=decals.lower() if decals is not None else None,
+        serialNumber=serial_number.lower() if serial_number is not None else None,
         max_distance=max_distance,
         db=db)
 
@@ -103,11 +103,11 @@ async def get_serial_number_suggestions(
 
 @bikes.get("/bikes/suggest/colours")
 async def get_colour_suggestions(
-        colour: str,
-        max_distance: int = 4,
+        colours: str,
+        max_distance: int = 2,
         db: Session = Depends(dep.get_db)
-) -> list[str]:
-    return crud.get_similar_colours(db=db, colour=colour.lower(), max_distance=max_distance)
+) -> list[list[schemas.Colour]]:
+    return crud.get_similar_colour_sets(db=db, colours=colours.split("|"), max_distance=max_distance)
 
 
 @bikes.get("/bikes/conditions")

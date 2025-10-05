@@ -6,6 +6,7 @@ from sqlalchemy import String, UUID, text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
+from .bikeColours import bike_colour_association_table
 
 
 class Bike(Base):
@@ -22,6 +23,7 @@ class Bike(Base):
 
 
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="bike")
+    colours: Mapped[List["Colour"]] = relationship(secondary=bike_colour_association_table, back_populates="bikes")
 
     def __eq__(self, other: dict):
         return all([

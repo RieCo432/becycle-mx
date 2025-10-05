@@ -48,7 +48,6 @@ export default {
   },
   methods: {
     showEventDetail(eventClickInfo) {
-      console.log(eventClickInfo);
       if (eventClickInfo.event.extendedProps.typeTitle === 'Closed Day') {
         this.appointmentModalInfo = {
           title: eventClickInfo.event.title,

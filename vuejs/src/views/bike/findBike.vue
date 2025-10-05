@@ -8,16 +8,20 @@ import DashButton from '@/components/Button/index.vue';
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import levenshtein from '@/util/levenshtein';
+import BikeSuggestion from '@/components/ComboboxTextInput/BikeSuggestion.vue';
+import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
 
 const toast = useToast();
 
 export default {
   name: 'findBike',
   components: {
+    ComboboxColourPicker,
     DashButton,
     Button,
     ComboboxTextInput,
     Card,
+    BikeSuggestion,
   },
   data() {
     return {
@@ -26,7 +30,7 @@ export default {
       selectedBike: {
         make: null,
         model: null,
-        colour: null,
+        colours: null,
         serialNumber: null,
         decals: null,
         id: null,
@@ -42,14 +46,15 @@ export default {
     fetchBikes() {
       if ((
         (this.selectedBike.make ? this.selectedBike.make.length : 0) +
-          (this.selectedBike.model ? this.selectedBike.model.length : 0) +
-          (this.selectedBike.colour ? this.selectedBike.colour.length : 0) +
-          (this.selectedBike.serialNumber ? this.selectedBike.serialNumber.length : 0)
+        (this.selectedBike.model ? this.selectedBike.model.length : 0) +
+        (this.selectedBike.colours ? 3 : 0) +
+        (this.selectedBike.serialNumber ? this.selectedBike.serialNumber.length : 0)
       ) > 2) {
         requests.findBikes(
           this.selectedBike.make,
           this.selectedBike.model,
           this.selectedBike.colour,
+          this.selectedBike.colours ? this.selectedBike.colours.map((colour) => colour.hex) : null,
           this.selectedBike.serialNumber,
           4).then((response) => {
           this.bikeSuggestions = response.data;
@@ -103,7 +108,7 @@ export default {
       const bike = {
         make: this.selectedBike.make ? this.selectedBike.make : '',
         model: this.selectedBike.model ? this.selectedBike.model : '',
-        colour: this.selectedBike.colour ? this.selectedBike.colour : '',
+        colours: this.selectedBike.colours ? this.selectedBike.colours : [],
         serialNumber: this.selectedBike.serialNumber ? this.selectedBike.serialNumber : '',
       };
       levenshtein.filterSortObject(this.bikeSuggestions, bike, 4).then((result) => {
@@ -126,11 +131,6 @@ export default {
       this.filtered_bike_suggestions = [];
     },
   },
-  computed: {
-    filteredBikeSuggestionsLegible() {
-      return this.filtered_bike_suggestions.map((bike) => (`${bike.make} ${bike.model} ${bike.colour} ${bike.serialNumber}`));
-    },
-  },
 };
 </script>
 
@@ -142,7 +142,7 @@ export default {
           <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedBike.make"
-                :suggestions="filteredBikeSuggestionsLegible"
+                :suggestions="filtered_bike_suggestions"
                 :selected-callback="selectBike"
                 :allow-new=false
                 label="Make"
@@ -152,13 +152,38 @@ export default {
                 v-model="selectedBike.make"
                 @input="handleInput"
                 @emptied="resetComboBoxes"
-            />
+            >
+              <template #suggestion="{ suggestion, active }">
+                <BikeSuggestion
+                  :suggestion="suggestion"
+                  :active="active"/>
+              </template>
+            </ComboboxTextInput>
+          </div>
+
+          <div class="col-span-12 lg:col-span-6 lg:row-span-3">
+            <ComboboxColourPicker
+                :suggestions="filtered_bike_suggestions"
+                :selected-callback="selectBike"
+                :allow-new=false
+                label="Colour"
+                name="colour"
+                v-model="selectedBike.colours"
+                @update:modelValue="handleInput"
+                @emptied="resetComboBoxes"
+            >
+              <template #suggestion="{ suggestion, active }">
+                <BikeSuggestion
+                    :suggestion="suggestion"
+                    :active="active"/>
+              </template>
+            </ComboboxColourPicker>
           </div>
 
           <div class="col-span-12 lg:col-span-6">
             <ComboboxTextInput
                 :field-model-value="selectedBike.model"
-                :suggestions="filteredBikeSuggestionsLegible"
+                :suggestions="filtered_bike_suggestions"
                 :selected-callback="selectBike"
                 :allow-new=false
                 label="Model"
@@ -168,29 +193,19 @@ export default {
                 v-model="selectedBike.model"
                 @input="handleInput"
                 @emptied="resetComboBoxes"
-            />
+            >
+              <template #suggestion="{ suggestion, active }">
+                <BikeSuggestion
+                    :suggestion="suggestion"
+                    :active="active"/>
+              </template>
+            </ComboboxTextInput>
           </div>
 
-          <div class="col-span-12 lg:col-span-6">
-            <ComboboxTextInput
-                :field-model-value="selectedBike.colour"
-                :suggestions="filteredBikeSuggestionsLegible"
-                :selected-callback="selectBike"
-                :allow-new=false
-                label="Colour"
-                type="text"
-                placeholder="Pink"
-                name="colour"
-                v-model="selectedBike.colour"
-                @input="handleInput"
-                @emptied="resetComboBoxes"
-            />
-          </div>
-
-          <div class="col-span-12 lg:col-span-6">
+          <div class="col-span-12">
             <ComboboxTextInput
                 :field-model-value="selectedBike.serialNumber"
-                :suggestions="filteredBikeSuggestionsLegible"
+                :suggestions="filtered_bike_suggestions"
                 :selected-callback="selectBike"
                 :allow-new=false
                 label="Serial Number"
@@ -200,7 +215,13 @@ export default {
                 v-model="selectedBike.serialNumber"
                 @input="handleInput"
                 @emptied="resetComboBoxes"
-            />
+            >
+              <template #suggestion="{ suggestion, active }">
+                <BikeSuggestion
+                    :suggestion="suggestion"
+                    :active="active"/>
+              </template>
+            </ComboboxTextInput>
           </div>
 
           <div class="col-span-6 mt-10">
@@ -208,16 +229,16 @@ export default {
                 v-if="selectedBike.id !== null"
                 text="Go To Bike"
                 class="btn-dark"
-                @click="$router.push({path: `/bikes/${selectedBike.id}`})"
+                @click="$router.push({ path: `/bikes/${selectedBike.id}` })"
             />
             <span v-else class="text-red-500">No bike selected!</span>
           </div>
           <div class="col-span-6 mt-10">
-            <DashButton @click="readBikeDetailsFromNfcTag" :is-disabled="isInReadMode">Read From NFC Tag</DashButton>
+            <DashButton @click="readBikeDetailsFromNfcTag" :is-disabled="isInReadMode">
+              Read From NFC Tag
+            </DashButton>
           </div>
-
         </div>
-
       </Card>
     </div>
   </div>
