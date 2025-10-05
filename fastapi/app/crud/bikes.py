@@ -127,10 +127,19 @@ def get_similar_colour_sets(db: Session, colours: list[str], max_distance: int =
     all_bikes = [_ for _ in db.scalars(
         select(models.Bike)
     )]
-    # TODO: These need to be unique
-    result = [bike.colours for bike in all_bikes if sum([0 if colour in colours else 1 for colour in [c.hex for c in bike.colours]]) <= max_distance]
+    colour_sets_roughly_matching_query = [bike.colours for bike in all_bikes if sum([0 if colour in colours else 1 for colour in [c.hex for c in bike.colours]]) <= max_distance]
+    colour_sets_result = []
     
-    return result
+    for colour_set_to_be_added in colour_sets_roughly_matching_query:
+        should_be_added = True
+        for colour_set_already_added in colour_sets_result:
+            if set([c.hex for c in colour_set_to_be_added]) == set([c.hex for c in colour_set_already_added]):
+                should_be_added = False
+                break
+        if should_be_added:
+            colour_sets_result.append(colour_set_to_be_added)
+    
+    return colour_sets_result
 
 
 def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase) -> models.Bike:
