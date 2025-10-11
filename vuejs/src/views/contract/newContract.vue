@@ -219,7 +219,7 @@
                   </div>
 
                   <!-- TODO: colour suggestions should be shown as coloured dots -->
-                  <div class="col-span-10 md:col-span-5">
+                  <div class="col-span-12 md:col-span-5">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"
                         :selected-callback="selectColours"
@@ -239,7 +239,7 @@
                     </ComboboxColourPicker>
                   </div>
 
-                  <div class="col-span-10 md:col-span-5 md:col-start-7">
+                  <div class="col-span-12 md:col-span-5 md:col-start-7">
                     <TextInput
                         label="Decals"
                         type="text"
@@ -250,7 +250,7 @@
                     />
                   </div>
 
-                  <div class="col-span-10 md:col-span-5">
+                  <div class="col-span-12 md:col-span-5">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
