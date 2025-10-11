@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot :show="activeModal" as="template">
-    <Dialog as="div" class="relative z-[99999]">
+    <Dialog as="div" class="relative z-[9999]">
       <TransitionChild
           :enter="noFade ? '' : 'duration-300 ease-out'"
           :enter-from="noFade ? '' : 'opacity-0'"
