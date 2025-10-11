@@ -136,7 +136,7 @@ export default {
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-12 lg:col-span-8">
+    <div class="col-span-12 lg:col-span-8 lg:col-start-3">
       <Card title="Find Bike">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12 lg:col-span-6">

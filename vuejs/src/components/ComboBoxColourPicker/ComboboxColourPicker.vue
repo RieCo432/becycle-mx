@@ -20,7 +20,7 @@
             {{ label }}
           </label>
           <div v-if="allColours" class="relative" :class="horizontal ? 'flex-1' : ''">
-            <div class="grid grid-cols-8 gap-2">
+            <div class="grid grid-cols-6 gap-2">
               <div v-for="colour in allColours" :key="colour.id" class="flex items-center justify-center">
                 <Tooltip placement="top" arrow theme="dark">
                   <template #button>
@@ -31,7 +31,12 @@
                           class="text-white px-0 py-0 absolute bg-blue-500 rounded-full" />
                       <div
                           :class="[
-                              'w-10', 'h-10', 'rounded-full', 'border-2',
+                              'w-10', 'h-10',
+                              'sm:w-14', 'sm:h-14',
+                              'md:w-16', 'md:h-16',
+                              'lg:w-12', 'lg:h-12',
+                              '2xl:w-14', '2xl:h-14',
+                              'rounded-full', 'border-2',
                               internalModelValue.map((c) => (c.hex)).includes(colour.hex)
                               ? 'border-blue-500'
                               : ' border-transparent']"
