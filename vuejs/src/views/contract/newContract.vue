@@ -53,22 +53,23 @@
           >
             <form @submit.prevent="submit" @keydown.enter="submit">
               <div v-if="stepNumber === 0">
-                <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="lg:col-span-2 md:col-span-2 col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                <div class="grid grid-cols-1 2xl:grid-cols-2 gap-5">
+                  <div class="col-span-1">
+                    <h4 class="text-slate-800 dark:text-slate-300 mb-6">
                       Create a New Contract or choose a draft to continue.
                     </h4>
                   </div>
-                  <div class="col-span-full">
+                  <div class="col-span-1">
                     <DashButton @click="startNewDraft">Create New</DashButton>
                   </div>
-                  <div class="col-span-full grid grid-cols-1 lg:grid-cols-2 dark:text-slate-300 gap-5">
-                    <ContractDraftCard
-                        v-for="draft in contractDrafts"
-                        :draft="draft"
-                        :continue-draft-function="continueDraft"
-                        :key="draft.id"/>
-                  </div>
+                  <template v-for="draft in contractDrafts" :key="draft.id">
+                    <div class="col-span-1">
+                      <ContractDraftCard
+                          :draft="draft"
+                          :continue-draft-function="continueDraft"
+                          />
+                    </div>
+                  </template>
                 </div>
               </div>
               <div v-if="stepNumber === 1">

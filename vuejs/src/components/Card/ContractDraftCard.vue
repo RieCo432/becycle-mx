@@ -19,7 +19,7 @@ export default {
 </script>
 
 <template>
-  <Card class-name="bg-slate-300 dark:bg-slate-500 border border-slate-300 h-full w-full">
+  <Card class-name="border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full w-full">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
       <div class="col-span-1">
         <span class="block part-label">Client</span>
