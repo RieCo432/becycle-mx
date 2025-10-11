@@ -1,10 +1,11 @@
 <script>
 import DashButton from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
+import Tooltip from '@/components/Tooltip/index.vue';
 
 export default {
   name: 'ContractDraftCard',
-  components: {Card, DashButton},
+  components: {Tooltip, Card, DashButton},
   props: {
     continueDraftFunction: {
       type: Function,
@@ -34,7 +35,28 @@ export default {
         <span class="block part-text">
           {{draft.bike !== null ? `${draft.bike.make} ${draft.bike.model}` : '-'}}
           <br>
-          {{draft.bike !== null ? `${draft.bike.colour} ${draft.bike.decals !== null ? draft.bike.decals : ''}` : '-'}}
+          <span
+              v-if="draft.bike !== null && draft.bike.colours.length > 0">
+            <div
+                class="h-5 rounded-full overflow-hidden">
+                <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${draft.bike.colours.length}`">
+                  <template
+                      v-for="c in draft.bike.colours"
+                      :key="c.name"
+                  >
+                    <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
+                      <template #button>
+                        <div class="w-full h-full"></div>
+                      </template>
+                      <span>{{ c.name }} ({{ c.hex }})</span>
+                    </Tooltip>
+                  </template>
+                </div>
+              </div>
+          </span>
+          <span v-else>-</span>
+          <br>
+          {{draft.bike !== null ? `${draft.bike.decals !== null ? draft.bike.decals : ''}` : '-'}}
           <br>
           {{draft.bike !== null ? `${draft.bike.serialNumber}` : '-'}}
         </span>
