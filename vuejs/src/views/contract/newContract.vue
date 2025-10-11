@@ -53,39 +53,23 @@
           >
             <form @submit.prevent="submit" @keydown.enter="submit">
               <div v-if="stepNumber === 0">
-                <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="lg:col-span-2 md:col-span-2 col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                <div class="grid grid-cols-1 2xl:grid-cols-2 gap-5">
+                  <div class="col-span-1">
+                    <h4 class="text-slate-800 dark:text-slate-300 mb-6">
                       Create a New Contract or choose a draft to continue.
                     </h4>
                   </div>
-                  <div class="col-span-full">
+                  <div class="col-span-1">
                     <DashButton @click="startNewDraft">Create New</DashButton>
                   </div>
-                  <div class="col-span-full grid grid-cols-6 dark:text-slate-300 gap-5">
-                    <div class="col-span-1">Client</div>
-                    <div class="col-span-1">Bike</div>
-                    <div class="col-span-1">Deposit Collector</div>
-                    <div class="col-span-1">Working Volunteer</div>
-                    <div class="col-span-1">Checking Volunteer</div>
-                    <template v-for="draft in contractDrafts" :key="draft.id">
-                      <div class="col-span-1 col-start-1" v-if="draft.client !== null">
-                        {{`${draft.client.firstName} ${draft.client.lastName} ${draft.client.emailAddress}`}}
-                      </div>
-                      <div class="col-span-1" v-if="draft.bike !== null">
-                        {{`${draft.bike.make} ${draft.bike.model} ${draft.bike.colour} ${draft.bike.serialNumber}`}}
-                      </div>
-                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">
-                        {{`${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}`}}
-                      </div>
-                      <div class="col-span-1" v-if="draft.workingUser !== null">{{draft.workingUser.username}}</div>
-                      <div class="col-span-1" v-if="draft.checkingUser !== null">{{draft.checkingUser.username}}</div>
-                      <div class="col-span-1 col-start-6">
-                        <DashButton @click="() => continueDraft(draft.id)">Continue</DashButton>
-                      </div>
-                    </template>
-
-                  </div>
+                  <template v-for="draft in contractDrafts" :key="draft.id">
+                    <div class="col-span-1">
+                      <ContractDraftCard
+                          :draft="draft"
+                          :continue-draft-function="continueDraft"
+                          />
+                    </div>
+                  </template>
                 </div>
               </div>
               <div v-if="stepNumber === 1">
@@ -696,12 +680,14 @@ import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColo
 import Tooltip from '@/components/Tooltip/index.vue';
 import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSuggestion.vue';
 import colourSuggestionSort from '@/util/colourSuggestionSort';
+import ContractDraftCard from '@/components/Card/ContractDraftCard.vue';
 
 const toast = useToast();
 
 export default {
   name: 'newContract',
   components: {
+    ContractDraftCard,
     ColourSetSuggestion,
     Tooltip,
     ComboboxColourPicker,
