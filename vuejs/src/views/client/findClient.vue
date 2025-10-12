@@ -44,6 +44,9 @@ export default {
       }
     },
     selectClient(event, i) {
+      // TODO: remove these
+      console.log('selected filtered suggestions', this.filtered_client_suggestions);
+      console.log('selected index', i);
       this.selectedClient = this.filtered_client_suggestions[i];
     },
     async run_filter() {
@@ -68,7 +71,7 @@ export default {
         id: null,
       };
       this.filtered_client_suggestions = [];
-    }
+    },
   },
   computed: {
     filteredClientSuggestionsLegible() {
@@ -80,7 +83,7 @@ export default {
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-12 lg:col-span-8">
+    <div class="col-span-12 lg:col-span-8 lg:col-start-3">
       <Card title="Find Client">
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12 lg:col-span-6">

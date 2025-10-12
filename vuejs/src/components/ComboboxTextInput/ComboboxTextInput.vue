@@ -37,7 +37,7 @@
                   @keydown.esc="() => (showSuggestions = false)"
                   @keydown.down="() => (activeIndex = (activeIndex + 1) % suggestions.length)"
                   @keydown.up="() => (activeIndex = (activeIndex + suggestions.length - 1) % suggestions.length)"
-                  @keydown.enter="() => (activeIndex === -1 ? selected(null, fieldModelValue) : selected(null, suggestions[activeIndex]))"
+                  @keydown.enter="onEnter"
                   @input="(event) => {$emit('update:modelValue', event.target.value); if (event.target.value === '') $emit('emptied')}"
                   :error="error"
                   :id="name"
@@ -273,6 +273,18 @@ export default {
     toggleType() {
       // toggle the type of the input field
       this.types = this.types === 'text' ? 'password' : 'text';
+    },
+    onEnter() {
+      // TODO: remove these
+      console.log('on enter, activeIndex: ', this.activeIndex);
+      console.log('on enter, suggestions: ', this.suggestions);
+      console.log('on enter, allowNew: ', this.allowNew);
+      console.log('on enter, fieldModelValue: ', this.fieldModelValue);
+      if (this.activeIndex === -1 && this.allowNew) {
+        this.selectedCallback(null, this.fieldModelValue);
+      } else if (this.activeIndex >= 0) {
+        this.selectedCallback(null, this.suggestions[this.activeIndex]);
+      }
     },
   },
 };

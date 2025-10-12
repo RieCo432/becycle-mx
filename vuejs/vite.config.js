@@ -18,13 +18,13 @@ export default defineConfig(() => {
         },
       },
     },
-    server: {https: true}, // Not needed for Vite 5+
+    server: {https: false}, // set to true for NFC development
     plugins: [
       Vue(),
       ViteImages({
         dirs: ['src/assets/images'],
       }),
-      mkcert(),
+      // mkcert(), // this is required for NFC development
     ],
     resolve: {
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue', '.css'],

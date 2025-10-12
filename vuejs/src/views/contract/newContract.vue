@@ -53,39 +53,23 @@
           >
             <form @submit.prevent="submit" @keydown.enter="submit">
               <div v-if="stepNumber === 0">
-                <div class="grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="lg:col-span-2 md:col-span-2 col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
+                <div class="grid grid-cols-1 2xl:grid-cols-2 gap-5">
+                  <div class="col-span-1">
+                    <h4 class="text-slate-800 dark:text-slate-300 mb-6">
                       Create a New Contract or choose a draft to continue.
                     </h4>
                   </div>
-                  <div class="col-span-full">
+                  <div class="col-span-1">
                     <DashButton @click="startNewDraft">Create New</DashButton>
                   </div>
-                  <div class="col-span-full grid grid-cols-6 dark:text-slate-300 gap-5">
-                    <div class="col-span-1">Client</div>
-                    <div class="col-span-1">Bike</div>
-                    <div class="col-span-1">Deposit Collector</div>
-                    <div class="col-span-1">Working Volunteer</div>
-                    <div class="col-span-1">Checking Volunteer</div>
-                    <template v-for="draft in contractDrafts" :key="draft.id">
-                      <div class="col-span-1 col-start-1" v-if="draft.client !== null">
-                        {{`${draft.client.firstName} ${draft.client.lastName} ${draft.client.emailAddress}`}}
-                      </div>
-                      <div class="col-span-1" v-if="draft.bike !== null">
-                        {{`${draft.bike.make} ${draft.bike.model} ${draft.bike.colour} ${draft.bike.serialNumber}`}}
-                      </div>
-                      <div class="col-span-1" v-if="draft.depositCollectingUser !== null">
-                        {{`${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}`}}
-                      </div>
-                      <div class="col-span-1" v-if="draft.workingUser !== null">{{draft.workingUser.username}}</div>
-                      <div class="col-span-1" v-if="draft.checkingUser !== null">{{draft.checkingUser.username}}</div>
-                      <div class="col-span-1 col-start-6">
-                        <DashButton @click="() => continueDraft(draft.id)">Continue</DashButton>
-                      </div>
-                    </template>
-
-                  </div>
+                  <template v-for="draft in contractDrafts" :key="draft.id">
+                    <div class="col-span-1">
+                      <ContractDraftCard
+                          :draft="draft"
+                          :continue-draft-function="continueDraft"
+                          />
+                    </div>
+                  </template>
                 </div>
               </div>
               <div v-if="stepNumber === 1">
@@ -154,8 +138,8 @@
                 </div>
               </div>
               <div v-if="stepNumber === 2">
-                <div class="grid grid-cols-12 gap-5">
-                  <div class="col-span-full">
+                <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
+                  <div class="col-span-full row-start-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Enter the bike's details
                     </h4>
@@ -165,7 +149,7 @@
 <!--                      Read From NFC Tag-->
 <!--                    </DashButton>-->
 <!--                  </div>-->
-                  <div class="col-span-10 md:col-span-5">
+                  <div class="col-span-4 xl:col-span-3 xl:row-start-2">
                     <ComboboxTextInput
                         :allow-new="makeNotInList"
                         :field-model-value="make"
@@ -180,18 +164,19 @@
                         @input="fetchBikeMakeSuggestions"
                     />
                   </div>
-                  <div class="col-span-2 md:col-span-1">
+                  <div class="col-span-2 xl:col-span-1 xl:row-start-2">
                     <label
                         class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
                       Add New
                     </label>
                     <DashButton
-                        :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'} w-full`"
                         :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
-                        @click="() => {makeNotInList = !makeNotInList}"/>
+                        @click.prevent="() => {makeNotInList = !makeNotInList}"
+                    />
                   </div>
 
-                  <div class="col-span-10 md:col-span-5">
+                  <div class="col-span-4 xl:col-span-3 xl:row-start-2">
                     <ComboboxTextInput
                         :allow-new="modelNotInList"
                         :field-model-value="model"
@@ -207,19 +192,21 @@
                     />
                   </div>
 
-                  <div class="col-span-2 md:col-span-1">
+                  <div class="col-span-2 xl:col-span-1 xl:row-start-2">
                     <label
                         class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
                       Add New
                     </label>
                     <DashButton
-                        :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'} w-full`"
                         :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
-                        @click="() => {modelNotInList = !modelNotInList}"/>
+                        @click.prevent="() => {modelNotInList = !modelNotInList}"
+                    />
                   </div>
 
+
                   <!-- TODO: colour suggestions should be shown as coloured dots -->
-                  <div class="col-span-10 md:col-span-5">
+                  <div class="col-span-6 xl:col-span-4 xl:row-span-4 xl:row-start-3 col-start-1">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"
                         :selected-callback="selectColours"
@@ -239,7 +226,7 @@
                     </ComboboxColourPicker>
                   </div>
 
-                  <div class="col-span-10 md:col-span-5 md:col-start-7">
+                  <div class="col-span-6 xl:col-span-4 xl:col-start-5 xl:row-start-3">
                     <TextInput
                         label="Decals"
                         type="text"
@@ -250,7 +237,7 @@
                     />
                   </div>
 
-                  <div class="col-span-10 md:col-span-5">
+                  <div class="col-span-6 xl:col-span-4 xl:col-start-5 xl:row-start-4">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
@@ -265,13 +252,45 @@
                     />
                   </div>
 
+
 <!--                  <div class="col-span-full">-->
 <!--                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">-->
 <!--                      Write To NFC Tag-->
 <!--                    </DashButton>-->
 <!--                  </div>-->
 
-                  <div class="col-span-12 md:col-span-6 md:col-start-1">
+                  <div class="col-span-6 xl:col-span-4 xl:row-span-5 xl:col-start-9 xl:row-start-2">
+                    <BikeOverviewCard
+                        :bike="bikeToBeLinked"
+                        :bike-search="{
+                          make: make,
+                          model: model,
+                          decals: decals,
+                          colours: colours,
+                          serialNumber: serialNumber
+                        }"/>
+                  </div>
+                  <div class="col-span-6 xl:col-span-4 xl:col-start-9 xl:row-start-7">
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Use this bike or create new?</h5>
+                    <Radio
+                        v-if="bikeToBeLinked"
+                        label="Use this bike"
+                        class="mb-5"
+                        name="matchWithBikeId"
+                        v-model="matchWithBikeId"
+                        :value="bikeToBeLinked.id"
+                    />
+                    <Radio
+                        label="Create New Bike"
+                        class="mb-5"
+                        name="matchWithBikeId"
+                        v-model="matchWithBikeId"
+                        value="new"
+                    />
+                    <ErrorMessage name="matchWithBikeId" :error="matchWithBikeIdError" class="text-danger-500"/>
+                  </div>
+
+                  <div class="col-span-6 xl:col-span-2 xl:col-start-5 xl:row-start-5">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"
@@ -281,7 +300,7 @@
                     <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
                   </div>
 
-                  <div class="col-span-12 md:col-span-6">
+                  <div class="col-span-6 xl:col-span-2 xl:col-start-7 xl:row-start-5">
                     <Checkbox
                         label="Sticker on bike?"
                         name="stickerOnBike"
@@ -696,12 +715,16 @@ import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColo
 import Tooltip from '@/components/Tooltip/index.vue';
 import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSuggestion.vue';
 import colourSuggestionSort from '@/util/colourSuggestionSort';
+import ContractDraftCard from '@/components/Card/ContractDraftCard.vue';
+import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
 
 const toast = useToast();
 
 export default {
   name: 'newContract',
   components: {
+    BikeOverviewCard,
+    ContractDraftCard,
     ColourSetSuggestion,
     Tooltip,
     ComboboxColourPicker,
@@ -767,6 +790,8 @@ export default {
     const clientId = ref('');
     const bikeId = ref('');
 
+    const bikeToBeLinked = ref(null);
+
     const makeSuggestions = ref([]);
     const modelSuggestions = ref([]);
     const colourSuggestions = ref([]);
@@ -813,6 +838,7 @@ export default {
       serialNumber: yup.string().required(' Serial Number is required '),
       bikePhotoTaken: yup.boolean().oneOf([true], 'Must take a photo of the bike').required('Must take a photo of the bike'),
       stickerOnBike: yup.boolean().oneOf([true], 'Must put a Becycle sticker on bike').required('Must put a Becycle sticker on bike'),
+      matchWithBikeId: yup.string().required(' Select one option.'),
     });
 
     const contractSchema = yup.object().shape({
@@ -911,6 +937,7 @@ export default {
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
     const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
+    const {value: matchWithBikeId, errorMessage: matchWithBikeIdError} = useField('matchWithBikeId');
     makeNotInList.value = false;
     modelNotInList.value = false;
 
@@ -991,6 +1018,7 @@ export default {
 
     function setBike() {
       if (bikeId.value !== null && bikeId.value !== '') {
+        matchWithBikeId.value = bikeId.value;
         requests.putDraftContractBike(activeDraft.value.id, bikeId.value)
           .then((response) => {
             activeDraft.value = response.data;
@@ -1002,6 +1030,27 @@ export default {
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
+          });
+      }
+    }
+
+    function tryMatchingBike() {
+      if (make.value &&
+          make.value !== '' &&
+          model.value &&
+          model.value !== '' &&
+          colours.value &&
+          colours.value.length > 0 &&
+          serialNumber.value &&
+          serialNumber.value !== '') {
+        requests.findBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), serialNumber.value)
+          .then((response) => {
+            bikeToBeLinked.value = response.data;
+          })
+          .catch((error) => {
+            if (error.response.status === 404) {
+              bikeToBeLinked.value = null;
+            }
           });
       }
     }
@@ -1039,21 +1088,17 @@ export default {
             });
         } else if (stepNumber.value === 2) {
           // Bike details processing
-          requests.findBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), serialNumber.value)
-            .then((response) => {
-              bikeId.value = response.data['id'];
-              setBike();
-            })
-            .catch((error) => {
-              if (error.response.status === 404) {
-                requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
-                  .then((response) => {
-                    toast.success('New Bike Created!', {timeout: 1000});
-                    bikeId.value = response.data['id'];
-                    setBike();
-                  });
-              }
-            });
+          if (matchWithBikeId.value === 'new') {
+            requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
+              .then((response) => {
+                toast.success('New Bike Created!', {timeout: 1000});
+                bikeId.value = response.data['id'];
+                setBike();
+              });
+          } else {
+            bikeId.value = matchWithBikeId.value;
+            setBike();
+          }
         } else if (stepNumber.value === 3) {
           requests.putDraftContractDetails(activeDraft.value.id, type.value, condition.value, notes.value)
             .then((response) => {
@@ -1135,6 +1180,9 @@ export default {
 
     const prev = () => {
       stepNumber.value--;
+      if (stepNumber.value === 2) {
+        tryMatchingBike();
+      }
     };
 
     return {
@@ -1179,6 +1227,9 @@ export default {
       stickerOnBike,
       stickerOnBikeError,
       bikeId,
+      matchWithBikeId,
+      matchWithBikeIdError,
+      bikeToBeLinked,
 
       type,
       typeError,
@@ -1237,6 +1288,7 @@ export default {
       steps,
       stepNumber,
       prev,
+      tryMatchingBike,
     };
   },
   data() {
@@ -1494,6 +1546,7 @@ export default {
 
           this.clientId = this.activeDraft.clientId;
           this.bikeId = this.activeDraft.bikeId;
+          this.matchWithBikeId = this.activeDraft.bikeId;
 
           this.stepNumber = 1;
           this.clientSuggestions.push(this.activeDraft.client);
@@ -1511,6 +1564,53 @@ export default {
         });
     },
     startNewDraft() {
+      this.firstName = null;
+      this.lastName = null;
+      this.emailAddress = null;
+      this.confirmEmailAddress = null;
+
+      this.bikeId = null;
+      this.make = null;
+      this.model = null;
+      this.colours = [];
+      this.decals = null;
+      this.serialNumber = null;
+      this.bikePhotoTaken = false;
+      this.stickerOnBike = false;
+      this.matchWithBikeId = null;
+      this.type = null;
+      this.condition = null;
+      this.notes = null;
+      this.depositAmountCollected = null;
+      this.depositCollectingUser = null;
+      this.depositCollectingPassword = null;
+      this.workingUser = null;
+      this.workingUserPassword = null;
+      this.checkingUser = null;
+      this.checkingUserPassword = null;
+      this.mCheckFrontWheelHub = false;
+      this.mCheckFrontWheelTire = false;
+      this.mCheckRearWheelHub = false;
+      this.mCheckRearWheelTire = false;
+      this.mCheckBottomBracket = false;
+      this.mCheckFrontBrake = false;
+      this.mCheckRearBrake = false;
+      this.mCheckSeatPost = false;
+      this.mCheckHeadset = false;
+      this.everythingCorrect = false;
+      this.activeDraft = null;
+      this.stepNumber = 1;
+      this.userSelectionOptionsStatic = true;
+      this.clientSuggestions = [];
+      this.filtered_client_suggestions = [];
+      this.filtered_make_suggestions = [];
+      this.filtered_model_suggestions = [];
+      this.filtered_colours_suggestions = [];
+      this.filtered_serial_number_suggestions = [];
+      this.filtered_deposit_collecting_user_suggestions = [];
+      this.filtered_working_user_suggestions = [];
+      this.filtered_checking_user_suggestions = [];
+
       requests.postNewContractDraft()
         .then((response) => {
           this.activeDraft = response.data;
@@ -1544,11 +1644,13 @@ export default {
       this.run_filter();
     },
     make() {
+      this.tryMatchingBike();
       levenshtein.filterSort(this.makeSuggestions, this.make, 4).then((result) => {
         this.filtered_make_suggestions = result.slice(0, 6);
       });
     },
     model() {
+      this.tryMatchingBike();
       levenshtein.filterSort(this.modelSuggestions, this.model, 4).then((result) => {
         this.filtered_model_suggestions = result.slice(0, 6);
       });
@@ -1560,12 +1662,14 @@ export default {
     },
     // TODO: could these watchers be combined?
     colours() {
+      this.tryMatchingBike();
       this.filterAndSortColourSuggestions();
     },
     coloursSuggestions() {
       this.filterAndSortColourSuggestions();
     },
     serialNumber() {
+      this.tryMatchingBike();
       levenshtein.filterSort(this.serialNumberSuggestions, this.serialNumber, 4).then((result) => {
         this.filtered_serial_number_suggestions = result.slice(0, 6);
       });
