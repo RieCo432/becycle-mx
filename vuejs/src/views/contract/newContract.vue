@@ -205,7 +205,6 @@
                   </div>
 
 
-
                   <!-- TODO: colour suggestions should be shown as coloured dots -->
                   <div class="col-span-6 xl:col-span-4 xl:row-span-4 xl:row-start-3 col-start-1">
                     <ComboboxColourPicker
@@ -254,15 +253,41 @@
                   </div>
 
 
-
 <!--                  <div class="col-span-full">-->
 <!--                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">-->
 <!--                      Write To NFC Tag-->
 <!--                    </DashButton>-->
 <!--                  </div>-->
 
-                  <div class="col-span-6 xl:col-span-4 xl:row-span-6 xl:col-start-9 xl:row-start-2">
-                    <BikeOverviewCard :bike="bikeToBeLinked" :bike-search="{make: make, model: model, decals: decals, colours: colours, serialNumber: serialNumber}"/>
+                  <div class="col-span-6 xl:col-span-4 xl:row-span-5 xl:col-start-9 xl:row-start-2">
+                    <BikeOverviewCard
+                        :bike="bikeToBeLinked"
+                        :bike-search="{
+                          make: make,
+                          model: model,
+                          decals: decals,
+                          colours: colours,
+                          serialNumber: serialNumber
+                        }"/>
+                  </div>
+                  <div class="col-span-6 xl:col-span-4 xl:col-start-9 xl:row-start-7">
+                    <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Use this bike or create new?</h5>
+                    <Radio
+                        v-if="bikeToBeLinked"
+                        label="Use this bike"
+                        class="mb-5"
+                        name="matchWithBikeId"
+                        v-model="matchWithBikeId"
+                        :value="bikeToBeLinked.id"
+                    />
+                    <Radio
+                        label="Create New Bike"
+                        class="mb-5"
+                        name="matchWithBikeId"
+                        v-model="matchWithBikeId"
+                        value="new"
+                    />
+                    <ErrorMessage name="matchWithBikeId" :error="matchWithBikeIdError" class="text-danger-500"/>
                   </div>
 
                   <div class="col-span-6 xl:col-span-2 xl:col-start-5 xl:row-start-5">
@@ -765,6 +790,8 @@ export default {
     const clientId = ref('');
     const bikeId = ref('');
 
+    const bikeToBeLinked = ref(null);
+
     const makeSuggestions = ref([]);
     const modelSuggestions = ref([]);
     const colourSuggestions = ref([]);
@@ -811,6 +838,7 @@ export default {
       serialNumber: yup.string().required(' Serial Number is required '),
       bikePhotoTaken: yup.boolean().oneOf([true], 'Must take a photo of the bike').required('Must take a photo of the bike'),
       stickerOnBike: yup.boolean().oneOf([true], 'Must put a Becycle sticker on bike').required('Must put a Becycle sticker on bike'),
+      matchWithBikeId: yup.string().required(' Select one option.'),
     });
 
     const contractSchema = yup.object().shape({
@@ -909,6 +937,7 @@ export default {
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
     const {value: bikePhotoTaken, errorMessage: bikePhotoTakenError} = useField('bikePhotoTaken');
     const {value: stickerOnBike, errorMessage: stickerOnBikeError} = useField('stickerOnBike');
+    const {value: matchWithBikeId, errorMessage: matchWithBikeIdError} = useField('matchWithBikeId');
     makeNotInList.value = false;
     modelNotInList.value = false;
 
@@ -989,6 +1018,7 @@ export default {
 
     function setBike() {
       if (bikeId.value !== null && bikeId.value !== '') {
+        matchWithBikeId.value = bikeId.value;
         requests.putDraftContractBike(activeDraft.value.id, bikeId.value)
           .then((response) => {
             activeDraft.value = response.data;
@@ -1000,6 +1030,27 @@ export default {
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
+          });
+      }
+    }
+
+    function tryMatchingBike() {
+      if (make.value &&
+          make.value !== '' &&
+          model.value &&
+          model.value !== '' &&
+          colours.value &&
+          colours.value.length > 0 &&
+          serialNumber.value &&
+          serialNumber.value !== '') {
+        requests.findBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), serialNumber.value)
+          .then((response) => {
+            bikeToBeLinked.value = response.data;
+          })
+          .catch((error) => {
+            if (error.response.status === 404) {
+              bikeToBeLinked.value = null;
+            }
           });
       }
     }
@@ -1037,21 +1088,17 @@ export default {
             });
         } else if (stepNumber.value === 2) {
           // Bike details processing
-          requests.findBike(make.value, model.value, colours.value.map((c) => c.hex).join('|'), serialNumber.value)
-            .then((response) => {
-              bikeId.value = response.data['id'];
-              setBike();
-            })
-            .catch((error) => {
-              if (error.response.status === 404) {
-                requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
-                  .then((response) => {
-                    toast.success('New Bike Created!', {timeout: 1000});
-                    bikeId.value = response.data['id'];
-                    setBike();
-                  });
-              }
-            });
+          if (matchWithBikeId.value === 'new') {
+            requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
+              .then((response) => {
+                toast.success('New Bike Created!', {timeout: 1000});
+                bikeId.value = response.data['id'];
+                setBike();
+              });
+          } else {
+            bikeId.value = matchWithBikeId.value;
+            setBike();
+          }
         } else if (stepNumber.value === 3) {
           requests.putDraftContractDetails(activeDraft.value.id, type.value, condition.value, notes.value)
             .then((response) => {
@@ -1133,6 +1180,9 @@ export default {
 
     const prev = () => {
       stepNumber.value--;
+      if (stepNumber.value === 2) {
+        tryMatchingBike();
+      }
     };
 
     return {
@@ -1177,6 +1227,9 @@ export default {
       stickerOnBike,
       stickerOnBikeError,
       bikeId,
+      matchWithBikeId,
+      matchWithBikeIdError,
+      bikeToBeLinked,
 
       type,
       typeError,
@@ -1235,6 +1288,7 @@ export default {
       steps,
       stepNumber,
       prev,
+      tryMatchingBike,
     };
   },
   data() {
@@ -1246,7 +1300,6 @@ export default {
       filtered_model_suggestions: [],
       filtered_colours_suggestions: [],
       filtered_serial_number_suggestions: [],
-      bikeToBeLinked: null,
     };
   },
   created() {
@@ -1493,6 +1546,7 @@ export default {
 
           this.clientId = this.activeDraft.clientId;
           this.bikeId = this.activeDraft.bikeId;
+          this.matchWithBikeId = this.activeDraft.bikeId;
 
           this.stepNumber = 1;
           this.clientSuggestions.push(this.activeDraft.client);
@@ -1510,6 +1564,53 @@ export default {
         });
     },
     startNewDraft() {
+      this.firstName = null;
+      this.lastName = null;
+      this.emailAddress = null;
+      this.confirmEmailAddress = null;
+
+      this.bikeId = null;
+      this.make = null;
+      this.model = null;
+      this.colours = [];
+      this.decals = null;
+      this.serialNumber = null;
+      this.bikePhotoTaken = false;
+      this.stickerOnBike = false;
+      this.matchWithBikeId = null;
+      this.type = null;
+      this.condition = null;
+      this.notes = null;
+      this.depositAmountCollected = null;
+      this.depositCollectingUser = null;
+      this.depositCollectingPassword = null;
+      this.workingUser = null;
+      this.workingUserPassword = null;
+      this.checkingUser = null;
+      this.checkingUserPassword = null;
+      this.mCheckFrontWheelHub = false;
+      this.mCheckFrontWheelTire = false;
+      this.mCheckRearWheelHub = false;
+      this.mCheckRearWheelTire = false;
+      this.mCheckBottomBracket = false;
+      this.mCheckFrontBrake = false;
+      this.mCheckRearBrake = false;
+      this.mCheckSeatPost = false;
+      this.mCheckHeadset = false;
+      this.everythingCorrect = false;
+      this.activeDraft = null;
+      this.stepNumber = 1;
+      this.userSelectionOptionsStatic = true;
+      this.clientSuggestions = [];
+      this.filtered_client_suggestions = [];
+      this.filtered_make_suggestions = [];
+      this.filtered_model_suggestions = [];
+      this.filtered_colours_suggestions = [];
+      this.filtered_serial_number_suggestions = [];
+      this.filtered_deposit_collecting_user_suggestions = [];
+      this.filtered_working_user_suggestions = [];
+      this.filtered_checking_user_suggestions = [];
+
       requests.postNewContractDraft()
         .then((response) => {
           this.activeDraft = response.data;
@@ -1530,26 +1631,6 @@ export default {
     filterAndSortColourSuggestions() {
       this.filtered_colours_suggestions = this.coloursSuggestions
         .toSorted((a, b) => colourSuggestionSort.colourSuggestionSort(a, b, this.colours)).slice(0, 6);
-    },
-    tryMatchingBike() {
-      if (this.make &&
-          this.make !== '' &&
-          this.model &&
-          this.model !== '' &&
-          this.colours &&
-          this.colours.length > 0 &&
-          this.serialNumber &&
-          this.serialNumber !== '') {
-        requests.findBike(this.make, this.model, this.colours.map((c) => c.hex).join('|'), this.serialNumber)
-          .then((response) => {
-            this.bikeToBeLinked = response.data;
-          })
-          .catch((error) => {
-            if (error.response.status === 404) {
-              this.bikeToBeLinked = null;
-            }
-          });
-      }
     },
   },
   watch: {
