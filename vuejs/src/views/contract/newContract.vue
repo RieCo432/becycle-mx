@@ -138,8 +138,8 @@
                 </div>
               </div>
               <div v-if="stepNumber === 2">
-                <div class="grid grid-cols-6 md:grid-cols-12 gap-5">
-                  <div class="col-span-full">
+                <div class="grid grid-cols-6 md:grid-cols-12 gap-3">
+                  <div class="col-span-full row-start-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Enter the bike's details
                     </h4>
@@ -149,7 +149,7 @@
 <!--                      Read From NFC Tag-->
 <!--                    </DashButton>-->
 <!--                  </div>-->
-                  <div class="col-span-5 md:col-span-4">
+                  <div class="col-span-5 md:col-span-4 md:row-start-2">
                     <ComboboxTextInput
                         :allow-new="makeNotInList"
                         :field-model-value="make"
@@ -164,7 +164,7 @@
                         @input="fetchBikeMakeSuggestions"
                     />
                   </div>
-                  <div class="col-span-1 md:col-span-1">
+                  <div class="col-span-1 md:col-span-1 md:row-start-2">
                     <label
                         class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
                       Add New
@@ -175,7 +175,7 @@
                         @click="() => {makeNotInList = !makeNotInList}"/>
                   </div>
 
-                  <div class="col-span-5 md:col-span-4">
+                  <div class="col-span-5 md:col-span-4 md:row-start-2">
                     <ComboboxTextInput
                         :allow-new="modelNotInList"
                         :field-model-value="model"
@@ -191,7 +191,7 @@
                     />
                   </div>
 
-                  <div class="col-span-1 md:col-span-1">
+                  <div class="col-span-1 md:col-span-1 md:row-start-2">
                     <label
                         class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
                       Add New
@@ -202,12 +202,10 @@
                         @click="() => {modelNotInList = !modelNotInList}"/>
                   </div>
 
-                  <div class="col-span-6 md:col-span-2 md:row-span-3 md:col-start-11">
-                    <BikeOverviewCard :bike="bikeToBeLinked" :bike-search="{make: make, model: model, decals: decals, colours: colours, serialNumber: serialNumber}"/>
-                  </div>
+
 
                   <!-- TODO: colour suggestions should be shown as coloured dots -->
-                  <div class="col-span-6 md:col-span-4 md:row-span-2">
+                  <div class="col-span-6 md:col-span-4 md:row-span-4 md:row-start-3 col-start-1">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"
                         :selected-callback="selectColours"
@@ -227,7 +225,7 @@
                     </ComboboxColourPicker>
                   </div>
 
-                  <div class="col-span-6 md:col-span-4 md:col-start-6">
+                  <div class="col-span-6 md:col-span-4 md:col-start-6 md:row-start-3">
                     <TextInput
                         label="Decals"
                         type="text"
@@ -238,7 +236,7 @@
                     />
                   </div>
 
-                  <div class="col-span-6 md:col-span-4 md:col-start-6">
+                  <div class="col-span-6 md:col-span-4 md:col-start-6 md:row-start-4">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
@@ -261,7 +259,11 @@
 <!--                    </DashButton>-->
 <!--                  </div>-->
 
-                  <div class="col-span-6 md:col-span-5 md:col-start-1">
+                  <div class="col-span-6 md:col-span-2 md:row-span-6 md:col-start-11 md:row-start-2">
+                    <BikeOverviewCard :bike="bikeToBeLinked" :bike-search="{make: make, model: model, decals: decals, colours: colours, serialNumber: serialNumber}"/>
+                  </div>
+
+                  <div class="col-span-6 md:col-span-2 md:col-start-6 md:row-start-5">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"
@@ -271,7 +273,7 @@
                     <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
                   </div>
 
-                  <div class="col-span-6 md:col-span-5">
+                  <div class="col-span-6 md:col-span-2 md:col-start-8 md:row-start-5">
                     <Checkbox
                         label="Sticker on bike?"
                         name="stickerOnBike"
