@@ -138,7 +138,7 @@
                 </div>
               </div>
               <div v-if="stepNumber === 2">
-                <div class="grid grid-cols-6 md:grid-cols-12 gap-3">
+                <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
                   <div class="col-span-full row-start-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Enter the bike's details
@@ -149,7 +149,7 @@
 <!--                      Read From NFC Tag-->
 <!--                    </DashButton>-->
 <!--                  </div>-->
-                  <div class="col-span-5 md:col-span-4 md:row-start-2">
+                  <div class="col-span-4 xl:col-span-3 xl:row-start-2">
                     <ComboboxTextInput
                         :allow-new="makeNotInList"
                         :field-model-value="make"
@@ -164,19 +164,19 @@
                         @input="fetchBikeMakeSuggestions"
                     />
                   </div>
-                  <div class="col-span-1 md:col-span-1 md:row-start-2">
+                  <div class="col-span-2 xl:col-span-1 xl:row-start-2">
                     <label
                         class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
                       Add New
                     </label>
                     <DashButton
-                        :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'} w-full`"
                         :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
                         @click.prevent="() => {makeNotInList = !makeNotInList}"
                     />
                   </div>
 
-                  <div class="col-span-5 md:col-span-4 md:row-start-2">
+                  <div class="col-span-4 xl:col-span-3 xl:row-start-2">
                     <ComboboxTextInput
                         :allow-new="modelNotInList"
                         :field-model-value="model"
@@ -192,13 +192,13 @@
                     />
                   </div>
 
-                  <div class="col-span-1 md:col-span-1 md:row-start-2">
+                  <div class="col-span-2 xl:col-span-1 xl:row-start-2">
                     <label
                         class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
                       Add New
                     </label>
                     <DashButton
-                        :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
+                        :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'} w-full`"
                         :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
                         @click.prevent="() => {modelNotInList = !modelNotInList}"
                     />
@@ -207,7 +207,7 @@
 
 
                   <!-- TODO: colour suggestions should be shown as coloured dots -->
-                  <div class="col-span-6 md:col-span-4 md:row-span-4 md:row-start-3 col-start-1">
+                  <div class="col-span-6 xl:col-span-4 xl:row-span-4 xl:row-start-3 col-start-1">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"
                         :selected-callback="selectColours"
@@ -227,7 +227,7 @@
                     </ComboboxColourPicker>
                   </div>
 
-                  <div class="col-span-6 md:col-span-4 md:col-start-6 md:row-start-3">
+                  <div class="col-span-6 xl:col-span-4 xl:col-start-5 xl:row-start-3">
                     <TextInput
                         label="Decals"
                         type="text"
@@ -238,7 +238,7 @@
                     />
                   </div>
 
-                  <div class="col-span-6 md:col-span-4 md:col-start-6 md:row-start-4">
+                  <div class="col-span-6 xl:col-span-4 xl:col-start-5 xl:row-start-4">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
@@ -261,11 +261,11 @@
 <!--                    </DashButton>-->
 <!--                  </div>-->
 
-                  <div class="col-span-6 md:col-span-2 md:row-span-6 md:col-start-11 md:row-start-2">
+                  <div class="col-span-6 xl:col-span-4 xl:row-span-6 xl:col-start-9 xl:row-start-2">
                     <BikeOverviewCard :bike="bikeToBeLinked" :bike-search="{make: make, model: model, decals: decals, colours: colours, serialNumber: serialNumber}"/>
                   </div>
 
-                  <div class="col-span-6 md:col-span-2 md:col-start-6 md:row-start-5">
+                  <div class="col-span-6 xl:col-span-2 xl:col-start-5 xl:row-start-5">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"
@@ -275,7 +275,7 @@
                     <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
                   </div>
 
-                  <div class="col-span-6 md:col-span-2 md:col-start-8 md:row-start-5">
+                  <div class="col-span-6 xl:col-span-2 xl:col-start-7 xl:row-start-5">
                     <Checkbox
                         label="Sticker on bike?"
                         name="stickerOnBike"
