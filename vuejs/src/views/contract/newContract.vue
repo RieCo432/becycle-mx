@@ -172,7 +172,8 @@
                     <DashButton
                         :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
                         :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
-                        @click="() => {makeNotInList = !makeNotInList}"/>
+                        @click.prevent="() => {makeNotInList = !makeNotInList}"
+                    />
                   </div>
 
                   <div class="col-span-5 md:col-span-4 md:row-start-2">
@@ -199,7 +200,8 @@
                     <DashButton
                         :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'}`"
                         :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
-                        @click="() => {modelNotInList = !modelNotInList}"/>
+                        @click.prevent="() => {modelNotInList = !modelNotInList}"
+                    />
                   </div>
 
 
