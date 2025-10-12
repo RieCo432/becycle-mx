@@ -138,7 +138,7 @@
                 </div>
               </div>
               <div v-if="stepNumber === 2">
-                <div class="grid grid-cols-12 gap-5">
+                <div class="grid grid-cols-6 md:grid-cols-12 gap-5">
                   <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Enter the bike's details
@@ -149,7 +149,7 @@
 <!--                      Read From NFC Tag-->
 <!--                    </DashButton>-->
 <!--                  </div>-->
-                  <div class="col-span-10 md:col-span-5">
+                  <div class="col-span-5 md:col-span-4">
                     <ComboboxTextInput
                         :allow-new="makeNotInList"
                         :field-model-value="make"
@@ -164,7 +164,7 @@
                         @input="fetchBikeMakeSuggestions"
                     />
                   </div>
-                  <div class="col-span-2 md:col-span-1">
+                  <div class="col-span-1 md:col-span-1">
                     <label
                         class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
                       Add New
@@ -175,7 +175,7 @@
                         @click="() => {makeNotInList = !makeNotInList}"/>
                   </div>
 
-                  <div class="col-span-10 md:col-span-5">
+                  <div class="col-span-5 md:col-span-4">
                     <ComboboxTextInput
                         :allow-new="modelNotInList"
                         :field-model-value="model"
@@ -191,7 +191,7 @@
                     />
                   </div>
 
-                  <div class="col-span-2 md:col-span-1">
+                  <div class="col-span-1 md:col-span-1">
                     <label
                         class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
                       Add New
@@ -202,8 +202,12 @@
                         @click="() => {modelNotInList = !modelNotInList}"/>
                   </div>
 
+                  <div class="col-span-6 md:col-span-2 md:row-span-3 md:col-start-11">
+                    <BikeOverviewCard :bike="bikeToBeLinked" :bike-search="{make: make, model: model, decals: decals, colours: colours, serialNumber: serialNumber}"/>
+                  </div>
+
                   <!-- TODO: colour suggestions should be shown as coloured dots -->
-                  <div class="col-span-12 md:col-span-5">
+                  <div class="col-span-6 md:col-span-4 md:row-span-2">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"
                         :selected-callback="selectColours"
@@ -223,7 +227,7 @@
                     </ComboboxColourPicker>
                   </div>
 
-                  <div class="col-span-12 md:col-span-5 md:col-start-7">
+                  <div class="col-span-6 md:col-span-4 md:col-start-6">
                     <TextInput
                         label="Decals"
                         type="text"
@@ -234,7 +238,7 @@
                     />
                   </div>
 
-                  <div class="col-span-12 md:col-span-5">
+                  <div class="col-span-6 md:col-span-4 md:col-start-6">
                     <ComboboxTextInput
                         :field-model-value="serialNumber"
                         :suggestions="filtered_serial_number_suggestions"
@@ -249,13 +253,15 @@
                     />
                   </div>
 
+
+
 <!--                  <div class="col-span-full">-->
 <!--                    <DashButton class="block-btn" @click="writeBikeDetailsToNfcTag" :is-disabled="isNfcActive">-->
 <!--                      Write To NFC Tag-->
 <!--                    </DashButton>-->
 <!--                  </div>-->
 
-                  <div class="col-span-12 md:col-span-6 md:col-start-1">
+                  <div class="col-span-6 md:col-span-5 md:col-start-1">
                     <Checkbox
                         label="Photo of bike taken?"
                         name="bikePhotoTaken"
@@ -265,7 +271,7 @@
                     <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
                   </div>
 
-                  <div class="col-span-12 md:col-span-6">
+                  <div class="col-span-6 md:col-span-5">
                     <Checkbox
                         label="Sticker on bike?"
                         name="stickerOnBike"
@@ -681,12 +687,14 @@ import Tooltip from '@/components/Tooltip/index.vue';
 import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSuggestion.vue';
 import colourSuggestionSort from '@/util/colourSuggestionSort';
 import ContractDraftCard from '@/components/Card/ContractDraftCard.vue';
+import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
 
 const toast = useToast();
 
 export default {
   name: 'newContract',
   components: {
+    BikeOverviewCard,
     ContractDraftCard,
     ColourSetSuggestion,
     Tooltip,
@@ -1234,6 +1242,7 @@ export default {
       filtered_model_suggestions: [],
       filtered_colours_suggestions: [],
       filtered_serial_number_suggestions: [],
+      bikeToBeLinked: null,
     };
   },
   created() {
@@ -1518,6 +1527,26 @@ export default {
       this.filtered_colours_suggestions = this.coloursSuggestions
         .toSorted((a, b) => colourSuggestionSort.colourSuggestionSort(a, b, this.colours)).slice(0, 6);
     },
+    tryMatchingBike() {
+      if (this.make &&
+          this.make !== '' &&
+          this.model &&
+          this.model !== '' &&
+          this.colours &&
+          this.colours.length > 0 &&
+          this.serialNumber &&
+          this.serialNumber !== '') {
+        requests.findBike(this.make, this.model, this.colours.map((c) => c.hex).join('|'), this.serialNumber)
+          .then((response) => {
+            this.bikeToBeLinked = response.data;
+          })
+          .catch((error) => {
+            if (error.response.status === 404) {
+              this.bikeToBeLinked = null;
+            }
+          });
+      }
+    },
   },
   watch: {
     emailAddress() {
@@ -1530,11 +1559,13 @@ export default {
       this.run_filter();
     },
     make() {
+      this.tryMatchingBike();
       levenshtein.filterSort(this.makeSuggestions, this.make, 4).then((result) => {
         this.filtered_make_suggestions = result.slice(0, 6);
       });
     },
     model() {
+      this.tryMatchingBike();
       levenshtein.filterSort(this.modelSuggestions, this.model, 4).then((result) => {
         this.filtered_model_suggestions = result.slice(0, 6);
       });
@@ -1546,12 +1577,14 @@ export default {
     },
     // TODO: could these watchers be combined?
     colours() {
+      this.tryMatchingBike();
       this.filterAndSortColourSuggestions();
     },
     coloursSuggestions() {
       this.filterAndSortColourSuggestions();
     },
     serialNumber() {
+      this.tryMatchingBike();
       levenshtein.filterSort(this.serialNumberSuggestions, this.serialNumber, 4).then((result) => {
         this.filtered_serial_number_suggestions = result.slice(0, 6);
       });
