@@ -47,13 +47,10 @@ export default {
   computed: {
     dataMatches() {
       if (this.fieldData === null && this.searchData === null) {
-        console.log('null');
         return true;
       } else if (typeof(this.fieldData) === 'string' && typeof(this.searchData) === 'string') {
-        console.log('string');
         return this.fieldData.toLowerCase() === this.searchData.toLowerCase();
       } else if (Array.isArray(this.fieldData) && Array.isArray(this.searchData)) {
-        console.log('array');
         const allSearchInField = this.searchData.every((sd) => this.fieldData.includes(sd));
         const allFieldInSearch = this.fieldData.every((fd) => this.searchData.includes(fd));
         return allSearchInField && allFieldInSearch;
