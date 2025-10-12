@@ -63,6 +63,9 @@ export default {
       }
     },
     selectBike(event, i) {
+      // TODO: remove these
+      console.log('selected filtered suggestions', this.filtered_bike_suggestions);
+      console.log('selected index', i);
       this.selectedBike = this.filtered_bike_suggestions[i];
     },
     verifyBikeDetails(rfidTagSerialNumber) {
