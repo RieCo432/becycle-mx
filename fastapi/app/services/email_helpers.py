@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formataddr
 from uuid import UUID
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import app.schemas as schemas
 
@@ -20,6 +21,12 @@ PRODUCTION = os.environ['PRODUCTION'] == "true"
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 months = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+
+env = Environment(
+    loader=FileSystemLoader("app/email_templates"),
+    autoescape=select_autoescape(["html", "xml"])
+)
 
 
 def send_email(destination: str, subject: str, content: str) -> None:
@@ -40,24 +47,12 @@ def send_email(destination: str, subject: str, content: str) -> None:
 
     else:
         print(destination, subject, content)
+        
+        
+def render_template(template_name: str, **kwargs) -> str:
+    template = env.get_template(template_name+".html")
+    return template.render(**kwargs)
 
-
-def build_email_verification_html(client_temp_id: UUID, verification_code: str) -> str:
-    return ("<html>"
-            "   <body>"
-            "       <h2>Enter this code on the website to verify your email address.</h2><br>"
-            "       <h2>{}</h2>"
-            "   </body>"
-            "</html>".format(verification_code))
-
-
-def build_client_login_code_html(login_code: str):
-    return ("<html>"
-            "   <body>"
-            "       <h2>Enter this code on the website to log in</h2><br>"
-            "       <h2>{}</h2>"
-            "   </body>"
-            "</html>".format(login_code))
 
 
 def build_appointment_confirmation_email(appointment_title: str, appointment_start_datetime: datetime, appointment_id: UUID, client_id: UUID, additional_note: str | None = None):
