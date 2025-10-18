@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Hi, {{ contract.client.firstName }}!</h2>
+    <h2>Your contract has been created!</h2><br>
+
+    {% include "partials/contract_info.html" %}
+
+    {% include "partials/contract_terms.html" %}
+    
+{% endblock %}
