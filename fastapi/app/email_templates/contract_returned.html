@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>Thank you for returning your bike!</p>
+    {% include "partials/contract_info.html" %}
+    <h2>Return Details:</h2>
+    <p>Deposit returned: &#163;{{ contract.depositAmountReturned }}</p>
+    <p>Returned on: {{ contract.returnedDate.strftime("%d %B %Y") }}</p>
+    <br>
+
+    {% include "partials/contract_terms.html"%}
+{% endblock %}

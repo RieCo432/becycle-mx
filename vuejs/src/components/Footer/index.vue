@@ -5,7 +5,7 @@
     >
       <div class="grid md:grid-cols-2 grid-cols-1 md:gap-5">
         <div class="text-center ltr:md:text-start rtl:md:text-right text-sm">
-          COPYRIGHT &copy; 2024 BECYCLE Workshop SCIO, All rights Reserved. Charity Registration Number: SC053291
+          COPYRIGHT &copy; 2023-2026 BECYCLE Workshop SCIO, All rights Reserved. Charity Registration Number: SC053291
         </div>
         <div class="ltr:md:text-right rtl:md:text-end text-center text-sm">
           Made by Colin Ries

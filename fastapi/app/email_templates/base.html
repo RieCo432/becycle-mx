@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>BECYCLE Workshop</title>
+        <style>
+            /* Basic embedded styling (for email compatibility) */
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9fafb;
+                color: #333;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                background: white;
+                border-radius: 8px;
+                padding: 24px;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+            {% block extra_style %}{% endblock %}
+        </style>
+    </head>
+    <body>
+        {% include "partials/header.html" %}
+        <div class="content">
+            <h2>Hi {{ client.firstName.capitalize() }},</h2>
+            {% block content %}{% endblock %}
+        </div>
+        {% include "partials/footer.html" %}
+    </body>
+</html>
