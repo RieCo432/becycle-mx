@@ -2,7 +2,12 @@
 <p>{{ contract.client.firstName }} {{ contract.client.lastName }}</p>
 <h2>Bike Details</h2>
 <p>{{ contract.bike.make }} {{ contract.bike.model }}</p>
-<p>Colour: {{ contract.bike.colour }}</p>
+<p>Colours:</p>
+<div style="border-radius: 9999px; overflow: hidden; height:40px; width:300px; display:flex; justify-content: center; padding: 0">
+    {% for colour in contract.bike.colours %}
+        <div style="display:inline-block; margin: 0; height:100%; width:{{ 100 / contract.bike.colours|length }}%; background-color:{{ colour.hex }}"></div>
+    {% endfor %}
+</div>
 <p>Serial number: {{ contract.bike.serialNumber }}</p>
 <h2>Contract Details</h2>
 <p>Deposit paid: &#163;{{ contract.depositAmountCollected }}
