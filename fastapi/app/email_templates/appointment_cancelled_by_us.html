@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Hi {{ appointment.client.firstName}},</h2>
     <p>We have cancelled your appointment.
     {% if appointment.cancellationReason %}
         <br/> Reason: {{ appointment.cancellationReason }} <br/>

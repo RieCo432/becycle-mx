@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Hi {{ appointment.client.firstName}},</h2>
     <p>We have received your appointment request. Here are the details of your request:</p>
     {% include "partials/appointment_info.html" %}
     <p>Please note that this appointment is not confirmed yet.</p>

@@ -22,6 +22,23 @@ target_email = "colin.ries@gmail.com"
 target_client = crud.get_client_by_email(db, target_email)
 
 if __name__ == "__main__":
+    client_temp = models.ClientTemp(
+        firstName="colin",
+        lastName="ries",
+        emailAddress="colin.ries@gmail.com",
+        verificationCode="012345"
+    )
+    client_temp.send_email_verification_link()
+    
+    client_login = models.ClientLogin(
+        clientId=target_client.id,
+        client=target_client,
+        code="012345"
+    )
+    
+    client_login.send_login_code()
+    
+    
     contract = target_client.contracts[0]
 
     contract.send_creation_email()

@@ -25,6 +25,7 @@
     <body>
         {% include "partials/header.html" %}
         <div class="content">
+            <h2>Hi {{ client.firstName.capitalize() }},</h2>
             {% block content %}{% endblock %}
         </div>
         {% include "partials/footer.html" %}
