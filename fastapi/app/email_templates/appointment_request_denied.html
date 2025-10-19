@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Hi {{ appointment.client.firstName}},</h2>
+    <p>Your appointment request has been denied. 
+        {% if appointment.cancellationReason %}
+            <br/> Reason: {{ appointment.cancellationReason }} <br/>
+        {% endif%}
+        
+        Here are the details of your request:</p>
+    {% include "partials/appointment_info.html" %}
+    {% include "partials/book_new_appointment_instruction.html" %}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Hi {{ appointment.client.firstName}},</h2>
+    <p>You have cancelled your appointment. Thank you for letting us know.
+        Here are the details of your cancelled appointment:</p>
+    {% include "partials/appointment_info.html" %}
+    {% include "partials/book_new_appointment_instruction.html" %}
+{% endblock %}
