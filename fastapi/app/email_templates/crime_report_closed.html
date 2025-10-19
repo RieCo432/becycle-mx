@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>Your crime report has been closed on {{ crimeReport.closedOn.strftime("%d %B %Y") }}</p>
+    
+    {% include "partials/crimereport_info.html" %}
+
+    <p>If this is a mistake, please contact us as soon as possible.</p>
+    <p>If you have the bike in your possession now, you can return it to reclaim your deposit as normal.
+        If the police returned the bike to us, you are still able to visit us as soon as possible to reclaim your deposit.
+    </p>
+
+{% endblock %}

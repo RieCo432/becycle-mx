@@ -1135,7 +1135,7 @@ export default {
               userSelectionOptionsStatic.value = true;
             })
             .catch((error) => {
-              if (error.response.status === 401) {
+              if (error.response.status === 400) {
                 depositCollectingPasswordSetErrors('Wrong Password!');
               } else {
                 toast.error(error.response.data.detail.description, {timeout: 5000});
@@ -1152,7 +1152,7 @@ export default {
               userSelectionOptionsStatic.value = true;
             })
             .catch((error) => {
-              if (error.response.status === 401) {
+              if (error.response.status === 400) {
                 workingPasswordOrPinSetErrors('Wrong Password!');
               } else {
                 toast.error(error.response.data.detail.description, {timeout: 5000});
@@ -1168,7 +1168,7 @@ export default {
               stepNumber.value = 7;
             })
             .catch((error) => {
-              if (error.response.status === 401) {
+              if (error.response.status === 400) {
                 checkingPasswordOrPinSetErrors('Wrong Password!');
               } else {
                 toast.error(error.response.data.detail.description, {timeout: 5000});

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>We have received your appointment request. Here are the details of your request:</p>
+    {% include "partials/appointment_info.html" %}
+    <p>Please note that this appointment is not confirmed yet.</p>
+    {% include "partials/cancel_appointment_instruction.html" %}
+{% endblock %}

@@ -30,8 +30,6 @@ class Appointment(Base):
 
     cancellationReason: Mapped[str] = mapped_column("cancellationreason", Text, nullable=True, quote=False)
 
-    _rental_note = "<p>Please note that the rental deposit must be paid in <span style=\"color:#ff0000\">CASH ONLY</span>. This is because we cannot return money via card.</p>"
-
 
     def __eq_dict__(self, other: dict):
         return all([
@@ -63,51 +61,47 @@ class Appointment(Base):
             ])
 
     def send_request_received_email(self):
-        email_html_content = (
-            services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime, self.id, self.clientId)) if self.type.id != "rent" \
-            else services.email_helpers.build_appointment_request_received_email(self.type.title, self.startDateTime, self.id, self.clientId, Appointment._rental_note)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_request_received", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="Appointment Request Received",
+            subject="Your Appointment Request Has Been Received",
             content=email_html_content
         )
 
     def send_confirmation_email(self):
-        email_html_content = services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime, self.id, self.clientId) if self.type.id != "rent" \
-            else services.email_helpers.build_appointment_confirmation_email(self.type.title, self.startDateTime, self.id, self.clientId, Appointment._rental_note)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_confirmation", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="Your Appointment Confirmation",
+            subject="Your Appointment Has Been Confirmed",
             content=email_html_content
         )
 
     def send_request_denied_email(self):
-        email_html_content = services.email_helpers.build_appointment_request_denied_email(self.type.title, self.startDateTime, self.cancellationReason)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_request_denied", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="Your Apoointment Request has been denied",
+            subject="Your Appointment Request Has Been Denied",
             content=email_html_content
         )
 
     def send_cancellation_email(self):
-        email_html_content = services.email_helpers.build_appointment_cancellation_email(self.type.title, self.startDateTime, self.cancellationReason)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_cancelled_by_us", client=self.client, appointment=self)
         services.send_email(
             destination=self.client.emailAddress,
-            subject="Your Appointment has been cancelled",
+            subject="Your Appointment Has Been Cancelled",
             content=email_html_content
         )
 
     def send_client_cancellation_email(self):
-        email_html_content = services.email_helpers.build_appointment_cancellation_by_client_email(self.type.title, self.startDateTime)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_cancelled_by_client", client=self.client, appointment=self)
         services.send_email(
             destination=self.client.emailAddress,
-            subject="Your Appointment has been cancelled as requested",
+            subject="Your Appointment Has Been Cancelled",
             content=email_html_content
         )
 
     def send_reminder_email(self):
-        email_html_content = services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime, self.id, self.clientId) if self.type.id != "rent" \
-            else services.email_helpers.build_appointment_reminder_email(self.type.title, self.startDateTime, self.id, self.clientId, Appointment._rental_note)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_reminder", client=self.client, appointment=self)
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Reminder",

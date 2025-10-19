@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2 style='color:#ff0000'>Your Contract is due to expire soon. Please visit us with your bike to return it, or extend the contract!</h2><br>
+
+    {% include "partials/contract_info.html" %}
+
+    {% include "partials/contract_terms.html" %}
+
+{% endblock %}
