@@ -13,14 +13,11 @@ import app.schemas as schemas
 GOOGLE_APP_PASSWORD = os.environ['GOOGLE_APP_PASSWORD']
 GOOGLE_ACCOUNT = os.environ['GOOGLE_ACCOUNT']
 EMAIL_FROM = os.environ['EMAIL_FROM']
-SMTP_PORT = os.environ['SMTP_PORT']
+SMTP_PORT = int(os.environ['SMTP_PORT'])
 SMTP_SERVER = os.environ['SMTP_SERVER']
 API_HOST_ADDRESS = os.environ['API_HOST_ADDRESS']
 API_HOST_PORT = os.environ['API_HOST_PORT']
 PRODUCTION = os.environ['PRODUCTION'] == "true"
-
-weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-months = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 
 env = Environment(
