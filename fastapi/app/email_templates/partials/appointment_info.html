@@ -1,4 +1,4 @@
-<p>We are looking forward to seeing on {{ appointment.startDateTime.strftime("%A, %d %B %Y at %H:%M") }} for your appointment: {{ appointment.type.title }}!</p>
+<p>{{ appointment.type.title.capitalize() }} appointment on {{ appointment.startDateTime.strftime("%A, %d %B %Y at %H:%M") }}</p>
 <p>Appointment notes: {{ appointment.notes }}</p>
 {% if appointment.typeId == "rent" %}
     <p>Please note that the rental deposit must be paid in <span style="color:#ff0000">CASH ONLY</span>. This is because we cannot return money via card.</p>
