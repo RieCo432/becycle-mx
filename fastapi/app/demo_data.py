@@ -47,6 +47,7 @@ def delete_all(db: Session):
     db.query(models.User).delete()
 
     db.query(models.DetectedPotentialBikeDuplicates).delete()
+    db.query(models.bike_colour_association_table).delete()
     db.query(models.Bike).delete()
 
     db.query(models.Appointment).delete()
