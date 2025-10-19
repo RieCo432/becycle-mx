@@ -111,7 +111,7 @@ class Contract(Base):
         email_html_content = services.email_helpers.render_template(template_name="contract_created", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="Your lending agreement",
+            subject="Your Bike Rental Contract",
             content=email_html_content
         )
 
@@ -119,7 +119,7 @@ class Contract(Base):
         email_html_content = services.email_helpers.render_template(template_name="contract_expiry_reminder", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="BECYCLE Contract Expiry Reminder",
+            subject="Your Bike Rental Expiry Reminder",
             content=email_html_content
         )
 
@@ -127,7 +127,7 @@ class Contract(Base):
         email_html_content = services.email_helpers.render_template(template_name="contract_returned", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="You have returned your bike",
+            subject="Your Bike Rental Has Ended",
             content=email_html_content
         )
 

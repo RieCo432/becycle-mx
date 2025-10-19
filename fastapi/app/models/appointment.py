@@ -64,7 +64,7 @@ class Appointment(Base):
         email_html_content = services.email_helpers.render_template(template_name="appointment_request_received", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="Appointment Request Received",
+            subject="Your Appointment Request Has Been Received",
             content=email_html_content
         )
 
@@ -72,7 +72,7 @@ class Appointment(Base):
         email_html_content = services.email_helpers.render_template(template_name="appointment_confirmation", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="Your Appointment Confirmation",
+            subject="Your Appointment Has Been Confirmed",
             content=email_html_content
         )
 
@@ -80,7 +80,7 @@ class Appointment(Base):
         email_html_content = services.email_helpers.render_template(template_name="appointment_request_denied", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
-            subject="Your Apoointment Request has been denied",
+            subject="Your Appointment Request Has Been Denied",
             content=email_html_content
         )
 
@@ -88,7 +88,7 @@ class Appointment(Base):
         email_html_content = services.email_helpers.render_template(template_name="appointment_cancelled_by_us", client=self.client, appointment=self)
         services.send_email(
             destination=self.client.emailAddress,
-            subject="Your Appointment has been cancelled",
+            subject="Your Appointment Has Been Cancelled",
             content=email_html_content
         )
 
@@ -96,7 +96,7 @@ class Appointment(Base):
         email_html_content = services.email_helpers.render_template(template_name="appointment_cancelled_by_client", client=self.client, appointment=self)
         services.send_email(
             destination=self.client.emailAddress,
-            subject="Your Appointment has been cancelled as requested",
+            subject="Your Appointment Has Been Cancelled",
             content=email_html_content
         )
 
