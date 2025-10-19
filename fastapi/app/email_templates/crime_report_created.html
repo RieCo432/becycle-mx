@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Hi {{ crimeReport.contract.client.firstName }},</h2>
+    <p>Your bike has been reported as stolen.</p>
+    {% include "partials/crimereport_info.html" %}
+
+    <p>If this is a mistake, please contact us as soon as possible.</p>
+{% endblock %}
