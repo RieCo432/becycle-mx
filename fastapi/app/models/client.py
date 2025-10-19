@@ -98,7 +98,7 @@ class ClientTemp(Base):
                                                          quote=False)
 
     def send_email_verification_link(self):
-        email_html_content = services.email_helpers.render_template(template_name="verify_email", user_name = self.firstName, code=self.verificationCode)
+        email_html_content = services.email_helpers.render_template(template_name="verify_email", client=self, user_name = self.firstName, code=self.verificationCode)
         services.email_helpers.send_email(
             destination=self.emailAddress,
             subject="Verify your email address",
@@ -127,7 +127,7 @@ class ClientLogin(Base):
                                                          nullable=False, quote=False)
 
     def send_login_code(self):
-        email_html_content = services.email_helpers.render_template(template_name="login_code", user_name=self.client.firstName, code=self.code)
+        email_html_content = services.email_helpers.render_template(template_name="login_code", client=self.client, code=self.code)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Log-in code",

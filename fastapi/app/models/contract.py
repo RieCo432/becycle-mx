@@ -108,7 +108,7 @@ class Contract(Base):
         ])
 
     def send_creation_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="contract_created", contract=self)
+        email_html_content = services.email_helpers.render_template(template_name="contract_created", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your lending agreement",
@@ -116,7 +116,7 @@ class Contract(Base):
         )
 
     def send_expiry_reminder_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="contract_expiry_reminder", contract=self)
+        email_html_content = services.email_helpers.render_template(template_name="contract_expiry_reminder", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="BECYCLE Contract Expiry Reminder",
@@ -124,7 +124,7 @@ class Contract(Base):
         )
 
     def send_return_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="contract_returned", contract=self)
+        email_html_content = services.email_helpers.render_template(template_name="contract_returned", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="You have returned your bike",

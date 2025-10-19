@@ -46,6 +46,6 @@ def send_email(destination: str, subject: str, content: str) -> None:
         print(destination, subject, content)
         
         
-def render_template(template_name: str, **kwargs) -> str:
+def render_template(template_name: str, client: "Client", **kwargs) -> str:
     template = env.get_template(template_name+".html")
-    return template.render(**kwargs)
+    return template.render(client=client, **kwargs)

@@ -61,7 +61,7 @@ class Appointment(Base):
             ])
 
     def send_request_received_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="appointment_request_received", appointment=self)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_request_received", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Appointment Request Received",
@@ -69,7 +69,7 @@ class Appointment(Base):
         )
 
     def send_confirmation_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="appointment_confirmation", appointment=self)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_confirmation", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Confirmation",
@@ -77,7 +77,7 @@ class Appointment(Base):
         )
 
     def send_request_denied_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="appointment_request_denied", appointment=self)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_request_denied", client=self.client, appointment=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Apoointment Request has been denied",
@@ -85,7 +85,7 @@ class Appointment(Base):
         )
 
     def send_cancellation_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="appointment_cancelled_by_us", appointment=self)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_cancelled_by_us", client=self.client, appointment=self)
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment has been cancelled",
@@ -93,7 +93,7 @@ class Appointment(Base):
         )
 
     def send_client_cancellation_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="appointment_cancelled_by_client", appointment=self)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_cancelled_by_client", client=self.client, appointment=self)
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment has been cancelled as requested",
@@ -101,7 +101,7 @@ class Appointment(Base):
         )
 
     def send_reminder_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="appointment_reminder", appointment=self)
+        email_html_content = services.email_helpers.render_template(template_name="appointment_reminder", client=self.client, appointment=self)
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Reminder",

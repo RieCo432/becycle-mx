@@ -29,14 +29,14 @@ class CrimeReport(Base):
         ])
 
     def send_crime_report_added_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="crime_report_created", crimeReport=self)
+        email_html_content = services.email_helpers.render_template(template_name="crime_report_created", client=self.contract.client, crimeReport=self)
         services.email_helpers.send_email(
             destination=self.contract.client.emailAddress,
             subject="Your Stolen Bike",
             content=email_html_content)
 
     def send_crime_report_closed_email(self):
-        email_html_content = services.email_helpers.render_template(template_name="crime_report_closed", crimeReport=self)
+        email_html_content = services.email_helpers.render_template(template_name="crime_report_closed", client=self.contract.client, crimeReport=self)
         services.email_helpers.send_email(
             destination=self.contract.client.emailAddress,
             subject="Your Stolen Bike",
