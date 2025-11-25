@@ -1,20 +1,54 @@
 # Becycle-mx
 
+<div align="center">
+	<img src="https://raw.githubusercontent.com/RieCo432/becycle-mx/refs/heads/main/vuejs/src/assets/images/logo/becycle-full.svg" alt="Becycle Logo" width="500" height="100" />
+</div>
+
 BECYCLE Workshop SCIO is a small, wholly volunteer operated and donations based community bike workshop that provides a free place to access practical help, education, learning and advice for maintaining and repairing bikes. When you come to BECYCLE be ready to learn from volunteers, and work with them to fix your bike together.
 
-## Setup
+## Development Setup
 
-Copy .env.template files and remove the .template extension of the environment files in secrets/, fastapi/, and vuejs/ and add the required information.
+### Requirements
 
-API SECRET can be optained using:
+- [Docker](https://www.docker.com/)
 
-```bash
-openssl rand -hex 32
-```
+The following are required if you wish to run the vuejs app and python api directly, not using docker:
+- [Python](https://www.python.org/downloads/)
+- [NodeJS](https://nodejs.org/en/download)
 
-GOOGLE ACCOUNT and GOOGLE APP PASSWORD can be obtained from the Google Account Security settings, but are not required for dev purposes.
+### Getting Started
 
-POSTGRES HOST is "postgres", the name of the docker compose service.
+1. Install the requirements above.
+2. Clone the repository.
+	- If you're not a contributor, you should fork the repository. That way you can make pull requests.
+3. Checkout the `dev` branch and do a pull to receive the most recent code.
+4. Create a copy of the following files and and remove `.template` from the end:
+	- `secrets/api.env.template`
+	- `secrets/postgres.env.template`
+	- `fastapi/local-api.env.template`
+	- `vuejs/.env.template`
+5. For the `secrets/api.env` update:
+	- `API_SECRET` can be generated using `openssl rand -hex 32`
+	- `GOOGLE_ACCOUNT` and `GOOGLE_APP_PASSWORD` can be obtained from the Google Account Security settings, but are not required for dev purposes.
+6. For `secrets/postgres.env` put whatever you find appropriate here:
+	- `POSTGRES_USER`
+	- `POSTGRES_DB`
+	- `POSTGRES_PASSWORD`
+	- `POSTGRES_PORT` the default is normally `5432`
+7. For `fastapi/local-api.env` update:
+	- Set the following as the same as in `api.env`
+		- `API_SECRET`
+		- `EMAIL_FROM`
+		- `GOOGLE_ACCOUNT`
+		- `GOOGLE_APP_PASSWORD`
+	- Set the following as the same as in `postgres.env`.
+		- `POSTGRES_USER`
+		- `POSTGRES_DB`
+		- `POSTGRES_PASSWORD`
+		- `POSTGRES_PORT`
+8. For `vuejs/.env` you shouldn't need to update anything.
+9. Run `sudo docker-compose up`
+10. Run `alembic upgrade head` within your virtual environment to make sure your local database is up-to-date with all the most recent migrations.
 
 These commands must be run periodically, using something like cron:
 
@@ -32,19 +66,15 @@ sudo docker exec becycle-mx_postgres_1 psql -U becycleAdmin becycledb -c "delete
 sudo docker exec becycle-mx_postgres_1 psql -U becycleAdmin becycledb -c "delete from contractdrafts where clientid is null and startDate < (current_date at time zone 'UTC') - interval '1 day';"
 ```
 
-With cron, this can be used to run the command every hour:
-``` 0 * * * * ```
+With cron, this can be used to run the command every hour: `0 * * * *`
 
-
-## Development
+## Contributing
 
 ### General Workflow
 
 1. If working on a GitHub issue, please assign the issue to yourself and move it into the "In progress" stage.
 	- If not working on a GitHub issue, consider creating one.
-2. Checkout the dev branch and do a pull to receive the most recent code.
-3. Run `alembic upgrade head` within your virtual environment to make sure your local database is up-to-date with all the most recent migrations.
-4. Create a new branch off of the "dev" branch following the naming conventions below:
+2. Create a new branch off of the "dev" branch following the naming conventions below:
 
 	#### Branches
 	- Where applicable, prefix the branch name with the number of the GitHub issue being worked on.
