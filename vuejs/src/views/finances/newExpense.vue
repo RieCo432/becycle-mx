@@ -27,6 +27,7 @@ export default {
       files.value = acceptFiles.map((file) =>
         Object.assign(file, {
           preview: URL.createObjectURL(file),
+          contentType: file.type
         }),
       );
     }
@@ -201,8 +202,7 @@ export default {
               <div @click="files = []">
                 <div
                     v-bind="getRootProps()"
-                    :class="'w-full text-center border rounded py-[52px] flex flex-col justify-center items-center '
-                    + (files.length === 0 ? 'cursor-pointer' : ' pointer-events-none') + ' '
+                    :class="'w-full text-center border rounded flex flex-col justify-center items-center '
                     + (fileError ? 'border-danger-500 border-solid' : 'border-secondary-500 border-dashed')
                     "
                 >
@@ -219,13 +219,19 @@ export default {
                       Drop files here or click to upload.
                     </p>
                   </div>
-                  <div class="flex space-x-4">
+                  <div v-else class="flex w-full h-full justify-center align-middle">
                     <img
-                        v-if="files.length === 1"
-                        :src="files[0].preview"
-                        class="object-contain block rounded-md"
-                        alt="Rceipt photo"
+                      v-if="files[0].contentType.startsWith('image/')"
+                      :src="files[0].preview"
+                      class="object-contain block rounded-md"
+                      alt="Receipt photo"
                     />
+                    <iframe 
+                      v-else-if="files[0].contentType === 'application/pdf'"
+                      class="w-full h-[500px]"
+                      :src="files[0].preview"
+                      type="application/pdf"
+                    ></iframe>
                   </div>
                 </div>
               </div>
