@@ -1,8 +1,10 @@
-from datetime import datetime
+import shutil
+from datetime import datetime, date
 import os
 from math import ceil
 from uuid import UUID
 
+import pandas as pd
 from sqlalchemy import select
 
 import app.models as models
@@ -189,4 +191,66 @@ def does_expense_exist(db: Session, expense_user: models.User, expense_data: sch
         )
     )
     return existing_expense is not None
+
+
+def get_all_expenses_and_receipts(db: Session, start_date: date, end_date: date) -> dict[str, str]:
+    all_receipts_in_period = [_ for _ in db.scalars(
+        select(models.Expense)
+        .where(
+            (models.Expense.transferDate != None)
+            & (models.Expense.transferDate >= start_date)
+            & (models.Expense.transferDate <= end_date)
+        )
+        .order_by(models.Expense.transferDate.desc())
+    )]
+
+    expenses_data = []
+
+    current_dir = os.path.dirname(__file__)
+
+    temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
+
+    export_dir = "expenses-export-"+datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+    export_dir_path = os.path.join(temp_data_dir, export_dir)
+    receipts_dir = os.path.join(export_dir_path, "receipts")
+
+    os.makedirs(receipts_dir, exist_ok=True)
+
+    for expense in all_receipts_in_period:
+        receipt_file_name = str(expense.receiptFileId) + "." + expense.receiptContentType.split("/")[1]
+
+        expenses_data.append({
+            "transferDate": expense.transferDate,
+            "expenseDate": expense.expenseDate,
+            "username": expense.expenseUser.username,
+            "amountOut": abs(expense.amount) if expense.amount < 0 else "",
+            "amountIn": expense.amount if expense.amount > 0 else "",
+            "tagId": expense.tagId,
+            "type": expense.type,
+            "notes": expense.notes,
+            "receiptId": receipt_file_name
+        })
+
+
+        output_file_path = os.path.join(receipts_dir, receipt_file_name)
+        with open(output_file_path, "wb") as fout:
+            fout.write(expense.receiptFile.content)
+
+
+    expenses_filepath = os.path.join(export_dir_path, "expenses.xlsx")
+    expenses_df = pd.DataFrame(expenses_data)
+
+    with pd.ExcelWriter(expenses_filepath, engine="openpyxl") as writer:
+        expenses_df.to_excel(writer, sheet_name="Expenses", index=False)
+
+    zip_name = export_dir + ".zip"
+    zip_path = os.path.join(temp_data_dir, export_dir)
+    shutil.make_archive(zip_path, "zip", export_dir_path)
+
+    return {
+        "path": zip_path+".zip",
+        "filename": zip_name,
+        "media_type": "application/zip"
+    }
 
