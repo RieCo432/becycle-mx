@@ -1,7 +1,7 @@
 <template>
   <span
     @click="toogleDark"
-    class="lg:h-[32px] lg:w-[32px] lg:bg-gray-500-f7 bg-slate-50 lg:dark:bg-slate-900 dark:text-white
+    class="h-[32px] w-[32px] sm:bg-gray-500-f7 bg-slate-50 dark:bg-slate-900 dark:text-white
            text-slate-900 cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center"
   >
     <Icon icon="heroicons-outline:moon" v-if="!this.$store.themeSettingsStore.isDark" />

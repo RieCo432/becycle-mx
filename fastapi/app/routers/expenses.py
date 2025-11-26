@@ -110,3 +110,11 @@ async def patch_expense_tag(
         db: Session = Depends(dep.get_db)
 ) -> schemas.ExpenseTag:
     return crud.update_expense_tag(db=db, expense_tag_id=expense_tag_id, expense_tag_update=expense_tag_update)
+
+@expenses.get("/expenses/all-receipts")
+async def get_all_expenses_and_receipts(
+        start_date: date,
+        end_date: date,
+        db: Session = Depends(dep.get_db)
+) -> FileResponse:
+    return FileResponse(**crud.get_all_expenses_and_receipts(db=db, start_date=start_date, end_date=end_date))
