@@ -55,10 +55,7 @@ class Client(Base):
                 self.createdOn == other.createdOn,
                 self.firstName == other.firstName,
                 self.lastName == other.lastName,
-                self.emailAddress == other.emailAddress,
-                self.preBecycleSurveyCompleted == other.preBecycleSurveyCompleted,
-                self.periBecycleSurveyCompleted == other.periBecycleSurveyCompleted,
-                self.postBecycleSurveyCompleted == other.postBecycleSurveyCompleted
+                self.emailAddress == other.emailAddress
             ])
 
 

@@ -151,10 +151,6 @@ def resolve_client_duplicate(db: Session, potential_client_duplicate_id: UUID, d
 
     db.commit()
 
-    keep_client.preBecycleSurveyCompleted |= discard_client.preBecycleSurveyCompleted
-    keep_client.periBecycleSurveyCompleted |= discard_client.periBecycleSurveyCompleted
-    keep_client.postBecycleSurveyCompleted |= discard_client.postBecycleSurveyCompleted
-
     db.delete(potential_client_duplicate)
     db.commit()
 
