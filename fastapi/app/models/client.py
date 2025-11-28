@@ -35,18 +35,6 @@ class Client(Base):
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="client")
     appointments: Mapped[List["Appointment"]] = relationship("Appointment", back_populates="client")
 
-    preBecycleSurveyCompleted: Mapped[bool] = mapped_column("prebecyclesurveycompleted", Boolean, default=False, server_default=text("FALSE"),
-                                                nullable=False,
-                                                quote=False)
-    periBecycleSurveyCompleted: Mapped[bool] = mapped_column("peribecyclesurveycompleted", Boolean, default=False,
-                                                            server_default=text("FALSE"),
-                                                            nullable=False,
-                                                            quote=False)
-    postBecycleSurveyCompleted: Mapped[bool] = mapped_column("postbecyclesurveycompleted", Boolean, default=False,
-                                                             server_default=text("FALSE"),
-                                                             nullable=False,
-                                                             quote=False)
-
     createdOn: Mapped[DateTime] = mapped_column("createdon", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=False, quote=False)
 
     def __eq_dict__(self, other: dict):

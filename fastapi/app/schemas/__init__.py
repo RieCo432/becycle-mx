@@ -9,7 +9,6 @@ from .public import *
 from .roadSegment import *
 from .settings import *
 from .statistics import *
-from .surveys import *
 from .tokens import *
 from .user import *
 from .expenses import *

@@ -8,7 +8,6 @@ from .finances import *
 from .roadSegments import *
 from .settings import *
 from .statistics import *
-from .surveys import *
 from .users import *
 from .expenses import *
 from .permissions import *
