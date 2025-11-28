@@ -13,6 +13,7 @@ services:
         env_file:
             - secrets/api.env
             - secrets/postgres.env
+            - secrets/organisation.env
         depends_on:
             - postgres
             
