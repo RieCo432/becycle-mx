@@ -18,6 +18,7 @@ SMTP_SERVER = os.environ['SMTP_SERVER']
 API_HOST_ADDRESS = os.environ['API_HOST_ADDRESS']
 API_HOST_PORT = os.environ['API_HOST_PORT']
 PRODUCTION = os.environ['PRODUCTION'] == "true"
+SENDER_NAME = os.environ['OFFICIAL_NAME']
 
 
 env = Environment(
@@ -29,7 +30,7 @@ env = Environment(
 def send_email(destination: str, subject: str, content: str) -> None:
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
-    message["From"] = formataddr(("BECYCLE", EMAIL_FROM))
+    message["From"] = formataddr((SENDER_NAME, EMAIL_FROM))
     message["To"] = destination
 
     message.attach(MIMEText(content, "html"))
@@ -48,4 +49,4 @@ def send_email(destination: str, subject: str, content: str) -> None:
         
 def render_template(template_name: str, client: "Client", **kwargs) -> str:
     template = env.get_template(template_name+".html")
-    return template.render(client=client, **kwargs)
+    return template.render(env=os.environ, client=client, **kwargs)

@@ -1,5 +1,5 @@
 <h3>Further information</h3>
-<p>You can view your contract at <a href='https://becycle.uk/'>becycle.uk</a> by logging in as a
+<p>You can view your contract at <a href="https://{{ env['DOMAIN'] }}">{{ env['DOMAIN'] }}</a> by logging in as a
     client with your email address and going to your profile.<br>
     To retain your deposit, please keep the bike in working condition and return it before the expiry date.
     If there are any problems with the bike, please book a repair appointment and we will assist you with 
@@ -14,7 +14,7 @@
 <p>
     Bicycle (Bike) Release Form: Terms of Loan) The agreed deposit is made and kept as a retainer against the value
     of the bike and released back to You (Keeper) upon the return of the borrowed bike – in satisfactory condition.
-    BeCYCLE Workshop reserves the right to deduct money from the deposit if and when any damage or excessive
+    {{ env['OFFICIAL_NAME'] }} reserves the right to deduct money from the deposit if and when any damage or excessive
     wear and tear occurs to the bike – and/or the bike was kept by You over the agreed rental period. The bike, when
     loaned is the full and sole responsibility of You (Keeper) therefore You are entrusted with the burden of
     ownership, maintenance, and upkeep. It is completely at your own risk that the bike is maintained and operated
