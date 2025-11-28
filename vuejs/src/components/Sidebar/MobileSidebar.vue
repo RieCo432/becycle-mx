@@ -9,13 +9,13 @@
     <div class="logo-segment flex justify-between items-center px-4 py-6">
       <router-link :to="{ name: 'home' }">
         <img
-          src="@/assets/images/logo/becycle-full.svg"
+            :src="`/src/assets/images/logo/${RESOURCES_SUB_DIR}/full.svg`"
           alt=""
           v-if="!this.$store.themeSettingsStore.isDark"
         />
 
         <img
-          src="@/assets/images/logo/becycle-full-white.svg"
+            :src="`/src/assets/images/logo/${RESOURCES_SUB_DIR}/full-white.svg`"
           alt=""
           v-if="this.$store.themeSettingsStore.isDark"
         />
@@ -30,7 +30,7 @@
       <Navmenu :items="topMenu" />
     </simplebar>
     <div class="absolute bottom-0">
-      <img src="/src/assets/images/registration/blue/small-blue-landscape.png" alt="Charity Registration Logo"/>
+      <img :src="`/src/assets/images/registration/${RESOURCES_SUB_DIR}/blue/small-blue-landscape.png`" alt="Charity Registration Logo"/>
     </div>
   </div>
 </template>
@@ -44,6 +44,7 @@ import 'simplebar/dist/simplebar.min.css';
 import {useThemeSettingsStore} from '@/store/themeSettings';
 
 const themeSettingsStore = useThemeSettingsStore();
+const RESOURCES_SUB_DIR = import.meta.env.VITE_RESOURCES_SUB_DIR;
 
 export default defineComponent({
   components: {
@@ -53,6 +54,7 @@ export default defineComponent({
   },
   data() {
     return {
+      RESOURCES_SUB_DIR: RESOURCES_SUB_DIR,
       topMenu,
       openClass: 'w-[248px]',
       closeClass: 'w-[72px] close_sidebar',

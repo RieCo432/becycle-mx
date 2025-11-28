@@ -792,24 +792,6 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  postPreBecycleSurvey(surveyAnswers) {
-    return axiosClient.post('/surveys/pre-becycle', surveyAnswers, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
-    });
-  },
-  postPeriBecycleSurvey(surveyAnswers) {
-    return axiosClient.post('/surveys/peri-becycle', surveyAnswers, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
-    });
-  },
-  postPostBecycleSurvey(surveyAnswers) {
-    return axiosClient.post('/surveys/post-becycle', surveyAnswers, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
-    });
-  },
   getBboxGeojson(northBound, eastBound, southBound, westBound) {
     return axiosClient.get('/maps/bbox-road-map', {
       params: {

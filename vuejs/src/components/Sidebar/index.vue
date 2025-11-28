@@ -38,7 +38,7 @@
           "
         >
           <img
-            src="@/assets/images/logo/becycle-full.svg"
+              :src="`/src/assets/images/logo/${RESOURCES_SUB_DIR}/full.svg`"
             alt=""
             v-if="
               !this.$store.themeSettingsStore.isDark &&
@@ -47,7 +47,7 @@
           />
 
           <img
-            src="@/assets/images/logo/becycle-full-white.svg"
+            :src="`/src/assets/images/logo/${RESOURCES_SUB_DIR}/full-white.svg`"
             alt=""
             v-if="
               this.$store.themeSettingsStore.isDark ||
@@ -63,15 +63,15 @@
           "
         >
           <img
-            src="@/assets/images/logo/becycle.svg"
-            alt=""
-            v-if="
+              :src="`/src/assets/images/logo/${RESOURCES_SUB_DIR}/default.svg`"
+              alt=""
+              v-if="
               !this.$store.themeSettingsStore.isDark &&
               !this.$store.themeSettingsStore.semidark
             "
           />
           <img
-            src="@/assets/images/logo/becycle-white.svg"
+              :src="`/src/assets/images/logo/${RESOURCES_SUB_DIR}/white.svg`"
             alt=""
             v-if="
               this.$store.themeSettingsStore.isDark ||
@@ -109,7 +109,7 @@
         <Navmenu :items="topMenu" />
       </simplebar>
       <div ref="scioLogo" class="absolute bottom-0">
-        <img  src="/src/assets/images/registration/blue/small-blue-landscape.png" alt="Charity Registration Logo"/>
+        <img :src="`/src/assets/images/registration/${RESOURCES_SUB_DIR}/blue/small-blue-landscape.png`" alt="Charity Registration Logo"/>
       </div>
     </div>
   </div>
@@ -123,6 +123,8 @@ import Navmenu from './Navmenu';
 import simplebar from 'simplebar-vue';
 import 'simplebar/dist/simplebar.min.css';
 
+const RESOURCES_SUB_DIR = import.meta.env.VITE_RESOURCES_SUB_DIR;
+
 export default defineComponent({
   components: {
     Icon,
@@ -131,6 +133,7 @@ export default defineComponent({
   },
   data() {
     return {
+      RESOURCES_SUB_DIR: RESOURCES_SUB_DIR,
       topMenu,
       openClass: 'w-[248px]',
       closeClass: 'w-[72px] close_sidebar',
