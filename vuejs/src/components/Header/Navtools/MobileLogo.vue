@@ -1,13 +1,13 @@
 <template>
   <router-link :to="{ name: 'home' }">
     <img
-        :src="`/src/images/logo/${RESOURCES_SUB_DIR}/default.svg`"
+        :src="defaultLogo"
         alt=""
         v-if="!this.$store.themeSettingsStore.isDark"
     />
 
     <img
-        :src="`/src/assets/images/logo/${RESOURCES_SUB_DIR}/white.svg`"
+        :src="defaultWhiteLogo"
         alt=""
         v-if="this.$store.themeSettingsStore.isDark"
     />
@@ -15,10 +15,14 @@
 </template>
 <script>
 const RESOURCES_SUB_DIR = import.meta.env.VITE_RESOURCES_SUB_DIR;
+const defaultLogo = new URL(`/src/assets/images/logo/${RESOURCES_SUB_DIR}/default.svg`, import.meta.url).href;
+const defaultWhiteLogo = new URL(`/src/assets/images/logo/${RESOURCES_SUB_DIR}/white.svg`, import.meta.url).href;
+
 export default {
   data() {
     return {
-      RESOURCES_SUB_DIR: RESOURCES_SUB_DIR,
+      defaultLogo: defaultLogo,
+      defaultWhiteLogo: defaultWhiteLogo,
     };
   },
 };
