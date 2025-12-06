@@ -147,9 +147,6 @@ export default defineComponent({
       return this.$store.themeSettingsStore.sidebarCollasp ? '167px' : '106px';
     },
   },
-  mounted() {
-    console.log('fullLogo', fullLogo);
-  },
 });
 </script>
 <style lang="scss">
