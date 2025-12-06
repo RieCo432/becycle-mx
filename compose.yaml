@@ -1,18 +1,15 @@
 services:
     web:
         build: vuejs/.
-        ports:
-            - "8080:80"
         volumes:
             - ./vuejs:/app
             - /app/node_modules
     api:
         build: fastapi/.
-        ports:
-            - "8000:8000"
         env_file:
             - secrets/api.env
             - secrets/postgres.env
+            - secrets/organisation.env
         depends_on:
             - postgres
             
@@ -22,8 +19,6 @@ services:
             - becycle_db_volume:/var/lib/postgresql/data
             - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
             # - ./postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
-        ports:
-            - "5432:5432"
         env_file:
             - secrets/postgres.env
             

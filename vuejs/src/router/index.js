@@ -26,7 +26,7 @@ router.beforeEach((to, from, next) => {
     words[i] = words[i][0].toUpperCase() + words[i].substring(1);
   }
 
-  document.title = 'beCyCle  - ' + words;
+  document.title = `${import.meta.env.VITE_COMMON_NAME} - ${words}`;
 
   if (to.meta.restrictTo == null) {
     next();
