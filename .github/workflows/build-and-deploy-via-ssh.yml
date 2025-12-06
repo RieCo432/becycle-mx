@@ -19,8 +19,14 @@ jobs:
     - name: SSH into server, pull, build and restart service
       run: |
         ssh -o StrictHostKeyChecking=no cicd@ssh.becycle.uk -p 2222 << 'EOF'
+          sudo systemctl stop nginx-mx
           cd /var/www/becycle-mx
           git pull
           sudo docker-compose build
           sudo systemctl restart becycle-mx
+          cd /var/www/belfastcyclecoop-mx
+          git pull
+          sudo docker-compose build
+          sudo systemctl restart belfastcyclecoop-mx
+          sudo systemctl start nginx-mx
         EOF
