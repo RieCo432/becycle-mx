@@ -36,5 +36,6 @@ jobs:
           sudo docker-compose build
           sudo systemctl start belfastcyclecoop-mx
           
+          sleep 15
           sudo systemctl start nginx-mx
         EOF
