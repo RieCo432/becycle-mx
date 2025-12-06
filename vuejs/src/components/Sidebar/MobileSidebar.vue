@@ -9,13 +9,13 @@
     <div class="logo-segment flex justify-between items-center px-4 py-6">
       <router-link :to="{ name: 'home' }">
         <img
-          src="@/assets/images/logo/becycle-full.svg"
+            :src="fullLogo"
           alt=""
           v-if="!this.$store.themeSettingsStore.isDark"
         />
 
         <img
-          src="@/assets/images/logo/becycle-full-white.svg"
+            :src="fullWhiteLogo"
           alt=""
           v-if="this.$store.themeSettingsStore.isDark"
         />
@@ -30,7 +30,7 @@
       <Navmenu :items="topMenu" />
     </simplebar>
     <div class="absolute bottom-0">
-      <img src="/src/assets/images/registration/blue/small-blue-landscape.png" alt="Charity Registration Logo"/>
+      <img :src="registrationBanner" alt="Charity Registration Logo"/>
     </div>
   </div>
 </template>
@@ -44,6 +44,12 @@ import 'simplebar/dist/simplebar.min.css';
 import {useThemeSettingsStore} from '@/store/themeSettings';
 
 const themeSettingsStore = useThemeSettingsStore();
+const RESOURCES_SUB_DIR = import.meta.env.VITE_RESOURCES_SUB_DIR;
+
+const fullLogo = new URL(`/src/assets/images/logo/${RESOURCES_SUB_DIR}/full.svg`, import.meta.url).href;
+const fullWhiteLogo = new URL(`/src/assets/images/logo/${RESOURCES_SUB_DIR}/full-white.svg`, import.meta.url).href;
+const registrationBanner = new URL(
+  `/src/assets/images/registration/${RESOURCES_SUB_DIR}/blue/small-blue-landscape.png`, import.meta.url).href;
 
 export default defineComponent({
   components: {
@@ -53,6 +59,9 @@ export default defineComponent({
   },
   data() {
     return {
+      fullLogo: fullLogo,
+      fullWhiteLogo: fullWhiteLogo,
+      registrationBanner: registrationBanner,
       topMenu,
       openClass: 'w-[248px]',
       closeClass: 'w-[72px] close_sidebar',
