@@ -38,7 +38,7 @@
           "
         >
           <img
-              :src="fullLogo"
+              :src="`/logo/${resourcesSubdir}/full.svg`"
             alt=""
             v-if="
               !this.$store.themeSettingsStore.isDark &&
@@ -47,7 +47,7 @@
           />
 
           <img
-            :src="fullWhiteLogo"
+            :src="`/logo/${resourcesSubdir}/full-white.svg`"
             alt=""
             v-if="
               this.$store.themeSettingsStore.isDark ||
@@ -63,7 +63,7 @@
           "
         >
           <img
-              :src="defaultLogo"
+              :src="`/logo/${resourcesSubdir}/default.svg`"
               alt=""
               v-if="
               !this.$store.themeSettingsStore.isDark &&
@@ -71,7 +71,7 @@
             "
           />
           <img
-              :src="defaultWhiteLogo"
+              :src="`/logo/${resourcesSubdir}/white.svg`"
             alt=""
             v-if="
               this.$store.themeSettingsStore.isDark ||
@@ -109,7 +109,7 @@
         <Navmenu :items="topMenu" />
       </simplebar>
       <div ref="scioLogo" class="absolute bottom-0">
-        <img :src="registrationBanner" alt="Charity Registration Logo"/>
+        <img :src="`/registration/${resourcesSubdir}/blue/small-blue-landscape.png`" alt="Charity Registration Logo"/>
       </div>
     </div>
   </div>
@@ -125,12 +125,6 @@ import 'simplebar/dist/simplebar.min.css';
 
 const RESOURCES_SUB_DIR = import.meta.env.VITE_RESOURCES_SUB_DIR;
 
-const fullLogo = new URL(`/src/assets/images/logo/${RESOURCES_SUB_DIR}/full.svg`, import.meta.url).href;
-const fullWhiteLogo = new URL(`/src/assets/images/logo/${RESOURCES_SUB_DIR}/full-white.svg`, import.meta.url).href;
-const defaultLogo = new URL(`/src/assets/images/logo/${RESOURCES_SUB_DIR}/default.svg`, import.meta.url).href;
-const defaultWhiteLogo = new URL(`/src/assets/images/logo/${RESOURCES_SUB_DIR}/white.svg`, import.meta.url).href;
-const registrationBanner = new URL(
-  `/src/assets/images/registration/${RESOURCES_SUB_DIR}/blue/small-blue-landscape.png`, import.meta.url).href;
 
 export default defineComponent({
   components: {
@@ -140,11 +134,7 @@ export default defineComponent({
   },
   data() {
     return {
-      fullLogo: fullLogo,
-      fullWhiteLogo: fullWhiteLogo,
-      defaultLogo: defaultLogo,
-      defaultWhiteLogo: defaultWhiteLogo,
-      registrationBanner: registrationBanner,
+      resourcesSubdir: RESOURCES_SUB_DIR,
       topMenu,
       openClass: 'w-[248px]',
       closeClass: 'w-[72px] close_sidebar',
@@ -156,6 +146,9 @@ export default defineComponent({
     topAndBottomLogosHeight() {
       return this.$store.themeSettingsStore.sidebarCollasp ? '167px' : '106px';
     },
+  },
+  mounted() {
+    console.log('fullLogo', fullLogo);
   },
 });
 </script>
