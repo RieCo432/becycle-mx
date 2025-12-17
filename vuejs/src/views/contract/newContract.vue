@@ -649,7 +649,7 @@
                     <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Bicycle (Bike) Release Form: Terms of Loan) The agreed deposit is made and kept as a retainer against the value
                       of the bike and released back to You (Keeper) upon the return of the borrowed bike – in satisfactory condition.
-                      BeCYCLE Workshop reserves the right to deduct money from the deposit if and when any damage or excessive
+                      {{ OFFICIAL_NAME }} reserves the right to deduct money from the deposit if and when any damage or excessive
                       wear and tear occurs to the bike – and/or the bike was kept by You over the agreed rental period. The bike, when
                       loaned is the full and sole responsibility of You (Keeper) therefore You are entrusted with the burden of
                       ownership, maintenance, and upkeep. It is completely at your own risk that the bike is maintained and operated
@@ -719,6 +719,7 @@ import ContractDraftCard from '@/components/Card/ContractDraftCard.vue';
 import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
 
 const toast = useToast();
+const OFFICIAL_NAME = import.meta.env.VITE_OFFICIAL_NAME;
 
 export default {
   name: 'newContract',
@@ -837,7 +838,9 @@ export default {
       decals: yup.string().nullable(),
       serialNumber: yup.string().required(' Serial Number is required '),
       bikePhotoTaken: yup.boolean().oneOf([true], 'Must take a photo of the bike').required('Must take a photo of the bike'),
-      stickerOnBike: yup.boolean().oneOf([true], 'Must put a Becycle sticker on bike').required('Must put a Becycle sticker on bike'),
+      stickerOnBike: yup.boolean()
+        .oneOf([true], `Must put a ${import.meta.env.VITE_COMMON_NAME} sticker on bike`)
+        .required(`Must put a ${import.meta.env.VITE_COMMON_NAME} sticker on bike`),
       matchWithBikeId: yup.string().required(' Select one option.'),
     });
 
@@ -1293,6 +1296,7 @@ export default {
   },
   data() {
     return {
+      OFFICIAL_NAME: OFFICIAL_NAME,
       clientSuggestions: [],
       isNfcActive: false,
       filtered_client_suggestions: [],

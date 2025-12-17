@@ -59,9 +59,6 @@ def delete_all(db: Session):
 
     db.query(models.Address).delete()
     db.query(models.ContractType).delete()
-    db.query(models.PeriBecycleSurvey).delete()
-    db.query(models.PostBecycleSurvey).delete()
-    db.query(models.PreBecycleSurvey).delete()
     db.query(models.AppointmentGeneralSettings).delete()
     db.query(models.AppointmentConcurrencyLimit).delete()
     db.query(models.ClientTemp).delete()
@@ -75,42 +72,27 @@ def add_clients(db: Session) -> list[models.Client]:
         models.Client(
             firstName="alice",
             lastName="humphrey",
-            emailAddress="alice.humphrey@example.com",
-            preBecycleSurveyCompleted=False,
-            periBecycleSurveyCompleted=False,
-            postBecycleSurveyCompleted=False
+            emailAddress="alice.humphrey@example.com"
         ),
         models.Client(
             firstName="bob",
             lastName="frank",
-            emailAddress="bob.frank@example.com",
-            preBecycleSurveyCompleted=True,
-            periBecycleSurveyCompleted=False,
-            postBecycleSurveyCompleted=False
+            emailAddress="bob.frank@example.com"
         ),
         models.Client(
             firstName="charlie",
             lastName="maurice",
-            emailAddress="charlie.maurice@example.com",
-            preBecycleSurveyCompleted=False,
-            periBecycleSurveyCompleted=True,
-            postBecycleSurveyCompleted=False
+            emailAddress="charlie.maurice@example.com"
         ),
         models.Client(
             firstName="debby",
             lastName="smith",
-            emailAddress="debby.smith@exmaple.com",
-            preBecycleSurveyCompleted=False,
-            periBecycleSurveyCompleted=False,
-            postBecycleSurveyCompleted=True
+            emailAddress="debby.smith@exmaple.com"
         ),
         models.Client(
             firstName="alex",
             lastName="smith",
-            emailAddress="alex.smith@example.com",
-            preBecycleSurveyCompleted=True,
-            periBecycleSurveyCompleted=True,
-            postBecycleSurveyCompleted=True
+            emailAddress="alex.smith@example.com"
         )
     ]
 
@@ -125,74 +107,47 @@ def add_clients_with_duplicates(db: Session) -> list[models.Client]:
         models.Client(
             firstName="alice",
             lastName="humphrey",
-            emailAddress="alice.humphrey@example.com",
-            preBecycleSurveyCompleted=False,
-            periBecycleSurveyCompleted=False,
-            postBecycleSurveyCompleted=False
+            emailAddress="alice.humphrey@example.com"
         ),
         models.Client(
             firstName="alex",
             lastName="smith",
-            emailAddress="a.smith@example.com",
-            preBecycleSurveyCompleted=True,
-            periBecycleSurveyCompleted=False,
-            postBecycleSurveyCompleted=False
+            emailAddress="a.smith@example.com"
         ),
         models.Client(
             firstName="alice",
             lastName="humfrey",
-            emailAddress="alice.humphrey@example.com",
-            preBecycleSurveyCompleted=False,
-            periBecycleSurveyCompleted=True,
-            postBecycleSurveyCompleted=False
+            emailAddress="alice.humphrey@example.com"
         ),
         models.Client(
             firstName="debby",
             lastName="smith",
-            emailAddress="debby.smith@exmaple.com",
-            preBecycleSurveyCompleted=False,
-            periBecycleSurveyCompleted=False,
-            postBecycleSurveyCompleted=True
+            emailAddress="debby.smith@exmaple.com"
         ),
         models.Client(
             firstName="alex",
             lastName="smith",
-            emailAddress="alex.smith@example.com",
-            preBecycleSurveyCompleted=True,
-            periBecycleSurveyCompleted=True,
-            postBecycleSurveyCompleted=True
+            emailAddress="alex.smith@example.com"
         ),
         models.Client(
             firstName="notprovided",
             lastName="notprovided",
-            emailAddress="sdjvhbsjvbwsjhdbv@notprovided.com",
-            preBecycleSurveyCompleted=True,
-            periBecycleSurveyCompleted=True,
-            postBecycleSurveyCompleted=True
+            emailAddress="sdjvhbsjvbwsjhdbv@notprovided.com"
         ),
         models.Client(
             firstName="ab",
             lastName="cd",
-            emailAddress="bgfdnggdbfdb@notprovided.com",
-            preBecycleSurveyCompleted=True,
-            periBecycleSurveyCompleted=True,
-            postBecycleSurveyCompleted=True
+            emailAddress="bgfdnggdbfdb@notprovided.com"
         ),
         models.Client(
             firstName="ab",
             lastName="ef",
-            emailAddress="dfnfdbdbfdbffggfr@notprovided.com",
-            preBecycleSurveyCompleted=True,
-            periBecycleSurveyCompleted=True,
-            postBecycleSurveyCompleted=True
+            emailAddress="dfnfdbdbfdbffggfr@notprovided.com"
         ),
         models.Client(
             firstName="notprovided",
             lastName="notprovided",
-            emailAddress="ewvrebsbsbrbsbsf@notprovided.com",
-            preBecycleSurveyCompleted=True,
-            periBecycleSurveyCompleted=True,
-            postBecycleSurveyCompleted=True
+            emailAddress="ewvrebsbsbrbsbsf@notprovided.com"
         ),
     ]
 
