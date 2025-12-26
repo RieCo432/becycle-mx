@@ -1033,7 +1033,7 @@ export default {
             requests.postSubmitDraftContract(activeDraft.value.id)
               .then((response) => {
                 toast.success('Contract Recorded!', {timeout: 1000});
-                router.push({path: `/contracts/${response.data.id}`});
+                router.push({path: `/contracts/${response.data.id}`, query: {showTerms: 1}});
               }).catch((error) => {
                 toast.error(error.response.data.detail.description, {timeout: 5000});
               });

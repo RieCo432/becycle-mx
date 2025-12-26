@@ -16,7 +16,7 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
-import Tooltip from "@/components/Tooltip/index.vue";
+import Tooltip from '@/components/Tooltip/index.vue';
 
 const toast = useToast();
 
