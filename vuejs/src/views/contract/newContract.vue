@@ -929,6 +929,16 @@ export default {
       }
     }
 
+    function promoteDraft() {
+      requests.postSubmitDraftContract(activeDraft.value.id)
+        .then((response) => {
+          toast.success('Contract Recorded!', {timeout: 1000});
+          router.push({path: `/contracts/${response.data.id}`, query: {showTerms: 1}});
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 5000});
+        });
+    }
+
     const submit = handleSubmit(() => {
       // next step until last step. if last step then submit form
       if (stepNumber.value === 1) {
@@ -979,7 +989,7 @@ export default {
               stepNumber.value = 6;
             }
             if (activeDraft.value.checkingUser !== null) {
-              stepNumber.value = 7;
+              promoteDraft();
             }
           })
           .catch((error) => {
@@ -1030,13 +1040,7 @@ export default {
             activeDraft.value = response.data;
             toast.success('Checking Volunteer Updated!', {timeout: 1000});
             userSelectionOptionsStatic.value = true;
-            requests.postSubmitDraftContract(activeDraft.value.id)
-              .then((response) => {
-                toast.success('Contract Recorded!', {timeout: 1000});
-                router.push({path: `/contracts/${response.data.id}`, query: {showTerms: 1}});
-              }).catch((error) => {
-                toast.error(error.response.data.detail.description, {timeout: 5000});
-              });
+            promoteDraft();
           })
           .catch((error) => {
             if (error.response.status === 400) {
