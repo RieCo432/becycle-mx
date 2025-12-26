@@ -553,122 +553,6 @@
                       hasicon/>
                 </div>
               </div>
-
-              <div v-if="stepNumber === 7">
-                <div class="grid lg:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h4>
-                    <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
-                      <thead>
-                        <tr class="border border-slate-500">Lendee Details</tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td class="border border-slate-500">Name</td>
-                          <td class="border border-slate-500">{{firstName}} {{lastName}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Email Address</td>
-                          <td class="border border-slate-500">{{emailAddress}}</td>
-                        </tr>
-                      </tbody>
-                      <thead>
-                        <tr class="border border-slate-500">Bike Details</tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td class="border border-slate-500">Make</td>
-                          <td class="border border-slate-500">{{make}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Model</td>
-                          <td class="border border-slate-500">{{model}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Colour</td>
-                          <td class="border border-slate-500">
-                            <div class="h-10 rounded-full overflow-hidden">
-                              <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${colours.length}`">
-                                <template
-                                    v-for="c in colours"
-                                    :key="c.name"
-                                >
-                                  <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
-                                    <template #button>
-                                      <div class="w-full h-full"></div>
-                                    </template>
-                                    <span>{{ c.name }} ({{ c.hex }})</span>
-                                  </Tooltip>
-                                </template>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Decals</td>
-                          <td class="border border-slate-500">{{decals}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Serial Number</td>
-                          <td class="border border-slate-500">{{serialNumber}}</td>
-                        </tr>
-                      </tbody>
-                      <thead>
-                      <tr class="border border-slate-500">Additional Details</tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td class="border border-slate-500">Lease Start</td>
-                          <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Lease End</td>
-                          <td class="border border-slate-500">{{datePlusSixMonths().toDateString()}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Deposit</td>
-                          <td class="border border-slate-500">&#163;{{depositAmountCollected}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Contract Type</td>
-                          <td class="border border-slate-500">{{type}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Bike Condition</td>
-                          <td class="border border-slate-500">{{condition}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Notes</td>
-                          <td class="border border-slate-500">{{notes}}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Terms of Loan</h4>
-                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Bicycle (Bike) Release Form: Terms of Loan) The agreed deposit is made and kept as a retainer against the value
-                      of the bike and released back to You (Keeper) upon the return of the borrowed bike – in satisfactory condition.
-                      {{ OFFICIAL_NAME }} reserves the right to deduct money from the deposit if and when any damage or excessive
-                      wear and tear occurs to the bike – and/or the bike was kept by You over the agreed rental period. The bike, when
-                      loaned is the full and sole responsibility of You (Keeper) therefore You are entrusted with the burden of
-                      ownership, maintenance, and upkeep. It is completely at your own risk that the bike is maintained and operated
-                      within reasonable use – to ensure Your personal safety.
-                    </p>
-                  </div>
-                  <div class="col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Agreement</h4>
-                    <Checkbox
-                        label="I confirm all details are correct and I agree to the terms of the loan!"
-                        name="everythingCorrect"
-                        activeClass="ring-primary-500 bg-primary-500"
-                        v-model="everythingCorrect"
-                        :error="everythingCorrectError"/>
-                    <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
-                  </div>
-                </div>
-              </div>
-
               <div
                   class="mt-10"
                   :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
@@ -770,10 +654,6 @@ export default {
         id: 7,
         title: 'Safety Check',
       },
-      {
-        id: 8,
-        title: 'Summary',
-      },
     ];
 
     const contractTypes = ref([]);
@@ -795,7 +675,6 @@ export default {
 
     const makeSuggestions = ref([]);
     const modelSuggestions = ref([]);
-    const colourSuggestions = ref([]);
     const coloursSuggestions = ref([]);
     const serialNumberSuggestions = ref([]);
 
@@ -893,10 +772,6 @@ export default {
         .required('Is there no play in the headset, does it steer easily and smoothly, and does it resist twisting?'),
     });
 
-    const reviewSchema = yup.object().shape({
-      everythingCorrect: yup.boolean().oneOf([true], 'This check is required').required('This check is required!'),
-    });
-
 
     // find current step schema
     const currentSchema = computed(() => {
@@ -913,8 +788,6 @@ export default {
         return workingUserSchema;
       case 6:
         return checkingUserSchema;
-      case 7:
-        return reviewSchema;
       default:
         return clientSchema;
       }
@@ -969,8 +842,6 @@ export default {
     const {value: mCheckRearBrake, errorMessage: mCheckRearBrakeError} = useField('mCheckRearBrake');
     const {value: mCheckSeatPost, errorMessage: mCheckSeatPostError} = useField('mCheckSeatPost');
     const {value: mCheckHeadset, errorMessage: mCheckHeadsetError} = useField('mCheckHeadset');
-
-    const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
     depositCollectingUser.value = '';
     workingUser.value = '';
@@ -1060,124 +931,120 @@ export default {
 
     const submit = handleSubmit(() => {
       // next step until last step. if last step then submit form
-      if (stepNumber.value === steps.length - 1) {
-        requests.postSubmitDraftContract(activeDraft.value.id)
+      if (stepNumber.value === 1) {
+        // Client details processing
+        requests.getClientByEmail(emailAddress.value)
           .then((response) => {
-            toast.success('Contract Recorded!', {timeout: 1000});
-            router.push({path: `/contracts/${response.data.id}`});
-          }).catch((error) => {
+            clientId.value = response.data[0]['id'];
+            setClient();
+          })
+          .catch((error) => {
+            if (error.response.status === 404) {
+              requests.postNewClient({
+                firstName: firstName.value,
+                lastName: lastName.value,
+                emailAddress: emailAddress.value,
+              }).then((response) => {
+                toast.success('New Client Created!', {timeout: 1000});
+                clientId.value = response.data['id'];
+                setClient();
+              });
+            }
+          });
+      } else if (stepNumber.value === 2) {
+        // Bike details processing
+        if (matchWithBikeId.value === 'new') {
+          requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
+            .then((response) => {
+              toast.success('New Bike Created!', {timeout: 1000});
+              bikeId.value = response.data['id'];
+              setBike();
+            });
+        } else {
+          bikeId.value = matchWithBikeId.value;
+          setBike();
+        }
+      } else if (stepNumber.value === 3) {
+        requests.putDraftContractDetails(activeDraft.value.id, type.value, condition.value, notes.value)
+          .then((response) => {
+            activeDraft.value = response.data;
+            toast.success('Contract Details Updated!', {timeout: 1000});
+            stepNumber.value = 4;
+            requests.getDepositBearers().then((response) =>
+              (depositBearers.value = response.data.map((user) => (user.username))));
+            if (activeDraft.value.depositCollectingUser !== null && activeDraft.value.depositAmountCollected !== null) {
+              stepNumber.value = 5;
+            }
+            if (activeDraft.value.workingUser !== null) {
+              stepNumber.value = 6;
+            }
+            if (activeDraft.value.checkingUser !== null) {
+              stepNumber.value = 7;
+            }
+          })
+          .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
           });
-      } else {
-        if (stepNumber.value === 1) {
-          // Client details processing
-          requests.getClientByEmail(emailAddress.value)
-            .then((response) => {
-              clientId.value = response.data[0]['id'];
-              setClient();
-            })
-            .catch((error) => {
-              if (error.response.status === 404) {
-                requests.postNewClient({
-                  firstName: firstName.value,
-                  lastName: lastName.value,
-                  emailAddress: emailAddress.value,
-                }).then((response) => {
-                  toast.success('New Client Created!', {timeout: 1000});
-                  clientId.value = response.data['id'];
-                  setClient();
-                });
-              }
-            });
-        } else if (stepNumber.value === 2) {
-          // Bike details processing
-          if (matchWithBikeId.value === 'new') {
-            requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
-              .then((response) => {
-                toast.success('New Bike Created!', {timeout: 1000});
-                bikeId.value = response.data['id'];
-                setBike();
-              });
-          } else {
-            bikeId.value = matchWithBikeId.value;
-            setBike();
-          }
-        } else if (stepNumber.value === 3) {
-          requests.putDraftContractDetails(activeDraft.value.id, type.value, condition.value, notes.value)
-            .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Contract Details Updated!', {timeout: 1000});
-              stepNumber.value = 4;
-              requests.getDepositBearers().then((response) =>
-                (depositBearers.value = response.data.map((user) => (user.username))));
-              if (activeDraft.value.depositCollectingUser !== null && activeDraft.value.depositAmountCollected !== null) {
-                stepNumber.value = 5;
-              }
-              if (activeDraft.value.workingUser !== null) {
-                stepNumber.value = 6;
-              }
-              if (activeDraft.value.checkingUser !== null) {
-                stepNumber.value = 7;
-              }
-            })
-            .catch((error) => {
+      } else if (stepNumber.value === 4) {
+        // Check password of deposit collector
+        requests.putDraftContractDeposit(
+          activeDraft.value.id,
+          depositAmountCollected.value,
+          depositCollectingUser.value,
+          depositCollectingPassword.value)
+          .then((response) => {
+            activeDraft.value = response.data;
+            toast.success('Deposit Details Updated!', {timeout: 1000});
+            stepNumber.value = 5;
+            requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
+            userSelectionOptionsStatic.value = true;
+          })
+          .catch((error) => {
+            if (error.response.status === 400) {
+              depositCollectingPasswordSetErrors('Wrong Password!');
+            } else {
               toast.error(error.response.data.detail.description, {timeout: 5000});
-            });
-        } else if (stepNumber.value === 4) {
-          // Check password of deposit collector
-          requests.putDraftContractDeposit(
-            activeDraft.value.id,
-            depositAmountCollected.value,
-            depositCollectingUser.value,
-            depositCollectingPassword.value)
-            .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Deposit Details Updated!', {timeout: 1000});
-              stepNumber.value = 5;
-              requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
-              userSelectionOptionsStatic.value = true;
-            })
-            .catch((error) => {
-              if (error.response.status === 400) {
-                depositCollectingPasswordSetErrors('Wrong Password!');
-              } else {
+            }
+          });
+      } else if (stepNumber.value === 5) {
+        // check password or pin of working volunteer
+        requests.putDraftContractWorkingUser(activeDraft.value.id, workingUser.value, workingPasswordOrPin.value)
+          .then((response) => {
+            activeDraft.value = response.data;
+            toast.success('Working Volunteer Updated!', {timeout: 1000});
+            stepNumber.value = 6;
+            requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.map((user) => (user.username))));
+            userSelectionOptionsStatic.value = true;
+          })
+          .catch((error) => {
+            if (error.response.status === 400) {
+              workingPasswordOrPinSetErrors('Wrong Password!');
+            } else {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            }
+          });
+      } else if (stepNumber.value === 6) {
+        // check password or pin of checking volunteer
+        requests.putDraftContractCheckingUser(activeDraft.value.id, checkingUser.value, checkingPasswordOrPin.value)
+          .then((response) => {
+            activeDraft.value = response.data;
+            toast.success('Checking Volunteer Updated!', {timeout: 1000});
+            userSelectionOptionsStatic.value = true;
+            requests.postSubmitDraftContract(activeDraft.value.id)
+              .then((response) => {
+                toast.success('Contract Recorded!', {timeout: 1000});
+                router.push({path: `/contracts/${response.data.id}`});
+              }).catch((error) => {
                 toast.error(error.response.data.detail.description, {timeout: 5000});
-              }
-            });
-        } else if (stepNumber.value === 5) {
-          // check password or pin of working volunteer
-          requests.putDraftContractWorkingUser(activeDraft.value.id, workingUser.value, workingPasswordOrPin.value)
-            .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Working Volunteer Updated!', {timeout: 1000});
-              stepNumber.value = 6;
-              requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.map((user) => (user.username))));
-              userSelectionOptionsStatic.value = true;
-            })
-            .catch((error) => {
-              if (error.response.status === 400) {
-                workingPasswordOrPinSetErrors('Wrong Password!');
-              } else {
-                toast.error(error.response.data.detail.description, {timeout: 5000});
-              }
-            });
-        } else if (stepNumber.value === 6) {
-          // check password or pin of checking volunteer
-          requests.putDraftContractCheckingUser(activeDraft.value.id, checkingUser.value, checkingPasswordOrPin.value)
-            .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Checking Volunteer Updated!', {timeout: 1000});
-              userSelectionOptionsStatic.value = true;
-              stepNumber.value = 7;
-            })
-            .catch((error) => {
-              if (error.response.status === 400) {
-                checkingPasswordOrPinSetErrors('Wrong Password!');
-              } else {
-                toast.error(error.response.data.detail.description, {timeout: 5000});
-              }
-            });
-        }
+              });
+          })
+          .catch((error) => {
+            if (error.response.status === 400) {
+              checkingPasswordOrPinSetErrors('Wrong Password!');
+            } else {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            }
+          });
       }
     });
 
@@ -1278,9 +1145,6 @@ export default {
       mCheckSeatPostError,
       mCheckHeadset,
       mCheckHeadsetError,
-
-      everythingCorrect,
-      everythingCorrectError,
 
       workingUserSelected,
       checkingUserSelected,
