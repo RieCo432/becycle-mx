@@ -78,12 +78,6 @@ export const topMenu = [
     show: ['user'],
   },
   {
-    title: 'Find Paper Contract',
-    icon: 'heroicons-outline:clipboard-document-list',
-    link: '/contracts/find-paper-contract',
-    show: ['user'],
-  },
-  {
     title: 'Leaderboards',
     icon: 'heroicons-outline:chart-bar',
     link: '/statistics/',
