@@ -199,7 +199,7 @@ export default {
               <ErrorMessage name="expenseDate" :error="expenseDateError" class="text-danger-500"/>
             </div>
             <div class="col-span-full">
-              <div @click="files = []">
+              <div>
                 <div
                     v-bind="getRootProps()"
                     :class="'w-full text-center border rounded flex flex-col justify-center items-center '
@@ -238,6 +238,9 @@ export default {
               <ErrorMessage name="file" :error="fileError" class="text-danger-500"/>
             </div>
             <div class="col-span-full">
+              <Button class="btn block w-full text-center bg-red-700 mb-4" style="text-transform: none;" @click="files = []">
+                Clear File(s)
+              </Button>
               <Button type="submit" class="btn block w-full text-center">
                 Submit
               </Button>
