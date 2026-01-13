@@ -1,7 +1,7 @@
 <template>
     <div class="grid grid-cols-12 gap-5">
       <div class="lg:col-span-6 col-span-12 row-span-2" v-if="aboutUsHtml !== null || editAllowed">
-        <Card title="Welcome to BECYCLE">
+        <Card :title="`Welcome to ${COMMON_NAME}`">
           <div class="h-full">
             <div class="grid grid-cols-12 gap-5">
               <div class="col-span-12">
@@ -56,8 +56,7 @@
                 <div class="grid grid-cols-12 h-full gap-5">
                   <div class="col-span-12">
                     <p class="text-base text-slate-700 dark:text-slate-300">
-                        This is the official website for BECYCLE Workshop SCIO,
-                        the community bicycle library and workshop in Aberdeen.</p><br>
+                      {{QUICK_INFO }}</p><br>
                     <p class="text-base text-slate-700 dark:text-slate-300" v-if="!loadingAddress">
                         We are located at:<br>
                         {{ address.number }} {{ address.street }}<br>
@@ -69,15 +68,23 @@
                       Loading...
                     </p>
                     <br>
-                    <span class="text-base text-slate-700 dark:text-slate-300">You can donate to our cause via PayPal:</span><br>
+                    <span
+                        v-if="PAYPAL_BUTTON_ID"
+                        class="text-base text-slate-700 dark:text-slate-300">You can donate to our cause via PayPal:</span><br>
                       <div id="donate-button-container">
                         <div id="donate-button"></div>
                       </div>
-                    <p class="text-base text-slate-700 dark:text-slate-300">You can contact us directly on social media:<br>
-                      <a href="https://facebook.com/beCyCleWorkshop/">
+                    <p
+                        v-if="FACEBOOK_LINK || INSTAGRAM_LINK"
+                        class="text-base text-slate-700 dark:text-slate-300">You can contact us directly on social media:<br>
+                      <a
+                          v-if="FACEBOOK_LINK"
+                          :href="FACEBOOK_LINK">
                           <img src="/src/assets/images/social/Facebook_Logo_Primary.png"
                                class="w-[32px] h-[32px] m-[16px] inline" alt="Facebook"/></a>
-                      <a href="https://instagram.com/becycleworkshop/">
+                      <a
+                          v-if="INSTAGRAM_LINK"
+                          :href="INSTAGRAM_LINK">
                           <img src="/src/assets/images/social/Instagram_Glyph_Gradient.png"
                                class="w-[32px] h-[32px] m-[16px] inline" alt="Instagram"/></a>
                     </p>
@@ -91,7 +98,7 @@
               <div class="grid grid-cols-12 gap-5">
                 <div class="col-span-12">
                   <Calendar
-                      v-if="!loadingClosedDays && !loadingOpenDays"
+                      v-if="!loadingOpenDays"
                       expanded
                       :is-dark="themeSettingsStore.isDark"
                       :columns="numCalendarColumns"
@@ -136,6 +143,12 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import {useToast} from 'vue-toastification';
 import Switch from '@/components/Switch';
 
+const COMMON_NAME = import.meta.env.VITE_COMMON_NAME;
+const QUICK_INFO = import.meta.env.VITE_QUICK_INFO;
+const FACEBOOK_LINK = import.meta.env.VITE_FACEBOOK_LINK;
+const INSTAGRAM_LINK = import.meta.env.VITE_INSTAGRAM_LINK;
+const PAYPAL_BUTTON_ID = import.meta.env.VITE_PAYPAL_DONATE_BUTTON_ID;
+
 const credentialsStore = useCredentialsStore();
 const themeSettingsStore = useThemeSettingsStore();
 const toast = useToast();
@@ -159,8 +172,12 @@ export default {
   },
   data() {
     return {
+      COMMON_NAME: COMMON_NAME,
+      QUICK_INFO: QUICK_INFO,
+      FACEBOOK_LINK: FACEBOOK_LINK,
+      INSTAGRAM_LINK: INSTAGRAM_LINK,
+      PAYPAL_BUTTON_ID: PAYPAL_BUTTON_ID,
       loadingOpeningTimes: true,
-      loadingClosedDays: true,
       loadingOpenDays: true,
       loadingAddress: true,
       openingTimes: null,
@@ -171,7 +188,13 @@ export default {
       aboutUsHtml: null,
       quillContent: null,
       themeSettingsStore: themeSettingsStore,
-      calendarAttributes: [],
+      calendarAttributes: [{
+        key: 'default-look',
+        dates: {repeat: {every: 'day'}},
+        content: {
+          class: 'opacity-20',
+        },
+      }],
       numCalendarColumns: mapCurrent({xs: 1, sm: 2, md: 2, lg: 1, xxl: 2}, 1),
       columns: [
         {
@@ -221,41 +244,17 @@ export default {
       this.openingTimes = response.data;
       this.loadingOpeningTimes = false;
     });
-    requests.getUpcomingClosures().then((response) => {
-      const closedDays = response.data.filter((closure) => closure.type === 'day')
-        .map((closure) => (new Date(Date.parse(closure.item.date))));
-      const closedPeriods = response.data.filter((closure) => closure.type === 'period')
-        .map((closure) => (
-          [
-            new Date(Date.parse(closure.item.date)),
-            new Date(Date.parse(closure.item.untilDate)),
-          ]));
-      this.calendarAttributes.push({
-        key: 'closedDays',
-        dates: closedDays,
-        highlight: {
-          color: 'red',
-          fillMode: 'light',
-        },
-      });
-      this.calendarAttributes.push({
-        key: 'closedPeriods',
-        dates: closedPeriods,
-        highlight: {
-          color: 'red',
-          fillMode: 'light',
-        },
-      });
-      this.loadingClosedDays = false;
-    });
     requests.getUpcomingOpenDates().then((response) => {
       response.data.forEach((openDay) => {
         this.calendarAttributes.push({
           key: 'openDays' + openDay,
           dates: new Date(Date.parse(openDay)),
+          content: {
+            class: 'opacity-100',
+          },
           highlight: {
-            color: 'green',
-            fillMode: 'light',
+            color: 'white',
+            fillMode: 'outline',
           },
         });
       });
@@ -270,18 +269,22 @@ export default {
       s.setAttribute('src', url); s.onload = callback;
       document.head.insertBefore(s, document.head.firstElementChild);
     }
-    loadAsync('https://www.paypalobjects.com/donate/sdk/donate-sdk.js', function() {
-      // eslint-disable-next-line new-cap
-      PayPal.Donation.Button({
-        env: 'production',
-        hosted_button_id: '5XHLXRAKWQEEN',
-        image: {
-          src: 'https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif',
-          alt: 'Donate with PayPal button',
-          title: 'PayPal - The safer, easier way to pay online!',
-        },
-      }).render('#donate-button');
-    });
+
+    if (PAYPAL_BUTTON_ID) {
+      loadAsync('https://www.paypalobjects.com/donate/sdk/donate-sdk.js', function() {
+        // eslint-disable-next-line new-cap
+        PayPal.Donation.Button({
+          env: 'production',
+          hosted_button_id: PAYPAL_BUTTON_ID,
+          image: {
+            src: 'https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif',
+            alt: 'Donate with PayPal button',
+            title: 'PayPal - The safer, easier way to pay online!',
+          },
+        }).render('#donate-button');
+      });
+    }
+
     loadAsync('https://app.termly.io/resource-blocker/cfac8041-9e2d-4f64-9c8b-1ba418ea07a1?autoBlock=on');
   },
 };

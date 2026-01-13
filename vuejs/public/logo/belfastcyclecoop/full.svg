@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 140 32" width="140px" height="32px" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="A">
+      <path d="M0 1089.954h1080V0H0z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#A)" transform="matrix(0.029630007222, 0, 0, -0.029359007254, -0.00060999993, -1090.250731179688)" style="transform-origin: 0.000634px 1090.25px;"></g>
+</svg>

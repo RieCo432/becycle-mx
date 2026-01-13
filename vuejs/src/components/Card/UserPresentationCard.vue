@@ -9,11 +9,14 @@ import TextInput from '@/components/TextInput/index.vue';
 import {useDropzone} from 'vue3-dropzone';
 import {Icon} from '@iconify/vue';
 
+const COMMON_NAME = import.meta.env.VITE_COMMON_NAME;
+
 export default {
   name: 'UserPresentationCard',
   components: {Icon, TextInput, DashButton, Card},
   data() {
     return {
+      COMMON_NAME : COMMON_NAME,
       photoUrl: null,
     };
   },
@@ -188,7 +191,7 @@ export default {
                   v-if="inEditMode"
                   label="Biography"
                   type="text"
-                  placeholder="I started volunteering at BECYCLE when..."
+                  :placeholder="`I started volunteering at ${ COMMON_NAME } when...`"
                   name="bio"
                   v-model="bio"
                   :error="bioError"

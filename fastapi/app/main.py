@@ -42,7 +42,6 @@ app.include_router(routers.deposit_exchanges)
 app.include_router(routers.finances)
 app.include_router(routers.statistics)
 # app.include_router(routers.maps)
-# app.include_router(routers.surveys)
 app.include_router(routers.admin)
 app.include_router(routers.expenses)
 app.include_router(routers.groups)
@@ -61,6 +60,7 @@ if os.environ["PRODUCTION"] == "true":
 db = SessionLocal()
 crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
 crud.fully_prune_tree(db=db)
+crud.ensure_default_admin_permissions_exist(db=db)
 db.close()
 
 if __name__ == "__main__":
