@@ -28,16 +28,24 @@ export default {
     const expenseId = ref('');
 
     const editExpenseSchemas = yup.object().shape({
-      inOrOut: yup.string().oneOf(['in', 'out']),
-      type: yup.string(),
-      tagId: yup.string(),
-      notes: yup.string(),
-      amount: yup.number(),
-      expenseDate: yup.date(),
-      expenseUserId: yup.string(),
+      inOrOut: yup.string().required().oneOf(['in', 'out']),
+      type: yup.string().required(),
+      tagId: yup.string().required(),
+      notes: yup.string().required(),
+      amount: yup.number().required(),
+      expenseDate: yup.date().required(),
+      expenseUserId: yup.string().required(),
       transferred: yup.bool(),
-      treasurerUserId: yup.string().nullable(),
-      transferDate: yup.date().nullable(),
+      treasurerUserId: yup.string().when('transferred', {
+        is: true,
+        then: () => yup.string().required(),
+        otherwise: () => yup.string().nullable()
+      }),
+      transferDate: yup.date().when('transferred', {
+        is: true,
+        then: () => yup.date().required(),
+        otherwise: () => yup.date().nullable()
+      }),
     });
 
     const {handleSubmit} = useForm({
@@ -205,9 +213,6 @@ export default {
   <Modal :active-modal="showModal" @close="closeModal" title="Edit Expense">
     <form @submit.prevent="submitPatchExpense">
       <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
-        <div class="col-span-full">
-          <h3 class="text-danger-500 dark:text-danger-600">BE CAREFUL! NO VALIDATION IS DONE ON THESE INPUTS</h3>
-        </div>
         <div class="col-span-6">
           <TextInput
               label="Amount (&pound;)"
@@ -303,6 +308,7 @@ export default {
               :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
           >
           </flat-pickr>
+          <ErrorMessage name="transferDate" :error="transferDateError" class="text-danger-500"/>
         </div>
         <div class="col-span-full">
           <Button type="submit" class="btn block w-full text-center">
