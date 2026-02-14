@@ -42,7 +42,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('aftertime')
     )
     op.create_index(op.f('ix_appointmentconcurrencylimits_aftertime'), 'appointmentconcurrencylimits', ['aftertime'], unique=False)
-    op.create_table('appointmentgeneralsettings',
+    appointment_general_settings_table = op.create_table('appointmentgeneralsettings',
     sa.Column('id', sa.Integer(), server_default=sa.text('1'), nullable=False),
     sa.Column('openingdays', sa.ARRAY(sa.Integer()), nullable=False),
     sa.Column('minbookahead', sa.Integer(), nullable=False),
@@ -50,6 +50,9 @@ def upgrade() -> None:
     sa.Column('slotduration', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+    op.bulk_insert(appointment_general_settings_table, [
+        {'id': 1, 'openingdays': [], 'minbookahead': 0, 'maxbookahead': 0, 'slotduration': 15}
+    ])
     op.create_index(op.f('ix_appointmentgeneralsettings_id'), 'appointmentgeneralsettings', ['id'], unique=False)
     op.create_table('appointmenttypes',
     sa.Column('id', sa.String(length=5), nullable=False),

@@ -16,7 +16,7 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
-import Tooltip from "@/components/Tooltip/index.vue";
+import Tooltip from '@/components/Tooltip/index.vue';
 
 const toast = useToast();
 
@@ -52,10 +52,6 @@ export default {
         id: 2,
         title: 'Deposit Return',
       },
-      {
-        id: 3,
-        title: 'Review',
-      },
     ];
 
     const stepNumber = ref(0);
@@ -72,10 +68,6 @@ export default {
       returnAcceptingPasswordOrPin: yup.string().required(' Password or Pin is required '),
     });
 
-    const reviewSchema = yup.object().shape({
-      everythingCorrect: yup.boolean().oneOf([true], 'This check is required').required('This check is required!'),
-    });
-
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
@@ -83,8 +75,6 @@ export default {
         return returnAcceptingUserSchema;
       case 1:
         return depositReturningSchema;
-      case 2:
-        return reviewSchema;
       default:
         return depositReturningSchema;
       }
@@ -105,9 +95,6 @@ export default {
     const {value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError,
       setErrors: returnAcceptingPasswordOrPinSetErrors} = useField('returnAcceptingPasswordOrPin');
 
-
-    const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
-
     depositReturningUser.value = '';
     returnAcceptingUser.value = '';
 
@@ -120,11 +107,7 @@ export default {
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
-      if (stepNumber.value === steps.length - 1) {
-        // handle submit
-        patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value,
-          returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
-      } else if (stepNumber.value === 0) {
+      if (stepNumber.value === 0) {
         // handle return accepting user
         requests.checkUserPasswordOrPin(returnAcceptingUser.value, returnAcceptingPasswordOrPin.value).then((response) => {
           if (response.data) {
@@ -140,8 +123,8 @@ export default {
         }
         requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
           if (response.data) {
-            stepNumber.value = 2;
-            userSelectionOptionsStatic.value = true;
+            patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value,
+              returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
           } else {
             depositReturningPasswordSetErrors('Wrong Password!');
           }
@@ -168,9 +151,6 @@ export default {
       returnAcceptingUserError,
       returnAcceptingPasswordOrPin,
       returnAcceptingPasswordOrPinError,
-
-      everythingCorrect,
-      everythingCorrectError,
 
       returnAcceptingUserSelected,
       userSelectionOptionsStatic,
@@ -585,40 +565,6 @@ export default {
                           v-model="depositReturningPassword"
                           :error="depositReturningPasswordError"
                           hasicon/>
-                    </div>
-                  </div>
-                  <div v-if="stepNumber === 2">
-                    <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-                      <div class="lg:col-span-3 md:col-span-2 col-span-1">
-                        <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                          Final Check
-                        </h4>
-                        <table class="w-full text-base text-slate-800 dark:text-slate-300 border
-                                      border-collapse border-slate-500 bg-slate-700">
-                          <thead>
-                          <tr class="border border-slate-500">Return Details</tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td class="border border-slate-500">Return Date</td>
-                              <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                            </tr>
-                            <tr>
-                              <td class="border border-slate-500">Deposit Returned</td>
-                              <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="col-span-1">
-                        <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h5>
-                        <Checkbox
-                            label="I confirm that this information is correct and the deposit was returned to the lendee!"
-                            name="everythingCorrect"
-                            v-model="everythingCorrect"
-                            :error="everythingCorrectError"/>
-                        <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
-                      </div>
                     </div>
                   </div>
 

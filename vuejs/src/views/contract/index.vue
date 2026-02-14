@@ -5,12 +5,14 @@ import {useToast} from 'vue-toastification';
 import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vue';
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 import EditContractDetailsModal from '@/components/Modal/EditContractDetailsModal.vue';
+import Modal from "@/components/Modal/Modal.vue";
 
 const toast = useToast();
 
 export default {
   name: 'contractIndex',
   components: {
+    Modal,
     EditContractDetailsModal,
     EditBikeDetailsModal,
     EditClientDetailsModal,
@@ -18,6 +20,7 @@ export default {
   },
   data() {
     return {
+      showTermsModal: false,
       client: {},
       bike: {},
       contract: {},
@@ -128,6 +131,11 @@ export default {
     },
   },
   mounted() {
+    console.log('route', this.$route);
+    if (this.$route.query.showTerms === '1') {
+      console.log('show terms modal');
+      this.showTermsModal = true;
+    }
     this.getContract();
     requests.getDepositBearers().then((response) => {
       this.depositBearers = response.data.sort(this.userSortingFunction).map((user) => (user.username));
@@ -187,6 +195,27 @@ export default {
                           :contract="contract"
                           @contract-details-updated="getContract">
     </EditContractDetailsModal>
+    <Modal
+        v-if="showTermsModal"
+           @close="() => showTermsModal = false"
+           :active-modal="showTermsModal"
+           title="Contract Terms"
+    >
+      <div class="grid-cols-1">
+        <div class="col-span-1">
+          <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Terms of Loan</h4>
+          <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
+            Bicycle (Bike) Release Form: Terms of Loan) The agreed deposit is made and kept as a retainer against the value
+            of the bike and released back to You (Keeper) upon the return of the borrowed bike – in satisfactory condition.
+            {{ OFFICIAL_NAME }} reserves the right to deduct money from the deposit if and when any damage or excessive
+            wear and tear occurs to the bike – and/or the bike was kept by You over the agreed rental period. The bike, when
+            loaned is the full and sole responsibility of You (Keeper) therefore You are entrusted with the burden of
+            ownership, maintenance, and upkeep. It is completely at your own risk that the bike is maintained and operated
+            within reasonable use – to ensure Your personal safety.
+          </p>
+        </div>
+      </div>
+    </Modal>
 
   </div>
 </template>

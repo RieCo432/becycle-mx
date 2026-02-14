@@ -1,5 +1,6 @@
 ﻿from uuid import UUID
 
+import bcrypt
 from fastapi import HTTPException, status
 from fastapi.routing import APIRoute
 from sqlalchemy import select
@@ -95,6 +96,43 @@ def prune_permissions_tree(db: Session, tree: schemas.PermissionNode) -> None:
         prune_permissions_tree(db=db, tree=child_node)
 
     return
+
+
+def ensure_default_admin_permissions_exist(db: Session) -> None:
+    admin_user = db.scalar(select(models.User).where(models.User.username == "admin"))
+
+    if admin_user is None:
+        admin_user = models.User(
+            username="admin",
+            password=bcrypt.hashpw("admin", bcrypt.gensalt()),
+            admin=True,
+            depositBearer=True,
+            rentalChecker=True,
+            appointmentManager=True,
+            treasurer=True,
+            softDeleted=False
+        )
+        db.add(admin_user)
+        db.commit()
+
+    admin_group = db.scalar(select(models.Group).where(models.Group.name == "admin"))
+
+
+
+    if admin_group is None:
+        admin_group = models.Group(name="admin")
+        db.add(admin_group)
+        db.commit()
+
+    if admin_group not in admin_user.groups:
+        admin_user.groups.append(admin_group)
+        db.commit()
+
+    global_permissions = [_ for _ in db.scalars(select(models.Permission).where(models.Permission.route == "/"))]
+    for p in global_permissions:
+        if p not in admin_group.permissions:
+            admin_group.permissions.append(p)
+            db.commit()
 
 
 def get_permissions_tree(db: Session, route: str = "/", is_leaf: bool = False) -> schemas.PermissionNode:
