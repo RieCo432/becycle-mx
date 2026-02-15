@@ -6,7 +6,6 @@ from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
-from .bikeColours import bike_colour_association_table
 
 
 class Account(Base):
@@ -31,6 +30,8 @@ class Account(Base):
     closedByuser: Mapped["User"] = relationship("User", foreign_keys=[closedByUserId], back_populates="accountsClosed")
     
     showInUis: Mapped[List[str]] = mapped_column("showinuis", ARRAY(String(20)), nullable=False, quote=False, server_default=text("ARRAY[]::text[]"))
+    
+    transactionLines: Mapped[List["TransactionLine"]] = relationship("TransactionLine", back_populates="account")
 
 
     def __eq__(self, other: dict):
