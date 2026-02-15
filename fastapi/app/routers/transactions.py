@@ -18,7 +18,10 @@ def create_transaction(
     user: models.User = Depends(dep.get_current_user),
     db: Session = Depends(dep.get_db)
 ):
-    return crud.create_transaction(db, transaction_data, user)
+    transaction_header = crud.create_transaction(db, transaction_data, user)
+    if transaction_data.attemptAutoPost:
+        transaction_header = crud.post_transaction_header(db, transaction_header.id, user)
+    return transaction_header
 
 @transactions.patch("/transactions/{transaction_id}/post", response_model=schemas.TransactionHeader)
 def post_transaction_header(transaction_header_id: UUID, user: models.User = Depends(dep.get_current_user), db: Session = Depends(dep.get_db)):

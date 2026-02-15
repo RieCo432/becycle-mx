@@ -39,4 +39,5 @@ class TransactionHeader(TransactionHeaderBase):
 class TransactionCreate(BaseModel):
     transactionHeader: TransactionHeaderCreate
     transactionLines: List[TransactionLineCreate]
+    attemptAutoPost: bool = True
     
