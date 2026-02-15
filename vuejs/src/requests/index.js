@@ -1440,4 +1440,38 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getAccounts() {
+    return axiosClient.get('/accounts', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postNewAccount(name, description, type, owneruserId, ownerGroupId, scheduledClosureDate, isInternal, showInUis) {
+    return axiosClient.post('/accounts', {
+      name: name,
+      description: description,
+      type: type,
+      ownerUserId: owneruserId,
+      ownerGroupId: ownerGroupId,
+      scheduledClosureDate: scheduledClosureDate,
+      isInternal: isInternal,
+      showInUis: showInUis,
+    },
+    {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  closeAccount(accountId) {
+    return axiosClient.patch(`/accounts/${accountId}/close`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  reopenAccount(accountId) {
+    return axiosClient.patch(`/accounts/${accountId}/reopen`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

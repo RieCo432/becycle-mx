@@ -213,6 +213,12 @@ export const topMenu = [
         childlink: '/admin/raw-data',
         show: ['user'],
       },
+      {
+        childtitle: 'Manage Accounts',
+        childicon: 'heroicons-outline:rectangle-stack',
+        childlink: '/admin/accounts',
+        show: ['user'],
+      },
     ],
   },
   {
