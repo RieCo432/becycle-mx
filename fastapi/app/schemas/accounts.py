@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -9,7 +9,7 @@ from .group import Group
 class AccountBase(BaseModel):
     name: str
     description: str
-    scheduledClosureDate: datetime | None = None
+    scheduledClosureDate: date | None = None
     showInUis: List[str]
 
 

@@ -1,8 +1,8 @@
 from typing import List
 from uuid import uuid4
 
-from datetime import datetime
-from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean, ARRAY
+from datetime import datetime, date
+from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean, ARRAY, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
@@ -12,7 +12,7 @@ class Account(Base):
     __tablename__ = "accounts"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
-    name: Mapped[str] = mapped_column("name", String(60), nullable=False, quote=False)
+    name: Mapped[str] = mapped_column("name", String(60), nullable=False, quote=False, unique=True)
     description: Mapped[str] = mapped_column("description", String(255), nullable=True, quote=False)
 
     ownerUserId: Mapped[UUID] = mapped_column("owneruserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
@@ -24,7 +24,7 @@ class Account(Base):
     type: Mapped[str] = mapped_column("type", String(20), nullable=False, quote=False)
     isInternal: Mapped[bool] = mapped_column("isinternal", Boolean, nullable=False, quote=False)
 
-    scheduledClosureDate: Mapped[datetime] = mapped_column("scheduledclosuredate", DateTime, nullable=True, quote=False)
+    scheduledClosureDate: Mapped[date] = mapped_column("scheduledclosuredate", Date, nullable=True, quote=False)
     
     closedOn: Mapped[datetime] = mapped_column("closedon", DateTime, nullable=True, quote=False)    
     closedByUserId: Mapped[UUID] = mapped_column("closedbyuserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)

@@ -23,7 +23,7 @@ async def get_account(account_id: UUID, db: Session = Depends(dep.get_db)) -> sc
     if account is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Account with ID {account_id} not found"
+            detail={"description": f"Account with ID {account_id} not found"}
         )
     return account
 
@@ -41,11 +41,21 @@ async def close_account(account_id: UUID, db: Session = Depends(dep.get_db), use
     if account.balance() != 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Account balance must be zero to close it."
+            detail={"description": "Account balance must be zero to close it."}
         )
     if account.closedOn is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Account is already closed."
+            detail={"description": "Account is already closed."}
         )
     return crud.close_account(db=db, account_id=account_id, user=user)
+
+@accounts.patch("/accounts/{account_id}/reopen")
+async def reopen_account(account_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.Account:
+    account = crud.get_account(db=db, account_id=account_id)
+    if account.closedOn is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Account is not closed."}
+        )
+    return crud.reopen_account(db=db, account_id=account_id)
