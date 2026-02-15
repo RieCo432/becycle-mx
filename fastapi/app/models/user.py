@@ -11,6 +11,7 @@ from .depositExchange import DepositExchange
 from .expense import Expense
 from .userPermission import user_permission_association_table
 from .groupUser import group_user_association_table
+from .accounts import Account
 
 
 class UserPhoto(Base):
@@ -82,6 +83,8 @@ class User(Base):
 
     permissions: Mapped[List["Permission"]] = relationship(secondary=user_permission_association_table, back_populates="users")
     groups: Mapped[List["Group"]] = relationship(secondary=group_user_association_table, back_populates="users")
+
+    accountsOwned: Mapped[List["Account"]] = relationship("Account", foreign_keys=[Account.ownerUserId], back_populates="ownerUser")
 
 
     def __eq_dict__(self, other: dict):
