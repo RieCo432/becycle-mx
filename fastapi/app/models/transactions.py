@@ -18,7 +18,7 @@ class TransactionHeader(Base):
 
     createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
     createdByUserId: Mapped[UUID] = mapped_column("createdbyuserid", ForeignKey("users.id"), nullable=False, quote=False)
-    createdByUser: Mapped["User"] = relationship("User", foreign_keys=[createdByUserId], back_populates="transactionsCreated")
+    createdByUser: Mapped["User"] = relationship("User", foreign_keys=[createdByUserId], back_populates="transactionHeadersCreated")
     
     transactionLines: Mapped[List["TransactionLine"]] = relationship("TransactionLine", back_populates="transactionHeader")
 
@@ -51,7 +51,7 @@ class TransactionLine(Base):
     
     postedOn: Mapped[datetime] = mapped_column("postedon", DateTime, nullable=True, quote=False)
     postedByUserId: Mapped[UUID] = mapped_column("postedbyuserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
-    postedByUser: Mapped["User"] = relationship("User", foreign_keys=[postedByUserId], back_populates="transactionsPosted")
+    postedByUser: Mapped["User"] = relationship("User", foreign_keys=[postedByUserId], back_populates="transactionLinesPosted")
     
     
     def __eq__(self, other: dict):

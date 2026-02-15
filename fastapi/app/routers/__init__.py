@@ -18,3 +18,4 @@ from .appointmentsPublic import appointments_public
 from .usersPublic import users_public
 from .crimeReports import crime_reports
 from .colours import colours
+from .accounts import accounts
