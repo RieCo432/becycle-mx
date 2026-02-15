@@ -38,7 +38,7 @@ async def update_account(account_id: UUID, updated_account_data: schemas.Account
 @accounts.patch("/accounts/{account_id}/close")
 async def close_account(account_id: UUID, db: Session = Depends(dep.get_db), user: models.User = Depends(dep.get_current_active_user)) -> schemas.Account:
     account = crud.get_account(db=db, account_id=account_id)
-    if account.balance() != 0:
+    if account.balance != 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Account balance must be zero to close it."}

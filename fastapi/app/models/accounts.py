@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from datetime import datetime, date
 from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean, ARRAY, Date
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
@@ -34,7 +35,30 @@ class Account(Base):
     
     transactionLines: Mapped[List["TransactionLine"]] = relationship("TransactionLine", back_populates="account")
     
-    def balance(self):
+    
+    @property
+    def normalBalance(self) -> str:
+        if (self.type == "dividend"):
+            return "debit"
+        elif (self.type == "expense"):
+            return "debit"
+        if (self.type == "asset"):
+            return "debit"
+        elif (self.type == "liability"):
+            return "credit"
+        elif (self.type == "equity"):
+            return "credit"
+        elif (self.type == "revenue"):
+            return "credit"
+    
+    @property
+    def normalisedBalance(self) -> int:
+        if self.normalBalance == "credit":
+            return -1 * self.balance
+        return self.balance
+    
+    @property
+    def balance(self) -> int:
         return sum([line.amount for line in self.transactionLines])
     
     def __eq__(self, other: dict):

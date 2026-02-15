@@ -25,6 +25,8 @@ class Account(AccountCreate):
     ownerGroup: Group | None = None
     closedOn: datetime | None = None
     closedByUser: User | None = None
+    balance: int
+    normalisedBalance: int
     
 class AccountUpdate(AccountBase):
     pass
