@@ -11,7 +11,7 @@ from uuid import UUID
 from app.services.accounts_helpers import AccountsHelpers
 
 
-def get_account(account_id: UUID, db: Session) -> models.Account | None:
+def get_account(db: Session, account_id: UUID) -> models.Account | None:
     return db.scalar(
         select(models.Account).where(models.Account.id == account_id)
     )
@@ -53,7 +53,7 @@ def get_accounts(db: Session) -> list[models.Account]:
     )]
 
 def update_account(db: Session, account_id: UUID, updated_account_data: schemas.AccountUpdate) -> models.Account:
-    account = get_account(account_id=account_id, db=db)
+    account = get_account(db=db, account_id=account_id)
     if account is None:
         return None
     account.name = updated_account_data.name
@@ -65,7 +65,7 @@ def update_account(db: Session, account_id: UUID, updated_account_data: schemas.
     return account
 
 def close_account(account_id: UUID, db: Session, user: models.User) -> models.Account:
-    account = get_account(account_id=account_id, db=db)
+    account = get_account(db=db, account_id=account_id)
     account.closedOn = datetime.now(timezone.utc)
     account.closedByUserId = user.id
     db.commit()
@@ -73,7 +73,7 @@ def close_account(account_id: UUID, db: Session, user: models.User) -> models.Ac
     return account
 
 def reopen_account(account_id: UUID, db: Session) -> models.Account:
-    account = get_account(account_id=account_id, db=db)
+    account = get_account(db=db, account_id=account_id)
     account.closedOn = None
     account.closedByUserId = None
     db.commit()

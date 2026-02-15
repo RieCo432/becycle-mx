@@ -35,6 +35,8 @@ class Account(Base):
     
     transactionLines: Mapped[List["TransactionLine"]] = relationship("TransactionLine", back_populates="account")
     
+    isAllowedNegative: Mapped[bool] = mapped_column("isallowednegative", Boolean, nullable=False, quote=False, server_default=text("FALSE"), default=False)
+    
     
     @property
     def normalBalance(self) -> str:

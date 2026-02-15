@@ -49,6 +49,7 @@ app.include_router(routers.groups)
 app.include_router(routers.crime_reports)
 app.include_router(routers.colours)
 app.include_router(routers.accounts)
+app.include_router(routers.transactions)
 
 
 
