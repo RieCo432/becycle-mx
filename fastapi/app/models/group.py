@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.db import Base
 from . import group_user_association_table, Permission
 from .groupPermission import group_permission_association_table
+from .accounts import Account
 
 
 
@@ -23,6 +24,8 @@ class Group(Base):
     permissions: Mapped[List["Permission"]] = relationship(secondary=group_permission_association_table, back_populates="groups")
 
     users: Mapped[List["User"]] = relationship(secondary=group_user_association_table, back_populates="groups")
+
+    accountsOwned: Mapped[List["Account"]] = relationship("Account", foreign_keys=[Account.ownerGroupId], back_populates="ownerGroup")
 
     def __eq__(self, other: dict):
         return all([
