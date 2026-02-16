@@ -64,6 +64,9 @@
               .toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
                 hour: "2-digit", minute: "2-digit", hour12: false, }) }}
           </span>
+          <span v-if="props.column.field === 'showInUis'">
+            {{ props.row.showInUis.join(', ') }}
+          </span>
             <div v-if="props.column.field === 'actions'" class="flex space-x-3 rtl:space-x-reverse">
                 <Tooltip
                         placement="top"
@@ -193,6 +196,10 @@ export default {
         {
           label: 'Closed By',
           field: 'closedByUser.username',
+        },
+        {
+          label: 'Show in UI',
+          field: 'showInUis',
         },
         {
           label: 'Actions',

@@ -1,9 +1,11 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
+from fastapi.params import Query
 from sqlalchemy.orm import Session
 
 import app.dependencies as dep
 from app import models, schemas, crud
+from typing import List, Annotated
 
 accounts = APIRouter(
     tags=["accounts"],
@@ -13,8 +15,8 @@ accounts = APIRouter(
 
 
 @accounts.get("/accounts")
-async def get_accounts(db: Session = Depends(dep.get_db)) -> list[schemas.Account]:
-    return crud.get_accounts(db=db)
+async def get_accounts(ui_filters: Annotated[List[str] | None, Query()] = None, db: Session = Depends(dep.get_db)) -> list[schemas.Account]:
+    return crud.get_accounts(db=db, ui_filters=ui_filters)
 
 
 @accounts.get("/accounts/{account_id}")

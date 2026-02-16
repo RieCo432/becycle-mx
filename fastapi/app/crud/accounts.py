@@ -2,13 +2,14 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from starlette import status
 
 from app import schemas, models, crud
 from uuid import UUID
 
 from app.services.accounts_helpers import AccountsHelpers
+from typing import List
 
 
 def get_account(db: Session, account_id: UUID) -> models.Account | None:
@@ -47,9 +48,14 @@ def create_account(new_account_data: schemas.AccountCreate, db: Session) -> mode
     db.refresh(db_account)
     return db_account
 
-def get_accounts(db: Session) -> list[models.Account]:
+def get_accounts(db: Session, ui_filters: List[str] | None = None) -> list[models.Account]:
+    filter_query = []
+    if ui_filters is not None:
+        filter_query.append(models.Account.showInUis.op('&&')(ui_filters))
+    
     return [_ for _ in db.scalars(
         select(models.Account)
+        .where(and_(*filter_query))
     )]
 
 def update_account(db: Session, account_id: UUID, updated_account_data: schemas.AccountUpdate) -> models.Account:
