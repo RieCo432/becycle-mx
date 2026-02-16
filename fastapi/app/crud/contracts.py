@@ -89,7 +89,6 @@ def create_contract(
         contract_data: schemas.ContractCreate,
         working_user_id: UUID,
         checking_user_id: UUID,
-        deposit_collecting_user_id: UUID,
         db: Session) -> models.Contract:
 
     contract = models.Contract(
@@ -97,8 +96,7 @@ def create_contract(
         bikeId=contract_data.bikeId,
         workingUserId=working_user_id,
         checkingUserId=checking_user_id,
-        depositCollectingUserId=deposit_collecting_user_id,
-        depositAmountCollected=contract_data.depositAmountCollected,
+        depositCollectedTransactionHeaderId=contract_data.depositCollectedTransactionHeaderId,
         conditionOfBike=contract_data.conditionOfBike,
         contractType=contract_data.contractType,
         notes=contract_data.notes
@@ -339,7 +337,7 @@ def update_contract_draft_details(db: Session, contract_draft_id: UUID, contract
     db.commit()
     return contract_draft
 
-def update_contract_draft_deposit(db: Session, contract_draft_id: UUID, deposit_collected_transaction_header_id: UUID, deposit_collecting_user: models.User) -> models.ContractDraft:
+def update_contract_draft_deposit(db: Session, contract_draft_id: UUID, deposit_collected_transaction_header_id: UUID) -> models.ContractDraft:
     contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
     
     if not db.scalar(

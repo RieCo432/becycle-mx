@@ -48,10 +48,12 @@ def create_account(new_account_data: schemas.AccountCreate, db: Session) -> mode
     db.refresh(db_account)
     return db_account
 
-def get_accounts(db: Session, ui_filters: List[str] | None = None) -> list[models.Account]:
+def get_accounts(db: Session, ui_filters: List[str] | None = None, types: List[str] | None = None) -> list[models.Account]:
     filter_query = []
     if ui_filters is not None:
         filter_query.append(models.Account.showInUis.op('&&')(ui_filters))
+    if types is not None:
+        filter_query.append(models.Account.type.in_(types))
     
     return [_ for _ in db.scalars(
         select(models.Account)

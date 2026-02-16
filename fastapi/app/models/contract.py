@@ -31,7 +31,7 @@ class Contract(Base):
     checkingUserId: Mapped[UUID] = mapped_column("checkinguserid", ForeignKey("users.id"), nullable=False, quote=False)
     checkingUser: Mapped["User"] = relationship("User", foreign_keys=[checkingUserId], back_populates="checkedContracts")
 
-    depositCollectingUserId: Mapped[UUID] = mapped_column("depositcollectinguserid", ForeignKey("users.id"), nullable=False, quote=False)
+    depositCollectingUserId: Mapped[UUID] = mapped_column("depositcollectinguserid", ForeignKey("users.id"), nullable=True, quote=False)
     depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")
 
     returnAcceptingUserId: Mapped[UUID] = mapped_column("returnacceptinguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
@@ -45,7 +45,7 @@ class Contract(Base):
 
     returnedDate: Mapped[date] = mapped_column("returneddate", Date, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
-    depositAmountCollected: Mapped[int] = mapped_column("depositamountcollected", Integer, nullable=False, quote=False)
+    depositAmountCollected: Mapped[int] = mapped_column("depositamountcollected", Integer, nullable=True, quote=False)
     depositAmountReturned: Mapped[int] = mapped_column("depositamountreturned", Integer, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
     conditionOfBike: Mapped[str] = mapped_column("conditionofbike", String(20), nullable=False, quote=False)

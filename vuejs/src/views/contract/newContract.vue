@@ -360,7 +360,7 @@
                 </div>
               </div>
               <div v-if="stepNumber === 4">
-                <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+                <div class="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-5">
                   <div class="lg:col-span-3 md:col-span-2 col-span-1">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Deposit Collection
@@ -378,18 +378,33 @@
                   />
 
                   <ComboboxTextInput
-                      :field-model-value="depositCollectingUser"
-                      :suggestions="filtered_deposit_collecting_user_suggestions"
-                      :selected-callback="selectDepositCollectingUser"
+                      :field-model-value="depositCollectedLiabilityAccount.name"
+                      :suggestions="filtered_deposit_collected_liability_account_suggestions.map(makeAccountLegible)"
+                      :selected-callback="selectDepositCollectedLiabilityAccount"
                       :allow-new="false"
                       :open-by-default="userSelectionOptionsStatic"
-                      label="Deposit Collector"
+                      label="Liability Account"
                       type="text"
                       placeholder="workshop"
-                      name="depositCollectingUser"
-                      v-model="depositCollectingUser"
-                      :error="depositCollectingUserError"
+                      name="depositCollectedLiabilityAccount"
+                      v-model="depositCollectedLiabilityAccount.name"
+                      :error="depositCollectedLiabilityAccountError"
                       @change="() => {}"
+                  />
+
+                  <ComboboxTextInput
+                    :field-model-value="depositCollectedAssetAccount.name"
+                    :suggestions="filtered_deposit_collected_asset_account_suggestions.map(makeAccountLegible)"
+                    :selected-callback="selectDepositCollectedAssetAccount"
+                    :allow-new="false"
+                    :open-by-default="userSelectionOptionsStatic"
+                    label="Asset Account"
+                    type="text"
+                    placeholder="workshop"
+                    name="depositCollectedAssetAccount"
+                    v-model="depositCollectedAssetAccount.name"
+                    :error="depositCollectedAssetAccountError"
+                    @change="() => {}"
                   />
 
                   <TextInput
@@ -678,7 +693,8 @@ export default {
     const coloursSuggestions = ref([]);
     const serialNumberSuggestions = ref([]);
 
-    const depositBearers = ref([]);
+    const depositLiabilityAccounts = ref([]);
+    const depositAssetAccounts = ref([]);
     const rentalCheckers = ref([]);
     const activeUsers = ref([]);
 
@@ -731,7 +747,14 @@ export default {
 
     const depositCollectionSchema = yup.object().shape({
       depositAmountCollected: yup.number().min(0, 'Must not be negative').integer().required(' Deposit Amount is required '),
-      depositCollectingUser: yup.string().required(' Deposit Collector Username is required '),
+      depositCollectedLiabilityAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The deposit liability account id is required '),
+        name: yup.string().required(' The deposit liability account name is required '),
+      }).required(' The deposit liability account is required '),
+      depositCollectedAssetAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The deposit asset account id is required '),
+        name: yup.string().required(' The deposit asset account name is required '),
+      }).required(' The deposit asset account is required '),
       depositCollectingPassword: yup.string().required(),
     });
 
@@ -822,9 +845,21 @@ export default {
     const {value: notes, errorMessage: notesError} = useField('notes');
 
     const {value: depositAmountCollected, errorMessage: depositAmountCollectedError} = useField('depositAmountCollected');
-    const {value: depositCollectingUser, errorMessage: depositCollectingUserError} = useField('depositCollectingUser');
+    const {
+      value: depositCollectedLiabilityAccount,
+      errorMessage: depositCollectedLiabilityAccountError,
+    } = useField('depositCollectedLiabilityAccount');
+    const {
+      value: depositCollectedAssetAccount,
+      errorMessage: depositCollectedAssetAccountError,
+    } = useField('depositCollectedAssetAccount');
     const {value: depositCollectingPassword, errorMessage: depositCollectingPasswordError,
       setErrors: depositCollectingPasswordSetErrors} = useField('depositCollectingPassword');
+
+    const depositCollectedTransactionHeader = ref({});
+    depositCollectedAssetAccount.value = {name: null, id: null};
+    depositCollectedLiabilityAccount.value = {name: null, id: null};
+
 
     const {value: workingUser, errorMessage: workingUserError} = useField('workingUser');
     const {value: workingPasswordOrPin, errorMessage: workingPasswordOrPinError,
@@ -843,7 +878,7 @@ export default {
     const {value: mCheckSeatPost, errorMessage: mCheckSeatPostError} = useField('mCheckSeatPost');
     const {value: mCheckHeadset, errorMessage: mCheckHeadsetError} = useField('mCheckHeadset');
 
-    depositCollectingUser.value = '';
+
     workingUser.value = '';
     checkingUser.value = '';
 
@@ -980,8 +1015,19 @@ export default {
             activeDraft.value = response.data;
             toast.success('Contract Details Updated!', {timeout: 1000});
             stepNumber.value = 4;
-            requests.getDepositBearers().then((response) =>
-              (depositBearers.value = response.data.map((user) => (user.username))));
+            requests.getAccounts([{name: 'types', value: 'asset'}, {name: 'ui_filters', value: 'deposit'}]).then((response) => {
+              depositAssetAccounts.value = response.data;
+            }).catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            });
+
+            requests.getAccounts([{name: 'types', value: 'liability'}, {name: 'ui_filters', value: 'deposit'}]).then((response) => {
+              depositLiabilityAccounts.value = response.data;
+            }).catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            });
+
+
             if (activeDraft.value.depositCollectingUser !== null && activeDraft.value.depositAmountCollected !== null) {
               stepNumber.value = 5;
             }
@@ -996,26 +1042,43 @@ export default {
             toast.error(error.response.data.detail.description, {timeout: 5000});
           });
       } else if (stepNumber.value === 4) {
-        // Check password of deposit collector
-        requests.putDraftContractDeposit(
-          activeDraft.value.id,
-          depositAmountCollected.value,
-          depositCollectingUser.value,
-          depositCollectingPassword.value)
-          .then((response) => {
-            activeDraft.value = response.data;
-            toast.success('Deposit Details Updated!', {timeout: 1000});
-            stepNumber.value = 5;
-            requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
-            userSelectionOptionsStatic.value = true;
-          })
-          .catch((error) => {
-            if (error.response.status === 400) {
-              depositCollectingPasswordSetErrors('Wrong Password!');
-            } else {
+        debugger;
+        const depositCollectedTransactionDraft = {
+          transactionHeader: {
+            event: 'deposit_collected',
+          },
+          transactionLines: [
+            {amount: -depositAmountCollected.value, accountId: depositCollectedLiabilityAccount.value.id},
+            {amount: depositAmountCollected.value, accountId: depositCollectedAssetAccount.value.id},
+          ],
+          attemptAutoPost: false,
+        };
+        requests.createTransaction(depositCollectedTransactionDraft).then((response) => {
+          depositCollectedTransactionHeader.value = response.data;
+          toast.success('Deposit Collected!', {timeout: 1000});
+
+          // Check password of deposit collector
+          requests.putDraftContractDeposit(
+            activeDraft.value.id,
+            depositCollectedTransactionHeader.value.id,
+            depositCollectedAssetAccount.value.ownerUser.username,
+            depositCollectingPassword.value)
+            .then((response) => {
+              activeDraft.value = response.data;
+              toast.success('Deposit Details Updated!', {timeout: 1000});
+              stepNumber.value = 5;
+              requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
+              userSelectionOptionsStatic.value = true;
+            })
+            .catch((error) => {
               toast.error(error.response.data.detail.description, {timeout: 5000});
-            }
-          });
+              if (error.response.status === 400) {
+                depositCollectingPasswordSetErrors('Wrong Password!');
+              }
+            });
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 5000});
+        });
       } else if (stepNumber.value === 5) {
         // check password or pin of working volunteer
         requests.putDraftContractWorkingUser(activeDraft.value.id, workingUser.value, workingPasswordOrPin.value)
@@ -1076,7 +1139,8 @@ export default {
       lastNameSetValue,
       clientId,
 
-      depositBearers,
+      depositAssetAccounts,
+      depositLiabilityAccounts,
       activeUsers,
       rentalCheckers,
 
@@ -1117,8 +1181,10 @@ export default {
 
       depositAmountCollected,
       depositAmountCollectedError,
-      depositCollectingUser,
-      depositCollectingUserError,
+      depositCollectedLiabilityAccount,
+      depositCollectedLiabilityAccountError,
+      depositCollectedAssetAccount,
+      depositCollectedAssetAccountError,
       depositCollectingPassword,
       depositCollectingPasswordError,
 
@@ -1288,7 +1354,22 @@ export default {
         this.colours.splice(0, this.colours.length, ...this.filtered_colours_suggestions[i]);
       }
     },
-    selectDepositCollectingUser(event, i) {
+    selectDepositCollectedLiabilityAccount(event, i) {
+      if (i !== -1) {
+        this.depositCollectedLiabilityAccount = this.filtered_deposit_collected_liability_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectDepositCollectedAssetAccount(event, i) {
+      if (i !== -1) {
+        this.depositCollectedAssetAccount = this.filtered_deposit_collected_asset_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    makeAccountLegible(account) {
+      return `${account.name}`;
+    },
+    select(event, i) {
       if (i !== -1) {
         this.depositCollectingUser = this.filtered_deposit_collecting_user_suggestions[i];
         this.userSelectionOptionsStatic = false;
@@ -1548,12 +1629,20 @@ export default {
     },
   },
   computed: {
-    filtered_deposit_collecting_user_suggestions() {
-      return this.depositBearers
-        .filter((suggestion) => suggestion
+    filtered_deposit_collected_liability_account_suggestions() {
+      return this.depositLiabilityAccounts
+        .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith(this.depositCollectingUser.toLowerCase()))
-        .sort(this.userSortingFunction)
+          .startsWith((this.depositCollectedLiabilityAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_deposit_collected_asset_account_suggestions() {
+      return this.depositAssetAccounts
+        .filter((suggestion) => suggestion.name
+          .toLowerCase()
+          .startsWith((this.depositCollectedAssetAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
     filtered_working_user_suggestions() {
