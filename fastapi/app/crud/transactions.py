@@ -15,6 +15,35 @@ def get_transaction_headers(db: Session) -> list[models.TransactionHeader]:
         select(models.TransactionHeader)
     )]
 
+
+def get_formatted_transaction_headers(db: Session) -> list[schemas.TransactionHeaderFormatted]:
+    transaction_headers = [_ for _ in db.scalars(
+        select(models.TransactionHeader)
+    )]
+    
+    formatted_transaction_headers: list[schemas.TransactionHeaderFormatted] = []
+    
+    for transaction_header in transaction_headers:
+        formatted_transaction_lines = []
+        for transaction_line in transaction_header.transactionLines:
+            formatted_transaction_lines.append(schemas.TransactionLineFormatted(
+                accountName=transaction_line.account.name,
+                credit=-transaction_line.amount if transaction_line.amount < 0 else 0,
+                debit=transaction_line.amount if transaction_line.amount > 0 else 0,
+            ))
+        formatted_transaction_headers.append(schemas.TransactionHeaderFormatted(
+            id=transaction_header.id,
+            event=transaction_header.event,
+            createdOn=transaction_header.createdOn,
+            createdByUsername=transaction_header.createdByUser.username,
+            postedOn=transaction_header.postedOn,
+            postedByUsername=transaction_header.postedByUser.username if transaction_header.postedByUser else None,
+            formattedTransactionLines=formatted_transaction_lines
+        ))
+        
+    return formatted_transaction_headers
+
+
 def create_transaction_header(db: Session, transaction_header_data: schemas.TransactionHeaderCreate) -> models.TransactionHeader:
     pass
 

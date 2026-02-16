@@ -11,6 +11,15 @@ transactions = APIRouter(
     dependencies=[Depends(dep.check_permissions)]
 )
 
+@transactions.get("/transactions", response_model=list[schemas.TransactionHeader])
+def get_transactions(db: Session = Depends(dep.get_db)):
+    return crud.get_transaction_headers(db)
+
+@transactions.get("/transactions/formatted", response_model=list[schemas.TransactionHeaderFormatted])
+def get_formatted_transactions(db: Session = Depends(dep.get_db)):
+    return crud.get_formatted_transaction_headers(db)
+
+
 
 @transactions.post("/transactions", response_model=schemas.TransactionHeader)
 def create_transaction(

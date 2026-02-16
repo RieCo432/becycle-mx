@@ -41,3 +41,19 @@ class TransactionCreate(BaseModel):
     transactionLines: List[TransactionLineCreate]
     attemptAutoPost: bool = True
     
+    
+class TransactionLineFormatted(BaseModel):
+    accountName: str
+    credit: int = 0
+    debit: int = 0
+    
+    
+class TransactionHeaderFormatted(BaseModel):
+    id: UUID
+    event: str
+    createdOn: datetime
+    createdByUsername: str
+    postedOn: datetime | None = None
+    postedByUsername: str | None = None
+    formattedTransactionLines: list[TransactionLineFormatted]
+    

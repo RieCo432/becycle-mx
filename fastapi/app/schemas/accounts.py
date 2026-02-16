@@ -20,6 +20,7 @@ class AccountCreate(AccountBase):
     isInternal: bool
 
 class Account(AccountCreate):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     ownerUser: User | None = None
     ownerGroup: Group | None = None
