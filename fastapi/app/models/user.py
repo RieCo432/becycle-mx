@@ -88,7 +88,7 @@ class User(Base):
     accountsOwned: Mapped[List["Account"]] = relationship("Account", foreign_keys=[Account.ownerUserId], back_populates="ownerUser")
     accountsClosed: Mapped[List["Account"]] = relationship("Account", foreign_keys=[Account.closedByUserId], back_populates="closedByUser")
     transactionHeadersCreated: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.createdByUserId], back_populates="createdByUser")
-    transactionLinesPosted: Mapped[List["TransactionLine"]] = relationship("TransactionLine", foreign_keys=[TransactionLine.postedByUserId], back_populates="postedByUser")
+    transactionHeadersPosted: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.postedByUserId], back_populates="postedByUser")
 
 
     def __eq_dict__(self, other: dict):

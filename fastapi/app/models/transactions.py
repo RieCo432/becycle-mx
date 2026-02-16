@@ -19,6 +19,10 @@ class TransactionHeader(Base):
     createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
     createdByUserId: Mapped[UUID] = mapped_column("createdbyuserid", ForeignKey("users.id"), nullable=False, quote=False)
     createdByUser: Mapped["User"] = relationship("User", foreign_keys=[createdByUserId], back_populates="transactionHeadersCreated")
+
+    postedOn: Mapped[datetime] = mapped_column("postedon", DateTime, nullable=True, quote=False)
+    postedByUserId: Mapped[UUID] = mapped_column("postedbyuserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
+    postedByUser: Mapped["User"] = relationship("User", foreign_keys=[postedByUserId], back_populates="transactionHeadersPosted")
     
     transactionLines: Mapped[List["TransactionLine"]] = relationship("TransactionLine", back_populates="transactionHeader")
 
@@ -31,8 +35,9 @@ class TransactionHeader(Base):
             str(self.createdByUserId) == str(other.get("createdByUserId", None)),
         ])
     
-    def does_balance(self) -> bool:
-        return sum([transaction_line for transaction_line in self.transactionLines]) == 0
+    @property
+    def doesBalance(self) -> bool:
+        return sum([transaction_line.amount for transaction_line in self.transactionLines]) == 0
     
     def is_posted(self) -> bool:
         return all([transaction_line.is_posted() for transaction_line in self.transactionLines])
@@ -48,10 +53,6 @@ class TransactionLine(Base):
     account: Mapped["Account"] = relationship("Account", foreign_keys=[accountId], back_populates="transactionLines")
     
     amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)  # value in the smallest unit (penny), positive for debit, negative for credit
-    
-    postedOn: Mapped[datetime] = mapped_column("postedon", DateTime, nullable=True, quote=False)
-    postedByUserId: Mapped[UUID] = mapped_column("postedbyuserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
-    postedByUser: Mapped["User"] = relationship("User", foreign_keys=[postedByUserId], back_populates="transactionLinesPosted")
     
     
     def __eq__(self, other: dict):

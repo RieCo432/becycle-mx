@@ -151,6 +151,12 @@ export const topMenu = [
         childlink: '/finances/cash-flow',
         show: ['user'],
       },
+      {
+        childtitle: 'Transaction History',
+        childicon: 'heroicons-outline:arrows-right-left',
+        childlink: '/finances/transactions',
+        show: ['user'],
+      },
     ],
   },
   {
