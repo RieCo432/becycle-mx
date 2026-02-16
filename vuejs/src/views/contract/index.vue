@@ -75,14 +75,12 @@ export default {
           this.loadReturnUserDetails();
         }
         Promise.all([
-          requests.getUser(this.contract['depositCollectingUserId']),
           requests.getUser(this.contract['workingUserId']),
           requests.getUser(this.contract['checkingUserId']),
-        ]).then(([depositCollectingUserResponse,
+        ]).then(([
           workingUserResponse,
           checkingUserResponse,
         ]) => {
-          this.depositCollectingUser = depositCollectingUserResponse.data;
           this.workingUser = workingUserResponse.data;
           this.checkingUser = checkingUserResponse.data;
           this.loadingContract = false;
@@ -155,7 +153,6 @@ export default {
     <view-contract
         :client="client"
         :bike="bike"
-        :deposit-collecting-username="depositCollectingUser.username"
         :working-username="workingUser.username"
         :checking-username="checkingUser.username"
         :contract="contract"

@@ -1048,8 +1048,8 @@ export default {
             event: 'deposit_collected',
           },
           transactionLines: [
-            {amount: -depositAmountCollected.value, accountId: depositCollectedLiabilityAccount.value.id},
-            {amount: depositAmountCollected.value, accountId: depositCollectedAssetAccount.value.id},
+            {amount: -depositAmountCollected.value * 100, accountId: depositCollectedLiabilityAccount.value.id},
+            {amount: depositAmountCollected.value * 100, accountId: depositCollectedAssetAccount.value.id},
           ],
           attemptAutoPost: false,
         };

@@ -3,6 +3,7 @@ from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+from .transactions import TransactionHeader
 
 
 class CrimeReportBase(BaseModel):
@@ -53,9 +54,11 @@ class Contract(ContractPublic):
     workingUserId: UUID
     checkingUserId: UUID
     depositCollectedTransactionHeaderId: UUID
+    depositCollectedTransactionHeader: TransactionHeader
 
     returnAcceptingUserId: UUID | None = None
     depositSettledTransactionHeaderId: UUID | None = None
+    depositSettledTransactionHeader: TransactionHeader | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -221,10 +221,6 @@ export default {
       type: Object,
       required: true,
     },
-    depositCollectingUsername: {
-      type: String,
-      required: true,
-    },
     workingUsername: {
       type: String,
       required: true,
@@ -425,8 +421,21 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Contract Type: {{contract.contractType}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.conditionOfBike}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">
-                      Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}
+                  <p class="text-slate-600 dark:text-slate-300 w-100">
+                      Deposit:
+                    <table class="border-collapse border dark:border-slate-400 min-w-full">
+                      <tr class=" dark:bg-slate-700">
+                        <th class="border dark:border-slate-500">Account</th>
+                        <th class="border dark:border-slate-500">Credit</th>
+                        <th class="border dark:border-slate-500">Debit</th>
+                      </tr>
+                      <tr v-for="line in contract.depositCollectedTransactionHeader.transactionLines" :key="line.id">
+                        <td class="border dark:border-slate-500">{{line.account.name}}</td>
+                        <td class="border dark:border-slate-500">{{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}</td>
+                        <td class="border dark:border-slate-500">{{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}</td>
+                      </tr>
+                    </table>
+
                   </p>
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
