@@ -1,5 +1,5 @@
 import socket
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
@@ -11,6 +11,9 @@ import app.models as models
 import app.schemas as schemas
 
 from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
+
+from .transactions import get_transaction_header
+from app.services.accounts_helpers import AccountTypes
 
 
 def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:
@@ -119,23 +122,42 @@ def does_contract_exist(db: Session, contract_data: schemas.ContractCreate):
 def return_contract(
         db: Session,
         contract_id: UUID,
-        deposit_amount_returned: int,
+        deposit_settled_transaction_header_id: UUID,
         return_accepting_user_id: UUID,
         deposit_returning_user_id: UUID) -> models.Contract:
 
     contract = get_contract(db=db, contract_id=contract_id)
 
-    if deposit_amount_returned > contract.depositAmountCollected:
+    transaction_header = get_transaction_header(db=db, transaction_header_id=deposit_settled_transaction_header_id)
+    if not transaction_header:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Amount returned is higher than amount collected!"},
+            detail={"description": "Deposit settled transaction header not found!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    if transaction_header.postedOn is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Deposit settled transaction header must be posted before it can be used to collect deposit!"},
+        )
+    
+    
+    if sum(
+            [tl.amount for tl in transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY]
+    ) != -sum(
+        [tl.amount for tl in contract.depositCollectedTransactionHeader.transactionLines if tl.account.type == AccountTypes.LIABILITY]
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "The liability change in this transaction does not match the liability incurred when the contract was made!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
 
     contract.returnAcceptingUserId = return_accepting_user_id
     contract.depositReturningUserId = deposit_returning_user_id
-    contract.returnedDate = datetime.utcnow().date()
-    contract.depositAmountReturned = deposit_amount_returned
+    contract.returnedDate = datetime.now(timezone.utc).date()
+    contract.depositSettledTransactionHeaderId = deposit_settled_transaction_header_id
 
     db.commit()
 
@@ -177,6 +199,7 @@ def get_paper_contract(db: Session, paper_id: str) -> UUID:
 
 
 def delete_contract(db: Session, contract_id: UUID) -> None:
+    # TODO: cannot just delete a contract. the transaction headers must be dealt with
     contract = get_contract(db=db, contract_id=contract_id)
     paper_contract = db.scalar(
         select(models.PaperContract)
@@ -192,8 +215,9 @@ def delete_contract(db: Session, contract_id: UUID) -> None:
 def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: schemas.ContractPatch) -> models.Contract:
     contract = get_contract(db=db, contract_id=contract_id)
 
-    if contract_patch_data.depositAmountCollected is not None:
-        contract.depositAmountCollected = contract_patch_data.depositAmountCollected
+    # TODO: deposit information needs to use new model
+    # if contract_patch_data.depositAmountCollected is not None:
+    #     contract.depositAmountCollected = contract_patch_data.depositAmountCollected
 
     if contract_patch_data.conditionOfBike is not None:
         contract.conditionOfBike = contract_patch_data.conditionOfBike
@@ -216,27 +240,27 @@ def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: 
     if contract_patch_data.checkingUserId is not None:
         contract.checkingUserId = contract_patch_data.checkingUserId
 
-    if contract_patch_data.depositCollectingUserId is not None:
-        contract.depositCollectingUserId = contract_patch_data.depositCollectingUserId
+    # if contract_patch_data.depositCollectingUserId is not None:
+    #     contract.depositCollectingUserId = contract_patch_data.depositCollectingUserId
 
     if contract_patch_data.returned:
-        if contract_patch_data.depositAmountReturned is not None:
-            contract.depositAmountReturned = contract_patch_data.depositAmountReturned
+        # if contract_patch_data.depositAmountReturned is not None:
+        #     contract.depositAmountReturned = contract_patch_data.depositAmountReturned
 
         if contract_patch_data.returnAcceptingUserId is not None:
             contract.returnAcceptingUserId = contract_patch_data.returnAcceptingUserId
 
-        if contract_patch_data.depositReturningUserId is not None:
-            contract.depositReturningUserId = contract_patch_data.depositReturningUserId
+        # if contract_patch_data.depositReturningUserId is not None:
+        #     contract.depositReturningUserId = contract_patch_data.depositReturningUserId
 
         if contract_patch_data.returnedDate is not None:
             contract.returnedDate = contract_patch_data.returnedDate
     else:
-        contract.depositAmountReturned = None
+        # contract.depositAmountReturned = None
 
         contract.returnAcceptingUserId = None
 
-        contract.depositReturningUser = None
+        # contract.depositReturningUser = None
 
         contract.returnedDate = None
 
@@ -315,10 +339,20 @@ def update_contract_draft_details(db: Session, contract_draft_id: UUID, contract
     db.commit()
     return contract_draft
 
-def update_contract_draft_deposit(db: Session, contract_draft_id: UUID, deposit_amount: int, deposit_collecting_user: models.User) -> models.ContractDraft:
+def update_contract_draft_deposit(db: Session, contract_draft_id: UUID, deposit_collected_transaction_header_id: UUID, deposit_collecting_user: models.User) -> models.ContractDraft:
     contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
-    contract_draft.depositAmountCollected = deposit_amount
-    contract_draft.depositCollectingUserId = deposit_collecting_user.id
+    
+    if not db.scalar(
+        select(models.TransactionHeader.postedOn)
+        .where(models.TransactionHeader.id == deposit_collected_transaction_header_id)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Deposit transaction header must be posted before it can be used to collect deposit!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    contract_draft.depositCollectedTransactionHeaderId = deposit_collected_transaction_header_id
     db.commit()
     return contract_draft
 
@@ -354,18 +388,33 @@ def does_contract_exist_already(db: Session, contract_draft_id: UUID) -> bool:
 
 def submit_contract(db: Session, contract_draft_id: UUID) -> models.Contract:
     contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    
+    transaction_header = get_transaction_header(db=db, transaction_header_id=contract_draft.depositCollectedTransactionHeaderId)
+    if transaction_header is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Deposit transaction header not found!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    if transaction_header.postedOn is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Deposit transaction header must be posted before it can be used to collect deposit!"},
+        )
+    
+    
     contract = create_contract(
         contract_data=schemas.ContractCreate(
             clientId=contract_draft.clientId,
             bikeId=contract_draft.bikeId,
-            depositAmountCollected=contract_draft.depositAmountCollected,
+            depositCollectedTransactionHeaderId=contract_draft.depositCollectedTransactionHeaderId,
             conditionOfBike=contract_draft.conditionOfBike,
             contractType=contract_draft.contractType,
             notes=contract_draft.notes
         ),
         working_user_id=contract_draft.workingUserId,
         checking_user_id=contract_draft.checkingUserId,
-        deposit_collecting_user_id=contract_draft.depositCollectingUserId,
         db=db
     )
     db.delete(contract_draft)

@@ -23,7 +23,7 @@ class ContractBase(BaseModel):
     clientId: UUID
     bikeId: UUID
 
-    depositAmountCollected: int
+    depositCollectedTransactionHeaderId: UUID
 
     conditionOfBike: str
     contractType: str
@@ -52,10 +52,10 @@ class ContractPublic(ContractBase):
 class Contract(ContractPublic):
     workingUserId: UUID
     checkingUserId: UUID
-    depositCollectingUserId: UUID
+    depositCollectedTransactionHeaderId: UUID
 
     returnAcceptingUserId: UUID | None = None
-    depositReturningUserId: UUID | None = None
+    depositSettledTransactionHeaderId: UUID | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -69,16 +69,17 @@ class ContractDraftDetails(BaseModel):
 class ContractRestricted(ContractPublic):
     workingUsername: str
     checkingUsername: str
-    depositCollectingUsername: str
+    depositCollectedTransactionHeaderId: UUID
 
     returnAcceptingUsername: str | None = None
-    depositReturningUsername: str | None = None
+    depositSettledTransactionHeaderId: UUID | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class ContractPatch(BaseModel):
-    depositAmountCollected: int
+    # TODO: deposit information needs to use new model
+    #depositAmountCollected: int
     conditionOfBike: str
     notes: str | None = None
     contractType: str
@@ -86,9 +87,9 @@ class ContractPatch(BaseModel):
     endDate: date
     returnedDate: date | None = None
     returned: bool
-    depositAmountReturned: int | None = None
+    #depositAmountReturned: int | None = None
     workingUserId: UUID
     checkingUserId: UUID
-    depositCollectingUserId: UUID
+    #depositCollectingUserId: UUID
     returnAcceptingUserId: UUID | None = None
-    depositReturningUserId: UUID | None = None
+    #depositReturningUserId: UUID | None = None

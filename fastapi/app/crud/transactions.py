@@ -15,6 +15,11 @@ def get_transaction_headers(db: Session) -> list[models.TransactionHeader]:
         select(models.TransactionHeader)
     )]
 
+def get_transaction_header(db: Session, transaction_header_id: UUID) -> models.TransactionHeader:
+    return db.scalar(
+        select(models.TransactionHeader)
+        .where(models.TransactionHeader.id == transaction_header_id)
+    )
 
 def get_formatted_transaction_headers(db: Session) -> list[schemas.TransactionHeaderFormatted]:
     transaction_headers = [_ for _ in db.scalars(
