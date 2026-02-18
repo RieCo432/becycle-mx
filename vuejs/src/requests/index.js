@@ -429,10 +429,10 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  patchReturnContract(contractId, depositAmountReturned, depositReturningUser, depositReturningPassword,
+  patchReturnContract(contractId, depositSettledTransactionHeaderId, depositReturningUser, depositReturningPassword,
     returnAcceptingUser, returnAcceptingPasswordOrPin) {
     return axiosClient.patch(`/contracts/${contractId}/return`, {
-      deposit_amount_returned: depositAmountReturned,
+      deposit_settled_transaction_header_id: depositSettledTransactionHeaderId,
       deposit_returning_username: depositReturningUser,
       deposit_returning_user_password: depositReturningPassword,
       working_username: returnAcceptingUser,

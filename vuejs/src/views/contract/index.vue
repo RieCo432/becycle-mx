@@ -34,7 +34,9 @@ export default {
         username: 'null',
       },
       contractId: this.$route.params.contractId,
-      depositBearers: [],
+      depositLiabilityAccounts: [],
+      depositAssetAccounts: [],
+      depositRevenueAccounts: [],
       activeUsers: [],
       depositReturnedByUser: {
         username: 'null',
@@ -87,9 +89,10 @@ export default {
         });
       });
     },
-    patchContractReturn(depositAmountReturned, depositReturningUser, depositReturningPassword,
+    patchContractReturn(depositSettledTransactionHeaderId, depositReturningUser, depositReturningPassword,
       returnAcceptingUser, returnAcceptingPasswordOrPin) {
-      requests.patchReturnContract(this.contract.id, depositAmountReturned,
+      
+      requests.patchReturnContract(this.contract.id, depositSettledTransactionHeaderId,
         depositReturningUser, depositReturningPassword,
         returnAcceptingUser, returnAcceptingPasswordOrPin)
         .then((response) => {
@@ -135,8 +138,23 @@ export default {
       this.showTermsModal = true;
     }
     this.getContract();
-    requests.getDepositBearers().then((response) => {
-      this.depositBearers = response.data.sort(this.userSortingFunction).map((user) => (user.username));
+    
+    requests.getAccounts([{name: 'types', value: 'liability'}, {name: 'ui_filters', value: 'return'}]).then((response) => {
+      this.depositLiabilityAccounts = response.data;
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 1000});
+    });
+
+    requests.getAccounts([{name: 'types', value: 'asset'}, {name: 'ui_filters', value: 'return'}]).then((response) => {
+      this.depositAssetAccounts = response.data;
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 1000});
+    });
+
+    requests.getAccounts([{name: 'types', value: 'revenue'}, {name: 'ui_filters', value: 'return'}]).then((response) => {
+      this.depositRevenueAccounts = response.data;
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 1000});
     });
     requests.getActiveUsers().then((response) => {
       this.activeUsers = response.data.sort(this.userSortingFunction).map((user) => (user.username));
@@ -158,7 +176,9 @@ export default {
         :contract="contract"
         :deposit-returned-by-username="depositReturnedByUser ? depositReturnedByUser.username : null"
         :return-accepted-by-username="returnAcceptedByUser ? returnAcceptedByUser.username : null"
-        :deposit-bearers="depositBearers"
+        :deposit-liability-accounts="depositLiabilityAccounts"
+        :deposit-asset-accounts="depositAssetAccounts"
+        :deposit-revenue-accounts="depositRevenueAccounts"
         :active-users="activeUsers"
         :loading-client="loadingClient"
         :loading-bike="loadingBike"

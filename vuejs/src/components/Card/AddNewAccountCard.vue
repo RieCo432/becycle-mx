@@ -30,7 +30,7 @@ export default {
       response.data.forEach((g) => groups.value.push(g));
     });
 
-    const availableUiFilters = ['deposit', 'expense', 'income', 'transfer'];
+    const availableUiFilters = ['deposit', 'expense', 'income', 'transfer', 'return'];
     const accountTypes = ['dividend', 'expense', 'asset', 'liability', 'equity', 'revenue'];
 
     const newAccountSchema = yup.object().shape({

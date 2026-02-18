@@ -14,6 +14,7 @@ from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
 
 from .transactions import get_transaction_header
 from app.services.accounts_helpers import AccountTypes
+from .transactions import post_transaction_header
 
 
 def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:
@@ -121,8 +122,7 @@ def return_contract(
         db: Session,
         contract_id: UUID,
         deposit_settled_transaction_header_id: UUID,
-        return_accepting_user_id: UUID,
-        deposit_returning_user_id: UUID) -> models.Contract:
+        return_accepting_user_id: UUID) -> models.Contract:
 
     contract = get_contract(db=db, contract_id=contract_id)
 
@@ -132,12 +132,6 @@ def return_contract(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Deposit settled transaction header not found!"},
             headers={"WWW-Authenticate": "Bearer"}
-        )
-    
-    if transaction_header.postedOn is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Deposit settled transaction header must be posted before it can be used to collect deposit!"},
         )
     
     
@@ -152,8 +146,14 @@ def return_contract(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    if transaction_header.postedOn is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "This deposit settlement transaction header isn't posted yet!"},
+        )
+
     contract.returnAcceptingUserId = return_accepting_user_id
-    contract.depositReturningUserId = deposit_returning_user_id
+    # contract.depositReturningUserId = deposit_returning_user_id
     contract.returnedDate = datetime.now(timezone.utc).date()
     contract.depositSettledTransactionHeaderId = deposit_settled_transaction_header_id
 
