@@ -49,10 +49,6 @@ export default {
     const isInWriteMode = ref(false);
     const userSelectionOptionsStatic = ref(true);
 
-    const depositLiabilityAccounts = toRef(props, 'depositLiabilityAccounts');
-    const depositAssetAccounts = toRef(props, 'depositAssetAccounts');
-    const depositRevenueAccounts = toRef(props, 'depositRevenueAccounts');
-
     const steps = [
       {
         id: 1,
@@ -77,10 +73,14 @@ export default {
         id: yup.string().uuid().required(' The deposit asset account id is required '),
         name: yup.string().required(' The deposit asset account name is required '),
       }).required(' The deposit asset account is required '),
-      depositReturnedRevenueAccount: yup.object().shape({
-        id: yup.string().uuid().required(' The deposit asset account id is required '),
-        name: yup.string().required(' The deposit asset account name is required '),
-      }).required(' The deposit asset account is required '),
+      depositReturnedRevenueAccount: yup.object().when('depositAmountReturned', {
+        is: (value) => value * 100 < depositAmountCollected.value,
+        then: () => yup.object().shape({
+          id: yup.string().uuid().required(' The deposit asset account id is required '),
+          name: yup.string().required(' The deposit asset account name is required ')})
+          .required('This is required if the deposit is not returned in full.'),
+        otherwise: () => yup.object().nullable(),
+      }),
       depositReturningPassword: yup.string().required(),
     });
 
@@ -156,10 +156,14 @@ export default {
           transactionLines: [
             {amount: depositAmountCollected.value, accountId: depositReturnedLiabilityAccount.value.id},
             {amount: - depositAmountReturned.value * 100, accountId: depositReturnedAssetAccount.value.id},
-            depositAmountReturned.value * 100 < depositAmountCollected.value ?
-              {amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
-                accountId: depositReturnedRevenueAccount.value.id} :
-              undefined,
+
+            ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
+              [{
+                amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
+                accountId: depositReturnedRevenueAccount.value.id,
+              }] :
+              []
+            ),
           ],
           attemptAutoPost: false,
         };
@@ -208,7 +212,7 @@ export default {
       returnAcceptingUserError,
       returnAcceptingPasswordOrPin,
       returnAcceptingPasswordOrPinError,
-      
+
       userSelectionOptionsStatic,
 
       submit,
@@ -673,7 +677,7 @@ export default {
                         @change="() => {}"
                       />
 
-                      <ComboboxTextInput v-if="depositAmountReturned ?? 100000000 < depositAmountCollected"
+                      <ComboboxTextInput v-if="depositAmountReturned * 100 < depositAmountCollected"
                         :field-model-value="depositReturnedRevenueAccount.name"
                         :suggestions="filtered_deposit_returned_revenue_account_suggestions.map(makeAccountLegible)"
                         :selected-callback="selectDepositReturnedRevenueAccount"

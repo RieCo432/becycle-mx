@@ -1042,7 +1042,6 @@ export default {
             toast.error(error.response.data.detail.description, {timeout: 5000});
           });
       } else if (stepNumber.value === 4) {
-        debugger;
         const depositCollectedTransactionDraft = {
           transactionHeader: {
             event: 'deposit_collected',
