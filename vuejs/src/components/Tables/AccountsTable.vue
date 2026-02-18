@@ -52,7 +52,7 @@
               :class="props.row.normalisedBalance < 0
                   ? 'text-danger-500 bg-danger-500'
                   : 'text-success-500 bg-success-500'">
-              {{ props.row.normalisedBalance }}
+              &#163;{{ (props.row.normalisedBalance / 100).toFixed(2) }}
             </span>
           </span>
           <span v-if="props.column.field === 'isInternal'">
