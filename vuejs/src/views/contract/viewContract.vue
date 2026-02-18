@@ -303,10 +303,6 @@ export default {
       type: Object,
       required: true,
     },
-    depositReturnedByUsername: {
-      type: String,
-      required: false,
-    },
     returnAcceptedByUsername: {
       type: String,
       required: false,
@@ -726,8 +722,21 @@ export default {
                   Returned on {{new Date(Date.parse(contract.returnedDate))
                   .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
               </p>
-              <p class="text-slate-600 dark:text-slate-300">
-                  Deposit returned: &#163; {{contract.depositAmountReturned}} by {{depositReturnedByUsername}}
+              <p class="text-slate-600 dark:text-slate-300 w-100">
+                Deposit Settlement:
+                <table class="border-collapse border dark:border-slate-400 min-w-full">
+                  <tr class=" dark:bg-slate-700">
+                    <th class="border dark:border-slate-500">Account</th>
+                    <th class="border dark:border-slate-500">Credit</th>
+                    <th class="border dark:border-slate-500">Debit</th>
+                  </tr>
+                  <tr v-for="line in contract.depositSettledTransactionHeader.transactionLines" :key="line.id">
+                    <td class="border dark:border-slate-500">{{line.account.name}}</td>
+                    <td class="border dark:border-slate-500">{{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}</td>
+                    <td class="border dark:border-slate-500">{{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}</td>
+                  </tr>
+                </table>
+
               </p>
               <p class="text-slate-600 dark:text-slate-300">Received by {{returnAcceptedByUsername}}</p>
             </div>

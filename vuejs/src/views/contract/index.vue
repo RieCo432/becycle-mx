@@ -73,9 +73,6 @@ export default {
           this.client = response.data;
           this.loadingClient = false;
         });
-        if (this.contract.returnedDate != null) {
-          this.loadReturnUserDetails();
-        }
         Promise.all([
           requests.getUser(this.contract['workingUserId']),
           requests.getUser(this.contract['checkingUserId']),
@@ -98,7 +95,7 @@ export default {
         .then((response) => {
           toast.success('Contract Returned!', {timeout: 1000});
           this.contract = response.data;
-          this.loadReturnUserDetails();
+          this.getContract();
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         });
@@ -109,14 +106,6 @@ export default {
         this.contract = response.data;
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
-    },
-    loadReturnUserDetails() {
-      requests.getUser(this.contract['returnAcceptingUserId']).then((response) => {
-        this.returnAcceptedByUser = response.data;
-      });
-      requests.getUser(this.contract['depositReturningUserId']).then((response) => {
-        this.depositReturnedByUser = response.data;
       });
     },
     patchCloseCrimeReport(crimeReportId) {
