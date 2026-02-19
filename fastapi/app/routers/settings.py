@@ -176,3 +176,8 @@ async def patch_faq(
     return crud.update_faq(db=db, faq_id=faq_id, updated_faq=updated_faq)
 
 
+@settings.get("/settings/projects")
+async def get_projects(db: Session = Depends(dep.get_db)) -> list[schemas.Project]:
+    return crud.get_all_projects(db=db)
+
+

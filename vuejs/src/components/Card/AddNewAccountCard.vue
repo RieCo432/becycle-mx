@@ -22,12 +22,16 @@ export default {
     const existingAccounts = toRef(props, 'accounts');
     const users = ref([]);
     const groups = ref([]);
+    const projects = ref([]);
 
     requests.getUsers().then((response) => {
       response.data.forEach((u) => users.value.push(u));
     });
     requests.getUserGroups().then((response) => {
       response.data.forEach((g) => groups.value.push(g));
+    });
+    requests.getProjects().then((response) => {
+      projects.value = response.data;
     });
 
     const availableUiFilters = ['deposit', 'expense', 'income', 'transfer', 'return'];
@@ -56,6 +60,7 @@ export default {
         label: yup.string().oneOf(availableUiFilters),
         value: yup.string().oneOf(availableUiFilters),
       })),
+      restrictedToProjectId: yup.string().nullable(),
     });
 
 
@@ -72,6 +77,7 @@ export default {
     const {value: scheduledClosureDate, errorMessage: scheduledClosureDateError} = useField('scheduledClosureDate');
     const {value: isInternal, errorMessage: isInternalError} = useField('isInternal');
     const {value: showInUis, errorMessage: showInUisError} = useField('showInUis');
+    const {value: restrictedToProjectId, errorMessage: restrictedToProjectIdError, setErrors: setProjectIdErrors} = useField('restrictedToProjectId');
 
     function validateOwnerUsername() {
       if (
@@ -91,6 +97,15 @@ export default {
       }
     }
 
+    function validateProjectId() {
+      if (
+        restrictedToProjectId.value &&
+        restrictedToProjectId.value !== '' &&
+        !projects.value.find((p) => p.id === restrictedToProjectId.value)) {
+        setProjectIdErrors(['Restricted to project id must be a valid project id']);
+      }
+    }
+
     const postNewAccount = handleNewAccountSubmit(() => {
       requests.postNewAccount(
         name.value.toLowerCase(),
@@ -104,7 +119,11 @@ export default {
           null,
         scheduledClosureDate.value,
         isInternal.value,
-        showInUis.value.map((f) => f.value.toLowerCase()))
+        showInUis.value.map((f) => f.value.toLowerCase()),
+        restrictedToProjectId.value && restrictedToProjectId.value !== '' ?
+          projects.value.find((p) => p.id === restrictedToProjectId.value).id :
+          null,
+      )
         .then((response) => {
           toast.success('Account created!', {timeout: 2000});
           context.emit('accountCreated');
@@ -117,6 +136,7 @@ export default {
       accountTypes,
       users,
       groups,
+      projects,
       availableUiFilters,
       name,
       nameError,
@@ -134,9 +154,12 @@ export default {
       isInternalError,
       showInUis,
       showInUisError,
+      restrictedToProjectId,
+      restrictedToProjectIdError,
       postNewAccount,
       validateOwnerUsername,
       validateOwnerGroupName,
+      validateProjectId,
     };
   },
   emits: ['accountCreated'],
@@ -155,6 +178,11 @@ export default {
     selectOwnerGroup(event, i) {
       if (i !== -1) {
         this.ownerGroupName = this.filtered_group_suggestions[i];
+      }
+    },
+    selectProject(event, i) {
+      if (i !== -1) {
+        this.restrictedToProjectId = this.filtered_project_suggestions[i];
       }
     },
     userSortingFunction(user1, user2) {
@@ -177,6 +205,14 @@ export default {
         .filter((suggestion) => suggestion
           .toLowerCase()
           .startsWith((this.ownerGroupName ?? '').toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_project_suggestions() {
+      return this.projects.map((g) => g.id)
+        .filter((suggestion) => suggestion
+          .toLowerCase()
+          .startsWith((this.restrictedToProjectId ?? '').toLowerCase()))
         .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -274,6 +310,20 @@ export default {
                 multiple
             />
           </div>
+
+          <ComboboxTextInput
+            :field-model-value="restrictedToProjectId"
+            :suggestions="filtered_project_suggestions"
+            :selected-callback="selectProject"
+            :allow-new="false"
+            label="Restricted to Project"
+            type="text"
+            placeholder="none"
+            name="restrictedToProjectId"
+            v-model="restrictedToProjectId"
+            :error="restrictedToProjectIdError"
+            @change="() => {validateProjectId()}"
+          />
 
           <Button type="submit" class="btn btn-dark block w-full text-center">
             Submit

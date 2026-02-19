@@ -2,11 +2,22 @@ from typing import List
 from uuid import uuid4
 
 from datetime import datetime, date
-from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean, ARRAY, Date
+from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean, ARRAY, Date, Text
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
+
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id: Mapped[str] = mapped_column("id", String(20), nullable=False, quote=False, primary_key=True)
+    description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
+    active: Mapped[bool] = mapped_column("active", Boolean, nullable=False, default=True, server_default=text("TRUE"),
+                                         quote=False)
+    
+    accounts: Mapped[List["Account"]] = relationship("Account", back_populates="restrictedToProject")
 
 
 class Account(Base):
@@ -36,6 +47,9 @@ class Account(Base):
     transactionLines: Mapped[List["TransactionLine"]] = relationship("TransactionLine", back_populates="account")
     
     isAllowedNegative: Mapped[bool] = mapped_column("isallowednegative", Boolean, nullable=False, quote=False, server_default=text("FALSE"), default=False)
+    
+    restrictedToProjectId: Mapped[str] = mapped_column("restrictedtoprojectid", ForeignKey(Project.id), nullable=True, quote=False, default=None, server_default=text("NULL"))
+    restrictedToProject: Mapped[Project] = relationship(Project, foreign_keys=[restrictedToProjectId], back_populates="accounts")
     
     
     @property
@@ -74,5 +88,8 @@ class Account(Base):
             str(self.isInternal) == str(other.get("isInternal", None)),
             str(self.scheduledClosureDate) == str(other.get("scheduledClosureDate", None)),
             str(self.closedOn) == str(other.get("closedOn", None)),
-            str(self.closedByUserId) == str(other.get("closedByUserId", None))
+            str(self.closedByUserId) == str(other.get("closedByUserId", None)),
+            str(self.showInUis) == str(other.get("showInUis", None)),
+            str(self.isAllowedNegative) == str(other.get("isAllowedNegative", None)),
+            str(self.restrictedToProjectId) == str(other.get("restrictedToProjectId", None))
         ])

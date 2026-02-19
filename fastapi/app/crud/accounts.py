@@ -41,19 +41,22 @@ def create_account(new_account_data: schemas.AccountCreate, db: Session) -> mode
         ownerGroupId=owner_group.id if owner_group is not None else None,
         scheduledClosureDate=new_account_data.scheduledClosureDate,
         type=new_account_data.type.lower(),
-        isInternal=new_account_data.isInternal
+        isInternal=new_account_data.isInternal,
+        restrictedToProjectId=new_account_data.restrictedToProjectId
     )
     db.add(db_account)
     db.commit()
     db.refresh(db_account)
     return db_account
 
-def get_accounts(db: Session, ui_filters: List[str] | None = None, types: List[str] | None = None) -> list[models.Account]:
+def get_accounts(db: Session, ui_filters: List[str] | None = None, types: List[str] | None = None, projectId: str | None = None) -> list[models.Account]:
     filter_query = []
     if ui_filters is not None:
         filter_query.append(models.Account.showInUis.op('&&')(ui_filters))
     if types is not None:
         filter_query.append(models.Account.type.in_(types))
+    if projectId is not None:
+        filter_query.append(models.Account.restrictedToProjectId == projectId)
     
     return [_ for _ in db.scalars(
         select(models.Account)
@@ -87,3 +90,8 @@ def reopen_account(account_id: UUID, db: Session) -> models.Account:
     db.commit()
     db.refresh(account)
     return account
+
+def get_all_projects(db: Session) -> list[models.Project]:
+    return [_ for _ in db.scalars(
+        select(models.Project)
+    )]
