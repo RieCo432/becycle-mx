@@ -185,7 +185,7 @@ export default {
 </script>
 
 <template>
-  <Card title="Add User">
+  <Card title="Add Account">
     <div class="grid grid-cols-12">
       <div class="col-span-12">
         <form @submit.prevent="postNewAccount" class="space-y-4">
