@@ -4,15 +4,18 @@ import requests from '@/requests';
 import AccountsTable from '@/components/Tables/AccountsTable.vue';
 import AddNewAccountCard from '@/components/Card/AddNewAccountCard.vue';
 import {useToast} from 'vue-toastification';
+import EditAccountModal from '@/components/Modal/EditAccountModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'accounts',
-  components: {AddNewAccountCard, AccountsTable, Card},
+  components: {EditAccountModal, AddNewAccountCard, AccountsTable, Card},
   data() {
     return {
       accounts: null,
+      showEditAccountModal: false,
+      selectedAccount: null,
     };
   },
   mounted() {
@@ -44,6 +47,10 @@ export default {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         });
     },
+    editAccount(accountId) {
+      this.selectedAccount = this.accounts.find((account) => account.id === accountId);
+      this.showEditAccountModal = true;
+    },
   },
 };
 
@@ -59,6 +66,7 @@ export default {
                     :accounts="accounts"
                     @reopen-account="reopenAccount"
                     @close-account="closeAccount"
+                    :edit-account="editAccount"
             />
           </div>
         </div>
@@ -69,6 +77,14 @@ export default {
               :accounts="accounts"
               @accountCreated="fetchAccounts"/>
     </div>
+    
+    <EditAccountModal
+      v-if="accounts !== null && selectedAccount !== null"
+      :show-modal="showEditAccountModal"
+              :account="selectedAccount"
+              @accountUpdated="fetchAccounts"
+      :close-modal="() => {showEditAccountModal = false; selectedAccount = null;}"
+      :accounts="accounts"/>
   </div>
 </template>
 

@@ -132,6 +132,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    editAccount: {
+      type: Function,
+      required: true,
+    },
   },
   emits: ['close-account', 'reopen-account'],
   methods: {
@@ -221,6 +225,13 @@ export default {
           id: 2,
           func: (id) => this.$emit('reopen-account', id),
           showIf: (row) => row.closedOn,
+        },
+        {
+          label: 'Edit',
+          icon: 'heroicons-outline:pencil',
+          id: 3,
+          func: (id) => this.editAccount(id),
+          showIf: (row) => !row.closedOn,
         },
       ],
     };
