@@ -4,7 +4,7 @@ import numpy as np
 from fastapi import HTTPException, status
 from openpyxl.chart import trendline
 from sqlalchemy.orm import Session
-from sqlalchemy import func, select
+from sqlalchemy import func, select, Date
 from sklearn import linear_model
 
 import app.models as models
@@ -15,6 +15,7 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from app.services import get_interval_timedelta
 from .users import get_deposit_bearers
+from ..services.accounts_helpers import AccountTypes
 
 
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
@@ -105,6 +106,52 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
     return schemas.DepositBalancesBook(dayBalances=deposit_balances_book)
 
 
+def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) -> schemas.DepositAccountBalances:
+    deposit_transaction_dates = [_ for _ in db.scalars(select(models.TransactionHeader.postedOn.cast(Date).distinct())
+                                                 .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged']))
+                                                 .order_by(models.TransactionHeader.postedOn.cast(Date)))]
+
+
+    deposit_account_day_balances_before_this_day = {}
+    
+    deposit_balances = schemas.DepositAccountBalances()
+    
+    for deposit_transaction_date in deposit_transaction_dates:
+        deposit_transactions_on_this_date = [_ for _ in db.scalars(select(models.TransactionHeader)
+                                                 .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged'])
+                                                        & (models.TransactionHeader.postedOn.cast(Date) == deposit_transaction_date)))]
+
+
+        deposit_account_day_balances = schemas.DepositAccountsDayBalances()
+        
+        for deposit_transaction in deposit_transactions_on_this_date:
+            for transaction_line in deposit_transaction.transactionLines:
+                if not only_asset_accounts or transaction_line.account.type == AccountTypes.ASSET:
+                    deposit_account_day_balances.diff[transaction_line.account.name] = deposit_account_day_balances.diff.get(transaction_line.account.name, 0) + transaction_line.amount
+
+            contract = None
+            if deposit_transaction.event == "deposit_collected":
+                contract = db.scalar(select(models.Contract).where(models.Contract.depositCollectedTransactionHeaderId == deposit_transaction.id))
+            elif deposit_transaction.event == "deposit_settled":
+                contract = db.scalar(select(models.Contract).where(models.Contract.depositSettledTransactionHeaderId == deposit_transaction.id))
+            
+            deposit_account_day_balances.transactions.append(schemas.DepositAccountTransaction(
+                details=schemas.DepositTransactionDetails(
+                    title = f"{contract.client.firstName} {contract.client.lastName}" if contract is not None else "Deposit Exchange",
+                    contractId = contract.id if contract is not None else None,
+                ),
+                event=deposit_transaction.event,
+                diff_by_account={line.account.name: line.amount for line in deposit_transaction.transactionLines if not only_asset_accounts or line.account.type == AccountTypes.ASSET}
+            ))
+            
+            deposit_account_day_balances.balances = {account_name: sum([deposit_account_day_balances.diff.get(account_name, 0) + deposit_account_day_balances_before_this_day.get(account_name, 0)]) for account_name in set(list(deposit_account_day_balances_before_this_day.keys()) + list(deposit_account_day_balances.diff.keys()))}
+            
+        deposit_account_day_balances_before_this_day = deposit_account_day_balances.balances
+        deposit_balances.dayBalances[deposit_transaction_date] = deposit_account_day_balances
+        
+    return deposit_balances
+        
+        
 def get_total_deposits(
         db: Session,
         start_date: date | None = None,

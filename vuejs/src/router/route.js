@@ -187,10 +187,19 @@ const routes = [
       },
       {
         path: '/finances/deposits',
-        name: 'Deposit Book',
+        name: 'Deposit Balances',
         meta: {
           restrictTo: ['user'],
           selectNavPath: '/finances/deposits',
+        },
+        component: () => import('@/views/finances/depositBalances.vue'),
+      },
+      {
+        path: '/finances/deposits-book',
+        name: 'Deposit Book',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/deposits-book',
         },
         component: () => import('@/views/finances/depositBook.vue'),
       },

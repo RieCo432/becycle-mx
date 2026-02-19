@@ -5,7 +5,7 @@ import {useToast} from 'vue-toastification';
 import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vue';
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 import EditContractDetailsModal from '@/components/Modal/EditContractDetailsModal.vue';
-import Modal from "@/components/Modal/Modal.vue";
+import Modal from '@/components/Modal/Modal.vue';
 
 const toast = useToast();
 
@@ -38,9 +38,6 @@ export default {
       depositAssetAccounts: [],
       depositRevenueAccounts: [],
       activeUsers: [],
-      depositReturnedByUser: {
-        username: 'null',
-      },
       returnAcceptedByUser: {
         username: 'null',
       },
@@ -88,7 +85,6 @@ export default {
     },
     patchContractReturn(depositSettledTransactionHeaderId, depositReturningUser, depositReturningPassword,
       returnAcceptingUser, returnAcceptingPasswordOrPin) {
-      
       requests.patchReturnContract(this.contract.id, depositSettledTransactionHeaderId,
         depositReturningUser, depositReturningPassword,
         returnAcceptingUser, returnAcceptingPasswordOrPin)
@@ -127,7 +123,7 @@ export default {
       this.showTermsModal = true;
     }
     this.getContract();
-    
+
     requests.getAccounts([{name: 'types', value: 'liability'}, {name: 'ui_filters', value: 'return'}]).then((response) => {
       this.depositLiabilityAccounts = response.data;
     }).catch((error) => {
@@ -163,7 +159,6 @@ export default {
         :working-username="workingUser.username"
         :checking-username="checkingUser.username"
         :contract="contract"
-        :deposit-returned-by-username="depositReturnedByUser ? depositReturnedByUser.username : null"
         :return-accepted-by-username="returnAcceptedByUser ? returnAcceptedByUser.username : null"
         :deposit-liability-accounts="depositLiabilityAccounts"
         :deposit-asset-accounts="depositAssetAccounts"

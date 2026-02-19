@@ -59,7 +59,7 @@ class Contract(Base):
 
     crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
 
-    depositCollectedTransactionHeaderId: Mapped[UUID] = mapped_column("depositcollectiontransactionheaderid", ForeignKey("transactionheaders.id"), nullable=True, quote=False)
+    depositCollectedTransactionHeaderId: Mapped[UUID] = mapped_column("depositcollectedtransactionheaderid", ForeignKey("transactionheaders.id"), nullable=True, quote=False)
     depositCollectedTransactionHeader: Mapped["TransactionHeader"] = relationship("TransactionHeader", foreign_keys=[depositCollectedTransactionHeaderId])
 
     depositSettledTransactionHeaderId: Mapped[UUID] = mapped_column("depositsettledtransactionheaderid", ForeignKey("transactionheaders.id"), nullable=True, quote=False)

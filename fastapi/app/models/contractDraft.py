@@ -46,7 +46,7 @@ class ContractDraft(Base):
 
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
     
-    depositCollectedTransactionHeaderId: Mapped[UUID] = mapped_column("depositcollectiontransactionheaderid", ForeignKey("transactionheaders.id"), nullable=True, quote=False)
+    depositCollectedTransactionHeaderId: Mapped[UUID] = mapped_column("depositcollectedtransactionheaderid", ForeignKey("transactionheaders.id"), nullable=True, quote=False)
     depositCollectedTransactionHeader: Mapped["TransactionHeader"] = relationship("TransactionHeader", foreign_keys=[depositCollectedTransactionHeaderId])
     
 

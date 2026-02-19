@@ -572,6 +572,15 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getDepositBalances(onlyAssetAccounts=true) {
+    return axiosClient.get('/finances/deposit-accounts', {
+      params: {
+        only_asset_accounts: onlyAssetAccounts,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   getUsers() {
     return axiosClient.get('/users', {
       headers: credentialsStore.getApiRequestHeader(),
