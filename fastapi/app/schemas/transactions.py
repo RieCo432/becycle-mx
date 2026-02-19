@@ -4,8 +4,8 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 from typing import List
 
-from app import schemas
-
+from .user import User
+from .accounts import Account
 
 class TransactionLineBase(BaseModel):
     amount: int
@@ -18,6 +18,7 @@ class TransactionLineCreate(TransactionLineBase):
 class TransactionLine(TransactionLineBase):
     id: UUID
     transactionHeaderId: UUID
+    account: Account
     
     
 class TransactionHeaderBase(BaseModel):
@@ -30,9 +31,9 @@ class TransactionHeaderCreate(TransactionHeaderBase):
 class TransactionHeader(TransactionHeaderBase):
     id: UUID
     createdOn: datetime
-    createdByUser: schemas.User
+    createdByUser: User
     postedOn: datetime | None = None
-    postedByUser: schemas.User | None = None
+    postedByUser: User | None = None
     transactionLines: List[TransactionLine] = []
     
     

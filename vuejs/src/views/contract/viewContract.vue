@@ -2,10 +2,9 @@
 import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
-import Checkbox from '@/components/Switch/index.vue';
 import {computed, ref, toRef} from 'vue';
 import * as yup from 'yup';
-import {useField, useForm, ErrorMessage} from 'vee-validate';
+import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import {useCredentialsStore} from '@/store/credentialsStore';
 import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
@@ -26,19 +25,26 @@ export default {
     Tooltip,
     SubmitCrimeReportCard,
     ComboboxTextInput,
-    Checkbox,
     Card,
     DashButton,
     TextInput,
     ContractClientCardSkeleton,
     ContractBikeCardSkeleton,
     ContractCardSkeleton,
-    ErrorMessage,
     Icon,
   },
   setup(props, context) {
     const credentialsStore = useCredentialsStore();
     const contractData = toRef(props, 'contract');
+    const depositAmountCollected = computed(() => {
+      return Math.abs(
+        contractData.value.depositCollectedTransactionHeader ?
+          contractData.value.depositCollectedTransactionHeader
+            .transactionLines
+            .find((l) => l.account.type === 'liability' ).amount :
+          0,
+      );
+    });
     const patchContractReturn = toRef(props, 'patchContractReturn');
     const isInWriteMode = ref(false);
     const userSelectionOptionsStatic = ref(true);
@@ -59,7 +65,22 @@ export default {
     const depositReturningSchema = yup.object().shape({
       depositAmountReturned: yup.number().min(0, 'Must be positive').integer()
         .required(' Deposit Amount is required '),
-      depositReturningUser: yup.string().required(' Deposit Returner Username is required '),
+      depositReturnedLiabilityAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The deposit liability account id is required '),
+        name: yup.string().required(' The deposit liability account name is required '),
+      }).required(' The deposit liability account is required '),
+      depositReturnedAssetAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The deposit asset account id is required '),
+        name: yup.string().required(' The deposit asset account name is required '),
+      }).required(' The deposit asset account is required '),
+      depositReturnedRevenueAccount: yup.object().when('depositAmountReturned', {
+        is: (value) => value * 100 < depositAmountCollected.value,
+        then: () => yup.object().shape({
+          id: yup.string().uuid().required(' The deposit asset account id is required '),
+          name: yup.string().required(' The deposit asset account name is required ')})
+          .required('This is required if the deposit is not returned in full.'),
+        otherwise: () => yup.object().nullable(),
+      }),
       depositReturningPassword: yup.string().required(),
     });
 
@@ -87,23 +108,29 @@ export default {
 
     const {value: depositAmountReturned, errorMessage: depositAmountReturnedError,
       setErrors: depositAmountReturnedSetErrors} = useField('depositAmountReturned');
-    const {value: depositReturningUser, errorMessage: depositReturningUserError} = useField('depositReturningUser');
+    const {
+      value: depositReturnedLiabilityAccount,
+      errorMessage: depositReturnedLiabilityAccountError,
+    } = useField('depositReturnedLiabilityAccount');
+    const {value: depositReturnedAssetAccount, errorMessage: depositReturnedAssetAccountError} = useField('depositReturnedAssetAccount');
+    const {
+      value: depositReturnedRevenueAccount,
+      errorMessage: depositReturnedRevenueAccountError,
+    } = useField('depositReturnedRevenueAccount');
     const {value: depositReturningPassword, errorMessage: depositReturningPasswordError,
       setErrors: depositReturningPasswordSetErrors} = useField('depositReturningPassword');
+
+    const depositSettledTransactionHeader = ref({});
+
+    depositReturnedLiabilityAccount.value = {name: null, id: null};
+    depositReturnedAssetAccount.value = {name: null, id: null};
+    depositReturnedRevenueAccount.value = {name: null, id: null};
 
     const {value: returnAcceptingUser, errorMessage: returnAcceptingUserError} = useField('returnAcceptingUser');
     const {value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError,
       setErrors: returnAcceptingPasswordOrPinSetErrors} = useField('returnAcceptingPasswordOrPin');
 
-    depositReturningUser.value = '';
     returnAcceptingUser.value = '';
-
-    function returnAcceptingUserSelected() {
-      returnAcceptingPasswordOrPin.value = null;
-      if (returnAcceptingUser.value === depositReturningUser.value) {
-        returnAcceptingPasswordOrPin.value = depositReturningPassword.value;
-      }
-    }
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
@@ -117,17 +144,46 @@ export default {
           }
         });
       } else if (stepNumber.value === 1) {
-        if (depositAmountReturned.value > contractData.value.depositAmountCollected) {
+        if (depositAmountReturned.value * 100 > depositAmountCollected.value) {
           depositAmountReturnedSetErrors('Must not be larger than the deposit collected!');
           return;
         }
-        requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
+
+        const depositReturnedTransactionDraft = {
+          transactionHeader: {
+            event: 'deposit_returned',
+          },
+          transactionLines: [
+            {amount: depositAmountCollected.value, accountId: depositReturnedLiabilityAccount.value.id},
+            {amount: - depositAmountReturned.value * 100, accountId: depositReturnedAssetAccount.value.id},
+
+            ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
+              [{
+                amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
+                accountId: depositReturnedRevenueAccount.value.id,
+              }] :
+              []
+            ),
+          ],
+          attemptAutoPost: false,
+        };
+
+        requests.createTransaction(depositReturnedTransactionDraft).then((response) => {
           if (response.data) {
-            patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value,
+            depositSettledTransactionHeader.value = response.data;
+            toast.success('Deposit Settled Successfully!');
+
+            patchContractReturn.value(
+              depositSettledTransactionHeader.value.id,
+              depositReturnedAssetAccount.value.ownerUser.username,
+              depositReturningPassword.value,
               returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
           } else {
             depositReturningPasswordSetErrors('Wrong Password!');
+            toast.error(response.data.detail.description, {timeout: 1000});
           }
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 1000});
         });
       }
     });
@@ -139,11 +195,16 @@ export default {
     return {
       isInWriteMode,
       contractData,
+      depositAmountCollected,
       credentialsStore,
       depositAmountReturned,
       depositAmountReturnedError,
-      depositReturningUser,
-      depositReturningUserError,
+      depositReturnedLiabilityAccount,
+      depositReturnedLiabilityAccountError,
+      depositReturnedAssetAccount,
+      depositReturnedAssetAccountError,
+      depositReturnedRevenueAccount,
+      depositReturnedRevenueAccountError,
       depositReturningPassword,
       depositReturningPasswordError,
 
@@ -152,7 +213,6 @@ export default {
       returnAcceptingPasswordOrPin,
       returnAcceptingPasswordOrPinError,
 
-      returnAcceptingUserSelected,
       userSelectionOptionsStatic,
 
       submit,
@@ -176,18 +236,32 @@ export default {
       if (user1.toLowerCase() < user2.toLowerCase()) return -1;
       return 0;
     },
-    selectDepositReturningUser(event, i) {
+    selectDepositReturnedLiabilityAccount(event, i) {
       if (i !== -1) {
-        this.depositReturningUser = this.filtered_deposit_returning_user_suggestions[i];
+        this.depositReturnedLiabilityAccount = this.filtered_deposit_returned_liability_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectDepositReturnedAssetAccount(event, i) {
+      if (i !== -1) {
+        this.depositReturnedAssetAccount = this.filtered_deposit_returned_asset_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectDepositReturnedRevenueAccount(event, i) {
+      if (i !== -1) {
+        this.depositReturnedRevenueAccount = this.filtered_deposit_returned_revenue_account_suggestions[i];
         this.userSelectionOptionsStatic = false;
       }
     },
     selectReturnAcceptingUser(event, i) {
       if (i !== -1) {
         this.returnAcceptingUser = this.filtered_return_accepting_user_suggestions[i];
-        this.returnAcceptingUserSelected();
         this.userSelectionOptionsStatic = false;
       }
+    },
+    makeAccountLegible(account) {
+      return `${account.name}`;
     },
     writeBikeDetailsToNfcTag() {
       this.isInWriteMode = true;
@@ -221,10 +295,6 @@ export default {
       type: Object,
       required: true,
     },
-    depositCollectingUsername: {
-      type: String,
-      required: true,
-    },
     workingUsername: {
       type: String,
       required: true,
@@ -237,15 +307,21 @@ export default {
       type: Object,
       required: true,
     },
-    depositReturnedByUsername: {
-      type: String,
-      required: false,
-    },
     returnAcceptedByUsername: {
       type: String,
       required: false,
     },
-    depositBearers: {
+    depositLiabilityAccounts: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    depositAssetAccounts: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    depositRevenueAccounts: {
       type: Array,
       required: false,
       default: () => [],
@@ -305,12 +381,28 @@ export default {
     },
   },
   computed: {
-    filtered_deposit_returning_user_suggestions() {
-      return this.depositBearers
-        .filter((suggestion) => suggestion
+    filtered_deposit_returned_liability_account_suggestions() {
+      return this.depositLiabilityAccounts
+        .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith(this.depositReturningUser.toLowerCase()))
-        .sort(this.userSortingFunction)
+          .startsWith((this.depositReturnedLiabilityAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_deposit_returned_asset_account_suggestions() {
+      return this.depositAssetAccounts
+        .filter((suggestion) => suggestion.name
+          .toLowerCase()
+          .startsWith((this.depositReturnedAssetAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_deposit_returned_revenue_account_suggestions() {
+      return this.depositRevenueAccounts
+        .filter((suggestion) => suggestion.name
+          .toLowerCase()
+          .startsWith((this.depositReturnedRevenueAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
     filtered_return_accepting_user_suggestions() {
@@ -425,8 +517,21 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Contract Type: {{contract.contractType}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.conditionOfBike}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">
-                      Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}
+                  <p class="text-slate-600 dark:text-slate-300 w-100">
+                      Deposit:
+                    <table class="border-collapse border dark:border-slate-400 min-w-full">
+                      <tr class=" dark:bg-slate-700">
+                        <th class="border dark:border-slate-500">Account</th>
+                        <th class="border dark:border-slate-500">Credit</th>
+                        <th class="border dark:border-slate-500">Debit</th>
+                      </tr>
+                      <tr v-for="line in contract.depositCollectedTransactionHeader.transactionLines" :key="line.id">
+                        <td class="border dark:border-slate-500">{{line.account.name}}</td>
+                        <td class="border dark:border-slate-500">{{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}</td>
+                        <td class="border dark:border-slate-500">{{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}</td>
+                      </tr>
+                    </table>
+
                   </p>
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
@@ -543,18 +648,48 @@ export default {
                       />
 
                       <ComboboxTextInput
-                          :field-model-value="depositReturningUser"
-                          :suggestions="filtered_deposit_returning_user_suggestions"
-                          :selected-callback="selectDepositReturningUser"
-                          :allow-new="false"
-                          :open-by-default="userSelectionOptionsStatic"
-                          label="Deposit Returner"
-                          type="text"
-                          placeholder="workshop"
-                          name="depositReturningUser"
-                          v-model="depositReturningUser"
-                          :error="depositReturningUserError"
-                          @input="() => {}"
+                        :field-model-value="depositReturnedLiabilityAccount.name"
+                        :suggestions="filtered_deposit_returned_liability_account_suggestions.map(makeAccountLegible)"
+                        :selected-callback="selectDepositReturnedLiabilityAccount"
+                        :allow-new="false"
+                        :open-by-default="userSelectionOptionsStatic"
+                        label="Liability Account"
+                        type="text"
+                        placeholder="workshop"
+                        name="depositReturnedLiabilityAccount"
+                        v-model="depositReturnedLiabilityAccount.name"
+                        :error="depositReturnedLiabilityAccountError"
+                        @change="() => {}"
+                      />
+
+                      <ComboboxTextInput
+                        :field-model-value="depositReturnedAssetAccount.name"
+                        :suggestions="filtered_deposit_returned_asset_account_suggestions.map(makeAccountLegible)"
+                        :selected-callback="selectDepositReturnedAssetAccount"
+                        :allow-new="false"
+                        :open-by-default="userSelectionOptionsStatic"
+                        label="Asset Account"
+                        type="text"
+                        placeholder="workshop"
+                        name="depositReturnedAssetAccount"
+                        v-model="depositReturnedAssetAccount.name"
+                        :error="depositReturnedAssetAccountError"
+                        @change="() => {}"
+                      />
+
+                      <ComboboxTextInput v-if="depositAmountReturned * 100 < depositAmountCollected"
+                        :field-model-value="depositReturnedRevenueAccount.name"
+                        :suggestions="filtered_deposit_returned_revenue_account_suggestions.map(makeAccountLegible)"
+                        :selected-callback="selectDepositReturnedRevenueAccount"
+                        :allow-new="false"
+                        :open-by-default="userSelectionOptionsStatic"
+                        label="Revenue Account"
+                        type="text"
+                        placeholder="workshop"
+                        name="depositReturnedRevenueAccount"
+                        v-model="depositReturnedRevenueAccount.name"
+                        :error="depositReturnedRevenueAccountError"
+                        @change="() => {}"
                       />
 
                       <TextInput
@@ -591,8 +726,21 @@ export default {
                   Returned on {{new Date(Date.parse(contract.returnedDate))
                   .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
               </p>
-              <p class="text-slate-600 dark:text-slate-300">
-                  Deposit returned: &#163; {{contract.depositAmountReturned}} by {{depositReturnedByUsername}}
+              <p class="text-slate-600 dark:text-slate-300 w-100">
+                Deposit Settlement:
+                <table class="border-collapse border dark:border-slate-400 min-w-full">
+                  <tr class=" dark:bg-slate-700">
+                    <th class="border dark:border-slate-500">Account</th>
+                    <th class="border dark:border-slate-500">Credit</th>
+                    <th class="border dark:border-slate-500">Debit</th>
+                  </tr>
+                  <tr v-for="line in contract.depositSettledTransactionHeader.transactionLines" :key="line.id">
+                    <td class="border dark:border-slate-500">{{line.account.name}}</td>
+                    <td class="border dark:border-slate-500">{{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}</td>
+                    <td class="border dark:border-slate-500">{{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}</td>
+                  </tr>
+                </table>
+
               </p>
               <p class="text-slate-600 dark:text-slate-300">Received by {{returnAcceptedByUsername}}</p>
             </div>

@@ -34,7 +34,9 @@ export default {
         username: 'null',
       },
       contractId: this.$route.params.contractId,
-      depositBearers: [],
+      depositLiabilityAccounts: [],
+      depositAssetAccounts: [],
+      depositRevenueAccounts: [],
       activeUsers: [],
       depositReturnedByUser: {
         username: 'null',
@@ -71,33 +73,29 @@ export default {
           this.client = response.data;
           this.loadingClient = false;
         });
-        if (this.contract.returnedDate != null) {
-          this.loadReturnUserDetails();
-        }
         Promise.all([
-          requests.getUser(this.contract['depositCollectingUserId']),
           requests.getUser(this.contract['workingUserId']),
           requests.getUser(this.contract['checkingUserId']),
-        ]).then(([depositCollectingUserResponse,
+        ]).then(([
           workingUserResponse,
           checkingUserResponse,
         ]) => {
-          this.depositCollectingUser = depositCollectingUserResponse.data;
           this.workingUser = workingUserResponse.data;
           this.checkingUser = checkingUserResponse.data;
           this.loadingContract = false;
         });
       });
     },
-    patchContractReturn(depositAmountReturned, depositReturningUser, depositReturningPassword,
+    patchContractReturn(depositSettledTransactionHeaderId, depositReturningUser, depositReturningPassword,
       returnAcceptingUser, returnAcceptingPasswordOrPin) {
-      requests.patchReturnContract(this.contract.id, depositAmountReturned,
+      
+      requests.patchReturnContract(this.contract.id, depositSettledTransactionHeaderId,
         depositReturningUser, depositReturningPassword,
         returnAcceptingUser, returnAcceptingPasswordOrPin)
         .then((response) => {
           toast.success('Contract Returned!', {timeout: 1000});
           this.contract = response.data;
-          this.loadReturnUserDetails();
+          this.getContract();
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         });
@@ -108,14 +106,6 @@ export default {
         this.contract = response.data;
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
-    },
-    loadReturnUserDetails() {
-      requests.getUser(this.contract['returnAcceptingUserId']).then((response) => {
-        this.returnAcceptedByUser = response.data;
-      });
-      requests.getUser(this.contract['depositReturningUserId']).then((response) => {
-        this.depositReturnedByUser = response.data;
       });
     },
     patchCloseCrimeReport(crimeReportId) {
@@ -137,8 +127,23 @@ export default {
       this.showTermsModal = true;
     }
     this.getContract();
-    requests.getDepositBearers().then((response) => {
-      this.depositBearers = response.data.sort(this.userSortingFunction).map((user) => (user.username));
+    
+    requests.getAccounts([{name: 'types', value: 'liability'}, {name: 'ui_filters', value: 'return'}]).then((response) => {
+      this.depositLiabilityAccounts = response.data;
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 1000});
+    });
+
+    requests.getAccounts([{name: 'types', value: 'asset'}, {name: 'ui_filters', value: 'return'}]).then((response) => {
+      this.depositAssetAccounts = response.data;
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 1000});
+    });
+
+    requests.getAccounts([{name: 'types', value: 'revenue'}, {name: 'ui_filters', value: 'return'}]).then((response) => {
+      this.depositRevenueAccounts = response.data;
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 1000});
     });
     requests.getActiveUsers().then((response) => {
       this.activeUsers = response.data.sort(this.userSortingFunction).map((user) => (user.username));
@@ -155,13 +160,14 @@ export default {
     <view-contract
         :client="client"
         :bike="bike"
-        :deposit-collecting-username="depositCollectingUser.username"
         :working-username="workingUser.username"
         :checking-username="checkingUser.username"
         :contract="contract"
         :deposit-returned-by-username="depositReturnedByUser ? depositReturnedByUser.username : null"
         :return-accepted-by-username="returnAcceptedByUser ? returnAcceptedByUser.username : null"
-        :deposit-bearers="depositBearers"
+        :deposit-liability-accounts="depositLiabilityAccounts"
+        :deposit-asset-accounts="depositAssetAccounts"
+        :deposit-revenue-accounts="depositRevenueAccounts"
         :active-users="activeUsers"
         :loading-client="loadingClient"
         :loading-bike="loadingBike"

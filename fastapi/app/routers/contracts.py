@@ -31,30 +31,7 @@ async def create_contract(
         deposit_collecting_user: models.User = Depends(dep.get_deposit_receiving_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
-    if working_user.id == checking_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Working and checking volunteer cannot be the same!"},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    if crud.does_contract_exist(db=db, contract_data=contract_data):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail={"description": "Contract already exists!"},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    contract = crud.create_contract(
-        contract_data=contract_data,
-        working_user_id=working_user.id,
-        checking_user_id=checking_user.id,
-        deposit_collecting_user_id=deposit_collecting_user.id,
-        db=db)
-
-    email_tasks.add_task(contract.send_creation_email)
-
-    return contract
+    raise HTTPException(status_code=status.HTTP_410_GONE, detail={"description": "This endpoint is deprecated."})
 
 
 @contracts.get("/contracts/drafts")
@@ -125,7 +102,7 @@ async def update_contract_draft_details(
 @contracts.put("/contracts/drafts/{contract_draft_id}/deposit")
 async def update_contract_draft_deposit(
         contract_draft_id: UUID,
-        deposit_amount: Annotated[int, Body(embed=True)],
+        deposit_collected_transaction_header_id: Annotated[UUID, Body(embed=True)],
         deposit_collecting_user: models.User = Depends(dep.get_deposit_receiving_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.ContractDraft:
@@ -135,7 +112,8 @@ async def update_contract_draft_deposit(
             detail={"description": "Contract draft not found."},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    return crud.update_contract_draft_deposit(db=db, contract_draft_id=contract_draft_id, deposit_amount=deposit_amount, deposit_collecting_user=deposit_collecting_user)
+    crud.post_transaction_header(db=db, transaction_header_id=deposit_collected_transaction_header_id, user=deposit_collecting_user)
+    return crud.update_contract_draft_deposit(db=db, contract_draft_id=contract_draft_id, deposit_collected_transaction_header_id=deposit_collected_transaction_header_id)
 
 
 @contracts.put("/contracts/drafts/{contract_draft_id}/working-user")
@@ -227,6 +205,8 @@ async def get_contract(contract_id: UUID, db: Session = Depends(dep.get_db)) -> 
 async def delete_contract(
         contract_id: UUID,
         db: Session = Depends(dep.get_db)):
+    # TODO: deposit information needs to use new model
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail={"description": "This endpoint has not been implemented yet."})
     crud.delete_contract(db=db, contract_id=contract_id)
 
 
@@ -235,6 +215,8 @@ async def patch_contract(
         contract_id: UUID,
         contract_patch_data: schemas.ContractPatch,
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
+    # TODO: deposit information needs to use new model
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail={"description": "This endpoint has not been implemented yet."})
     return crud.patch_contract_details(db=db, contract_id=contract_id, contract_patch_data=contract_patch_data)
 
 
@@ -242,27 +224,21 @@ async def patch_contract(
 async def return_bike(
         contract_id: UUID,
         email_tasks: BackgroundTasks,
-        deposit_amount_returned: Annotated[int, Body()],
+        deposit_settled_transaction_header_id: Annotated[UUID, Body()],
         working_user: models.User = Depends(dep.get_working_user),
         deposit_returning_user: models.User = Depends(dep.get_deposit_returning_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
-    if deposit_amount_returned > deposit_returning_user.get_deposit_bearer_balance():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "This deposit bearer does not have enough funds!"},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
 
     crime_reports = crud.get_crime_reports(db=db, contract_id=contract_id)
     if len([report for report in crime_reports if report.closedOn is None]) > 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "You cannot return a contract while there is an open crime report!"})
 
+    crud.post_transaction_header(db=db, transaction_header_id=deposit_settled_transaction_header_id, user=deposit_returning_user)
     contract = crud.return_contract(db=db,
                                     contract_id=contract_id,
-                                    deposit_amount_returned=deposit_amount_returned,
-                                    return_accepting_user_id=working_user.id,
-                                    deposit_returning_user_id=deposit_returning_user.id)
+                                    deposit_settled_transaction_header_id=deposit_settled_transaction_header_id,
+                                    return_accepting_user_id=working_user.id)
 
     email_tasks.add_task(contract.send_return_email)
 

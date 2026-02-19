@@ -45,6 +45,10 @@ class ContractDraft(Base):
     contractType: Mapped[str] = mapped_column("contracttype", String(20), nullable=True, quote=False)
 
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
+    
+    depositCollectedTransactionHeaderId: Mapped[UUID] = mapped_column("depositcollectiontransactionheaderid", ForeignKey("transactionheaders.id"), nullable=True, quote=False)
+    depositCollectedTransactionHeader: Mapped["TransactionHeader"] = relationship("TransactionHeader", foreign_keys=[depositCollectedTransactionHeaderId])
+    
 
     def __eq__dict(self, other: dict):
         return all([
@@ -64,6 +68,7 @@ class ContractDraft(Base):
             str(self.conditionOfBike) == str(other.get("conditionOfBike")),
             str(self.contractType) == str(other.get("contractType")),
             str(self.notes) == str(other.get("notes")),
+            str(self.depositCollectedTransactionHeaderId) == str(other.get("depositCollectedTransactionHeaderId")),
             # str(self.detailsSent) == str(other.get("detailsSent")),
             # str(self.expiryReminderSent) == str(other.get("expiryReminderSent")),
             # str(self.returnDetailsSent) == str(other.get("returnDetailsSent")),
@@ -89,6 +94,7 @@ class ContractDraft(Base):
             str(self.conditionOfBike) == str(other.conditionOfBike),
             str(self.contractType) == str(other.contractType),
             str(self.notes) == str(other.notes),
+            str(self.depositCollectedTransactionHeaderId) == str(other.depositCollectedTransactionHeaderId),
             # str(self.detailsSent) == str(other.detailsSent),
             # str(self.expiryReminderSent) == str(other.expiryReminderSent),
             # str(self.returnDetailsSent) == str(other.returnDetailsSent),

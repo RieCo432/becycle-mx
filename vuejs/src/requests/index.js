@@ -326,9 +326,9 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putDraftContractDeposit(draftContractId, depositAmont, depositCollectingUser, depositCollectingPassword) {
+  putDraftContractDeposit(draftContractId, depositCollectedTransactionHeaderId, depositCollectingUser, depositCollectingPassword) {
     return axiosClient.put(`/contracts/drafts/${draftContractId}/deposit`, {
-      deposit_amount: depositAmont,
+      deposit_collected_transaction_header_id: depositCollectedTransactionHeaderId,
       deposit_receiving_username: depositCollectingUser,
       deposit_receiving_user_password: depositCollectingPassword,
     }, {
@@ -429,10 +429,10 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  patchReturnContract(contractId, depositAmountReturned, depositReturningUser, depositReturningPassword,
+  patchReturnContract(contractId, depositSettledTransactionHeaderId, depositReturningUser, depositReturningPassword,
     returnAcceptingUser, returnAcceptingPasswordOrPin) {
     return axiosClient.patch(`/contracts/${contractId}/return`, {
-      deposit_amount_returned: depositAmountReturned,
+      deposit_settled_transaction_header_id: depositSettledTransactionHeaderId,
       deposit_returning_username: depositReturningUser,
       deposit_returning_user_password: depositReturningPassword,
       working_username: returnAcceptingUser,
@@ -1440,8 +1440,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getAccounts() {
-    return axiosClient.get('/accounts', {
+  getAccounts(queryParams=undefined) {
+    return axiosClient.get(`/accounts${
+      queryParams ?
+        `?${queryParams.map((p) => `${encodeURIComponent(p.name)}=${encodeURIComponent(p.value)}`).join('&')}` :
+        ''
+    }`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -1476,6 +1480,12 @@ export default {
   },
   getFormattedTransactionHeaders() {
     return axiosClient.get('/transactions/formatted', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  createTransaction(transaction) {
+    return axiosClient.post('/transactions', transaction, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

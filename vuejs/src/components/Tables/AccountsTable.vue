@@ -52,7 +52,7 @@
               :class="props.row.normalisedBalance < 0
                   ? 'text-danger-500 bg-danger-500'
                   : 'text-success-500 bg-success-500'">
-              {{ props.row.normalisedBalance }}
+              &#163;{{ (props.row.normalisedBalance / 100).toFixed(2) }}
             </span>
           </span>
           <span v-if="props.column.field === 'isInternal'">
@@ -63,6 +63,9 @@
             {{ new Date(Date.parse(props.row.closedOn))
               .toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
                 hour: "2-digit", minute: "2-digit", hour12: false, }) }}
+          </span>
+          <span v-if="props.column.field === 'showInUis'">
+            {{ props.row.showInUis.join(', ') }}
           </span>
             <div v-if="props.column.field === 'actions'" class="flex space-x-3 rtl:space-x-reverse">
                 <Tooltip
@@ -193,6 +196,10 @@ export default {
         {
           label: 'Closed By',
           field: 'closedByUser.username',
+        },
+        {
+          label: 'Show in UI',
+          field: 'showInUis',
         },
         {
           label: 'Actions',

@@ -9,6 +9,8 @@ import {useToast} from 'vue-toastification';
 const toast = useToast();
 const credentialsStore = useCredentialsStore();
 
+// TODO: this page needs fixed
+
 export default {
   name: 'rawData',
   components: {ContractEditTable, DashButton, Card},
