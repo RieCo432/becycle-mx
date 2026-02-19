@@ -1,4 +1,5 @@
 from datetime import date
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -20,8 +21,13 @@ class DepositBalancesBook(BaseModel):
     
     
     
-class DepositAccountTransaction(BaseModel):
+class DepositTransactionDetails(BaseModel):
     title: str
+    contractId: UUID | None = None
+    
+    
+class DepositAccountTransaction(BaseModel):
+    details: DepositTransactionDetails
     event: str
     diff_by_account: dict[str, int] = {}
     
