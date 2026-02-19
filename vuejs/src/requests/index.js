@@ -1475,6 +1475,18 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  putUpdateAccount(accountId, name, description, scheduledClosureDate, showInUis) {
+    return axiosClient.put(`/accounts/${accountId}`, {
+      name: name,
+      description: description,
+      scheduledClosureDate: scheduledClosureDate,
+      showInUis: showInUis,
+    },
+    {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   closeAccount(accountId) {
     return axiosClient.patch(`/accounts/${accountId}/close`, undefined, {
       headers: credentialsStore.getApiRequestHeader(),
