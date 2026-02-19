@@ -33,6 +33,8 @@ class TransactionHeader(Base):
             str(self.event) == str(other.get("event", None)),
             str(self.createdOn) == str(other.get("createdOn", None)),
             str(self.createdByUserId) == str(other.get("createdByUserId", None)),
+            str(self.postedOn) == str(other.get("postedOn", None)),
+            str(self.postedByUserId) == str(other.get("postedByUserId", None)),
         ])
     
     @property
@@ -61,8 +63,6 @@ class TransactionLine(Base):
             str(self.transactionHeaderId) == str(other.get("transactionHeaderId", None)),
             str(self.accountId) == str(other.get("accountId", None)),
             str(self.amount) == str(other.get("amount", None)),
-            str(self.postedOn) == str(other.get("postedOn", None)),
-            str(self.postedByUserId) == str(other.get("postedByUserId", None)),
         ])
     
     def is_posted(self):

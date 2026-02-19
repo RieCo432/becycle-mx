@@ -18,8 +18,9 @@ accounts = APIRouter(
 async def get_accounts(
         ui_filters: Annotated[List[str] | None, Query()] = None, 
         types: Annotated[List[str] | None, Query()] = None,
+        projectId: str | None = None,
         db: Session = Depends(dep.get_db)) -> list[schemas.Account]:
-    return crud.get_accounts(db=db, ui_filters=ui_filters, types=types)
+    return crud.get_accounts(db=db, ui_filters=ui_filters, types=types, projectId=projectId)
 
 
 @accounts.get("/accounts/{account_id}")
