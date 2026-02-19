@@ -65,15 +65,15 @@ export default {
     const depositReturningSchema = yup.object().shape({
       depositAmountReturned: yup.number().min(0, 'Must be positive').integer()
         .required(' Deposit Amount is required '),
-      depositReturnedLiabilityAccount: yup.object().shape({
+      depositSettledLiabilityAccount: yup.object().shape({
         id: yup.string().uuid().required(' The deposit liability account id is required '),
         name: yup.string().required(' The deposit liability account name is required '),
       }).required(' The deposit liability account is required '),
-      depositReturnedAssetAccount: yup.object().shape({
+      depositSettledAssetAccount: yup.object().shape({
         id: yup.string().uuid().required(' The deposit asset account id is required '),
         name: yup.string().required(' The deposit asset account name is required '),
       }).required(' The deposit asset account is required '),
-      depositReturnedRevenueAccount: yup.object().when('depositAmountReturned', {
+      depositSettledRevenueAccount: yup.object().when('depositAmountReturned', {
         is: (value) => value * 100 < depositAmountCollected.value,
         then: () => yup.object().shape({
           id: yup.string().uuid().required(' The deposit asset account id is required '),
@@ -109,22 +109,22 @@ export default {
     const {value: depositAmountReturned, errorMessage: depositAmountReturnedError,
       setErrors: depositAmountReturnedSetErrors} = useField('depositAmountReturned');
     const {
-      value: depositReturnedLiabilityAccount,
-      errorMessage: depositReturnedLiabilityAccountError,
-    } = useField('depositReturnedLiabilityAccount');
-    const {value: depositReturnedAssetAccount, errorMessage: depositReturnedAssetAccountError} = useField('depositReturnedAssetAccount');
+      value: depositSettledLiabilityAccount,
+      errorMessage: depositSettledLiabilityAccountError,
+    } = useField('depositSettledLiabilityAccount');
+    const {value: depositSettledAssetAccount, errorMessage: depositSettledAssetAccountError} = useField('depositSettledAssetAccount');
     const {
-      value: depositReturnedRevenueAccount,
-      errorMessage: depositReturnedRevenueAccountError,
-    } = useField('depositReturnedRevenueAccount');
+      value: depositSettledRevenueAccount,
+      errorMessage: depositSettledRevenueAccountError,
+    } = useField('depositSettledRevenueAccount');
     const {value: depositReturningPassword, errorMessage: depositReturningPasswordError,
       setErrors: depositReturningPasswordSetErrors} = useField('depositReturningPassword');
 
     const depositSettledTransactionHeader = ref({});
 
-    depositReturnedLiabilityAccount.value = {name: null, id: null};
-    depositReturnedAssetAccount.value = {name: null, id: null};
-    depositReturnedRevenueAccount.value = {name: null, id: null};
+    depositSettledLiabilityAccount.value = {name: null, id: null};
+    depositSettledAssetAccount.value = {name: null, id: null};
+    depositSettledRevenueAccount.value = {name: null, id: null};
 
     const {value: returnAcceptingUser, errorMessage: returnAcceptingUserError} = useField('returnAcceptingUser');
     const {value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError,
@@ -149,18 +149,18 @@ export default {
           return;
         }
 
-        const depositReturnedTransactionDraft = {
+        const depositSettledTransactionDraft = {
           transactionHeader: {
-            event: 'deposit_returned',
+            event: 'deposit_settled',
           },
           transactionLines: [
-            {amount: depositAmountCollected.value, accountId: depositReturnedLiabilityAccount.value.id},
-            {amount: - depositAmountReturned.value * 100, accountId: depositReturnedAssetAccount.value.id},
+            {amount: depositAmountCollected.value, accountId: depositSettledLiabilityAccount.value.id},
+            {amount: - depositAmountReturned.value * 100, accountId: depositSettledAssetAccount.value.id},
 
             ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
               [{
                 amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
-                accountId: depositReturnedRevenueAccount.value.id,
+                accountId: depositSettledRevenueAccount.value.id,
               }] :
               []
             ),
@@ -168,14 +168,14 @@ export default {
           attemptAutoPost: false,
         };
 
-        requests.createTransaction(depositReturnedTransactionDraft).then((response) => {
+        requests.createTransaction(depositSettledTransactionDraft).then((response) => {
           if (response.data) {
             depositSettledTransactionHeader.value = response.data;
             toast.success('Deposit Settled Successfully!');
 
             patchContractReturn.value(
               depositSettledTransactionHeader.value.id,
-              depositReturnedAssetAccount.value.ownerUser.username,
+              depositSettledAssetAccount.value.ownerUser.username,
               depositReturningPassword.value,
               returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
           } else {
@@ -199,12 +199,12 @@ export default {
       credentialsStore,
       depositAmountReturned,
       depositAmountReturnedError,
-      depositReturnedLiabilityAccount,
-      depositReturnedLiabilityAccountError,
-      depositReturnedAssetAccount,
-      depositReturnedAssetAccountError,
-      depositReturnedRevenueAccount,
-      depositReturnedRevenueAccountError,
+      depositSettledLiabilityAccount,
+      depositSettledLiabilityAccountError,
+      depositSettledAssetAccount,
+      depositSettledAssetAccountError,
+      depositSettledRevenueAccount,
+      depositSettledRevenueAccountError,
       depositReturningPassword,
       depositReturningPasswordError,
 
@@ -236,21 +236,21 @@ export default {
       if (user1.toLowerCase() < user2.toLowerCase()) return -1;
       return 0;
     },
-    selectDepositReturnedLiabilityAccount(event, i) {
+    selectdepositSettledLiabilityAccount(event, i) {
       if (i !== -1) {
-        this.depositReturnedLiabilityAccount = this.filtered_deposit_returned_liability_account_suggestions[i];
+        this.depositSettledLiabilityAccount = this.filtered_deposit_settled_liability_account_suggestions[i];
         this.userSelectionOptionsStatic = false;
       }
     },
-    selectDepositReturnedAssetAccount(event, i) {
+    selectdepositSettledAssetAccount(event, i) {
       if (i !== -1) {
-        this.depositReturnedAssetAccount = this.filtered_deposit_returned_asset_account_suggestions[i];
+        this.depositSettledAssetAccount = this.filtered_deposit_settled_asset_account_suggestions[i];
         this.userSelectionOptionsStatic = false;
       }
     },
-    selectDepositReturnedRevenueAccount(event, i) {
+    selectdepositSettledRevenueAccount(event, i) {
       if (i !== -1) {
-        this.depositReturnedRevenueAccount = this.filtered_deposit_returned_revenue_account_suggestions[i];
+        this.depositSettledRevenueAccount = this.filtered_deposit_settled_revenue_account_suggestions[i];
         this.userSelectionOptionsStatic = false;
       }
     },
@@ -381,27 +381,27 @@ export default {
     },
   },
   computed: {
-    filtered_deposit_returned_liability_account_suggestions() {
+    filtered_deposit_settled_liability_account_suggestions() {
       return this.depositLiabilityAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.depositReturnedLiabilityAccount.name ?? '').toLowerCase()))
+          .startsWith((this.depositSettledLiabilityAccount.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
-    filtered_deposit_returned_asset_account_suggestions() {
+    filtered_deposit_settled_asset_account_suggestions() {
       return this.depositAssetAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.depositReturnedAssetAccount.name ?? '').toLowerCase()))
+          .startsWith((this.depositSettledAssetAccount.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
-    filtered_deposit_returned_revenue_account_suggestions() {
+    filtered_deposit_settled_revenue_account_suggestions() {
       return this.depositRevenueAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.depositReturnedRevenueAccount.name ?? '').toLowerCase()))
+          .startsWith((this.depositSettledRevenueAccount.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -648,47 +648,47 @@ export default {
                       />
 
                       <ComboboxTextInput
-                        :field-model-value="depositReturnedLiabilityAccount.name"
-                        :suggestions="filtered_deposit_returned_liability_account_suggestions.map(makeAccountLegible)"
-                        :selected-callback="selectDepositReturnedLiabilityAccount"
+                        :field-model-value="depositSettledLiabilityAccount.name"
+                        :suggestions="filtered_deposit_settled_liability_account_suggestions.map(makeAccountLegible)"
+                        :selected-callback="selectdepositSettledLiabilityAccount"
                         :allow-new="false"
                         :open-by-default="userSelectionOptionsStatic"
                         label="Liability Account"
                         type="text"
                         placeholder="workshop"
-                        name="depositReturnedLiabilityAccount"
-                        v-model="depositReturnedLiabilityAccount.name"
-                        :error="depositReturnedLiabilityAccountError"
+                        name="depositSettledLiabilityAccount"
+                        v-model="depositSettledLiabilityAccount.name"
+                        :error="depositSettledLiabilityAccountError"
                         @change="() => {}"
                       />
 
                       <ComboboxTextInput
-                        :field-model-value="depositReturnedAssetAccount.name"
-                        :suggestions="filtered_deposit_returned_asset_account_suggestions.map(makeAccountLegible)"
-                        :selected-callback="selectDepositReturnedAssetAccount"
+                        :field-model-value="depositSettledAssetAccount.name"
+                        :suggestions="filtered_deposit_settled_asset_account_suggestions.map(makeAccountLegible)"
+                        :selected-callback="selectdepositSettledAssetAccount"
                         :allow-new="false"
                         :open-by-default="userSelectionOptionsStatic"
                         label="Asset Account"
                         type="text"
                         placeholder="workshop"
-                        name="depositReturnedAssetAccount"
-                        v-model="depositReturnedAssetAccount.name"
-                        :error="depositReturnedAssetAccountError"
+                        name="depositSettledAssetAccount"
+                        v-model="depositSettledAssetAccount.name"
+                        :error="depositSettledAssetAccountError"
                         @change="() => {}"
                       />
 
                       <ComboboxTextInput v-if="depositAmountReturned * 100 < depositAmountCollected"
-                        :field-model-value="depositReturnedRevenueAccount.name"
-                        :suggestions="filtered_deposit_returned_revenue_account_suggestions.map(makeAccountLegible)"
-                        :selected-callback="selectDepositReturnedRevenueAccount"
+                        :field-model-value="depositSettledRevenueAccount.name"
+                        :suggestions="filtered_deposit_settled_revenue_account_suggestions.map(makeAccountLegible)"
+                        :selected-callback="selectdepositSettledRevenueAccount"
                         :allow-new="false"
                         :open-by-default="userSelectionOptionsStatic"
                         label="Revenue Account"
                         type="text"
                         placeholder="workshop"
-                        name="depositReturnedRevenueAccount"
-                        v-model="depositReturnedRevenueAccount.name"
-                        :error="depositReturnedRevenueAccountError"
+                        name="depositSettledRevenueAccount"
+                        v-model="depositSettledRevenueAccount.name"
+                        :error="depositSettledRevenueAccountError"
                         @change="() => {}"
                       />
 
