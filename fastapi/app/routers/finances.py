@@ -17,6 +17,11 @@ async def get_deposit_book(db: Session = Depends(dep.get_db)) -> schemas.Deposit
     return crud.get_deposit_balances_book(db=db)
 
 
+@finances.get("/finances/deposit-accounts")
+async def get_deposit_book(db: Session = Depends(dep.get_db)) -> schemas.DepositAccountBalances:
+    return crud.get_deposit_account_balances(db=db)
+
+
 @finances.get("/finances/deposits/total")
 async def get_total_deposits(
         interval: str,

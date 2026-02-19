@@ -17,4 +17,21 @@ class DepositDayBalances(BaseModel):
 
 class DepositBalancesBook(BaseModel):
     dayBalances: dict[date, DepositDayBalances] = {}
+    
+    
+    
+class DepositAccountTransaction(BaseModel):
+    title: str
+    event: str
+    diff_by_account: dict[str, int] = {}
+    
+    
+class DepositAccountsDayBalances(BaseModel):
+    transactions: list[DepositAccountTransaction] = []
+    diff: dict[str, int] = {}
+    balances: dict[str, int] = {}
+    
+    
+class DepositAccountBalances(BaseModel):
+    dayBalances: dict[date, DepositAccountsDayBalances] = {}
 

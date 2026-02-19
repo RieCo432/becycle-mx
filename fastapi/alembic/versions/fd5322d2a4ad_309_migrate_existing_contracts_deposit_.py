@@ -147,7 +147,7 @@ def upgrade() -> None:
                         f"(id, event, createdon, createdbyuserid, postedon, postedbyuserid) "
                         f"VALUES "
                         f"('{deposit_exchange_transaction_header_id}', "
-                        f"'deposit_exchange', "
+                        f"'deposit_exchanged', "
                         f"'{datetime(exchange_date.year, exchange_date.month, exchange_date.day, 19, 0, 0)}', "
                         f"'{from_user_id}', "
                         f"'{datetime(exchange_date.year, exchange_date.month, exchange_date.day, 19, 0, 0)}', "
