@@ -1082,6 +1082,19 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  postNewExpenseClaim(expenseTransactionHeaderId, notes, expenseDate, receiptFile) {
+    return axiosClient.post('/expenses/claims', {
+      expense_claim_transaction_header_id: expenseTransactionHeaderId,
+      notes: notes,
+      expense_date: expenseDate,
+      receipt_file: receiptFile,
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
   getExpenseTypes() {
     return axiosClient.get('/expenses/types', {
       headers: credentialsStore.getApiRequestHeader(),

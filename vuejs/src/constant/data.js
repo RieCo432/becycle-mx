@@ -134,6 +134,12 @@ export const topMenu = [
         show: ['user'],
       },
       {
+        childtitle: 'Claim Expense',
+        childicon: 'heroicons-outline:document-plus',
+        childlink: '/finances/expenses/claim',
+        show: ['user'],
+      },
+      {
         childtitle: 'Manage Expenses',
         childicon: 'heroicons-outline:arrows-right-left',
         childlink: '/finances/expenses/manage',

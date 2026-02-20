@@ -231,6 +231,15 @@ const routes = [
         component: () => import('@/views/finances/newExpense.vue'),
       },
       {
+        path: '/finances/expenses/claim',
+        name: 'Claim Expense',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/expenses/claim',
+        },
+        component: () => import('@/views/finances/newExpenseClaim.vue'),
+      },
+      {
         path: '/finances/expenses/manage',
         name: 'Manage Expenses',
         meta: {
