@@ -18,9 +18,11 @@ accounts = APIRouter(
 async def get_accounts(
         ui_filters: Annotated[List[str] | None, Query()] = None, 
         types: Annotated[List[str] | None, Query()] = None,
-        projectId: str | None = None,
+        project_id: str | None = None,
+        for_user: bool = False,
+        user: models.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)) -> list[schemas.Account]:
-    return crud.get_accounts(db=db, ui_filters=ui_filters, types=types, projectId=projectId)
+    return crud.get_accounts(db=db, ui_filters=ui_filters, types=types, projectId=project_id, for_user = user if for_user else None)
 
 
 @accounts.get("/accounts/{account_id}")

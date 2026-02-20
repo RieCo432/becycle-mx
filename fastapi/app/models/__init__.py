@@ -19,3 +19,4 @@ from .colours import *
 from .bikeColours import *
 from .accounts import *
 from .transactions import *
+from .expenseClaims import *

@@ -44,6 +44,22 @@ async def post_expense(
     return crud.create_expense(db=db, expense_user=expense_user, expense_data=expense_data, receipt_file=receipt_file)
 
 
+@expenses.post("/expenses/claims")
+async def post_expense_claim(
+        notes: Annotated[str, Body(embed=True)],
+        expense_date: Annotated[date, Body(embed=True)],
+        expense_claim_transaction_header_id: Annotated[UUID, Body(embed=True)],
+        receipt_file: UploadFile,
+        user: schemas.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)) -> schemas.ExpenseClaim:
+    
+    expense_claim_data = schemas.ExpenseClaimCreate(notes=notes, expenseTransactionHeaderId=expense_claim_transaction_header_id, expenseDate=expense_date)
+    
+    crud.post_transaction_header(db=db, transaction_header_id=expense_claim_data.expenseTransactionHeaderId, user=user)
+    
+    return crud.create_expense_claim(db=db, expense_claim_data=expense_claim_data, receipt_file=receipt_file)
+
+
 @expenses.get("/expenses/{expense_id}/receipt")
 async def get_expense_receipt(
         expense_id: UUID,
