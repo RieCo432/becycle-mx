@@ -49,7 +49,7 @@
               </div>
               <div
                 class="px-6 py-8"
-                :class="scrollContent ? 'overflow-y-auto max-h-[400px]' : ''"
+                :class="scrollContent ? 'overflow-y-auto max-h-[400px]' : 'h-full'"
               >
                 <slot />
               </div>

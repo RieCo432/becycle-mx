@@ -72,7 +72,7 @@ export default {
         name: yup.string().required(' The liability account name is required '),
       }).required(' The liability account is required '),
 
-      assetAccount: yup.object().when('useAdvanced', {
+      assetAccount: yup.object().when('useAdvance', {
         is: true,
         then: () => yup.object().shape({
           id: yup.string().uuid().required(' The asset account id is required '),
@@ -294,7 +294,7 @@ export default {
                 :options="projects"
                 label="Tag/Project"
                 v-model="projectId"
-                name="tagId"
+                name="projectId"
                 placeholder="Is this for a specific project? If so, select it here."
                 :error="projectIdError"
                 @change="fetchExpenseAccounts"
