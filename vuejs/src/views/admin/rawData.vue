@@ -85,11 +85,13 @@ export default {
           id: 'delete',
           icon: 'heroicons-outline:trash',
           func: (contractId) => {
-            requests.deleteContract(contractId).then(() => {
-              toast.success('Contract Deleted!', {timeout: 2000});
-              const indexInArray = this.rawContractData.findIndex((c) => c.id === contractId);
-              this.rawContractData.splice(indexInArray, 1);
-            });
+            if (confirm('Are you sure you want to delete this contract?')) {
+              requests.deleteContract(contractId).then(() => {
+                toast.success('Contract Deleted!', {timeout: 2000});
+                const indexInArray = this.rawContractData.findIndex((c) => c.id === contractId);
+                this.rawContractData.splice(indexInArray, 1);
+              });
+            }
           },
         },
       ],
