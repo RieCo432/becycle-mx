@@ -169,8 +169,33 @@ def delete_expense_claim(db: Session, expense_claim_id: UUID) -> None:
 
     if expense_claim is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense claim not found"})
+    
+    if expense_claim.reimbursementTransactionHeaderId is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This expense claim has already been reimbursed"})
+    
+    expense_transaction_header = db.scalar(
+        select(models.TransactionHeader)
+        .where(models.TransactionHeader.id == expense_claim.expenseTransactionHeaderId)
+    )
+    
+    expense_receipt_file = db.scalar(
+        select(models.ExpenseReceipt)
+        .where(models.ExpenseReceipt.id == expense_claim.receiptFileId)
+    )
+
 
     db.delete(expense_claim)
+    db.flush()
+
+    db.delete(expense_receipt_file)
+
+    for line in expense_transaction_header.transactionLines:
+        db.delete(line)
+
+    db.flush()
+    db.delete(expense_transaction_header)
+    
+    
     db.commit()
 
 
