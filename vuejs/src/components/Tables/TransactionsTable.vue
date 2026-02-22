@@ -77,10 +77,10 @@
             <Icon v-else icon="heroicons-outline:x-mark"/>
           </span>
           <span v-if="props.column.field === 'credit'">
-            <span v-if="props.row.credit > 0">{{props.row.credit}}</span>
+            <span v-if="props.row.credit > 0">&#163; {{(props.row.credit / 100).toFixed(2)}}</span>
           </span>
           <span v-if="props.column.field === 'debit'">
-            <span v-if="props.row.debit > 0">{{props.row.debit}}</span>
+            <span v-if="props.row.debit > 0">&#163; {{(props.row.debit / 100 ).toFixed(2)}}</span>
           </span>
         </template>
         <template #pagination-bottom="props">
@@ -148,6 +148,10 @@ export default {
         {
           label: 'Event',
           field: 'event',
+        },
+        {
+          label: 'id',
+          field: 'id',
         },
         {
           label: 'Created On',

@@ -32,6 +32,7 @@ def get_formatted_transaction_headers(db: Session) -> list[schemas.TransactionHe
         formatted_transaction_lines = []
         for transaction_line in transaction_header.transactionLines:
             formatted_transaction_lines.append(schemas.TransactionLineFormatted(
+                id=transaction_line.id,
                 accountName=transaction_line.account.name,
                 credit=-transaction_line.amount if transaction_line.amount < 0 else 0,
                 debit=transaction_line.amount if transaction_line.amount > 0 else 0,

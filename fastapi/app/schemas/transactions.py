@@ -44,6 +44,7 @@ class TransactionCreate(BaseModel):
     
     
 class TransactionLineFormatted(BaseModel):
+    id: UUID
     accountName: str
     credit: int = 0
     debit: int = 0
