@@ -1160,6 +1160,15 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  putExpenseClaim(expenseClaimId, notes, expenseDate) {
+    return axiosClient.put(`/expenses/claims/${expenseClaimId}`, {
+      notes: notes,
+      expenseDate: expenseDate,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   deleteExpense(expenseId) {
     return axiosClient.delete(`/expenses/${expenseId}`, {
       headers: credentialsStore.getApiRequestHeader(),

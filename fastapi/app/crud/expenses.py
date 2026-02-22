@@ -187,10 +187,6 @@ def update_expense_claim(db: Session, expense_claim_id: UUID, updated_expense_cl
         expense_claim.expenseDate = updated_expense_claim_data.expenseDate
     if updated_expense_claim_data.notes is not None:
         expense_claim.notes = updated_expense_claim_data.notes
-    if updated_expense_claim_data.expenseTransactionHeaderId is not None:
-        expense_claim.expenseTransactionHeaderId = updated_expense_claim_data.expenseTransactionHeaderId
-    if updated_expense_claim_data.reimbursementTransactionHeaderId is not None:
-        expense_claim.reimbursementTransactionHeaderId = updated_expense_claim_data.reimbursementTransactionHeaderId
     
     db.commit()
     return expense_claim

@@ -109,7 +109,7 @@ export default {
       treasurerUserIdError,
       transferDate,
       transferDateError,
-      submitPatchExpense,
+      submitUpdateExpenseClaim: submitPatchExpense,
     };
   },
   data() {

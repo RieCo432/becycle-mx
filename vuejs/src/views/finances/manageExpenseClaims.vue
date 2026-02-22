@@ -6,12 +6,14 @@ import Modal from '@/components/Modal/Modal.vue';
 import ExpenseClaimSummaryTable from '@/components/Tables/ExpenseClaimSummaryTable.vue';
 import TransactionLinesTable from '@/components/Tables/TransactionLinesTable.vue';
 import TransactionReimbursementForm from '@/components/Forms/TransactionReimbursementForm.vue';
+import EditExpenseClaimModal from '@/components/Modal/EditExpenseClaimModal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'manageExpenseClaims',
   components: {
+    EditExpenseClaimModal,
     TransactionReimbursementForm,
     TransactionLinesTable,
     ExpenseClaimSummaryTable,
@@ -44,7 +46,11 @@ export default {
           field: 'amount',
         },
         {
-          label: 'Claimed By',
+          label: 'Project',
+          field: 'projectId',
+        },
+        {
+          label: 'Added By',
           field: 'expenseTransactionHeader.postedByUser.username',
         },
         {
@@ -69,11 +75,23 @@ export default {
             this.showExpenseClaimInfoModal = true;
           },
         },
+        {
+          id: 'editExpense',
+          label: 'Edit Expense',
+          icon: 'heroicons-outline:pencil',
+          func: (expenseId) => this.openEditExpenseClaimModal(expenseId),
+        },
+        {
+          id: 'delete',
+          label: 'Delete expense',
+          icon: 'heroicons-outline:trash',
+          func: (expenseId) => this.deleteExpenseClaim(expenseId),
+        },
       ],
     };
   },
   methods: {
-    deleteExpense(expenseClaimId) {
+    deleteExpenseClaim(expenseClaimId) {
       if (confirm('Are you sure you want to delete this expense?')) {
         requests.deleteExpenseClaim(expenseClaimId).then(() => {
           toast.warning('Expense Deleted', {timeout: 2000});
@@ -94,7 +112,7 @@ export default {
       this.showExpenseClaimInfoModal = false;
       this.receiptUrl = null;
     },
-    openEditExpenseModal(expenseId) {
+    openEditExpenseClaimModal(expenseId) {
       this.editExpenseClaim = this.expenseClaims.find((e) => e.id === expenseId);
       this.showExpenseClaimEditModal = true;
     },
@@ -102,9 +120,10 @@ export default {
       this.showExpenseClaimEditModal = false;
       this.editExpenseClaim = null;
     },
-    expenseUpdated(updatedExpense) {
-      const indexInArray = this.expenseClaims.findIndex((e) => (e.id === updatedExpense.id));
-      this.expenseClaims.splice(indexInArray, 1, updatedExpense);
+    expenseClaimUpdated(updatedExpenseClaim) {
+      const indexInArray = this.expenseClaims.findIndex((e) => (e.id === updatedExpenseClaim.id));
+      this.expenseClaims.splice(indexInArray, 1, updatedExpenseClaim);
+      this.closeExpenseEditModal();
     },
     expenseClaimReimbursed(expenseClaim) {
       if (this.showExpenseClaimInfoModal) this.expenseClaimInfo = expenseClaim;
@@ -113,7 +132,6 @@ export default {
       this.closeExpenseInfoModal();
     },
     getExpenseStatus(expenseClaim) {
-      console.log(expenseClaim);
       const expenseLiabilityTxLine = expenseClaim.expenseTransactionHeader
         .transactionLines
         .find((line) => line.account.type === 'liability');
@@ -134,6 +152,12 @@ export default {
       return this.expenseClaims.map((expenseClaim) => ({
         ...expenseClaim,
         status: this.getExpenseStatus(expenseClaim),
+        projectId: expenseClaim
+          .expenseTransactionHeader
+          .transactionLines
+          .find((line) => line.account.type === 'expense')
+          .account
+          .restrictedToProjectId,
       }));
     },
   },
@@ -142,28 +166,6 @@ export default {
     requests.getUserMe().then((response) => {
       this.isUserTreasurer = response.data.treasurer;
       this.isUserAdmin = response.data.admin;
-      if (this.isUserTreasurer) {
-        this.actions.push({
-          id: 'markTransferred',
-          label: 'Mark as transferred',
-          icon: 'heroicons-outline:arrows-right-left',
-          func: (expenseId) => this.patchExpenseTransferred(expenseId),
-        });
-      }
-      if (this.isUserAdmin) {
-        this.actions.push({
-          id: 'editExpense',
-          label: 'Edit Expense',
-          icon: 'heroicons-outline:pencil',
-          func: (expenseId) => this.openEditExpenseModal(expenseId),
-        });
-        this.actions.push({
-          id: 'delete',
-          label: 'Delete expense',
-          icon: 'heroicons-outline:trash',
-          func: (expenseId) => this.deleteExpense(expenseId),
-        });
-      }
     });
   },
 };
@@ -180,7 +182,10 @@ export default {
       </div>
   </div>
 
-    <Modal @close="closeExpenseInfoModal()" :active-modal="showExpenseClaimInfoModal" size-class="max-w-[1700px] h-[1000px]" title="Expense Details">
+    <Modal
+      @close="closeExpenseInfoModal()"
+      :active-modal="showExpenseClaimInfoModal"
+      size-class="max-w-[1700px] h-[1000px]" title="Expense Details">
       <div v-if="showExpenseClaimInfoModal && expenseClaimInfo" class="grid grid-cols-6 lg:grid-cols-12 h-full">
         <div class="col-span-4 text-base text-slate-700 dark:text-slate-300 h-full">
           <p>Volunteer: {{ expenseClaimInfo.expenseTransactionHeader.postedByUser.username }}</p>
@@ -195,8 +200,13 @@ export default {
           </div>
           <div>
             <p class="font-bold">Reimbursement Transaction:</p>
-            <TransactionLinesTable v-if="expenseClaimInfo.reimbursementTransactionHeaderId !== null" :transaction-header="expenseClaimInfo.reimbursementTransactionHeader"/>
-            <TransactionReimbursementForm v-else-if="expenseClaimInfo.status === 'Pending'" :expense-claim-info="expenseClaimInfo" @expense-reimbursed="expenseClaimReimbursed"/>
+            <TransactionLinesTable
+              v-if="expenseClaimInfo.reimbursementTransactionHeaderId !== null"
+              :transaction-header="expenseClaimInfo.reimbursementTransactionHeader"/>
+            <TransactionReimbursementForm
+              v-else-if="expenseClaimInfo.status === 'Pending'"
+              :expense-claim-info="expenseClaimInfo"
+              @expense-reimbursed="expenseClaimReimbursed"/>
           </div>
 
         </div>
@@ -207,15 +217,13 @@ export default {
         </div>
       </div>
     </Modal>
-
-
-<!--    <EditExpenseModal-->
-<!--        :show-modal="showExpenseClaimEditModal"-->
-<!--        :expense="editExpenseClaim"-->
-<!--        :close-modal="closeExpenseEditModal"-->
-<!--        @expense-updated="expenseUpdated"-->
-<!--        @close="closeExpenseEditModal"-->
-<!--    ></EditExpenseModal>-->
+    <EditExpenseClaimModal
+        :show-modal="showExpenseClaimEditModal"
+        :expense-claim="editExpenseClaim"
+        :close-modal="closeExpenseEditModal"
+        @expense-claim-updated="expenseClaimUpdated"
+        @close="closeExpenseEditModal"
+    ></EditExpenseClaimModal>
   </div>
 </template>
 

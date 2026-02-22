@@ -211,6 +211,9 @@ export default {
             @change="() => {}"
           />
         </div>
+        <div class="col-span-6" v-if="assetAccount">
+          Balance: <span :class="assetAccount.balance < amount * 100 ? 'text-red-500' : ''">&#163; {{ (assetAccount.balance / 100).toFixed(2) }}</span>
+        </div>
         <div class="col-span-full">
           <Button type="submit" class="btn block w-full text-center">
             Submit
