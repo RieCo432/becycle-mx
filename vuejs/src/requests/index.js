@@ -1117,8 +1117,28 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getExpenseClaims() {
+    return axiosClient.get('/expenses/claims', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   patchExpenseTransferred(expenseId) {
     return axiosClient.patch(`/expenses/${expenseId}/transfer`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchExpenseClaimReimbursed(expenseClaimId, reimbursementTransactionHeaderId) {
+    return axiosClient.patch(`/expenses/claims/${expenseClaimId}/reimburse`, {
+      reimbursement_transaction_header_id: reimbursementTransactionHeaderId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteExpenseClaim(expenseClaimId) {
+    return axiosClient.delete(`/expenses/claims/${expenseClaimId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -1148,6 +1168,13 @@ export default {
   },
   getExpenseReceipt(expenseId) {
     return axiosClient.get(`/expenses/${expenseId}/receipt`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  getExpenseClaimReceipt(expenseClaimId) {
+    return axiosClient.get(`/expenses/claims/${expenseClaimId}/receipt`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       responseType: 'blob',

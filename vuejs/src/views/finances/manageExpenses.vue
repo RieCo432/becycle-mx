@@ -20,14 +20,14 @@ export default {
   },
   data() {
     return {
-      loadingExpenses: true,
+      loadingExpenseClaims: true,
       isUserTreasurer: false,
       isUserAdmin: false,
-      expenses: [],
-      expenseInfo: {},
-      showExpenseInfoModal: false,
-      showExpenseEditModal: false,
-      editExpense: null,
+      expenseClaims: [],
+      expenseClaimInfo: {},
+      showExpenseClaimInfoModal: false,
+      showExpenseClaimEditModal: false,
+      editExpenseClaim: null,
       receiptUrl: null,
       filterByTag: null,
       columns: [
@@ -83,9 +83,9 @@ export default {
           label: 'View Receipt',
           icon: 'heroicons-outline:receipt-percent',
           func: (expenseId) => {
-            this.expenseInfo = this.expenses.find((e) => e.id === expenseId);
+            this.expenseInfo = this.expenseClaims.find((e) => e.id === expenseId);
             requests.getExpenseReceipt(expenseId).then((response) => {
-              this.receiptUrl = window.URL.createObjectURL(new Blob([response.data], {type: this.expenseInfo.receiptContentType}));
+              this.receiptUrl = window.URL.createObjectURL(new Blob([response.data], {type: this.expenseClaimInfo.receiptContentType}));
             });
             this.showExpenseInfoModal = true;
           },
@@ -97,8 +97,8 @@ export default {
     patchExpenseTransferred(expenseId) {
       requests.patchExpenseTransferred(expenseId).then((response) => {
         toast.success('Expense Transferred', {timeout: 2000});
-        const indexInArray = this.expenses.findIndex((e) => (e.id === response.data.id));
-        this.expenses.splice(indexInArray, 1, this.setExpenseStatus(response.data));
+        const indexInArray = this.expenseClaims.findIndex((e) => (e.id === response.data.id));
+        this.expenseClaims.splice(indexInArray, 1, this.setExpenseStatus(response.data));
         this.closeExpenseInfoModal();
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -109,8 +109,8 @@ export default {
       if (confirmed) {
         requests.deleteExpense(expenseId).then(() => {
           toast.warning('Expense Deleted', {timeout: 2000});
-          const indexInArray = this.expenses.findIndex((e) => (e.id === expenseId));
-          this.expenses.splice(indexInArray, 1);
+          const indexInArray = this.expenseClaims.findIndex((e) => (e.id === expenseId));
+          this.expenseClaims.splice(indexInArray, 1);
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         });
@@ -127,7 +127,7 @@ export default {
       this.receiptUrl = null;
     },
     openEditExpenseModal(expenseId) {
-      this.editExpense = this.expenses.find((e) => e.id === expenseId);
+      this.editExpense = this.expenseClaims.find((e) => e.id === expenseId);
       this.showExpenseEditModal = true;
     },
     closeExpenseEditModal() {
@@ -135,8 +135,8 @@ export default {
       this.editExpense = null;
     },
     expenseUpdated(updatedExpense) {
-      const indexInArray = this.expenses.findIndex((e) => (e.id === updatedExpense.id));
-      this.expenses.splice(indexInArray, 1, updatedExpense);
+      const indexInArray = this.expenseClaims.findIndex((e) => (e.id === updatedExpense.id));
+      this.expenseClaims.splice(indexInArray, 1, updatedExpense);
     },
     setExpenseStatus(expense) {
       return {...expense, status: expense.transferDate ? 'Closed' : 'Open'};

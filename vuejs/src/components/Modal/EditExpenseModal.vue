@@ -48,7 +48,7 @@ export default {
       }),
     });
 
-    const {handleSubmit} = useForm({
+    const {handleSubmit: handleSubmitEditExpense} = useForm({
       validationSchema: editExpenseSchemas,
       keepValuesOnUnmount: true,
     });
@@ -64,7 +64,7 @@ export default {
     const {value: treasurerUserId, errorMessage: treasurerUserIdError, resetField: resetTreasurerUserId} = useField('treasurerUserId');
     const {value: transferDate, errorMessage: transferDateError, resetField: resetTransferDate} = useField('transferDate');
 
-    const submitPatchExpense = handleSubmit(() => {
+    const submitPatchExpense = handleSubmitEditExpense(() => {
       requests.patchExpense(expenseId.value, (inOrOut.value === 'out' ? -1 : 1) * amount.value, type.value, tagId.value, notes.value,
         expenseDate.value, expenseUserId.value, transferred.value, treasurerUserId.value, transferDate.value)
         .then((response) => {

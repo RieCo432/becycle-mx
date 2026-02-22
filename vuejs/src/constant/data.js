@@ -146,6 +146,12 @@ export const topMenu = [
         show: ['user'],
       },
       {
+        childtitle: 'Manage Expense Claims',
+        childicon: 'heroicons-outline:arrows-right-left',
+        childlink: '/finances/expenses/claims/manage',
+        show: ['user'],
+      },
+      {
         childtitle: 'Deposit Charts',
         childicon: 'heroicons-outline:presentation-chart-line',
         childlink: '/finances/deposit-charts',

@@ -19,3 +19,8 @@ class ExpenseClaim(ExpenseClaimBase):
     expenseTransactionHeader: TransactionHeader
     reimbursementTransactionHeaderId: UUID | None = None
     reimbursementTransactionHeader: TransactionHeader | None = None
+    
+    
+    
+class ExpenseClaimUpdate(ExpenseClaimBase):
+    reimbursementTransactionHeaderId: UUID | None = None
