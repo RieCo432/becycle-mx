@@ -49,19 +49,27 @@ def create_account(new_account_data: schemas.AccountCreate, db: Session) -> mode
     db.refresh(db_account)
     return db_account
 
-def get_accounts(db: Session, ui_filters: List[str] | None = None, types: List[str] | None = None, projectId: str | None = None) -> list[models.Account]:
+def get_accounts(db: Session, ui_filters: List[str] | None = None, types: List[str] | None = None, projectId: str | None = None, for_user: models.User | None = None) -> list[models.Account]:
     filter_query = []
     if ui_filters is not None:
         filter_query.append(models.Account.showInUis.op('&&')(ui_filters))
     if types is not None:
         filter_query.append(models.Account.type.in_(types))
-    if projectId is not None:
-        filter_query.append(models.Account.restrictedToProjectId == projectId)
     
-    return [_ for _ in db.scalars(
+    filter_query.append(models.Account.restrictedToProjectId == projectId)
+    
+    accounts = [_ for _ in db.scalars(
         select(models.Account)
         .where(and_(*filter_query))
     )]
+    
+    final_accounts = []
+    
+    for account in accounts:
+        if not for_user or account.ownerUserId == for_user.id or account.ownerGroupId in [group.id for group in for_user.groups]:
+            final_accounts.append(account) 
+            
+    return final_accounts
 
 def update_account(db: Session, account_id: UUID, updated_account_data: schemas.AccountUpdate) -> models.Account:
     account = get_account(db=db, account_id=account_id)

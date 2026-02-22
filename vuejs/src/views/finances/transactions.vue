@@ -18,6 +18,7 @@ export default {
     fetchTransactions() {
       requests.getFormattedTransactionHeaders().then((response) => {
         this.transactions = response.data.map((transaction) => ({
+          id: transaction.id,
           event: transaction.event,
           createdOn: transaction.createdOn,
           createdByUsername: transaction.createdByUsername,
@@ -27,6 +28,7 @@ export default {
           debit: null,
           accountName: transaction.accountName,
           children: transaction.formattedTransactionLines.map((line) => ({
+            id: line.id,
             createdOn: null,
             postedOn: null,
             accountName: line.accountName,

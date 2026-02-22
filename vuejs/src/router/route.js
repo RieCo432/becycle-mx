@@ -231,6 +231,15 @@ const routes = [
         component: () => import('@/views/finances/newExpense.vue'),
       },
       {
+        path: '/finances/expenses/claim',
+        name: 'Claim Expense',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/expenses/claim',
+        },
+        component: () => import('@/views/finances/newExpenseClaim.vue'),
+      },
+      {
         path: '/finances/expenses/manage',
         name: 'Manage Expenses',
         meta: {
@@ -238,6 +247,15 @@ const routes = [
           selectNavPath: '/finances/expenses/manage',
         },
         component: () => import('@/views/finances/manageExpenses.vue'),
+      },
+      {
+        path: '/finances/expenses/claims/manage',
+        name: 'Manage Expense Claims',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/expenses/claims/manage',
+        },
+        component: () => import('@/views/finances/manageExpenseClaims.vue'),
       },
       {
         path: '/finances/transactions',
