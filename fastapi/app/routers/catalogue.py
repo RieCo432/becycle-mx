@@ -30,8 +30,8 @@ async def get_catalogue(
 async def post_catalogue_item(
         name: Annotated[str, Body(embed=True)],
         description: Annotated[str, Body(embed=True)],
-        purchase_price: Annotated[int, Body(embed=True)],
-        recommended_retail_price: Annotated[int, Body(embed=True)],
+        purchase_price: Annotated[int, Body(embed=True)] | None = None,
+        recommended_retail_price: Annotated[int, Body(embed=True)] | None = None,
         photo: UploadFile | None = None,
         db: Session = Depends(dep.get_db)
 ) -> schemas.CatalogueItem:
