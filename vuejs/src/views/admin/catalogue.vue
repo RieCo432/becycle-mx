@@ -35,10 +35,10 @@ export default {
 
 <template>
   <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
-    <div class="col-span-6" v-for="item in sortedCatalogueItems" :key="item.id">
+    <div class="col-span-2" v-for="item in sortedCatalogueItems" :key="item.id">
       <CatalogueItemCard editable :item-details="item" @catalogueItemUpdated="updateCatalogueItem"/>
     </div>
-    <div class="col-span-6">
+    <div class="col-span-2">
       <AddNewCatalogueItemCard
         @catalogue-item-added="addItemToCatalogue"
       ></AddNewCatalogueItemCard>

@@ -151,7 +151,7 @@ export default {
             </div>
             <div class="col-span-2 p-3">
               <TextInput
-                label="Recommended Retail Price"
+                label="Recommended Retail Price (£)"
                 type="number"
                 placeholder="5.00"
                 name="recommendedRetailPrice"

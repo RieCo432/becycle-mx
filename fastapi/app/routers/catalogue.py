@@ -55,6 +55,15 @@ async def patch_catalogue_item(
     return crud.update_catalogue_item(db, catalogue_item_id, updated_catalogue_item, photo)
 
 
+@catalogue.patch("/catalogue/{catalogue_item_id}/availability")
+async def patch_make_catalogue_item_available(
+        catalogue_item_id: UUID,
+        available: Annotated[bool, Body(embed=True)],
+        db: Session = Depends(dep.get_db)
+) -> schemas.CatalogueItem:
+    return crud.set_catalogue_item_available(db, catalogue_item_id, available)
+
+
 @catalogue.get("/catalogue/{catalogue_item_id}/photo")
 async def get_catalogue_item_photo(
         catalogue_item_id: UUID,

@@ -10,7 +10,6 @@ import {useDropzone} from 'vue3-dropzone';
 import {Icon} from '@iconify/vue';
 import Button from '@/components/Button/index.vue';
 import {useToast} from 'vue-toastification';
-import {events as context} from 'vuedraggable/src/core/sortableEvents';
 
 const toast = useToast();
 
@@ -18,11 +17,6 @@ const toast = useToast();
 export default {
   name: 'CatalogueItemCard',
   components: {Button, Icon, TextInput, DashButton, Card},
-  data() {
-    return {
-      photoUrl: null,
-    };
-  },
   props: {
     itemDetails: {
       type: Object,
@@ -43,36 +37,38 @@ export default {
       this.name = this.itemDetails.name;
       this.description = this.itemDetails.description;
     },
-    getImage() {
-      console.log('item details', this.itemDetails);
-      if (this.itemDetails.catalogueItemPhotoId) {
-        requests.getCatalogueItemPhoto(this.itemDetails.id).then((response) => {
-          console.log('response', response);
-          const photoFile = new File([response.data], this.itemDetails.catalogueItemPhotoId, {type: response.data.type});
-          console.log('photoFile', photoFile);
-          this.photoUrl = window.URL.createObjectURL(photoFile);
-          this.files.splice(0, this.files.length, Object.assign(photoFile, {preview: this.photoUrl}));
-        });
-      }
+    toggleAvailability() {
+      requests.patchCatalogueItemAvailability(this.itemDetails.id, !this.itemDetails.available).then((response) => {
+        toast.success('Catalogue item availability updated successfully', {timeout: 2000});
+        this.$emit('catalogueItemUpdated', response.data);
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     },
   },
-  mounted() {
+  created() {
     this.getImage();
   },
   emits: ['catalogueItemUpdated'],
-  watch: {
-    itemDetails() {
-      this.getImage();
-    },
-  },
   setup(props, context) {
     const inEditMode = ref(false);
     const isOldPhoto = ref(true);
+    const photoUrl = ref(null);
     const itemDetails = toRef(props, 'itemDetails');
     const editItemSchema = yup.object().shape({
       name: yup.string().max(60).required('Name is required'),
       description: yup.string().max(512).required('Description is required'),
     });
+
+    function getImage() {
+      if (itemDetails.value.catalogueItemPhotoId) {
+        requests.getCatalogueItemPhoto(itemDetails.value.id).then((response) => {
+          const photoFile = new File([response.data], itemDetails.value.catalogueItemPhotoId, {type: response.data.type});
+          photoUrl.value = window.URL.createObjectURL(photoFile);
+          files.value.splice(0, files.value.length, Object.assign(photoFile, {preview: photoUrl.value}));
+        });
+      }
+    }
 
     const {handleSubmit} = useForm({
       validationSchema: editItemSchema,
@@ -100,8 +96,9 @@ export default {
         description.value,
         !isOldPhoto.value ? files.value[0] : undefined)
         .then((response) => {
-          toast.success('Catalogue item updated successfully', {timeout: 2000}),
+          toast.success('Catalogue item updated successfully', {timeout: 2000});
           context.emit('catalogueItemUpdated', response.data);
+          if (!isOldPhoto.value) getImage();
           inEditMode.value = false;
           isOldPhoto.value = true;
         }).catch((error) => {
@@ -121,6 +118,8 @@ export default {
       descriptionError,
       submitItemDetails,
       isOldPhoto,
+      getImage,
+      photoUrl,
     };
   },
 };
@@ -171,11 +170,15 @@ export default {
           <div class="grid grid-cols-1 divide-y divide-solid divide-slate-600">
             <div class="col-span-1 p-3">
               <div class="grid grid-cols-8" v-if="!inEditMode">
-                <p class="w-full col-span-6 text-slate-700 dark:text-slate-300 text-2xl truncate font-semibold">
+                <p class="w-full col-span-4 text-slate-700 dark:text-slate-300 text-2xl truncate font-semibold">
                   {{ itemDetails.name }}
                 </p>
-                <Button v-if="editable" @click="openEditMode" class="col-span-1 rounded-l-full">
+                <Button v-if="editable" @click="openEditMode" class="col-span-2 rounded-l-full">
                   Edit
+                </Button>
+                <Button v-if="editable" @click="toggleAvailability" class="col-span-2 rounded-r-full" :btn-class="itemDetails.available ? 'btn-success' : 'btn-danger'">
+                  <Icon icon="heroicons-outline:trash" v-if="itemDetails.available"></Icon>
+                  <Icon icon="heroicons-outline:plus" v-else></Icon>
                 </Button>
               </div>
               <div class="grid grid-cols-8" v-if="inEditMode">

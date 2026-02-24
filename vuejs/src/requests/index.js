@@ -1609,4 +1609,10 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  patchCatalogueItemAvailability(catalogueItemId, available) {
+    return axiosClient.patch(`/catalogue/${catalogueItemId}/availability`, {available: available}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

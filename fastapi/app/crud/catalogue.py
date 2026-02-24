@@ -143,3 +143,12 @@ def get_catalogue_item_photo(db: Session, catalogue_item_id: UUID) -> dict[str, 
         fout.write(catalogue_item.catalogueItemPhoto.content)
 
     return {"path": output_file_path, "media_type": catalogue_item.catalogueItemPhoto.contentType}
+
+
+def set_catalogue_item_available(db: Session, catalogue_item_id: UUID, available: bool) -> models.CatalogueItem:
+    catalogue_item = get_catalogue_item(db=db, catalogue_item_id=catalogue_item_id)
+    catalogue_item.available = available
+    db.commit()
+    db.refresh(catalogue_item)
+    
+    return catalogue_item
