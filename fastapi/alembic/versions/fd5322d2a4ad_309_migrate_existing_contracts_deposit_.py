@@ -26,13 +26,19 @@ def upgrade() -> None:
     db = op.get_bind()
 
 
+    if (db.execute(text("SELECT ID FROM groups where name = 'treasurers';")).rowcount == 0):
+        db.execute(text("INSERT INTO groups (name) VALUES ('treasurers');"))
+
     treasurer_user_group_id = db.execute(text("SELECT ID FROM groups where name = 'treasurers';")).first()[0]
 
     db.execute(text(f"INSERT INTO accounts "
                     f"(name, type, description, ownergroupid, isinternal) "
                     f"VALUES "
                     f"('bank deposit stash', 'asset', 'Bike deposits in the bank', '{treasurer_user_group_id}', true);"))
-    
+
+    if (db.execute(text("SELECT ID FROM groups where name = 'deposit bearers';")).rowcount == 0):
+        db.execute(text("INSERT INTO groups (name) VALUES ('deposit bearers');"))
+
     deposit_bearer_group_id = db.execute(text("SELECT ID FROM groups where name = 'deposit bearers';")).first()[0]
     
     db.execute(text(f"INSERT INTO accounts "
