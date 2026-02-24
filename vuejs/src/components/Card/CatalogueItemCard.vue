@@ -206,6 +206,12 @@ export default {
                   :error="descriptionError"
               />
             </div>
+            <div class="col-span-1 p-3">
+              <p v-if="!inEditMode" class="dark:text-slate-300 text-slate-700 inline-block">&#163; {{ (itemDetails.purchasePrice / 100).toFixed(2) }}</p>
+            </div>
+            <div class="col-span-1 p-3">
+              <p v-if="!inEditMode" class="dark:text-slate-300 text-slate-700 inline-block">&#163; {{ (itemDetails.recommendedRetailPrice / 100).toFixed(2) }}</p>
+            </div>
           </div>
         </div>
       </div>
