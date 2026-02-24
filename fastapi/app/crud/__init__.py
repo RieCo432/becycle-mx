@@ -16,3 +16,4 @@ from .crimeReports import *
 from .colours import *
 from .accounts import *
 from .transactions import *
+from .catalogue import *

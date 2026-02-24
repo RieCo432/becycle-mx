@@ -438,6 +438,15 @@ const routes = [
         component: () => import('@/views/admin/accounts.vue'),
       },
       {
+        path: '/admin/catalogue',
+        name: 'Manage Catalogue',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/catalogue',
+        },
+        component: () => import('@/views/admin/catalogue.vue'),
+      },
+      {
         path: '/crimereports',
         name: 'Find Crime Reports',
         meta: {

@@ -8,20 +8,23 @@ import DashButton from '@/components/Button/index.vue';
 import TextInput from '@/components/TextInput/index.vue';
 import {useDropzone} from 'vue3-dropzone';
 import {Icon} from '@iconify/vue';
+import Button from '@/components/Button/index.vue';
+import {useToast} from 'vue-toastification';
+import {events as context} from 'vuedraggable/src/core/sortableEvents';
 
-const COMMON_NAME = import.meta.env.VITE_COMMON_NAME;
+const toast = useToast();
+
 
 export default {
-  name: 'UserPresentationCard',
-  components: {Icon, TextInput, DashButton, Card},
+  name: 'CatalogueItemCard',
+  components: {Button, Icon, TextInput, DashButton, Card},
   data() {
     return {
-      COMMON_NAME : COMMON_NAME,
       photoUrl: null,
     };
   },
   props: {
-    presentationCardDetails: {
+    itemDetails: {
       type: Object,
       required: true,
     },
@@ -29,11 +32,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    updateitemDetails: {
-      type: Function,
-      required: false,
-    },
-    deleteCard: {
+    updateItemDetails: {
       type: Function,
       required: false,
     },
@@ -41,43 +40,47 @@ export default {
   methods: {
     openEditMode() {
       this.inEditMode = true;
-      this.name = this.presentationCardDetails.name;
-      this.bio = this.presentationCardDetails.bio;
+      this.name = this.itemDetails.name;
+      this.description = this.itemDetails.description;
     },
     getImage() {
-      if (this.presentationCardDetails.id !== 'NOTSET') {
-        requests.getPresentationCardPhoto(this.presentationCardDetails.id).then((response) => {
-          const photoFile = new File([response.data], {type: this.presentationCardDetails.photoContentType});
+      console.log('item details', this.itemDetails);
+      if (this.itemDetails.catalogueItemPhotoId) {
+        requests.getCatalogueItemPhoto(this.itemDetails.id).then((response) => {
+          console.log('response', response);
+          const photoFile = new File([response.data], this.itemDetails.catalogueItemPhotoId, {type: response.data.type});
+          console.log('photoFile', photoFile);
           this.photoUrl = window.URL.createObjectURL(photoFile);
           this.files.splice(0, this.files.length, Object.assign(photoFile, {preview: this.photoUrl}));
         });
       }
     },
   },
-  created() {
+  mounted() {
     this.getImage();
   },
+  emits: ['catalogueItemUpdated'],
   watch: {
-    presentationCardDetails() {
+    itemDetails() {
       this.getImage();
     },
   },
-  setup(props) {
+  setup(props, context) {
     const inEditMode = ref(false);
     const isOldPhoto = ref(true);
-    const updateCardDetails = toRef(props, 'updateCardDetails');
-    const editCardSchema = yup.object().shape({
-      name: yup.string().max(20).required('Name is required'),
-      bio: yup.string().max(450).required('Bio is required'),
+    const itemDetails = toRef(props, 'itemDetails');
+    const editItemSchema = yup.object().shape({
+      name: yup.string().max(60).required('Name is required'),
+      description: yup.string().max(512).required('Description is required'),
     });
 
     const {handleSubmit} = useForm({
-      validationSchema: editCardSchema,
+      validationSchema: editItemSchema,
       keepValuesOnUnmount: true,
     });
 
     const {value: name, errorMessage: nameError} = useField('name');
-    const {value: bio, errorMessage: bioError} = useField('bio');
+    const {value: description, errorMessage: descriptionError} = useField('description');
 
     const files = ref([]);
     function onDrop(acceptFiles) {
@@ -90,10 +93,20 @@ export default {
 
     const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: false});
 
-    const submitCardDetails = handleSubmit(() => {
-      updateCardDetails.value(name.value, bio.value, !isOldPhoto.value ? files.value[0] : undefined);
-      inEditMode.value = false;
-      isOldPhoto.value = true;
+    const submitItemDetails = handleSubmit(() => {
+      requests.putUpdateCatalogueItem(
+        itemDetails.value.id,
+        name.value,
+        description.value,
+        !isOldPhoto.value ? files.value[0] : undefined)
+        .then((response) => {
+          toast.success('Catalogue item updated successfully', {timeout: 2000}),
+          context.emit('catalogueItemUpdated', response.data);
+          inEditMode.value = false;
+          isOldPhoto.value = true;
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     });
 
     return {
@@ -104,9 +117,9 @@ export default {
       inEditMode,
       name,
       nameError,
-      bio,
-      bioError,
-      submitCardDetails,
+      description,
+      descriptionError,
+      submitItemDetails,
       isOldPhoto,
     };
   },
@@ -115,12 +128,12 @@ export default {
 
 <template>
   <Card gap-null class-name="rounded-3xl" body-class="p-0">
-    <form @submit.prevent="submitCardDetails">
+    <form @submit.prevent="submitItemDetails">
       <div class="grid grid-cols-5 md:grid-cols-9 lg:grid-cols-12">
         <div class="col-span-5">
-          <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Profile Picture" class="aspect-square rounded-3xl"/>
+          <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Item Picture" class="aspect-square rounded-3xl"/>
           <img v-if="!inEditMode && !photoUrl" src="@/assets/images/defaultProfilePicture.jpg"
-               alt="Profile Picture" class="aspect-square rounded-3xl"/>
+               alt="Item Picture" class="aspect-square rounded-3xl"/>
           <div v-if="inEditMode" class="h-full w-full aspect-square" @click="() => {
             files = [];
             isOldPhoto = false;
@@ -149,7 +162,7 @@ export default {
               <img v-else
                   :src="files[0].preview"
                   class="object-cover h-full w-full block rounded-3xl aspect-square"
-                   alt="Volunteer Presentation Photo"
+                   alt="Item Picture"
               />
             </div>
           </div>
@@ -159,15 +172,11 @@ export default {
             <div class="col-span-1 p-3">
               <div class="grid grid-cols-8" v-if="!inEditMode">
                 <p class="w-full col-span-6 text-slate-700 dark:text-slate-300 text-2xl truncate font-semibold">
-                    {{presentationCardDetails.name}}
+                  {{ itemDetails.name }}
                 </p>
-                <DashButton v-if="editable" @click="openEditMode" class="col-span-1 rounded-l-full">
-                  <Icon icon="heroicons-outline:pencil-square"></Icon>
-                </DashButton>
-                <DashButton v-if="editable" @click="deleteCard" class="col-span-1 rounded-r-full bg-danger-600">
-                  <Icon icon="heroicons-outline:trash"></Icon>
-                </DashButton>
-
+                <Button v-if="editable" @click="openEditMode" class="col-span-1 rounded-l-full">
+                  Edit
+                </Button>
               </div>
               <div class="grid grid-cols-8" v-if="inEditMode">
                 <TextInput
@@ -175,26 +184,26 @@ export default {
                     v-if="inEditMode"
                     label="Name"
                     type="text"
-                    placeholder="John Doe"
+                    placeholder="Derailleur"
                     name="name"
                     v-model="name"
                     :error="nameError"
                 />
-                <DashButton v-if="inEditMode" @click="submitCardDetails" class="col-span-2 justify-self-end my-auto rounded-full">
+                <DashButton v-if="inEditMode" @click="submitItemDetails" class="col-span-2 justify-self-end my-auto rounded-full">
                   <Icon icon="heroicons-outline:check"></Icon>
                 </DashButton>
               </div>
             </div>
             <div class="col-span-1 p-3">
-              <p v-if="!inEditMode" class="dark:text-slate-300 text-slate-700 inline-block">{{presentationCardDetails.bio}}</p>
+              <p v-if="!inEditMode" class="dark:text-slate-300 text-slate-700 inline-block">{{ itemDetails.description }}</p>
               <TextInput
                   v-if="inEditMode"
-                  label="Biography"
+                  label="Description"
                   type="text"
-                  :placeholder="`I started volunteering at ${ COMMON_NAME } when...`"
-                  name="bio"
-                  v-model="bio"
-                  :error="bioError"
+                  placeholder="Spare derailleurs from the box"
+                  name="description"
+                  v-model="description"
+                  :error="descriptionError"
               />
             </div>
           </div>

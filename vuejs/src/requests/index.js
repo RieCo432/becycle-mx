@@ -1567,4 +1567,46 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getItemCatalogue(includeUnavailable) {
+    return axiosClient.get('/catalogue', {
+      params: {include_unavailable: includeUnavailable},
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getCatalogueItemPhoto(catalogueItemId) {
+    return axiosClient.get(`/catalogue/${catalogueItemId}/photo`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  postNewCatalogueItem(name, description, purchasePrice, recommendedRetailPrice, photo) {
+    return axiosClient.post('/catalogue', {
+      name: name,
+      description: description,
+      purchase_price: purchasePrice,
+      recommended_retail_price: recommendedRetailPrice,
+      ...photo ? {photo: photo} : {},
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateCatalogueItem(catalogueItemId, name, description, photo) {
+    return axiosClient.put(`/catalogue/${catalogueItemId}`, {
+      name: name,
+      description: description,
+      ...photo ? {photo: photo} : {},
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

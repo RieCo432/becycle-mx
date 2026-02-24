@@ -50,6 +50,7 @@ app.include_router(routers.crime_reports)
 app.include_router(routers.colours)
 app.include_router(routers.accounts)
 app.include_router(routers.transactions)
+app.include_router(routers.catalogue)
 
 
 
