@@ -13,12 +13,12 @@
     <!-- main sidebar end -->
     <Transition name="mobilemenu">
       <mobile-sidebar
-        v-if="window.width < 1280 && this.$store.themeSettingsStore.mobielSidebar"
+        v-if="window.width <= 1280 && this.$store.themeSettingsStore.mobielSidebar"
       />
     </Transition>
     <Transition name="overlay-fade">
       <div
-        v-if="window.width < 1280 && this.$store.themeSettingsStore.mobielSidebar"
+        v-if="window.width <= 1280 && this.$store.themeSettingsStore.mobielSidebar"
         class="overlay bg-slate-900 bg-opacity-70 backdrop-filter backdrop-blur-[3px] backdrop-brightness-10 fixed inset-0 z-[999]"
         @click="this.$store.themeSettingsStore.mobielSidebar = false"
       ></div>
