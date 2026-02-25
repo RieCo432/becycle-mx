@@ -1,6 +1,6 @@
 from typing import Annotated, List
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, Body
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, Body, Form
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import FileResponse
@@ -28,10 +28,10 @@ async def get_catalogue(
 
 @catalogue.post("/catalogue", response_model=schemas.CatalogueItem)
 async def post_catalogue_item(
-        name: Annotated[str, Body(embed=True)],
-        description: Annotated[str, Body(embed=True)],
-        purchase_price: Annotated[int, Body(embed=True)] | None = None,
-        recommended_retail_price: Annotated[int, Body(embed=True)] | None = None,
+        name: Annotated[str, Form()],
+        description: Annotated[str, Form()],
+        purchase_price: Annotated[int | None, Form()] = None,
+        recommended_retail_price: Annotated[int | None, Form()] = None,
         photo: UploadFile | None = None,
         db: Session = Depends(dep.get_db)
 ) -> schemas.CatalogueItem:
