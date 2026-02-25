@@ -117,64 +117,60 @@ export default {
             </div>
           </div>
         </div>
-        <div class="col-span-2 md:col-span-4 lg:col-span-7">
-          <div class="grid grid-cols-2">
-            <div class="col-span-2 p-3">
-              <TextInput
-                class="col-span-6"
-                label="Name"
-                type="text"
-                placeholder="Derailleur"
-                name="name"
-                v-model="name"
-                :error="nameError"
-              />
-            </div>
-            <div class="col-span-2 p-3">
-              <TextInput
-                  label="Description"
-                  type="text"
-                  placeholder="Spare deraillieurs from the box"
-                  name="description"
-                  v-model="description"
-                  :error="descriptionError"
-              />
-            </div>
-            <div class="col-span-2 p-3">
-              <TextInput
-                label="Purchase Price (£)"
-                type="number"
-                placeholder="3.50"
-                name="purchasePrice"
-                v-model="purchasePrice"
-                :error="purchasePriceError"
-              />
-            </div>
-            <div class="col-span-2 p-3">
-              <TextInput
-                label="Recommended Retail Price (£)"
-                type="number"
-                placeholder="5.00"
-                name="recommendedRetailPrice"
-                v-model="recommendedRetailPrice"
-                :error="recommendedRetailPriceError"
-              />
-            </div>
-            <div class="col-span-1 p-3">
-              <Button
-                @click.prevent="() => {resetNewItemForm(); files = []}"
-                btn-class="btn btn-danger rounded-full block w-full text-center">
-                Reset Form
-              </Button>
-            </div>
-            <div class="col-span-1 p-3">
-              <Button
-                  type="submit"
-                  btn-class="btn btn-primary block w-full text-center rounded-full">
-                Submit
-              </Button>
-            </div>
-          </div>
+        <div class="col-span-2 p-2">
+          <TextInput
+              class="col-span-6"
+              label="Name"
+              type="text"
+              placeholder="Derailleur"
+              name="name"
+              v-model="name"
+              :error="nameError"
+          />
+        </div>
+        <div class="col-span-2 p-2">
+          <TextInput
+              label="Description"
+              type="text"
+              placeholder="Spare deraillieurs from the box"
+              name="description"
+              v-model="description"
+              :error="descriptionError"
+          />
+        </div>
+        <div class="col-span-2 p-2">
+          <TextInput
+              label="Purchase Price (£)"
+              type="number"
+              placeholder="3.50"
+              name="purchasePrice"
+              v-model="purchasePrice"
+              :error="purchasePriceError"
+          />
+        </div>
+        <div class="col-span-2 p-2">
+          <TextInput
+              label="Recommended Retail Price (£)"
+              type="number"
+              placeholder="5.00"
+              name="recommendedRetailPrice"
+              v-model="recommendedRetailPrice"
+              :error="recommendedRetailPriceError"
+          />
+        </div>
+        <div class="col-span-1 p-2">
+          <Button
+              @click.prevent="() => {resetNewItemForm(); files = []}"
+              btn-class="btn btn-danger rounded-full block w-full text-center">
+            Reset Form
+          </Button>
+        </div>
+        <div class="col-span-1 p-2">
+          <Button
+              type="submit"
+              btn-class="btn btn-primary block w-full text-center rounded-full">
+            Submit
+          </Button>
         </div>
       </div>
     </form>
