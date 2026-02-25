@@ -46,11 +46,12 @@ export default {
     const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: false});
 
     const submitItemDetails = handleSubmit(() => {
+      console.log(purchasePrice.value, recommendedRetailPrice.value);
       requests.postNewCatalogueItem(
         name.value,
         description.value,
-        purchasePrice.value * 100,
-        recommendedRetailPrice.value * 100,
+        purchasePrice.value ? purchasePrice.value * 100 : null,
+        recommendedRetailPrice.value ? recommendedRetailPrice.value * 100 : null,
         files.value[0]).then((response) => {
         toast.success('Item added successfully', {timeout: 2000});
         context.emit('catalogueItemAdded', response.data);
@@ -82,8 +83,8 @@ export default {
 <template>
   <Card gap-null class-name="rounded-3xl" body-class="p-0">
     <form @submit.prevent="submitItemDetails">
-      <div class="grid grid-cols-5 md:grid-cols-9 lg:grid-cols-12">
-        <div class="col-span-5">
+      <div class="grid grid-cols-2">
+        <div class="col-span-2">
           <div class="h-full w-full aspect-square" @click="() => {
             files = [];
           }">
@@ -116,7 +117,7 @@ export default {
             </div>
           </div>
         </div>
-        <div class="col-span-5 md:col-span-4 lg:col-span-7">
+        <div class="col-span-2 md:col-span-4 lg:col-span-7">
           <div class="grid grid-cols-2">
             <div class="col-span-2 p-3">
               <TextInput
@@ -161,16 +162,16 @@ export default {
             </div>
             <div class="col-span-1 p-3">
               <Button
-                type="submit"
-                btn-class="btn btn-primary block w-full text-center rounded-full">
-                Submit
+                @click.prevent="() => {resetNewItemForm(); files = []}"
+                btn-class="btn btn-danger rounded-full block w-full text-center">
+                Reset Form
               </Button>
             </div>
             <div class="col-span-1 p-3">
               <Button
-                @click.prevent="() => {resetNewItemForm(); files = []}"
-                btn-class="btn btn-danger rounded-full block w-full text-center">
-                Reset Form
+                  type="submit"
+                  btn-class="btn btn-primary block w-full text-center rounded-full">
+                Submit
               </Button>
             </div>
           </div>

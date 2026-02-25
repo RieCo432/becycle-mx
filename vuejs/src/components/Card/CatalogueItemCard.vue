@@ -128,11 +128,11 @@ export default {
 <template>
   <Card gap-null class-name="rounded-3xl" body-class="p-0">
     <form @submit.prevent="submitItemDetails">
-      <div class="grid grid-cols-5 md:grid-cols-9 lg:grid-cols-12">
-        <div class="col-span-5">
-          <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Item Picture" class="aspect-square rounded-3xl"/>
+      <div class="grid grid-cols-2">
+        <div class="col-span-2">
+          <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Item Picture" class="aspect-square rounded-3xl h-full w-full"/>
           <img v-if="!inEditMode && !photoUrl" src="@/assets/images/defaultProfilePicture.jpg"
-               alt="Item Picture" class="aspect-square rounded-3xl"/>
+               alt="Item Picture" class="h-full w-full aspect-square rounded-3xl"/>
           <div v-if="inEditMode" class="h-full w-full aspect-square" @click="() => {
             files = [];
             isOldPhoto = false;
@@ -166,20 +166,13 @@ export default {
             </div>
           </div>
         </div>
-        <div class="col-span-5 md:col-span-4 lg:col-span-7">
-          <div class="grid grid-cols-1 divide-y divide-solid divide-slate-600">
-            <div class="col-span-1 p-3">
+        <div class="col-span-2">
+          <div class="grid grid-cols-2 divide-y divide-solid divide-slate-600">
+            <div class="col-span-2 p-3">
               <div class="grid grid-cols-8" v-if="!inEditMode">
-                <p class="w-full col-span-4 text-slate-700 dark:text-slate-300 text-2xl truncate font-semibold">
+                <p class="w-full col-span-8 text-slate-700 dark:text-slate-300 text-2xl font-semibold">
                   {{ itemDetails.name }}
                 </p>
-                <Button v-if="editable" @click="openEditMode" class="col-span-2 rounded-l-full">
-                  Edit
-                </Button>
-                <Button v-if="editable" @click="toggleAvailability" class="col-span-2 rounded-r-full" :btn-class="itemDetails.available ? 'btn-success' : 'btn-danger'">
-                  <Icon icon="heroicons-outline:trash" v-if="itemDetails.available"></Icon>
-                  <Icon icon="heroicons-outline:plus" v-else></Icon>
-                </Button>
               </div>
               <div class="grid grid-cols-8" v-if="inEditMode">
                 <TextInput
@@ -192,12 +185,9 @@ export default {
                     v-model="name"
                     :error="nameError"
                 />
-                <DashButton v-if="inEditMode" @click="submitItemDetails" class="col-span-2 justify-self-end my-auto rounded-full">
-                  <Icon icon="heroicons-outline:check"></Icon>
-                </DashButton>
               </div>
             </div>
-            <div class="col-span-1 p-3">
+            <div class="col-span-2 p-3">
               <p v-if="!inEditMode" class="dark:text-slate-300 text-slate-700 inline-block">{{ itemDetails.description }}</p>
               <TextInput
                   v-if="inEditMode"
@@ -209,12 +199,32 @@ export default {
                   :error="descriptionError"
               />
             </div>
-            <div class="col-span-1 p-3">
-              <p v-if="!inEditMode" class="dark:text-slate-300 text-slate-700 inline-block">&#163; {{ (itemDetails.purchasePrice / 100).toFixed(2) }}</p>
+            <div class="col-span-2 grid p-3 dark:text-slate-300 text-slate-700" v-if="!inEditMode">
+              <div class="justify-self-start">Purchase:</div>
+              <div class="justify-self-end">&#163; {{ (itemDetails.purchasePrice / 100).toFixed(2) }}</div>
             </div>
-            <div class="col-span-1 p-3">
-              <p v-if="!inEditMode" class="dark:text-slate-300 text-slate-700 inline-block">&#163; {{ (itemDetails.recommendedRetailPrice / 100).toFixed(2) }}</p>
+            <div class="col-span-2 p-3 flex-row dark:text-slate-300 text-slate-700" v-if="!inEditMode">
+              <span class="align-left">Recommended:</span>
+                <span class="align-right">&#163; {{ (itemDetails.recommendedRetailPrice / 100).toFixed(2) }}</span>
             </div>
+          </div>
+        </div>
+        <div class="col-span-2 p-3" v-if="editable && !inEditMode">
+          <div class="grid grid-cols-2">
+            <Button @click.prevent="openEditMode" class="col-span-1 rounded-l-full">
+              Edit
+            </Button>
+            <Button @click.prevent="toggleAvailability" class="col-span-1 rounded-r-full" :btn-class="itemDetails.available ? 'btn-success' : 'btn-danger'">
+              <Icon icon="heroicons-outline:check-circle" v-if="itemDetails.available"></Icon>
+              <Icon icon="heroicons-outline:no-symbol" v-else></Icon>
+            </Button>
+          </div>
+        </div>
+        <div class="col-span-2 p-3" v-if="inEditMode">
+          <div class="grid grid-cols-2">
+            <DashButton v-if="inEditMode" @click="submitItemDetails" class="col-span-2 justify-self-end my-auto rounded-full">
+              Update
+            </DashButton>
           </div>
         </div>
       </div>
