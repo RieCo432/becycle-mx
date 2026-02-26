@@ -8,12 +8,13 @@ import TextInput from '@/components/TextInput/index.vue';
 import {useDropzone} from 'vue3-dropzone';
 import Button from '@/components/Button/index.vue';
 import {useToast} from 'vue-toastification';
+import Switch from '@/components/Switch';
 
 const toast = useToast();
 
 export default {
   name: 'AddNewCatalogueItemCard',
-  components: {Button, TextInput, Card},
+  components: {Button, TextInput, Card, Switch},
   emits: ['catalogueItemAdded'],
 
   setup(props, context) {
@@ -36,6 +37,10 @@ export default {
         .min(0)
         .nullable()
         .transform((value) => Number.isNaN(value) ? null : value ),
+      isSecondHand: yup
+        .boolean()
+        .required('Is second hand status is required')
+        .default(false),
     });
 
     const {handleSubmit, handleReset: resetNewItemForm} = useForm({
@@ -47,6 +52,7 @@ export default {
     const {value: description, errorMessage: descriptionError} = useField('description');
     const {value: purchasePrice, errorMessage: purchasePriceError} = useField('purchasePrice');
     const {value: recommendedRetailPrice, errorMessage: recommendedRetailPriceError} = useField('recommendedRetailPrice');
+    const {value: isSecondHand, errorMessage: isSecondHandError} = useField('isSecondHand');
 
     const files = ref([]);
     function onDrop(acceptFiles) {
@@ -66,6 +72,7 @@ export default {
         description.value,
         purchasePrice.value ? purchasePrice.value * 100 : null,
         recommendedRetailPrice.value ? recommendedRetailPrice.value * 100 : null,
+        isSecondHand.value,
         files.value[0]).then((response) => {
         toast.success('Item added successfully', {timeout: 2000});
         context.emit('catalogueItemAdded', response.data);
@@ -87,6 +94,8 @@ export default {
       purchasePriceError,
       recommendedRetailPrice,
       recommendedRetailPriceError,
+      isSecondHand,
+      isSecondHandError,
       submitItemDetails,
       resetNewItemForm,
     };
@@ -170,6 +179,13 @@ export default {
               name="recommendedRetailPrice"
               v-model="recommendedRetailPrice"
               :error="recommendedRetailPriceError"
+          />
+        </div>
+        <div class="col-span-2 p-2">
+          <Switch
+              label="Is second hand?"
+              name="isSecondHand"
+              v-model="isSecondHand"
           />
         </div>
         <div class="col-span-1 p-2">

@@ -1581,12 +1581,13 @@ export default {
       responseType: 'blob',
     });
   },
-  postNewCatalogueItem(name, description, purchasePrice, recommendedRetailPrice, photo) {
+  postNewCatalogueItem(name, description, purchasePrice, recommendedRetailPrice, isSecondHand, photo) {
     return axiosClient.post('/catalogue', {
       name: name,
       description: description,
       purchase_price: purchasePrice,
       recommended_retail_price: recommendedRetailPrice,
+      is_second_hand: isSecondHand,
       ...photo ? {photo: photo} : {},
     }, {
       headers: {
@@ -1596,10 +1597,11 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putUpdateCatalogueItem(catalogueItemId, name, description, photo) {
+  putUpdateCatalogueItem(catalogueItemId, name, description, isSecondHand, photo) {
     return axiosClient.put(`/catalogue/${catalogueItemId}`, {
       name: name,
       description: description,
+      is_second_hand: isSecondHand,
       ...photo ? {photo: photo} : {},
     }, {
       headers: {

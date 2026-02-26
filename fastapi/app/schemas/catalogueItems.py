@@ -9,6 +9,7 @@ from typing import List
 class CatalogueItemBase(BaseModel):
     name: str
     description: str
+    isSecondHand: bool
     
     
 class CatalogueItemCreate(CatalogueItemBase):

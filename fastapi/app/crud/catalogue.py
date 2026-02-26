@@ -71,8 +71,8 @@ def create_catalogue_item(db: Session, catalogue_item: schemas.CatalogueItemCrea
         purchasePrice=catalogue_item.purchasePrice,
         recommendedRetailPrice=catalogue_item.recommendedRetailPrice,
         available=True,
-        catalogueItemPhotoId=catalogue_item_photo.id if catalogue_item_photo is not None else None
-        
+        catalogueItemPhotoId=catalogue_item_photo.id if catalogue_item_photo is not None else None,
+        isSecondHand=catalogue_item.isSecondHand
     )
     db.add(db_catalogue_item)
     db.commit()
@@ -125,6 +125,8 @@ def update_catalogue_item(db: Session, catalogue_item_id: UUID, catalogue_item_u
         catalogue_item.name = catalogue_item_update_date.name
     if catalogue_item_update_date.description is not None:
         catalogue_item.description = catalogue_item_update_date.description
+    if catalogue_item_update_date.isSecondHand is not None:
+        catalogue_item.isSecondHand = catalogue_item_update_date.isSecondHand
         
     db.commit()
     db.refresh(catalogue_item)

@@ -32,6 +32,7 @@ async def post_catalogue_item(
         description: Annotated[str, Form()],
         purchase_price: Annotated[int | None, Form()] = None,
         recommended_retail_price: Annotated[int | None, Form()] = None,
+        is_second_hand: Annotated[bool, Form()] = False,
         photo: UploadFile | None = None,
         db: Session = Depends(dep.get_db)
 ) -> schemas.CatalogueItem:
@@ -39,7 +40,9 @@ async def post_catalogue_item(
         name=name,
         description=description, 
         purchasePrice=purchase_price, 
-        recommendedRetailPrice=recommended_retail_price)
+        recommendedRetailPrice=recommended_retail_price,
+        isSecondHand=is_second_hand
+    )
     return crud.create_catalogue_item(db, new_catalogue_item, photo)
 
 
@@ -48,10 +51,11 @@ async def patch_catalogue_item(
         catalogue_item_id: UUID,
         name: Annotated[str, Body(embed=True)],
         description: Annotated[str, Body(embed=True)],
+        is_second_hand: Annotated[bool, Body(embed=True)] = False,
         photo: UploadFile | None = None,
         db: Session = Depends(dep.get_db)
 ) -> schemas.CatalogueItem:
-    updated_catalogue_item = schemas.CatalogueItemUpdate(name=name, description=description)
+    updated_catalogue_item = schemas.CatalogueItemUpdate(name=name, description=description, isSecondHand=is_second_hand)
     return crud.update_catalogue_item(db, catalogue_item_id, updated_catalogue_item, photo)
 
 

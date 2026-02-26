@@ -10,13 +10,14 @@ import {useDropzone} from 'vue3-dropzone';
 import {Icon} from '@iconify/vue';
 import Button from '@/components/Button/index.vue';
 import {useToast} from 'vue-toastification';
+import Switch from '@/components/Switch';
 
 const toast = useToast();
 
 
 export default {
   name: 'CatalogueItemCard',
-  components: {Button, Icon, TextInput, DashButton, Card},
+  components: {Button, Icon, TextInput, DashButton, Card, Switch},
   props: {
     itemDetails: {
       type: Object,
@@ -58,6 +59,7 @@ export default {
     const editItemSchema = yup.object().shape({
       name: yup.string().max(60).required('Name is required'),
       description: yup.string().max(512).required('Description is required'),
+      isSecondHand: yup.boolean().required('Is second hand is required'),
     });
 
     function getImage() {
@@ -77,6 +79,7 @@ export default {
 
     const {value: name, errorMessage: nameError} = useField('name');
     const {value: description, errorMessage: descriptionError} = useField('description');
+    const {value: isSecondHand, errorMessage: isSecondHandError} = useField('isSecondHand');
 
     const files = ref([]);
     function onDrop(acceptFiles) {
@@ -94,6 +97,7 @@ export default {
         itemDetails.value.id,
         name.value,
         description.value,
+        isSecondHand.value,
         !isOldPhoto.value ? files.value[0] : undefined)
         .then((response) => {
           toast.success('Catalogue item updated successfully', {timeout: 2000});
@@ -116,6 +120,8 @@ export default {
       nameError,
       description,
       descriptionError,
+      isSecondHand,
+      isSecondHandError,
       submitItemDetails,
       isOldPhoto,
       getImage,
@@ -150,12 +156,21 @@ export default {
         <div>Recommended Price:</div>
         <div>&#163; {{ (itemDetails.recommendedRetailPrice / 100).toFixed(2) }}</div>
       </div>
+      <div class="col-span-2 p-2 flex-row dark:text-slate-300 text-slate-700 flex justify-between" v-if="!inEditMode">
+        <div>Condition:</div>
+        <div>{{ itemDetails.isSecondHand ? 'Used' : 'New' }}</div>
+      </div>
       <div class="col-span-2 p-2" v-if="editable">
         <div class="grid grid-cols-2">
           <Button @click.prevent="openEditMode" class="col-span-1 rounded-l-full">
             <Icon icon="heroicons-outline:pencil"></Icon>
           </Button>
-          <Button @click.prevent="toggleAvailability" class="col-span-1 rounded-r-full" :btn-class="itemDetails.available ? 'btn-success' : 'btn-danger'">
+          <Button
+            @click.prevent="toggleAvailability"
+            class="col-span-1 rounded-r-full"
+            :btn-class="itemDetails.available
+            ? 'btn-success'
+            : 'btn-danger'">
             <Icon icon="heroicons-outline:check-circle" v-if="itemDetails.available"></Icon>
             <Icon icon="heroicons-outline:no-symbol" v-else></Icon>
           </Button>
@@ -219,6 +234,13 @@ export default {
               name="description"
               v-model="description"
               :error="descriptionError"
+          />
+        </div>
+        <div class="col-span-2 p-2">
+          <Switch
+            label="Is second hand?"
+            name="isSecondHand"
+            v-model="isSecondHand"
           />
         </div>
         <div class="col-span-2 p-3" v-if="inEditMode">

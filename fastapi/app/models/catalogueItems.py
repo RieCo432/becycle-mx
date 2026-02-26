@@ -19,6 +19,7 @@ class CatalogueItem(Base):
     createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
     catalogueItemPhotoId: Mapped[UUID] = mapped_column("photoid", ForeignKey("catalogueitemphotos.id"), nullable=True, quote=False)
     catalogueItemPhoto: Mapped["CatalogueItemPhoto"] = relationship("CatalogueItemPhoto")
+    isSecondHand: Mapped[bool] = mapped_column("issecondhand", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
 
 class CatalogueItemPhoto(Base):
     __tablename__ = "catalogueitemphotos"
