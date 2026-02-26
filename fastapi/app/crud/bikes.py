@@ -103,7 +103,8 @@ def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
         colour=str.join(', ', [c.name for c in colours]),
         colours=colours,
         decals=bike_data.decals.lower() if bike_data.decals is not None else None,
-        serialNumber=bike_data.serialNumber.lower()
+        serialNumber=bike_data.serialNumber.lower(),
+        disposition=bike_data.disposition
     )
     db.add(bike)
     db.commit()
@@ -194,6 +195,8 @@ def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase)
         for bike_with_this_tag in bikes_with_this_tag:
             if bike_with_this_tag.id != bike_id:
                 bike_with_this_tag.rfidTagSerialNumber = "MOVED TO ANOTHER BIKE"
+    if updated_bike_data.disposition is not None:
+        bike.disposition = updated_bike_data.disposition
 
 
     db.commit()
