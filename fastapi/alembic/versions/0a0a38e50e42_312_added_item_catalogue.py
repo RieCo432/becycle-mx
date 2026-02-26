@@ -29,7 +29,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_catalogueitemphotos_id'), 'catalogueitemphotos', ['id'], unique=False)
     op.create_table('catalogueitems',
     sa.Column('id', sa.UUID(), server_default=sa.text('uuid_generate_v4()'), nullable=False),
-    sa.Column('make', sa.String(length=60), nullable=False),
+    sa.Column('name', sa.String(length=60), nullable=False),
     sa.Column('description', sa.String(length=512), nullable=True),
     sa.Column('purchaseprice', sa.Integer(), nullable=True),
     sa.Column('recommendedretailprice', sa.Integer(), nullable=True),

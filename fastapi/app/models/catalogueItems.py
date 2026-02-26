@@ -11,7 +11,7 @@ class CatalogueItem(Base):
     __tablename__ = "catalogueitems"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
-    name: Mapped[str] = mapped_column("make", String(60), nullable=False, quote=False)
+    name: Mapped[str] = mapped_column("name", String(60), nullable=False, quote=False)
     description: Mapped[str] = mapped_column("description", String(512), nullable=True, quote=False)
     purchasePrice: Mapped[int] = mapped_column("purchaseprice", Integer, nullable=True, quote=False)
     recommendedRetailPrice: Mapped[int] = mapped_column("recommendedretailprice", Integer, nullable=True, quote=False)
