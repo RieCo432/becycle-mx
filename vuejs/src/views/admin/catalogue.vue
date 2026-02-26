@@ -42,6 +42,8 @@ export default {
             (this.searchQuery === '' ||
               item.name.toLowerCase().startsWith(this.searchQuery.toLowerCase()) ||
               item.description.toLowerCase().startsWith(this.searchQuery.toLowerCase()) ||
+              item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              item.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
               distance(this.searchQuery, item.name) <= 3 ||
               distance(this.searchQuery, item.description) <= 3
             ) &&
@@ -58,9 +60,9 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-6 xl:grid-cols-8 gap-5">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
     <div class="col-span-1">
-      <Card title="Search Catalogue" class="dark:text-slate-300 text-slate-700">
+      <Card title="Search Catalogue" class-name="dark:text-slate-300 text-slate-700 rounded-3xl">
         <div class="grid grid-cols-1 gap-2">
           <div class="col">
             <TextInput
