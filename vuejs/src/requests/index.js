@@ -1567,4 +1567,54 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getItemCatalogue(includeUnavailable) {
+    return axiosClient.get('/catalogue', {
+      params: {include_unavailable: includeUnavailable},
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getCatalogueItemPhoto(catalogueItemId) {
+    return axiosClient.get(`/catalogue/${catalogueItemId}/photo`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  postNewCatalogueItem(name, description, purchasePrice, recommendedRetailPrice, isSecondHand, photo) {
+    return axiosClient.post('/catalogue', {
+      name: name,
+      description: description,
+      purchase_price: purchasePrice,
+      recommended_retail_price: recommendedRetailPrice,
+      is_second_hand: isSecondHand,
+      ...photo ? {photo: photo} : {},
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateCatalogueItem(catalogueItemId, name, description, isSecondHand, photo) {
+    return axiosClient.put(`/catalogue/${catalogueItemId}`, {
+      name: name,
+      description: description,
+      is_second_hand: isSecondHand,
+      ...photo ? {photo: photo} : {},
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchCatalogueItemAvailability(catalogueItemId, available) {
+    return axiosClient.patch(`/catalogue/${catalogueItemId}/availability`, {available: available}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

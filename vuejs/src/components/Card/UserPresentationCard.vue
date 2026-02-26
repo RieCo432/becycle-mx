@@ -29,7 +29,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    updateCardDetails: {
+    updateitemDetails: {
       type: Function,
       required: false,
     },

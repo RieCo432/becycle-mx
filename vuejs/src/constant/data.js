@@ -237,6 +237,12 @@ export const topMenu = [
         childlink: '/admin/accounts',
         show: ['user'],
       },
+      {
+        childtitle: 'Manage Catalogue',
+        childicon: 'heroicons-outline:cube',
+        childlink: '/admin/catalogue',
+        show: ['user'],
+      },
     ],
   },
   {
