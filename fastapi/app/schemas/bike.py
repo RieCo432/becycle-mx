@@ -15,7 +15,7 @@ class BikeBase(BaseModel):
     decals: str | None = None
     serialNumber: str
     rfidTagSerialNumber: str | None = None
-    disposition: Disposition = Disposition.RENTAL
+    disposition: Disposition
 
 
 class BikeCreate(BikeBase):
