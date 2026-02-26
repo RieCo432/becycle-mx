@@ -18,10 +18,24 @@ export default {
 
   setup(props, context) {
     const addNewItemSchema = yup.object().shape({
-      name: yup.string().max(60).required('Name is required'),
-      description: yup.string().max(512).required('Description is required'),
-      purchasePrice: yup.number().min(0),
-      recommendedRetailPrice: yup.number().min(0),
+      name: yup
+        .string()
+        .max(60)
+        .required('Name is required'),
+      description: yup
+        .string()
+        .max(512)
+        .required('Description is required'),
+      purchasePrice: yup
+        .number()
+        .min(0)
+        .nullable()
+        .transform((value) => Number.isNaN(value) ? null : value ),
+      recommendedRetailPrice: yup
+        .number()
+        .min(0)
+        .nullable()
+        .transform((value) => Number.isNaN(value) ? null : value ),
     });
 
     const {handleSubmit, handleReset: resetNewItemForm} = useForm({
@@ -141,7 +155,7 @@ export default {
         <div class="col-span-2 p-2">
           <TextInput
               label="Purchase Price (£)"
-              type="number"
+              type="text"
               placeholder="3.50"
               name="purchasePrice"
               v-model="purchasePrice"
@@ -151,7 +165,7 @@ export default {
         <div class="col-span-2 p-2">
           <TextInput
               label="Recommended Retail Price (£)"
-              type="number"
+              type="text"
               placeholder="5.00"
               name="recommendedRetailPrice"
               v-model="recommendedRetailPrice"
