@@ -15,18 +15,28 @@ import Button from '@/components/Button/index.vue';
 import colourSuggestionSort from '@/util/colourSuggestionSort';
 import Select from '@/components/Select/index.vue';
 import {useToast} from 'vue-toastification';
+import Checkbox from '@/components/Checkbox/index.vue';
 
 const toast = useToast();
 
 export default {
   name: 'AddNewBikeCard',
-  components: {Select, Button, ComboboxColourPicker, TextInput, ComboboxTextInput, DashButton, ColourSetSuggestion, Card},
-  emits: ['bikeAdded'],
+  components: {
+    Checkbox,
+    Select, Button, ComboboxColourPicker, TextInput, ComboboxTextInput, DashButton, ColourSetSuggestion, Card},
+  props: {
+    modelValue: {
+      type: Array,
+      required: true,
+    },
+  },
+  emits: ['updateSearch'],
   setup(props, context) {
     const makeSuggestions = ref([]);
     const modelSuggestions = ref([]);
     const coloursSuggestions = ref([]);
     const serialNumberSuggestions = ref([]);
+    const bikeSuggestions = ref([]);
     const dispositions = ref([
       {
         value: 'rental',
@@ -36,6 +46,9 @@ export default {
         label: 'Sale',
       },
     ]);
+    const filteredBikeSuggestions = ref([]);
+    const includeRental = ref(true);
+    const includeSale = ref(true);
 
     const addBikeSchema = yup.object().shape({
       makeNotInList: yup.boolean(),
@@ -90,6 +103,25 @@ export default {
     makeNotInList.value = false;
     modelNotInList.value = false;
 
+    function runFilter() {
+      const bike = {
+        make: make.value ? make.value : '',
+        model: model.value ? model.value : '',
+        colours: colours.value ? colours.value : [],
+        serialNumber: serialNumber.value ? serialNumber.value : '',
+      };
+      levenshtein.filterSortObject(
+        bikeSuggestions.value
+          .filter((b) =>
+            (includeRental.value && b.disposition === 'rental') ||
+            (includeSale.value && b.disposition === 'sale')),
+        bike,
+        4).then((result) => {
+        filteredBikeSuggestions.value = result;
+        context.emit('update:modelValue', filteredBikeSuggestions.value);
+      });
+    }
+
     const submit = handleSubmit(() => {
       requests.postNewBike(
         make.value,
@@ -100,7 +132,8 @@ export default {
         disposition.value )
         .then((response) => {
           toast.success('New Bike Created!', {timeout: 2000});
-          context.emit('bikeAdded', response.data);
+          bikeSuggestions.value.push(response.data);
+          runFilter();
         });
     });
 
@@ -126,6 +159,11 @@ export default {
       coloursSuggestions,
       serialNumberSuggestions,
       dispositions,
+      bikeSuggestions,
+      filteredBikeSuggestions,
+      includeRental,
+      includeSale,
+      runFilter,
 
       submit,
     };
@@ -155,6 +193,8 @@ export default {
       leading: true,
       trailing: true,
     });
+    this.fetchBikes = debounce(this.fetchBikes, 1000, {leading: false, trailing: true});
+    this.runFilter = debounce(this.runFilter, 200, {leading: true, trailing: true});
   },
   methods: {
     fetchBikeMakeSuggestions() {
@@ -203,14 +243,52 @@ export default {
       this.filtered_colours_suggestions = this.coloursSuggestions
         .toSorted((a, b) => colourSuggestionSort.colourSuggestionSort(a, b, this.colours)).slice(0, 6);
     },
+    fetchBikes() {
+      if ((
+        (this.make ? this.make.length : 0) +
+        (this.model ? this.model.length : 0) +
+        (this.colours ? 3 : 0) +
+        (this.serialNumber ? this.serialNumber.length : 0)
+      ) > 2) {
+        const dispositions = [];
+        if (this.includeRental) dispositions.push('rental');
+        if (this.includeSale) dispositions.push('sale');
+
+        requests.findBikes(
+          this.make,
+          this.model,
+          this.colour,
+          this.colours ? this.colours.map((colour) => colour.hex) : null,
+          this.serialNumber,
+          dispositions,
+          4).then((response) => {
+          this.bikeSuggestions = response.data;
+          this.runFilter();
+        });
+      }
+    },
+    handleInput() {
+      this.$emit('updateSearch', {
+        make: this.make,
+        model: this.model,
+        colours: this.colours,
+        serialNumber: this.serialNumber,
+      });
+      this.runFilter();
+      this.fetchBikes();
+    },
   },
   watch: {
     make() {
+      this.fetchBikeMakeSuggestions();
+      this.handleInput();
       levenshtein.filterSort(this.makeSuggestions, this.make, 4).then((result) => {
         this.filtered_make_suggestions = result.slice(0, 6);
       });
     },
     model() {
+      this.fetchBikeModelSuggestions();
+      this.handleInput();
       levenshtein.filterSort(this.modelSuggestions, this.model, 4).then((result) => {
         this.filtered_model_suggestions = result.slice(0, 6);
       });
@@ -222,16 +300,24 @@ export default {
       this.filterAndSortColourSuggestions();
     },
     serialNumber() {
+      this.fetchSerialNumberSuggestions();
+      this.handleInput();
       levenshtein.filterSort(this.serialNumberSuggestions, this.serialNumber, 4).then((result) => {
         this.filtered_serial_number_suggestions = result.slice(0, 6);
       });
+    },
+    includeRental() {
+      this.handleInput();
+    },
+    includeSale() {
+      this.handleInput();
     },
   },
 };
 </script>
 
 <template>
-  <Card title="Add Bike">
+  <Card title="Search/Add Bike">
     <form @submit.prevent="submit" @keydown.enter="submit">
       <div class="grid grid-cols-6 gap-5">
         <div class="col-span-4">
@@ -358,9 +444,24 @@ export default {
           />
         </div>
 
+        <div class="col-span-3">
+          <Checkbox
+            label="Include Rental"
+            v-model="includeRental"
+            activeClass="ring-primary-500 bg-primary-500"
+          />
+        </div>
+        <div class="col-span-3">
+          <Checkbox
+            label="Include Sale"
+            v-model="includeSale"
+            activeClass="ring-primary-500 bg-primary-500"
+          />
+        </div>
+
         <div class="col-span-6">
           <Button
-            text="Submit"
+            text="Add Bike"
             btnClass="btn-dark"
           />
         </div>
