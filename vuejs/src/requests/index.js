@@ -194,13 +194,14 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  postNewBike(make, model, colours, decals, serialNumber) {
+  postNewBike(make, model, colours, decals, serialNumber, disposition) {
     return axiosClient.post('/bikes', {
       make: make,
       model: model,
       colours: colours,
       decals: decals,
       serialNumber: serialNumber,
+      disposition: disposition,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),

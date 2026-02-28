@@ -340,16 +340,19 @@ def update_contract_draft_details(db: Session, contract_draft_id: UUID, contract
 def update_contract_draft_deposit(db: Session, contract_draft_id: UUID, deposit_collected_transaction_header_id: UUID) -> models.ContractDraft:
     contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
     
-    if not db.scalar(
-        select(models.TransactionHeader.postedOn)
-        .where(models.TransactionHeader.id == deposit_collected_transaction_header_id)
-    ):
+    transaction_header = db.get(models.TransactionHeader, deposit_collected_transaction_header_id)
+    
+    if not transaction_header.postedOn:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Deposit transaction header must be posted before it can be used to collect deposit!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     
+    deposit_amount = abs([tl.amount for tl in transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY][0])
+    
+    
+    contract_draft.bike.roughValue = max(deposit_amount, 40)
     contract_draft.depositCollectedTransactionHeaderId = deposit_collected_transaction_header_id
     db.commit()
     return contract_draft
