@@ -149,7 +149,7 @@ export default {
         this.bikeSuggestions
           .filter((b) =>
             (this.includeRental && b.disposition === 'rental') ||
-            (!this.includeSale && b.disposition === 'sale')),
+            (this.includeSale && b.disposition === 'sale')),
         bike,
         4).then((result) => {
         this.filtered_bike_suggestions = result;
@@ -224,8 +224,8 @@ export default {
 
 <template>
   <Card title="Search Bikes">
-    <div class="grid grid-cols-2 gap-5">
-      <div class="col-span-2">
+    <div class="grid grid-cols-6 gap-5">
+      <div class="col-span-6">
         <ComboboxTextInput
           :allow-new="false"
           :field-model-value="make"
@@ -239,7 +239,7 @@ export default {
         />
       </div>
 
-      <div class="col-span-2">
+      <div class="col-span-6">
         <ComboboxTextInput
           :allow-new="false"
           :field-model-value="model"
@@ -253,7 +253,7 @@ export default {
         />
       </div>
 
-      <div class="col-span-2">
+      <div class="col-span-6">
         <ComboboxColourPicker
           :suggestions="filtered_colours_suggestions"
           :selected-callback="selectColours"
@@ -272,7 +272,7 @@ export default {
         </ComboboxColourPicker>
       </div>
 
-      <div class="col-span-2">
+      <div class="col-span-6">
         <TextInput
           label="Decals"
           type="text"
@@ -282,7 +282,7 @@ export default {
         />
       </div>
 
-      <div class="col-span-2">
+      <div class="col-span-6">
         <ComboboxTextInput
           :field-model-value="serialNumber"
           :suggestions="filtered_serial_number_suggestions"
@@ -294,14 +294,14 @@ export default {
           v-model="serialNumber"
         />
       </div>
-      <div class="col">
+      <div class="col-span-3">
         <Checkbox
           label="Include Rental"
           v-model="includeRental"
           activeClass="ring-primary-500 bg-primary-500"
         />
       </div>
-      <div class="col">
+      <div class="col-span-3">
         <Checkbox
           label="Include Sale"
           v-model="includeSale"
