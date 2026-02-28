@@ -162,8 +162,11 @@ export default {
       },
     });
   },
-  findBikes(make, model, colour, colours, serialNumber, maxDistance = 4) {
-    return axiosClient.get('/bikes/find', {
+  findBikes(make, model, colour, colours, serialNumber, dispositions, maxDistance = 4) {
+    return axiosClient.get(`/bikes/find${dispositions.length ?
+      '?' + dispositions.map((d) => `dispositions=${d}`).join('&') :
+      ''
+    }`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
