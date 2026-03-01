@@ -294,6 +294,7 @@ export default {
       });
     },
     colours() {
+      this.handleInput();
       this.filterAndSortColourSuggestions();
     },
     coloursSuggestions() {
@@ -319,7 +320,7 @@ export default {
 <template>
   <Card title="Search/Add Bike">
     <form @submit.prevent="submit" @keydown.enter="submit">
-      <div class="grid grid-cols-6 gap-5">
+      <div class="grid grid-cols-6 gap-2">
         <div class="col-span-4">
           <ComboboxTextInput
             :allow-new="makeNotInList"
