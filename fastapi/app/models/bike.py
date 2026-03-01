@@ -31,6 +31,8 @@ class Bike(Base):
 
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="bike")
     colours: Mapped[List["Colour"]] = relationship(secondary=bike_colour_association_table, back_populates="bikes")
+    
+    bikeSaleLines: Mapped[List["SaleLine"]] = relationship("BikeSaleLine", back_populates="bike")
 
     def __eq__(self, other: dict):
         return all([

@@ -13,6 +13,7 @@ from .userPermission import user_permission_association_table
 from .groupUser import group_user_association_table
 from .accounts import Account
 from .transactions import TransactionHeader, TransactionLine
+from .sales import SaleHeader
 
 
 class UserPhoto(Base):
@@ -89,6 +90,8 @@ class User(Base):
     accountsClosed: Mapped[List["Account"]] = relationship("Account", foreign_keys=[Account.closedByUserId], back_populates="closedByUser")
     transactionHeadersCreated: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.createdByUserId], back_populates="createdByUser")
     transactionHeadersPosted: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.postedByUserId], back_populates="postedByUser")
+    
+    saleHeadersCreated: Mapped[List["SaleHeader"]] = relationship("SaleHeader", foreign_keys=[SaleHeader.createdByUserId], back_populates="createdByUser")
 
 
     def __eq_dict__(self, other: dict):
