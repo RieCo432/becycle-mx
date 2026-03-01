@@ -22,3 +22,4 @@ from .accounts import *
 from .transactions import *
 from .expenseClaims import *
 from .catalogueItems import *
+from .sales import *
