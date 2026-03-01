@@ -72,10 +72,9 @@ class ContractDraftDetails(BaseModel):
 class ContractRestricted(ContractPublic):
     workingUsername: str
     checkingUsername: str
-    depositCollectedTransactionHeaderId: UUID
-
     returnAcceptingUsername: str | None = None
-    depositSettledTransactionHeaderId: UUID | None = None
+    depositAmountCollected: int
+    depositAmountReturned: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
