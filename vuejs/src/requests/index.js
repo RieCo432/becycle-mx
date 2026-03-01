@@ -162,8 +162,11 @@ export default {
       },
     });
   },
-  findBikes(make, model, colour, colours, serialNumber, maxDistance = 4) {
-    return axiosClient.get('/bikes/find', {
+  findBikes(make, model, colour, colours, serialNumber, dispositions, maxDistance = 4) {
+    return axiosClient.get(`/bikes/find${dispositions.length ?
+      '?' + dispositions.map((d) => `dispositions=${d}`).join('&') :
+      ''
+    }`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
@@ -194,13 +197,15 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  postNewBike(make, model, colours, decals, serialNumber) {
+  postNewBike(make, model, colours, decals, serialNumber, disposition, roughValue) {
     return axiosClient.post('/bikes', {
       make: make,
       model: model,
       colours: colours,
       decals: decals,
       serialNumber: serialNumber,
+      disposition: disposition,
+      roughValue: roughValue,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),

@@ -6,7 +6,7 @@ import app.crud as crud
 import app.dependencies as dep
 import app.models as models
 import app.schemas as schemas
-
+from app.services.accounts_helpers import AccountTypes
 
 clients_me = APIRouter(
     tags=["clients"],
@@ -52,20 +52,16 @@ async def get_my_contract(
     return schemas.ContractRestricted(
         workingUsername=contract.workingUser.username,
         checkingUsername=contract.checkingUser.username,
-        depositCollectingUsername=contract.depositCollectingUser.username,
         returnAcceptingUsername=contract.returnAcceptingUser.username if contract.returnAcceptingUser else None,
-        depositReturningUsername=contract.depositReturningUser.username if contract.depositReturningUser else None,
         id=contract.id,
         startDate=contract.startDate,
         endDate=contract.endDate,
         returnedDate=contract.returnedDate,
-        depositAmountReturned=contract.depositAmountReturned,
         detailsSent=contract.detailsSent,
         expiryReminderSent=contract.expiryReminderSent,
         returnDetailsSent=contract.returnDetailsSent,
         clientId=contract.clientId,
         bikeId=contract.bikeId,
-        depositAmountCollected=contract.depositAmountCollected,
         conditionOfBike=contract.conditionOfBike,
         contractType=contract.contractType,
         notes=contract.notes,
@@ -77,7 +73,10 @@ async def get_my_contract(
                 closedOn=report.closedOn,
                 contractId=report.contractId
             ) for report in contract.crimeReports
-        ]
+        ],
+        depositAmountCollected=abs([tl.amount for tl in contract.depositCollectedTransactionHeader.transactionLines if tl.account.type == AccountTypes.LIABILITY][0]),
+        depositAmountReturned=abs([tl.amount for tl in contract.depositSettledTransactionHeader.transactionLines if tl.account.type == AccountTypes.ASSET][0]) if contract.depositSettledTransactionHeader else None,
+        depositCollectedTransactionHeaderId=contract.depositCollectedTransactionHeaderId,
     )
 
 

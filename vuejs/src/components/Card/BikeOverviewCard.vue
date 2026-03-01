@@ -16,13 +16,18 @@ export default {
       required: false,
       default: () => {},
     },
+    noTitle: {
+      type: Boolean,
+      required: false,
+      default: false,
+    }
   },
 };
 </script>
 
 <template>
   <Card
-      title="Bike To Be Matched"
+      :title="noTitle ? '' : 'Bike To Be Matched'"
       class-name="border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full">
     <template v-if="bike">
       <div class="grid grid-cols-4 h-full gap-5">
@@ -50,10 +55,22 @@ export default {
               :search-data="bikeSearch.decals && bikeSearch.decals !== '' ? bikeSearch.decals : null"
               field-name="Decals"/>
         </div>
+        <div class="col-span-2">
+          <TextLabelWithPillBadgeIndicatingMatch
+            :field-data="bike.disposition"
+            :search-data="bike.disposition"
+            field-name="Disposition"/>
+        </div>
+        <div class="col-span-2">
+          <TextLabelWithPillBadgeIndicatingMatch
+            :field-data="bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a'"
+            :search-data="bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a'"
+            field-name="Rough Value"/>
+        </div>
         <div class="col-span-4">
           <TextLabelWithPillBadgeIndicatingMatch
-              :search-data="bikeSearch.colours.map((c) => c.hex)"
-              :field-data="bike.colours.map((c) => c.hex)"
+              :search-data="bikeSearch.colours?.map((c) => c.hex)"
+              :field-data="bike.colours?.map((c) => c.hex)"
               field-name="Colours">
             <div class="h-10 rounded-full overflow-hidden">
               <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${bike.colours.length}`">
@@ -71,6 +88,9 @@ export default {
               </div>
             </div>
           </TextLabelWithPillBadgeIndicatingMatch>
+        </div>
+        <div class="col-span-4">
+          <slot name="footer"/>
         </div>
         <!--            <div class="col-span-4 col-start-1 mt-auto">-->
         <!--              <DashButton class="w-full" :is-disabled="isInWriteMode" @click="writeBikeDetailsToNfcTag">-->

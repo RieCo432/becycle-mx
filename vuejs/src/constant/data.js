@@ -60,7 +60,7 @@ export const topMenu = [
     show: ['user'],
   },
   {
-    title: 'Find Bike',
+    title: 'Bike Catalogue',
     icon: 'heroicons-outline:magnifying-glass',
     link: '/bikes',
     show: ['user'],

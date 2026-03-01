@@ -999,7 +999,7 @@ export default {
       } else if (stepNumber.value === 2) {
         // Bike details processing
         if (matchWithBikeId.value === 'new') {
-          requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
+          requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value, 'rental')
             .then((response) => {
               toast.success('New Bike Created!', {timeout: 1000});
               bikeId.value = response.data['id'];

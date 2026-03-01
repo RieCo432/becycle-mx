@@ -381,7 +381,7 @@ const routes = [
           restrictTo: ['user'],
           selectNavPath: '/bikes',
         },
-        component: () => import('@/views/bike/findBike.vue'),
+        component: () => import('@/views/bike/BikeCatalogue.vue'),
       },
       {
         path: '/statistics/contracts',

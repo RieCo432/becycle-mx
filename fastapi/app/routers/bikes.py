@@ -1,10 +1,12 @@
+from typing import Annotated, List
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from starlette import status
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
+from app.extensions.disposition import Disposition
 
 bikes = APIRouter(
     tags=["bikes"],
@@ -30,6 +32,7 @@ async def find_bike(
 
 @bikes.get("/bikes/find")
 async def find_bikes(
+        dispositions: Annotated[List[Disposition] | None, Query()] = None,
         make: str | None = None,
         model: str | None = None,
         colour: str | None = None,
@@ -45,6 +48,7 @@ async def find_bikes(
         colours=colours.split("|") if colours is not None else None,
         decals=decals.lower() if decals is not None else None,
         serialNumber=serial_number.lower() if serial_number is not None else None,
+        dispositions=dispositions if dispositions is not None else None,
         max_distance=max_distance,
         db=db)
 

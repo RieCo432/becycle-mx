@@ -162,6 +162,8 @@ export default {
               <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+              <p class="text-slate-600 dark:text-slate-300">{{bike.disposition}}</p>
+              <p class="text-slate-600 dark:text-slate-300">{{bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a'}}</p>
             </div>
             <div class="col-span-4 col-start-1">
               <div class="h-10 rounded-full overflow-hidden">
