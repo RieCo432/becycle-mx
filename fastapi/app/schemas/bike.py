@@ -16,6 +16,7 @@ class BikeBase(BaseModel):
     serialNumber: str
     rfidTagSerialNumber: str | None = None
     disposition: Disposition
+    roughValue: int | None = None
 
 
 class BikeCreate(BikeBase):

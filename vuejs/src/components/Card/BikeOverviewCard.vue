@@ -55,6 +55,18 @@ export default {
               :search-data="bikeSearch.decals && bikeSearch.decals !== '' ? bikeSearch.decals : null"
               field-name="Decals"/>
         </div>
+        <div class="col-span-2">
+          <TextLabelWithPillBadgeIndicatingMatch
+            :field-data="bike.disposition"
+            :search-data="bike.disposition"
+            field-name="Disposition"/>
+        </div>
+        <div class="col-span-2">
+          <TextLabelWithPillBadgeIndicatingMatch
+            :field-data="bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a'"
+            :search-data="bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a'"
+            field-name="Rough Value"/>
+        </div>
         <div class="col-span-4">
           <TextLabelWithPillBadgeIndicatingMatch
               :search-data="bikeSearch.colours?.map((c) => c.hex)"

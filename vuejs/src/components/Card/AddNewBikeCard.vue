@@ -129,7 +129,9 @@ export default {
         colours.value,
         decals.value,
         serialNumber.value,
-        disposition.value )
+        disposition.value,
+        roughValue.value * 100,
+      )
         .then((response) => {
           toast.success('New Bike Created!', {timeout: 2000});
           bikeSuggestions.value.push(response.data);
