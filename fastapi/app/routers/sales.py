@@ -14,8 +14,10 @@ sales = APIRouter(
 
 
 @sales.get("/sales", response_model=list[schemas.SaleHeader])
-async def get_sale_headers(db: Session = Depends(dep.get_db)) -> list[schemas.SaleHeader]:
-    return crud.get_sale_headers(db)
+async def get_sale_headers(
+        pending: bool = False,
+        db: Session = Depends(dep.get_db)) -> list[schemas.SaleHeader]:
+    return crud.get_sale_headers(db, pending=pending)
 
 
 @sales.post("/sales", response_model=schemas.SaleHeader)
@@ -23,29 +25,30 @@ def create_sale_headers(db: Session = Depends(dep.get_db), user: models.User = D
     return crud.create_sale_header(db=db, user=user)
 
 
-@sales.put("/sales/catalogue-item-line", response_model=schemas.CatalogueItemSaleLine)
-def create_catalogue_item_line(
-        catalogue_item_sale_line: schemas.CatalogueItemSaleLine, 
+@sales.post("/sales/catalogue-item-sale-line", response_model=schemas.CatalogueItemSaleLine)
+def create_catalogue_item_sale_line(
+        catalogue_item_sale_line: schemas.CatalogueItemSaleLineCreate, 
         db: Session = Depends(dep.get_db)
 ) -> schemas.CatalogueItemSaleLine:
     return crud.add_catalogue_item_sale_line(db=db, catalogue_item_sale_line_data=catalogue_item_sale_line)
 
 
-@sales.put("/sales/bike-sale-line", response_model=schemas.BikeSaleLine)
+@sales.post("/sales/bike-sale-line", response_model=schemas.BikeSaleLine)
 def create_bike_sale_line(
-        bike_sale_line: schemas.BikeSaleLine, 
+        bike_sale_line: schemas.BikeSaleLineCreate, 
         db: Session = Depends(dep.get_db)
 ) -> schemas.BikeSaleLine:
     return crud.add_bike_sale_line(db=db, bike_sale_line_data=bike_sale_line)
 
 
-@sales.put("/sales/{sale_header_id}/payment")
+@sales.patch("/sales/{sale_header_id}/payment")
 async def finalise_sale(
         sale_header_id: UUID,
         transaction_header_id: Annotated[UUID, Body(embed=True)],
         user: models.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.SaleHeader:
+    # TODO: make sure sale is not complete already
     if not crud.does_payment_cover_sale_price(db=db, transaction_header_id=transaction_header_id, sale_header_id=sale_header_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

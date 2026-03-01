@@ -276,6 +276,15 @@ const routes = [
         component: () => import('@/views/sales/index.vue'),
       },
       {
+        path: '/point-of-sale',
+        name: 'Point of Sale',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/point-of-sale',
+        },
+        component: () => import('@/views/sales/PointOfSale.vue'),
+      },
+      {
         path: '/admin/users',
         name: 'User Management',
         meta: {

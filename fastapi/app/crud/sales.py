@@ -12,9 +12,14 @@ from .transactions import get_transaction_header
 from ..services.accounts_helpers import AccountTypes
 
 
-def get_sale_headers(db: Session) -> list[models.SaleHeader]:
+def get_sale_headers(db: Session, pending: bool = False) -> list[models.SaleHeader]:
+    query = select(models.SaleHeader)
+    
+    if not pending:
+        query = query.where(models.SaleHeader.transactionHeaderId != None)
+    
     return [_ for _ in db.scalars(
-        select(models.SaleHeader)
+        query
     )]
 
 

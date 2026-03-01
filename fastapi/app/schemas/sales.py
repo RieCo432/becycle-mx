@@ -43,5 +43,8 @@ class SaleHeader(SaleHeaderBase):
     createdOn: datetime
     createdByUser: User
     
-    transactionHeaderId: UUID
-    transactionHeader: TransactionHeader
+    transactionHeaderId: UUID | None = None
+    transactionHeader: TransactionHeader | None = None
+    
+    catalogueItemSaleLines: List[CatalogueItemSaleLine] = []
+    bikeSaleLines: List[BikeSaleLine] = []

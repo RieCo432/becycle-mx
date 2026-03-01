@@ -1622,8 +1622,21 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getSales() {
+  getSales(pending) {
     return axiosClient.get('/sales', {
+      params: {pending: pending},
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postNewSale() {
+    return axiosClient.post('/sales', {}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postCatalogueItemSaleLine(catalogueItemSaleLine) {
+    return axiosClient.post('/sales/catalogue-item-sale-line', catalogueItemSaleLine, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

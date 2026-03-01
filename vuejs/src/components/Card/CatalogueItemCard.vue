@@ -25,7 +25,6 @@ export default {
     },
     editable: {
       type: Boolean,
-      required: true,
     },
     updateItemDetails: {
       type: Function,
@@ -132,7 +131,7 @@ export default {
 </script>
 
 <template>
-  <Card gap-null class-name="rounded-3xl" body-class="p-0">
+  <Card class-name="rounded-3xl" body-class="p-0">
 
     <div v-if="!inEditMode" class="grid grid-cols-2">
       <div class="col-span-2">

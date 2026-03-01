@@ -54,6 +54,12 @@ export const topMenu = [
     show: ['user'],
   },
   {
+    title: 'Point of Sale',
+    icon: 'heroicons-outline:credit-card',
+    link: '/point-of-sale',
+    show: ['user'],
+  },
+  {
     title: 'Find Client',
     icon: 'heroicons-outline:document-magnifying-glass',
     link: '/clients',
