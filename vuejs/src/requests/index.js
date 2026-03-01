@@ -1622,4 +1622,10 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getSales() {
+    return axiosClient.get('/sales', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

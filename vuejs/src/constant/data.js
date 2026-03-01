@@ -169,6 +169,12 @@ export const topMenu = [
         childlink: '/finances/transactions',
         show: ['user'],
       },
+      {
+        childtitle: 'Sales History',
+        childicon: 'heroicons-outline:currency-pound',
+        childlink: '/finances/sales',
+        show: ['user'],
+      },
     ],
   },
   {

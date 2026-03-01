@@ -31,13 +31,13 @@ class CatalogueItemSaleLine(Base):
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
     saleHeaderId: Mapped[UUID] = mapped_column("saleheaderid", ForeignKey("saleheaders.id"), nullable=False, quote=False)
-    saleHeader: Mapped[SaleHeader] = relationship("SaleHeader", foreign_keys=[saleHeaderId], back_populates="saleLines")
+    saleHeader: Mapped[SaleHeader] = relationship("SaleHeader", foreign_keys=[saleHeaderId], back_populates="catalogueItemSaleLines")
     
     quantity: Mapped[int] = mapped_column("quantity", Integer, nullable=False, quote=False)
     salePrice: Mapped[int] = mapped_column("saleprice", Integer, nullable=False, quote=False)
     
     catalogueItemId: Mapped[UUID] = mapped_column("catalogueitemid", ForeignKey("catalogueitems.id"), nullable=False, quote=False)
-    catalogueItem: Mapped["CatalogueItem"] = relationship("CatalogueItem", foreign_keys=[catalogueItemId], back_populates="saleLines")
+    catalogueItem: Mapped["CatalogueItem"] = relationship("CatalogueItem", foreign_keys=[catalogueItemId], back_populates="catalogueItemSaleLines")
     
     
 class BikeSaleLine(Base):
@@ -45,9 +45,9 @@ class BikeSaleLine(Base):
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
     saleHeaderId: Mapped[UUID] = mapped_column("saleheaderid", ForeignKey("saleheaders.id"), nullable=False, quote=False)
-    saleHeader: Mapped[SaleHeader] = relationship("SaleHeader", foreign_keys=[saleHeaderId], back_populates="saleLines")
+    saleHeader: Mapped[SaleHeader] = relationship("SaleHeader", foreign_keys=[saleHeaderId], back_populates="bikeSaleLines")
     
     salePrice: Mapped[int] = mapped_column("saleprice", Integer, nullable=False, quote=False)
     
     bikeId: Mapped[UUID] = mapped_column("bikeid", ForeignKey("bikes.id"), nullable=False, quote=False)
-    bike: Mapped["Bike"] = relationship("Bike", foreign_keys=[bikeId], back_populates="saleLines")
+    bike: Mapped["Bike"] = relationship("Bike", foreign_keys=[bikeId], back_populates="bikeSaleLines")

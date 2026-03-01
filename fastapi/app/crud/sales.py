@@ -80,7 +80,8 @@ def does_payment_cover_sale_price(db: Session, transaction_header_id: UUID, sale
     transaction_header = get_transaction_header(db=db, transaction_header_id=transaction_header_id)
     sale_header = get_sale_header(db=db, sale_header_id=sale_header_id)
     
-    total_sale_price = sum([line.salePrice for line in sale_header.catalogueItemSaleLines]) + sum([line.salePrice for line in sale_header.bikeSaleLines])
+    total_sale_price = (sum([line.salePrice for line in sale_header.catalogueItemSaleLines]) 
+                        + sum([line.salePrice for line in sale_header.bikeSaleLines]))
     transaction_amount = sum([line.amount for line in transaction_header.transactionLines if line.account.type == AccountTypes.ASSET])
     
     return total_sale_price == transaction_amount
