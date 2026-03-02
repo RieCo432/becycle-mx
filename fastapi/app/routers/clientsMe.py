@@ -74,9 +74,8 @@ async def get_my_contract(
                 contractId=report.contractId
             ) for report in contract.crimeReports
         ],
-        depositAmountCollected=abs([tl.amount for tl in contract.depositCollectedTransactionHeader.transactionLines if tl.account.type == AccountTypes.LIABILITY][0]),
-        depositAmountReturned=abs([tl.amount for tl in contract.depositSettledTransactionHeader.transactionLines if tl.account.type == AccountTypes.ASSET][0]) if contract.depositSettledTransactionHeader else None,
-        depositCollectedTransactionHeaderId=contract.depositCollectedTransactionHeaderId,
+        depositAmountCollected=0, # abs([tl.amount for tl in contract.depositCollectedTransactionHeader.transactionLines if tl.account.type == AccountTypes.LIABILITY][0]),
+        depositAmountReturned=0, # abs([tl.amount for tl in contract.depositSettledTransactionHeader.transactionLines if tl.account.type == AccountTypes.ASSET][0]) if contract.depositSettledTransactionHeader else None,
     )
 
 

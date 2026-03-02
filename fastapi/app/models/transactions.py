@@ -25,7 +25,7 @@ class TransactionHeader(Base):
     postedByUser: Mapped["User"] = relationship("User", foreign_keys=[postedByUserId], back_populates="transactionHeadersPosted")
 
     contractId: Mapped[UUID] = mapped_column("contractid", ForeignKey("contracts.id"), nullable=True, quote=False)
-    contract: Mapped["Contract"] = relationship("Contract", foreign_keys=[contractId], back_populates="transactionHeaders")
+    contract: Mapped["Contract"] = relationship("Contract", foreign_keys=[contractId], back_populates="depositTransactionHeaders")
     
     transactionLines: Mapped[List["TransactionLine"]] = relationship("TransactionLine", back_populates="transactionHeader")
 

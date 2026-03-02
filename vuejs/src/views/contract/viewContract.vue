@@ -38,8 +38,8 @@ export default {
     const contractData = toRef(props, 'contract');
     const depositAmountCollected = computed(() => {
       return Math.abs(
-        contractData.value.depositCollectedTransactionHeader ?
-          contractData.value.depositCollectedTransactionHeader
+        contractData.value.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected') ?
+          contractData.value.depositTransactionHeaders.find((header) => header.event === 'deposit_collected')
             .transactionLines
             .find((l) => l.account.type === 'liability').amount :
           0,
@@ -555,14 +555,14 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300 w-100">
                     Deposit:
                   </p>
-                  <table v-if="contract.depositCollectedTransactionHeader"
+                  <table v-if="contract.depositTransactionHeaders.find((header) => header.event === 'deposit_collected')"
                          class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
                     <tr class=" dark:bg-slate-700">
                       <th class="border dark:border-slate-500">Account</th>
                       <th class="border dark:border-slate-500">Credit</th>
                       <th class="border dark:border-slate-500">Debit</th>
                     </tr>
-                    <tr v-for="line in contract.depositCollectedTransactionHeader.transactionLines" :key="line.id">
+                    <tr v-for="line in contract.depositTransactionHeaders.find((header) => header.event === 'deposit_collected').transactionLines" :key="line.id">
                       <td class="border dark:border-slate-500">{{ line.account.name }}</td>
                       <td class="border dark:border-slate-500">
                         {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
@@ -774,14 +774,14 @@ export default {
               <p class="text-slate-600 dark:text-slate-300 w-100">
                 Deposit Settlement:
               </p>
-              <table v-if="contract.depositSettledTransactionHeader"
+              <table v-if="contract.depositTransactionHeaders.find((header) => header.event === 'deposit_settled')"
                      class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
                 <tr class=" dark:bg-slate-700">
                   <th class="border dark:border-slate-500">Account</th>
                   <th class="border dark:border-slate-500">Credit</th>
                   <th class="border dark:border-slate-500">Debit</th>
                 </tr>
-                <tr v-for="line in contract.depositSettledTransactionHeader.transactionLines" :key="line.id">
+                <tr v-for="line in contract.depositTransactionHeaders.find((header) => header.event === 'deposit_settled').transactionLines" :key="line.id">
                   <td class="border dark:border-slate-500">{{ line.account.name }}</td>
                   <td class="border dark:border-slate-500">
                     {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}

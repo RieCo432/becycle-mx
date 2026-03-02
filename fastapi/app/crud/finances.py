@@ -130,10 +130,8 @@ def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) 
                     deposit_account_day_balances.diff[transaction_line.account.name] = deposit_account_day_balances.diff.get(transaction_line.account.name, 0) + transaction_line.amount
 
             contract = None
-            if deposit_transaction.event == "deposit_collected":
-                contract = db.scalar(select(models.Contract).where(models.Contract.depositCollectedTransactionHeaderId == deposit_transaction.id))
-            elif deposit_transaction.event == "deposit_settled":
-                contract = db.scalar(select(models.Contract).where(models.Contract.depositSettledTransactionHeaderId == deposit_transaction.id))
+            if deposit_transaction.event in ["deposit_collected", "deposit_settled"]:
+                contract = db.scalar(select(models.Contract).where(models.Contract.id == deposit_transaction.contractId))
             
             deposit_account_day_balances.transactions.append(schemas.DepositAccountTransaction(
                 details=schemas.DepositTransactionDetails(
