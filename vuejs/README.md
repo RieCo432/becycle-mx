@@ -1,4 +1,4 @@
-# Dashcode (Node V-14)
+# Becycle-mx VueJS Frontend
 
 ## Project setup
 ```
@@ -7,7 +7,7 @@ yarn install
 
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+yarn run dev
 ```
 
 ### Compiles and minifies for production
