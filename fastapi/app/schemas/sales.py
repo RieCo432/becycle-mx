@@ -23,6 +23,11 @@ class CatalogueItemSaleLine(CatalogueItemSaleLineCreate):
     catalogueItem: CatalogueItem
     
     
+class CatalogueItemSaleLineUpdate(BaseModel):
+    quantity: int
+    salePrice: int
+    
+    
 class BikeSaleLineCreate(BaseModel):
     saleHeaderId: UUID
     bikeId: UUID

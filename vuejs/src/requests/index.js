@@ -1641,4 +1641,16 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  deleteCatalogueItemSaleLine(catalogueItemSaleLineId) {
+    return axiosClient.delete(`/sales/catalogue-item-sale-line/${catalogueItemSaleLineId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateCatalogueItemSaleLine(catalogueItemSaleLineId, catalogueItemSaleLine) {
+    return axiosClient.put(`/sales/catalogue-item-sale-line/${catalogueItemSaleLineId}`, catalogueItemSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

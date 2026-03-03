@@ -106,3 +106,34 @@ def finalise_sale(db: Session, sale_header_id: UUID, transaction_header_id: UUID
     
     db.commit()
     return sale_header
+
+
+def get_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UUID) -> models.CatalogueItemSaleLine:
+    catalogue_item_sale_line =  db.scalar(
+        select(models.CatalogueItemSaleLine)
+        .where(models.CatalogueItemSaleLine.id == catalogue_item_sale_line_id)
+    )
+    return catalogue_item_sale_line
+
+def update_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UUID, catalogue_item_sale_line_update: schemas.CatalogueItemSaleLineUpdate) -> models.CatalogueItemSaleLine:
+    catalogue_item_sale_line = get_catalogue_item_sale_line(db=db, catalogue_item_sale_line_id=catalogue_item_sale_line_id)
+    
+    if catalogue_item_sale_line is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Catalogue item sale line not found"})
+    
+    catalogue_item_sale_line.salePrice = catalogue_item_sale_line_update.salePrice
+    catalogue_item_sale_line.quantity = catalogue_item_sale_line_update.quantity
+    
+    db.commit()
+    
+    return catalogue_item_sale_line
+
+
+def delete_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UUID) -> None:
+    catalogue_item_sale_line = get_catalogue_item_sale_line(db=db, catalogue_item_sale_line_id=catalogue_item_sale_line_id)
+    
+    if catalogue_item_sale_line is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Catalogue item sale line not found"})
+    
+    db.delete(catalogue_item_sale_line)
+    db.commit()
