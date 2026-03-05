@@ -26,6 +26,8 @@ export default {
       showEditQuantityModal: false,
       selectedItem: null,
       quantity: 0,
+      editSalePriceActive: false,
+      newSalePrice: 0,
     };
   },
   created() {
@@ -79,7 +81,6 @@ export default {
     selectItem(item) {
       this.selectedItem = item;
       this.quantity = 0;
-      console.log('Selected item:', this.selectedItem);
       this.showQuantityModal = true;
     },
     closeQuantityModal() {
@@ -118,6 +119,27 @@ export default {
       this.selectedItem = this.currentSale.catalogueItemSaleLines.find((line) => line.id === lineId).catalogueItem;
       this.quantity = this.currentSale.catalogueItemSaleLines.find((line) => line.id === lineId).quantity;
       this.showEditQuantityModal = true;
+    },
+    editSalePrice(lineId) {
+      const line = this.currentSale.catalogueItemSaleLines.find((line) => line.id === lineId);
+      this.selectedItem = line.catalogueItem;
+      this.newSalePrice = line.salePrice / 100;
+      this.editSalePriceActive = true;
+    },
+    setNewSalePrice() {
+      const line = this.currentSale.catalogueItemSaleLines.find((line) => line.catalogueItem.id === this.selectedItem.id);
+
+      requests.putUpdateCatalogueItemSaleLine(line.id, {
+        quantity: line.quantity,
+        salePrice: this.newSalePrice * 100,
+      }).then((response) => {
+        const indexInArr = this.currentSale.catalogueItemSaleLines.findIndex((line) => line.id === response.data.id);
+        this.currentSale.catalogueItemSaleLines.splice(indexInArr, 1, response.data);
+        toast.success('Sale price updated!', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+      this.editSalePriceActive = false;
     },
   },
   computed: {
@@ -204,8 +226,26 @@ export default {
             <template v-for="line in currentSale.catalogueItemSaleLines" :key="line.id">
               <div class="col-span-1"></div>
               <div class="col-span-4"><h6>{{line.catalogueItem.name}}</h6></div>
-              <div class="col-span-1 text-right"><h6 class="inline align-bottom mb-0">{{line.quantity}}</h6><Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="openEditQuantityModal(line.id)"/></div>
-              <div class="col-span-2 text-right"><h6>{{(line.salePrice / 100).toFixed(2)}}</h6></div>
+              <div class="col-span-1 text-right">
+                <h6 class="inline align-bottom mb-0">{{line.quantity}}</h6>
+                <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="openEditQuantityModal(line.id)"/></div>
+              <div class="col-span-2 text-right">
+                <template v-if="editSalePriceActive && line.catalogueItem.id === selectedItem.id">
+                  <Icon class="inline align-middle" icon="heroicons-outline:check" @click="setNewSalePrice"/>
+                  <Icon class="inline align-middle" icon="heroicons-outline:x" @click="() => {editSalePriceActive = false; selectedItem = null}"/>
+                  <input
+                    class="inline align-bottom mb-0 w-[50px] text-right input-control [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    type="number"
+                    v-model="newSalePrice"
+                    :placeholder="line.salePrice / 100"
+                  />
+
+                </template>
+                <template v-else>
+                  <h6 class="inline align-bottom mb-0">{{(line.salePrice / 100).toFixed(2)}}</h6>
+                  <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="editSalePrice(line.id)"/>
+                </template>
+              </div>
               <div class="col-span-1 justify-items-center"><Icon icon="heroicons-outline:trash" @click="removeCatalogueItemSaleLine(line.id)"/></div>
             </template>
             <div v-if="currentSale.bikeSaleLines.length > 0" class="col-span-full"><h5>Bikes</h5></div>
