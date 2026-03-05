@@ -55,18 +55,25 @@ export default {
       toast.success('Sale Continued!', {timeout: 2000});
     },
     addItemToSale() {
-      const catalogueItemSaleLine = {
-        saleHeaderId: this.currentSale.id,
-        catalogueItemId: this.selectedItem.id,
-        quantity: this.quantity,
-        salePrice: this.selectedItem.recommendedRetailPrice * this.quantity,
-      };
-      requests.postCatalogueItemSaleLine(catalogueItemSaleLine).then((response) => {
-        toast.success('Item added to sale!', {timeout: 2000});
-        this.currentSale.catalogueItemSaleLines.push(response.data);
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      const sameItemInSale = this.currentSale.catalogueItemSaleLines.find((line) => line.catalogueItemId === this.selectedItem.id);
+      if (!sameItemInSale) {
+        const catalogueItemSaleLine = {
+          saleHeaderId: this.currentSale.id,
+          catalogueItemId: this.selectedItem.id,
+          quantity: this.quantity,
+          salePrice: this.selectedItem.recommendedRetailPrice * this.quantity,
+        };
+        requests.postCatalogueItemSaleLine(catalogueItemSaleLine).then((response) => {
+          toast.success('Item added to sale!', {timeout: 2000});
+          this.currentSale.catalogueItemSaleLines.push(response.data);
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+      } else {
+        this.quantity += sameItemInSale.quantity;
+        this.updateItemQuantity();
+      }
+      
       this.showQuantityModal = false;
     },
     selectItem(item) {
