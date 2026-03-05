@@ -180,15 +180,15 @@ export default {
           <div class="col-span-8">
 
             <template v-if="showItems">
-              <div v-if="showUsed === null" class="grid grid-cols-2 gap-5">
+              <div v-if="showUsed === null" class="grid grid-cols-2 gap-5 h-full">
                 <div class="col-span-full">
                   <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full"/>
                 </div>
-                <div class="col-span-1">
-                  <Button text="New" @click="showUsed = false" class="w-full"/>
+                <div class="col-span-1 row-span-4">
+                  <Button text="New" @click="showUsed = false" class="w-full h-full text-6xl"/>
                 </div>
-                <div class="col-span-1">
-                  <Button text="Used" @click="showUsed = true" class="w-full"/>
+                <div class="col-span-1 row-span-4">
+                  <Button text="Used" @click="showUsed = true" class="w-full h-full text-6xl"/>
                 </div>
               </div>
               <div v-else class="grid grid-cols-5 gap-5">
@@ -205,6 +205,7 @@ export default {
             <template v-else-if="showBikes">
               <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full"/>
               <BikeCatalogue
+                class="mt-3"
                 outer-grid-col-classes="grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"
                 inner-grid-col-span-classes="col-span-1 lg:col-span-1 2xl:col-span-2"
                 inner-grid-col-classes="grid-cols-1 2xl:grid-cols-2"
@@ -217,12 +218,12 @@ export default {
             </template>
 
             <template v-else>
-              <div class="grid grid-cols-2 gap-5">
-                <div class="col-span-1">
-                  <Button class="w-full h-full" text="Add Catalogue Item" @click="() => showItems = true"></Button>
+              <div class="grid grid-cols-2 gap-5 h-full">
+                <div class="col-span-1 row-span-5">
+                  <Button class="w-full h-full text-6xl" text="Add Catalogue Item" @click="() => showItems = true"></Button>
                 </div>
-                <div class="col-span-1">
-                  <Button class="w-full h-full" text="Add Bike" @click="() => showBikes = true"></Button>
+                <div class="col-span-1 row-span-5">
+                  <Button class="w-full h-full text-6xl" text="Add Bike" @click="() => showBikes = true"></Button>
                 </div>
               </div>
             </template>

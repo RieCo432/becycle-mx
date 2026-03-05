@@ -131,8 +131,9 @@ export default {
 </script>
 
 <template>
-  <Card class-name="rounded-3xl" body-class="p-0">
-
+  <Card
+    class-name="rounded-3xl border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full"
+    body-class="p-0">
     <div v-if="!inEditMode" class="grid grid-cols-2">
       <div class="col-span-2">
         <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Item Picture" class="aspect-square rounded-3xl h-full w-full"/>

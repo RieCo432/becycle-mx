@@ -332,7 +332,9 @@ export default {
 </script>
 
 <template>
-  <Card title="Search/Add Bike">
+  <Card
+    title="Search/Add Bike"
+    class-name="border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full">
     <form @submit.prevent="submit" @keydown.enter="submit">
       <div class="grid grid-cols-6 gap-2">
         <div class="col-span-4">
