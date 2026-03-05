@@ -29,6 +29,14 @@ export default {
       type: Array,
       required: true,
     },
+    includeRentalInitial: {
+      type: Boolean,
+      default: true,
+    },
+    includeSaleInitial: {
+      type: Boolean,
+      default: true,
+    },
   },
   emits: ['updateSearch'],
   setup(props, context) {
@@ -47,8 +55,8 @@ export default {
       },
     ]);
     const filteredBikeSuggestions = ref([]);
-    const includeRental = ref(true);
-    const includeSale = ref(true);
+    const includeRental = ref(props.includeRentalInitial);
+    const includeSale = ref(props.includeSaleInitial);
 
     const addBikeSchema = yup.object().shape({
       makeNotInList: yup.boolean(),
@@ -197,6 +205,10 @@ export default {
     });
     this.fetchBikes = debounce(this.fetchBikes, 1000, {leading: false, trailing: true});
     this.runFilter = debounce(this.runFilter, 200, {leading: true, trailing: true});
+  },
+  mounted() {
+    console.log(this.includeRentalInitial, this.includeRental);
+    console.log(this.includeSaleInitial, this.includeSale);
   },
   methods: {
     fetchBikeMakeSuggestions() {
