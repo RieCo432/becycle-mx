@@ -28,26 +28,13 @@
 
     <div
       class="content-wrapper transition-all duration-150"
-      :class="window.width > 1280 ? switchHeaderClass() : ''"
-    >
-      <div
-        class="page-content"
-        :class="this.$route.meta.appheight ? 'h-full' : 'page-min-height'"
-      >
-        <div
-          :class="` transition-all duration-150 ${
-            this.$store.themeSettingsStore.cWidth === 'boxed'
-              ? 'container mx-auto'
-              : 'container-fluid'
-          }`"
-        >
-          <Breadcrumbs v-if="!this.$route.meta.hide" />
+      :class="window.width > 1280 ? switchHeaderClass() : ''">
+      <div class="page-content page-min-height">
           <router-view v-slot="{ Component }">
             <transition name="router-animation" mode="out-in" appear>
               <component :is="Component"></component>
             </transition>
           </router-view>
-        </div>
       </div>
     </div>
     <Footer
@@ -92,6 +79,9 @@ export default {
 };
 </script>
 <style lang="scss">
+.transition-all {
+  min-height: calc(100% - 133px);
+}
 .router-animation-enter-active {
   animation: coming 0.2s;
   animation-delay: 0.1s;
@@ -142,6 +132,6 @@ export default {
   @apply md:pt-6 md:pb-[37px] md:px-6 pt-[15px] px-[15px] pb-24;
 }
 .page-min-height {
-  min-height: calc(var(--vh, 1vh) * 100 - 132px);
+  min-height: calc(var(--vh, 1vh) * 100 - 133px);
 }
 </style>

@@ -190,6 +190,7 @@ export default {
       isCheckout: false,
       activeUsers: [],
       userSelectionOptionsStatic: false,
+      browseSales: false,
     };
   },
   created() {
@@ -227,6 +228,7 @@ export default {
       });
     },
     continueSale(saleId) {
+      this.browseSales = false;
       this.currentSale = this.openSales.find((sale) => sale.id === saleId);
       toast.success('Sale Continued!', {timeout: 2000});
     },
@@ -438,6 +440,7 @@ export default {
     },
     closeSale() {
       this.isCheckout = false;
+      this.browseSales = false;
       this.currentSale = null;
       this.showItems = null;
       this.showBikes = null;
@@ -507,44 +510,58 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="fill-page">
+    <!-- TODO: I think this needs to not be a card in order to work correctly and fill the whole screen. Too much baggage in the card component-->
     <Card title="Point of Sale">
-      <div v-if="currentSale === null">
-        <h2>Start New Sale</h2>
-        <Button text="New Sale" @click="startNewSale"></Button>
-        <h2>Open Sales</h2>
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-4" v-for="sale in openSales" :key="sale.id">
-            {{ sale }}
-            <Button text="Continue Sale" @click="continueSale(sale.id)"></Button>
+      <template v-if="currentSale === null">
+        <template v-if="!browseSales">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 h-full">
+            <div class="col-span-1 h-full">
+              <Button class="w-full h-full dark:bg-slate-900 bg-slate-400 text-6xl" text="New Sale" @click="startNewSale"/>
+            </div>
+            <div class="col-span-1 h-full">
+              <Button class="w-full h-full dark:bg-slate-900 bg-slate-400 text-6xl" text="Browse Sales" @click="browseSales = true"/>
+            </div>
           </div>
-        </div>
-      </div>
-      <div v-else>
+        </template>
+        <template v-else>
+          <div class="grid grid-cols-12 gap-5">
+            <div class="col-span-full">
+              <Button class="w-full dark:bg-slate-900 bg-slate-400" text="Back" @click="() => {browseSales = false; currentSale = null}"/>
+            </div>
+            <div class="col-span-4" v-for="sale in openSales" :key="sale.id">
+              {{ sale }}
+              <Button text="Continue Sale" @click="continueSale(sale.id)"></Button>
+            </div>
+          </div>
+        </template>
+      </template>
+      <template v-else>
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12">
-            <Button class="w-full" text="Close Sale" @click="closeSale"></Button>
+            <Button class="w-full dark:bg-slate-900 bg-slate-400" text="Close Sale" @click="closeSale"/>
           </div>
           <div class="col-span-12">
-            <h2>Sale: {{ currentSale.id }}</h2>
+            <span class="text-2xl lg:text-4xl text-slate-800 dark:text-slate-300">Sale created by {{currentSale.createdByUser.username}} on {{ new Date(Date.parse(currentSale.createdOn))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }} </span>
           </div>
-          <div class="col-span-8">
+          <div class="col-span-full 2xl:col-span-8">
             <template v-if="!isCheckout">
               <template v-if="showItems">
                 <div v-if="showUsed === null" class="grid grid-cols-2 gap-5 h-full">
                   <div class="col-span-full">
-                    <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full"/>
+                    <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full dark:bg-slate-900 bg-slate-400"/>
                   </div>
                   <div class="col-span-1 row-span-4">
-                    <Button text="New" @click="showUsed = false" class="w-full h-full text-6xl"/>
+                    <Button text="New" @click="showUsed = false" class="w-full h-full text-6xl dark:bg-slate-900 bg-slate-400 aspect-square"/>
                   </div>
                   <div class="col-span-1 row-span-4">
-                    <Button text="Used" @click="showUsed = true" class="w-full h-full text-6xl"/>
+                    <Button text="Used" @click="showUsed = true" class="w-full h-full text-6xl dark:bg-slate-900 bg-slate-400 aspect-square"/>
                   </div>
                 </div>
                 <div v-else class="grid grid-cols-5 gap-5">
                   <div class="col-span-5">
-                    <Button text="Back" @click="showUsed = null" class="w-full"/>
+                    <Button text="Back" @click="showUsed = null" class="w-full dark:bg-slate-900 bg-slate-400"/>
                   </div>
                   <div
                     v-for="item in catalogueItems.filter((item) => item.isSecondHand === showUsed)"
@@ -557,7 +574,7 @@ export default {
               </template>
 
               <template v-else-if="showBikes">
-                <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full"/>
+                <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full dark:bg-slate-900 bg-slate-400"/>
                 <BikeCatalogue
                   class="mt-3"
                   outer-grid-col-classes="grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"
@@ -572,16 +589,16 @@ export default {
               </template>
 
               <template v-else>
-                <div class="grid grid-cols-2 gap-5 h-full">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 h-full">
                   <div class="col-span-1 row-span-5">
                     <Button
-                      class="w-full h-full text-6xl"
+                      class="w-full h-full text-2xl lg:text-6xl aspect-[1.5] 2xl:aspect-square dark:bg-slate-900 bg-slate-400 text-wrap"
                       text="Add Catalogue Item"
                       @click="() => showItems = true"/>
                   </div>
                   <div class="col-span-1 row-span-5">
                     <Button
-                      class="w-full h-full text-6xl"
+                      class="w-full h-full text-2xl lg:text-6xl aspect-[1.5] 2xl:aspect-square dark:bg-slate-900 bg-slate-400 text-wrap"
                       text="Add Bike"
                       @click="() => showBikes = true"/>
                   </div>
@@ -676,7 +693,7 @@ export default {
               </form>
             </template>
           </div>
-          <div class="col-span-4">
+          <div class="col-span-full 2xl:col-span-4 h-full relative">
             <div class="grid grid-cols-9 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
               <div class="col-span-full text-center"><h4>Basket</h4></div>
               <template v-if="currentSale.catalogueItemSaleLines.length + currentSale.bikeSaleLines.length > 0">
@@ -773,15 +790,12 @@ export default {
               <div class="col-span-full h-10"></div>
               <div class="col-span-6 text-center"><h5>Total</h5></div>
               <div class="col-span-2 text-right"><h5>{{ (totalSalePrice / 100).toFixed(2) }}</h5></div>
-              <div class="col-span-full mt-5">
-                <Button v-if="!isCheckout" class="w-full" text="Checkout" @click="checkoutSale"/>
-                <Button v-if="isCheckout" class="w-full" text="Cancel Checkout" @click="cancelCheckout"/>
-              </div>
             </div>
-
+            <Button v-if="!isCheckout" class="w-full absolute bottom-0" text="Checkout" @click="checkoutSale"/>
+            <Button v-if="isCheckout" class="w-full absolute bottom-0" text="Cancel Checkout" @click="cancelCheckout"/>
           </div>
         </div>
-      </div>
+      </template>
     </Card>
 
     <Modal
@@ -890,5 +904,8 @@ export default {
 </template>
 
 <style scoped lang="scss">
-
+.fill-page {
+  min-height: calc(var(--vh, 1vh) * 100 - 194px);
+  height: calc(var(--vh, 1vh) * 100 - 194px);
+}
 </style>
