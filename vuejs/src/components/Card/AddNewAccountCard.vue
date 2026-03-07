@@ -34,7 +34,7 @@ export default {
       projects.value = response.data;
     });
 
-    const availableUiFilters = ['deposit', 'expense', 'income', 'transfer', 'return'];
+    const availableUiFilters = ['deposit', 'expense', 'income', 'transfer', 'return', 'sale'];
     const accountTypes = ['dividend', 'expense', 'asset', 'liability', 'equity', 'revenue'];
 
     const newAccountSchema = yup.object().shape({
