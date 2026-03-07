@@ -6,20 +6,24 @@ from starlette import status
 import app.models as models
 import app.schemas as schemas
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from datetime import datetime, timezone
 from .transactions import get_transaction_header
 from ..services.accounts_helpers import AccountTypes
 
 
-def get_sale_headers(db: Session, pending: bool = False) -> list[models.SaleHeader]:
+def get_sale_headers(db: Session, pending: bool = True, completed: bool = True) -> list[models.SaleHeader]:
     query = select(models.SaleHeader)
     
-    if not pending:
-        query = query.where(models.SaleHeader.transactionHeaderId != None)
+    filters = []
+    
+    if pending:
+        filters.append(models.SaleHeader.transactionHeaderId == None)
+    if completed:
+        filters.append(models.SaleHeader.transactionHeaderId != None)
     
     return [_ for _ in db.scalars(
-        query
+        query.where(or_(*filters))
     )]
 
 

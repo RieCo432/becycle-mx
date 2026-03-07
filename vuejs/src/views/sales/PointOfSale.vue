@@ -9,15 +9,142 @@ import Modal from '@/components/Modal/Modal.vue';
 import {Icon} from '@iconify/vue';
 import BikeCatalogue from '@/views/bike/BikeCatalogue.vue';
 import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
+import {computed, ref, watch} from 'vue';
+import * as yup from 'yup';
+import {useField, useForm} from 'vee-validate';
+import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 
 const toast = useToast();
 export default {
   name: 'PointOfSale',
-  components: {BikeOverviewCard, BikeCatalogue, Icon, Modal, TextInput, CatalogueItemCard, Card, Button},
+  components: {
+    ComboboxTextInput,
+    BikeOverviewCard, BikeCatalogue, Icon, Modal, TextInput, CatalogueItemCard, Card, Button},
+  setup(props, context) {
+    const revenueAccounts = ref([]);
+    const assetAccounts = ref([]);
+    const currentSale = ref(null);
+    const openSales = ref([]);
+
+    const saleCheckoutSchema = yup.object().shape({
+      hasCatalogueItemSaleLines: yup.boolean(),
+      catalogueItemRevenueAccount: yup.object().when('hasCatalogueItemSaleLines', {
+        is: true,
+        then: () => yup.object().shape({
+          id: yup.string().uuid().required(' The revenue account id is required '),
+          name: yup.string().required(' The revenue account name is required ')})
+          .required('This is required for selling catalogue items.'),
+        otherwise: () => yup.object().nullable(),
+      }),
+      hasBikeSaleLines: yup.boolean(),
+      bikeRevenueAccount: yup.object().when('hasBikeSaleLines', {
+        is: true,
+        then: () => yup.object().shape({
+          id: yup.string().uuid().required(' The revenue account id is required '),
+          name: yup.string().required(' The revenue account name is required ')})
+          .required('This is required for selling bikes.'),
+        otherwise: () => yup.object().nullable(),
+      }),
+      paymentAssetAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The asset account id is required '),
+        name: yup.string().required(' The asset account name is required ')})
+        .required('Select the payment asset account.'),
+      username: yup.string().required(' The username is required '),
+      passwordOrPin: yup.string().required(' The password or pin is required '),
+    });
+
+    const {handleSubmit, handleReset: resetCheckoutForm} = useForm({
+      validationSchema: saleCheckoutSchema,
+      keepValuesOnUnmount: true,
+    });
+
+    const {value: hasCatalogueItemSaleLines, errorMessage: hasCatalogueItemSaleLinesError} = useField('hasCatalogueItemSaleLines');
+    const {value: catalogueItemRevenueAccount, errorMessage: catalogueItemRevenueAccountError} = useField('catalogueItemRevenueAccount');
+    const {value: hasBikeSaleLines, errorMessage: hasBikeSaleLinesError} = useField('hasBikeSaleLines');
+    const {value: bikeRevenueAccount, errorMessage: bikeRevenueAccountError} = useField('bikeRevenueAccount');
+    const {value: paymentAssetAccount, errorMessage: paymentAssetAccountError} = useField('paymentAssetAccount');
+    const {value: username, errorMessage: usernameError} = useField('username');
+    const {value: passwordOrPin, errorMessage: passwordOrPinError} = useField('passwordOrPin');
+
+    function getSales() {
+      requests.getSales(true, false).then((response) => {
+        openSales.value = response.data;
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+    }
+
+    watch(
+      () => currentSale.value,
+      (newValue) => {
+        if (newValue) {
+          hasCatalogueItemSaleLines.value = newValue.catalogueItemSaleLines.length > 0;
+          hasBikeSaleLines.value = newValue.bikeSaleLines.length > 0;
+        }
+      },
+      {deep: true},
+    );
+
+    const submitSaleCheckout = handleSubmit(() => {
+      const catalogueItemTotalSalePrice = currentSale.value.catalogueItemSaleLines.reduce((total, line) => total + line.salePrice, 0);
+      const bikeTotalSalePrice = currentSale.value.bikeSaleLines.reduce((total, line) => total + line.salePrice, 0);
+      const totalSalePrice = catalogueItemTotalSalePrice + bikeTotalSalePrice;
+
+      if (totalSalePrice <= 0) {
+        toast.error('Sale price must be above 0!', {timeout: 2000});
+        return;
+      }
+
+      const saleTransactionsHeaderDraft = {
+        transactionHeader: {
+          event: 'sale',
+        },
+        transactionLines: [
+          {amount: totalSalePrice, accountId: paymentAssetAccount.value.id},
+          ...(hasCatalogueItemSaleLines.value ? [{amount: -catalogueItemTotalSalePrice, accountId: catalogueItemRevenueAccount.value.id}] : []),
+          ...(hasBikeSaleLines.value ? [{amount: -bikeTotalSalePrice, accountId: bikeRevenueAccount.value.id}] : []),
+        ],
+        attemptAutoPost: false,
+      };
+
+      requests.createTransaction(saleTransactionsHeaderDraft).then((response) => {
+        toast.success('Transaction created', {timeout: 2000});
+
+        requests.patchSalePayment(currentSale.value.id, response.data.id, username.value, passwordOrPin.value).then((response) => {
+          toast.success('Sale completed!', {timeout: 2000});
+          currentSale.value = null;
+        });
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+    });
+
+    return {
+      revenueAccounts,
+      assetAccounts,
+      currentSale,
+      catalogueItemRevenueAccount,
+      catalogueItemRevenueAccountError,
+      bikeRevenueAccount,
+      bikeRevenueAccountError,
+      paymentAssetAccount,
+      paymentAssetAccountError,
+      hasCatalogueItemSaleLines,
+      hasCatalogueItemSaleLinesError,
+      hasBikeSaleLines,
+      hasBikeSaleLinesError,
+      username,
+      usernameError,
+      passwordOrPin,
+      passwordOrPinError,
+      submitSaleCheckout,
+      resetCheckoutForm,
+      getSales,
+      openSales,
+    };
+  },
   data() {
     return {
-      openSales: [],
-      currentSale: null,
       showCatalogueBrowseModal: false,
       showBikeBrowseModal: false,
       catalogueItems: [],
@@ -32,16 +159,31 @@ export default {
       newSalePrice: 0,
       selectedBike: null,
       showNewBikeSalePriceModal: false,
+      isCheckout: false,
+      activeUsers: [],
+      userSelectionOptionsStatic: false,
     };
   },
   created() {
-    requests.getSales(true).then((response) => {
-      this.openSales = response.data;
+    this.getSales();
+    requests.getItemCatalogue(false).then((response) => {
+      this.catalogueItems = response.data;
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
-    requests.getItemCatalogue(false).then((response) => {
-      this.catalogueItems = response.data;
+    requests.getAccounts([
+      {name: 'type', value: 'revenue'},
+      {name: 'type', value: 'asset'},
+      {name: 'ui_filters', value: 'sale'},
+    ]).then((response) => {
+      this.revenueAccounts = response.data.filter((account) => account.type === 'revenue');
+      this.assetAccounts = response.data.filter((account) => account.type === 'asset');
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
+
+    requests.getActiveUsers().then((response) => {
+      this.activeUsers = response.data.map((user) => user.username);
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
@@ -205,11 +347,124 @@ export default {
         this.selectedBike = null;
       }
     },
+    checkoutSale() {
+      if (this.currentSale.bikeSaleLines.length + this.currentSale.catalogueItemSaleLines.length === 0) {
+        toast.error('Nothing in sale!', {timeout: 2000});
+        return;
+      }
+      this.catalogueItemRevenueAccount = {
+        id: '',
+        name: '',
+      };
+      this.bikeRevenueAccount = {
+        id: '',
+        name: '',
+      };
+      this.paymentAssetAccount = {
+        id: '',
+        name: '',
+      };
+      this.username = '';
+      this.isCheckout = true;
+    },
+    cancelCheckout() {
+      this.isCheckout = false;
+      this.showItems = null;
+      this.showBikes = null;
+      toast.warning('Checkout cancelled!', {timeout: 2000});
+    },
+    selectUser(event, i) {
+      if (i !== -1) {
+        this.username = this.filtered_working_user_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    makeAccountLegible(account) {
+      return `${account.name}`;
+    },
+    selectCatalogueItemRevenueAccount(event, i) {
+      if (i !== -1) {
+        this.catalogueItemRevenueAccount = this.filtered_catalogue_item_revenue_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectBikeRevenueAccount(event, i) {
+      if (i !== -1) {
+        this.bikeRevenueAccount = this.filtered_bike_revenue_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectPaymentAssetAccount(event, i) {
+      if (i !== -1) {
+        this.paymentAssetAccount = this.filtered_payment_asset_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    closeSale() {
+      this.isCheckout = false;
+      this.currentSale = null;
+      this.showItems = null;
+      this.showBikes = null;
+      this.showEditQuantityModal = false;
+      this.showNewBikeSalePriceModal = false;
+      this.editSalePriceActive = false;
+      this.selectedItem = null;
+      this.selectedBike = null;
+      this.newSalePrice = 0;
+    },
   },
   computed: {
     totalSalePrice() {
       return this.currentSale.catalogueItemSaleLines.reduce((total, line) => total + line.salePrice, 0) +
         this.currentSale.bikeSaleLines.reduce((total, line) => total + line.salePrice, 0);
+    },
+    filtered_working_user_suggestions() {
+      return this.username ? this.activeUsers
+        .filter((suggestion) =>
+          suggestion
+            .toLowerCase()
+            .startsWith(this.username.toLowerCase()))
+        .sort(this.userSortingFunction)
+        .slice(0, 10) : this.activeUsers;
+    },
+    filtered_catalogue_item_revenue_account_suggestions() {
+      return this.revenueAccounts
+        .filter((suggestion) => suggestion.name
+          .toLowerCase()
+          .startsWith((this.catalogueItemRevenueAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_bike_revenue_account_suggestions() {
+      return this.revenueAccounts
+        .filter((suggestion) => suggestion.name
+          .toLowerCase()
+          .startsWith((this.bikeRevenueAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_payment_asset_account_suggestions() {
+      return this.assetAccounts
+        .filter((suggestion) => suggestion.name
+          .toLowerCase()
+          .startsWith((this.paymentAssetAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    revenueAccountsColSpan() {
+      return 3 - (this.hasCatalogueItemSaleLines ? 1 : 0) - (this.hasBikeSaleLines ? 1 : 0);
+    },
+  },
+  watch: {
+    hasBikeSaleLines(newValue) {
+      if (!(newValue || this.hasCatalogueItemSaleLines) && this.isCheckout) {
+        this.cancelCheckout();
+      }
+    },
+    hasCatalogueItemSaleLines(newValue) {
+      if (!(newValue || this.hasBikeSaleLines) && this.isCheckout) {
+        this.cancelCheckout();
+      }
     },
   },
 };
@@ -232,128 +487,221 @@ export default {
       <div v-else>
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12">
-            <Button class="w-full" text="Close Sale" @click="currentSale = null"></Button>
+            <Button class="w-full" text="Close Sale" @click="closeSale"></Button>
           </div>
           <div class="col-span-12">
             <h2>Sale: {{ currentSale.id }}</h2>
           </div>
           <div class="col-span-8">
+            <template v-if="!isCheckout">
+              <template v-if="showItems">
+                <div v-if="showUsed === null" class="grid grid-cols-2 gap-5 h-full">
+                  <div class="col-span-full">
+                    <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full"/>
+                  </div>
+                  <div class="col-span-1 row-span-4">
+                    <Button text="New" @click="showUsed = false" class="w-full h-full text-6xl"/>
+                  </div>
+                  <div class="col-span-1 row-span-4">
+                    <Button text="Used" @click="showUsed = true" class="w-full h-full text-6xl"/>
+                  </div>
+                </div>
+                <div v-else class="grid grid-cols-5 gap-5">
+                  <div class="col-span-5">
+                    <Button text="Back" @click="showUsed = null" class="w-full"/>
+                  </div>
+                  <div v-for="item in catalogueItems.filter((item) => item.isSecondHand === showUsed)" :key="item.id"
+                       class="col-span-1" @click="() => selectItem(item)">
+                    <CatalogueItemCard :item-details="item"/>
+                  </div>
+                </div>
+              </template>
 
-            <template v-if="showItems">
-              <div v-if="showUsed === null" class="grid grid-cols-2 gap-5 h-full">
-                <div class="col-span-full">
-                  <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full"/>
+              <template v-else-if="showBikes">
+                <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full"/>
+                <BikeCatalogue
+                  class="mt-3"
+                  outer-grid-col-classes="grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"
+                  inner-grid-col-span-classes="col-span-1 lg:col-span-1 2xl:col-span-2"
+                  inner-grid-col-classes="grid-cols-1 2xl:grid-cols-2"
+                  :include-rental="false"
+                >
+                  <template v-slot:specialAction="props">
+                    <Button class="col" @click="addBikeToSale(props.bike)">Add To Sale</Button>
+                  </template>
+                </BikeCatalogue>
+              </template>
+
+              <template v-else>
+                <div class="grid grid-cols-2 gap-5 h-full">
+                  <div class="col-span-1 row-span-5">
+                    <Button class="w-full h-full text-6xl" text="Add Catalogue Item" @click="() => showItems = true"></Button>
+                  </div>
+                  <div class="col-span-1 row-span-5">
+                    <Button class="w-full h-full text-6xl" text="Add Bike" @click="() => showBikes = true"></Button>
+                  </div>
                 </div>
-                <div class="col-span-1 row-span-4">
-                  <Button text="New" @click="showUsed = false" class="w-full h-full text-6xl"/>
-                </div>
-                <div class="col-span-1 row-span-4">
-                  <Button text="Used" @click="showUsed = true" class="w-full h-full text-6xl"/>
-                </div>
-              </div>
-              <div v-else class="grid grid-cols-5 gap-5">
-                <div class="col-span-5">
-                  <Button text="Back" @click="showUsed = null" class="w-full"/>
-                </div>
-                <div v-for="item in catalogueItems.filter((item) => item.isSecondHand === showUsed)" :key="item.id"
-                     class="col-span-1" @click="() => selectItem(item)">
-                  <CatalogueItemCard :item-details="item"/>
-                </div>
-              </div>
+              </template>
             </template>
-
-            <template v-else-if="showBikes">
-              <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full"/>
-              <BikeCatalogue
-                class="mt-3"
-                outer-grid-col-classes="grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"
-                inner-grid-col-span-classes="col-span-1 lg:col-span-1 2xl:col-span-2"
-                inner-grid-col-classes="grid-cols-1 2xl:grid-cols-2"
-                :include-rental="false"
-              >
-                <template v-slot:specialAction="props">
-                  <Button class="col" @click="addBikeToSale(props.bike)">Add To Sale</Button>
-                </template>
-              </BikeCatalogue>
-            </template>
-
             <template v-else>
-              <div class="grid grid-cols-2 gap-5 h-full">
-                <div class="col-span-1 row-span-5">
-                  <Button class="w-full h-full text-6xl" text="Add Catalogue Item" @click="() => showItems = true"></Button>
+              <form @submit.prevent="submitSaleCheckout">
+                <div class="grid grid-cols-2 gap-4">
+                  <div
+                    v-if="hasCatalogueItemSaleLines"
+                    :class="`col-span-${revenueAccountsColSpan}`">
+                    <ComboboxTextInput
+                      :field-model-value="catalogueItemRevenueAccount.name"
+                      :suggestions="filtered_catalogue_item_revenue_account_suggestions.map(makeAccountLegible)"
+                      :selected-callback="selectCatalogueItemRevenueAccount"
+                      :allow-new="false"
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Catalogue Item Revenue Account"
+                      type="text"
+                      placeholder="workshop"
+                      name="catalogueItemRevenueAccount"
+                      v-model="catalogueItemRevenueAccount.name"
+                      :error="catalogueItemRevenueAccountError"
+                      @change="() => {}"
+                    />
+                  </div>
+                  <div
+                    v-if="hasBikeSaleLines"
+                    :class="`col-span-${revenueAccountsColSpan}`">
+                    <ComboboxTextInput
+                      :field-model-value="bikeRevenueAccount.name"
+                      :suggestions="filtered_bike_revenue_account_suggestions.map(makeAccountLegible)"
+                      :selected-callback="selectBikeRevenueAccount"
+                      :allow-new="false"
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Bike Sale Revenue Account"
+                      type="text"
+                      placeholder="workshop"
+                      name="bikeRevenueAccount"
+                      v-model="bikeRevenueAccount.name"
+                      :error="bikeRevenueAccountError"
+                      @change="() => {}"
+                    />
+                  </div>
+                  <div class="col-span-full">
+                    <ComboboxTextInput
+                      :field-model-value="paymentAssetAccount.name"
+                      :suggestions="filtered_payment_asset_account_suggestions.map(makeAccountLegible)"
+                      :selected-callback="selectPaymentAssetAccount"
+                      :allow-new="false"
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Payment Account"
+                      type="text"
+                      placeholder="workshop"
+                      name="paymentAssetAccount"
+                      v-model="paymentAssetAccount.name"
+                      :error="paymentAssetAccountError"
+                      @change="() => {}"
+                    />
+                  </div>
+                  <div class="col-span-full">
+                    <ComboboxTextInput
+                      :field-model-value="username"
+                      :suggestions="filtered_working_user_suggestions"
+                      :selected-callback="selectUser"
+                      :allow-new="false"
+                      :open-by-default="userSelectionOptionsStatic"
+                      label="Volunteer"
+                      type="text"
+                      placeholder="workshop"
+                      name="username"
+                      v-model="username"
+                      :error="usernameError"
+                      @change="() => {}"
+                    />
+                  </div>
+                  <div class="col-span-full">
+                    <TextInput
+                      label="Password or Pin"
+                      type="password"
+                      placeholder="Password or Pin"
+                      name="passwordOrPin"
+                      v-model="passwordOrPin"
+                      :error="passwordOrPinError"
+                      hasicon/>
+                  </div>
+                  <div class="col-span-full">
+                    <Button class="w-full" type="submit" text="Complete Sale"/>
+                  </div>
                 </div>
-                <div class="col-span-1 row-span-5">
-                  <Button class="w-full h-full text-6xl" text="Add Bike" @click="() => showBikes = true"></Button>
-                </div>
-              </div>
+              </form>
             </template>
           </div>
           <div class="col-span-4">
-            <div class="grid grid-cols-9 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-              <div class="col-span-full text-center"><h4>Basket</h4></div>
-              <template v-if ="currentSale.catalogueItemSaleLines.length + currentSale.bikeSaleLines.length > 0">
-                <div class="col-span-1"></div>
-                <div class="col-span-4 text-center"><h5>Item</h5></div>
-                <div class="col-span-1 text-center"><h5>Qty</h5></div>
-                <div class="col-span-2 text-center"><h5>Price</h5></div>
-                <div class="col-span-1"></div>
-              </template>
-              <div v-if="currentSale.catalogueItemSaleLines.length > 0" class="col-span-full"><h5>Catalogue Items</h5></div>
-              <template v-for="line in currentSale.catalogueItemSaleLines" :key="line.id">
-                <div class="col-span-1"></div>
-                <div class="col-span-4"><h6>{{line.catalogueItem.name}}</h6></div>
-                <div class="col-span-1 text-right">
-                  <h6 class="inline align-bottom mb-0">{{line.quantity}}</h6>
-                  <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="openEditQuantityModal(line.id)"/></div>
-                <div class="col-span-2 text-right">
-                  <template v-if="editSalePriceActive && selectedItem && line.catalogueItem.id === selectedItem.id">
-                    <Icon class="inline align-middle" icon="heroicons-outline:check" @click="setNewItemSalePrice"/>
-                    <Icon class="inline align-middle" icon="heroicons-outline:x" @click="() => {editSalePriceActive = false; selectedItem = null}"/>
-                    <input
-                      class="inline align-bottom mb-0 w-[50px] text-right input-control [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      type="number"
-                      v-model="newSalePrice"
-                      :placeholder="line.salePrice / 100"
-                    />
+              <div class="grid grid-cols-9 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+                <div class="col-span-full text-center"><h4>Basket</h4></div>
+                <template v-if ="currentSale.catalogueItemSaleLines.length + currentSale.bikeSaleLines.length > 0">
+                  <div class="col-span-1"></div>
+                  <div class="col-span-4 text-center"><h5>Item</h5></div>
+                  <div class="col-span-1 text-center"><h5>Qty</h5></div>
+                  <div class="col-span-2 text-center"><h5>Price</h5></div>
+                  <div class="col-span-1"></div>
+                </template>
+                <div v-if="currentSale.catalogueItemSaleLines.length > 0" class="col-span-full"><h5>Catalogue Items</h5></div>
+                <template v-for="line in currentSale.catalogueItemSaleLines" :key="line.id">
+                  <div class="col-span-1"></div>
+                  <div class="col-span-4"><h6>{{line.catalogueItem.name}}</h6></div>
+                  <div class="col-span-1 text-right">
+                    <h6 class="inline align-bottom mb-0">{{line.quantity}}</h6>
+                    <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="openEditQuantityModal(line.id)"/></div>
+                  <div class="col-span-2 text-right">
+                    <template v-if="editSalePriceActive && selectedItem && line.catalogueItem.id === selectedItem.id">
+                      <Icon class="inline align-middle" icon="heroicons-outline:check" @click="setNewItemSalePrice"/>
+                      <Icon class="inline align-middle" icon="heroicons-outline:x" @click="() => {editSalePriceActive = false; selectedItem = null}"/>
+                      <input
+                        class="inline align-bottom mb-0 w-[50px] text-right input-control [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        type="number"
+                        v-model="newSalePrice"
+                        :placeholder="line.salePrice / 100"
+                      />
 
-                  </template>
-                  <template v-else>
-                    <h6 class="inline align-bottom mb-0">{{(line.salePrice / 100).toFixed(2)}}</h6>
-                    <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="editItemSalePrice(line.id)"/>
-                  </template>
-                </div>
-                <div class="col-span-1 justify-items-center"><Icon icon="heroicons-outline:trash" @click="removeCatalogueItemSaleLine(line.id)"/></div>
-              </template>
-              <div v-if="currentSale.bikeSaleLines.length > 0" class="col-span-full"><h5>Bikes</h5></div>
-              <template v-for="line in currentSale.bikeSaleLines" :key="line.id">
-                <div class="col-span-1"></div>
-                <div class="col-span-4">
-                  <h6>{{line.bike.make}} {{line.bike.model}}</h6>
-                </div>
-                <div class="col-span-1 text-right"><h6>-</h6></div>
-                <div class="col-span-2 text-right">
-                  <template v-if="editSalePriceActive && selectedBike && line.bike.id === selectedBike.id">
-                    <Icon class="inline align-middle" icon="heroicons-outline:check" @click="setNewBikeSalePrice"/>
-                    <Icon class="inline align-middle" icon="heroicons-outline:x" @click="() => {editSalePriceActive = false; selectedBike = null}"/>
-                    <input
-                      class="inline align-bottom mb-0 w-[50px] text-right input-control [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      type="number"
-                      v-model="newSalePrice"
-                      :placeholder="line.salePrice / 100"
-                    />
+                    </template>
+                    <template v-else>
+                      <h6 class="inline align-bottom mb-0">{{(line.salePrice / 100).toFixed(2)}}</h6>
+                      <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="editItemSalePrice(line.id)"/>
+                    </template>
+                  </div>
+                  <div class="col-span-1 justify-items-center"><Icon icon="heroicons-outline:trash" @click="removeCatalogueItemSaleLine(line.id)"/></div>
+                </template>
+                <div v-if="currentSale.bikeSaleLines.length > 0" class="col-span-full"><h5>Bikes</h5></div>
+                <template v-for="line in currentSale.bikeSaleLines" :key="line.id">
+                  <div class="col-span-1"></div>
+                  <div class="col-span-4">
+                    <h6>{{line.bike.make}} {{line.bike.model}}</h6>
+                  </div>
+                  <div class="col-span-1 text-right"><h6>-</h6></div>
+                  <div class="col-span-2 text-right">
+                    <template v-if="editSalePriceActive && selectedBike && line.bike.id === selectedBike.id">
+                      <Icon class="inline align-middle" icon="heroicons-outline:check" @click="setNewBikeSalePrice"/>
+                      <Icon class="inline align-middle" icon="heroicons-outline:x" @click="() => {editSalePriceActive = false; selectedBike = null}"/>
+                      <input
+                        class="inline align-bottom mb-0 w-[50px] text-right input-control [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        type="number"
+                        v-model="newSalePrice"
+                        :placeholder="line.salePrice / 100"
+                      />
 
-                  </template>
-                  <template v-else>
-                    <h6 class="inline align-bottom mb-0">{{(line.salePrice / 100).toFixed(2)}}</h6>
-                    <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="editBikeSalePrice(line.id)"/>
-                  </template>
+                    </template>
+                    <template v-else>
+                      <h6 class="inline align-bottom mb-0">{{(line.salePrice / 100).toFixed(2)}}</h6>
+                      <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="editBikeSalePrice(line.id)"/>
+                    </template>
+                  </div>
+                  <div class="col-span-1 justify-items-center"><Icon icon="heroicons-outline:trash" @click="removeBikeSaleLine(line.id)"/></div>
+                </template>
+                <div class="col-span-full h-10"></div>
+                <div class="col-span-6 text-center"><h5>Total</h5></div>
+                <div class="col-span-2 text-right"><h5>{{ (totalSalePrice / 100).toFixed(2) }}</h5></div>
+                <div class="col-span-full mt-5">
+                  <Button v-if="!isCheckout" class="w-full" text="Checkout" @click="checkoutSale"/>
+                  <Button v-if="isCheckout" class="w-full" text="Cancel Checkout" @click="cancelCheckout"/>
                 </div>
-                <div class="col-span-1 justify-items-center"><Icon icon="heroicons-outline:trash" @click="removeBikeSaleLine(line.id)"/></div>
-              </template>
-              <div class="col-span-full h-10"></div>
-              <div class="col-span-6 text-center"><h5>Total</h5></div>
-              <div class="col-span-2 text-right"><h5>{{ (totalSalePrice / 100).toFixed(2) }}</h5></div>
-            </div>
+              </div>
+
           </div>
         </div>
       </div>

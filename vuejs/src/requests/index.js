@@ -1622,9 +1622,9 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getSales(pending) {
+  getSales(pending, completed) {
     return axiosClient.get('/sales', {
-      params: {pending: pending},
+      params: {pending: pending, completed: completed},
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -1670,5 +1670,16 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
+  },
+  patchSalePayment(saleId, paymentTransactionHeaderId, workingUser, workingPasswordOrPin) {
+    return axiosClient.patch(`/sales/${saleId}/payment`,
+      {
+        transaction_header_id: paymentTransactionHeaderId,
+        working_username: workingUser,
+        working_user_password_or_pin: workingPasswordOrPin,
+      }, {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
   },
 };

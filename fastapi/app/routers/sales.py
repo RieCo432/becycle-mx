@@ -15,9 +15,10 @@ sales = APIRouter(
 
 @sales.get("/sales", response_model=list[schemas.SaleHeader])
 async def get_sale_headers(
-        pending: bool = False,
+        pending: bool = True,
+        completed: bool = True,
         db: Session = Depends(dep.get_db)) -> list[schemas.SaleHeader]:
-    return crud.get_sale_headers(db, pending=pending)
+    return crud.get_sale_headers(db, pending=pending, completed=completed)
 
 
 @sales.post("/sales", response_model=schemas.SaleHeader)
@@ -79,7 +80,7 @@ async def delete_bike_sale_line(
 async def finalise_sale(
         sale_header_id: UUID,
         transaction_header_id: Annotated[UUID, Body(embed=True)],
-        user: models.User = Depends(dep.get_current_active_user),
+        user: models.User = Depends(dep.get_working_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.SaleHeader:
     # TODO: make sure sale is not complete already
