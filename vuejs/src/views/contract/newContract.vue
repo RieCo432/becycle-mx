@@ -884,13 +884,14 @@ export default {
 
     function workingUserSelected() {
       workingPasswordOrPin.value = null;
-      if (workingUser.value === depositCollectingUser.value) {
+      console.log('workingUserSelected', depositCollectedAssetAccount.value);
+      if (workingUser.value === depositCollectedAssetAccount.value.ownerUser.username) {
         workingPasswordOrPin.value = depositCollectingPassword.value;
       }
     }
     function checkingUserSelected() {
       checkingPasswordOrPin.value = null;
-      if (checkingUser.value === depositCollectingUser.value) {
+      if (checkingUser.value === depositCollectedAssetAccount.value.ownerUser.username) {
         checkingPasswordOrPin.value = depositCollectingPassword.value;
       }
     }
@@ -974,6 +975,24 @@ export default {
         });
     }
 
+    function getActiveUsers() {
+      requests.getActiveUsers().then((response) => {
+        activeUsers.value = response.data.map((user) => (user.username));
+        userSelectionOptionsStatic.value = true;
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 5000});
+      });
+    }
+
+    function getRentalCheckers() {
+      requests.getRentalCheckers().then((response) => {
+        rentalCheckers.value = response.data.map((user) => (user.username));
+        userSelectionOptionsStatic.value = true;
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 5000});
+      });
+    }
+
     const submit = handleSubmit(() => {
       // next step until last step. if last step then submit form
       if (stepNumber.value === 1) {
@@ -1028,13 +1047,19 @@ export default {
             });
 
 
-            if (activeDraft.value.depositCollectingUser !== null && activeDraft.value.depositAmountCollected !== null) {
+            if (activeDraft.value.depositCollectedTransactionId != null) {
+              toast.success('Deposit Already Collected!', {timeout: 1000});
+              getActiveUsers();
+
               stepNumber.value = 5;
             }
             if (activeDraft.value.workingUser !== null) {
+              toast.success('Working User Already Selected!', {timeout: 1000});
+              getRentalCheckers();
               stepNumber.value = 6;
             }
             if (activeDraft.value.checkingUser !== null) {
+              toast.success('Checking User Already Selected!', {timeout: 1000});
               promoteDraft();
             }
           })
@@ -1042,42 +1067,46 @@ export default {
             toast.error(error.response.data.detail.description, {timeout: 5000});
           });
       } else if (stepNumber.value === 4) {
-        const depositCollectedTransactionDraft = {
-          transactionHeader: {
-            event: 'deposit_collected',
-          },
-          transactionLines: [
-            {amount: -depositAmountCollected.value * 100, accountId: depositCollectedLiabilityAccount.value.id},
-            {amount: depositAmountCollected.value * 100, accountId: depositCollectedAssetAccount.value.id},
-          ],
-          attemptAutoPost: false,
-        };
-        requests.createTransaction(depositCollectedTransactionDraft).then((response) => {
-          depositCollectedTransactionHeader.value = response.data;
-          toast.success('Deposit Collected!', {timeout: 1000});
+        if (!activeDraft.value.depositCollectedTransactionId) {
+          const depositCollectedTransactionDraft = {
+            transactionHeader: {
+              event: 'deposit_collected',
+            },
+            transactionLines: [
+              {amount: -depositAmountCollected.value * 100, accountId: depositCollectedLiabilityAccount.value.id},
+              {amount: depositAmountCollected.value * 100, accountId: depositCollectedAssetAccount.value.id},
+            ],
+            attemptAutoPost: false,
+          };
+          requests.createTransaction(depositCollectedTransactionDraft).then((response) => {
+            depositCollectedTransactionHeader.value = response.data;
+            toast.success('Deposit Collected!', {timeout: 1000});
 
-          // Check password of deposit collector
-          requests.putDraftContractDeposit(
-            activeDraft.value.id,
-            depositCollectedTransactionHeader.value.id,
-            depositCollectedAssetAccount.value.ownerUser.username,
-            depositCollectingPassword.value)
-            .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Deposit Details Updated!', {timeout: 1000});
-              stepNumber.value = 5;
-              requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
-              userSelectionOptionsStatic.value = true;
-            })
-            .catch((error) => {
-              toast.error(error.response.data.detail.description, {timeout: 5000});
-              if (error.response.status === 400) {
-                depositCollectingPasswordSetErrors('Wrong Password!');
-              }
-            });
-        }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 5000});
-        });
+            // Check password of deposit collector
+            requests.putDraftContractDeposit(
+              activeDraft.value.id,
+              depositCollectedTransactionHeader.value.id,
+              depositCollectedAssetAccount.value.ownerUser.username,
+              depositCollectingPassword.value)
+              .then((response) => {
+                activeDraft.value = response.data;
+                toast.success('Deposit Details Updated!', {timeout: 1000});
+                stepNumber.value = 5;
+                getActiveUsers();
+              })
+              .catch((error) => {
+                toast.error(error.response.data.detail.description, {timeout: 5000});
+                if (error.response.status === 400) {
+                  depositCollectingPasswordSetErrors('Wrong Password!');
+                }
+              });
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 5000});
+          });
+        } else {
+          toast.success('Deposit Details Already Done!', {timeout: 1000});
+          stepNumber.value = 5;
+        }
       } else if (stepNumber.value === 5) {
         // check password or pin of working volunteer
         requests.putDraftContractWorkingUser(activeDraft.value.id, workingUser.value, workingPasswordOrPin.value)
@@ -1085,8 +1114,7 @@ export default {
             activeDraft.value = response.data;
             toast.success('Working Volunteer Updated!', {timeout: 1000});
             stepNumber.value = 6;
-            requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.map((user) => (user.username))));
-            userSelectionOptionsStatic.value = true;
+            getRentalCheckers();
           })
           .catch((error) => {
             if (error.response.status === 400) {
