@@ -14,13 +14,13 @@ export default {
     bikeSearch: {
       type: Object,
       required: false,
-      default: () => {},
+      default: null,
     },
     noTitle: {
       type: Boolean,
       required: false,
       default: false,
-    }
+    },
   },
 };
 </script>
@@ -34,25 +34,25 @@ export default {
         <div class="col-span-2">
           <TextLabelWithPillBadgeIndicatingMatch
               :field-data="bike.make"
-              :search-data="bikeSearch.make"
+              :search-data="bikeSearch ? bikeSearch.make : bike.make"
               field-name="Make"/>
         </div>
         <div class="col-span-2">
           <TextLabelWithPillBadgeIndicatingMatch
               :field-data="bike.model"
-              :search-data="bikeSearch.model"
+              :search-data="bikeSearch ? bikeSearch.model : bike.model"
               field-name="Model"/>
         </div>
         <div class="col-span-2">
           <TextLabelWithPillBadgeIndicatingMatch
               :field-data="bike.serialNumber"
-              :search-data="bikeSearch.serialNumber"
+              :search-data="bikeSearch ? bikeSearch.serialNumber : bike.serialNumber"
               field-name="Serial Number"/>
         </div>
         <div class="col-span-2">
           <TextLabelWithPillBadgeIndicatingMatch
               :field-data="bike.decals && bike.decals !== '' ? bike.decals : null"
-              :search-data="bikeSearch.decals && bikeSearch.decals !== '' ? bikeSearch.decals : null"
+              :search-data="bikeSearch ? (bikeSearch.decals && bikeSearch.decals !== '' ? bikeSearch.decals : null) : bike.decals && bike.decals !== '' ? bike.decals : null"
               field-name="Decals"/>
         </div>
         <div class="col-span-2">
@@ -69,7 +69,7 @@ export default {
         </div>
         <div class="col-span-4">
           <TextLabelWithPillBadgeIndicatingMatch
-              :search-data="bikeSearch.colours?.map((c) => c.hex)"
+              :search-data="bikeSearch ? bikeSearch.colours?.map((c) => c.hex) : bike.colours?.map((c) => c.hex)"
               :field-data="bike.colours?.map((c) => c.hex)"
               field-name="Colours">
             <div class="h-10 rounded-full overflow-hidden">

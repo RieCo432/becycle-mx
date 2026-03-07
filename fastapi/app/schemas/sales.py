@@ -39,6 +39,9 @@ class BikeSaleLine(BikeSaleLineCreate):
     bike: Bike
 
 
+class BikeSaleLineUpdate(BaseModel):
+    salePrice: int
+
 class SaleHeaderBase(BaseModel):
     pass
 

@@ -206,10 +206,6 @@ export default {
     this.fetchBikes = debounce(this.fetchBikes, 1000, {leading: false, trailing: true});
     this.runFilter = debounce(this.runFilter, 200, {leading: true, trailing: true});
   },
-  mounted() {
-    console.log(this.includeRentalInitial, this.includeRental);
-    console.log(this.includeSaleInitial, this.includeSale);
-  },
   methods: {
     fetchBikeMakeSuggestions() {
       requests.getBikeMakeSuggestions(this.make.toLowerCase(), 4).then((response) => {

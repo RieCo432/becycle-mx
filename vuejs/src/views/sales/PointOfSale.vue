@@ -8,11 +8,12 @@ import TextInput from '@/components/TextInput/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import {Icon} from '@iconify/vue';
 import BikeCatalogue from '@/views/bike/BikeCatalogue.vue';
+import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
 
 const toast = useToast();
 export default {
   name: 'PointOfSale',
-  components: {BikeCatalogue, Icon, Modal, TextInput, CatalogueItemCard, Card, Button},
+  components: {BikeOverviewCard, BikeCatalogue, Icon, Modal, TextInput, CatalogueItemCard, Card, Button},
   data() {
     return {
       openSales: [],
@@ -29,6 +30,8 @@ export default {
       quantity: 0,
       editSalePriceActive: false,
       newSalePrice: 0,
+      selectedBike: null,
+      showNewBikeSalePriceModal: false,
     };
   },
   created() {
@@ -76,7 +79,7 @@ export default {
         this.quantity += sameItemInSale.quantity;
         this.updateItemQuantity();
       }
-      
+
       this.showQuantityModal = false;
     },
     selectItem(item) {
@@ -85,8 +88,10 @@ export default {
       this.showQuantityModal = true;
     },
     closeQuantityModal() {
-      this.showQuantityModal = false;
-      this.selectedItem = null;
+      if (this.quantity > 0) {
+        this.showQuantityModal = false;
+        this.selectedItem = null;
+      }
       this.quantity = 0;
     },
     closeEditQuantityModal() {
@@ -96,7 +101,7 @@ export default {
     },
     removeCatalogueItemSaleLine(catalogueItemSaleLineId) {
       requests.deleteCatalogueItemSaleLine(catalogueItemSaleLineId).then(() => {
-        this.currentSale.catalogueItemSaleLines = this.currentSale.catalogueItemSaleLines.filter(line => line.id !== catalogueItemSaleLineId);
+        this.currentSale.catalogueItemSaleLines = this.currentSale.catalogueItemSaleLines.filter((line) => line.id !== catalogueItemSaleLineId);
         toast.success('Item removed from sale!', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -121,13 +126,13 @@ export default {
       this.quantity = this.currentSale.catalogueItemSaleLines.find((line) => line.id === lineId).quantity;
       this.showEditQuantityModal = true;
     },
-    editSalePrice(lineId) {
+    editItemSalePrice(lineId) {
       const line = this.currentSale.catalogueItemSaleLines.find((line) => line.id === lineId);
       this.selectedItem = line.catalogueItem;
       this.newSalePrice = line.salePrice / 100;
       this.editSalePriceActive = true;
     },
-    setNewSalePrice() {
+    setNewItemSalePrice() {
       const line = this.currentSale.catalogueItemSaleLines.find((line) => line.catalogueItem.id === this.selectedItem.id);
 
       requests.putUpdateCatalogueItemSaleLine(line.id, {
@@ -143,7 +148,62 @@ export default {
       this.editSalePriceActive = false;
     },
     addBikeToSale(bike) {
-      console.log(bike);
+      const sameBikeInSale = this.currentSale.bikeSaleLines.find((line) => line.bike.id === bike.id);
+      if (!sameBikeInSale) {
+        const bikeSaleLine = {
+          saleHeaderId: this.currentSale.id,
+          bikeId: bike.id,
+          salePrice: bike.roughValue ? bike.roughValue : 0,
+        };
+        requests.postBikeSaleLine(bikeSaleLine).then((response) => {
+          this.currentSale.bikeSaleLines.push(response.data);
+          toast.success('Bike added to sale!', {timeout: 2000});
+          if (!bike.roughValue) {
+            toast.warning('Bike rough value not set, please set it!', {timeout: 2000});
+            this.selectedBike = response.data.bike;
+            this.newSalePrice = 0;
+            this.showNewBikeSalePriceModal = true;
+          }
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+      } else {
+        toast.error('Bike already in sale!', {timeout: 2000});
+      };
+    },
+    removeBikeSaleLine(bikeSaleLineId) {
+      requests.deleteBikeSaleLine(bikeSaleLineId).then(() => {
+        this.currentSale.bikeSaleLines = this.currentSale.bikeSaleLines.filter((line) => line.id !== bikeSaleLineId);
+        toast.success('Bike removed from sale!', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+    },
+    editBikeSalePrice(bikeSaleLineId) {
+      const bikeSaleLine = this.currentSale.bikeSaleLines.find((line) => line.id === bikeSaleLineId);
+      this.selectedBike = bikeSaleLine.bike;
+      this.newSalePrice = bikeSaleLine.salePrice / 100;
+      this.editSalePriceActive = true;
+    },
+    setNewBikeSalePrice() {
+      const bikeSaleLine = this.currentSale.bikeSaleLines.find((line) => line.bike.id === this.selectedBike.id);
+      requests.putUpdateBikeSaleLine(bikeSaleLine.id, {
+        salePrice: this.newSalePrice * 100,
+      }).then((response) => {
+        const indexInArr = this.currentSale.bikeSaleLines.findIndex((line) => line.id === response.data.id);
+        this.currentSale.bikeSaleLines.splice(indexInArr, 1, response.data);
+        toast.success('Sale price updated!', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+      this.editSalePriceActive = false;
+      this.closeNewBikeSalePriceModal();
+    },
+    closeNewBikeSalePriceModal() {
+      if (this.newSalePrice > 0) {
+        this.showNewBikeSalePriceModal = false;
+        this.selectedBike = null;
+      }
     },
   },
   computed: {
@@ -246,8 +306,8 @@ export default {
                   <h6 class="inline align-bottom mb-0">{{line.quantity}}</h6>
                   <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="openEditQuantityModal(line.id)"/></div>
                 <div class="col-span-2 text-right">
-                  <template v-if="editSalePriceActive && line.catalogueItem.id === selectedItem.id">
-                    <Icon class="inline align-middle" icon="heroicons-outline:check" @click="setNewSalePrice"/>
+                  <template v-if="editSalePriceActive && selectedItem && line.catalogueItem.id === selectedItem.id">
+                    <Icon class="inline align-middle" icon="heroicons-outline:check" @click="setNewItemSalePrice"/>
                     <Icon class="inline align-middle" icon="heroicons-outline:x" @click="() => {editSalePriceActive = false; selectedItem = null}"/>
                     <input
                       class="inline align-bottom mb-0 w-[50px] text-right input-control [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -259,7 +319,7 @@ export default {
                   </template>
                   <template v-else>
                     <h6 class="inline align-bottom mb-0">{{(line.salePrice / 100).toFixed(2)}}</h6>
-                    <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="editSalePrice(line.id)"/>
+                    <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="editItemSalePrice(line.id)"/>
                   </template>
                 </div>
                 <div class="col-span-1 justify-items-center"><Icon icon="heroicons-outline:trash" @click="removeCatalogueItemSaleLine(line.id)"/></div>
@@ -267,10 +327,28 @@ export default {
               <div v-if="currentSale.bikeSaleLines.length > 0" class="col-span-full"><h5>Bikes</h5></div>
               <template v-for="line in currentSale.bikeSaleLines" :key="line.id">
                 <div class="col-span-1"></div>
-                <div class="col-span-4"><h6>{{line.bike.make}} {{line.bike.model}}</h6></div>
-                <div class="col-span-1"><h6>1</h6></div>
-                <div class="col-span-2"><h6>{{(line.salePrice / 100).toFixed(2)}}</h6></div>
-                <div class="col-span-1"><Icon icon="heroicons-outline:trash"/></div>
+                <div class="col-span-4">
+                  <h6>{{line.bike.make}} {{line.bike.model}}</h6>
+                </div>
+                <div class="col-span-1 text-right"><h6>-</h6></div>
+                <div class="col-span-2 text-right">
+                  <template v-if="editSalePriceActive && selectedBike && line.bike.id === selectedBike.id">
+                    <Icon class="inline align-middle" icon="heroicons-outline:check" @click="setNewBikeSalePrice"/>
+                    <Icon class="inline align-middle" icon="heroicons-outline:x" @click="() => {editSalePriceActive = false; selectedBike = null}"/>
+                    <input
+                      class="inline align-bottom mb-0 w-[50px] text-right input-control [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      type="number"
+                      v-model="newSalePrice"
+                      :placeholder="line.salePrice / 100"
+                    />
+
+                  </template>
+                  <template v-else>
+                    <h6 class="inline align-bottom mb-0">{{(line.salePrice / 100).toFixed(2)}}</h6>
+                    <Icon class="inline align-middle" icon="heroicons-outline:pencil" @click="editBikeSalePrice(line.id)"/>
+                  </template>
+                </div>
+                <div class="col-span-1 justify-items-center"><Icon icon="heroicons-outline:trash" @click="removeBikeSaleLine(line.id)"/></div>
               </template>
               <div class="col-span-full h-10"></div>
               <div class="col-span-6 text-center"><h5>Total</h5></div>
@@ -281,7 +359,12 @@ export default {
       </div>
     </Card>
 
-    <Modal v-if="selectedItem" :active-modal="showQuantityModal" @close="closeQuantityModal" title="Quantity">
+    <Modal
+      v-if="selectedItem"
+      :active-modal="showQuantityModal"
+      @close="closeQuantityModal"
+      title="Quantity"
+    >
       <div class="grid grid-cols-2 gap-5">
         <div class="col-span-1">
           <CatalogueItemCard :item-details="selectedItem"/>
@@ -317,7 +400,11 @@ export default {
       </div>
     </Modal>
 
-    <Modal v-if="selectedItem" :active-modal="showEditQuantityModal" @close="closeEditQuantityModal" title="Quantity">
+    <Modal
+      v-if="selectedItem"
+      :active-modal="showEditQuantityModal"
+      @close="closeEditQuantityModal"
+      title="Quantity">
       <div class="grid grid-cols-2 gap-5">
         <div class="col-span-1">
           <CatalogueItemCard :item-details="selectedItem"/>
@@ -349,6 +436,28 @@ export default {
         <div class="col-span-2">
           <Button text="Add" @click="updateItemQuantity" class="w-full"/>
 
+        </div>
+      </div>
+    </Modal>
+
+    <Modal
+      v-if="selectedBike"
+      :active-modal="showNewBikeSalePriceModal"
+      @close="closeNewBikeSalePriceModal"
+      title="Price">
+      <div class="grid grid-cols-2 gap-5">
+        <div class="col-span-1">
+          <BikeOverviewCard :bike="selectedBike"/>
+        </div>
+        <div class="col-span-1">
+          <TextInput
+            type="number"
+            label="Enter Price"
+            v-model="newSalePrice"
+          ></TextInput>
+        </div>
+        <div class="col-span-2">
+          <Button text="Add" @click="setNewBikeSalePrice" class="w-full"/>
         </div>
       </div>
     </Modal>

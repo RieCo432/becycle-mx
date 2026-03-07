@@ -115,11 +115,26 @@ def get_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UUID)
     )
     return catalogue_item_sale_line
 
+
+def get_bike_sale_line(db: Session, bike_sale_line_id: UUID) -> models.BikeSaleLine:
+    bike_sale_line =  db.scalar(
+        select(models.BikeSaleLine)
+        .where(models.BikeSaleLine.id == bike_sale_line_id)
+    )
+    return bike_sale_line
+
 def update_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UUID, catalogue_item_sale_line_update: schemas.CatalogueItemSaleLineUpdate) -> models.CatalogueItemSaleLine:
     catalogue_item_sale_line = get_catalogue_item_sale_line(db=db, catalogue_item_sale_line_id=catalogue_item_sale_line_id)
     
     if catalogue_item_sale_line is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Catalogue item sale line not found"})
+
+    sale_header = catalogue_item_sale_line.saleHeader
+    if sale_header.transactionHeaderId is not None and sale_header.transactionHeader.postedOn is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Sale header is already posted."}
+        )
     
     catalogue_item_sale_line.salePrice = catalogue_item_sale_line_update.salePrice
     catalogue_item_sale_line.quantity = catalogue_item_sale_line_update.quantity
@@ -129,11 +144,55 @@ def update_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UU
     return catalogue_item_sale_line
 
 
+def update_bike_sale_line(db: Session, bike_sale_line_id: UUID, bike_sale_line_update: schemas.BikeSaleLineUpdate) -> models.BikeSaleLine:
+    bike_sale_line = get_bike_sale_line(db=db, bike_sale_line_id=bike_sale_line_id)
+
+    if bike_sale_line is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Bike sale line not found"})
+
+    sale_header = bike_sale_line.saleHeader
+    if sale_header.transactionHeaderId is not None and sale_header.transactionHeader.postedOn is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Sale header is already posted."}
+        )
+
+    bike_sale_line.salePrice = bike_sale_line_update.salePrice
+
+    db.commit()
+
+    return bike_sale_line
+
+
 def delete_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UUID) -> None:
     catalogue_item_sale_line = get_catalogue_item_sale_line(db=db, catalogue_item_sale_line_id=catalogue_item_sale_line_id)
+
+    sale_header = catalogue_item_sale_line.saleHeader
+    if sale_header.transactionHeaderId is not None and sale_header.transactionHeader.postedOn is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Sale header is already posted."}
+        )
     
     if catalogue_item_sale_line is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Catalogue item sale line not found"})
     
     db.delete(catalogue_item_sale_line)
+    db.commit()
+    
+    
+def delete_bike_sale_line(db: Session, bike_sale_line_id: UUID) -> None:
+    bike_sale_line = get_bike_sale_line(db=db, bike_sale_line_id=bike_sale_line_id)
+    
+    sale_header = bike_sale_line.saleHeader
+    if sale_header.transactionHeaderId is not None and sale_header.transactionHeader.postedOn is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Sale header is already posted."}
+        )
+    
+    if bike_sale_line is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Bike sale line not found"})
+    
+    db.delete(bike_sale_line)
     db.commit()

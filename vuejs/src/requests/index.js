@@ -1653,4 +1653,22 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  postBikeSaleLine(bikeSaleLine) {
+    return axiosClient.post('/sales/bike-sale-line', bikeSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteBikeSaleLine(bikeSaleLineId) {
+    return axiosClient.delete(`/sales/bike-sale-line/${bikeSaleLineId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateBikeSaleLine(bikeSaleLineId, bikeSaleLine) {
+    return axiosClient.put(`/sales/bike-sale-line/${bikeSaleLineId}`, bikeSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };
