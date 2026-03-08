@@ -134,50 +134,52 @@ export default {
   <Card
     class-name="rounded-3xl border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full"
     body-class="p-0">
-    <div v-if="!inEditMode" class="grid grid-cols-2">
-      <div class="col-span-2">
-        <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Item Picture" class="aspect-square rounded-3xl h-full w-full"/>
-        <img v-if="!inEditMode && !photoUrl" src="@/assets/images/defaultProfilePicture.jpg"
-             alt="Item Picture" class="h-full w-full aspect-square rounded-3xl"/>
-      </div>
-      <div class="col-span-2 p-2">
-        <p class="w-full col-span-8 text-slate-700 dark:text-slate-300 text-2xl font-semibold">
-          {{ itemDetails.name }}
-        </p>
-      </div>
-      <div class="col-span-2 p-2">
-        <p class="dark:text-slate-300 text-slate-700 inline-block">{{ itemDetails.description }}</p>
-      </div>
-      <div class="col-span-2 p-2 dark:text-slate-300 text-slate-700 flex justify-between" v-if="!inEditMode">
-        <div>Purchase Price:</div>
-        <div>&#163; {{ (itemDetails.purchasePrice / 100).toFixed(2) }}</div>
-      </div>
-      <div class="col-span-2 p-2 flex-row dark:text-slate-300 text-slate-700 flex justify-between" v-if="!inEditMode">
-        <div>Recommended Price:</div>
-        <div>&#163; {{ (itemDetails.recommendedRetailPrice / 100).toFixed(2) }}</div>
-      </div>
-      <div class="col-span-2 p-2 flex-row dark:text-slate-300 text-slate-700 flex justify-between" v-if="!inEditMode">
-        <div>Condition:</div>
-        <div>{{ itemDetails.isSecondHand ? 'Used' : 'New' }}</div>
-      </div>
-      <div class="col-span-2 p-2" v-if="editable">
-        <div class="grid grid-cols-2">
-          <Button @click.prevent="openEditMode" class="col-span-1 rounded-l-full">
-            <Icon icon="heroicons-outline:pencil"></Icon>
-          </Button>
-          <Button
-            @click.prevent="toggleAvailability"
-            class="col-span-1 rounded-r-full"
-            :btn-class="itemDetails.available
-            ? 'btn-success'
-            : 'btn-danger'">
-            <Icon icon="heroicons-outline:check-circle" v-if="itemDetails.available"></Icon>
-            <Icon icon="heroicons-outline:no-symbol" v-else></Icon>
-          </Button>
+    <div v-if="!inEditMode" class="h-full w-full flex flex-col ">
+      
+      <div class="grid grid-cols-4 md:grid-cols-3 lg:grid-cols-1 flex-shrink">
+        <div class="col-span-1 row-span-5 lg:row-span-1">
+          <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Item Picture" class="aspect-square rounded-3xl h-full w-full"/>
+          <img v-if="!inEditMode && !photoUrl" src="@/assets/images/defaultProfilePicture.jpg"
+               alt="Item Picture" class="h-full w-full aspect-square rounded-3xl"/>
+        </div>
+        <div class="col-span-3 md:col-span-2 lg:col-span-1 p-2">
+          <p class="w-full col-span-8 text-slate-700 dark:text-slate-300 text-2xl font-semibold">
+            {{ itemDetails.name }}
+          </p>
+        </div>
+        <div class="col-span-3 md:col-span-2 lg:col-span-1 p-2">
+          <p class="dark:text-slate-300 text-slate-700 inline-block">{{ itemDetails.description }}</p>
+        </div>
+        <div class="col-span-3 md:col-span-2 lg:col-span-1 p-2 dark:text-slate-300 text-slate-700 flex justify-between" v-if="!inEditMode">
+          <div>Purchase Price:</div>
+          <div>&#163; {{ (itemDetails.purchasePrice / 100).toFixed(2) }}</div>
+        </div>
+        <div class="col-span-3 md:col-span-2 lg:col-span-1 p-2 flex-row dark:text-slate-300 text-slate-700 flex justify-between" v-if="!inEditMode">
+          <div>Recommended Price:</div>
+          <div>&#163; {{ (itemDetails.recommendedRetailPrice / 100).toFixed(2) }}</div>
+        </div>
+        <div class="col-span-3 md:col-span-2 lg:col-span-1 p-2 flex-row dark:text-slate-300 text-slate-700 flex justify-between" v-if="!inEditMode">
+          <div>Condition:</div>
+          <div>{{ itemDetails.isSecondHand ? 'Used' : 'New' }}</div>
         </div>
       </div>
-    </div>
 
+      <div v-if="editable" class="grid grid-cols-2 w-full mt-auto bottom-0">
+        <Button @click.prevent="openEditMode" class="col-span-1 rounded-l-full">
+          <Icon icon="heroicons-outline:pencil"></Icon>
+        </Button>
+        <Button
+          @click.prevent="toggleAvailability"
+          class="col-span-1 rounded-r-full"
+          :btn-class="itemDetails.available
+            ? 'btn-success'
+            : 'btn-danger'">
+          <Icon icon="heroicons-outline:check-circle" v-if="itemDetails.available"></Icon>
+          <Icon icon="heroicons-outline:no-symbol" v-else></Icon>
+        </Button>
+      </div>
+    </div>
+    
     <form v-else @submit.prevent="submitItemDetails">
       <div class="grid grid-cols-2">
         <div class="col-span-2">
