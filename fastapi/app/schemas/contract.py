@@ -24,11 +24,11 @@ class ContractBase(BaseModel):
     clientId: UUID
     bikeId: UUID
 
-    depositCollectedTransactionHeaderId: UUID
-
     conditionOfBike: str
     contractType: str
     notes: str | None = None
+
+    depositTransactionHeaders: List[TransactionHeader] = []
 
 
 class ContractCreate(ContractBase):
@@ -53,12 +53,8 @@ class ContractPublic(ContractBase):
 class Contract(ContractPublic):
     workingUserId: UUID
     checkingUserId: UUID
-    depositCollectedTransactionHeaderId: UUID
-    depositCollectedTransactionHeader: TransactionHeader
 
     returnAcceptingUserId: UUID | None = None
-    depositSettledTransactionHeaderId: UUID | None = None
-    depositSettledTransactionHeader: TransactionHeader | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

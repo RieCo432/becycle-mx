@@ -97,7 +97,6 @@ def create_contract(
         bikeId=contract_data.bikeId,
         workingUserId=working_user_id,
         checkingUserId=checking_user_id,
-        depositCollectedTransactionHeaderId=contract_data.depositCollectedTransactionHeaderId,
         conditionOfBike=contract_data.conditionOfBike,
         contractType=contract_data.contractType,
         notes=contract_data.notes
@@ -138,7 +137,7 @@ def return_contract(
     if sum(
             [tl.amount for tl in transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY]
     ) != -sum(
-        [tl.amount for tl in contract.depositCollectedTransactionHeader.transactionLines if tl.account.type == AccountTypes.LIABILITY]
+        [tl.amount for tl in [th for th in contract.depositTransactionHeaders if th.event == "deposit_collected"][0].transactionLines if tl.account.type == AccountTypes.LIABILITY]
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -155,7 +154,7 @@ def return_contract(
     contract.returnAcceptingUserId = return_accepting_user_id
     # contract.depositReturningUserId = deposit_returning_user_id
     contract.returnedDate = datetime.now(timezone.utc).date()
-    contract.depositSettledTransactionHeaderId = deposit_settled_transaction_header_id
+    transaction_header.contractId = contract.id
 
     db.commit()
 
@@ -409,7 +408,6 @@ def submit_contract(db: Session, contract_draft_id: UUID) -> models.Contract:
         contract_data=schemas.ContractCreate(
             clientId=contract_draft.clientId,
             bikeId=contract_draft.bikeId,
-            depositCollectedTransactionHeaderId=contract_draft.depositCollectedTransactionHeaderId,
             conditionOfBike=contract_draft.conditionOfBike,
             contractType=contract_draft.contractType,
             notes=contract_draft.notes
@@ -418,6 +416,8 @@ def submit_contract(db: Session, contract_draft_id: UUID) -> models.Contract:
         checking_user_id=contract_draft.checkingUserId,
         db=db
     )
+    transaction_header.contractId = contract.id
+
     db.delete(contract_draft)
     db.commit()
     return contract

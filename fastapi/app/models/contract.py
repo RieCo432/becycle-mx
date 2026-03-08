@@ -10,6 +10,7 @@ import app.services as services
 from app.database.db import Base
 
 from typing import Self, List
+from .transactions import TransactionHeader
 
 CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
@@ -59,11 +60,7 @@ class Contract(Base):
 
     crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
 
-    depositCollectedTransactionHeaderId: Mapped[UUID] = mapped_column("depositcollectedtransactionheaderid", ForeignKey("transactionheaders.id"), nullable=True, quote=False)
-    depositCollectedTransactionHeader: Mapped["TransactionHeader"] = relationship("TransactionHeader", foreign_keys=[depositCollectedTransactionHeaderId])
-
-    depositSettledTransactionHeaderId: Mapped[UUID] = mapped_column("depositsettledtransactionheaderid", ForeignKey("transactionheaders.id"), nullable=True, quote=False)
-    depositSettledTransactionHeader: Mapped["TransactionHeader"] = relationship("TransactionHeader", foreign_keys=[depositSettledTransactionHeaderId])
+    depositTransactionHeaders: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.contractId], back_populates="contract")
 
     def __eq__dict(self, other: dict):
         return all([
