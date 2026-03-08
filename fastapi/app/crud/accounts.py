@@ -99,7 +99,7 @@ def reopen_account(account_id: UUID, db: Session) -> models.Account:
     db.refresh(account)
     return account
 
-def get_all_projects(db: Session) -> list[models.Project]:
+def get_all_projects(db: Session) -> list[models.Project]: # TODO: this should be able to filter by active status
     return [_ for _ in db.scalars(
         select(models.Project)
     )]

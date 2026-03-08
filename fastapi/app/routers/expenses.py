@@ -17,6 +17,8 @@ expenses = APIRouter(
 )
 
 
+# TODO: remove endpoints relating to legacy expenses management
+
 @expenses.post("/expenses")
 async def post_expense(
         amount: Annotated[float, Body(embed=True)],

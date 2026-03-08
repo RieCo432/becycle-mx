@@ -186,7 +186,7 @@ const routes = [
         component: () => import('@/views/appointments/index.vue'),
       },
       {
-        path: '/finances/deposits',
+        path: '/finances/deposits', // TODO: this needs deleted
         name: 'Deposit Balances',
         meta: {
           restrictTo: ['user'],
@@ -222,7 +222,7 @@ const routes = [
         component: () => import('@/views/finances/cashFlow.vue'),
       },
       {
-        path: '/finances/expenses/submit',
+        path: '/finances/expenses/submit', // TODO: this needs deleted
         name: 'Submit Expense',
         meta: {
           restrictTo: ['user'],
@@ -240,7 +240,7 @@ const routes = [
         component: () => import('@/views/finances/newExpenseClaim.vue'),
       },
       {
-        path: '/finances/expenses/manage',
+        path: '/finances/expenses/manage', // TODO: this needs deleted
         name: 'Manage Expenses',
         meta: {
           restrictTo: ['user'],

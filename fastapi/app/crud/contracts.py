@@ -162,6 +162,7 @@ def return_contract(
 
 
 def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
+    # TODO: ensure deposit liability is reactivated
     contract = get_contract(db=db, contract_id=contract_id)
 
     contract.endDate = (datetime.utcnow() + relativedelta(months=6)).date()

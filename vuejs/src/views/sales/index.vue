@@ -2,6 +2,8 @@
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 
+// TODO: this needs to become a functional sales history
+
 const toast = useToast();
 export default {
   name: 'index',

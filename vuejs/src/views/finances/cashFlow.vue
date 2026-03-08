@@ -7,6 +7,8 @@ import requests from '@/requests';
 import {useThemeSettingsStore} from '@/store/themeSettings';
 import Select from '@/components/Select/index.vue';
 
+// TODO: this needs updated
+
 const themeSettingsStore = useThemeSettingsStore();
 
 export default {

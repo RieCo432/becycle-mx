@@ -180,4 +180,5 @@ async def patch_faq(
 async def get_projects(db: Session = Depends(dep.get_db)) -> list[schemas.Project]:
     return crud.get_all_projects(db=db)
 
+# TODO: need some endpoints for adding and disabling projects
 
