@@ -360,8 +360,8 @@
                 </div>
               </div>
               <div v-if="stepNumber === 4">
-                <div class="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="lg:col-span-3 md:col-span-2 col-span-1">
+                <div class="grid 2xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Deposit Collection
                     </h4>
@@ -884,7 +884,6 @@ export default {
 
     function workingUserSelected() {
       workingPasswordOrPin.value = null;
-      console.log('workingUserSelected', depositCollectedAssetAccount.value);
       if (workingUser.value === depositCollectedAssetAccount.value.ownerUser.username) {
         workingPasswordOrPin.value = depositCollectingPassword.value;
       }
@@ -1046,8 +1045,7 @@ export default {
               toast.error(error.response.data.detail.description, {timeout: 5000});
             });
 
-
-            if (activeDraft.value.depositCollectedTransactionId != null) {
+            if (activeDraft.value.depositCollectedTransactionHeaderId != null) {
               toast.success('Deposit Already Collected!', {timeout: 1000});
               getActiveUsers();
 
