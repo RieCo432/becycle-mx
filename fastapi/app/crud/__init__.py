@@ -17,3 +17,4 @@ from .colours import *
 from .accounts import *
 from .transactions import *
 from .catalogue import *
+from .sales import *

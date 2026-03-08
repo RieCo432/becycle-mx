@@ -1,4 +1,5 @@
-﻿from uuid import uuid4
+﻿from typing import List
+from uuid import uuid4
 
 from datetime import datetime
 from sqlalchemy import String, UUID, text, DateTime, LargeBinary, ForeignKey, Integer, Text, Boolean
@@ -20,6 +21,8 @@ class CatalogueItem(Base):
     catalogueItemPhotoId: Mapped[UUID] = mapped_column("photoid", ForeignKey("catalogueitemphotos.id"), nullable=True, quote=False)
     catalogueItemPhoto: Mapped["CatalogueItemPhoto"] = relationship("CatalogueItemPhoto")
     isSecondHand: Mapped[bool] = mapped_column("issecondhand", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+    
+    catalogueItemSaleLines: Mapped[List["CatalogueItemSaleLine"]] = relationship("CatalogueItemSaleLine", back_populates="catalogueItem")
 
 class CatalogueItemPhoto(Base):
     __tablename__ = "catalogueitemphotos"

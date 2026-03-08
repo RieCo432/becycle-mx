@@ -1622,4 +1622,64 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getSales(pending, completed) {
+    return axiosClient.get('/sales', {
+      params: {pending: pending, completed: completed},
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postNewSale() {
+    return axiosClient.post('/sales', {}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postCatalogueItemSaleLine(catalogueItemSaleLine) {
+    return axiosClient.post('/sales/catalogue-item-sale-line', catalogueItemSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteCatalogueItemSaleLine(catalogueItemSaleLineId) {
+    return axiosClient.delete(`/sales/catalogue-item-sale-line/${catalogueItemSaleLineId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateCatalogueItemSaleLine(catalogueItemSaleLineId, catalogueItemSaleLine) {
+    return axiosClient.put(`/sales/catalogue-item-sale-line/${catalogueItemSaleLineId}`, catalogueItemSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postBikeSaleLine(bikeSaleLine) {
+    return axiosClient.post('/sales/bike-sale-line', bikeSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteBikeSaleLine(bikeSaleLineId) {
+    return axiosClient.delete(`/sales/bike-sale-line/${bikeSaleLineId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateBikeSaleLine(bikeSaleLineId, bikeSaleLine) {
+    return axiosClient.put(`/sales/bike-sale-line/${bikeSaleLineId}`, bikeSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchSalePayment(saleId, paymentTransactionHeaderId, workingUser, workingPasswordOrPin) {
+    return axiosClient.patch(`/sales/${saleId}/payment`,
+      {
+        transaction_header_id: paymentTransactionHeaderId,
+        working_username: workingUser,
+        working_user_password_or_pin: workingPasswordOrPin,
+      }, {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
 };

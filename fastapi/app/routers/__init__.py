@@ -21,3 +21,4 @@ from .colours import colours
 from .accounts import accounts
 from .transactions import transactions
 from .catalogue import catalogue
+from .sales import sales
