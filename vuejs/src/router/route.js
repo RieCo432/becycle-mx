@@ -267,6 +267,15 @@ const routes = [
         component: () => import('@/views/finances/transactions.vue'),
       },
       {
+        path: '/finances/transactions/record',
+        name: 'Record Transaction',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/transactions/record',
+        },
+        component: () => import('@/views/finances/recordTransaction.vue'),
+      },
+      {
         path: '/finances/sales',
         name: 'Sales History',
         meta: {

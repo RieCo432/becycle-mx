@@ -158,5 +158,9 @@ def post_transaction_header(db: Session, transaction_header_id: UUID, user: mode
     return transaction_header
     
 
-    
+def get_transaction_events(db: Session) -> List[str]:
+    return [_ for _ in db.scalars(
+        select(models.TransactionHeader.event)
+        .distinct()
+    )]
 
