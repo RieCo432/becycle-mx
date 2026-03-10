@@ -201,6 +201,7 @@ export default {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
     requests.getAccounts([
+      {name: 'for_user', value: true},
       {name: 'type', value: 'revenue'},
       {name: 'type', value: 'asset'},
       {name: 'ui_filters', value: 'sale'},
