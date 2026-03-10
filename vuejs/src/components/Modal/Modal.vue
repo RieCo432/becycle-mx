@@ -30,7 +30,7 @@
             :leave-to="noFade ? '' : 'opacity-0 scale-95'"
           >
             <DialogPanel
-              class="w-full transform overflow-hidden rounded-md bg-white dark:bg-slate-800 text-left align-middle shadow-xl transition-all"
+              class="w-full transform overflow-visible rounded-md bg-white dark:bg-slate-800 text-left align-middle shadow-xl transition-all"
               :class="sizeClass"
             >
               <div
