@@ -91,7 +91,7 @@ export default {
 
     });
 
-    const {handleSubmit, handleReset: resetNewDonationsForm} = useForm({
+    const {handleSubmit} = useForm({
       validationSchema: newDonationsSchema,
       keepValuesOnUnmount: true,
     });
@@ -105,6 +105,15 @@ export default {
 
     assetAccount.value = {name: null, id: null};
     revenueAccount.value = {name: null, id: null};
+    
+    function resetNewDonationsForm() {
+      projectId.value = 'null';
+      revenueAccount.value = {name: null, id: null};
+      assetAccount.value = {name: null, id: null};
+      amount.value = null;
+      event.value = null;
+      eventNotInList.value = false;
+    }
 
     const submitNewDonations = handleSubmit(() => {
       const transactionDraft = {
@@ -119,7 +128,8 @@ export default {
 
       requests.createTransaction(transactionDraft).then((response) => {
         toast.success('Transaction Created and Posted!', {timeout: 2000});
-        context.emit('close', response.data);
+        resetNewDonationsForm();
+        context.emit('close');
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
@@ -160,6 +170,7 @@ export default {
   },
   methods: {
     closeModal() {
+      this.resetNewDonationsForm();
       this.$emit('close');
     },
     selectRevenueAccount(event, i) {
@@ -205,6 +216,14 @@ export default {
         .filter((suggestion) => suggestion
           .toLowerCase()
           .startsWith((this.event ?? '').toLowerCase()));
+    },
+  },
+  watch: {
+    activeModal(newValue) {
+      if (newValue) {
+        this.getAssetAccounts();
+        this.getRevenueAccounts();
+      }
     },
   },
 };
