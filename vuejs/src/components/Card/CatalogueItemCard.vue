@@ -19,7 +19,7 @@ export default {
   name: 'CatalogueItemCard',
   components: {Button, Icon, TextInput, DashButton, Card, Switch},
   props: {
-    itemDetails: {
+    presentationCardDetails: {
       type: Object,
       required: true,
     },
@@ -34,11 +34,11 @@ export default {
   methods: {
     openEditMode() {
       this.inEditMode = true;
-      this.name = this.itemDetails.name;
-      this.description = this.itemDetails.description;
+      this.name = this.presentationCardDetails.name;
+      this.description = this.presentationCardDetails.description;
     },
     toggleAvailability() {
-      requests.patchCatalogueItemAvailability(this.itemDetails.id, !this.itemDetails.available).then((response) => {
+      requests.patchCatalogueItemAvailability(this.presentationCardDetails.id, !this.presentationCardDetails.available).then((response) => {
         toast.success('Catalogue item availability updated successfully', {timeout: 2000});
         this.$emit('catalogueItemUpdated', response.data);
       }).catch((error) => {

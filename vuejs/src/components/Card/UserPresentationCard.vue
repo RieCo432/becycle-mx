@@ -16,7 +16,7 @@ export default {
   components: {Icon, TextInput, DashButton, Card},
   data() {
     return {
-      COMMON_NAME : COMMON_NAME,
+      COMMON_NAME: COMMON_NAME,
       photoUrl: null,
     };
   },
@@ -29,7 +29,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    updateitemDetails: {
+    updateItemDetails: {
       type: Function,
       required: false,
     },

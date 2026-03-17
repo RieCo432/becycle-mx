@@ -5,7 +5,7 @@
           v-if="!loadingPresentationCard"
           :presentation-card-details="presentationCardDetails"
           editable
-          :updateitem-details="updateMyCardDetails"
+          :update-item-details="updateMyCardDetails"
           :delete-card="deleteMyCard"
       />
     </div>
@@ -27,7 +27,7 @@ export default {
   data() {
     return {
       username: 'loading...',
-      itemDetails: null,
+      presentationCardDetails: null,
       photoUrl: null,
       loadingPresentationCard: true,
     };
@@ -35,7 +35,7 @@ export default {
   methods: {
     updateMyCardDetails(name, bio, photo) {
       requests.postMyPresentationCardDetails(name, bio, photo).then((response) => {
-        this.itemDetails = response.data;
+        this.presentationCardDetails = response.data;
         toast.success('Card Updated!', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -43,7 +43,7 @@ export default {
     },
     deleteMyCard() {
       requests.deleteMyPresentationCard().then(() => {
-        this.itemDetails = {
+        this.presentationCardDetails = {
           name: 'NOT SET',
           bio: 'NOT SET',
           id: 'NOTSET',
@@ -59,11 +59,11 @@ export default {
       this.username = response.data.username;
     });
     requests.getMyPresentationCard().then((response) => {
-      this.itemDetails = response.data;
+      this.presentationCardDetails = response.data;
     }).catch((error) => {
       if (error.status !== 404) {
       }
-      this.itemDetails = {
+      this.presentationCardDetails = {
         name: 'NOT SET',
         bio: 'NOT SET',
         id: 'NOTSET',
