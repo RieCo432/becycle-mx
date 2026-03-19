@@ -177,16 +177,29 @@ export default {
           {accountId: creditAccount.value.id, amount: -amount.value * 100},
           {accountId: debitAccount.value.id, amount: amount.value * 100},
         ],
+        attemptAutoPost: false,
       };
 
-      throw new Error('This won\'t work, we need a way to send the relevant usernames and passwords');
-      // requests.createTransaction(transactionDraft).then((response) => {
-      //   toast.success('Transaction created successfully', {timeout: 2000});
-      //   resetNewTransferForm();
-      //   context.emit('close');
-      // }).catch((error) => {
-      //   toast.error(error.response.data.detail.description, {timeout: 2000});
-      // });
+      const additionalData = [];
+      if (!loggedInUserCanSignCreditAccount.value) {
+        additionalData.push({username: creditAccountUsername.value, password: creditAccountPassword.value});
+      }
+      if (!loggedInUserCanSignDebitAccount.value) {
+        additionalData.push({username: debitAccountUsername.value, password: debitAccountPassword.value});
+      }
+      
+      requests.createTransaction(transactionDraft).then((response) => {
+        toast.success('Transaction created successfully', {timeout: 2000});
+        requests.postTransaction(response.data.id, additionalData).then((response) => {
+          toast.success('Transaction posted successfully', {timeout: 2000});
+          resetNewTransferForm();
+          context.emit('close');
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     });
 
 
