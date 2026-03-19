@@ -248,3 +248,26 @@ async def get_deposit_exchange_from_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
     return deposit_giving_user
+
+
+async def get_active_users(
+        users_and_passwords: Annotated[list[dict[str, str]] | None, Body()] = None,
+        db: Session = Depends(get_db)) -> list[models.User]:
+    if users_and_passwords is None:
+        return []
+    active_users = []
+    for user_credentials in users_and_passwords:
+        user = crud.authenticate_user(username=user_credentials["username"], password_cleartext=user_credentials["password"], db=db)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"description": f"User {user_credentials['username']} not found or wrong password.", "username": user_credentials["username"]},
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        if user.softDeleted:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"description": f"User {user_credentials['username']} is soft-deleted.", "username": user_credentials["username"]},
+            )
+        active_users.append(user)
+    return active_users

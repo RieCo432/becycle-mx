@@ -38,6 +38,11 @@ async def create_transaction(
     return transaction_header
 
 @transactions.patch("/transactions/{transaction_header_id}/post", response_model=schemas.TransactionHeader)
-async def post_transaction_header(transaction_header_id: UUID, user: models.User = Depends(dep.get_current_user), db: Session = Depends(dep.get_db)):
-    return crud.post_transaction_header(db, transaction_header_id, user)
+async def post_transaction_header(
+        transaction_header_id: UUID,
+        user: models.User = Depends(dep.get_current_user),
+        additional_active_users: list[models.User] | None = Depends(dep.get_active_users),
+        db: Session = Depends(dep.get_db)):
+    
+    return crud.post_transaction_header(db, transaction_header_id, user, additional_active_users)
 
