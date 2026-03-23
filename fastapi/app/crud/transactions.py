@@ -128,13 +128,13 @@ def can_transaction_line_be_posted(db: Session, transaction_line_id: UUID, user:
                     or transaction_line.account.ownerGroupId not in [group.id for group in user.groups]
             )
     ):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "You are not allowed to post transactions on one of these accounts"})
+        return False
     
 
     return True
         
     
-def post_transaction_header(db: Session, transaction_header_id: UUID, user: models.User) -> models.TransactionHeader:
+def post_transaction_header(db: Session, transaction_header_id: UUID, user: models.User, additional_users: list[models.User] | None = None) -> models.TransactionHeader:
     transaction_header = db.scalar(
             select(models.TransactionHeader)
             .where(models.TransactionHeader.id == transaction_header_id)
@@ -146,8 +146,17 @@ def post_transaction_header(db: Session, transaction_header_id: UUID, user: mode
             
     can_all_lines_be_posted = True
     for transaction_line in transaction_header.transactionLines:
-        can_all_lines_be_posted &= can_transaction_line_be_posted(db, transaction_line.id, user)
+        can_line_be_posted = can_transaction_line_be_posted(db, transaction_line.id, user)
+        if additional_users is not None:
+            for additional_user in additional_users:
+                can_line_be_posted |= can_transaction_line_be_posted(db, transaction_line.id, additional_user)
+
+        can_all_lines_be_posted &= can_line_be_posted
         
+    if not can_all_lines_be_posted:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "You are not allowed to post transactions on one of these accounts"})
+    
     if can_all_lines_be_posted:
         transaction_header.postedOn = datetime.now(timezone.utc)
         transaction_header.postedByUserId = user.id
@@ -158,5 +167,9 @@ def post_transaction_header(db: Session, transaction_header_id: UUID, user: mode
     return transaction_header
     
 
-    
+def get_transaction_events(db: Session) -> List[str]:
+    return [_ for _ in db.scalars(
+        select(models.TransactionHeader.event)
+        .distinct()
+    )]
 

@@ -176,6 +176,12 @@ export const topMenu = [
         show: ['user'],
       },
       {
+        childtitle: 'Record Transaction',
+        childicon: 'heroicons-outline:arrows-right-left',
+        childlink: '/finances/transactions/record',
+        show: ['user'],
+      },
+      {
         childtitle: 'Sales History',
         childicon: 'heroicons-outline:currency-pound',
         childlink: '/finances/sales',

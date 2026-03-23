@@ -4,7 +4,6 @@ import requests from '@/requests';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import {ref, toRef} from 'vue';
-import DashButton from '@/components/Button/index.vue';
 import TextInput from '@/components/TextInput/index.vue';
 import {useDropzone} from 'vue3-dropzone';
 import {Icon} from '@iconify/vue';
@@ -17,7 +16,7 @@ const toast = useToast();
 
 export default {
   name: 'CatalogueItemCard',
-  components: {Button, Icon, TextInput, DashButton, Card, Switch},
+  components: {Button, Icon, TextInput, Card, Switch},
   props: {
     itemDetails: {
       type: Object,
@@ -36,6 +35,7 @@ export default {
       this.inEditMode = true;
       this.name = this.itemDetails.name;
       this.description = this.itemDetails.description;
+      this.isSecondHand = this.itemDetails.isSecondHand;
     },
     toggleAvailability() {
       requests.patchCatalogueItemAvailability(this.itemDetails.id, !this.itemDetails.available).then((response) => {
@@ -247,9 +247,9 @@ export default {
         </div>
         <div class="col-span-2 p-3" v-if="inEditMode">
           <div class="grid grid-cols-2">
-            <DashButton v-if="inEditMode" @click="submitItemDetails" class="col-span-2 justify-self-end my-auto rounded-full">
+            <Button v-if="inEditMode" @click="submitItemDetails" class="col-span-2 justify-self-end my-auto rounded-full">
               Update
-            </DashButton>
+            </Button>
           </div>
         </div>
       </div>

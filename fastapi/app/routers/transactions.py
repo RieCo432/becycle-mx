@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
 from sqlalchemy.orm import Session
@@ -12,17 +13,21 @@ transactions = APIRouter(
 )
 
 @transactions.get("/transactions", response_model=list[schemas.TransactionHeader])
-def get_transactions(db: Session = Depends(dep.get_db)):
+async def get_transactions(db: Session = Depends(dep.get_db)):
     return crud.get_transaction_headers(db)
 
 @transactions.get("/transactions/formatted", response_model=list[schemas.TransactionHeaderFormatted])
-def get_formatted_transactions(db: Session = Depends(dep.get_db)):
+async def get_formatted_transactions(db: Session = Depends(dep.get_db)):
     return crud.get_formatted_transaction_headers(db)
 
 
+@transactions.get("/transactions/events", response_model=List[str])
+async def get_transaction_events(db: Session = Depends(dep.get_db)):
+    return crud.get_transaction_events(db)
+
 
 @transactions.post("/transactions", response_model=schemas.TransactionHeader)
-def create_transaction(
+async def create_transaction(
     transaction_data: schemas.TransactionCreate,
     user: models.User = Depends(dep.get_current_user),
     db: Session = Depends(dep.get_db)
@@ -32,7 +37,12 @@ def create_transaction(
         transaction_header = crud.post_transaction_header(db, transaction_header.id, user)
     return transaction_header
 
-@transactions.patch("/transactions/{transaction_id}/post", response_model=schemas.TransactionHeader)
-def post_transaction_header(transaction_header_id: UUID, user: models.User = Depends(dep.get_current_user), db: Session = Depends(dep.get_db)):
-    return crud.post_transaction_header(db, transaction_header_id, user)
+@transactions.patch("/transactions/{transaction_header_id}/post", response_model=schemas.TransactionHeader)
+async def post_transaction_header(
+        transaction_header_id: UUID,
+        user: models.User = Depends(dep.get_current_user),
+        additional_active_users: list[models.User] | None = Depends(dep.get_active_users),
+        db: Session = Depends(dep.get_db)):
+    
+    return crud.post_transaction_header(db, transaction_header_id, user, additional_active_users)
 

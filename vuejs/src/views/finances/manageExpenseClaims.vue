@@ -185,7 +185,7 @@ export default {
     <Modal
       @close="closeExpenseInfoModal()"
       :active-modal="showExpenseClaimInfoModal"
-      size-class="max-w-[1700px] h-[1000px]" title="Expense Details">
+      size-class="max-w-[1700px]" title="Expense Details">
       <div v-if="showExpenseClaimInfoModal && expenseClaimInfo" class="grid grid-cols-6 lg:grid-cols-12 h-full">
         <div class="col-span-4 text-base text-slate-700 dark:text-slate-300 h-full">
           <p>Volunteer: {{ expenseClaimInfo.expenseTransactionHeader.postedByUser.username }}</p>
