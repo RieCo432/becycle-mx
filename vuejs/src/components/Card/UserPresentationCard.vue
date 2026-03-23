@@ -65,7 +65,7 @@ export default {
   setup(props) {
     const inEditMode = ref(false);
     const isOldPhoto = ref(true);
-    const updateCardDetails = toRef(props, 'updateCardDetails');
+    const updateItemDetails = toRef(props, 'updateItemDetails');
     const editCardSchema = yup.object().shape({
       name: yup.string().max(20).required('Name is required'),
       bio: yup.string().max(450).required('Bio is required'),
@@ -91,7 +91,7 @@ export default {
     const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: false});
 
     const submitCardDetails = handleSubmit(() => {
-      updateCardDetails.value(name.value, bio.value, !isOldPhoto.value ? files.value[0] : undefined);
+      updateItemDetails.value(name.value, bio.value, !isOldPhoto.value ? files.value[0] : undefined);
       inEditMode.value = false;
       isOldPhoto.value = true;
     });
