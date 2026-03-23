@@ -1,6 +1,6 @@
 <script>
 import Button from '@/components/Button/index.vue';
-import {ref} from 'vue';
+import {nextTick, ref} from 'vue';
 import requests from '@/requests';
 import * as yup from 'yup';
 import {useField, useFieldArray, useForm} from 'vee-validate';
@@ -10,22 +10,24 @@ import TextInput from '@/components/TextInput/index.vue';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import Select from '@/components/Select/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
+import {Icon} from '@iconify/vue';
+import {validate} from 'uuid';
+import Tooltip from '@/components/Tooltip/index.vue';
 
 const toast = useToast();
 
 export default {
   name: 'RecordOtherTransactionModal',
-  components: {DashButton, TextInput, ComboboxTextInput, Select, Modal, Button},
+  components: {Tooltip, Icon, DashButton, TextInput, ComboboxTextInput, Select, Modal, Button},
   emits: ['close'],
   setup(props, context) {
     const allAccounts = ref([]);
-
     const eventSuggestions = ref([]);
-
-    const users = ref([]);
-
-    const loggedInUser = ref(null);
-
+    const allUsers = ref([]);
+    const additionalUsernamesThatCanPostToSomeAccount = ref([]);
+    const loggedInUsername = ref(null);
+    const doesTransactionBalance = ref(true);
+    const currentSetOfUsernames = ref([]);
 
     requests.getTransactionEvents().then((response) => {
       eventSuggestions.value = response.data;
@@ -34,7 +36,13 @@ export default {
     });
 
     requests.getUserMe().then((response) => {
-      loggedInUser.value = response.data.username;
+      loggedInUsername.value = response.data.username;
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
+
+    requests.getActiveUsers().then((response) => {
+      allUsers.value.splice(0, allUsers.value.length, ...response.data);
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
@@ -63,6 +71,14 @@ export default {
         .typeError('Amount must be a number')
         .positive('Amount must be positive')
         .required('Amount is required'),
+
+      canBePostedByCurrentSetOfUsers: yup.boolean()
+        .oneOf([true], 'None of the current users can post to this account.'),
+    });
+
+    const userAuthSchema = yup.object({
+      username: yup.string().required('Username is required'),
+      password: yup.string().required('Password is required'),
     });
 
     const newTransactionSchema = yup.object().shape({
@@ -70,6 +86,8 @@ export default {
         .of(transactionLineSchema)
         .min(1, 'Add at least one transaction line')
         .required('Transaction lines are required'),
+      usernamesAndPasswords: yup.array()
+        .of(userAuthSchema),
       event: yup.string().required(' The event is required ')
         .max(60, 'The event must be less than 60 characters')
         .when('eventNotInList', {
@@ -78,20 +96,6 @@ export default {
           otherwise: (schema) => schema.oneOf(eventSuggestions.value, 'Please choose a value from the list, or add a new event.'),
         }),
       eventNotinList: yup.boolean(),
-
-
-      // TODO: bind this logic in
-      // loggedInUserCanSignDebitAccount: yup.boolean(),
-      // debitAccountUsername: yup.string().when('loggedInUserCanSignDebitAccount', {
-      //   is: false,
-      //   then: (schema) => schema.required(' The debit account username is required '),
-      //   otherwise: (schema) => schema.notRequired(),
-      // }),
-      // debitAccountPassword: yup.string().when('loggedInUserCanSignDebitAccount', {
-      //   is: false,
-      //   then: (schema) => schema.required(' The debit account password is required '),
-      //   otherwise: (schema) => schema.notRequired(),
-      // }),
     });
 
     function getBlankTransactionLine() {
@@ -99,83 +103,112 @@ export default {
         account: {id: null, name: null},
         type: null,
         amount: null,
+        canBePostedByCurrentSetOfUsers: true,
+      };
+    }
+
+    function getBlankUserAuth() {
+      return {
+        username: null,
+        password: null,
       };
     }
 
 
-    const {setFieldValue, handleSubmit, errors} = useForm({
+    const {setFieldValue, handleSubmit, errors, validate, setFieldError} = useForm({
       validationSchema: newTransactionSchema,
-      keepValuesOnUnmount: true,
+      keepValuesOnUnmount: false,
       initialValues: {
         transactionLines: [
           getBlankTransactionLine(),
           getBlankTransactionLine(),
         ],
+        usernamesAndPasswords: [],
         event: null,
       },
     });
 
 
-    const {fields: transactionLines, push, remove} = useFieldArray('transactionLines');
+    const {
+      fields: transactionLines,
+      push: pushTransactionLine,
+      remove: removeTransactionLine,
+    } = useFieldArray('transactionLines');
+    const {
+      fields: usernamesAndPasswords,
+      push: pushUsernamesAndPasswords,
+      remove: removeUsernamesAndPasswords,
+    } = useFieldArray('usernamesAndPasswords');
     const {value: event, errorMessage: eventError} = useField('event');
     const {value: eventNotInList, errorMessage: eventNotInListError} = useField('eventNotInList');
 
-
     function resetNewTransferForm() {
-      for (let i=0; i<transactionLines.value.length; i++) {
-        remove(i);
+      let numberTransactionLinesToRemove = transactionLines.value.length;
+      while (numberTransactionLinesToRemove > 0) {
+        removeTransactionLine(0);
+        numberTransactionLinesToRemove--;
+      }
+      let numberUsernamesAndPasswordsToRemove = usernamesAndPasswords.value.length;
+      while (numberUsernamesAndPasswordsToRemove > 0) {
+        removeUsernamesAndPasswords(0);
+        numberUsernamesAndPasswordsToRemove--;
       }
       for (let i=0; i<2; i++) {
-        push(getBlankTransactionLine());
+        pushTransactionLine(getBlankTransactionLine());
       }
       event.value = null;
       eventNotInList.value = false;
     }
 
     const submitNewTransaction = handleSubmit(() => {
-      // if (amount.value * 100 > amount.value.balance) {
-      //   setAmountPayoutErrors('Insufficient funds');
-      //   return;
-      // }
-      // const transactionDraft = {
-      //   transactionHeader: {
-      //     event: event.value,
-      //   },
-      //   transactionLines: [
-      //     {accountId: creditAccount.value.id, amount: -amount.value * 100},
-      //     {accountId: debitAccount.value.id, amount: amount.value * 100},
-      //   ],
-      //   attemptAutoPost: false,
-      // };
-      //
-      // const additionalData = [];
-      // if (!loggedInUserCanSignCreditAccount.value) {
-      //   additionalData.push({username: creditAccountUsername.value, password: creditAccountPassword.value});
-      // }
-      // if (!loggedInUserCanSignDebitAccount.value) {
-      //   additionalData.push({username: debitAccountUsername.value, password: debitAccountPassword.value});
-      // }
-      //
-      // requests.createTransaction(transactionDraft).then((response) => {
-      //   toast.success('Transaction created successfully', {timeout: 2000});
-      //   requests.postTransaction(response.data.id, additionalData).then((response) => {
-      //     toast.success('Transaction posted successfully', {timeout: 2000});
-      //     resetNewTransferForm();
-      //     context.emit('close');
-      //   }).catch((error) => {
-      //     toast.error(error.response.data.detail.description, {timeout: 2000});
-      //   });
-      // }).catch((error) => {
-      //   toast.error(error.response.data.detail.description, {timeout: 2000});
-      // });
+      let transactionBalance = 0;
+
+      const transactionDraft = {
+        transactionHeader: {
+          event: event.value,
+        },
+        transactionLines: transactionLines.value.map((transactionLine) => {
+          const amount = transactionLine.value.amount * 100 * (transactionLine.value.type === 'debit' ? 1 : -1);
+          transactionBalance += amount;
+          return {
+            accountId: transactionLine.value.account.id,
+            amount: amount,
+          };
+        }),
+        attemptAutoPost: false,
+      };
+      
+      doesTransactionBalance.value = transactionBalance === 0;
+      if (!doesTransactionBalance.value) return;
+
+      const additionalData = usernamesAndPasswords.value.map((usernameAndPassword) => ({
+        username: usernameAndPassword.value.username,
+        password: usernameAndPassword.value.password,
+      }));
+
+      requests.createTransaction(transactionDraft).then((response) => {
+        toast.success('Transaction created successfully', {timeout: 2000});
+        requests.postTransaction(response.data.id, additionalData).then((response) => {
+          toast.success('Transaction posted successfully', {timeout: 2000});
+          resetNewTransferForm();
+          context.emit('close');
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     });
 
 
     return {
       allAccounts,
-      remove,
-      push,
+      removeTransactionLine,
+      pushTransactionLine,
       transactionLines,
+      removeUsernamesAndPasswords,
+      pushUsernamesAndPasswords,
+      usernamesAndPasswords,
       errors,
       event,
       eventError,
@@ -185,10 +218,16 @@ export default {
       submitNewTransaction,
       getAccounts,
       eventSuggestions,
-      users,
-      loggedInUser,
+      allUsers,
+      loggedInUsername,
       setFieldValue,
       getBlankTransactionLine,
+      additionalUsernamesThatCanPostToSomeAccount,
+      getBlankUserAuth,
+      validate,
+      setFieldError,
+      doesTransactionBalance,
+      currentSetOfUsernames,
     };
   },
   props: {
@@ -202,7 +241,7 @@ export default {
       this.resetNewTransferForm();
       this.$emit('close');
     },
-    selectCreditAccount(event, selectedIndex, transactionLineIndex) {
+    selectAccount(event, selectedIndex, transactionLineIndex) {
       if (selectedIndex !== -1) {
         this.setFieldValue(`transactionLines[${transactionLineIndex}].account.name`,
           this.filtered_account_suggestions[transactionLineIndex][selectedIndex].name);
@@ -210,30 +249,115 @@ export default {
           this.filtered_account_suggestions[transactionLineIndex][selectedIndex].id);
         this.userSelectionOptionsStatic = false;
 
-        // TODO: this logic needs wired in
-        // this.creditUsers.splice(0, this.creditUsers.length);
-        // const promises = [];
-        // if (this.creditAccount.ownerGroupId) {
-        //   promises.push(requests.getGroupUsers(this.creditAccount.ownerGroupId));
-        // }
-        // if (this.creditAccount.ownerUserId && !this.creditUsers.find((user) => user.id === this.creditAccount.ownerUser.username)) {
-        //   promises.push(requests.getUser(this.creditAccount.ownerUserId));
-        // }
-        // Promise.all(promises).then((responses) => {
-        //   responses.forEach((response) => {
-        //     if (!response.data.length) {
-        //       if (!this.creditUsers.includes(response.data.username)) this.creditUsers.push(response.data.username);
-        //     } else {
-        //       response.data.forEach((user) => {
-        //         if (!this.creditUsers.includes(user.username)) this.creditUsers.push(user.username);
-        //       });
-        //     }
-        //   });
-        //   this.loggedInUserCanSignCreditAccount = this.creditUsers.includes(this.loggedInUser);
-        // }).catch((error) => {
-        //   toast.error(error.response.data.detail.description, {timeout: 2000});
-        // });
+        nextTick(() => this.checkUserPostingRights());
       }
+    },
+
+    checkUserPostingRights() {
+      this.currentSetOfUsernames = this.usernamesAndPasswords
+        .map(
+          (usernameAndPassword) => {
+            const signingUser = this.allUsers.find(
+              (user) =>
+                user.username === usernameAndPassword.value?.username);
+            if (signingUser) {
+              return signingUser.username;
+            }
+          },
+        )
+        .filter((username) => username !== undefined && username !== null);
+
+      if (!this.currentSetOfUsernames.includes(this.loggedInUsername)) {
+        this.currentSetOfUsernames.push(this.loggedInUsername);
+      }
+
+      this.additionalUsernamesThatCanPostToSomeAccount
+        .splice(0, this.additionalUsernamesThatCanPostToSomeAccount.length);
+
+      let isCurrentSetOfUsersSufficient = true;
+
+      for (let i=0; i < this.transactionLines.length; i++) {
+        const usernamesThatCanPostToThisAccount = [];
+        const account = this.allAccounts.find(
+          (account) =>
+            account.id === this.transactionLines[i].value.account.id);
+        if (!account) {
+          this.setFieldValue(
+            `transactionLines[${i}].canBePostedByCurrentSetOfUsers`, true);
+          continue;
+        }
+
+        if (account.ownerGroupId) {
+          usernamesThatCanPostToThisAccount
+            .push(
+              ...this.allUsers
+                .filter((user) =>
+                  user
+                    .groups
+                    .map((group) => group.id)
+                    .includes(account.ownerGroupId))
+                .map((user) => user.username));
+        }
+
+        if (account.ownerUserId) {
+          const ownerUser = this.allUsers.find((user) => user.id === account.ownerUserId);
+          if (!usernamesThatCanPostToThisAccount.includes(ownerUser.username)) {
+            usernamesThatCanPostToThisAccount
+              .push(this.allUsers
+                .find((user) => user.id === account.ownerUserId)
+                .username,
+              );
+          }
+        }
+
+        usernamesThatCanPostToThisAccount.forEach((username) => {
+          if (
+            !this.additionalUsernamesThatCanPostToSomeAccount.includes(username) &&
+            username !== this.loggedInUsername
+          ) {
+            this.additionalUsernamesThatCanPostToSomeAccount.push(username);
+          }
+        });
+
+        let isCurrentSetOfUsersSufficientForThisAccount = false;
+
+        for (let j=0; j<usernamesThatCanPostToThisAccount.length; j++) {
+          isCurrentSetOfUsersSufficientForThisAccount |=
+            this.currentSetOfUsernames.includes(usernamesThatCanPostToThisAccount[j]);
+        }
+
+        this.setFieldValue(
+          `transactionLines[${i}].canBePostedByCurrentSetOfUsers`,
+          isCurrentSetOfUsersSufficientForThisAccount);
+        if (!isCurrentSetOfUsersSufficientForThisAccount) {
+          this.setFieldError(
+            `transactionLines[${i}].canBePostedByCurrentSetOfUsers`,
+            'None of the current users can post to this account.');
+        }
+
+        isCurrentSetOfUsersSufficient &= isCurrentSetOfUsersSufficientForThisAccount;
+      }
+
+      const amountAdditionalUsersNullOrEmpty = this.usernamesAndPasswords
+        .filter((usernameAndPassword) => usernameAndPassword.value.username === null || usernameAndPassword.value.username === '')
+        .length;
+
+      if (amountAdditionalUsersNullOrEmpty > 0) {
+        let amountToBeDeleted = amountAdditionalUsersNullOrEmpty;
+        let i = 0;
+        while (amountToBeDeleted > 0 && i < this.usernamesAndPasswords.length) {
+          if (this.usernamesAndPasswords[i].value.username === null) {
+            this.removeUsernamesAndPasswords(i);
+            amountToBeDeleted--;
+          } else {
+            i++;
+          }
+        }
+      }
+      if (!isCurrentSetOfUsersSufficient) {
+        this.pushUsernamesAndPasswords(this.getBlankUserAuth());
+      }
+      nextTick(validate);
     },
 
     selectEvent(event, i) {
@@ -244,12 +368,13 @@ export default {
     makeAccountLegible(account) {
       return `${account.name}`;
     },
-    // TODO: more auth logic
-    // selectCreditUser(event, i) {
-    //   if (i !== -1) {
-    //     this.creditAccountUsername = this.filtered_credit_user_suggestions[i];
-    //   }
-    // },
+    selectUser(event, selectedIndex, usernameAndPasswordIndex) {
+      if (selectedIndex !== -1) {
+        this.setFieldValue(`usernamesAndPasswords[${usernameAndPasswordIndex}].username`,
+          this.filtered_user_suggestions[usernameAndPasswordIndex][selectedIndex]);
+        nextTick(this.checkUserPostingRights);
+      }
+    },
   },
   computed: {
     filtered_account_suggestions() {
@@ -266,16 +391,14 @@ export default {
           .toLowerCase()
           .includes((this.event ?? '').toLowerCase()));
     },
-    // TODO: wire in the auth logic
-    // filtered_credit_user_suggestions() {
-    //   return this.creditUsers
-    //     .filter((suggestion) =>
-    //       suggestion
-    //         .toLowerCase()
-    //         .startsWith((this.creditAccountUsername ?? '').toLowerCase()))
-    //     // .sort(this.userSortingFunction)
-    //     .slice(0, 10);
-    // },
+    filtered_user_suggestions() {
+      return this.usernamesAndPasswords.map((usernameAndPassword) => (
+        this.additionalUsernamesThatCanPostToSomeAccount.filter((suggestion) => suggestion
+          .toLowerCase()
+          .includes((usernameAndPassword.value.username ?? '').toLowerCase()) &&
+          !this.currentSetOfUsernames.includes(suggestion.toLowerCase()))
+      ));
+    },
   },
   mounted() {
     this.getAccounts();
@@ -292,7 +415,11 @@ export default {
 </script>
 
 <template>
-  <Modal :active-modal="activeModal" @close="closeModal" title="Record Other Transaction" size-class="max-w-[1200px]">
+  <Modal
+    :active-modal="activeModal"
+    @close="closeModal"
+    title="Record Other Transaction"
+    size-class="max-w-[1200px]">
     <form @submit.prevent="submitNewTransaction">
       <div class="grid grid-cols-12 gap-5">
         <div
@@ -302,8 +429,9 @@ export default {
           <div class="col-span-6 mb-2">
             <ComboboxTextInput
               :field-model-value="transactionLine.value.account.name"
-              :suggestions="filtered_account_suggestions[index].map(makeAccountLegible)"
-              :selected-callback="(event, i) => selectCreditAccount(event, i, index)"
+              :suggestions="filtered_account_suggestions[index]
+              .map(makeAccountLegible)"
+              :selected-callback="(event, i) => selectAccount(event, i, index)"
               :allow-new="false"
               :open-by-default="false"
               label="Account"
@@ -312,18 +440,27 @@ export default {
               :name="`transactionLines[${index}].account.name`"
               v-model="transactionLine.value.account.name"
               @change="() => {}"
-              :error="errors[`transactionLines[${index}].account.name`] ? errors[`transactionLines[${index}].account.name`] : ''"
+              :error="errors[`transactionLines[${index}].account.name`] ?
+              errors[`transactionLines[${index}].account.name`] :
+              ''"
             />
           </div>
-          <div class="col-span-3">
+          <div class="col-span-2">
             <Select
-              :options="[{value: 'debit', label: 'Debit'}, {value: 'credit', label: 'Credit'}]"
+              :options="[
+                {value: 'debit', label: 'Debit'},
+                {value: 'credit', label: 'Credit'},
+                ]"
               label="Debit or Credit?"
               v-model="transactionLine.type"
               :name="`transactionLines[${index}].type`"
               placeholder="Cr/Dr?"
-              :error="errors[`transactionLines[${index}].type`] ? errors[`transactionLines[${index}].type`] : ''"
-              @update:modelValue="(newValue) => {setFieldValue(`transactionLines[${index}].type`, newValue);}"
+              :error="errors[`transactionLines[${index}].type`] ?
+              errors[`transactionLines[${index}].type`] :
+              ''"
+              @update:modelValue="(newValue) => {
+                setFieldValue(`transactionLines[${index}].type`, newValue);
+              }"
             />
           </div>
           <div class="col-span-2">
@@ -333,48 +470,90 @@ export default {
               placeholder="12.34"
               :name="`transactionLines[${index}].amount`"
               v-model="transactionLine.amount"
-              :error="errors[`transactionLines[${index}].amount`] ? errors[`transactionLines[${index}].amount`] : ''"
-              @update:modelValue="(newValue) => {setFieldValue(`transactionLines[${index}].amount`, newValue);}"
+              :error="errors[`transactionLines[${index}].amount`] ?
+              errors[`transactionLines[${index}].amount`] :
+              ''"
+              @update:modelValue="(newValue) => {
+                setFieldValue(`transactionLines[${index}].amount`, newValue);
+              }"
             />
           </div>
+          <div class="col-span-1 place-items-center">
+            <div
+              v-if="errors[`transactionLines[${index}].canBePostedByCurrentSetOfUsers`]"
+              class="flex items-center justify-center h-full">
+              <Tooltip
+                placement="top"
+                theme="dark"
+                arrow>
+                <template #button>
+                  <Icon
+                    class="text-danger-500 dark:text-danger-500  text-5xl"
+                    icon="heroicons-outline:shield-exclamation" />
+                </template>
+                <span>{{ errors[`transactionLines[${index}].canBePostedByCurrentSetOfUsers`] ?? '' }}</span>
+              </Tooltip>
+            </div>
+          </div>
           <div class="col-span-1">
-            <Button icon="heroicons-outline:trash" class="w-full h-full" @click="remove(index)"/>
+            <Button
+              icon="heroicons-outline:trash"
+              class="w-full h-full"
+              @click="removeTransactionLine(index)"/>
           </div>
 
         </div>
         <div class="col-span-12">
-          <Button icon="heroicons-outline:plus" class="w-full" @click="push(getBlankTransactionLine())"/>
+          <Button
+            icon="heroicons-outline:plus"
+            class="w-full"
+            @click="pushTransactionLine(getBlankTransactionLine())"/>
         </div>
+        <div class="col-span-12">
+          <Button
+            icon="heroicons-outline:magnifying-glass"
+            class="w-full"
+            @click="checkUserPostingRights"/>
+        </div>
+        <div class="col-span-12">
+          <div
+            class="col-span-full px-2 grid grid-cols-12 rounded-md gap-5 bg-slate-300 dark:bg-slate-700"
+            v-for="(usernameAndPassword, index) in usernamesAndPasswords"
+            :key="index"
+          >
+            <div class="col-span-6 mb-2">
+              <ComboboxTextInput
+                :field-model-value="usernameAndPassword.value.username"
+                :suggestions="filtered_user_suggestions[index]"
+                :selected-callback="(event, i) => selectUser(event, i, index)"
+                :allow-new="false"
+                :open-by-default="false"
+                label="Username"
+                type="text"
+                placeholder="workshop"
+                :name="`usernamesAndPasswords[${index}].username`"
+                v-model="usernameAndPassword.value.username"
+                :error="errors[`usernamesAndPasswords[${index}].username`] ?
+                errors[`usernamesAndPasswords[${index}].username`] :
+                ''"
+                @change="() => {}"
+              />
+            </div>
+            <div class="col-span-6">
+              <TextInput
+                label="Password"
+                type="password"
+                placeholder="Password"
+                :name="`usernamesAndPasswords[${index}].password`"
+                v-model="usernameAndPassword.value.password"
+                :error="errors[`usernamesAndPasswords[${index}].password`] ?
+                errors[`usernamesAndPasswords[${index}].password`] :
+                ''"
+                hasicon/>
+            </div>
 
-        <!-- TODO: Can this be wired in such that number of users and passwords can be kept as small as possible?-->
-
-        <!--        <div v-if="!loggedInUserCanSignCreditAccount && creditAccount.id" class="col-span-6">-->
-        <!--          <ComboboxTextInput-->
-        <!--            :field-model-value="creditAccountUsername"-->
-        <!--            :suggestions="filtered_credit_user_suggestions"-->
-        <!--            :selected-callback="selectCreditUser"-->
-        <!--            :allow-new="false"-->
-        <!--            :open-by-default="false"-->
-        <!--            label="Credit Account Username"-->
-        <!--            type="text"-->
-        <!--            placeholder="workshop"-->
-        <!--            name="creditAccountUsername"-->
-        <!--            v-model="creditAccountUsername"-->
-        <!--            :error="creditAccountUsernameError"-->
-        <!--            @change="() => {}"-->
-        <!--          />-->
-        <!--        </div>-->
-        <!--        <div v-if="!loggedInUserCanSignCreditAccount && creditAccount.id" class="col-span-6">-->
-        <!--          <TextInput-->
-        <!--            label="Credit Account Password"-->
-        <!--            type="password"-->
-        <!--            placeholder="Password"-->
-        <!--            name="creditAccountPassword"-->
-        <!--            v-model="creditAccountPassword"-->
-        <!--            :error="creditAccountPasswordError"-->
-        <!--            hasicon/>-->
-        <!--        </div>-->
-
+          </div>
+        </div>
         <div class="col-span-8">
           <ComboboxTextInput
             :allow-new="eventNotInList"
@@ -395,10 +574,28 @@ export default {
             Add New
           </label>
           <DashButton
-            :class="`btn-sm ${eventNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'} w-full`"
+            :class="`btn-sm ${eventNotInList ?
+            'bg-success-500 dark:bg-success-500' :
+            'bg-primary-500 dark:bg-primary-500'} w-full`"
             :icon="eventNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
             @click.prevent="() => {eventNotInList = !eventNotInList}"
           />
+        </div>
+        <div v-if="!doesTransactionBalance" class="col-span-12">
+          <div
+            class="flex items-center justify-center h-full">
+            <Tooltip
+              placement="top"
+              theme="dark"
+              arrow>
+              <template #button>
+                <Icon
+                  class="text-danger-500 dark:text-danger-500  text-5xl"
+                  icon="heroicons-outline:scale" />
+              </template>
+              <span>The sum or credits needs to match the sum of debits</span>
+            </Tooltip>
+          </div>
         </div>
         <div class="col-span-12">
           <Button type="submit" class="btn btn-dark block w-full text-center" text="Submit"/>

@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+from .group import Group
 
 
 class UserBase(BaseModel):
@@ -22,6 +23,7 @@ class User(UserBase):
     id: UUID
     softDeleted: bool
     lastAuthenticated: datetime | None = None
+    groups: list[Group] = []
 
     model_config = ConfigDict(from_attributes=True)
 
