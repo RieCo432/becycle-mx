@@ -112,7 +112,7 @@ async def update_contract_draft_deposit(
             detail={"description": "Contract draft not found."},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    crud.post_transaction_header(db=db, transaction_header_id=deposit_collected_transaction_header_id, user=deposit_collecting_user)
+    # crud.post_transaction_header(db=db, transaction_header_id=deposit_collected_transaction_header_id, user=deposit_collecting_user)
     return crud.update_contract_draft_deposit(db=db, contract_draft_id=contract_draft_id, deposit_collected_transaction_header_id=deposit_collected_transaction_header_id)
 
 
@@ -234,7 +234,7 @@ async def return_bike(
     if len([report for report in crime_reports if report.closedOn is None]) > 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "You cannot return a contract while there is an open crime report!"})
 
-    crud.post_transaction_header(db=db, transaction_header_id=deposit_settled_transaction_header_id, user=deposit_returning_user)
+    # crud.post_transaction_header(db=db, transaction_header_id=deposit_settled_transaction_header_id, user=deposit_returning_user)
     contract = crud.return_contract(db=db,
                                     contract_id=contract_id,
                                     deposit_settled_transaction_header_id=deposit_settled_transaction_header_id,

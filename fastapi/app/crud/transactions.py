@@ -57,7 +57,7 @@ def create_transaction_lines(db: Session, transaction_lines_data: List[schemas.T
     pass
     
     
-def create_transaction(db: Session, transaction_data: schemas.TransactionCreate, user: models.User) -> models.TransactionHeader:
+def create_transaction(db: Session, transaction_data: schemas.TransactionCreate, user: models.User, additional_active_users: List[models.User] | None = None) -> models.TransactionHeader:
     transaction_header = models.TransactionHeader(
         event=transaction_data.transactionHeader.event,
         createdOn=datetime.now(timezone.utc),
@@ -96,6 +96,13 @@ def create_transaction(db: Session, transaction_data: schemas.TransactionCreate,
     if not transaction_header.doesBalance:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Transaction does not balance!"})
+
+    if transaction_data.attemptAutoPost:
+        try:
+            transaction_header = crud.post_transaction_header(db, transaction_header.id, user, additional_active_users)
+        except Exception as e:
+            db.rollback()
+            raise e
     
     db.commit()
     return transaction_header

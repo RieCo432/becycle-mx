@@ -1074,13 +1074,16 @@ export default {
               {amount: -depositAmountCollected.value * 100, accountId: depositCollectedLiabilityAccount.value.id},
               {amount: depositAmountCollected.value * 100, accountId: depositCollectedAssetAccount.value.id},
             ],
-            attemptAutoPost: false,
+            attemptAutoPost: true,
           };
-          requests.createTransaction(depositCollectedTransactionDraft).then((response) => {
+          const transactionAuthDetails = [{
+            username: depositCollectedAssetAccount.value.ownerUser.username,
+            password: depositCollectingPassword.value,
+          }];
+          requests.createTransaction(depositCollectedTransactionDraft, transactionAuthDetails).then((response) => {
             depositCollectedTransactionHeader.value = response.data;
             toast.success('Deposit Collected!', {timeout: 1000});
 
-            // Check password of deposit collector
             requests.putDraftContractDeposit(
               activeDraft.value.id,
               depositCollectedTransactionHeader.value.id,
@@ -1100,6 +1103,11 @@ export default {
               });
           }).catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
+            if (
+              error.response.status === 400 &&
+              (error.response.data.detail.username ?? '') === depositCollectedAssetAccount.value.ownerUser.username) {
+              depositCollectingPasswordSetErrors('Wrong Password!');
+            }
           });
         } else {
           toast.success('Deposit Details Already Done!', {timeout: 1000});

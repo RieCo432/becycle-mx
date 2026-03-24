@@ -30,11 +30,11 @@ async def get_transaction_events(db: Session = Depends(dep.get_db)):
 async def create_transaction(
     transaction_data: schemas.TransactionCreate,
     user: models.User = Depends(dep.get_current_user),
+    additional_active_users: list[models.User] | None = Depends(dep.get_active_users),
     db: Session = Depends(dep.get_db)
 ):
-    transaction_header = crud.create_transaction(db, transaction_data, user)
-    if transaction_data.attemptAutoPost:
-        transaction_header = crud.post_transaction_header(db, transaction_header.id, user)
+    transaction_header = crud.create_transaction(db, transaction_data, user, additional_active_users)
+
     return transaction_header
 
 @transactions.patch("/transactions/{transaction_header_id}/post", response_model=schemas.TransactionHeader)

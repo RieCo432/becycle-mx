@@ -1560,8 +1560,11 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  createTransaction(transaction) {
-    return axiosClient.post('/transactions', transaction, {
+  createTransaction(transaction, additionalUsernamesAndPasswords = []) {
+    return axiosClient.post('/transactions', {
+      transaction_data: transaction,
+      users_and_passwords: additionalUsernamesAndPasswords,
+    }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

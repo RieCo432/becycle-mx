@@ -175,24 +175,29 @@ export default {
                 []
             ),
           ],
-          attemptAutoPost: false,
+          attemptAutoPost: true,
         };
 
-        requests.createTransaction(depositSettledTransactionDraft).then((response) => {
-          if (response.data) {
-            depositSettledTransactionHeader.value = response.data;
-            toast.success('Deposit Settled Successfully!');
+        const transactionAuthDetails = [{
+          username: depositSettledAssetAccount.value.ownerUser.username,
+          password: depositReturningPassword.value,
+        }];
+        
+        requests.createTransaction(depositSettledTransactionDraft, transactionAuthDetails).then((response) => {
+          depositSettledTransactionHeader.value = response.data;
+          toast.success('Deposit Settled Successfully!');
 
-            patchContractReturn.value(
-              depositSettledTransactionHeader.value.id,
-              depositSettledAssetAccount.value.ownerUser.username,
-              depositReturningPassword.value,
-              returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
-          } else {
-            depositReturningPasswordSetErrors('Wrong Password!');
-            toast.error(response.data.detail.description, {timeout: 1000});
-          }
+          patchContractReturn.value(
+            depositSettledTransactionHeader.value.id,
+            depositSettledAssetAccount.value.ownerUser.username,
+            depositReturningPassword.value,
+            returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
         }).catch((error) => {
+          if (
+            error.response.status === 400 &&
+            (error.response.data.detail.username ?? '') === depositSettledAssetAccount.value.ownerUser.username) {
+            depositReturningPasswordSetErrors('Wrong Password!');
+          }
           toast.error(error.response.data.detail.description, {timeout: 1000});
         });
       }
