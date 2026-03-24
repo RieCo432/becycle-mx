@@ -568,6 +568,7 @@
                       hasicon/>
                 </div>
               </div>
+              
               <div
                   class="mt-10"
                   :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
@@ -580,9 +581,11 @@
                 />
                 <Button
                     v-if="stepNumber !== 0"
-                    :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                     btnClass="btn-dark"
-                />
+                >
+                  <span v-if="!stepIsLoading">{{stepNumber !== this.steps.length - 1 ? 'next' : 'submit'}}</span>
+                  <VueSpinner v-if="stepIsLoading" size="20px" class="text-sky-500"/>
+                </Button>
               </div>
             </form>
           </div>
@@ -614,7 +617,7 @@ import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSugg
 import colourSuggestionSort from '@/util/colourSuggestionSort';
 import ContractDraftCard from '@/components/Card/ContractDraftCard.vue';
 import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
-import BounceLoader from 'vue-spinner';
+import {VueSpinner} from 'vue3-spinners';
 
 const toast = useToast();
 const OFFICIAL_NAME = import.meta.env.VITE_OFFICIAL_NAME;
@@ -622,7 +625,7 @@ const OFFICIAL_NAME = import.meta.env.VITE_OFFICIAL_NAME;
 export default {
   name: 'newContract',
   components: {
-    BounceLoader,
+    VueSpinner,
     BikeOverviewCard,
     ContractDraftCard,
     ColourSetSuggestion,
