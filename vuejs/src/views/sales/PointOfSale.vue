@@ -767,7 +767,7 @@ export default {
                             v-model="newSalePrice"
                             :placeholder="(line.catalogueItem.recommendedRetailPrice / 100 * line.quantity).toFixed(2)"
                             @keydown.enter.prevent="setNewItemSalePrice"
-                            @focusout ="() => {editSalePriceActive = false; selectedItem = null}"/>
+                            @keydown.esc.prevent ="() => {editSalePriceActive = false; selectedItem = null}"/>
 
                         </template>
                         <template v-else>
@@ -806,7 +806,7 @@ export default {
                             type="number"
                             v-model="newSalePrice"
                             :placeholder="(line.bike.roughValue ? line.bike.roughValue / 100 : 100).toFixed(2)"
-                            @focusout="() => {editSalePriceActive = false; selectedBike = null}"
+                            @keydown.esc.prevent="() => {editSalePriceActive = false; selectedBike = null}"
                             @keydown.enter.prevent="setNewBikeSalePrice"
                           />
 
