@@ -11,6 +11,7 @@ from app.database.db import Base
 
 from typing import Self, List
 from .transactions import TransactionHeader
+from ..services.accounts_helpers import AccountTypes
 
 CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
@@ -61,6 +62,25 @@ class Contract(Base):
     crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
 
     depositTransactionHeaders: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.contractId], back_populates="contract")
+
+    @property
+    def liability_collected(self) -> float:
+        for th in self.depositTransactionHeaders:
+            if th.event == "deposit_collected":
+                for tl in th.transactionLines:
+                    if tl.account.type == AccountTypes.LIABILITY:
+                        return abs(tl.amount) / 100
+                    
+        return 0.0
+    
+    @property
+    def deposit_amount_returned(self) -> float:
+        for th in self.depositTransactionHeaders:
+            if th.event == "deposit_settled":
+                for tl in th.transactionLines:
+                    if tl.account.type == AccountTypes.ASSET:
+                        return abs(tl.amount) / 100
+        return 0.0
 
     def __eq__dict(self, other: dict):
         return all([
