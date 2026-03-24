@@ -11,7 +11,7 @@ import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import {useToast} from 'vue-toastification';
-import BounceLoader from 'vue-spinner/src/BounceLoader.vue';
+import BounceLoader from 'vue-spinner';
 import window from '@/mixins/window';
 
 const toast = useToast();
