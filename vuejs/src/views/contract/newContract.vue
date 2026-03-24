@@ -608,14 +608,13 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
-// import nfc from '@/nfc';
 import levenshtein from '@/util/levenshtein';
 import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
-import Tooltip from '@/components/Tooltip/index.vue';
 import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSuggestion.vue';
 import colourSuggestionSort from '@/util/colourSuggestionSort';
 import ContractDraftCard from '@/components/Card/ContractDraftCard.vue';
 import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
+import BounceLoader from 'vue-spinner';
 
 const toast = useToast();
 const OFFICIAL_NAME = import.meta.env.VITE_OFFICIAL_NAME;
@@ -623,10 +622,10 @@ const OFFICIAL_NAME = import.meta.env.VITE_OFFICIAL_NAME;
 export default {
   name: 'newContract',
   components: {
+    BounceLoader,
     BikeOverviewCard,
     ContractDraftCard,
     ColourSetSuggestion,
-    Tooltip,
     ComboboxColourPicker,
     DashButton,
     Checkbox,
@@ -701,6 +700,7 @@ export default {
     const router = useRouter();
 
     const userSelectionOptionsStatic = ref(true);
+    const stepIsLoading = ref(false);
 
     // step by step yup schema
     const clientSchema = yup.object().shape({
@@ -921,6 +921,9 @@ export default {
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
           });
       }
     }
@@ -939,6 +942,9 @@ export default {
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
           });
       }
     }
@@ -993,6 +999,11 @@ export default {
     }
 
     const submit = handleSubmit(() => {
+      if (stepIsLoading.value) {
+        toast.error('Please wait for the previous step to complete', {timeout: 5000});
+        return;
+      }
+      stepIsLoading.value = true;
       // next step until last step. if last step then submit form
       if (stepNumber.value === 1) {
         // Client details processing
@@ -1022,6 +1033,9 @@ export default {
               toast.success('New Bike Created!', {timeout: 1000});
               bikeId.value = response.data['id'];
               setBike();
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
             });
         } else {
           bikeId.value = matchWithBikeId.value;
@@ -1050,19 +1064,25 @@ export default {
               getActiveUsers();
 
               stepNumber.value = 5;
+              stepIsLoading.value = false;
             }
             if (activeDraft.value.workingUser !== null) {
               toast.success('Working User Already Selected!', {timeout: 1000});
               getRentalCheckers();
               stepNumber.value = 6;
+              stepIsLoading.value = false;
             }
             if (activeDraft.value.checkingUser !== null) {
               toast.success('Checking User Already Selected!', {timeout: 1000});
+              stepIsLoading.value = false;
               promoteDraft();
             }
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
           });
       } else if (stepNumber.value === 4) {
         if (!activeDraft.value.depositCollectedTransactionId) {
@@ -1108,10 +1128,13 @@ export default {
               (error.response.data.detail.username ?? '') === depositCollectedAssetAccount.value.ownerUser.username) {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
-          });
+          }).finally(() => {
+              stepIsLoading.value = false;
+            });
         } else {
           toast.success('Deposit Details Already Done!', {timeout: 1000});
           stepNumber.value = 5;
+          stepIsLoading.value = false;
         }
       } else if (stepNumber.value === 5) {
         // check password or pin of working volunteer
@@ -1128,6 +1151,9 @@ export default {
             } else {
               toast.error(error.response.data.detail.description, {timeout: 5000});
             }
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
           });
       } else if (stepNumber.value === 6) {
         // check password or pin of checking volunteer
@@ -1144,6 +1170,9 @@ export default {
             } else {
               toast.error(error.response.data.detail.description, {timeout: 5000});
             }
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
           });
       }
     });
@@ -1259,6 +1288,7 @@ export default {
       stepNumber,
       prev,
       tryMatchingBike,
+      stepIsLoading,
     };
   },
   data() {
