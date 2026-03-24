@@ -80,7 +80,6 @@ async def delete_bike_sale_line(
 async def finalise_sale(
         sale_header_id: UUID,
         transaction_header_id: Annotated[UUID, Body(embed=True)],
-        user: models.User = Depends(dep.get_working_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.SaleHeader:
     # TODO: make sure sale is not complete already
@@ -90,5 +89,5 @@ async def finalise_sale(
             detail={"description": "Sale price does not cover payment."}
         )
     
-    crud.post_transaction_header(db=db, transaction_header_id=transaction_header_id, user=user)
+    # crud.post_transaction_header(db=db, transaction_header_id=transaction_header_id, user=user)
     return crud.finalise_sale(db=db, sale_header_id=sale_header_id, transaction_header_id=transaction_header_id)

@@ -188,15 +188,10 @@ export default {
         additionalData.push({username: debitAccountUsername.value, password: debitAccountPassword.value});
       }
       
-      requests.createTransaction(transactionDraft).then((response) => {
-        toast.success('Transaction created successfully', {timeout: 2000});
-        requests.postTransaction(response.data.id, additionalData).then((response) => {
-          toast.success('Transaction posted successfully', {timeout: 2000});
-          resetNewTransferForm();
-          context.emit('close');
-        }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-        });
+      requests.createTransaction(transactionDraft, additionalData).then((response) => {
+        toast.success('Transaction created and posted successfully', {timeout: 2000});
+        resetNewTransferForm();
+        context.emit('close');
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
