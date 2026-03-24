@@ -54,7 +54,7 @@ export default {
       })
         .required('Select the payment asset account.'),
       username: yup.string().required(' The username is required '),
-      passwordOrPin: yup.string().required(' The password or pin is required '),
+      password: yup.string().required(' The password is required '),
     });
 
     const {handleSubmit, handleReset: resetCheckoutForm} = useForm({
@@ -74,7 +74,7 @@ export default {
     const {value: bikeRevenueAccount, errorMessage: bikeRevenueAccountError} = useField('bikeRevenueAccount');
     const {value: paymentAssetAccount, errorMessage: paymentAssetAccountError} = useField('paymentAssetAccount');
     const {value: username, errorMessage: usernameError} = useField('username');
-    const {value: passwordOrPin, errorMessage: passwordOrPinError} = useField('passwordOrPin');
+    const {value: password, errorMessage: passwordError, setErrors: passwordSetErrors} = useField('password');
 
     function getSales() {
       requests.getSales(true, false).then((response) => {
@@ -128,21 +128,29 @@ export default {
             }] :
             []),
         ],
-        attemptAutoPost: false,
+        attemptAutoPost: true,
       };
+      
+      const transactionAuthDetails = [{
+        username: username.value,
+        password: password.value,
+      }];
 
-      requests.createTransaction(saleTransactionsHeaderDraft).then((response) => {
+      requests.createTransaction(saleTransactionsHeaderDraft, transactionAuthDetails).then((response) => {
         toast.success('Transaction created', {timeout: 2000});
 
         requests.patchSalePayment(
           currentSale.value.id,
-          response.data.id,
-          username.value,
-          passwordOrPin.value).then((response) => {
+          response.data.id).then((response) => {
           toast.success('Sale completed!', {timeout: 2000});
           currentSale.value = null;
         });
       }).catch((error) => {
+        if (
+          error.response.status === 400 &&
+          (error.response.data.detail.username ?? '') === username.value) {
+          passwordSetErrors('Wrong Password!');
+        }
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
     });
@@ -163,8 +171,8 @@ export default {
       hasBikeSaleLinesError,
       username,
       usernameError,
-      passwordOrPin,
-      passwordOrPinError,
+      password,
+      passwordError,
       submitSaleCheckout,
       resetCheckoutForm,
       getSales,
@@ -699,12 +707,12 @@ export default {
                     </div>
                     <div class="col-span-full">
                       <TextInput
-                        label="Password or Pin"
+                        label="Password"
                         type="password"
-                        placeholder="Password or Pin"
-                        name="passwordOrPin"
-                        v-model="passwordOrPin"
-                        :error="passwordOrPinError"
+                        placeholder="Password"
+                        name="password"
+                        v-model="password"
+                        :error="passwordError"
                         hasicon/>
                     </div>
                     <div class="col-span-full">

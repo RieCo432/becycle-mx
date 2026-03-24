@@ -1674,12 +1674,10 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  patchSalePayment(saleId, paymentTransactionHeaderId, workingUser, workingPasswordOrPin) {
+  patchSalePayment(saleId, paymentTransactionHeaderId) {
     return axiosClient.patch(`/sales/${saleId}/payment`,
       {
         transaction_header_id: paymentTransactionHeaderId,
-        working_username: workingUser,
-        working_user_password_or_pin: workingPasswordOrPin,
       }, {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
