@@ -568,7 +568,7 @@
                       hasicon/>
                 </div>
               </div>
-              
+
               <div
                   class="mt-10"
                   :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
@@ -980,6 +980,8 @@ export default {
           router.push({path: `/contracts/${response.data.id}`, query: {showTerms: 1}});
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 5000});
+        }).finally(() => {
+          stepIsLoading.value = false;
         });
     }
 
@@ -1132,8 +1134,8 @@ export default {
               depositCollectingPasswordSetErrors('Wrong Password!');
             }
           }).finally(() => {
-              stepIsLoading.value = false;
-            });
+            stepIsLoading.value = false;
+          });
         } else {
           toast.success('Deposit Details Already Done!', {timeout: 1000});
           stepNumber.value = 5;
@@ -1173,8 +1175,6 @@ export default {
             } else {
               toast.error(error.response.data.detail.description, {timeout: 5000});
             }
-          })
-          .finally(() => {
             stepIsLoading.value = false;
           });
       }
