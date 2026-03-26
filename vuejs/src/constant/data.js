@@ -128,27 +128,9 @@ export const topMenu = [
         show: ['user'],
       },
       {
-        childtitle: 'Submit Deposit Exchange',
-        childicon: 'heroicons-outline:arrows-right-left',
-        childlink: '/admin/deposit-exchanges',
-        show: ['user'],
-      },
-      {
-        childtitle: 'Submit Expense',
-        childicon: 'heroicons-outline:document-plus',
-        childlink: '/finances/expenses/submit',
-        show: ['user'],
-      },
-      {
         childtitle: 'Claim Expense',
         childicon: 'heroicons-outline:document-plus',
         childlink: '/finances/expenses/claim',
-        show: ['user'],
-      },
-      {
-        childtitle: 'Manage Expenses',
-        childicon: 'heroicons-outline:arrows-right-left',
-        childlink: '/finances/expenses/manage',
         show: ['user'],
       },
       {

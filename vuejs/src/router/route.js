@@ -186,22 +186,13 @@ const routes = [
         component: () => import('@/views/appointments/index.vue'),
       },
       {
-        path: '/finances/deposits', // TODO: this needs deleted
+        path: '/finances/deposits',
         name: 'Deposit Balances',
         meta: {
           restrictTo: ['user'],
           selectNavPath: '/finances/deposits',
         },
         component: () => import('@/views/finances/depositBalances.vue'),
-      },
-      {
-        path: '/finances/deposits-book',
-        name: 'Deposit Book',
-        meta: {
-          restrictTo: ['user'],
-          selectNavPath: '/finances/deposits-book',
-        },
-        component: () => import('@/views/finances/depositBook.vue'),
       },
       {
         path: '/finances/deposit-charts',
@@ -222,15 +213,6 @@ const routes = [
         component: () => import('@/views/finances/cashFlow.vue'),
       },
       {
-        path: '/finances/expenses/submit', // TODO: this needs deleted
-        name: 'Submit Expense',
-        meta: {
-          restrictTo: ['user'],
-          selectNavPath: '/finances/expenses/submit',
-        },
-        component: () => import('@/views/finances/newExpense.vue'),
-      },
-      {
         path: '/finances/expenses/claim',
         name: 'Claim Expense',
         meta: {
@@ -238,15 +220,6 @@ const routes = [
           selectNavPath: '/finances/expenses/claim',
         },
         component: () => import('@/views/finances/newExpenseClaim.vue'),
-      },
-      {
-        path: '/finances/expenses/manage', // TODO: this needs deleted
-        name: 'Manage Expenses',
-        meta: {
-          restrictTo: ['user'],
-          selectNavPath: '/finances/expenses/manage',
-        },
-        component: () => import('@/views/finances/manageExpenses.vue'),
       },
       {
         path: '/finances/expenses/claims/manage',
@@ -328,15 +301,6 @@ const routes = [
           selectNavPath: '/admin/appointment-settings',
         },
         component: () => import('@/views/admin/appointmentSettings.vue'),
-      },
-      {
-        path: '/admin/deposit-exchanges',
-        name: 'Deposit Exchanges',
-        meta: {
-          restrictTo: ['user'],
-          selectNavPath: '/admin/deposit-exchanges',
-        },
-        component: () => import('@/views/admin/DepositExchanges.vue'),
       },
       {
         path: '/admin/raw-data',
