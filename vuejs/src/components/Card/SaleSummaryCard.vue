@@ -3,14 +3,27 @@ import Card from '@/components/Card/index.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import TextLabelWithPillBadgeIndicatingMatch from '@/components/Card/TextLabelWithPillBadgeIndicatingMatch.vue';
 import Button from '@/components/Button/index.vue';
+import {number} from 'yup';
 
 export default {
   name: 'SaleSummaryCard',
+  methods: {number},
   components: {Button, TextLabelWithPillBadgeIndicatingMatch, Tooltip, Card},
   props: {
     saleHeader: {
       type: Object,
       required: true,
+    },
+  },
+  computed: {
+    numberOfItemSaleLines() {
+      return this.saleHeader.catalogueItemSaleLines.length;
+    },
+    numberOfBikeSaleLines() {
+      return this.saleHeader.bikeSaleLines.length;
+    },
+    maximumNumberOfSaleLines() {
+      return Math.max(this.numberOfBikeSaleLines, this.numberOfItemSaleLines);
     },
   },
 };
@@ -27,39 +40,39 @@ export default {
         <div class="flex flex-col">
           <div class="w-full flex-shrink">
             <div class="grid grid-cols-11 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-              <div class="col-span-full text-center"><h4>Stuff</h4></div>
+              <div class="col-span-full text-center"><h4>Sale Content</h4></div>
 
               <div class="col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                <div class="col-span-5 text-center"><h4>Catalogue Items</h4></div>
-                <div class="col-span-3 text-left"><h6>Item</h6></div>
-                <div class="col-span-1 text-right"><h6>Qty</h6></div>
-                <div class="col-span-1 text-right"><h6>Price</h6></div>
+                <div class="col-span-5 text-center h-10"><h4>Catalogue Items</h4></div>
+                <div class="col-span-3 text-left h-8"><h6>Item</h6></div>
+                <div class="col-span-1 text-right h-8"><h6>Qty</h6></div>
+                <div class="col-span-1 text-right h-8"><h6>Price</h6></div>
                 <template v-for="line in saleHeader.catalogueItemSaleLines" :key="line.id">
-                  <div class="col-span-3"><span>{{ line.catalogueItem.name }}</span></div>
-                  <div class="col-span-1 text-right">
+                  <div class="col-span-3 h-8"><span>{{ line.catalogueItem.name }}</span></div>
+                  <div class="col-span-1 text-right h-8">
                     <span class="inline align-bottom mb-0">{{ line.quantity }}</span>
                   </div>
-                  <div class="col-span-1 text-right">
+                  <div class="col-span-1 text-right h-8">
                     <span class="inline align-bottom mb-0">{{ (line.salePrice / 100).toFixed(2) }}</span>
                   </div>
                 </template>
-                <div class="col-span-full h-10"></div>
-                <div class="col-span-4 text-center"><h5>Sub Total</h5></div>
-                <div class="col-span-1 text-right"><h5>{{ (saleHeader.catalogueItemSaleLines.reduce((total, line) => total + line.salePrice, 0) / 100).toFixed(2) }}</h5></div>
+                <div class="col-span-full h-8" v-for="i in (maximumNumberOfSaleLines - numberOfItemSaleLines + 1)" :key="i"></div>
+                <div class="col-span-4 text-center h-8"><h5>Sub Total</h5></div>
+                <div class="col-span-1 text-right h-8"><h5>{{ (saleHeader.catalogueItemSaleLines.reduce((total, line) => total + line.salePrice, 0) / 100).toFixed(2) }}</h5></div>
               </div>
               <div class="col-span-1"></div>
 
               <div class="col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                <div class="col-span-5 text-center"><h4>Bikes</h4></div>
-                <div class="col-span-1 text-left"><h6>Make</h6></div>
-                <div class="col-span-1 left"><h6>Model</h6></div>
-                <div class="col-span-1 text-left"><h6>Colours</h6></div>
-                <div class="col-span-1 text-left"><h6>Serial Number</h6></div>
-                <div class="col-span-1 text-right"><h6>Price</h6></div>
+                <div class="col-span-5 text-center h-10"><h4>Bikes</h4></div>
+                <div class="col-span-1 text-left h-8"><h6>Make</h6></div>
+                <div class="col-span-1 left h-8"><h6>Model</h6></div>
+                <div class="col-span-1 text-left h-8"><h6>Colours</h6></div>
+                <div class="col-span-1 text-left h-8"><h6>Serial No.</h6></div>
+                <div class="col-span-1 text-right h-8"><h6>Price</h6></div>
                 <template v-for="line in saleHeader.bikeSaleLines" :key="line.id">
-                  <div class="col-span-1"><span>{{ line.bike.make }}</span></div>
-                  <div class="col-span-1"><span>{{ line.bike.model }}</span></div>
-                  <div class="col-span-1">
+                  <div class="col-span-1 h-8"><span>{{ line.bike.make }}</span></div>
+                  <div class="col-span-1 h-8"><span>{{ line.bike.model }}</span></div>
+                  <div class="col-span-1 h-8">
                     <div class="h-full rounded-full overflow-hidden">
                       <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${line.bike.colours.length}`">
                         <template
@@ -76,19 +89,19 @@ export default {
                       </div>
                     </div>
                   </div>
-                  <div class="col-span-1 text-left"><span>{{ line.bike.serialNumber }}</span></div>
-                  <div class="col-span-1 text-right">
+                  <div class="col-span-1 text-left h-8"><span>{{ line.bike.serialNumber }}</span></div>
+                  <div class="col-span-1 text-right h-8">
                     <span class="inline align-bottom mb-0">{{ (line.salePrice / 100).toFixed(2) }}</span>
                   </div>
                 </template>
-                <div class="col-span-full h-10"></div>
-                <div class="col-span-4 text-center"><h5>Sub Total</h5></div>
-                <div class="col-span-1 text-right"><h5>{{ (saleHeader.bikeSaleLines.reduce((total, line) => total + line.salePrice, 0) / 100).toFixed(2) }}</h5></div>
+                <div class="col-span-full h-8" v-for="i in (maximumNumberOfSaleLines - numberOfBikeSaleLines + 1)" :key="i"></div>
+                <div class="col-span-4 text-center h-8"><h5>Sub Total</h5></div>
+                <div class="col-span-1 text-right h-8"><h5>{{ (saleHeader.bikeSaleLines.reduce((total, line) => total + line.salePrice, 0) / 100).toFixed(2) }}</h5></div>
                 
               </div>
-              <div class="col-span-full h-10"></div>
-              <div class="col-span-9 col-start-1 text-center"><h5>Total</h5></div>
-              <div class="col-span-2 col-start-10 text-right"><h5>{{ ((saleHeader.catalogueItemSaleLines.reduce((total, line) => total + line.salePrice, 0) + saleHeader.bikeSaleLines.reduce((total, line) => total + line.salePrice, 0)) / 100).toFixed(2) }}</h5></div>
+              <div class="col-span-full h-8"></div>
+              <div class="col-span-9 col-start-1 text-center h-8"><h5>Total</h5></div>
+              <div class="col-span-2 col-start-10 text-right h-8"><h5>{{ ((saleHeader.catalogueItemSaleLines.reduce((total, line) => total + line.salePrice, 0) + saleHeader.bikeSaleLines.reduce((total, line) => total + line.salePrice, 0)) / 100).toFixed(2) }}</h5></div>
             </div>
           </div>
         </div>
