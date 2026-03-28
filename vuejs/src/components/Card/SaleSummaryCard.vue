@@ -1,0 +1,126 @@
+<script>
+import Card from '@/components/Card/index.vue';
+import Tooltip from '@/components/Tooltip/index.vue';
+import TextLabelWithPillBadgeIndicatingMatch from '@/components/Card/TextLabelWithPillBadgeIndicatingMatch.vue';
+import Button from '@/components/Button/index.vue';
+
+export default {
+  name: 'SaleSummaryCard',
+  components: {Button, TextLabelWithPillBadgeIndicatingMatch, Tooltip, Card},
+  props: {
+    saleHeader: {
+      type: Object,
+      required: true,
+    },
+  },
+};
+</script>
+
+<template>
+  <Card
+      :title="`${saleHeader.transactionHeader?.postedByUser.username} @ ${new Date(Date.parse(saleHeader.transactionHeader.postedOn))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}`"
+      class-name="border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full">
+    <div class="grid grid-cols-3 h-full gap-5">
+      
+      <div class="col-span-2">
+        <div class="flex flex-col">
+          <div class="w-full flex-shrink">
+            <div class="grid grid-cols-11 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+              <div class="col-span-full text-center"><h4>Stuff</h4></div>
+
+              <div class="col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+                <div class="col-span-5 text-center"><h4>Catalogue Items</h4></div>
+                <div class="col-span-3 text-left"><h6>Item</h6></div>
+                <div class="col-span-1 text-right"><h6>Qty</h6></div>
+                <div class="col-span-1 text-right"><h6>Price</h6></div>
+                <template v-for="line in saleHeader.catalogueItemSaleLines" :key="line.id">
+                  <div class="col-span-3"><span>{{ line.catalogueItem.name }}</span></div>
+                  <div class="col-span-1 text-right">
+                    <span class="inline align-bottom mb-0">{{ line.quantity }}</span>
+                  </div>
+                  <div class="col-span-1 text-right">
+                    <span class="inline align-bottom mb-0">{{ (line.salePrice / 100).toFixed(2) }}</span>
+                  </div>
+                </template>
+                <div class="col-span-full h-10"></div>
+                <div class="col-span-4 text-center"><h5>Sub Total</h5></div>
+                <div class="col-span-1 text-right"><h5>{{ (saleHeader.catalogueItemSaleLines.reduce((total, line) => total + line.salePrice, 0) / 100).toFixed(2) }}</h5></div>
+              </div>
+              <div class="col-span-1"></div>
+
+              <div class="col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+                <div class="col-span-5 text-center"><h4>Bikes</h4></div>
+                <div class="col-span-1 text-left"><h6>Make</h6></div>
+                <div class="col-span-1 left"><h6>Model</h6></div>
+                <div class="col-span-1 text-left"><h6>Colours</h6></div>
+                <div class="col-span-1 text-left"><h6>Serial Number</h6></div>
+                <div class="col-span-1 text-right"><h6>Price</h6></div>
+                <template v-for="line in saleHeader.bikeSaleLines" :key="line.id">
+                  <div class="col-span-1"><span>{{ line.bike.make }}</span></div>
+                  <div class="col-span-1"><span>{{ line.bike.model }}</span></div>
+                  <div class="col-span-1">
+                    <div class="h-full rounded-full overflow-hidden">
+                      <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${line.bike.colours.length}`">
+                        <template
+                          v-for="c in line.bike.colours"
+                          :key="c.name"
+                        >
+                          <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
+                            <template #button>
+                              <div class="w-full h-full"></div>
+                            </template>
+                            <span>{{ c.name }} ({{ c.hex }})</span>
+                          </Tooltip>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-span-1 text-left"><span>{{ line.bike.serialNumber }}</span></div>
+                  <div class="col-span-1 text-right">
+                    <span class="inline align-bottom mb-0">{{ (line.salePrice / 100).toFixed(2) }}</span>
+                  </div>
+                </template>
+                <div class="col-span-full h-10"></div>
+                <div class="col-span-4 text-center"><h5>Sub Total</h5></div>
+                <div class="col-span-1 text-right"><h5>{{ (saleHeader.bikeSaleLines.reduce((total, line) => total + line.salePrice, 0) / 100).toFixed(2) }}</h5></div>
+                
+              </div>
+              <div class="col-span-full h-10"></div>
+              <div class="col-span-9 col-start-1 text-center"><h5>Total</h5></div>
+              <div class="col-span-2 col-start-10 text-right"><h5>{{ ((saleHeader.catalogueItemSaleLines.reduce((total, line) => total + line.salePrice, 0) + saleHeader.bikeSaleLines.reduce((total, line) => total + line.salePrice, 0)) / 100).toFixed(2) }}</h5></div>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="col-span-1">
+          <div class="flex flex-col">
+            <div class="w-full flex-shrink">
+              <div class="grid grid-cols-10 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+                
+                
+                <div class="col-span-full h-10"></div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-2"></div>
+      </div>
+      
+      <div class="col-span-1">
+        {{saleHeader.transactionHeader}}
+      </div>
+    </div>
+  </Card>
+</template>
+
+<style scoped lang="scss">
+.part-label {
+  @apply text-base text-slate-400 dark:text-slate-400 mb-1;
+}
+.part-text {
+  @apply text-base text-slate-600 dark:text-slate-300 font-medium;
+}
+</style>
