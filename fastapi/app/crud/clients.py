@@ -178,7 +178,11 @@ def update_client(db: Session, client_id: UUID, new_first_name: str, new_last_na
     client.lastName = new_last_name.lower()
 
     if new_email_address is not None:
-        if get_client_by_email(db=db, email_address=new_email_address.lower()) is not None:
+        if db.scalar(
+                select(models.Client)
+                .where(models.Client.emailAddress == new_email_address.lower())
+                .where(models.Client.id != client_id)
+        ) is not None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, 
                 detail={"description": "This email address is already in use."})
