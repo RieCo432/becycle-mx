@@ -15,6 +15,7 @@ export default {
   components: {TextInput, Button, Modal},
   setup(props, context) {
     const closeModal = toRef(props, 'closeModal');
+    const client = toRef(props, 'client');
     const nameChangeSchema = yup.object().shape({
       firstName: yup.string().required('First name is required'),
       lastName: yup.string().required('Last name is required'),
@@ -34,6 +35,8 @@ export default {
         context.emit('clientDetailsUpdated', response.data);
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
+        firstName.value = client.value.firstName;
+        lastName.value = client.value.lastName;
       }).finally(() => {
         closeModal.value();
       });

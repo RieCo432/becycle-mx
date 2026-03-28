@@ -50,6 +50,10 @@ export default {
         context.emit('clientDetailsUpdated', response.data);
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
+        firstName.value = client.value.firstName;
+        lastName.value = client.value.lastName;
+        emailAddress.value = client.value.emailAddress;
+        confirmEmailAddress.value = client.value.emailAddress;
       }).finally(() => {
         closeModal.value();
       });
