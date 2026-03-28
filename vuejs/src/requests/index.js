@@ -740,7 +740,7 @@ export default {
   patchChangeNames(patchData) {
     return axiosClient.patch('/clients/me', patchData, {
       headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
     });
   },
   patchClientChangeDetails(clientId, patchData) {
