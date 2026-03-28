@@ -91,3 +91,10 @@ async def finalise_sale(
     
     # crud.post_transaction_header(db=db, transaction_header_id=transaction_header_id, user=user)
     return crud.finalise_sale(db=db, sale_header_id=sale_header_id, transaction_header_id=transaction_header_id)
+
+@sales.delete("/sales/{sale_header_id}")
+async def delete_sale(
+        sale_header_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> None:
+    crud.delete_sale_header(db=db, sale_header_id=sale_header_id)

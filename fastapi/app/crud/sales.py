@@ -200,3 +200,29 @@ def delete_bike_sale_line(db: Session, bike_sale_line_id: UUID) -> None:
     
     db.delete(bike_sale_line)
     db.commit()
+    
+    
+def delete_sale_header(db: Session, sale_header_id: UUID) -> None:
+    sale_header = get_sale_header(db=db, sale_header_id=sale_header_id)
+    
+    if sale_header.transactionHeaderId is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Closed sales cannot be deleted."}
+        )
+    
+    try:
+        for line in sale_header.catalogueItemSaleLines:
+            db.delete(line)
+        for line in sale_header.bikeSaleLines:
+            db.delete(line)
+        db.delete(sale_header)
+        db.flush()
+        
+        db.delete(sale_header)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Sale header could not be deleted."})
+        
