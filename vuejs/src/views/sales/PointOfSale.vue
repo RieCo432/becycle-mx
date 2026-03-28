@@ -206,8 +206,6 @@ export default {
   },
   data() {
     return {
-      showCatalogueBrowseModal: false,
-      showBikeBrowseModal: false,
       catalogueItems: [],
       showItems: false,
       showBikes: false,
@@ -490,17 +488,21 @@ export default {
       }
     },
     closeSale() {
-      this.isCheckout = false;
-      this.browseSales = false;
       this.currentSale = null;
-      this.showItems = null;
-      this.showBikes = null;
+      this.showItems = false;
+      this.showBikes = false;
+      this.showUsed = null;
+      this.showQuantityModal = false;
       this.showEditQuantityModal = false;
-      this.showNewBikeSalePriceModal = false;
-      this.editSalePriceActive = false;
       this.selectedItem = null;
-      this.selectedBike = null;
+      this.quantity = 0;
+      this.editSalePriceActive = false;
       this.newSalePrice = 0;
+      this.selectedBike = null;
+      this.showNewBikeSalePriceModal = false;
+      this.isCheckout = false;
+      this.userSelectionOptionsStatic = false;
+      this.browseSales = false;
     },
     deleteSale(saleHeaderId) {
       requests.deleteSale(saleHeaderId)
