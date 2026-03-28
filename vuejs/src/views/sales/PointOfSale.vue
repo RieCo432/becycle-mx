@@ -44,6 +44,7 @@ export default {
     const isCheckout = ref(false);
     const userSelectionOptionsStatic = ref(false);
     const browseSales = ref(false);
+    const quantityError = ref(null);
 
     const saleCheckoutSchema = yup.object().shape({
       hasCatalogueItemSaleLines: yup.boolean(),
@@ -147,6 +148,7 @@ export default {
       isCheckout.value = false;
       userSelectionOptionsStatic.value = false;
       browseSales.value = false;
+      quantityError.value = null;
     }
 
     const submitSaleCheckout = handleSubmit(() => {
@@ -255,6 +257,7 @@ export default {
       userSelectionOptionsStatic,
       browseSales,
       closeSale,
+      quantityError,
     };
   },
   created() {
@@ -305,6 +308,11 @@ export default {
       toast.success('Sale Continued!', {timeout: 2000});
     },
     addItemToSale() {
+      if (this.quantity === 0) {
+        this.quantityError = 'Quantity must be above 0!';
+        return;
+      }
+      this.quantityError = null;
       const sameItemInSale = this.currentSale.catalogueItemSaleLines
         .find((line) => line.catalogueItemId === this.selectedItem.id);
       if (!sameItemInSale) {
@@ -340,6 +348,7 @@ export default {
         this.selectedItem = null;
         this.quantity = 0;
       }
+      this.quantityError = null;
     },
     closeEditQuantityModal() {
       this.showEditQuantityModal = false;
@@ -1002,6 +1011,7 @@ export default {
                 type="number"
                 label="Enter Quantity"
                 v-model="quantity"
+                :error="quantityError"
               ></TextInput>
             </div>
 
@@ -1053,6 +1063,7 @@ export default {
                 type="number"
                 label="Enter Quantity"
                 v-model="quantity"
+                :error="quantityError"
               ></TextInput>
             </div>
 
