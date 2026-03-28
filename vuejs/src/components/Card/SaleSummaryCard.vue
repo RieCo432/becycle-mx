@@ -34,8 +34,7 @@ export default {
       :title="`${saleHeader.transactionHeader?.postedByUser.username} @ ${new Date(Date.parse(saleHeader.transactionHeader.postedOn))
               .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}`"
       class-name="border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full">
-    <div class="grid grid-cols-3 h-full gap-5">
-      
+    <div class="grid h-full gap-5" :class="saleHeader.transactionHeaderId == null ? 'grid-cols-2' : 'grid-cols-3'">
       <div class="col-span-2">
         <div class="flex flex-col">
           <div class="w-full flex-shrink">
@@ -122,8 +121,29 @@ export default {
         <div class="col-span-2"></div>
       </div>
       
-      <div class="col-span-1">
-        {{saleHeader.transactionHeader}}
+      <div v-if="saleHeader.transactionHeaderId != null"  class="col-span-1 flex flex-col">
+        <div class="flex flex-col justify-center items-center mb-2">
+          <h4>Payment Transaction</h4>
+        </div>
+        <div class="flex flex-col">
+          <table
+            class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
+            <tr class=" dark:bg-slate-700">
+              <th class="border dark:border-slate-500">Account</th>
+              <th class="border dark:border-slate-500">Credit</th>
+              <th class="border dark:border-slate-500">Debit</th>
+            </tr>
+            <tr v-for="line in saleHeader.transactionHeader.transactionLines" :key="line.id">
+              <td class="border dark:border-slate-500">{{ line.account.name }}</td>
+              <td class="border dark:border-slate-500">
+                {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
+              </td>
+              <td class="border dark:border-slate-500">
+                {{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}
+              </td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
   </Card>
