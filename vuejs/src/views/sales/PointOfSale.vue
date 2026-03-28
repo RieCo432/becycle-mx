@@ -28,6 +28,23 @@ export default {
     const currentSale = ref(null);
     const openSales = ref([]);
 
+    const activeUsers = ref([]);
+    const catalogueItems = ref([]);
+    const showItems = ref(false);
+    const showBikes = ref(false);
+    const showUsed = ref(null);
+    const showQuantityModal = ref(false);
+    const showEditQuantityModal = ref(false);
+    const selectedItem = ref(null);
+    const quantity = ref(0);
+    const editSalePriceActive = ref(false);
+    const newSalePrice = ref(0);
+    const selectedBike = ref(null);
+    const showNewBikeSalePriceModal = ref(false);
+    const isCheckout = ref(false);
+    const userSelectionOptionsStatic = ref(false);
+    const browseSales = ref(false);
+
     const saleCheckoutSchema = yup.object().shape({
       hasCatalogueItemSaleLines: yup.boolean(),
       catalogueItemRevenueAccount: yup.object().when('hasCatalogueItemSaleLines', {
@@ -114,6 +131,24 @@ export default {
       {deep: true},
     );
 
+    function closeSale() {
+      currentSale.value = null;
+      showItems.value = false;
+      showBikes.value = false;
+      showUsed.value = null;
+      showQuantityModal.value = false;
+      showEditQuantityModal.value = false;
+      selectedItem.value = null;
+      quantity.value = 0;
+      editSalePriceActive.value = false;
+      newSalePrice.value = 0;
+      selectedBike.value = null;
+      showNewBikeSalePriceModal.value = false;
+      isCheckout.value = false;
+      userSelectionOptionsStatic.value = false;
+      browseSales.value = false;
+    }
+
     const submitSaleCheckout = handleSubmit(() => {
       const catalogueItemTotalSalePrice = currentSale.value
         .catalogueItemSaleLines
@@ -167,7 +202,8 @@ export default {
             response.data.id)
             .then((response) => {
               toast.success('Sale completed!', {timeout: 2000});
-              currentSale.value = null;
+              closeSale();
+              getSales();
             });
         })
         .catch((error) => {
@@ -202,26 +238,23 @@ export default {
       resetCheckoutForm,
       getSales,
       openSales,
-    };
-  },
-  data() {
-    return {
-      catalogueItems: [],
-      showItems: false,
-      showBikes: false,
-      showUsed: null,
-      showQuantityModal: false,
-      showEditQuantityModal: false,
-      selectedItem: null,
-      quantity: 0,
-      editSalePriceActive: false,
-      newSalePrice: 0,
-      selectedBike: null,
-      showNewBikeSalePriceModal: false,
-      isCheckout: false,
-      activeUsers: [],
-      userSelectionOptionsStatic: false,
-      browseSales: false,
+      activeUsers,
+      catalogueItems,
+      showItems,
+      showBikes,
+      showUsed,
+      showQuantityModal,
+      showEditQuantityModal,
+      selectedItem,
+      quantity,
+      editSalePriceActive,
+      newSalePrice,
+      selectedBike,
+      showNewBikeSalePriceModal,
+      isCheckout,
+      userSelectionOptionsStatic,
+      browseSales,
+      closeSale,
     };
   },
   created() {
@@ -486,23 +519,6 @@ export default {
         this.paymentAssetAccount = this.filtered_payment_asset_account_suggestions[i];
         this.userSelectionOptionsStatic = false;
       }
-    },
-    closeSale() {
-      this.currentSale = null;
-      this.showItems = false;
-      this.showBikes = false;
-      this.showUsed = null;
-      this.showQuantityModal = false;
-      this.showEditQuantityModal = false;
-      this.selectedItem = null;
-      this.quantity = 0;
-      this.editSalePriceActive = false;
-      this.newSalePrice = 0;
-      this.selectedBike = null;
-      this.showNewBikeSalePriceModal = false;
-      this.isCheckout = false;
-      this.userSelectionOptionsStatic = false;
-      this.browseSales = false;
     },
     deleteSale(saleHeaderId) {
       requests.deleteSale(saleHeaderId)
