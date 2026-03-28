@@ -462,6 +462,18 @@ export default {
       this.selectedBike = null;
       this.newSalePrice = 0;
     },
+    deleteSale(saleHeaderId) {
+      requests.deleteSale(saleHeaderId).then(() => {
+        toast.success('Sale deleted!', {timeout: 2000});
+        const saleIndex = this.openSales.findIndex((sale) => sale.id === saleHeaderId);
+        this.openSales.splice(saleIndex, 1);
+        if (this.openSales.length === 0) {
+          this.browseSales = false;
+        }
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+    },
   },
   computed: {
     totalSalePrice() {
@@ -552,8 +564,10 @@ export default {
                       <div class="col-span-1">
                         <Button text="Continue Sale" class="w-full" @click="continueSale(sale.id)"></Button>
                       </div>
+                      <div class="col-span-1">
+                        <Button text="Delete Sale" class="w-full" btn-class="bg-danger-500 text-white" @click="deleteSale(sale.id)"></Button>
+                      </div>
                     </div>
-                    
                   </template>
                 </SaleSummaryCard>
               </div>
