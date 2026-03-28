@@ -1,7 +1,6 @@
 <script>
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
-import Card from '@/components/Card/index.vue';
 import Button from '@/components/Button/index.vue';
 import CatalogueItemCard from '@/components/Card/CatalogueItemCard.vue';
 import TextInput from '@/components/TextInput/index.vue';
@@ -21,7 +20,7 @@ export default {
   components: {
     SaleSummaryCard,
     ComboboxTextInput,
-    BikeOverviewCard, BikeCatalogue, Icon, Modal, TextInput, CatalogueItemCard, Card, Button,
+    BikeOverviewCard, BikeCatalogue, Icon, Modal, TextInput, CatalogueItemCard, Button,
   },
   setup(props, context) {
     const revenueAccounts = ref([]);
@@ -72,18 +71,36 @@ export default {
       value: catalogueItemRevenueAccount,
       errorMessage: catalogueItemRevenueAccountError,
     } = useField('catalogueItemRevenueAccount');
-    const {value: hasBikeSaleLines, errorMessage: hasBikeSaleLinesError} = useField('hasBikeSaleLines');
-    const {value: bikeRevenueAccount, errorMessage: bikeRevenueAccountError} = useField('bikeRevenueAccount');
-    const {value: paymentAssetAccount, errorMessage: paymentAssetAccountError} = useField('paymentAssetAccount');
-    const {value: username, errorMessage: usernameError} = useField('username');
-    const {value: password, errorMessage: passwordError, setErrors: passwordSetErrors} = useField('password');
+    const {
+      value: hasBikeSaleLines,
+      errorMessage: hasBikeSaleLinesError,
+    } = useField('hasBikeSaleLines');
+    const {
+      value: bikeRevenueAccount,
+      errorMessage: bikeRevenueAccountError,
+    } = useField('bikeRevenueAccount');
+    const {
+      value: paymentAssetAccount,
+      errorMessage: paymentAssetAccountError,
+    } = useField('paymentAssetAccount');
+    const {
+      value: username,
+      errorMessage: usernameError,
+    } = useField('username');
+    const {
+      value: password,
+      errorMessage: passwordError,
+      setErrors: passwordSetErrors,
+    } = useField('password');
 
     function getSales() {
-      requests.getSales(true, false).then((response) => {
-        openSales.value = response.data;
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      requests.getSales(true, false)
+        .then((response) => {
+          openSales.value = response.data;
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     }
 
     watch(
@@ -116,7 +133,10 @@ export default {
           event: 'sale',
         },
         transactionLines: [
-          {amount: totalSalePrice, accountId: paymentAssetAccount.value.id},
+          {
+            amount: totalSalePrice,
+            accountId: paymentAssetAccount.value.id,
+          },
           ...(hasCatalogueItemSaleLines.value ?
             [{
               amount: -catalogueItemTotalSalePrice,
@@ -132,29 +152,32 @@ export default {
         ],
         attemptAutoPost: true,
       };
-      
+
       const transactionAuthDetails = [{
         username: username.value,
         password: password.value,
       }];
 
-      requests.createTransaction(saleTransactionsHeaderDraft, transactionAuthDetails).then((response) => {
-        toast.success('Transaction created', {timeout: 2000});
+      requests.createTransaction(saleTransactionsHeaderDraft, transactionAuthDetails)
+        .then((response) => {
+          toast.success('Transaction created', {timeout: 2000});
 
-        requests.patchSalePayment(
-          currentSale.value.id,
-          response.data.id).then((response) => {
-          toast.success('Sale completed!', {timeout: 2000});
-          currentSale.value = null;
-        });
-      }).catch((error) => {
-        if (
-          error.response.status === 400 &&
+          requests.patchSalePayment(
+            currentSale.value.id,
+            response.data.id)
+            .then((response) => {
+              toast.success('Sale completed!', {timeout: 2000});
+              currentSale.value = null;
+            });
+        })
+        .catch((error) => {
+          if (
+            error.response.status === 400 &&
           (error.response.data.detail.username ?? '') === username.value) {
-          passwordSetErrors('Wrong Password!');
-        }
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+            passwordSetErrors('Wrong Password!');
+          }
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     });
 
     return {
@@ -205,38 +228,45 @@ export default {
   },
   created() {
     this.getSales();
-    requests.getItemCatalogue(false).then((response) => {
-      this.catalogueItems = response.data;
-    }).catch((error) => {
-      toast.error(error.response.data.detail.description, {timeout: 2000});
-    });
+    requests.getItemCatalogue(false)
+      .then((response) => {
+        this.catalogueItems = response.data;
+      })
+      .catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     requests.getAccounts([
       {name: 'for_user', value: true},
       {name: 'type', value: 'revenue'},
       {name: 'type', value: 'asset'},
       {name: 'ui_filters', value: 'sale'},
-    ]).then((response) => {
-      this.revenueAccounts = response.data.filter((account) => account.type === 'revenue');
-      this.assetAccounts = response.data.filter((account) => account.type === 'asset');
-    }).catch((error) => {
-      toast.error(error.response.data.detail.description, {timeout: 2000});
-    });
+    ])
+      .then((response) => {
+        this.revenueAccounts = response.data.filter((account) => account.type === 'revenue');
+        this.assetAccounts = response.data.filter((account) => account.type === 'asset');
+      })
+      .catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
 
-    requests.getActiveUsers().then((response) => {
-      this.activeUsers = response.data.map((user) => user.username);
-    }).catch((error) => {
-      toast.error(error.response.data.detail.description, {timeout: 2000});
-    });
+    requests.getActiveUsers()
+      .then((response) => {
+        this.activeUsers = response.data.map((user) => user.username);
+      })
+      .catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
   },
   methods: {
     startNewSale() {
-      requests.postNewSale().then((response) => {
-        this.currentSale = response.data;
-        this.openSales.push(this.currentSale);
-        toast.success('Sale Started!', {timeout: 2000});
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      requests.postNewSale()
+        .then((response) => {
+          this.currentSale = response.data;
+          this.openSales.push(this.currentSale);
+          toast.success('Sale Started!', {timeout: 2000});
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     },
     continueSale(saleId) {
       this.browseSales = false;
@@ -253,12 +283,14 @@ export default {
           quantity: this.quantity,
           salePrice: this.selectedItem.recommendedRetailPrice * this.quantity,
         };
-        requests.postCatalogueItemSaleLine(catalogueItemSaleLine).then((response) => {
-          toast.success('Item added to sale!', {timeout: 2000});
-          this.currentSale.catalogueItemSaleLines.push(response.data);
-        }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-        });
+        requests.postCatalogueItemSaleLine(catalogueItemSaleLine)
+          .then((response) => {
+            toast.success('Item added to sale!', {timeout: 2000});
+            this.currentSale.catalogueItemSaleLines.push(response.data);
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+          });
       } else {
         this.quantity += sameItemInSale.quantity;
         this.updateItemQuantity();
@@ -284,13 +316,15 @@ export default {
       this.quantity = 0;
     },
     removeCatalogueItemSaleLine(catalogueItemSaleLineId) {
-      requests.deleteCatalogueItemSaleLine(catalogueItemSaleLineId).then(() => {
-        this.currentSale.catalogueItemSaleLines = this.currentSale.catalogueItemSaleLines
-          .filter((line) => line.id !== catalogueItemSaleLineId);
-        toast.success('Item removed from sale!', {timeout: 2000});
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      requests.deleteCatalogueItemSaleLine(catalogueItemSaleLineId)
+        .then(() => {
+          this.currentSale.catalogueItemSaleLines =
+            this.currentSale.catalogueItemSaleLines.filter((line) => line.id !== catalogueItemSaleLineId);
+          toast.success('Item removed from sale!', {timeout: 2000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     },
     updateItemQuantity() {
       const catalogueItemSaleLine = this.currentSale.catalogueItemSaleLines
@@ -298,14 +332,16 @@ export default {
       requests.putUpdateCatalogueItemSaleLine(catalogueItemSaleLine.id, {
         quantity: this.quantity,
         salePrice: this.selectedItem.recommendedRetailPrice * this.quantity,
-      }).then((result) => {
-        const indexInArr = this.currentSale.catalogueItemSaleLines
-          .findIndex((line) => line.id === catalogueItemSaleLine.id);
-        this.currentSale.catalogueItemSaleLines.splice(indexInArr, 1, result.data);
-        toast.success('Item quantity updated!', {timeout: 2000});
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      })
+        .then((result) => {
+          const indexInArr = this.currentSale.catalogueItemSaleLines
+            .findIndex((line) => line.id === catalogueItemSaleLine.id);
+          this.currentSale.catalogueItemSaleLines.splice(indexInArr, 1, result.data);
+          toast.success('Item quantity updated!', {timeout: 2000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
       this.closeEditQuantityModal();
     },
     openEditQuantityModal(lineId) {
@@ -329,7 +365,8 @@ export default {
         quantity: line.quantity,
         salePrice: this.newSalePrice * 100,
       }).then((response) => {
-        const indexInArr = this.currentSale.catalogueItemSaleLines.findIndex((line) => line.id === response.data.id);
+        const indexInArr = this.currentSale.catalogueItemSaleLines
+          .findIndex((line) => line.id === response.data.id);
         this.currentSale.catalogueItemSaleLines.splice(indexInArr, 1, response.data);
         toast.success('Sale price updated!', {timeout: 2000});
       }).catch((error) => {
@@ -345,30 +382,33 @@ export default {
           bikeId: bike.id,
           salePrice: bike.roughValue ? bike.roughValue : 0,
         };
-        requests.postBikeSaleLine(bikeSaleLine).then((response) => {
-          this.currentSale.bikeSaleLines.push(response.data);
-          toast.success('Bike added to sale!', {timeout: 2000});
-          if (!bike.roughValue) {
-            toast.warning('Bike rough value not set, please set it!', {timeout: 2000});
-            this.selectedBike = response.data.bike;
-            this.newSalePrice = 0;
-            this.showNewBikeSalePriceModal = true;
-          }
-        }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-        });
+        requests.postBikeSaleLine(bikeSaleLine)
+          .then((response) => {
+            this.currentSale.bikeSaleLines.push(response.data);
+            toast.success('Bike added to sale!', {timeout: 2000});
+            if (!bike.roughValue) {
+              toast.warning('Bike rough value not set, please set it!', {timeout: 2000});
+              this.selectedBike = response.data.bike;
+              this.newSalePrice = 0;
+              this.showNewBikeSalePriceModal = true;
+            }
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+          });
       } else {
         toast.error('Bike already in sale!', {timeout: 2000});
       }
-      ;
     },
     removeBikeSaleLine(bikeSaleLineId) {
-      requests.deleteBikeSaleLine(bikeSaleLineId).then(() => {
-        this.currentSale.bikeSaleLines = this.currentSale.bikeSaleLines.filter((line) => line.id !== bikeSaleLineId);
-        toast.success('Bike removed from sale!', {timeout: 2000});
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      requests.deleteBikeSaleLine(bikeSaleLineId)
+        .then(() => {
+          this.currentSale.bikeSaleLines = this.currentSale.bikeSaleLines.filter((line) => line.id !== bikeSaleLineId);
+          toast.success('Bike removed from sale!', {timeout: 2000});
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     },
     editBikeSalePrice(bikeSaleLineId) {
       const bikeSaleLine = this.currentSale.bikeSaleLines.find((line) => line.id === bikeSaleLineId);
@@ -463,16 +503,18 @@ export default {
       this.newSalePrice = 0;
     },
     deleteSale(saleHeaderId) {
-      requests.deleteSale(saleHeaderId).then(() => {
-        toast.success('Sale deleted!', {timeout: 2000});
-        const saleIndex = this.openSales.findIndex((sale) => sale.id === saleHeaderId);
-        this.openSales.splice(saleIndex, 1);
-        if (this.openSales.length === 0) {
-          this.browseSales = false;
-        }
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
+      requests.deleteSale(saleHeaderId)
+        .then(() => {
+          toast.success('Sale deleted!', {timeout: 2000});
+          const saleIndex = this.openSales.findIndex((sale) => sale.id === saleHeaderId);
+          this.openSales.splice(saleIndex, 1);
+          if (this.openSales.length === 0) {
+            this.browseSales = false;
+          }
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     },
   },
   computed: {
@@ -533,39 +575,54 @@ export default {
 </script>
 
 <template>
-
   <div class="flex flex-col fill-page">
-    <div class="flex-1 flex flex-col h-full rounded-md card bg-white dark:bg-slate-800 border border-gray-5002 dark:border-slate-700">
-      <div
-        class="p-2 border-b border-gray-5002 dark:border-slate-700">
-        <span class="text-4xl dark:text-slate-300 text-slate-800 align-middle">Point of Sale</span>
+    <div
+      class="flex-1 flex flex-col h-full rounded-md card
+           bg-white dark:bg-slate-800 border border-gray-5002 dark:border-slate-700">
+      <div class="p-2 border-b border-gray-5002 dark:border-slate-700">
+        <span class="text-4xl dark:text-slate-300 text-slate-800 align-middle">
+          Point of Sale
+        </span>
       </div>
       <div class="flex-grow flex flex-col p-2">
         <template v-if="currentSale === null">
           <template v-if="!browseSales">
             <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-full">
               <div class="col-span-1 h-full">
-                <Button class="w-full h-full dark:bg-slate-900 bg-slate-400 text-6xl" text="New Sale" @click="startNewSale"/>
+                <Button class="w-full h-full dark:bg-slate-900 bg-slate-400 text-6xl"
+                        text="New Sale"
+                        @click="startNewSale"/>
               </div>
               <div class="col-span-1 h-full">
-                <Button class="w-full h-full dark:bg-slate-900 bg-slate-400 text-6xl" text="Browse Sales" @click="browseSales = true"/>
+                <Button class="w-full h-full dark:bg-slate-900 bg-slate-400 text-6xl"
+                        text="Browse Sales"
+                        @click="browseSales = true"/>
               </div>
             </div>
           </template>
           <template v-else>
             <div class="grid grid-cols-12 gap-5">
               <div class="col-span-full">
-                <Button class="w-full dark:bg-slate-900 bg-slate-400" text="Back" @click="() => {browseSales = false; currentSale = null}"/>
+                <Button class="w-full dark:bg-slate-900 bg-slate-400"
+                        text="Back"
+                        @click="() => {browseSales = false; currentSale = null}"/>
               </div>
-              <div class="col-span-12" v-for="sale in openSales" :key="sale.id">
+              <div class="col-span-12"
+                   v-for="sale in openSales"
+                   :key="sale.id">
                 <SaleSummaryCard :sale-header="sale">
                   <template v-slot:footer>
                     <div class="grid grid-cols-2 gap-2">
                       <div class="col-span-1">
-                        <Button text="Continue Sale" class="w-full" @click="continueSale(sale.id)"></Button>
+                        <Button text="Continue Sale"
+                                class="w-full"
+                                @click="continueSale(sale.id)"/>
                       </div>
                       <div class="col-span-1">
-                        <Button text="Delete Sale" class="w-full" btn-class="bg-danger-500 text-white" @click="deleteSale(sale.id)"></Button>
+                        <Button text="Delete Sale"
+                                class="w-full"
+                                btn-class="bg-danger-500 text-white"
+                                @click="deleteSale(sale.id)"/>
                       </div>
                     </div>
                   </template>
@@ -577,22 +634,27 @@ export default {
         <template v-else>
           <div class="grid grid-cols-12 gap-5">
             <div class="col-span-12">
-              <Button class="w-full dark:bg-slate-900 bg-slate-400" text="Close Sale" @click="closeSale"/>
+              <Button class="w-full dark:bg-slate-900 bg-slate-400"
+                      text="Close Sale"
+                      @click="closeSale"/>
             </div>
             <div class="col-span-12">
             <span
               class="text-2xl lg:text-4xl text-slate-800 dark:text-slate-300">
               Sale created by
-              {{currentSale.createdByUser.username}}
+              {{ currentSale.createdByUser.username }}
               on
-              {{ new Date(Date.parse(currentSale.createdOn))
-              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+              {{
+                new Date(Date.parse(currentSale.createdOn))
+                  .toLocaleDateString(undefined, {weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})
+              }}
             </span>
             </div>
             <div class="col-span-full 2xl:col-span-8">
               <template v-if="!isCheckout">
                 <template v-if="showItems">
-                  <div v-if="showUsed === null" class="grid grid-cols-2 gap-5">
+                  <div v-if="showUsed === null"
+                       class="grid grid-cols-2 gap-5">
                     <div class="col-span-full">
                       <Button
                         text="Back"
@@ -612,9 +674,12 @@ export default {
                         class="w-full h-full text-6xl dark:bg-slate-900 bg-slate-400 aspect-square"/>
                     </div>
                   </div>
-                  <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-5">
+                  <div v-else
+                       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-5">
                     <div class="col-span-full">
-                      <Button text="Back" @click="showUsed = null" class="w-full dark:bg-slate-900 bg-slate-400"/>
+                      <Button text="Back"
+                              @click="showUsed = null"
+                              class="w-full dark:bg-slate-900 bg-slate-400"/>
                     </div>
                     <div
                       v-for="item in catalogueItems.filter((item) => item.isSecondHand === showUsed)"
@@ -625,9 +690,10 @@ export default {
                     </div>
                   </div>
                 </template>
-
                 <template v-else-if="showBikes">
-                  <Button text="Back" @click="() => {showBikes = null; showItems = null}" class="w-full dark:bg-slate-900 bg-slate-400"/>
+                  <Button text="Back"
+                          @click="() => {showBikes = null; showItems = null}"
+                          class="w-full dark:bg-slate-900 bg-slate-400"/>
                   <BikeCatalogue
                     class="mt-3"
                     outer-grid-col-classes="grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"
@@ -636,22 +702,25 @@ export default {
                     :include-rental="false"
                   >
                     <template v-slot:specialAction="props">
-                      <Button class="col" @click="addBikeToSale(props.bike)">Add To Sale</Button>
+                      <Button class="col"
+                              text="Add to Sale"
+                              @click="addBikeToSale(props.bike)"/>
                     </template>
                   </BikeCatalogue>
                 </template>
-
                 <template v-else>
                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                     <div class="col-span-1 row-span-5">
                       <Button
-                        class="w-full h-full text-2xl lg:text-6xl aspect-[1.5] 2xl:aspect-square dark:bg-slate-900 bg-slate-400 text-wrap"
+                        class="w-full h-full text-2xl lg:text-6xl aspect-[1.5] 2xl:aspect-square
+                             dark:bg-slate-900 bg-slate-400 text-wrap"
                         text="Add Catalogue Item"
                         @click="() => showItems = true"/>
                     </div>
                     <div class="col-span-1 row-span-5">
                       <Button
-                        class="w-full h-full text-2xl lg:text-6xl aspect-[1.5] 2xl:aspect-square dark:bg-slate-900 bg-slate-400 text-wrap"
+                        class="w-full h-full text-2xl lg:text-6xl aspect-[1.5] 2xl:aspect-square
+                             dark:bg-slate-900 bg-slate-400 text-wrap"
                         text="Add Bike"
                         @click="() => showBikes = true"/>
                     </div>
@@ -751,21 +820,35 @@ export default {
               :class="isCheckout ? 'row-start-2 2xl:row-start-auto' : ''">
               <div class="flex flex-col">
                 <div class="w-full flex-shrink">
-                  <div class="grid grid-cols-12 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                    <div class="col-span-full text-center"><h4>Basket</h4></div>
+                  <div
+                    class="grid grid-cols-12 gap-2 divide-x divide-y
+                         dark:text-slate-300 text-slate-700 align-middle">
+                    <div class="col-span-full text-center">
+                      <h4>Basket</h4>
+                    </div>
                     <template v-if="currentSale.catalogueItemSaleLines.length + currentSale.bikeSaleLines.length > 0">
                       <div class="col-span-1"></div>
-                      <div class="col-span-4 text-left"><h6>Item</h6></div>
-                      <div class="col-span-2 text-right"><h6>Qty</h6></div>
-                      <div class="col-span-3 text-right"><h6>Price</h6></div>
-                      <div class="col-span-2"></div>
+                      <div class="col-span-4 text-left">
+                        <h6>Item</h6>
+                      </div>
+                      <div class="col-span-2 text-right">
+                        <h6>Qty</h6>
+                      </div>
+                      <div class="col-span-3 text-right">
+                        <h6>Price</h6>
+                      </div>
+                      <div class="col-span-2"/>
                     </template>
-                    <div v-if="currentSale.catalogueItemSaleLines.length > 0" class="col-span-full">
+                    <div v-if="currentSale.catalogueItemSaleLines.length > 0"
+                         class="col-span-full">
                       <h6>Catalogue Items</h6>
                     </div>
-                    <template v-for="line in currentSale.catalogueItemSaleLines" :key="line.id">
-                      <div class="col-span-1"></div>
-                      <div class="col-span-4"><span>{{ line.catalogueItem.name }}</span></div>
+                    <template v-for="line in currentSale.catalogueItemSaleLines"
+                              :key="line.id">
+                      <div class="col-span-1"/>
+                      <div class="col-span-4">
+                        <span>{{ line.catalogueItem.name }}</span>
+                      </div>
                       <div class="col-span-2 text-right">
                         <span class="inline align-bottom mb-0">{{ line.quantity }}</span>
                         <Icon
@@ -774,7 +857,10 @@ export default {
                           @click="openEditQuantityModal(line.id)"/>
                       </div>
                       <div class="col-span-3 text-right">
-                        <template v-if="editSalePriceActive && selectedItem && line.catalogueItem.id === selectedItem.id">
+                        <template
+                          v-if="editSalePriceActive &&
+                                selectedItem &&
+                                line.catalogueItem.id === selectedItem.id">
                           <Icon
                             class="lg:inline align-middle hidden"
                             icon="heroicons-outline:check"
@@ -784,14 +870,14 @@ export default {
                             icon="heroicons-outline:x"
                             @click="() => {editSalePriceActive = false; selectedItem = null}"/>
                           <input
-                            class="inline align-bottom mb-0 w-[80%] lg:w-[50px] text-right input-control
-                        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none
-                        [&::-webkit-inner-spin-button]:appearance-none"
+                            class=" inline align-bottom mb-0 w-[80%] lg:w-[50px] text-right input-control
+                                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none
+                                    [&::-webkit-inner-spin-button]:appearance-none"
                             type="number"
                             v-model="newSalePrice"
                             :placeholder="(line.catalogueItem.recommendedRetailPrice / 100 * line.quantity).toFixed(2)"
                             @keydown.enter.prevent="setNewItemSalePrice"
-                            @keydown.esc.prevent ="() => {editSalePriceActive = false; selectedItem = null}"/>
+                            @keydown.esc.prevent="() => {editSalePriceActive = false; selectedItem = null}"/>
 
                         </template>
                         <template v-else>
@@ -803,18 +889,27 @@ export default {
                         </template>
                       </div>
                       <div class="col-span-2 justify-items-center">
-                        <Icon icon="heroicons-outline:trash" @click="removeCatalogueItemSaleLine(line.id)"/>
+                        <Icon icon="heroicons-outline:trash"
+                              @click="removeCatalogueItemSaleLine(line.id)"/>
                       </div>
                     </template>
-                    <div v-if="currentSale.bikeSaleLines.length > 0" class="col-span-full"><h5>Bikes</h5></div>
-                    <template v-for="line in currentSale.bikeSaleLines" :key="line.id">
-                      <div class="col-span-1"></div>
+                    <div v-if="currentSale.bikeSaleLines.length > 0"
+                         class="col-span-full">
+                      <h5>Bikes</h5>
+                    </div>
+                    <template v-for="line in currentSale.bikeSaleLines"
+                              :key="line.id">
+                      <div class="col-span-1"/>
                       <div class="col-span-4">
                         <h6>{{ line.bike.make }} {{ line.bike.model }}</h6>
                       </div>
-                      <div class="col-span-2 text-right"><h6>-</h6></div>
+                      <div class="col-span-2 text-right">
+                        <h6>-</h6>
+                      </div>
                       <div class="col-span-3 text-right">
-                        <template v-if="editSalePriceActive && selectedBike && line.bike.id === selectedBike.id">
+                        <template v-if="editSalePriceActive &&
+                                        selectedBike &&
+                                        line.bike.id === selectedBike.id">
                           <Icon
                             class="inline align-middle"
                             icon="heroicons-outline:check"
@@ -824,16 +919,15 @@ export default {
                             icon="heroicons-outline:x"
                             @click="() => {editSalePriceActive = false; selectedBike = null}"/>
                           <input
-                            class="inline align-bottom mb-0 w-[50px] text-right input-control
-                        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none
-                        [&::-webkit-inner-spin-button]:appearance-none"
+                            class=" inline align-bottom mb-0 w-[50px] text-right input-control
+                                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none
+                                    [&::-webkit-inner-spin-button]:appearance-none"
                             type="number"
                             v-model="newSalePrice"
                             :placeholder="(line.bike.roughValue ? line.bike.roughValue / 100 : 100).toFixed(2)"
                             @keydown.esc.prevent="() => {editSalePriceActive = false; selectedBike = null}"
                             @keydown.enter.prevent="setNewBikeSalePrice"
                           />
-
                         </template>
                         <template v-else>
                           <h6 class="inline align-bottom mb-0">{{ (line.salePrice / 100).toFixed(2) }}</h6>
@@ -844,17 +938,28 @@ export default {
                         </template>
                       </div>
                       <div class="col-span-2 justify-items-center">
-                        <Icon icon="heroicons-outline:trash" @click="removeBikeSaleLine(line.id)"/>
+                        <Icon icon="heroicons-outline:trash"
+                              @click="removeBikeSaleLine(line.id)"/>
                       </div>
                     </template>
-                    <div class="col-span-full h-10"></div>
-                    <div class="col-span-6 text-center"><h5>Total</h5></div>
-                    <div class="col-span-2 text-right"><h5>{{ (totalSalePrice / 100).toFixed(2) }}</h5></div>
+                    <div class="col-span-full h-10"/>
+                    <div class="col-span-6 text-center">
+                      <h5>Total</h5>
+                    </div>
+                    <div class="col-span-2 text-right">
+                      <h5>{{ (totalSalePrice / 100).toFixed(2) }}</h5>
+                    </div>
                   </div>
                 </div>
                 <div class="w-full mt-5">
-                  <Button v-if="!isCheckout" class="w-full" text="Checkout" @click="checkoutSale"/>
-                  <Button v-if="isCheckout" class="w-full" text="Cancel Checkout" @click="cancelCheckout"/>
+                  <Button v-if="!isCheckout"
+                          class="w-full"
+                          text="Checkout"
+                          @click="checkoutSale"/>
+                  <Button v-if="isCheckout"
+                          class="w-full"
+                          text="Cancel Checkout"
+                          @click="cancelCheckout"/>
                 </div>
               </div>
             </div>
@@ -883,22 +988,33 @@ export default {
             </div>
 
             <div class="col-span-1">
-              <Button text="Clear" @click="() => quantity = 0" class="w-full"/>
+              <Button text="Clear"
+                      @click="() => quantity = 0"
+                      class="w-full"/>
             </div>
             <div class="col-span-1">
-              <Button text="-" @click="() => quantity > 0 ? quantity-- : 0" class="w-full"/>
+              <Button text="-"
+                      @click="() => quantity > 0 ? quantity-- : 0"
+                      class="w-full"/>
             </div>
             <div class="col-span-1">
-              <Button text="+" @click="() => quantity++" class="w-full"/>
+              <Button text="+"
+                      @click="() => quantity++"
+                      class="w-full"/>
             </div>
-            <div class="col-span-1" v-for="qty in [1, 2, 3, 4, 5, 6, 7, 8, 9]" :key="qty">
-              <Button :text="qty.toString()" @click="() => quantity = qty" class="w-full"/>
+            <div class="col-span-1"
+                 v-for="qty in [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+                 :key="qty">
+              <Button :text="qty.toString()"
+                      @click="() => quantity = qty"
+                      class="w-full"/>
             </div>
           </div>
         </div>
         <div class="col-span-full">
-          <Button text="Add" @click="addItemToSale" class="w-full"/>
-
+          <Button text="Add"
+                  @click="addItemToSale"
+                  class="w-full"/>
         </div>
       </div>
     </Modal>
@@ -923,21 +1039,34 @@ export default {
             </div>
 
             <div class="col-span-1">
-              <Button text="Clear" @click="() => quantity = 0" class="w-full"/>
+              <Button text="Clear"
+                      @click="() => quantity = 0"
+                      class="w-full"/>
             </div>
             <div class="col-span-1">
-              <Button text="-" @click="() => quantity > 0 ? quantity-- : 0" class="w-full"/>
+              <Button text="-"
+                      @click="() => quantity > 0 ? quantity-- : 0"
+                      class="w-full"/>
             </div>
             <div class="col-span-1">
-              <Button text="+" @click="() => quantity++" class="w-full"/>
+              <Button text="+"
+                      @click="() => quantity++"
+                      class="w-full"/>
             </div>
-            <div class="col-span-1" v-for="qty in [1, 2, 3, 4, 5, 6, 7, 8, 9]" :key="qty">
-              <Button :text="qty.toString()" @click="() => quantity = qty" class="w-full"/>
+            <div class="col-span-1"
+                 v-for="qty in [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+                 :key="qty">
+              <Button
+                :text="qty.toString()"
+                @click="() => quantity = qty"
+                class="w-full"/>
             </div>
           </div>
         </div>
         <div class="col-span-full">
-          <Button text="Update" @click="updateItemQuantity" class="w-full"/>
+          <Button text="Update"
+                  @click="updateItemQuantity"
+                  class="w-full"/>
         </div>
       </div>
     </Modal>
@@ -959,7 +1088,9 @@ export default {
           ></TextInput>
         </div>
         <div class="col-span-2">
-          <Button text="Add" @click="setNewBikeSalePrice" class="w-full"/>
+          <Button text="Add"
+                  @click="setNewBikeSalePrice"
+                  class="w-full"/>
         </div>
       </div>
     </Modal>
