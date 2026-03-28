@@ -13,11 +13,13 @@ import {ref, watch} from 'vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
+import SaleSummaryCard from '@/components/Card/SaleSummaryCard.vue';
 
 const toast = useToast();
 export default {
   name: 'PointOfSale',
   components: {
+    SaleSummaryCard,
     ComboboxTextInput,
     BikeOverviewCard, BikeCatalogue, Icon, Modal, TextInput, CatalogueItemCard, Card, Button,
   },
@@ -543,9 +545,17 @@ export default {
               <div class="col-span-full">
                 <Button class="w-full dark:bg-slate-900 bg-slate-400" text="Back" @click="() => {browseSales = false; currentSale = null}"/>
               </div>
-              <div class="col-span-4" v-for="sale in openSales" :key="sale.id">
-                {{ sale }}
-                <Button text="Continue Sale" @click="continueSale(sale.id)"></Button>
+              <div class="col-span-12" v-for="sale in openSales" :key="sale.id">
+                <SaleSummaryCard :sale-header="sale">
+                  <template v-slot:footer>
+                    <div class="grid grid-cols-2 gap-2">
+                      <div class="col-span-1">
+                        <Button text="Continue Sale" class="w-full" @click="continueSale(sale.id)"></Button>
+                      </div>
+                    </div>
+                    
+                  </template>
+                </SaleSummaryCard>
               </div>
             </div>
           </template>
