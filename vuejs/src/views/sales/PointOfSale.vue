@@ -335,11 +335,11 @@ export default {
       this.showQuantityModal = true;
     },
     closeQuantityModal() {
-      if (this.quantity > 0) {
+      if (this.quantity === 0) {
         this.showQuantityModal = false;
         this.selectedItem = null;
+        this.quantity = 0;
       }
-      this.quantity = 0;
     },
     closeEditQuantityModal() {
       this.showEditQuantityModal = false;
