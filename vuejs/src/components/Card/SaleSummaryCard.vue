@@ -31,7 +31,10 @@ export default {
 
 <template>
   <Card
-      :title="`${saleHeader.transactionHeader?.postedByUser.username} @ ${new Date(Date.parse(saleHeader.transactionHeader.postedOn))
+      :title="saleHeader.transactionHeaderId ?
+      `Closed By ${saleHeader.transactionHeader?.postedByUser.username} @ ${new Date(Date.parse(saleHeader.transactionHeader.postedOn))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}` :
+              `Started By ${saleHeader.createdByUser.username} @ ${new Date(Date.parse(saleHeader.createdOn))
               .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}`"
       class-name="border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full">
     <div class="grid h-full gap-5" :class="saleHeader.transactionHeaderId == null ? 'grid-cols-2' : 'grid-cols-3'">
@@ -144,6 +147,9 @@ export default {
             </tr>
           </table>
         </div>
+      </div>
+      <div class="col-span-full">
+        <slot name="footer"/>
       </div>
     </div>
   </Card>
