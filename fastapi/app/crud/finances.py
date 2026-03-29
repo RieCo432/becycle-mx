@@ -108,7 +108,7 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
 
 def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) -> schemas.DepositAccountBalances:
     deposit_transaction_dates = [_ for _ in db.scalars(select(models.TransactionHeader.postedOn.cast(Date).distinct())
-                                                 .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged']))
+                                                 .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost']))
                                                  .order_by(models.TransactionHeader.postedOn.cast(Date)))]
 
 
@@ -118,7 +118,7 @@ def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) 
     
     for deposit_transaction_date in deposit_transaction_dates:
         deposit_transactions_on_this_date = [_ for _ in db.scalars(select(models.TransactionHeader)
-                                                 .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged'])
+                                                 .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost'])
                                                         & (models.TransactionHeader.postedOn.cast(Date) == deposit_transaction_date)))]
 
 
@@ -135,14 +135,24 @@ def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) 
             
             deposit_account_day_balances.transactions.append(schemas.DepositAccountTransaction(
                 details=schemas.DepositTransactionDetails(
-                    title = f"{contract.client.firstName} {contract.client.lastName}" if contract is not None else "Deposit Exchange",
+                    title = f"{contract.client.firstName} {contract.client.lastName}" if contract is not None else deposit_transaction.event,
                     contractId = contract.id if contract is not None else None,
                 ),
                 event=deposit_transaction.event,
                 diff_by_account={line.account.name: line.amount for line in deposit_transaction.transactionLines if not only_asset_accounts or line.account.type == AccountTypes.ASSET}
             ))
             
-            deposit_account_day_balances.balances = {account_name: sum([deposit_account_day_balances.diff.get(account_name, 0) + deposit_account_day_balances_before_this_day.get(account_name, 0)]) for account_name in set(list(deposit_account_day_balances_before_this_day.keys()) + list(deposit_account_day_balances.diff.keys()))}
+            deposit_account_day_balances.balances = {
+                account_name: sum([
+                    deposit_account_day_balances.diff.get(account_name, 0) + 
+                    deposit_account_day_balances_before_this_day.get(account_name, 0)
+                ]) for account_name in set(
+                    list(deposit_account_day_balances_before_this_day.keys()) + 
+                    list(deposit_account_day_balances.diff.keys())
+                ) if not (
+                        deposit_account_day_balances.diff.get(account_name, 0) == 0 and 
+                        deposit_account_day_balances_before_this_day.get(account_name, 0) == 0
+                )}
             
         deposit_account_day_balances_before_this_day = deposit_account_day_balances.balances
         deposit_balances.dayBalances[deposit_transaction_date] = deposit_account_day_balances
