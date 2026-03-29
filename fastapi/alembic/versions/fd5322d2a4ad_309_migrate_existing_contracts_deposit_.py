@@ -110,7 +110,7 @@ def upgrade() -> None:
             deposit_returner_account_search = db.execute(text(f"SELECT id FROM accounts where owneruserid='{deposit_returning_user_id}' AND type='asset' AND name LIKE '%deposit%';"))
 
             if deposit_returner_account_search.rowcount == 0:
-                username = db.execute(text(f"SELECT username FROM users where id='{deposit_returning_user_id}';"))
+                username = db.execute(text(f"SELECT username FROM users where id='{deposit_returning_user_id}';")).first()[0]
                 db.execute(text(f"INSERT INTO accounts "
                                 f"(name, owneruserid, type, isinternal, description) "
                                 f"VALUES "
