@@ -52,10 +52,10 @@ def upgrade() -> None:
     db.execute(text(f"INSERT INTO accounts "
                     f"(name, type, description, ownergroupid, isinternal) "
                     f"VALUES "
-                    f"('forfeited deposit income', 'revenue', 'This is where forfeited deposits are recorded', '{deposit_bearer_group_id}', true);"))
+                    f"('retained deposits income pre-migration', 'revenue', 'This is where the retained portion of partial deposit refunds are recorded', '{deposit_bearer_group_id}', true);"))
 
 
-    deposit_forfeit_revenue_account_id = db.execute(text("SELECT ID FROM accounts where name = 'forfeited deposit income';")).first()[0]
+    deposit_retained_revenue_account_id = db.execute(text("SELECT ID FROM accounts where name = 'retained deposits income pre-migration';")).first()[0]
 
     for contract in db.execute(text("SELECT "
                                 "id"
@@ -137,7 +137,7 @@ def upgrade() -> None:
             if deposit_amount_returned < deposit_amount_collected:
                 db.execute(text(f"INSERT INTO transactionlines (transactionheaderid, accountid, amount) "
                                 f"VALUES "
-                                f"('{deposit_settled_transaction_header_id}', '{deposit_forfeit_revenue_account_id}', {-((deposit_amount_collected - deposit_amount_returned) * 100)});"))
+                                f"('{deposit_settled_transaction_header_id}', '{deposit_retained_revenue_account_id}', {-((deposit_amount_collected - deposit_amount_returned) * 100)});"))
                 
             db.execute(text(f"UPDATE contracts SET depositsettledtransactionheaderid = '{deposit_settled_transaction_header_id}' WHERE id = '{contract_id}';"))
                 
