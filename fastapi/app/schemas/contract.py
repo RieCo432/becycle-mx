@@ -3,6 +3,7 @@ from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+from .transactions import TransactionHeader
 
 
 class CrimeReportBase(BaseModel):
@@ -23,11 +24,11 @@ class ContractBase(BaseModel):
     clientId: UUID
     bikeId: UUID
 
-    depositAmountCollected: int
-
     conditionOfBike: str
     contractType: str
     notes: str | None = None
+
+    depositTransactionHeaders: List[TransactionHeader] = []
 
 
 class ContractCreate(ContractBase):
@@ -52,10 +53,8 @@ class ContractPublic(ContractBase):
 class Contract(ContractPublic):
     workingUserId: UUID
     checkingUserId: UUID
-    depositCollectingUserId: UUID
 
     returnAcceptingUserId: UUID | None = None
-    depositReturningUserId: UUID | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -69,16 +68,16 @@ class ContractDraftDetails(BaseModel):
 class ContractRestricted(ContractPublic):
     workingUsername: str
     checkingUsername: str
-    depositCollectingUsername: str
-
     returnAcceptingUsername: str | None = None
-    depositReturningUsername: str | None = None
+    depositAmountCollected: int
+    depositAmountReturned: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class ContractPatch(BaseModel):
-    depositAmountCollected: int
+    # TODO: deposit information needs to use new model
+    #depositAmountCollected: int
     conditionOfBike: str
     notes: str | None = None
     contractType: str
@@ -86,9 +85,9 @@ class ContractPatch(BaseModel):
     endDate: date
     returnedDate: date | None = None
     returned: bool
-    depositAmountReturned: int | None = None
+    #depositAmountReturned: int | None = None
     workingUserId: UUID
     checkingUserId: UUID
-    depositCollectingUserId: UUID
+    #depositCollectingUserId: UUID
     returnAcceptingUserId: UUID | None = None
-    depositReturningUserId: UUID | None = None
+    #depositReturningUserId: UUID | None = None

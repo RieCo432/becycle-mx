@@ -3,6 +3,8 @@ import AdvancedTable from '@/components/Tables/AdvancedTable.vue';
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 
+// TODO: deposit amount calculations need updated
+
 export default {
   name: 'userLeaderboard',
   components: {Card, AdvancedTable},

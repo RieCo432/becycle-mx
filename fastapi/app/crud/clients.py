@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 import app.models as models
 import app.schemas as schemas
+from psycopg2.errors import UniqueViolation
 
 
 def get_all_clients(db: Session) -> list[schemas.Client]:
@@ -177,9 +178,19 @@ def update_client(db: Session, client_id: UUID, new_first_name: str, new_last_na
     client.lastName = new_last_name.lower()
 
     if new_email_address is not None:
+        if db.scalar(
+                select(models.Client)
+                .where(models.Client.emailAddress == new_email_address.lower())
+                .where(models.Client.id != client_id)
+        ) is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail={"description": "This email address is already in use."})
+        
         client.emailAddress = new_email_address.lower()
 
     db.commit()
+
 
     return client
 

@@ -5,4 +5,11 @@
     {% include "partials/crimereport_info.html" %}
 
     <p>If this is a mistake, please contact us as soon as possible.</p>
+
+    {% with contract=crimeReport.contract %}
+        {% include "partials/contract_info.html" %}
+    {% endwith %}
+
+    {% include "partials/contract_terms.html" %}
+    
 {% endblock %}

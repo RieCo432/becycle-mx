@@ -9,6 +9,8 @@ import {useToast} from 'vue-toastification';
 const toast = useToast();
 const credentialsStore = useCredentialsStore();
 
+// TODO: this page needs fixed
+
 export default {
   name: 'rawData',
   components: {ContractEditTable, DashButton, Card},
@@ -83,11 +85,15 @@ export default {
           id: 'delete',
           icon: 'heroicons-outline:trash',
           func: (contractId) => {
-            requests.deleteContract(contractId).then(() => {
-              toast.success('Contract Deleted!', {timeout: 2000});
-              const indexInArray = this.rawContractData.findIndex((c) => c.id === contractId);
-              this.rawContractData.splice(indexInArray, 1);
-            });
+            if (confirm('Are you sure you want to delete this contract?')) {
+              requests.deleteContract(contractId).then(() => {
+                toast.success('Contract Deleted!', {timeout: 2000});
+                const indexInArray = this.rawContractData.findIndex((c) => c.id === contractId);
+                this.rawContractData.splice(indexInArray, 1);
+              }).catch((error) => {
+                toast.error(error.response.data.detail.description, {timeout: 2000});
+              });
+            }
           },
         },
       ],

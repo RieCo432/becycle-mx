@@ -31,9 +31,11 @@ export default {
       <ManageExpenseTypesCard v-if="user" :user="user"></ManageExpenseTypesCard>
     </div>
     <div class="col-span-6">
+      <!-- TODO: this is obsolete now -->
       <ManageContractTypesCard v-if="user" :user="user"></ManageContractTypesCard>
     </div>
     <div class="col-span-6">
+      <!-- TODO: this is obsolete now. Replace with a card for managing projects -->
       <ManageExpenseTagsCard v-if="user" :user="user"></ManageExpenseTagsCard>
     </div>
     <div class="col-span-6 xl:col-span-12">

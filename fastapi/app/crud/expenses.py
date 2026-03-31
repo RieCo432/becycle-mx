@@ -12,8 +12,29 @@ import app.schemas as schemas
 from sqlalchemy.orm import Session
 from fastapi import UploadFile, HTTPException, status
 
+from app.models import ExpenseReceipt
+
 
 def create_expense(db: Session, expense_user: models.User, expense_data: schemas.ExpenseBase, receipt_file: UploadFile) -> models.Expense:
+    new_expense_receipt = save_expense_receipt(db, receipt_file)
+
+    new_expense = models.Expense(
+        type=expense_data.type,
+        notes=expense_data.notes,
+        expenseUserId=expense_user.id,
+        expenseDate=expense_data.expenseDate,
+        receiptContentType=receipt_file.content_type,
+        amount=expense_data.amount,
+        receiptFileId=new_expense_receipt.id,
+        tagId=expense_data.tagId
+    )
+    db.add(new_expense)
+    db.commit()
+
+    return new_expense
+
+
+def save_expense_receipt(db: Session, receipt_file: UploadFile) -> ExpenseReceipt:
     if receipt_file.content_type.startswith("image"):
         from PIL import Image
 
@@ -42,21 +63,7 @@ def create_expense(db: Session, expense_user: models.User, expense_data: schemas
 
     db.add(new_expense_receipt)
     db.commit()
-
-    new_expense = models.Expense(
-        type=expense_data.type,
-        notes=expense_data.notes,
-        expenseUserId=expense_user.id,
-        expenseDate=expense_data.expenseDate,
-        receiptContentType=receipt_file.content_type,
-        amount=expense_data.amount,
-        receiptFileId=new_expense_receipt.id,
-        tagId=expense_data.tagId
-    )
-    db.add(new_expense)
-    db.commit()
-
-    return new_expense
+    return new_expense_receipt
 
 
 def get_expense_receipt_file(db: Session, expense_id: UUID) -> dict[str, str]:
@@ -73,6 +80,22 @@ def get_expense_receipt_file(db: Session, expense_id: UUID) -> dict[str, str]:
         fout.write(expense.receiptFile.content)
 
     return {"path": output_file_path, "media_type": expense.receiptContentType}
+
+
+def get_expense_claim_receipt_file(db: Session, expense_claim_id: UUID) -> dict[str, str]:
+    expense_claim = db.scalar(
+        select(models.ExpenseClaim)
+        .where(models.ExpenseClaim.id == expense_claim_id)
+    )
+
+    current_dir = os.path.dirname(__file__)
+    temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
+    output_file_path = os.path.join(temp_data_dir, str(expense_claim.id))
+
+    with open(output_file_path, "wb") as fout:
+        fout.write(expense_claim.receiptFile.content)
+
+    return {"path": output_file_path, "media_type": expense_claim.receiptContentType}
 
 
 def patch_expense_transferred(db: Session, expense_id: UUID, treasurer_user: models.User) -> models.Expense:
@@ -95,6 +118,37 @@ def patch_expense_transferred(db: Session, expense_id: UUID, treasurer_user: mod
     return expense
 
 
+def patch_expense_claim_reimburse(db: Session, expense_claim_id: UUID, reimbursement_transaction_header_id: UUID) -> models.ExpenseClaim:
+    reimbursement_transaction_header = db.scalar(
+        select(models.TransactionHeader)
+        .where(
+            (models.TransactionHeader.id == reimbursement_transaction_header_id)
+        )
+    )
+    
+    if reimbursement_transaction_header is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This reimbursement transaction header does not exist"})
+    if reimbursement_transaction_header.postedOn is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This transaction is not posted!"})
+    
+    expense_claim = db.scalar(
+        select(models.ExpenseClaim)
+        .where(
+            (models.ExpenseClaim.reimbursementTransactionHeaderId == None)
+            & (models.ExpenseClaim.id == expense_claim_id)
+        )
+    )
+
+    if expense_claim is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This expense claim does not exist or has already been reimbursed"})
+
+    expense_claim.reimbursementTransactionHeaderId = reimbursement_transaction_header_id
+
+    db.commit()
+    db.refresh(expense_claim)
+
+    return expense_claim
+
 def delete_expense(db: Session, expense_id: UUID) -> None:
     expense = db.scalar(
         select(models.Expense)
@@ -106,6 +160,61 @@ def delete_expense(db: Session, expense_id: UUID) -> None:
 
     db.delete(expense)
     db.commit()
+
+def delete_expense_claim(db: Session, expense_claim_id: UUID) -> None:
+    expense_claim = db.scalar(
+        select(models.ExpenseClaim)
+        .where(models.ExpenseClaim.id == expense_claim_id)
+    )
+
+    if expense_claim is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense claim not found"})
+    
+    if expense_claim.reimbursementTransactionHeaderId is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This expense claim has already been reimbursed"})
+    
+    expense_transaction_header = db.scalar(
+        select(models.TransactionHeader)
+        .where(models.TransactionHeader.id == expense_claim.expenseTransactionHeaderId)
+    )
+    
+    expense_receipt_file = db.scalar(
+        select(models.ExpenseReceipt)
+        .where(models.ExpenseReceipt.id == expense_claim.receiptFileId)
+    )
+
+
+    db.delete(expense_claim)
+    db.flush()
+
+    db.delete(expense_receipt_file)
+
+    for line in expense_transaction_header.transactionLines:
+        db.delete(line)
+
+    db.flush()
+    db.delete(expense_transaction_header)
+    
+    
+    db.commit()
+
+
+def update_expense_claim(db: Session, expense_claim_id: UUID, updated_expense_claim_data: schemas.ExpenseClaimUpdate) -> models.ExpenseClaim:
+    expense_claim = db.scalar(
+        select(models.ExpenseClaim)
+        .where(models.ExpenseClaim.id == expense_claim_id)
+    )
+    
+    if expense_claim is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense claim not found"})
+    
+    if updated_expense_claim_data.expenseDate is not None:
+        expense_claim.expenseDate = updated_expense_claim_data.expenseDate
+    if updated_expense_claim_data.notes is not None:
+        expense_claim.notes = updated_expense_claim_data.notes
+    
+    db.commit()
+    return expense_claim
 
 
 def update_expense(db: Session, expense_id: UUID, updated_expense_data: schemas.ExpenseUpdate) -> models.Expense:
@@ -149,6 +258,13 @@ def get_expenses(db: Session, tag_id: str | None) -> list[models.Expense]:
         expenses = expenses.where(models.Expense.tagId == tag_id)
     return [
         _ for _ in db.scalars(expenses)
+    ]
+
+
+def get_expense_claims(db: Session) -> list[models.ExpenseClaim]:
+    expense_claims = select(models.ExpenseClaim)
+    return [
+        _ for _ in db.scalars(expense_claims)
     ]
 
 def get_expense_tags(db: Session, inactive: bool) -> list[models.ExpenseTag]:
@@ -254,3 +370,28 @@ def get_all_expenses_and_receipts(db: Session, start_date: date, end_date: date)
         "media_type": "application/zip"
     }
 
+
+def create_expense_claim(db: Session, expense_claim_data: schemas.ExpenseClaimCreate, receipt_file: UploadFile) -> schemas.ExpenseClaim:
+    expense_claim_transaction_header = db.scalar(
+        select(models.TransactionHeader).where(models.TransactionHeader.id == expense_claim_data.expenseTransactionHeaderId)
+    )
+    if expense_claim_transaction_header is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Expense Transaction Header not found"})
+    if expense_claim_transaction_header.postedOn is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This transaction is not posted!"})
+
+    new_expense_receipt = save_expense_receipt(db, receipt_file)
+    
+    
+    expense_claim = models.ExpenseClaim(
+        expenseDate=expense_claim_data.expenseDate,
+        expenseTransactionHeaderId=expense_claim_data.expenseTransactionHeaderId,
+        notes=expense_claim_data.notes,
+        receiptFileId=new_expense_receipt.id,
+        receiptContentType=receipt_file.content_type
+    )
+    
+    db.add(expense_claim)
+    db.commit()
+    db.refresh(expense_claim)
+    return expense_claim

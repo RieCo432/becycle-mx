@@ -11,7 +11,7 @@ import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import {useToast} from 'vue-toastification';
-import BounceLoader from 'vue-spinner/src/BounceLoader.vue';
+import {VueSpinner} from 'vue3-spinners';
 import window from '@/mixins/window';
 
 const toast = useToast();
@@ -20,7 +20,7 @@ export default {
   name: 'AppointmentCalendar',
   mixins: [window],
   components: {
-    BounceLoader,
+    VueSpinner,
     Button,
     TextInput,
     AppointmentInfoModal,
@@ -225,13 +225,10 @@ export default {
       addClosedDayNotes: null,
       showAddClosedDayModal: false,
       addClosedDayDate: null,
-      loaderBoxSize: null,
-      loaderColor: '#7E96FC',
     };
   },
   mounted() {
     this.calendarApi = this.$refs.fullCalendar.getApi();
-    this.loaderBoxSize = this.$refs.loaderBox.clientHeight.toString() + 'px';
     requests.getUserMe().then((response) => {
       this.userIsAppointmentManager = response.data.appointmentManager;
     });
@@ -251,8 +248,10 @@ export default {
             ></FullCalendar>
           </div>
           <div class="absolute z-50 top-1/2 left-1/2 translate-x-28 w-20 h-20 p-0" ref="loaderBox">
-            <bounce-loader v-if="loaderBoxSize != null" class="z-50 h-100 w-100" :loading="isLoading"
-                           :size="loaderBoxSize" :color="loaderColor"></bounce-loader>
+            <VueSpinner
+              v-if="isLoading"
+              size="40px"
+              class="z-50 h-100 w-100 text-sky-500"></VueSpinner>
           </div>
         </div>
 

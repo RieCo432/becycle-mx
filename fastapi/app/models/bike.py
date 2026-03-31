@@ -2,12 +2,17 @@ from typing import List
 from uuid import uuid4
 
 from datetime import datetime
-from sqlalchemy import String, UUID, text, DateTime
+from sqlalchemy import String, UUID, text, DateTime, Integer, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
 from .bikeColours import bike_colour_association_table
 
+from app.extensions.disposition import Disposition
+
+
+
+list_of_dispositions = ", ".join(["'" + d.value + "'" for d in Disposition])
 
 class Bike(Base):
     __tablename__ = "bikes"
@@ -20,10 +25,14 @@ class Bike(Base):
     serialNumber: Mapped[str] = mapped_column("serialnumber", String(40), nullable=False, quote=False)
     rfidTagSerialNumber: Mapped[str] = mapped_column("rfidtagserialnumber", String(24), nullable=True, quote=False)
     createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
+    roughValue: Mapped[int] = mapped_column("roughvalue", Integer, nullable=True, quote=False)
+    disposition: Mapped[Disposition] = mapped_column("disposition", Enum(Disposition, native_enum=True), nullable=False, quote=False)
 
 
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="bike")
     colours: Mapped[List["Colour"]] = relationship(secondary=bike_colour_association_table, back_populates="bikes")
+    
+    bikeSaleLines: Mapped[List["SaleLine"]] = relationship("BikeSaleLine", back_populates="bike")
 
     def __eq__(self, other: dict):
         return all([

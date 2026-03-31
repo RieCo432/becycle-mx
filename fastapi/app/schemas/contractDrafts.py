@@ -22,6 +22,5 @@ class ContractDraft(BaseModel):
     workingUser: UserBase | None = None
     checkingUserId: UUID | None = None
     checkingUser: UserBase | None = None
-    depositCollectingUserId: UUID | None = None
-    depositCollectingUser: UserBase | None = None
+    depositCollectedTransactionHeaderId: UUID | None = None
     depositAmountCollected: int | None = None

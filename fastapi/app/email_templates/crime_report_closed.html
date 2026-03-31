@@ -10,4 +10,10 @@
         If the police returned the bike to us, you are still able to visit us as soon as possible to reclaim your deposit.
     </p>
 
+    {% with contract=crimeReport.contract %}
+        {% include "partials/contract_info.html" %}
+    {% endwith %}
+
+    {% include "partials/contract_terms.html" %}
+
 {% endblock %}

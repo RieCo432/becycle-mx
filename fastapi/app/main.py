@@ -45,9 +45,12 @@ app.include_router(routers.statistics)
 app.include_router(routers.admin)
 app.include_router(routers.expenses)
 app.include_router(routers.groups)
-
 app.include_router(routers.crime_reports)
 app.include_router(routers.colours)
+app.include_router(routers.accounts)
+app.include_router(routers.transactions)
+app.include_router(routers.catalogue)
+app.include_router(routers.sales)
 
 
 

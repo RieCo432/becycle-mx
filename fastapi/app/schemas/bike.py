@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 from .contract import Contract
 from .colours import Colour
+from app.extensions.disposition import Disposition
 
 
 class BikeBase(BaseModel):
@@ -14,6 +15,8 @@ class BikeBase(BaseModel):
     decals: str | None = None
     serialNumber: str
     rfidTagSerialNumber: str | None = None
+    disposition: Disposition
+    roughValue: int | None = None
 
 
 class BikeCreate(BikeBase):

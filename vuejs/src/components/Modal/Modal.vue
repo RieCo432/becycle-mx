@@ -30,7 +30,7 @@
             :leave-to="noFade ? '' : 'opacity-0 scale-95'"
           >
             <DialogPanel
-              class="w-full transform overflow-hidden rounded-md bg-white dark:bg-slate-800 text-left align-middle shadow-xl transition-all"
+              class="w-full transform overflow-visible rounded-md bg-white dark:bg-slate-800 text-left align-middle shadow-xl transition-all"
               :class="sizeClass"
             >
               <div
@@ -49,7 +49,7 @@
               </div>
               <div
                 class="px-6 py-8"
-                :class="scrollContent ? 'overflow-y-auto max-h-[400px]' : ''"
+                :class="scrollContent ? 'overflow-y-auto max-h-[400px]' : 'h-full'"
               >
                 <slot />
               </div>

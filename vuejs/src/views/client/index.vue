@@ -153,7 +153,7 @@ export default {
         :open-edit-details-modal="() => showEditDetailsModal = true"
         :loading-client-details="loadingClientDetails"
     ></client-view>
-    <EditClientDetailsModal v-if="!loadingClientDetails"
+    <EditClientDetailsModal v-if="!loadingClientDetails && showEditDetailsModal"
                             :close-modal="() => showEditDetailsModal = false"
                             :show-modal="showEditDetailsModal"
                             :client="client"

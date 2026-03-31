@@ -11,7 +11,6 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 
-from app import models
 from sqlalchemy import select, text
 
 # revision identifiers, used by Alembic.

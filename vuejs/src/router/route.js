@@ -187,12 +187,12 @@ const routes = [
       },
       {
         path: '/finances/deposits',
-        name: 'Deposit Book',
+        name: 'Deposit Balances',
         meta: {
           restrictTo: ['user'],
           selectNavPath: '/finances/deposits',
         },
-        component: () => import('@/views/finances/depositBook.vue'),
+        component: () => import('@/views/finances/depositBalances.vue'),
       },
       {
         path: '/finances/deposit-charts',
@@ -213,22 +213,58 @@ const routes = [
         component: () => import('@/views/finances/cashFlow.vue'),
       },
       {
-        path: '/finances/expenses/submit',
-        name: 'Submit Expense',
+        path: '/finances/expenses/claim',
+        name: 'Claim Expense',
         meta: {
           restrictTo: ['user'],
-          selectNavPath: '/finances/expenses/submit',
+          selectNavPath: '/finances/expenses/claim',
         },
-        component: () => import('@/views/finances/newExpense.vue'),
+        component: () => import('@/views/finances/newExpenseClaim.vue'),
       },
       {
-        path: '/finances/expenses/manage',
-        name: 'Manage Expenses',
+        path: '/finances/expenses/claims/manage',
+        name: 'Manage Expense Claims',
         meta: {
           restrictTo: ['user'],
-          selectNavPath: '/finances/expenses/manage',
+          selectNavPath: '/finances/expenses/claims/manage',
         },
-        component: () => import('@/views/finances/manageExpenses.vue'),
+        component: () => import('@/views/finances/manageExpenseClaims.vue'),
+      },
+      {
+        path: '/finances/transactions',
+        name: 'Transaction History',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/transactions',
+        },
+        component: () => import('@/views/finances/transactions.vue'),
+      },
+      {
+        path: '/finances/transactions/record',
+        name: 'Record Transaction',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/transactions/record',
+        },
+        component: () => import('@/views/finances/recordTransaction.vue'),
+      },
+      {
+        path: '/finances/sales',
+        name: 'Sales History',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/finances/sales',
+        },
+        component: () => import('@/views/sales/index.vue'),
+      },
+      {
+        path: '/point-of-sale',
+        name: 'Point of Sale',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/point-of-sale',
+        },
+        component: () => import('@/views/sales/PointOfSale.vue'),
       },
       {
         path: '/admin/users',
@@ -265,15 +301,6 @@ const routes = [
           selectNavPath: '/admin/appointment-settings',
         },
         component: () => import('@/views/admin/appointmentSettings.vue'),
-      },
-      {
-        path: '/admin/deposit-exchanges',
-        name: 'Deposit Exchanges',
-        meta: {
-          restrictTo: ['user'],
-          selectNavPath: '/admin/deposit-exchanges',
-        },
-        component: () => import('@/views/admin/DepositExchanges.vue'),
       },
       {
         path: '/admin/raw-data',
@@ -345,7 +372,7 @@ const routes = [
           restrictTo: ['user'],
           selectNavPath: '/bikes',
         },
-        component: () => import('@/views/bike/findBike.vue'),
+        component: () => import('@/views/bike/BikeCatalogue.vue'),
       },
       {
         path: '/statistics/contracts',
@@ -391,6 +418,24 @@ const routes = [
           selectNavPath: '/admin/user-groups',
         },
         component: () => import('@/views/admin/userGroups.vue'),
+      },
+      {
+        path: '/admin/accounts',
+        name: 'Manage Accounts',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/accounts',
+        },
+        component: () => import('@/views/admin/accounts.vue'),
+      },
+      {
+        path: '/admin/catalogue',
+        name: 'Manage Catalogue',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/catalogue',
+        },
+        component: () => import('@/views/admin/catalogue.vue'),
       },
       {
         path: '/crimereports',

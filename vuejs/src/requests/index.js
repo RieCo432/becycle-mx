@@ -162,8 +162,11 @@ export default {
       },
     });
   },
-  findBikes(make, model, colour, colours, serialNumber, maxDistance = 4) {
-    return axiosClient.get('/bikes/find', {
+  findBikes(make, model, colour, colours, serialNumber, dispositions, maxDistance = 4) {
+    return axiosClient.get(`/bikes/find${dispositions.length ?
+      '?' + dispositions.map((d) => `dispositions=${d}`).join('&') :
+      ''
+    }`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params: {
@@ -194,13 +197,15 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  postNewBike(make, model, colours, decals, serialNumber) {
+  postNewBike(make, model, colours, decals, serialNumber, disposition, roughValue) {
     return axiosClient.post('/bikes', {
       make: make,
       model: model,
       colours: colours,
       decals: decals,
       serialNumber: serialNumber,
+      disposition: disposition,
+      roughValue: roughValue,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -326,9 +331,9 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putDraftContractDeposit(draftContractId, depositAmont, depositCollectingUser, depositCollectingPassword) {
+  putDraftContractDeposit(draftContractId, depositCollectedTransactionHeaderId, depositCollectingUser, depositCollectingPassword) {
     return axiosClient.put(`/contracts/drafts/${draftContractId}/deposit`, {
-      deposit_amount: depositAmont,
+      deposit_collected_transaction_header_id: depositCollectedTransactionHeaderId,
       deposit_receiving_username: depositCollectingUser,
       deposit_receiving_user_password: depositCollectingPassword,
     }, {
@@ -429,10 +434,10 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  patchReturnContract(contractId, depositAmountReturned, depositReturningUser, depositReturningPassword,
+  patchReturnContract(contractId, depositSettledTransactionHeaderId, depositReturningUser, depositReturningPassword,
     returnAcceptingUser, returnAcceptingPasswordOrPin) {
     return axiosClient.patch(`/contracts/${contractId}/return`, {
-      deposit_amount_returned: depositAmountReturned,
+      deposit_settled_transaction_header_id: depositSettledTransactionHeaderId,
       deposit_returning_username: depositReturningUser,
       deposit_returning_user_password: depositReturningPassword,
       working_username: returnAcceptingUser,
@@ -568,6 +573,15 @@ export default {
   },
   getDepositBook() {
     return axiosClient.get('/finances/deposit-book', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getDepositBalances(onlyAssetAccounts=true) {
+    return axiosClient.get('/finances/deposit-accounts', {
+      params: {
+        only_asset_accounts: onlyAssetAccounts,
+      },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -726,7 +740,7 @@ export default {
   patchChangeNames(patchData) {
     return axiosClient.patch('/clients/me', patchData, {
       headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => redirectToClientLoginIfUnauthorised(status),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
     });
   },
   patchClientChangeDetails(clientId, patchData) {
@@ -1073,6 +1087,19 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  postNewExpenseClaim(expenseTransactionHeaderId, notes, expenseDate, receiptFile) {
+    return axiosClient.post('/expenses/claims', {
+      expense_claim_transaction_header_id: expenseTransactionHeaderId,
+      notes: notes,
+      expense_date: expenseDate,
+      receipt_file: receiptFile,
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
   getExpenseTypes() {
     return axiosClient.get('/expenses/types', {
       headers: credentialsStore.getApiRequestHeader(),
@@ -1095,8 +1122,28 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getExpenseClaims() {
+    return axiosClient.get('/expenses/claims', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   patchExpenseTransferred(expenseId) {
     return axiosClient.patch(`/expenses/${expenseId}/transfer`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchExpenseClaimReimbursed(expenseClaimId, reimbursementTransactionHeaderId) {
+    return axiosClient.patch(`/expenses/claims/${expenseClaimId}/reimburse`, {
+      reimbursement_transaction_header_id: reimbursementTransactionHeaderId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteExpenseClaim(expenseClaimId) {
+    return axiosClient.delete(`/expenses/claims/${expenseClaimId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -1118,6 +1165,15 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  putExpenseClaim(expenseClaimId, notes, expenseDate) {
+    return axiosClient.put(`/expenses/claims/${expenseClaimId}`, {
+      notes: notes,
+      expenseDate: expenseDate,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   deleteExpense(expenseId) {
     return axiosClient.delete(`/expenses/${expenseId}`, {
       headers: credentialsStore.getApiRequestHeader(),
@@ -1126,6 +1182,13 @@ export default {
   },
   getExpenseReceipt(expenseId) {
     return axiosClient.get(`/expenses/${expenseId}/receipt`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  getExpenseClaimReceipt(expenseClaimId) {
+    return axiosClient.get(`/expenses/claims/${expenseClaimId}/receipt`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       responseType: 'blob',
@@ -1436,6 +1499,204 @@ export default {
   },
   getColours() {
     return axiosClient.get('/colours', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getAccounts(queryParams=undefined) {
+    return axiosClient.get(`/accounts${
+      queryParams ?
+        `?${queryParams.map((p) => `${encodeURIComponent(p.name)}=${encodeURIComponent(p.value)}`).join('&')}` :
+        ''
+    }`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postNewAccount(name, description, type, owneruserId, ownerGroupId, scheduledClosureDate, isInternal, showInUis, restrictedToProjectId) {
+    return axiosClient.post('/accounts', {
+      name: name,
+      description: description,
+      type: type,
+      ownerUserId: owneruserId,
+      ownerGroupId: ownerGroupId,
+      scheduledClosureDate: scheduledClosureDate,
+      isInternal: isInternal,
+      showInUis: showInUis,
+      restrictedToProjectId: restrictedToProjectId,
+    },
+    {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateAccount(accountId, name, description, scheduledClosureDate, showInUis) {
+    return axiosClient.put(`/accounts/${accountId}`, {
+      name: name,
+      description: description,
+      scheduledClosureDate: scheduledClosureDate,
+      showInUis: showInUis,
+    },
+    {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  closeAccount(accountId) {
+    return axiosClient.patch(`/accounts/${accountId}/close`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  reopenAccount(accountId) {
+    return axiosClient.patch(`/accounts/${accountId}/reopen`, undefined, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getFormattedTransactionHeaders() {
+    return axiosClient.get('/transactions/formatted', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  createTransaction(transaction, additionalUsernamesAndPasswords = []) {
+    return axiosClient.post('/transactions', {
+      transaction_data: transaction,
+      users_and_passwords: additionalUsernamesAndPasswords,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getProjects() {
+    return axiosClient.get('/settings/projects', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getItemCatalogue(includeUnavailable) {
+    return axiosClient.get('/catalogue', {
+      params: {include_unavailable: includeUnavailable},
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getCatalogueItemPhoto(catalogueItemId) {
+    return axiosClient.get(`/catalogue/${catalogueItemId}/photo`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  postNewCatalogueItem(name, description, purchasePrice, recommendedRetailPrice, isSecondHand, photo) {
+    return axiosClient.post('/catalogue', {
+      name: name,
+      description: description,
+      purchase_price: purchasePrice,
+      recommended_retail_price: recommendedRetailPrice,
+      is_second_hand: isSecondHand,
+      ...photo ? {photo: photo} : {},
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateCatalogueItem(catalogueItemId, name, description, isSecondHand, photo) {
+    return axiosClient.put(`/catalogue/${catalogueItemId}`, {
+      name: name,
+      description: description,
+      is_second_hand: isSecondHand,
+      ...photo ? {photo: photo} : {},
+    }, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchCatalogueItemAvailability(catalogueItemId, available) {
+    return axiosClient.patch(`/catalogue/${catalogueItemId}/availability`, {available: available}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getSales(pending, completed) {
+    return axiosClient.get('/sales', {
+      params: {pending: pending, completed: completed},
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postNewSale() {
+    return axiosClient.post('/sales', {}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postCatalogueItemSaleLine(catalogueItemSaleLine) {
+    return axiosClient.post('/sales/catalogue-item-sale-line', catalogueItemSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteCatalogueItemSaleLine(catalogueItemSaleLineId) {
+    return axiosClient.delete(`/sales/catalogue-item-sale-line/${catalogueItemSaleLineId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateCatalogueItemSaleLine(catalogueItemSaleLineId, catalogueItemSaleLine) {
+    return axiosClient.put(`/sales/catalogue-item-sale-line/${catalogueItemSaleLineId}`, catalogueItemSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postBikeSaleLine(bikeSaleLine) {
+    return axiosClient.post('/sales/bike-sale-line', bikeSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteBikeSaleLine(bikeSaleLineId) {
+    return axiosClient.delete(`/sales/bike-sale-line/${bikeSaleLineId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putUpdateBikeSaleLine(bikeSaleLineId, bikeSaleLine) {
+    return axiosClient.put(`/sales/bike-sale-line/${bikeSaleLineId}`, bikeSaleLine, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchSalePayment(saleId, paymentTransactionHeaderId) {
+    return axiosClient.patch(`/sales/${saleId}/payment`,
+      {
+        transaction_header_id: paymentTransactionHeaderId,
+      }, {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
+  },
+  getTransactionEvents() {
+    return axiosClient.get('/transactions/events', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postTransaction(transactionHeaderId, additionalUsersAndPasswords = null) {
+    return axiosClient.patch(`/transactions/${transactionHeaderId}/post`, additionalUsersAndPasswords, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteSale(saleId) {
+    return axiosClient.delete(`/sales/${saleId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
