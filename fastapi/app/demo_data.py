@@ -9,6 +9,7 @@ from sqlalchemy import select
 import app.models as models
 from sqlalchemy.orm import Session
 
+from extensions.disposition import Disposition
 
 today = datetime.datetime.utcnow().date()
 one_quarter_ago = (today - relativedelta(months=3))
@@ -24,16 +25,30 @@ def delete_all(db: Session):
     db.query(models.RoadSegmentReportType).delete()
     db.query(models.RoadSegment).delete()
 
+    db.query(models.Expense).delete()
+    db.query(models.ExpenseClaim).delete()
+    db.query(models.ExpenseReceipt).delete()
+
+    db.query(models.CatalogueItemSaleLine).delete()
+    db.query(models.BikeSaleLine).delete()
+    db.query(models.SaleHeader).delete()
+
+    db.query(models.TransactionLine).delete()
+    db.query(models.TransactionHeader).delete()
+
+    db.query(models.Account).delete()
+    db.query(models.Project).delete()
+
     db.query(models.ContractDraft).delete()
 
     db.query(models.CrimeReport).delete()
     db.query(models.PaperContract).delete()
     db.query(models.Contract).delete()
 
-    db.query(models.Expense).delete()
-    db.query(models.ExpenseReceipt).delete()
-
     db.query(models.DepositExchange).delete()
+
+    db.query(models.CatalogueItem).delete()
+    db.query(models.CatalogueItemPhoto).delete()
 
     db.query(models.group_permission_association_table).delete()
     db.query(models.group_user_association_table).delete()
@@ -248,25 +263,14 @@ def add_clients_temp(db: Session) -> list[models.ClientTemp]:
 
 def add_bikes(db: Session) -> list[models.Bike]:
     bikes = [
-        models.Bike(make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
-        models.Bike(make="apollo", model="excelle", colour="black", decals=None, serialNumber="abcd1256"),
-        models.Bike(make="avigo", model="amethyst", colour="purple", decals=None, serialNumber="uvwx2345"),
-        models.Bike(make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
-        models.Bike(make="raleigh", model="enigma", colour="blue", decals=None, serialNumber="mnop3456"),
-        models.Bike(make="revolution", model="cuillin sport", colour="black", decals=None, serialNumber="qrst7890"),
-        models.Bike(make="elephantbike", model="heavy af", colour="blue", decals=None, serialNumber="ijkl9012")
+        models.Bike(disposition="RENTAL", roughValue=4000, make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="apollo", model="excelle", colour="black", decals=None, serialNumber="abcd1256"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="avigo", model="amethyst", colour="purple", decals=None, serialNumber="uvwx2345"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="raleigh", model="enigma", colour="blue", decals=None, serialNumber="mnop3456"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="revolution", model="cuillin sport", colour="black", decals=None, serialNumber="qrst7890"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="elephantbike", model="heavy af", colour="blue", decals=None, serialNumber="ijkl9012")
     ]
-
-    db.add_all(bikes)
-    db.commit()
-
-    return bikes
-
-def add_bikes_for_all_colours(db: Session) -> list[models.Bike]:
-    bikes = []
-    with open("data/all_colours.txt", "r") as f:
-        for line in f:
-            bikes.append(models.Bike(make="NOTPROVIDED", model="NOTPROVIDED", colour=line.strip(), decals=None, serialNumber="NOTPROVIDED"))
 
     db.add_all(bikes)
     db.commit()
@@ -276,19 +280,17 @@ def add_bikes_for_all_colours(db: Session) -> list[models.Bike]:
 
 def add_bikes_with_duplicates(db: Session) -> list[models.Bike]:
     bikes = [
-        models.Bike(make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
-        models.Bike(make="apollo", model="excelle", colour="black", decals=None, serialNumber="abcd1256"),
-        models.Bike(make="apolo", model="skidmark", colour="brown", decals=None, serialNumber="bcd1234"),
-        models.Bike(make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
-        models.Bike(make="raleigh", model="enigma", colour="blue and grey", decals=None, serialNumber="mnop3456"),
-        models.Bike(make="raleigh", model="enigma", colour="black and grey", decals=None, serialNumber="qrst7890"),
-        models.Bike(make="apollo", model="excelle", colour="green", decals=None, serialNumber="ijkl9012"),
-        models.Bike(make="notprovided", model="notprovided", colour="notprovided", decals=None, serialNumber="notprovided"),
-        models.Bike(make="notprovided", model="notprovided", colour="notprovided", decals=None,
-                    serialNumber="notprovided"),
-        models.Bike(make="ab", model="cd", colour="d", decals=None,
-                    serialNumber="notprovided"),
-        models.Bike(make="ralegh", model="engma", colour="black and grey", decals=None, serialNumber="qrst7890"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="apollo", model="skidmarks", colour="brown", decals=None, serialNumber="abcd1234"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="apollo", model="excelle", colour="black", decals=None, serialNumber="abcd1256"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="apolo", model="skidmark", colour="brown", decals=None, serialNumber="bcd1234"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="raleigh", model="chloe", colour="pink", decals=None, serialNumber="efgh5678"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="raleigh", model="enigma", colour="blue and grey", decals=None, serialNumber="mnop3456"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="raleigh", model="enigma", colour="black and grey", decals=None, serialNumber="qrst7890"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="apollo", model="excelle", colour="green", decals=None, serialNumber="ijkl9012"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="notprovided", model="notprovided", colour="notprovided", decals=None, serialNumber="notprovided"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="notprovided", model="notprovided", colour="notprovided", decals=None, serialNumber="notprovided"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="ab", model="cd", colour="d", decals=None, serialNumber="notprovided"),
+        models.Bike(disposition="RENTAL", roughValue=4000, make="ralegh", model="engma", colour="black and grey", decals=None, serialNumber="qrst7890"),
     ]
 
     db.add_all(bikes)
@@ -484,6 +486,87 @@ def add_user_presentation_cards(db: Session, users: list[models.User], user_phot
     return user_presentation_cards
 
 
+def add_accounts(db: Session, users: list[models.User], groups: list[models.Group], projects: list[models.Project]) -> list[models.Account]:
+    accounts = [
+        models.Account(
+            name=f"{users[0].username} deposit stash",
+            description=f"deposit stash for {users[0].username}",
+            ownerUserId=users[0].id,
+            ownerGroupId=None,
+            type="asset",
+            showInUis=["deposit", "return", "transfer"],
+            isInternal=True,
+            scheduledClosureDate=None,
+            isAllowedNegative=False,
+            restrictedToProjectId=None
+        ),
+        models.Account(
+            name=f"{users[2].username} deposit stash",
+            description=f"deposit stash for {users[2].username}",
+            ownerUserId=users[2].id,
+            ownerGroupId=None,
+            type="asset",
+            showInUis=["deposit", "return", "transfer"],
+            isInternal=True,
+            scheduledClosureDate=None,
+            isAllowedNegative=False,
+            restrictedToProjectId=None
+        ),
+        models.Account(
+            name=f"active bike deposits",
+            description=f"active bike deposits description",
+            ownerUserId=None,
+            ownerGroupId=[g for g in groups if g.name == "deposit bearers"][0].id,
+            type="liability",
+            showInUis=["deposit", "return", "transfer"],
+            isInternal=True,
+            scheduledClosureDate=None,
+            isAllowedNegative=False,
+            restrictedToProjectId=None
+        ),
+        models.Account(
+            name=f"dormant bike deposits",
+            description=f"dormant bike deposits description",
+            ownerUserId=None,
+            ownerGroupId=[g for g in groups if g.name == "deposit bearers"][0].id,
+            type="liability",
+            showInUis=["return", "transfer"],
+            isInternal=True,
+            scheduledClosureDate=None,
+            isAllowedNegative=False,
+            restrictedToProjectId=None
+        ),
+        models.Account(
+            name=f"forfeited bike deposits",
+            description=f"forfeited bike deposits description",
+            ownerUserId=None,
+            ownerGroupId=[g for g in groups if g.name == "treasurers"][0].id,
+            type="revenue",
+            showInUis=["transfer"],
+            isInternal=True,
+            scheduledClosureDate=None,
+            isAllowedNegative=False,
+            restrictedToProjectId=None
+        ),
+        models.Account(
+            name=f"retained bike deposits",
+            description=f"retained bike deposits description",
+            ownerUserId=None,
+            ownerGroupId=[g for g in groups if g.name == "treasurers"][0].id,
+            type="revenue",
+            showInUis=["transfer"],
+            isInternal=True,
+            scheduledClosureDate=None,
+            isAllowedNegative=False,
+            restrictedToProjectId=None
+        ),
+    ]
+
+    db.add_all(accounts)
+    db.commit()
+
+    return accounts
+
 def add_contracts(db: Session, users: list[models.User], clients: list[models.Client], bikes: list[models.Bike], contract_types: list[models.ContractType]) -> list[models.Contract]:
     contracts = [
         models.Contract(
@@ -491,14 +574,10 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             bikeId=bikes[0].id,
             workingUserId=users[0].id,
             checkingUserId=users[1].id,
-            depositCollectingUserId=users[0].id,
             returnAcceptingUserId=users[0].id,
-            depositReturningUserId=users[0].id,
             startDate=five_quarter_ago,
             endDate=three_quarter_ago,
             returnedDate=three_quarter_ago - relativedelta(months=1),
-            depositAmountCollected=40,
-            depositAmountReturned=30,
             conditionOfBike="fair",
             contractType=contract_types[0].id,
             notes="returned on time",
@@ -510,14 +589,10 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             bikeId=bikes[1].id,
             workingUserId=users[0].id,
             checkingUserId=users[1].id,
-            depositCollectingUserId=users[0].id,
             returnAcceptingUserId=users[0].id,
-            depositReturningUserId=users[0].id,
             startDate=six_quarter_ago - relativedelta(months=2),
             endDate=four_quarter_ago - relativedelta(months=2),
             returnedDate=six_quarter_ago,
-            depositAmountCollected=40,
-            depositAmountReturned=40,
             conditionOfBike="fair",
             contractType=contract_types[1].id,
             notes="returned very early",
@@ -529,17 +604,13 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             bikeId=bikes[2].id,
             workingUserId=users[0].id,
             checkingUserId=users[1].id,
-            depositCollectingUserId=users[2].id,
             returnAcceptingUserId=None,
-            depositReturningUserId=None,
             startDate=two_quarter_ago - relativedelta(months=1),
             endDate=today - relativedelta(months=1),
             returnedDate=None,
-            depositAmountCollected=40,
-            depositAmountReturned=None,
             conditionOfBike="good",
             contractType=contract_types[0].id,
-            notes="this should be expired",
+            notes="this should be dormant",
             detailsSent=True,
             expiryReminderSent=False,
             returnDetailsSent=False
@@ -548,14 +619,10 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             bikeId=bikes[3].id,
             workingUserId=users[0].id,
             checkingUserId=users[1].id,
-            depositCollectingUserId=users[2].id,
             returnAcceptingUserId=None,
-            depositReturningUserId=None,
             startDate=one_quarter_ago,
             endDate=today + relativedelta(months=3),
             returnedDate=None,
-            depositAmountCollected=40,
-            depositAmountReturned=None,
             conditionOfBike="fair",
             contractType=contract_types[2].id,
             notes="this one is open",
@@ -567,14 +634,10 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             bikeId=bikes[4].id,
             workingUserId=users[2].id,
             checkingUserId=users[1].id,
-            depositCollectingUserId=users[2].id,
             returnAcceptingUserId=users[2].id,
-            depositReturningUserId=users[2].id,
             startDate=three_quarter_ago - relativedelta(months=1),
             endDate=one_quarter_ago - relativedelta(months=1),
             returnedDate=today - relativedelta(months=2),
-            depositAmountCollected=40,
-            depositAmountReturned=20,
             conditionOfBike="fair",
             contractType=contract_types[0].id,
             notes="returned late",
@@ -586,14 +649,10 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             bikeId=bikes[5].id,
             workingUserId=users[2].id,
             checkingUserId=users[1].id,
-            depositCollectingUserId=users[2].id,
             returnAcceptingUserId=users[2].id,
-            depositReturningUserId=users[2].id,
             startDate=five_quarter_ago - relativedelta(months=1),
             endDate=three_quarter_ago - relativedelta(months=1),
             returnedDate=one_quarter_ago - relativedelta(months=2),
-            depositAmountCollected=40,
-            depositAmountReturned=10,
             conditionOfBike="fair",
             contractType=contract_types[1].id,
             notes="returned very late",
@@ -605,17 +664,30 @@ def add_contracts(db: Session, users: list[models.User], clients: list[models.Cl
             bikeId=bikes[6].id,
             workingUserId=users[2].id,
             checkingUserId=users[1].id,
-            depositCollectingUserId=users[2].id,
             returnAcceptingUserId=users[2].id,
-            depositReturningUserId=users[2].id,
             startDate=two_quarter_ago - relativedelta(months=1),
             endDate=today - relativedelta(months=1),
             returnedDate=today - relativedelta(months=2),
-            depositAmountCollected=40,
-            depositAmountReturned=30,
             conditionOfBike="fair",
             contractType=contract_types[0].id,
             notes="returned on time",
+            detailsSent=True,
+            expiryReminderSent=False,
+            returnDetailsSent=False
+        ), models.Contract(
+            clientId=clients[4].id,
+            bikeId=bikes[6].id,
+            workingUserId=users[2].id,
+            checkingUserId=users[1].id,
+            depositCollectingUserId=users[2].id,
+            returnAcceptingUserId=users[2].id,
+            depositReturningUserId=users[2].id,
+            startDate=two_quarter_ago - relativedelta(months=19),
+            endDate=today - relativedelta(months=13),
+            returnedDate=None,
+            conditionOfBike="fair",
+            contractType=contract_types[0].id,
+            notes="this deposit has been forfeited",
             detailsSent=True,
             expiryReminderSent=False,
             returnDetailsSent=False
@@ -1455,10 +1527,16 @@ def add_permissions(db: Session) -> list[models.Permission]:
     )]
 
 
-def add_admin_group(db: Session, permissions: list[models.Permission], users: list[models.User]) -> list[models.Group]:
+def add_groups(db: Session, permissions: list[models.Permission], users: list[models.User]) -> list[models.Group]:
     groups = [
         models.Group(
             name="admin",
+        ),
+        models.Group(
+            name="treasurers"
+        ),
+        models.Group(
+            name="deposit bearers"
         )
     ]
 
@@ -1488,8 +1566,8 @@ if __name__ == "__main__":
     delete_all(db=demo_db)
 
     demo_users = add_users(db=demo_db)
-    #demo_bikes = add_bikes(db=demo_db)
-    demo_bikes = add_bikes_for_all_colours(db=demo_db)
+    demo_bikes = add_bikes(db=demo_db)
+    # demo_bikes = add_bikes_for_all_colours(db=demo_db)
     demo_clients = add_clients(db=demo_db)
     demo_user_photos = add_user_photos(db=demo_db, users=demo_users)
     demo_user_presentation_cards = add_user_presentation_cards(db=demo_db, users=demo_users, user_photos=demo_user_photos)
@@ -1511,4 +1589,6 @@ if __name__ == "__main__":
     demo_road_segment_report_types = add_road_segment_report_types(db=demo_db)
     demo_road_segment_reports = add_road_segment_reports(db=demo_db, road_segments=demo_road_segments, road_segment_report_types=demo_road_segment_report_types)
     demo_permissions = add_permissions(db=demo_db)
-    demo_groups = add_admin_group(db=demo_db, permissions=demo_permissions, users=demo_users)
+    demo_groups = add_groups(db=demo_db, permissions=demo_permissions, users=demo_users)
+    demo_projects = []
+    demo_accounts = add_accounts(db=demo_db, users=demo_users, groups=demo_groups, projects=demo_projects)
