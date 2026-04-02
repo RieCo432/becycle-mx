@@ -14,7 +14,7 @@ from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
 
 from .transactions import get_transaction_header
 from app.services.accounts_helpers import AccountTypes
-from .transactions import post_transaction_header
+from app.models import TransactionHeader, TransactionLine
 
 
 def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:
@@ -125,27 +125,60 @@ def return_contract(
 
     contract = get_contract(db=db, contract_id=contract_id)
 
-    transaction_header = get_transaction_header(db=db, transaction_header_id=deposit_settled_transaction_header_id)
-    if not transaction_header:
+    deposit_settled_transaction_header = get_transaction_header(db=db, transaction_header_id=deposit_settled_transaction_header_id)
+    if not deposit_settled_transaction_header:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Deposit settled transaction header not found!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     
+    account_balances_for_contract = {}
+    for transaction_header in contract.depositTransactionHeaders:
+        for transaction_line in transaction_header.transactionLines:
+            if transaction_line.account.type == AccountTypes.LIABILITY:
+                account_balances_for_contract[transaction_line.account.id] = account_balances_for_contract.get(transaction_line.account.id, 0) + transaction_line.amount
+            
+    does_any_liability_exist = any([balance != 0 for balance in account_balances_for_contract.values()])
+    if not does_any_liability_exist:
+        for tl in deposit_settled_transaction_header.transactionLines:
+            db.delete(tl)
+        db.delete(deposit_settled_transaction_header)
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "No liability exists for this contract! Transaction has been deleted."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    liability_transaction_line = [tl for tl in deposit_settled_transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY][0]
+    
+    if abs(account_balances_for_contract[liability_transaction_line.account.id]) < abs(liability_transaction_line.amount) :
+        for tl in deposit_settled_transaction_header.transactionLines:
+            db.delete(tl)
+        db.delete(deposit_settled_transaction_header)
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "The selected liability account does not have enough liability on this contract! Transaction has been deleted."},
+        )
     
     if sum(
-            [tl.amount for tl in transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY]
+            [tl.amount for tl in deposit_settled_transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY]
     ) != -sum(
         [tl.amount for tl in [th for th in contract.depositTransactionHeaders if th.event == "deposit_collected"][0].transactionLines if tl.account.type == AccountTypes.LIABILITY]
     ):
+        for tl in deposit_settled_transaction_header.transactionLines:
+            db.delete(tl)
+        db.delete(deposit_settled_transaction_header)
+        db.commit()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "The liability change in this transaction does not match the liability incurred when the contract was made!"},
+            detail={"description": "The liability change in this transaction does not match the liability incurred when the contract was made! Transaction has been deleted."},
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    if transaction_header.postedOn is None:
+    if deposit_settled_transaction_header.postedOn is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "This deposit settlement transaction header isn't posted yet!"},
@@ -154,7 +187,7 @@ def return_contract(
     contract.returnAcceptingUserId = return_accepting_user_id
     # contract.depositReturningUserId = deposit_returning_user_id
     contract.returnedDate = datetime.now(timezone.utc).date()
-    transaction_header.contractId = contract.id
+    deposit_settled_transaction_header.contractId = contract.id
 
     db.commit()
 
@@ -162,8 +195,40 @@ def return_contract(
 
 
 def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
-    # TODO: ensure deposit liability is reactivated
     contract = get_contract(db=db, contract_id=contract_id)
+    
+    if any([th.event == "deposit_forfeited" for th in contract.depositTransactionHeaders]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Cannot extend contract with forfeited deposit"},
+        )
+    
+    last_deposit_transaction_header = sorted(contract.depositTransactionHeaders, key=lambda th: th.postedOn, reverse=True)[0]
+    if last_deposit_transaction_header.event == "liability_dormant":
+        admin_id = db.scalar(select(models.User.id).where(models.User.username == "admin"))
+        if admin_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={"description": "Something went wrong while re-activating the deposit liability!"},
+            )
+        liability_reactivated_transaction_header = TransactionHeader(
+            contractId=contract.id,
+            event="liability_reactivated",
+            createdByUserId=admin_id,
+            postedOn=datetime.now(timezone.utc),
+            postedByUserId=admin_id,
+        )
+        db.add(liability_reactivated_transaction_header)
+        db.flush()
+        
+        for tl in last_deposit_transaction_header.transactionLines:
+            transaction_line = TransactionLine(
+                transactionHeaderId=liability_reactivated_transaction_header.id,
+                account=tl.account,
+                amount=-tl.amount
+            )
+            db.add(transaction_line)
+        db.commit()
 
     contract.endDate = (datetime.utcnow() + relativedelta(months=6)).date()
 
