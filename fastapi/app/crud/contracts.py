@@ -125,17 +125,37 @@ def return_contract(
 
     contract = get_contract(db=db, contract_id=contract_id)
 
-    transaction_header = get_transaction_header(db=db, transaction_header_id=deposit_settled_transaction_header_id)
-    if not transaction_header:
+    deposit_settled_transaction_header = get_transaction_header(db=db, transaction_header_id=deposit_settled_transaction_header_id)
+    if not deposit_settled_transaction_header:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Deposit settled transaction header not found!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
     
+    account_balances_for_contract = {}
+    for transaction_header in contract.depositTransactionHeaders:
+        for transaction_line in transaction_header.transactionLines:
+            if transaction_line.account.type == AccountTypes.LIABILITY:
+                account_balances_for_contract[transaction_line.account.id] = account_balances_for_contract.get(transaction_line.account.id, 0) + transaction_line.amount
+            
+    does_any_liability_exist = any([balance != 0 for balance in account_balances_for_contract.values()])
+    if not does_any_liability_exist:
+        for tl in deposit_settled_transaction_header.transactionLines:
+            db.delete(tl)
+        db.delete(deposit_settled_transaction_header)
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "No liability exists for this contract! Transaction has been deleted."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+            
+    
     
     if sum(
-            [tl.amount for tl in transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY]
+            [tl.amount for tl in deposit_settled_transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY]
     ) != -sum(
         [tl.amount for tl in [th for th in contract.depositTransactionHeaders if th.event == "deposit_collected"][0].transactionLines if tl.account.type == AccountTypes.LIABILITY]
     ):
@@ -145,7 +165,7 @@ def return_contract(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    if transaction_header.postedOn is None:
+    if deposit_settled_transaction_header.postedOn is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "This deposit settlement transaction header isn't posted yet!"},
@@ -154,7 +174,7 @@ def return_contract(
     contract.returnAcceptingUserId = return_accepting_user_id
     # contract.depositReturningUserId = deposit_returning_user_id
     contract.returnedDate = datetime.now(timezone.utc).date()
-    transaction_header.contractId = contract.id
+    deposit_settled_transaction_header.contractId = contract.id
 
     db.commit()
 
