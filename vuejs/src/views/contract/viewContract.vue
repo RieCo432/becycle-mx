@@ -77,7 +77,7 @@ export default {
         is: (value) => value * 100 < depositAmountCollected.value,
         then: () => yup.object().shape({
           id: yup.string().uuid().required(' The deposit asset account id is required '),
-          name: yup.string().required(' The deposit asset account name is required ')
+          name: yup.string().required(' The deposit asset account name is required '),
         })
           .required('This is required if the deposit is not returned in full.'),
         otherwise: () => yup.object().nullable(),
@@ -93,12 +93,12 @@ export default {
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return returnAcceptingUserSchema;
-        case 1:
-          return depositReturningSchema;
-        default:
-          return depositReturningSchema;
+      case 0:
+        return returnAcceptingUserSchema;
+      case 1:
+        return depositReturningSchema;
+      default:
+        return depositReturningSchema;
       }
     });
 
@@ -109,7 +109,7 @@ export default {
 
     const {
       value: depositAmountReturned, errorMessage: depositAmountReturnedError,
-      setErrors: depositAmountReturnedSetErrors
+      setErrors: depositAmountReturnedSetErrors,
     } = useField('depositAmountReturned');
     const {
       value: depositSettledLiabilityAccount,
@@ -117,7 +117,7 @@ export default {
     } = useField('depositSettledLiabilityAccount');
     const {
       value: depositSettledAssetAccount,
-      errorMessage: depositSettledAssetAccountError
+      errorMessage: depositSettledAssetAccountError,
     } = useField('depositSettledAssetAccount');
     const {
       value: depositSettledRevenueAccount,
@@ -125,7 +125,7 @@ export default {
     } = useField('depositSettledRevenueAccount');
     const {
       value: depositReturningPassword, errorMessage: depositReturningPasswordError,
-      setErrors: depositReturningPasswordSetErrors
+      setErrors: depositReturningPasswordSetErrors,
     } = useField('depositReturningPassword');
 
     const depositSettledTransactionHeader = ref({});
@@ -137,7 +137,7 @@ export default {
     const {value: returnAcceptingUser, errorMessage: returnAcceptingUserError} = useField('returnAcceptingUser');
     const {
       value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError,
-      setErrors: returnAcceptingPasswordOrPinSetErrors
+      setErrors: returnAcceptingPasswordOrPinSetErrors,
     } = useField('returnAcceptingPasswordOrPin');
 
     returnAcceptingUser.value = '';
@@ -168,11 +168,11 @@ export default {
             {amount: -depositAmountReturned.value * 100, accountId: depositSettledAssetAccount.value.id},
 
             ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
-                [{
-                  amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
-                  accountId: depositSettledRevenueAccount.value.id,
-                }] :
-                []
+              [{
+                amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
+                accountId: depositSettledRevenueAccount.value.id,
+              }] :
+              []
             ),
           ],
           attemptAutoPost: true,
@@ -182,7 +182,7 @@ export default {
           username: depositSettledAssetAccount.value.ownerUser.username,
           password: depositReturningPassword.value,
         }];
-        
+
         requests.createTransaction(depositSettledTransactionDraft, transactionAuthDetails).then((response) => {
           depositSettledTransactionHeader.value = response.data;
           toast.success('Deposit Settled Successfully!');
@@ -402,11 +402,24 @@ export default {
     },
   },
   computed: {
+    forfeitedDate() {
+      return this.contract.depositTransactionHeaders.find((header) => header.event === 'deposit_forfeited').postedOn;
+    },
     filtered_deposit_settled_liability_account_suggestions() {
+      const liabilityAccountContractBalances = {};
+      this.contract.depositTransactionHeaders.forEach((header) => {
+        header.transactionLines.forEach((line) => {
+          if (line.account.type === 'liability') {
+            liabilityAccountContractBalances[line.account.id] = (liabilityAccountContractBalances[line.account.id] ?? 0) + line.amount;
+          }
+        });
+      });
       return this.depositLiabilityAccounts
-        .filter((suggestion) => suggestion.name
-          .toLowerCase()
-          .startsWith((this.depositSettledLiabilityAccount.name ?? '').toLowerCase()))
+        .filter((suggestion) =>
+          Math.abs(liabilityAccountContractBalances[suggestion.id] ?? 0) === this.depositAmountCollected &&
+          suggestion.name
+            .toLowerCase()
+            .startsWith((this.depositSettledLiabilityAccount.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -584,7 +597,10 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{ workingUsername }}</p>
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{ checkingUsername }}</p>
                 </div>
-                <DashButton v-if="isUser" class="mt-5" @click="patchContractExtend">
+                <DashButton v-if="isUser &&
+                filtered_deposit_settled_liability_account_suggestions.length > 0" 
+                            class="mt-5" 
+                            @click="patchContractExtend">
                   Extend Contract
                 </DashButton>
               </div>
@@ -596,7 +612,7 @@ export default {
         (((contract.returnedDate == null) && isUser) || (contract.returnedDate != null)) &&
         contract.crimeReports.filter((report) => (report.closedOn === null)).length === 0">
           <Card title="Return">
-            <div v-if="(contract.returnedDate == null) && isUser">
+            <div v-if="(contract.returnedDate == null) && isUser && filtered_deposit_settled_liability_account_suggestions.length > 0">
               <div class="flex z-[5] items-center relative justify-center md:mx-8">
                 <div
                   class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
@@ -768,6 +784,14 @@ export default {
                   </div>
                 </form>
               </div>
+            </div>
+            <div v-else-if="contract.returnedDate == null &&
+              filtered_deposit_settled_liability_account_suggestions.length === 0">
+              <p class="text-danger-500 dark:text-danger-500">
+                This contract was forfeited on {{ new Date(Date.parse(forfeitedDate))
+                .toLocaleDateString(undefined, {weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})
+                }} and can no longer be returned.
+              </p>
             </div>
             <div v-else-if="contract.returnedDate != null">
               <p class="text-slate-600 dark:text-slate-300">
