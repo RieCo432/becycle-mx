@@ -16,12 +16,14 @@ import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
+import Modal from '@/components/Modal/Modal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    Modal,
     Tooltip,
     SubmitCrimeReportCard,
     ComboboxTextInput,
@@ -36,6 +38,7 @@ export default {
   setup(props, context) {
     const credentialsStore = useCredentialsStore();
     const contractData = toRef(props, 'contract');
+    const showDepositTransactions = ref(false);
     const depositAmountCollected = computed(() => {
       return Math.abs(
         contractData.value.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected') ?
@@ -234,8 +237,7 @@ export default {
       steps,
       stepNumber,
       prev,
-
-
+      showDepositTransactions
     };
   },
   methods: {
@@ -532,11 +534,18 @@ export default {
         </div>
         <div class="col-span-12 lg:col-span-4 gap-5">
           <Card title="Contract">
-            <template #header v-if="isUserAdmin && !loadingContract">
-              <div class="col-span-6 mt-auto">
-                <DashButton class="w-full btn-sm bg-danger-600" @click="openEditContractDetailsModal">
-                  Edit Details
-                </DashButton>
+            <template #header v-if="!loadingContract && isUser">
+              <div class="grid grid-cols-12 gap-2">
+                <div class="col-span-6 mt-auto">
+                  <DashButton class="w-full btn-sm bg-danger-600" @click="() => showDepositTransactions = true">
+                    Show Txs
+                  </DashButton>
+                </div>
+                <div v-if="isUserAdmin" class="col-span-6 mt-auto">
+                  <DashButton class="w-full btn-sm bg-danger-600" @click="openEditContractDetailsModal">
+                    Edit Details
+                  </DashButton>
+                </div>
               </div>
             </template>
             <template v-if="loadingContract">
@@ -886,6 +895,34 @@ export default {
         </template>
       </div>
     </div>
+    <Modal title="Deposit Transactions" :active-modal="showDepositTransactions" @close="() => showDepositTransactions = false">
+      <table class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
+        <tr class=" dark:bg-slate-700">
+          <th class="border dark:border-slate-500">Account</th>
+          <th class="border dark:border-slate-500">Credit</th>
+          <th class="border dark:border-slate-500">Debit</th>
+        </tr>
+        <template v-for="transactionHeader in contract.depositTransactionHeaders
+        .toSorted((a, b) => new Date(Date.parse(a.createdOn)) - new Date(Date.parse(b.createdOn)))" :key="transactionHeader.id">
+          <tr class=" dark:bg-slate-600">
+            <td class="border dark:border-slate-500">{{ transactionHeader.event }}</td>
+            <td class="border dark:border-slate-500">{{ new Date(Date.parse(transactionHeader.postedOn))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</td>
+            <td></td>
+          </tr>
+          <tr v-for="line in transactionHeader.transactionLines" :key="line.id">
+            <td class="border dark:border-slate-500">{{ line.account.name }}</td>
+            <td class="border dark:border-slate-500">
+              {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
+            </td>
+            <td class="border dark:border-slate-500">
+              {{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}
+            </td>
+          </tr>
+        </template>
+      </table>
+    </Modal>
+    
   </div>
 </template>
 
