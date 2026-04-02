@@ -14,7 +14,7 @@ from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
 
 from .transactions import get_transaction_header
 from app.services.accounts_helpers import AccountTypes
-from .transactions import post_transaction_header
+from app.models import TransactionHeader, TransactionLine
 
 
 def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:
@@ -195,7 +195,6 @@ def return_contract(
 
 
 def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
-    # TODO: ensure deposit liability is reactivated
     contract = get_contract(db=db, contract_id=contract_id)
     
     if any([th.event == "deposit_forfeited" for th in contract.depositTransactionHeaders]):
@@ -203,6 +202,33 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Cannot extend contract with forfeited deposit"},
         )
+    
+    last_deposit_transaction_header = sorted(contract.depositTransactionHeaders, key=lambda th: th.postedOn, reverse=True)[0]
+    if last_deposit_transaction_header.event == "liability_dormant":
+        admin_id = db.scalar(select(models.User.id).where(models.User.username == "admin"))
+        if admin_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={"description": "Something went wrong while re-activating the deposit liability!"},
+            )
+        liability_reactivated_transaction_header = TransactionHeader(
+            contractId=contract.id,
+            event="liability_reactivated",
+            createdByUserId=admin_id,
+            postedOn=datetime.now(timezone.utc),
+            postedByUserId=admin_id,
+        )
+        db.add(liability_reactivated_transaction_header)
+        db.flush()
+        
+        for tl in last_deposit_transaction_header.transactionLines:
+            transaction_line = TransactionLine(
+                transactionHeaderId=liability_reactivated_transaction_header.id,
+                account=tl.account,
+                amount=-tl.amount
+            )
+            db.add(transaction_line)
+        db.commit()
 
     contract.endDate = (datetime.utcnow() + relativedelta(months=6)).date()
 
