@@ -151,17 +151,30 @@ def return_contract(
             headers={"WWW-Authenticate": "Bearer"}
         )
     
-            
+    liability_transaction_line = [tl for tl in deposit_settled_transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY][0]
     
+    if abs(account_balances_for_contract[liability_transaction_line.account.id]) < abs(liability_transaction_line.amount) :
+        for tl in deposit_settled_transaction_header.transactionLines:
+            db.delete(tl)
+        db.delete(deposit_settled_transaction_header)
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "The selected liability account does not have enough liability on this contract! Transaction has been deleted."},
+        )
     
     if sum(
             [tl.amount for tl in deposit_settled_transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY]
     ) != -sum(
         [tl.amount for tl in [th for th in contract.depositTransactionHeaders if th.event == "deposit_collected"][0].transactionLines if tl.account.type == AccountTypes.LIABILITY]
     ):
+        for tl in deposit_settled_transaction_header.transactionLines:
+            db.delete(tl)
+        db.delete(deposit_settled_transaction_header)
+        db.commit()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "The liability change in this transaction does not match the liability incurred when the contract was made!"},
+            detail={"description": "The liability change in this transaction does not match the liability incurred when the contract was made! Transaction has been deleted."},
             headers={"WWW-Authenticate": "Bearer"}
         )
 
