@@ -118,9 +118,7 @@ export default {
     },
   },
   mounted() {
-    console.log('route', this.$route);
     if (this.$route.query.showTerms === '1') {
-      console.log('show terms modal');
       this.showTermsModal = true;
     }
     this.getContract();

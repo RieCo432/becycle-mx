@@ -66,7 +66,6 @@ export default {
     const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: false});
 
     const submitItemDetails = handleSubmit(() => {
-      console.log(purchasePrice.value, recommendedRetailPrice.value);
       requests.postNewCatalogueItem(
         name.value,
         description.value,

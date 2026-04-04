@@ -275,11 +275,6 @@ export default {
       this.types = this.types === 'text' ? 'password' : 'text';
     },
     onEnter() {
-      // TODO: remove these
-      console.log('on enter, activeIndex: ', this.activeIndex);
-      console.log('on enter, suggestions: ', this.suggestions);
-      console.log('on enter, allowNew: ', this.allowNew);
-      console.log('on enter, fieldModelValue: ', this.fieldModelValue);
       if (this.activeIndex === -1 && this.allowNew) {
         this.selectedCallback(null, this.fieldModelValue);
       } else if (this.activeIndex >= 0) {
