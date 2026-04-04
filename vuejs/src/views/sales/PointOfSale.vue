@@ -206,6 +206,9 @@ export default {
               toast.success('Sale completed!', {timeout: 2000});
               closeSale();
               getSales();
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 2000});
             });
         })
         .catch((error) => {
