@@ -13,6 +13,7 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import SaleSummaryCard from '@/components/Card/SaleSummaryCard.vue';
+import {VueSpinner} from 'vue3-spinners';
 
 const toast = useToast();
 export default {
@@ -20,7 +21,14 @@ export default {
   components: {
     SaleSummaryCard,
     ComboboxTextInput,
-    BikeOverviewCard, BikeCatalogue, Icon, Modal, TextInput, CatalogueItemCard, Button,
+    BikeOverviewCard,
+    BikeCatalogue,
+    Icon,
+    Modal,
+    TextInput,
+    CatalogueItemCard,
+    Button,
+    VueSpinner,
   },
   setup(props, context) {
     const revenueAccounts = ref([]);
@@ -45,6 +53,7 @@ export default {
     const userSelectionOptionsStatic = ref(false);
     const browseSales = ref(false);
     const quantityError = ref(null);
+    const processingSale = ref(false);
 
     const saleCheckoutSchema = yup.object().shape({
       hasCatalogueItemSaleLines: yup.boolean(),
@@ -152,6 +161,7 @@ export default {
     }
 
     const submitSaleCheckout = handleSubmit(() => {
+      processingSale.value = true;
       const catalogueItemTotalSalePrice = currentSale.value
         .catalogueItemSaleLines
         .reduce((total, line) => total + line.salePrice, 0);
@@ -209,6 +219,9 @@ export default {
             })
             .catch((error) => {
               toast.error(error.response.data.detail.description, {timeout: 2000});
+            })
+            .finally(() => {
+              processingSale.value = false;
             });
         })
         .catch((error) => {
@@ -218,6 +231,7 @@ export default {
             passwordSetErrors('Wrong Password!');
           }
           toast.error(error.response.data.detail.description, {timeout: 2000});
+          processingSale.value = false;
         });
     });
 
@@ -261,6 +275,7 @@ export default {
       browseSales,
       closeSale,
       quantityError,
+      processingSale,
     };
   },
   created() {
@@ -839,7 +854,13 @@ export default {
                         hasicon/>
                     </div>
                     <div class="col-span-full">
-                      <Button class="w-full" type="submit" text="Complete Sale"/>
+                      <Button
+                        class="w-full"
+                        btnClass="btn-dark"
+                        :disabled="processingSale">
+                        <span v-if="!processingSale">Confirm Payment</span>
+                        <VueSpinner v-if="processingSale" size="20px" class="text-sky-500"/>
+                      </Button>
                     </div>
                   </div>
                 </form>
