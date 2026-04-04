@@ -38,9 +38,7 @@ export default {
       depositAssetAccounts: [],
       depositRevenueAccounts: [],
       activeUsers: [],
-      returnAcceptedByUser: {
-        username: 'null',
-      },
+      returnAcceptedByUser: {},
       loadingBike: true,
       loadingClient: true,
       loadingContract: true,
@@ -73,12 +71,15 @@ export default {
         Promise.all([
           requests.getUser(this.contract['workingUserId']),
           requests.getUser(this.contract['checkingUserId']),
+          ...(this.contract['returnAcceptingUserId'] ? [requests.getUser(this.contract['returnAcceptingUserId'])] : []),
         ]).then(([
           workingUserResponse,
           checkingUserResponse,
+          returnAcceptedByUserResponse,
         ]) => {
           this.workingUser = workingUserResponse.data;
           this.checkingUser = checkingUserResponse.data;
+          this.returnAcceptedByUser = returnAcceptedByUserResponse ? returnAcceptedByUserResponse.data : null;
           this.loadingContract = false;
         });
       });
