@@ -263,6 +263,7 @@ def get_paper_contract(db: Session, paper_id: str) -> UUID:
 
 def delete_contract(db: Session, contract_id: UUID) -> None:
     # TODO: cannot just delete a contract. the transaction headers must be dealt with
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail={"description": "Deleting Contracts is not supported at this time."})
     contract = get_contract(db=db, contract_id=contract_id)
     paper_contract = db.scalar(
         select(models.PaperContract)

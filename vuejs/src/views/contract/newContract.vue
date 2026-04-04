@@ -51,7 +51,7 @@
           <div
               class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
           >
-            <form @submit.prevent="submit" @keydown.enter="submit">
+            <form @submit.prevent="submit" @keydown.enter="() => {}">
               <div v-if="stepNumber === 0">
                 <div class="grid grid-cols-1 2xl:grid-cols-2 gap-5">
                   <div class="col-span-1">
@@ -203,9 +203,7 @@
                         @click.prevent="() => {modelNotInList = !modelNotInList}"
                     />
                   </div>
-
-
-                  <!-- TODO: colour suggestions should be shown as coloured dots -->
+                  
                   <div class="col-span-6 xl:col-span-4 xl:row-span-4 xl:row-start-3 col-start-1">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"
@@ -582,7 +580,7 @@
                 <Button
                     v-if="stepNumber !== 0"
                     btnClass="btn-dark"
-                >
+                    :disabled="stepIsLoading">
                   <span v-if="!stepIsLoading">{{stepNumber !== this.steps.length - 1 ? 'next' : 'submit'}}</span>
                   <VueSpinner v-if="stepIsLoading" size="20px" class="text-sky-500"/>
                 </Button>
@@ -1692,6 +1690,9 @@ export default {
       levenshtein.filterSort(this.serialNumberSuggestions, this.serialNumber, 4).then((result) => {
         this.filtered_serial_number_suggestions = result.slice(0, 6);
       });
+    },
+    stepNumber() {
+      this.stepIsLoading = false;
     },
   },
   computed: {
