@@ -203,9 +203,7 @@
                         @click.prevent="() => {modelNotInList = !modelNotInList}"
                     />
                   </div>
-
-
-                  <!-- TODO: colour suggestions should be shown as coloured dots -->
+                  
                   <div class="col-span-6 xl:col-span-4 xl:row-span-4 xl:row-start-3 col-start-1">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"

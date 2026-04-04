@@ -3,8 +3,6 @@ import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import SaleSummaryCard from '@/components/Card/SaleSummaryCard.vue';
 
-// TODO: this needs to become a functional sales history
-
 const toast = useToast();
 export default {
   name: 'index',

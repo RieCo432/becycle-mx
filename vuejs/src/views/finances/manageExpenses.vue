@@ -7,8 +7,6 @@ import DashButton from '@/components/Button/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import EditExpenseModal from '@/components/Modal/EditExpenseModal.vue';
 
-// TODO: this needs deleted
-
 const toast = useToast();
 
 export default {
