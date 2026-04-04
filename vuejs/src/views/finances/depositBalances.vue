@@ -36,8 +36,10 @@ export default {
         const transactionsOnDate = pageOnDate['transactions'].map((transaction) => {
           const diffByAccountString = transaction['diff_by_account'];
           Object.keys(diffByAccountString).forEach((accountName) => {
-            diffByAccountString[accountName] = 
-              `${diffByAccountString[accountName] > 0 ? '+' : ''}${diffByAccountString[accountName] < 0 ? '-' : ''} £${(Math.abs(diffByAccountString[accountName] / 100)).toFixed(2)}`;
+            diffByAccountString[accountName] =
+              `${diffByAccountString[accountName] > 0 ? '+' : ''}
+              ${diffByAccountString[accountName] < 0 ? '-' : ''} 
+              £${(Math.abs(diffByAccountString[accountName] / 100)).toFixed(2)}`;
           });
           return {
             details: {
@@ -52,8 +54,10 @@ export default {
         const dayDiffByAccountNameString = pageOnDate['diff'];
         depositAccounts.forEach((accountName) => {
           if (dayDiffByAccountNameString.hasOwnProperty(accountName)) {
-            dayDiffByAccountNameString[accountName] = 
-              `${dayDiffByAccountNameString[accountName] > 0 ? '+' : ''}${dayDiffByAccountNameString[accountName] < 0 ? '-' : ''} £${(Math.abs(dayDiffByAccountNameString[accountName] / 100)).toFixed(2)}`;
+            dayDiffByAccountNameString[accountName] =
+              `${dayDiffByAccountNameString[accountName] > 0 ? '+' : ''}
+              ${dayDiffByAccountNameString[accountName] < 0 ? '-' : ''} 
+              £${(Math.abs(dayDiffByAccountNameString[accountName] / 100)).toFixed(2)}`;
           } else {
             dayDiffByAccountNameString[accountName] = '0';
           }
@@ -63,7 +67,9 @@ export default {
         depositAccounts.forEach((accountName) => {
           if (dayBalancesByAccountNameString.hasOwnProperty(accountName)) {
             dayBalancesByAccountNameString[accountName] =
-              `${dayBalancesByAccountNameString[accountName] > 0 ? '+' : ''}${dayBalancesByAccountNameString[accountName] < 0 ? '-' : ''} £${(Math.abs(dayBalancesByAccountNameString[accountName] / 100)).toFixed(2)}`;
+              `${dayBalancesByAccountNameString[accountName] > 0 ? '+' : ''}
+              ${dayBalancesByAccountNameString[accountName] < 0 ? '-' : ''} 
+              £${(Math.abs(dayBalancesByAccountNameString[accountName] / 100)).toFixed(2)}`;
           } else {
             dayBalancesByAccountNameString[accountName] = '0';
           }
