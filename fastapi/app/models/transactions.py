@@ -12,17 +12,17 @@ class TransactionHeader(Base):
     __tablename__ = "transactionheaders"
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
-    event: Mapped[str] = mapped_column("event", String(60), nullable=False, quote=False)
+    event: Mapped[str] = mapped_column("event", String(60), nullable=False, quote=False, index=True)
 
-    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
-    createdByUserId: Mapped[UUID] = mapped_column("createdbyuserid", ForeignKey("users.id"), nullable=False, quote=False)
+    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False, index=True)
+    createdByUserId: Mapped[UUID] = mapped_column("createdbyuserid", ForeignKey("users.id"), nullable=False, quote=False, index=True)
     createdByUser: Mapped["User"] = relationship("User", foreign_keys=[createdByUserId], back_populates="transactionHeadersCreated")
 
-    postedOn: Mapped[datetime] = mapped_column("postedon", DateTime, nullable=True, quote=False)
-    postedByUserId: Mapped[UUID] = mapped_column("postedbyuserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
+    postedOn: Mapped[datetime] = mapped_column("postedon", DateTime, nullable=True, quote=False, index=True)
+    postedByUserId: Mapped[UUID] = mapped_column("postedbyuserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False, index=True)
     postedByUser: Mapped["User"] = relationship("User", foreign_keys=[postedByUserId], back_populates="transactionHeadersPosted")
 
-    contractId: Mapped[UUID] = mapped_column("contractid", ForeignKey("contracts.id"), nullable=True, quote=False)
+    contractId: Mapped[UUID] = mapped_column("contractid", ForeignKey("contracts.id"), nullable=True, quote=False, index=True)
     contract: Mapped["Contract"] = relationship("Contract", foreign_keys=[contractId], back_populates="depositTransactionHeaders")
     
     transactionLines: Mapped[List["TransactionLine"]] = relationship("TransactionLine", back_populates="transactionHeader")
@@ -49,10 +49,10 @@ class TransactionLine(Base):
     __tablename__ = "transactionlines"
     
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
-    transactionHeaderId: Mapped[UUID] = mapped_column("transactionheaderid", ForeignKey("transactionheaders.id"), nullable=False, quote=False)
+    transactionHeaderId: Mapped[UUID] = mapped_column("transactionheaderid", ForeignKey("transactionheaders.id"), nullable=False, quote=False, index=True)
     transactionHeader: Mapped["TransactionHeader"] = relationship("TransactionHeader", foreign_keys=[transactionHeaderId], back_populates="transactionLines")
     
-    accountId: Mapped[UUID] = mapped_column("accountid", ForeignKey("accounts.id"), nullable=False, quote=False)
+    accountId: Mapped[UUID] = mapped_column("accountid", ForeignKey("accounts.id"), nullable=False, quote=False, index=True)
     account: Mapped["Account"] = relationship("Account", foreign_keys=[accountId], back_populates="transactionLines")
     
     amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)  # value in the smallest unit (penny), positive for debit, negative for credit
