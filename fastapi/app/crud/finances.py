@@ -9,13 +9,15 @@ from sklearn import linear_model
 
 import app.models as models
 import app.schemas as schemas
-from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date, get_contract_drafts_grouped_by_start_date
+from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date, \
+    get_contract_drafts_grouped_by_start_date, get_contracts_client_data
 from .depositExchanges import get_deposit_exchanges_grouped_by_date
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from app.services import get_interval_timedelta
 from .users import get_deposit_bearers
 from ..services.accounts_helpers import AccountTypes
+import time
 
 
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
@@ -107,41 +109,70 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
 
 
 def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) -> schemas.DepositAccountBalances:
-    deposit_transaction_dates = [_ for _ in db.scalars(select(models.TransactionHeader.postedOn.cast(Date).distinct())
-                                                 .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost']))
-                                                 .order_by(models.TransactionHeader.postedOn.cast(Date)))]
+    deposit_transaction_dates = db.scalars(select(models.TransactionHeader.postedOn.cast(Date).distinct())
+                                           .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost']))
+                                           .order_by(models.TransactionHeader.postedOn.cast(Date)))
 
 
     deposit_account_day_balances_before_this_day = {}
     
     deposit_balances = schemas.DepositAccountBalances()
+    total_query_time = 0
+    total_calculation_time = 0
+    total_day_transaction_time = 0
+    total_day_balances_time = 0
+    total_time_asset_accounts_only = 0
     
     for deposit_transaction_date in deposit_transaction_dates:
-        deposit_transactions_on_this_date = [_ for _ in db.scalars(select(models.TransactionHeader)
-                                                 .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost'])
-                                                        & (models.TransactionHeader.postedOn.cast(Date) == deposit_transaction_date)))]
+        time_pre_query = time.perf_counter()
+        deposit_transactions_on_this_date = db.scalars(
+            select(models.TransactionHeader)
+            .join(models.Contract, models.TransactionHeader.contractId == models.Contract.id)
+            .join(models.Client, models.Contract.clientId == models.Client.id)
+            .where(
+                models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost'])
+                & (models.TransactionHeader.postedOn.cast(Date) == deposit_transaction_date)
+            )
+        )
+        time_post_query = time.perf_counter()
+        total_query_time += time_post_query - time_pre_query
+        #print(f"Query took {time_post_query - time_pre_query:.6f} seconds")
 
 
+        time_pre_calculation = time.perf_counter()
         deposit_account_day_balances = schemas.DepositAccountsDayBalances()
         
         for deposit_transaction in deposit_transactions_on_this_date:
+            
+            time_pre_asset_accounts_only = time.perf_counter()
             for transaction_line in deposit_transaction.transactionLines:
                 if not only_asset_accounts or transaction_line.account.type == AccountTypes.ASSET:
                     deposit_account_day_balances.diff[transaction_line.account.name] = deposit_account_day_balances.diff.get(transaction_line.account.name, 0) + transaction_line.amount
+            time_post_asset_accounts_only = time.perf_counter()
+            total_time_asset_accounts_only += time_post_asset_accounts_only - time_pre_asset_accounts_only
+            #print(f"Asset accounts only took {time_post_asset_accounts_only - time_pre_asset_accounts_only:.6f} seconds")
 
-            contract = None
-            if deposit_transaction.event in ["deposit_collected", "deposit_settled"]:
-                contract = db.scalar(select(models.Contract).where(models.Contract.id == deposit_transaction.contractId))
-            
+
+
+
+            time_pre_day_transaction = time.perf_counter()
             deposit_account_day_balances.transactions.append(schemas.DepositAccountTransaction(
                 details=schemas.DepositTransactionDetails(
-                    title = f"{contract.client.firstName} {contract.client.lastName}" if contract is not None else deposit_transaction.event,
-                    contractId = contract.id if contract is not None else None,
+                    title = f"{deposit_transaction.contract.client.firstName} {deposit_transaction.contract.client.lastName}" if deposit_transaction.contractId is not None else deposit_transaction.event,
+                    contractId = deposit_transaction.contractId,
                 ),
                 event=deposit_transaction.event,
                 diff_by_account={line.account.name: line.amount for line in deposit_transaction.transactionLines if not only_asset_accounts or line.account.type == AccountTypes.ASSET}
             ))
+            time_post_day_transaction = time.perf_counter()
+            total_day_transaction_time += time_post_day_transaction - time_pre_day_transaction
+            #print(f"Day transactions took {time_post_day_transaction - time_pre_day_transaction:.6f} seconds")
             
+            
+            
+            
+            
+            time_pre_day_balances = time.perf_counter()
             deposit_account_day_balances.balances = {
                 account_name: sum([
                     deposit_account_day_balances.diff.get(account_name, 0) + 
@@ -153,9 +184,24 @@ def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) 
                         deposit_account_day_balances.diff.get(account_name, 0) == 0 and 
                         deposit_account_day_balances_before_this_day.get(account_name, 0) == 0
                 )}
+            time_post_day_balances = time.perf_counter()
+            total_day_balances_time += time_post_day_balances - time_pre_day_balances
+            #print(f"Day balances took {time_post_day_balances - time_pre_day_balances:.6f} seconds")
+            
             
         deposit_account_day_balances_before_this_day = deposit_account_day_balances.balances
         deposit_balances.dayBalances[deposit_transaction_date] = deposit_account_day_balances
+        
+        time_post_calculation = time.perf_counter()
+        total_calculation_time += time_post_calculation - time_pre_calculation
+        #print(f"Calculation took {time_post_calculation - time_pre_calculation:.6f} seconds")
+        
+
+    print(f"Total query time                   : {total_query_time:.6f} seconds")
+    print(f"Total calculation time             : {total_calculation_time:.6f} seconds")
+    print(f"Total time for day transactions    : {total_day_transaction_time:.6f} seconds")
+    print(f"Total time for day balances        : {total_day_balances_time:.6f} seconds")
+    print(f"Total time for asset accounts only : {total_time_asset_accounts_only:.6f} seconds")
         
     return deposit_balances
         
