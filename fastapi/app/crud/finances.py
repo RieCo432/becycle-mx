@@ -2,22 +2,19 @@ from math import ceil
 
 import numpy as np
 from fastapi import HTTPException, status
-from openpyxl.chart import trendline
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, select, Date
 from sklearn import linear_model
 
 import app.models as models
 import app.schemas as schemas
-from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date, \
-    get_contract_drafts_grouped_by_start_date, get_contracts_client_data
+from .contracts import get_contracts_grouped_by_start_date, get_contracts_grouped_by_returned_date
 from .depositExchanges import get_deposit_exchanges_grouped_by_date
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from app.services import get_interval_timedelta
 from .users import get_deposit_bearers
 from ..services.accounts_helpers import AccountTypes
-import time
 
 
 def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
@@ -108,7 +105,7 @@ def get_deposit_balances_book(db: Session) -> schemas.DepositBalancesBook:
     return schemas.DepositBalancesBook(dayBalances=deposit_balances_book)
 
 
-def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) -> schemas.DepositAccountBalances:
+def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True, only_deposit_bearer_accounts: bool = True) -> schemas.DepositAccountBalances:
     deposit_transaction_dates = db.scalars(select(models.TransactionHeader.postedOn.cast(Date).distinct())
                                            .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost']))
                                            .order_by(models.TransactionHeader.postedOn.cast(Date)))
@@ -150,7 +147,14 @@ def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True) 
             # if we only want data for asset accounts, filter out non-asset accounts
             filtered_lines = [
                 line for line in deposit_transaction.transactionLines
-                if not only_asset_accounts or line.account.type == AccountTypes.ASSET
+                if (
+                           not only_asset_accounts 
+                           or line.account.type == AccountTypes.ASSET
+                )
+                and (
+                    not only_deposit_bearer_accounts
+                    or "deposit" in line.account.showInUis or "return" in line.account.showInUis
+                   )
             ]
             
             for transaction_line in filtered_lines:

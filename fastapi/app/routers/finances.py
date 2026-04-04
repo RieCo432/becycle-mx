@@ -22,8 +22,11 @@ async def get_deposit_book(db: Session = Depends(dep.get_db)) -> schemas.Deposit
 
 
 @finances.get("/finances/deposit-accounts")
-async def get_deposit_book(only_asset_accounts: bool = True, db: Session = Depends(dep.get_db)) -> schemas.DepositAccountBalances:
-    return crud.get_deposit_account_balances(db=db, only_asset_accounts=only_asset_accounts)
+async def get_deposit_book(
+        only_asset_accounts: bool = True, 
+        only_deposit_bearer_accounts: bool = True,
+        db: Session = Depends(dep.get_db)) -> schemas.DepositAccountBalances:
+    return crud.get_deposit_account_balances(db=db, only_asset_accounts=only_asset_accounts, only_deposit_bearer_accounts=only_deposit_bearer_accounts)
 
 
 @finances.get("/finances/deposits/total")
