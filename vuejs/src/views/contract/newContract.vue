@@ -51,7 +51,9 @@
           <div
               class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
           >
-            <form @submit.prevent="submit" @keydown.enter="submit">
+            <form @submit.prevent="submit" @keydown.enter="() => {
+              if (stepNumber !== this.steps.length - 1) submit()
+            }">
               <div v-if="stepNumber === 0">
                 <div class="grid grid-cols-1 2xl:grid-cols-2 gap-5">
                   <div class="col-span-1">
