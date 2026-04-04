@@ -386,10 +386,10 @@ def test_get_contracts_takeout_excel(contracts, admin_user_auth_header):
         assert df_filtered["Contract Type"][0] == contract.contractType
         assert df_filtered["Working Volunteer"][0] == contract.workingUser.username
         assert df_filtered["Checking Volunteer"][0] == contract.checkingUser.username
-        assert df_filtered["Deposit Amount Collected"][0] == contract.depositAmountCollected
+        assert df_filtered["Deposit Amount Collected"][0] == contract.depositAmountCollectedRestricted
         assert df_filtered["Deposit Collected By"][0] == contract.depositCollectingUser.username
         assert df_filtered["Returned Date"][0].date() == contract.returnedDate if contract.returnedDate is not None else pd.isnull(df_filtered["Returned Date"][0])
-        assert df_filtered["Deposit Amount Returned"][0] == contract.depositAmountReturned if contract.depositAmountReturned is not None else pd.isnull(df_filtered["Deposit Amount Returned"][0])
+        assert df_filtered["Deposit Amount Returned"][0] == contract.depositAmountReturnedRestricted if contract.depositAmountReturnedRestricted is not None else pd.isnull(df_filtered["Deposit Amount Returned"][0])
         assert df_filtered["Deposit Returned By"][0] == contract.depositReturningUser.username if contract.depositReturningUser is not None else pd.isnull(df_filtered["Deposit Returned By"][0])
         assert df_filtered["Return Received By"][0] == contract.returnAcceptingUser.username if contract.returnAcceptingUser is not None else pd.isnull(df_filtered["Return Received By"][0])
 

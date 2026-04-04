@@ -33,22 +33,22 @@ class Contract(Base):
     checkingUserId: Mapped[UUID] = mapped_column("checkinguserid", ForeignKey("users.id"), nullable=False, quote=False)
     checkingUser: Mapped["User"] = relationship("User", foreign_keys=[checkingUserId], back_populates="checkedContracts")
 
-    depositCollectingUserId: Mapped[UUID] = mapped_column("depositcollectinguserid", ForeignKey("users.id"), nullable=True, quote=False)
-    depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")
+    depositCollectingUserId: Mapped[UUID] = mapped_column("depositcollectinguserid", ForeignKey("users.id"), nullable=True, quote=False)  # TODO: needs removed long-term
+    depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")  # TODO: needs removed long-term
 
     returnAcceptingUserId: Mapped[UUID] = mapped_column("returnacceptinguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
     returnAcceptingUser: Mapped["User"] = relationship("User", foreign_keys=[returnAcceptingUserId], back_populates="returnedContracts")
 
-    depositReturningUserId: Mapped[UUID] = mapped_column("depositreturninguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
-    depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")
+    depositReturningUserId: Mapped[UUID] = mapped_column("depositreturninguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)  # TODO: needs removed long-term
+    depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")  # TODO: needs removed long-term
 
     startDate: Mapped[date] = mapped_column("startdate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, index=True, quote=False)
     endDate: Mapped[date] = mapped_column("enddate", Date, default=datetime.utcnow().date() + relativedelta(months=CONTRACT_EXPIRE_MONTHS), server_default=text("(current_date at time zone 'utc' + make_interval(months => {:d}))".format(CONTRACT_EXPIRE_MONTHS)), nullable=False, index=True, quote=False)
 
     returnedDate: Mapped[date] = mapped_column("returneddate", Date, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
-    depositAmountCollected: Mapped[int] = mapped_column("depositamountcollected", Integer, nullable=True, quote=False)
-    depositAmountReturned: Mapped[int] = mapped_column("depositamountreturned", Integer, nullable=True, quote=False, server_default=text("NULL"), default=None)
+    depositAmountCollected: Mapped[int] = mapped_column("depositamountcollected", Integer, nullable=True, quote=False)  # TODO: needs removed long-term
+    depositAmountReturned: Mapped[int] = mapped_column("depositamountreturned", Integer, nullable=True, quote=False, server_default=text("NULL"), default=None)  # TODO: needs removed long-term
 
     conditionOfBike: Mapped[str] = mapped_column("conditionofbike", String(20), nullable=False, quote=False)
     contractType: Mapped[str] = mapped_column("contracttype", String(20), nullable=False, quote=False)
@@ -124,8 +124,8 @@ class Contract(Base):
             str(self.startDate) == str(other.startDate),
             str(self.endDate) == str(other.endDate),
             str(self.returnedDate) == str(other.returnedDate),
-            str(self.depositAmountCollected) == str(other.depositAmountCollected),
-            str(self.depositAmountReturned) == str(other.depositAmountReturned),
+            str(self.depositAmountCollected) == str(other.depositAmountCollectedRestricted),
+            str(self.depositAmountReturned) == str(other.depositAmountReturnedRestricted),
             str(self.conditionOfBike) == str(other.conditionOfBike),
             str(self.contractType) == str(other.contractType),
             str(self.notes) == str(other.notes),

@@ -278,10 +278,6 @@ def delete_contract(db: Session, contract_id: UUID) -> None:
 def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: schemas.ContractPatch) -> models.Contract:
     contract = get_contract(db=db, contract_id=contract_id)
 
-    # TODO: deposit information needs to use new model
-    # if contract_patch_data.depositAmountCollected is not None:
-    #     contract.depositAmountCollected = contract_patch_data.depositAmountCollected
-
     if contract_patch_data.conditionOfBike is not None:
         contract.conditionOfBike = contract_patch_data.conditionOfBike
 
@@ -303,29 +299,14 @@ def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: 
     if contract_patch_data.checkingUserId is not None:
         contract.checkingUserId = contract_patch_data.checkingUserId
 
-    # if contract_patch_data.depositCollectingUserId is not None:
-    #     contract.depositCollectingUserId = contract_patch_data.depositCollectingUserId
 
-    if contract_patch_data.returned:
-        # if contract_patch_data.depositAmountReturned is not None:
-        #     contract.depositAmountReturned = contract_patch_data.depositAmountReturned
+    if contract.returnedDate is not None and contract_patch_data.returnedDate is not None:
 
         if contract_patch_data.returnAcceptingUserId is not None:
             contract.returnAcceptingUserId = contract_patch_data.returnAcceptingUserId
 
-        # if contract_patch_data.depositReturningUserId is not None:
-        #     contract.depositReturningUserId = contract_patch_data.depositReturningUserId
-
         if contract_patch_data.returnedDate is not None:
             contract.returnedDate = contract_patch_data.returnedDate
-    else:
-        # contract.depositAmountReturned = None
-
-        contract.returnAcceptingUserId = None
-
-        # contract.depositReturningUser = None
-
-        contract.returnedDate = None
 
     db.commit()
 
@@ -513,3 +494,87 @@ def get_contract_drafts_grouped_by_start_date(db: Session) -> dict[date, list[mo
     contract_drafts_by_start_date = {start_date: get_contract_drafts_by_start_date(db=db, start_date=start_date) for start_date in get_contract_draft_start_dates(db=db)}
     return contract_drafts_by_start_date
 
+
+def get_collected_and_returned_deposit_amounts(db: Session, contract_id: UUID) -> tuple[int, int | None]:
+    contract = get_contract(db=db, contract_id=contract_id)
+    if contract is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": "Contract not found!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    deposit_amount_collected = db.scalar(
+        select(models.TransactionLine.amount)
+        .join(models.TransactionHeader)
+        .join(models.Account)
+        .where(
+            (models.TransactionHeader.contractId == contract.id)
+            & (models.TransactionHeader.event == "deposit_collected")
+            & (models.Account.type == AccountTypes.LIABILITY)
+        )
+    )
+
+    deposit_amount_returned = db.scalar(
+        select(models.TransactionLine.amount)
+        .join(models.TransactionHeader)
+        .join(models.Account)
+        .where(
+            (models.TransactionHeader.contractId == contract.id)
+            & (models.TransactionHeader.event == "deposit_settled")
+            & (models.Account.type == AccountTypes.ASSET)
+        )
+    )
+    
+    deposit_amount_collected = -deposit_amount_collected if deposit_amount_collected is not None else 0
+    deposit_amount_returned = -deposit_amount_returned if deposit_amount_returned is not None else None
+    
+    return deposit_amount_collected, deposit_amount_returned
+
+
+def get_client_restricted_contract(db: Session, client_id: UUID, contract: models.Contract | None = None, contract_id: UUID | None = None) -> schemas.ContractRestricted:
+    if contract is None and contract_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Either contract or contract_id must be provided!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    if contract is None and contract_id is not None:
+        contract = get_client_contract(db=db, client_id=client_id, contract_id=contract_id)
+
+    deposit_amount_collected, deposit_amount_returned = get_collected_and_returned_deposit_amounts(db=db, contract_id=contract.id)
+
+    return schemas.ContractRestricted(
+        id=contract.id,
+        startDate=contract.startDate,
+        endDate=contract.endDate,
+        returnedDate=contract.returnedDate,
+        detailsSent=contract.detailsSent,
+        expiryReminderSent=contract.expiryReminderSent,
+        returnDetailsSent=contract.returnDetailsSent,
+        clientId=contract.clientId,
+        bikeId=contract.bikeId,
+        conditionOfBike=contract.conditionOfBike,
+        contractType=contract.contractType,
+        notes=contract.notes,
+        crimeReports=[
+            schemas.CrimeReport(
+                id=report.id,
+                crimeNumber=report.crimeNumber,
+                createdOn=report.createdOn,
+                closedOn=report.closedOn,
+                contractId=report.contractId
+            ) for report in contract.crimeReports
+        ],
+        depositAmountCollectedRestricted=deposit_amount_collected,
+        depositAmountReturnedRestricted=deposit_amount_returned
+    )
+
+def get_client_restricted_contracts(db: Session, client_id: UUID) -> list[schemas.ContractRestricted]:
+    contracts = get_contracts(db=db, client_id=client_id)
+    
+    return [
+        get_client_restricted_contract(db=db, client_id=client_id, contract=contract)
+        for contract in contracts
+    ]
