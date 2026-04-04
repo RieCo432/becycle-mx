@@ -582,7 +582,7 @@
                 <Button
                     v-if="stepNumber !== 0"
                     btnClass="btn-dark"
-                >
+                    :disabled="stepIsLoading">
                   <span v-if="!stepIsLoading">{{stepNumber !== this.steps.length - 1 ? 'next' : 'submit'}}</span>
                   <VueSpinner v-if="stepIsLoading" size="20px" class="text-sky-500"/>
                 </Button>
