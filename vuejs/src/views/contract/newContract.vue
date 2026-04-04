@@ -51,9 +51,7 @@
           <div
               class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
           >
-            <form @submit.prevent="submit" @keydown.enter="() => {
-              if (stepNumber !== this.steps.length - 1) submit()
-            }">
+            <form @submit.prevent="submit" @keydown.enter="() => {}">
               <div v-if="stepNumber === 0">
                 <div class="grid grid-cols-1 2xl:grid-cols-2 gap-5">
                   <div class="col-span-1">
@@ -1692,6 +1690,9 @@ export default {
       levenshtein.filterSort(this.serialNumberSuggestions, this.serialNumber, 4).then((result) => {
         this.filtered_serial_number_suggestions = result.slice(0, 6);
       });
+    },
+    stepNumber() {
+      this.stepIsLoading = false;
     },
   },
   computed: {
