@@ -206,8 +206,8 @@ def test_get_my_deposit_balance(users, deposit_bearer_user_auth_header, contract
     response = client.get("/users/me/deposit_balance", headers=deposit_bearer_user_auth_header)
 
     assert response.status_code == 200
-    assert (response.json() == sum([contract.depositAmountCollected for contract in users[2].depositCollectedContracts])
-            - sum([contract.depositAmountReturned for contract in users[2].depositReturnedContracts])
+    assert (response.json() == sum([contract.depositAmountCollectedRestricted for contract in users[2].depositCollectedContracts])
+            - sum([contract.depositAmountReturnedRestricted for contract in users[2].depositReturnedContracts])
             + sum([deposit_exchange.amount for deposit_exchange in users[2].depositExchangesReceived])
             - sum([deposit_exchange.amount for deposit_exchange in users[2].depositExchangesGiven]))
 

@@ -202,13 +202,13 @@ def test_get_total_deposits_yearly(contracts, normal_user_auth_header):
             "name": "standard",
             "data": [
                 [one_year_ago_str, sum([
-                    contracts[0].depositAmountCollected
+                    contracts[0].depositAmountCollectedRestricted
                 ])],
                 [today_str, sum([
-                    contracts[0].depositAmountCollected,
-                    contracts[2].depositAmountCollected,
-                    contracts[4].depositAmountCollected,
-                    contracts[6].depositAmountCollected,
+                    contracts[0].depositAmountCollectedRestricted,
+                    contracts[2].depositAmountCollectedRestricted,
+                    contracts[4].depositAmountCollectedRestricted,
+                    contracts[6].depositAmountCollectedRestricted,
                 ])]
             ]
         },
@@ -216,12 +216,12 @@ def test_get_total_deposits_yearly(contracts, normal_user_auth_header):
             "name": "refugee",
             "data": [
                 [one_year_ago_str, sum([
-                    contracts[1].depositAmountCollected,
-                    contracts[5].depositAmountCollected
+                    contracts[1].depositAmountCollectedRestricted,
+                    contracts[5].depositAmountCollectedRestricted
                 ])],
                 [today_str, sum([
-                    contracts[1].depositAmountCollected,
-                    contracts[5].depositAmountCollected
+                    contracts[1].depositAmountCollectedRestricted,
+                    contracts[5].depositAmountCollectedRestricted
                 ])]
             ]
         },
@@ -230,7 +230,7 @@ def test_get_total_deposits_yearly(contracts, normal_user_auth_header):
             "data": [
                 [one_year_ago_str, 0],
                 [today_str, sum([
-                    contracts[3].depositAmountCollected
+                    contracts[3].depositAmountCollectedRestricted
                 ])]
             ]
         }
@@ -257,32 +257,32 @@ def test_get_total_deposits_quarterly(contracts, normal_user_auth_header):
             "data": [
                 [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, sum([
-                    contracts[0].depositAmountCollected
+                    contracts[0].depositAmountCollectedRestricted
                 ])],
                 [four_quarter_ago_str, sum([
-                    contracts[0].depositAmountCollected
+                    contracts[0].depositAmountCollectedRestricted
                 ])],
                 [three_quarter_ago_str, sum([
-                    contracts[0].depositAmountCollected,
-                    contracts[4].depositAmountCollected
+                    contracts[0].depositAmountCollectedRestricted,
+                    contracts[4].depositAmountCollectedRestricted
                 ])],
                 [two_quarter_ago_str, sum([
-                    contracts[0].depositAmountCollected,
-                    contracts[4].depositAmountCollected,
-                    contracts[2].depositAmountCollected,
-                    contracts[6].depositAmountCollected,
+                    contracts[0].depositAmountCollectedRestricted,
+                    contracts[4].depositAmountCollectedRestricted,
+                    contracts[2].depositAmountCollectedRestricted,
+                    contracts[6].depositAmountCollectedRestricted,
                 ])],
                 [one_quarter_ago_str, sum([
-                    contracts[0].depositAmountCollected,
-                    contracts[4].depositAmountCollected,
-                    contracts[2].depositAmountCollected,
-                    contracts[6].depositAmountCollected,
+                    contracts[0].depositAmountCollectedRestricted,
+                    contracts[4].depositAmountCollectedRestricted,
+                    contracts[2].depositAmountCollectedRestricted,
+                    contracts[6].depositAmountCollectedRestricted,
                 ])],
                 [today_str, sum([
-                    contracts[0].depositAmountCollected,
-                    contracts[4].depositAmountCollected,
-                    contracts[2].depositAmountCollected,
-                    contracts[6].depositAmountCollected,
+                    contracts[0].depositAmountCollectedRestricted,
+                    contracts[4].depositAmountCollectedRestricted,
+                    contracts[2].depositAmountCollectedRestricted,
+                    contracts[6].depositAmountCollectedRestricted,
                 ])]
             ]
         },
@@ -290,31 +290,31 @@ def test_get_total_deposits_quarterly(contracts, normal_user_auth_header):
             "name": "refugee",
             "data": [
                 [six_quarter_ago_str, sum([
-                    contracts[1].depositAmountCollected,
+                    contracts[1].depositAmountCollectedRestricted,
                 ])],
                 [five_quarter_ago_str, sum([
-                    contracts[1].depositAmountCollected,
-                    contracts[5].depositAmountCollected,
+                    contracts[1].depositAmountCollectedRestricted,
+                    contracts[5].depositAmountCollectedRestricted,
                 ])],
                 [four_quarter_ago_str, sum([
-                    contracts[1].depositAmountCollected,
-                    contracts[5].depositAmountCollected,
+                    contracts[1].depositAmountCollectedRestricted,
+                    contracts[5].depositAmountCollectedRestricted,
                 ])],
                 [three_quarter_ago_str, sum([
-                    contracts[1].depositAmountCollected,
-                    contracts[5].depositAmountCollected,
+                    contracts[1].depositAmountCollectedRestricted,
+                    contracts[5].depositAmountCollectedRestricted,
                 ])],
                 [two_quarter_ago_str, sum([
-                    contracts[1].depositAmountCollected,
-                    contracts[5].depositAmountCollected,
+                    contracts[1].depositAmountCollectedRestricted,
+                    contracts[5].depositAmountCollectedRestricted,
                 ])],
                 [one_quarter_ago_str, sum([
-                    contracts[1].depositAmountCollected,
-                    contracts[5].depositAmountCollected,
+                    contracts[1].depositAmountCollectedRestricted,
+                    contracts[5].depositAmountCollectedRestricted,
                 ])],
                 [today_str, sum([
-                    contracts[1].depositAmountCollected,
-                    contracts[5].depositAmountCollected,
+                    contracts[1].depositAmountCollectedRestricted,
+                    contracts[5].depositAmountCollectedRestricted,
                 ])]
             ]
         },
@@ -327,10 +327,10 @@ def test_get_total_deposits_quarterly(contracts, normal_user_auth_header):
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
                 [one_quarter_ago_str, sum([
-                    contracts[3].depositAmountCollected,
+                    contracts[3].depositAmountCollectedRestricted,
                 ])],
                 [today_str, sum([
-                    contracts[3].depositAmountCollected,
+                    contracts[3].depositAmountCollectedRestricted,
                 ])]
             ]
         }
@@ -359,14 +359,14 @@ def test_get_claimable_deposits_yearly_two_months_grace(contracts, normal_user_a
         {
             "name": "standard",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountCollected for i in [0]])],  # contracts 0
-                [today_str, sum([contracts[i].depositAmountCollected for i in [2]])]  # contracts 2
+                [one_year_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0]])],  # contracts 0
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2]])]  # contracts 2
             ]
         },
         {
             "name": "refugee",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountCollected for i in [1]])],  # contracts 5
+                [one_year_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [1]])],  # contracts 5
                 [today_str, 0]
             ]
         },
@@ -374,7 +374,7 @@ def test_get_claimable_deposits_yearly_two_months_grace(contracts, normal_user_a
             "name": "kids",
             "data": [
                 [one_year_ago_str, 0],
-                [today_str, sum([contracts[i].depositAmountCollected for i in [3]])]  # contracts 3
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])]  # contracts 3
             ]
         }
     ], key=lambda series: series.get("name"))
@@ -399,21 +399,21 @@ def test_get_claimable_deposits_quarterly_two_months_grace(contracts, normal_use
             "name": "standard",
             "data": [
                 [six_quarter_ago_str, 0],
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0]])],  # contracts 0
-                [four_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0]])],  # contracts 0
-                [three_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [4]])],  # contracts 4
-                [two_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 4, 6]])],  # contracts 2, 4, 6
-                [one_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 4, 6]])],  # contracts 2, 4, 6
-                [today_str, sum([contracts[i].depositAmountCollected for i in [2]])]  # contracts 2
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0]])],  # contracts 0
+                [four_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0]])],  # contracts 0
+                [three_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [4]])],  # contracts 4
+                [two_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 4, 6]])],  # contracts 2, 4, 6
+                [one_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 4, 6]])],  # contracts 2, 4, 6
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2]])]  # contracts 2
             ]
         },
         {
             "name": "refugee",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]])],  # contracts 1
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [5]])],  # contracts 5
-                [four_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [5]])],  # contracts 5
-                [three_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [5]])],  # contracts 5
+                [six_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [1]])],  # contracts 1
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [5]])],  # contracts 5
+                [four_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [5]])],  # contracts 5
+                [three_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [5]])],  # contracts 5
                 [two_quarter_ago_str, 0],
                 [one_quarter_ago_str, 0],
                 [today_str, 0]
@@ -427,8 +427,8 @@ def test_get_claimable_deposits_quarterly_two_months_grace(contracts, normal_use
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
-                [one_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [3]])],   # contracts 3
-                [today_str, sum([contracts[i].depositAmountCollected for i in [3]])]  # contracts 3
+                [one_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])],   # contracts 3
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])]  # contracts 3
             ]
         }
     ], key=lambda series: series.get("name"))
@@ -456,14 +456,14 @@ def test_get_claimable_deposits_yearly_no_grace(contracts, normal_user_auth_head
         {
             "name": "standard",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountCollected for i in [0]])],   # contracts 0
+                [one_year_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0]])],   # contracts 0
                 [today_str, 0]
             ]
         },
         {
             "name": "refugee",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountCollected for i in [5]])],  # contracts 5
+                [one_year_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [5]])],  # contracts 5
                 [today_str, 0]
             ]
         },
@@ -471,7 +471,7 @@ def test_get_claimable_deposits_yearly_no_grace(contracts, normal_user_auth_head
             "name": "kids",
             "data": [
                 [one_year_ago_str, 0],
-                [today_str, sum([contracts[i].depositAmountCollected for i in [3]])]  # contracts 3
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])]  # contracts 3
             ]
         }
     ], key=lambda series: series.get("name"))
@@ -496,20 +496,20 @@ def test_get_claimable_deposits_quarterly_no_grace(contracts, normal_user_auth_h
             "name": "standard",
             "data": [
                 [six_quarter_ago_str, 0],
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0]])],  # contracts 0
-                [four_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0]])],  # contracts 0
-                [three_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [4]])],  # contracts 4
-                [two_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 4, 6]])],  # contracts 2, 4, 6
-                [one_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 6]])],  # contracts 2, 6
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0]])],  # contracts 0
+                [four_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0]])],  # contracts 0
+                [three_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [4]])],  # contracts 4
+                [two_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 4, 6]])],  # contracts 2, 4, 6
+                [one_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 6]])],  # contracts 2, 6
                 [today_str, 0]
             ]
         },
         {
             "name": "refugee",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]])],  # contracts 1
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [5]])],  # contracts 5
-                [four_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [5]])],  # contracts 5
+                [six_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [1]])],  # contracts 1
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [5]])],  # contracts 5
+                [four_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [5]])],  # contracts 5
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
                 [one_quarter_ago_str, 0],
@@ -524,8 +524,8 @@ def test_get_claimable_deposits_quarterly_no_grace(contracts, normal_user_auth_h
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
-                [one_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [3]])],  # contracts 3
-                [today_str, sum([contracts[i].depositAmountCollected for i in [3]])]  # contracts 3
+                [one_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])],  # contracts 3
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])]  # contracts 3
             ]
         }
     ], key=lambda series: series.get("name"))
@@ -553,14 +553,14 @@ def test_get_collected_yearly(contracts, normal_user_auth_header):
         {
             "name": "standard",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountCollected for i in [0]])],   # contracts 0
-                [today_str, sum([contracts[i].depositAmountCollected for i in [2, 4, 6]])],  # contracts 2, 4, 6
+                [one_year_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0]])],   # contracts 0
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 4, 6]])],  # contracts 2, 4, 6
             ]
         },
         {
             "name": "refugee",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountCollected for i in [1, 5]])],  # contracts 1, 5
+                [one_year_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [1, 5]])],  # contracts 1, 5
                 [today_str, 0]
             ]
         },
@@ -568,7 +568,7 @@ def test_get_collected_yearly(contracts, normal_user_auth_header):
             "name": "kids",
             "data": [
                 [one_year_ago_str, 0],
-                [today_str, sum([contracts[i].depositAmountCollected for i in [3]])]  # contracts 3
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])]  # contracts 3
             ]
         }
     ], key=lambda series: series.get("name"))
@@ -593,10 +593,10 @@ def test_get_collected_quarterly(contracts, normal_user_auth_header):
             "name": "standard",
             "data": [
                 [six_quarter_ago_str, 0],
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0]])],  # contracts 0
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0]])],  # contracts 0
                 [four_quarter_ago_str, 0],
-                [three_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [4]])],  # contracts 4
-                [two_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 6]])],  # contracts 2, 6
+                [three_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [4]])],  # contracts 4
+                [two_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 6]])],  # contracts 2, 6
                 [one_quarter_ago_str, 0],
                 [today_str, 0]
             ]
@@ -604,8 +604,8 @@ def test_get_collected_quarterly(contracts, normal_user_auth_header):
         {
             "name": "refugee",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]])],  # contracts 1
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [5]])],  # contracts 5
+                [six_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [1]])],  # contracts 1
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [5]])],  # contracts 5
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
@@ -621,7 +621,7 @@ def test_get_collected_quarterly(contracts, normal_user_auth_header):
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
-                [one_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [3]])],  # contracts 3
+                [one_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])],  # contracts 3
                 [today_str, 0]
             ]
         }
@@ -651,14 +651,14 @@ def test_get_returned_deposits_yearly(contracts, normal_user_auth_header):
             "name": "standard",
             "data": [
                 [one_year_ago_str, 0],
-                [today_str, sum([contracts[i].depositAmountReturned for i in [0, 4, 6]])],  # contracts 0, 4, 6
+                [today_str, sum([contracts[i].depositAmountReturnedRestricted for i in [0, 4, 6]])],  # contracts 0, 4, 6
             ]
         },
         {
             "name": "refugee",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
-                [today_str, sum([contracts[i].depositAmountReturned for i in [5]])]  # contracts 5
+                [one_year_ago_str, sum([contracts[i].depositAmountReturnedRestricted for i in [1]])],  # contracts 1
+                [today_str, sum([contracts[i].depositAmountReturnedRestricted for i in [5]])]  # contracts 5
             ]
         },
         {
@@ -692,21 +692,21 @@ def test_get_returned_deposits_quarterly(contracts, normal_user_auth_header):
                 [six_quarter_ago_str, 0],
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
-                [three_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
+                [three_quarter_ago_str, sum([contracts[i].depositAmountReturnedRestricted for i in [0]])],  # contracts 0
                 [two_quarter_ago_str, 0],
                 [one_quarter_ago_str, 0],
-                [today_str, sum([contracts[i].depositAmountReturned for i in [4, 6]])]  # contracts 4, 6
+                [today_str, sum([contracts[i].depositAmountReturnedRestricted for i in [4, 6]])]  # contracts 4, 6
             ]
         },
         {
             "name": "refugee",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
+                [six_quarter_ago_str, sum([contracts[i].depositAmountReturnedRestricted for i in [1]])],  # contracts 1
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
                 [three_quarter_ago_str, 0],
                 [two_quarter_ago_str, 0],
-                [one_quarter_ago_str, sum([contracts[i].depositAmountReturned for i in [5]])],  # contracts 5
+                [one_quarter_ago_str, sum([contracts[i].depositAmountReturnedRestricted for i in [5]])],  # contracts 5
                 [today_str, 0]
             ]
         },
@@ -747,22 +747,22 @@ def test_get_deposit_flow_yearly(contracts, normal_user_auth_header):
         {
             "name": "collected",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountCollected for i in [0, 1, 5]])],   # contracts 0, 1, 5
-                [today_str, sum([contracts[i].depositAmountCollected for i in [2, 3, 4, 6]])],  # contracts 2, 3, 4, 6
+                [one_year_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0, 1, 5]])],   # contracts 0, 1, 5
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 3, 4, 6]])],  # contracts 2, 3, 4, 6
             ]
         },
         {
             "name": "returned",
             "data": [
-                [one_year_ago_str, -sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
-                [today_str, -sum([contracts[i].depositAmountReturned for i in [0, 4, 5, 6]])],  # contracts 0, 4, 5, 6
+                [one_year_ago_str, -sum([contracts[i].depositAmountReturnedRestricted for i in [1]])],  # contracts 1
+                [today_str, -sum([contracts[i].depositAmountReturnedRestricted for i in [0, 4, 5, 6]])],  # contracts 0, 4, 5, 6
             ]
         },
         {
             "name": "diff",
             "data": [
-                [one_year_ago_str, sum([contracts[i].depositAmountCollected for i in [0, 1, 5]]) - sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 0, 1, 5
-                [today_str, sum([contracts[i].depositAmountCollected for i in [2, 3, 4, 6]]) - sum([contracts[i].depositAmountReturned for i in [0, 4, 5, 6]])],  # contracts 2, 3, 4, 6
+                [one_year_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0, 1, 5]]) - sum([contracts[i].depositAmountReturnedRestricted for i in [1]])],  # contracts 0, 1, 5
+                [today_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 3, 4, 6]]) - sum([contracts[i].depositAmountReturnedRestricted for i in [0, 4, 5, 6]])],  # contracts 2, 3, 4, 6
             ]
         },
     ], key=lambda series: series.get("name"))
@@ -786,37 +786,37 @@ def test_get_deposit_flow_quarterly(contracts, normal_user_auth_header):
         {
             "name": "collected",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]])],
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0, 5]])],  # contracts 0, 5
+                [six_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [1]])],
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0, 5]])],  # contracts 0, 5
                 [four_quarter_ago_str, 0],
-                [three_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [4]])],  # contracts 4
-                [two_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 6]])],  # contracts 2, 6
-                [one_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [3]])],  # contracts 3
+                [three_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [4]])],  # contracts 4
+                [two_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 6]])],  # contracts 2, 6
+                [one_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]])],  # contracts 3
                 [today_str, 0]
             ]
         },
         {
             "name": "returned",
             "data": [
-                [six_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
+                [six_quarter_ago_str, -sum([contracts[i].depositAmountReturnedRestricted for i in [1]])],  # contracts 1
                 [five_quarter_ago_str, 0],
                 [four_quarter_ago_str, 0],
-                [three_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
+                [three_quarter_ago_str, -sum([contracts[i].depositAmountReturnedRestricted for i in [0]])],  # contracts 0
                 [two_quarter_ago_str, 0],
-                [one_quarter_ago_str, -sum([contracts[i].depositAmountReturned for i in [5]])],  # contracts 5
-                [today_str, -sum([contracts[i].depositAmountReturned for i in [4, 6]])]  # contracts 4, 6
+                [one_quarter_ago_str, -sum([contracts[i].depositAmountReturnedRestricted for i in [5]])],  # contracts 5
+                [today_str, -sum([contracts[i].depositAmountReturnedRestricted for i in [4, 6]])]  # contracts 4, 6
             ]
         },
         {
             "name": "diff",
             "data": [
-                [six_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [1]]) - sum([contracts[i].depositAmountReturned for i in [1]])],  # contracts 1
-                [five_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [0, 5]])],
+                [six_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [1]]) - sum([contracts[i].depositAmountReturnedRestricted for i in [1]])],  # contracts 1
+                [five_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [0, 5]])],
                 [four_quarter_ago_str, 0],
-                [three_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [4]]) - sum([contracts[i].depositAmountReturned for i in [0]])],  # contracts 0
-                [two_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [2, 6]])],
-                [one_quarter_ago_str, sum([contracts[i].depositAmountCollected for i in [3]]) - sum([contracts[i].depositAmountReturned for i in [5]])],  # contracts 5
-                [today_str, -sum([contracts[i].depositAmountReturned for i in [4, 6]])]  # contracts 4, 6
+                [three_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [4]]) - sum([contracts[i].depositAmountReturnedRestricted for i in [0]])],  # contracts 0
+                [two_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [2, 6]])],
+                [one_quarter_ago_str, sum([contracts[i].depositAmountCollectedRestricted for i in [3]]) - sum([contracts[i].depositAmountReturnedRestricted for i in [5]])],  # contracts 5
+                [today_str, -sum([contracts[i].depositAmountReturnedRestricted for i in [4, 6]])]  # contracts 4, 6
             ]
         },
     ], key=lambda series: series.get("name"))
@@ -837,10 +837,10 @@ def test_get_deposit_flow_quarterly(contracts, normal_user_auth_header):
 
 def test_get_deposits_status_two_month_grace_period(contracts, normal_user_auth_header):
     expected_data = {
-        "open": sum([contracts[i].depositAmountCollected for i in [3]]),
-        "in_grace_period": sum([contracts[i].depositAmountCollected for i in [2]]),
+        "open": sum([contracts[i].depositAmountCollectedRestricted for i in [3]]),
+        "in_grace_period": sum([contracts[i].depositAmountCollectedRestricted for i in [2]]),
         "expired": 0,
-        "withheld": sum([contracts[i].depositAmountCollected - contracts[i].depositAmountReturned for i in [0, 1, 4, 5, 6]]),
+        "withheld": sum([contracts[i].depositAmountCollectedRestricted - contracts[i].depositAmountReturnedRestricted for i in [0, 1, 4, 5, 6]]),
     }
 
     response = test_client.get("/finances/deposits/status", params={"grace_period": 62}, headers=normal_user_auth_header)
@@ -851,10 +851,10 @@ def test_get_deposits_status_two_month_grace_period(contracts, normal_user_auth_
 
 def test_get_deposits_status_no_grace_period(contracts, normal_user_auth_header):
     expected_data = {
-        "open": sum([contracts[i].depositAmountCollected for i in [3]]),
+        "open": sum([contracts[i].depositAmountCollectedRestricted for i in [3]]),
         "in_grace_period": 0,
-        "expired": sum([contracts[i].depositAmountCollected for i in [2]]),
-        "withheld": sum([contracts[i].depositAmountCollected - contracts[i].depositAmountReturned for i in [0, 1, 4, 5, 6]]),
+        "expired": sum([contracts[i].depositAmountCollectedRestricted for i in [2]]),
+        "withheld": sum([contracts[i].depositAmountCollectedRestricted - contracts[i].depositAmountReturnedRestricted for i in [0, 1, 4, 5, 6]]),
     }
 
     response = test_client.get("/finances/deposits/status", params={"grace_period": 0}, headers=normal_user_auth_header)

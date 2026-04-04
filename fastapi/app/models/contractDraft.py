@@ -89,7 +89,7 @@ class ContractDraft(Base):
             str(self.startDate) == str(other.startDate),
             str(self.endDate) == str(other.endDate),
             # str(self.returnedDate) == str(other.returnedDate),
-            str(self.depositAmountCollected) == str(other.depositAmountCollected),
+            str(self.depositAmountCollected) == str(other.depositAmountCollectedRestricted),
             # str(self.depositAmountReturned) == str(other.depositAmountReturned),
             str(self.conditionOfBike) == str(other.conditionOfBike),
             str(self.contractType) == str(other.contractType),

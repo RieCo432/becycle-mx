@@ -28,8 +28,6 @@ class ContractBase(BaseModel):
     contractType: str
     notes: str | None = None
 
-    depositTransactionHeaders: List[TransactionHeader] = []
-
 
 class ContractCreate(ContractBase):
     pass
@@ -43,7 +41,6 @@ class ContractPublic(ContractBase):
     endDate: date
 
     returnedDate: date | None = None
-    depositAmountReturned: int | None = None
     detailsSent: bool = False
     expiryReminderSent: bool = False
     returnDetailsSent: bool = False
@@ -56,6 +53,8 @@ class Contract(ContractPublic):
 
     returnAcceptingUserId: UUID | None = None
 
+    depositTransactionHeaders: List[TransactionHeader] = []
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -66,11 +65,8 @@ class ContractDraftDetails(BaseModel):
 
 
 class ContractRestricted(ContractPublic):
-    workingUsername: str
-    checkingUsername: str
-    returnAcceptingUsername: str | None = None
-    depositAmountCollected: int
-    depositAmountReturned: int | None = None
+    depositAmountCollectedRestricted: int
+    depositAmountReturnedRestricted: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
