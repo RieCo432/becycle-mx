@@ -1,7 +1,8 @@
 import datetime
 from datetime import time
+from typing import Annotated, List
 from uuid import UUID
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import app.crud as crud
@@ -87,3 +88,8 @@ async def get_active_faq(
     return crud.get_active_faq(db=db)
 
 
+@public.get("/public/colours-bar")
+async def get_colours_bar(
+        colours_hex: Annotated[List[str], Query()],
+) -> FileResponse:
+    return FileResponse(**crud.get_colours_bar_image(colours_hex=colours_hex))
