@@ -106,6 +106,9 @@ def finalise_sale(db: Session, sale_header_id: UUID, transaction_header_id: UUID
     if transaction_header.postedOn is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Sale must be posted before it can be finalised"})
     
+    if sale_header.transactionHeaderId is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Sale has already been finalised"})
+    
     sale_header.transactionHeaderId = transaction_header.id    
     
     db.commit()

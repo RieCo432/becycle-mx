@@ -82,14 +82,12 @@ async def finalise_sale(
         transaction_header_id: Annotated[UUID, Body(embed=True)],
         db: Session = Depends(dep.get_db)
 ) -> schemas.SaleHeader:
-    # TODO: make sure sale is not complete already
     if not crud.does_payment_cover_sale_price(db=db, transaction_header_id=transaction_header_id, sale_header_id=sale_header_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Sale price does not cover payment."}
         )
     
-    # crud.post_transaction_header(db=db, transaction_header_id=transaction_header_id, user=user)
     return crud.finalise_sale(db=db, sale_header_id=sale_header_id, transaction_header_id=transaction_header_id)
 
 @sales.delete("/sales/{sale_header_id}")
