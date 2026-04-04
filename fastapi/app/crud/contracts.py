@@ -278,10 +278,6 @@ def delete_contract(db: Session, contract_id: UUID) -> None:
 def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: schemas.ContractPatch) -> models.Contract:
     contract = get_contract(db=db, contract_id=contract_id)
 
-    # TODO: deposit information needs to use new model
-    # if contract_patch_data.depositAmountCollected is not None:
-    #     contract.depositAmountCollected = contract_patch_data.depositAmountCollected
-
     if contract_patch_data.conditionOfBike is not None:
         contract.conditionOfBike = contract_patch_data.conditionOfBike
 
@@ -303,29 +299,14 @@ def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: 
     if contract_patch_data.checkingUserId is not None:
         contract.checkingUserId = contract_patch_data.checkingUserId
 
-    # if contract_patch_data.depositCollectingUserId is not None:
-    #     contract.depositCollectingUserId = contract_patch_data.depositCollectingUserId
 
-    if contract_patch_data.returned:
-        # if contract_patch_data.depositAmountReturned is not None:
-        #     contract.depositAmountReturned = contract_patch_data.depositAmountReturned
+    if contract.returnedDate is not None and contract_patch_data.returnedDate is not None:
 
         if contract_patch_data.returnAcceptingUserId is not None:
             contract.returnAcceptingUserId = contract_patch_data.returnAcceptingUserId
 
-        # if contract_patch_data.depositReturningUserId is not None:
-        #     contract.depositReturningUserId = contract_patch_data.depositReturningUserId
-
         if contract_patch_data.returnedDate is not None:
             contract.returnedDate = contract_patch_data.returnedDate
-    else:
-        # contract.depositAmountReturned = None
-
-        contract.returnAcceptingUserId = None
-
-        # contract.depositReturningUser = None
-
-        contract.returnedDate = None
 
     db.commit()
 

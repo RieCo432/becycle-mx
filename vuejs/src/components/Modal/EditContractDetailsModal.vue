@@ -25,15 +25,10 @@ export default {
       notes: yup.string().nullable(),
       contractType: yup.string().required('Contract Type is required'),
       conditionOfBike: yup.string().required('Condition is required'),
-      depositAmountCollected: yup.number().min(0).integer().required('Deposit Amount is required'),
-      depositCollectingUserId: yup.string().required('Deposit Collecting Volunteer is required'),
       workingUserId: yup.string().required('Working Volunteer is required'),
       checkingUserId: yup.string().required('Checking Volunteer is required'),
-      returned: yup.boolean(),
       returnedDate: yup.date().nullable(),
       returnAcceptingUserId: yup.string().nullable(),
-      depositAmountReturned: yup.number().integer().min(0).nullable(),
-      depositReturningUserId: yup.string().nullable(),
     });
 
     const {handleSubmit} = useForm({
@@ -46,16 +41,10 @@ export default {
     const {value: notes, errorMessage: notesError} = useField('notes');
     const {value: contractType, errorMessage: contractTypeError} = useField('contractType');
     const {value: conditionOfBike, errorMessage: conditionOfBikeError} = useField('conditionOfBike');
-    const {value: depositAmountCollected, errorMessage: depositAmountCollectedError} = useField('depositAmountCollected');
-    const {value: depositCollectingUserId, errorMessage: depositCollectingUserIdError} = useField('depositCollectingUserId');
     const {value: workingUserId, errorMessage: workingUserIdError} = useField('workingUserId');
     const {value: checkingUserId, errorMessage: checkingUserIdError} = useField('checkingUserId');
-    const {value: returned} = useField('returned');
     const {value: returnedDate, errorMessage: returnedDateError} = useField('returnedDate');
     const {value: returnAcceptingUserId, errorMessage: returnAcceptingUserIdError} = useField('returnAcceptingUserId');
-    const {value: depositAmountReturned, errorMessage: depositAmountReturnedError} = useField('depositAmountReturned');
-    const {value: depositReturningUserId, errorMessage: depositReturningUserIdError} = useField('depositReturningUserId');
-
 
     const submitChangeDetails = handleSubmit(() => {
       requests.patchContractChangeDetails(contract.value.id, {
@@ -64,19 +53,15 @@ export default {
         notes: notes.value,
         contractType: contractType.value,
         conditionOfBike: conditionOfBike.value,
-        depositAmountCollected: depositAmountCollected.value,
-        depositCollectingUserId: depositCollectingUserId.value,
         workingUserId: workingUserId.value,
         checkingUserId: checkingUserId.value,
-        returned: returned.value,
         returnedDate: returnedDate.value,
         returnAcceptingUserId: returnAcceptingUserId.value,
-        depositAmountReturned: depositAmountReturned.value,
-        depositReturningUserId: depositReturningUserId.value,
       }).then(() => {
         toast.success('Contract Details updated', {timeout: 2000});
         context.emit('contractDetailsUpdated');
       }).catch((error) => {
+        console.log(error);
         toast.error(error.response.data.detail.description, {timeout: 2000});
       }).finally(() => {
         closeModal.value();
@@ -94,23 +79,14 @@ export default {
       contractTypeError,
       conditionOfBike,
       conditionOfBikeError,
-      depositAmountCollected,
-      depositAmountCollectedError,
-      depositCollectingUserId,
-      depositCollectingUserIdError,
       workingUserId,
       workingUserIdError,
       checkingUserId,
       checkingUserIdError,
-      returned,
       returnedDate,
       returnedDateError,
       returnAcceptingUserId,
       returnAcceptingUserIdError,
-      depositAmountReturned,
-      depositAmountReturnedError,
-      depositReturningUserId,
-      depositReturningUserIdError,
 
       submitChangeDetails,
     };
@@ -145,15 +121,10 @@ export default {
     this.notes = this.contract.notes;
     this.conditionOfBike = this.contract.conditionOfBike;
     this.contractType = this.contract.contractType;
-    this.depositAmountCollected = this.contract.depositAmountCollected;
-    this.depositCollectingUserId = this.contract.depositCollectingUserId;
     this.workingUserId = this.contract.workingUserId;
     this.checkingUserId = this.contract.checkingUserId;
-    this.returned = this.contract.returnedDate !== null;
     this.returnedDate = this.contract.returnedDate;
     this.returnAcceptingUserId = this.contract.returnAcceptingUserId;
-    this.depositAmountReturned = this.contract.depositAmountReturned;
-    this.depositReturningUserId = this.contract.depositReturningUserId;
 
     requests.getBikeConditions().then((response) => (this.bikeConditions = response.data.map((cond) =>
       ({
@@ -163,8 +134,8 @@ export default {
     )));
     requests.getContractTypes().then((response) => (this.contractTypes = response.data.map((t) =>
       ({
-        label: t,
-        value: t,
+        label: t.id,
+        value: t.id,
       }),
     )));
     requests.getUsers().then((response) => (this.allUsers = response.data.map((user) =>
@@ -256,32 +227,7 @@ export default {
               :error="checkingUserIdError"
           />
         </div>
-        <div class="col-span-6">
-          <TextInput
-              label="Deposit Amount Collected (&pound;)"
-              type="number"
-              placeholder="40"
-              name="depositAmountCollected"
-              v-model="depositAmountCollected"
-              :error="depositAmountCollectedError"
-          />
-        </div>
-        <div class="col-span-6">
-          <Select
-              :options="allUsers"
-              label="Deposit Collector"
-              v-model="depositCollectingUserId"
-              name="depositCollectingUser"
-              :error="depositCollectingUserIdError"
-          />
-        </div>
-        <div class="col-span-full">
-          <Checkbox
-              label="Has this bike been returned?"
-              name="returned"
-              v-model="returned"/>
-        </div>
-        <template v-if="returned">
+        <template v-if="returnedDate != null">
           <div class="col-span-6 content-center">
             <label class="text-slate-700 dark:text-slate-300">Returned Date</label>
             <flat-pickr
@@ -302,25 +248,6 @@ export default {
                 v-model="returnAcceptingUserId"
                 name="returnAcceptingUserId"
                 :error="returnAcceptingUserIdError"
-            />
-          </div>
-          <div class="col-span-6">
-            <TextInput
-                label="Deposit Amount returned (&pound;)"
-                type="number"
-                placeholder="40"
-                name="depositAmountReturned"
-                v-model="depositAmountReturned"
-                :error="depositAmountReturnedError"
-            />
-          </div>
-          <div class="col-span-6">
-            <Select
-                :options="allUsers"
-                label="Deposit Returned By"
-                v-model="depositReturningUserId"
-                name="depositReturningUserId"
-                :error="depositReturningUserIdError"
             />
           </div>
         </template>

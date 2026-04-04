@@ -215,8 +215,7 @@ async def patch_contract(
         contract_id: UUID,
         contract_patch_data: schemas.ContractPatch,
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
-    # TODO: deposit information needs to use new model
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail={"description": "This endpoint has not been implemented yet."})
+
     return crud.patch_contract_details(db=db, contract_id=contract_id, contract_patch_data=contract_patch_data)
 
 

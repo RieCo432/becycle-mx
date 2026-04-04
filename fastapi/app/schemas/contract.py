@@ -76,18 +76,12 @@ class ContractRestricted(ContractPublic):
 
 
 class ContractPatch(BaseModel):
-    # TODO: deposit information needs to use new model
-    #depositAmountCollected: int
     conditionOfBike: str
     notes: str | None = None
     contractType: str
     startDate: date
     endDate: date
     returnedDate: date | None = None
-    returned: bool
-    #depositAmountReturned: int | None = None
     workingUserId: UUID
     checkingUserId: UUID
-    #depositCollectingUserId: UUID
     returnAcceptingUserId: UUID | None = None
-    #depositReturningUserId: UUID | None = None
