@@ -61,7 +61,6 @@ export default {
         toast.success('Contract Details updated', {timeout: 2000});
         context.emit('contractDetailsUpdated');
       }).catch((error) => {
-        console.log(error);
         toast.error(error.response.data.detail.description, {timeout: 2000});
       }).finally(() => {
         closeModal.value();
