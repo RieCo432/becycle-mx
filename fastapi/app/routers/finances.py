@@ -15,15 +15,13 @@ finances = APIRouter(
 # TODO: this entire router is full of endpoints that either need adapted, or removed entirely. 
 #  Many of the functions contained here are also better placed under the accounts router
 
-@finances.get("/finances/deposit-book")
-async def get_deposit_book(db: Session = Depends(dep.get_db)) -> schemas.DepositBalancesBook:
-    # TODO: this is obsolete
-    return crud.get_deposit_balances_book(db=db)
-
 
 @finances.get("/finances/deposit-accounts")
-async def get_deposit_book(only_asset_accounts: bool = True, db: Session = Depends(dep.get_db)) -> schemas.DepositAccountBalances:
-    return crud.get_deposit_account_balances(db=db, only_asset_accounts=only_asset_accounts)
+async def get_deposit_book(
+        only_asset_accounts: bool = True, 
+        only_deposit_bearer_accounts: bool = True,
+        db: Session = Depends(dep.get_db)) -> schemas.DepositAccountBalances:
+    return crud.get_deposit_account_balances(db=db, only_asset_accounts=only_asset_accounts, only_deposit_bearer_accounts=only_deposit_bearer_accounts)
 
 
 @finances.get("/finances/deposits/total")

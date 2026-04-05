@@ -85,13 +85,22 @@ export default {
     requests.getBikeContracts(this.$route.params.bikeId, true, true, true).then((response) => {
       Promise.all(response.data.map((contract) => {
         return requests.getClient(contract.clientId).then((clientResponse) => {
-          let status = 'open';
-          if (contract.returnedDate != null) {
+          const lastDepositTransaction = contract.depositTransactionHeaders
+            .toSorted((thA, thB) =>
+              new Date(thB.postedOn) - new Date(thA.postedOn))[0];
+          let status = 'undetermined';
+          if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
+            status = 'stolen';
+          } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_settled')) {
             status = 'closed';
+          } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_forfeited')) {
+            status = 'forfeited';
+          } else if (lastDepositTransaction.event === 'liability_dormant') {
+            status = 'dormant';
+          } else if (lastDepositTransaction.event === 'liability_reactivated') {
+            status = 'active';
           } else {
-            if (new Date(contract.endDate).getTime() < new Date().getTime()) {
-              status = 'expired';
-            }
+            status = 'active';
           }
           return {
             id: contract.id,

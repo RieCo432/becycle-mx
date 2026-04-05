@@ -15,12 +15,7 @@ export default {
       client: {},
       bike: {},
       contract: {},
-      depositCollectingUsername: null,
-      workingUsername: null,
-      checkingUsername: null,
       contractId: this.$route.params.contractId,
-      depositReturnedByUsername: null,
-      returnAcceptedByUsername: null,
       loadingBike: true,
       loadingClient: true,
       loadingContract: true,
@@ -38,11 +33,6 @@ export default {
         this.client = response.data;
         this.loadingClient = false;
       });
-      this.workingUsername = this.contract['workingUsername'];
-      this.checkingUsername = this.contract['checkingUsername'];
-      this.depositCollectingUsername = this.contract['depositCollectingUsername'];
-      this.returnAcceptedByUsername = this.contract['returnAcceptingUsername'];
-      this.depositReturnedByUsername = this.contract['depositReturningUsername'];
       this.loadingContract = false;
     });
   },
@@ -53,12 +43,7 @@ export default {
   <div>
     <view-contract :client="client"
                    :bike="bike"
-                   :depositCollectingUsername="depositCollectingUsername"
-                   :workingUsername="workingUsername"
-                   :checkingUsername="checkingUsername"
                    :contract="contract"
-                   :depositReturnedByUsername="depositReturnedByUsername"
-                   :returnAcceptedByUsername="returnAcceptedByUsername"
                    :loading-client="loadingClient"
                    :loading-bike="loadingBike"
                    :loading-contract="loadingContract"

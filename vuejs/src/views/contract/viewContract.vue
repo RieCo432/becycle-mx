@@ -16,12 +16,14 @@ import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
+import Modal from '@/components/Modal/Modal.vue';
 
 const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    Modal,
     Tooltip,
     SubmitCrimeReportCard,
     ComboboxTextInput,
@@ -36,6 +38,7 @@ export default {
   setup(props, context) {
     const credentialsStore = useCredentialsStore();
     const contractData = toRef(props, 'contract');
+    const showDepositTransactions = ref(false);
     const depositAmountCollected = computed(() => {
       return Math.abs(
         contractData.value.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected') ?
@@ -77,7 +80,7 @@ export default {
         is: (value) => value * 100 < depositAmountCollected.value,
         then: () => yup.object().shape({
           id: yup.string().uuid().required(' The deposit asset account id is required '),
-          name: yup.string().required(' The deposit asset account name is required ')
+          name: yup.string().required(' The deposit asset account name is required '),
         })
           .required('This is required if the deposit is not returned in full.'),
         otherwise: () => yup.object().nullable(),
@@ -93,12 +96,12 @@ export default {
 
     const currentSchema = computed(() => {
       switch (stepNumber.value) {
-        case 0:
-          return returnAcceptingUserSchema;
-        case 1:
-          return depositReturningSchema;
-        default:
-          return depositReturningSchema;
+      case 0:
+        return returnAcceptingUserSchema;
+      case 1:
+        return depositReturningSchema;
+      default:
+        return depositReturningSchema;
       }
     });
 
@@ -109,7 +112,7 @@ export default {
 
     const {
       value: depositAmountReturned, errorMessage: depositAmountReturnedError,
-      setErrors: depositAmountReturnedSetErrors
+      setErrors: depositAmountReturnedSetErrors,
     } = useField('depositAmountReturned');
     const {
       value: depositSettledLiabilityAccount,
@@ -117,7 +120,7 @@ export default {
     } = useField('depositSettledLiabilityAccount');
     const {
       value: depositSettledAssetAccount,
-      errorMessage: depositSettledAssetAccountError
+      errorMessage: depositSettledAssetAccountError,
     } = useField('depositSettledAssetAccount');
     const {
       value: depositSettledRevenueAccount,
@@ -125,7 +128,7 @@ export default {
     } = useField('depositSettledRevenueAccount');
     const {
       value: depositReturningPassword, errorMessage: depositReturningPasswordError,
-      setErrors: depositReturningPasswordSetErrors
+      setErrors: depositReturningPasswordSetErrors,
     } = useField('depositReturningPassword');
 
     const depositSettledTransactionHeader = ref({});
@@ -137,7 +140,7 @@ export default {
     const {value: returnAcceptingUser, errorMessage: returnAcceptingUserError} = useField('returnAcceptingUser');
     const {
       value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError,
-      setErrors: returnAcceptingPasswordOrPinSetErrors
+      setErrors: returnAcceptingPasswordOrPinSetErrors,
     } = useField('returnAcceptingPasswordOrPin');
 
     returnAcceptingUser.value = '';
@@ -168,11 +171,11 @@ export default {
             {amount: -depositAmountReturned.value * 100, accountId: depositSettledAssetAccount.value.id},
 
             ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
-                [{
-                  amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
-                  accountId: depositSettledRevenueAccount.value.id,
-                }] :
-                []
+              [{
+                amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
+                accountId: depositSettledRevenueAccount.value.id,
+              }] :
+              []
             ),
           ],
           attemptAutoPost: true,
@@ -182,7 +185,7 @@ export default {
           username: depositSettledAssetAccount.value.ownerUser.username,
           password: depositReturningPassword.value,
         }];
-        
+
         requests.createTransaction(depositSettledTransactionDraft, transactionAuthDetails).then((response) => {
           depositSettledTransactionHeader.value = response.data;
           toast.success('Deposit Settled Successfully!');
@@ -234,8 +237,7 @@ export default {
       steps,
       stepNumber,
       prev,
-
-
+      showDepositTransactions,
     };
   },
   methods: {
@@ -312,11 +314,11 @@ export default {
     },
     workingUsername: {
       type: String,
-      required: true,
+      required: false,
     },
     checkingUsername: {
       type: String,
-      required: true,
+      required: false,
     },
     contract: {
       type: Object,
@@ -402,11 +404,24 @@ export default {
     },
   },
   computed: {
+    forfeitedDate() {
+      return this.contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_forfeited').postedOn;
+    },
     filtered_deposit_settled_liability_account_suggestions() {
+      const liabilityAccountContractBalances = {};
+      this.contract.depositTransactionHeaders?.forEach((header) => {
+        header.transactionLines.forEach((line) => {
+          if (line.account.type === 'liability') {
+            liabilityAccountContractBalances[line.account.id] = (liabilityAccountContractBalances[line.account.id] ?? 0) + line.amount;
+          }
+        });
+      });
       return this.depositLiabilityAccounts
-        .filter((suggestion) => suggestion.name
-          .toLowerCase()
-          .startsWith((this.depositSettledLiabilityAccount.name ?? '').toLowerCase()))
+        .filter((suggestion) =>
+          Math.abs(liabilityAccountContractBalances[suggestion.id] ?? 0) === this.depositAmountCollected &&
+          suggestion.name
+            .toLowerCase()
+            .startsWith((this.depositSettledLiabilityAccount.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -477,7 +492,7 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">{{ bike.serialNumber }}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{ bike.disposition }}</p>
                   <p class="text-slate-600 dark:text-slate-300" v-if="isUser">
-                    {{ bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a' }}
+                    Rough Value: {{ bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a' }}
                   </p>
                 </div>
                 <div class="col-span-12 col-start-1">
@@ -519,11 +534,18 @@ export default {
         </div>
         <div class="col-span-12 lg:col-span-4 gap-5">
           <Card title="Contract">
-            <template #header v-if="isUserAdmin && !loadingContract">
-              <div class="col-span-6 mt-auto">
-                <DashButton class="w-full btn-sm bg-danger-600" @click="openEditContractDetailsModal">
-                  Edit Details
-                </DashButton>
+            <template #header v-if="!loadingContract && isUser">
+              <div class="grid grid-cols-12 gap-2">
+                <div class="col-span-6 mt-auto">
+                  <DashButton class="w-full btn-sm bg-danger-600" @click="() => showDepositTransactions = true">
+                    Show Txs
+                  </DashButton>
+                </div>
+                <div v-if="isUserAdmin" class="col-span-6 mt-auto">
+                  <DashButton class="w-full btn-sm bg-danger-600" @click="openEditContractDetailsModal">
+                    Edit Details
+                  </DashButton>
+                </div>
               </div>
             </template>
             <template v-if="loadingContract">
@@ -560,14 +582,15 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300 w-100">
                     Deposit:
                   </p>
-                  <table v-if="contract.depositTransactionHeaders.find((header) => header.event === 'deposit_collected')"
+                  <table v-if="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected')"
                          class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
                     <tr class=" dark:bg-slate-700">
                       <th class="border dark:border-slate-500">Account</th>
                       <th class="border dark:border-slate-500">Credit</th>
                       <th class="border dark:border-slate-500">Debit</th>
                     </tr>
-                    <tr v-for="line in contract.depositTransactionHeaders.find((header) => header.event === 'deposit_collected').transactionLines" :key="line.id">
+                    <tr v-for="line in contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected').transactionLines" 
+                        :key="line.id">
                       <td class="border dark:border-slate-500">{{ line.account.name }}</td>
                       <td class="border dark:border-slate-500">
                         {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
@@ -578,13 +601,16 @@ export default {
                     </tr>
                   </table>
                   <p v-else class="text-slate-600 dark:text-slate-300">&#163;
-                    {{ (contract.depositAmountCollected / 100).toFixed(2) }}</p>
+                    {{ contract.depositAmountCollectedRestricted ? (contract.depositAmountCollectedRestricted / 100).toFixed(2) : 'ERROR' }}</p>
 
 
-                  <p class="text-slate-600 dark:text-slate-300">Done by: {{ workingUsername }}</p>
-                  <p class="text-slate-600 dark:text-slate-300">Checked by: {{ checkingUsername }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Done by: {{ workingUsername ?? 'REDACTED' }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Checked by: {{ checkingUsername ?? 'REDACTED' }}</p>
                 </div>
-                <DashButton v-if="isUser" class="mt-5" @click="patchContractExtend">
+                <DashButton v-if="isUser &&
+                filtered_deposit_settled_liability_account_suggestions.length > -1"
+                            class="mt-5"
+                            @click="patchContractExtend">
                   Extend Contract
                 </DashButton>
               </div>
@@ -596,7 +622,7 @@ export default {
         (((contract.returnedDate == null) && isUser) || (contract.returnedDate != null)) &&
         contract.crimeReports.filter((report) => (report.closedOn === null)).length === 0">
           <Card title="Return">
-            <div v-if="(contract.returnedDate == null) && isUser">
+            <div v-if="(contract.returnedDate == null) && isUser && filtered_deposit_settled_liability_account_suggestions.length > 0">
               <div class="flex z-[5] items-center relative justify-center md:mx-8">
                 <div
                   class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
@@ -769,6 +795,14 @@ export default {
                 </form>
               </div>
             </div>
+            <div v-else-if="contract.returnedDate == null &&
+              filtered_deposit_settled_liability_account_suggestions.length === 0">
+              <p class="text-danger-500 dark:text-danger-500">
+                This contract was forfeited on {{ new Date(Date.parse(forfeitedDate))
+                .toLocaleDateString(undefined, {weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})
+                }} and can no longer be returned.
+              </p>
+            </div>
             <div v-else-if="contract.returnedDate != null">
               <p class="text-slate-600 dark:text-slate-300">
                 Returned on {{
@@ -779,14 +813,15 @@ export default {
               <p class="text-slate-600 dark:text-slate-300 w-100">
                 Deposit Settlement:
               </p>
-              <table v-if="contract.depositTransactionHeaders.find((header) => header.event === 'deposit_settled')"
+              <table v-if="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_settled')"
                      class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
                 <tr class=" dark:bg-slate-700">
                   <th class="border dark:border-slate-500">Account</th>
                   <th class="border dark:border-slate-500">Credit</th>
                   <th class="border dark:border-slate-500">Debit</th>
                 </tr>
-                <tr v-for="line in contract.depositTransactionHeaders.find((header) => header.event === 'deposit_settled').transactionLines" :key="line.id">
+                <tr v-for="line in contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_settled').transactionLines" 
+                    :key="line.id">
                   <td class="border dark:border-slate-500">{{ line.account.name }}</td>
                   <td class="border dark:border-slate-500">
                     {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
@@ -796,8 +831,8 @@ export default {
                   </td>
                 </tr>
               </table>
-              <p v-else class="text-slate-600 dark:text-slate-300">&#163; {{ (contract.depositAmountReturned / 100).toFixed(2) }}</p>
-              <p class="text-slate-600 dark:text-slate-300">Received by {{ returnAcceptedByUsername }}</p>
+              <p v-else class="text-slate-600 dark:text-slate-300">&#163; {{ contract.depositAmountReturnedRestricted ? (contract.depositAmountReturnedRestricted / 100).toFixed(2) : 'ERROR' }}</p>
+              <p class="text-slate-600 dark:text-slate-300">Received by {{ returnAcceptedByUsername ?? 'REDACTED' }}</p>
             </div>
           </Card>
         </div>
@@ -862,6 +897,33 @@ export default {
         </template>
       </div>
     </div>
+    <Modal title="Deposit Transactions" :active-modal="showDepositTransactions" @close="() => showDepositTransactions = false">
+      <table class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
+        <tr class=" dark:bg-slate-700">
+          <th class="border dark:border-slate-500">Account</th>
+          <th class="border dark:border-slate-500">Credit</th>
+          <th class="border dark:border-slate-500">Debit</th>
+        </tr>
+        <template v-for="transactionHeader in contract.depositTransactionHeaders?.toSorted((a, b) => new Date(Date.parse(a.createdOn)) - new Date(Date.parse(b.createdOn)))" :key="transactionHeader.id">
+          <tr class=" dark:bg-slate-600">
+            <td class="border dark:border-slate-500">{{ transactionHeader.event }}</td>
+            <td class="border dark:border-slate-500">{{ new Date(Date.parse(transactionHeader.postedOn))
+              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</td>
+            <td></td>
+          </tr>
+          <tr v-for="line in transactionHeader.transactionLines" :key="line.id">
+            <td class="border dark:border-slate-500">{{ line.account.name }}</td>
+            <td class="border dark:border-slate-500">
+              {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
+            </td>
+            <td class="border dark:border-slate-500">
+              {{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}
+            </td>
+          </tr>
+        </template>
+      </table>
+    </Modal>
+    
   </div>
 </template>
 

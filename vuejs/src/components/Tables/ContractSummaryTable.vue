@@ -80,13 +80,18 @@
                   : ''
               }
             ${
-              props.row.status === 'open'
+              props.row.status === 'active'
                 ? 'text-success-500 bg-success-500'
                 : ''
             }
             ${
-              props.row.status === 'expired'
+              props.row.status === 'forfeited'
                 ? 'text-danger-500 bg-danger-500'
+                : ''
+            }
+            ${
+              props.row.status === 'dormant'
+                ? 'text-warning-500 bg-warning-500'
                 : ''
             }
             ${

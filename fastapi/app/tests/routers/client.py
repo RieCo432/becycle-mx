@@ -457,13 +457,13 @@ def test_get_my_contract(contracts, clients, client_auth_headers):
             assert response_json.get("startDate") == str(client_contract.startDate)
             assert response_json.get("endDate") == str(client_contract.endDate)
 
-            assert response_json.get("depositAmountReturned") == client_contract.depositAmountReturned
+            assert response_json.get("depositAmountReturned") == client_contract.depositAmountReturnedRestricted
             assert response_json.get("detailsSent") == client_contract.detailsSent
             assert response_json.get("expiryReminderSent") == client_contract.expiryReminderSent
             assert response_json.get("returnDetailsSent") == client_contract.returnDetailsSent
             assert response_json.get("clientId") == str(client_contract.clientId)
             assert response_json.get("bikeId") == str(client_contract.bikeId)
-            assert response_json.get("depositAmountCollected") == client_contract.depositAmountCollected
+            assert response_json.get("depositAmountCollected") == client_contract.depositAmountCollectedRestricted
             assert response_json.get("conditionOfBike") == client_contract.conditionOfBike
             assert response_json.get("contractType") == client_contract.contractType
             assert response_json.get("notes") == client_contract.notes

@@ -217,7 +217,7 @@ def test_patch_contract(contracts, users, admin_user_auth_header):
 
     assert response.json() == contracts[2]
 
-    assert contracts[2].depositAmountCollected == 25
+    assert contracts[2].depositAmountCollectedRestricted == 25
     assert contracts[2].conditionOfBike == "excellent"
     assert contracts[2].notes == "patched"
     assert contracts[2].contractType == "kids"
@@ -256,7 +256,7 @@ def test_patch_contract_returned(contracts, users, admin_user_auth_header):
 
     assert response.json() == contracts[1]
 
-    assert contracts[1].depositAmountCollected == 40
+    assert contracts[1].depositAmountCollectedRestricted == 40
     assert contracts[1].conditionOfBike == "excellent"
     assert contracts[1].notes == "patched"
     assert contracts[1].contractType == "kids"
@@ -265,7 +265,7 @@ def test_patch_contract_returned(contracts, users, admin_user_auth_header):
     assert contracts[1].workingUserId == users[0].id
     assert contracts[1].checkingUserId == users[1].id
     assert contracts[1].depositCollectingUserId == users[0].id
-    assert contracts[1].depositAmountReturned == 30
+    assert contracts[1].depositAmountReturnedRestricted == 30
     assert contracts[1].returnedDate == datetime.utcnow().date()
     assert contracts[1].returnAcceptingUserId == users[1].id
     assert contracts[1].depositReturningUserId == users[2].id
@@ -305,7 +305,7 @@ def test_return_bike(contracts, users, normal_user_auth_header):
     assert response.json() == contracts[2]
 
     assert contracts[2].returnedDate == datetime.utcnow().date()
-    assert contracts[2].depositAmountReturned == 30
+    assert contracts[2].depositAmountReturnedRestricted == 30
     assert contracts[2].depositReturningUserId == users[2].id
     assert contracts[2].returnAcceptingUserId == users[1].id
 

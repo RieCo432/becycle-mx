@@ -33,10 +33,6 @@ export default {
       .transactionLines
       .find((line) => line.account.type === 'expense')
       .account.restrictedToProjectId;
-    
-    console.log('project id of expense account', projectIdOfExpenseAccount);
-
-    console.log('amount claimed', amountOnLiabilityAccount);
 
     const expenseReimbursementSchema = yup.object().shape({
       projectId: yup.string().required(),
@@ -61,7 +57,6 @@ export default {
     const {value: assetAccount, errorMessage: assetAccountError, resetField: resetAssetAccount} = useField('assetAccount');
 
     const submitExpenseReimbursement = handleSubmit(() => {
-      console.log(projectId.value);
       if ((projectId.value === 'null' ? null : projectId.value) !== projectIdOfExpenseAccount) {
         setProjectIdErrors('The projectId of the asset account must match the projectId of the expense account');
       }
@@ -134,8 +129,6 @@ export default {
     selectAssetAccount(event, i) {
       if (i !== -1) {
         this.assetAccount = this.filtered_asset_account_suggestions[i];
-        console.log(this.filtered_asset_account_suggestions[i]);
-        console.log(this.assetAccount);
         this.userSelectionOptionsStatic = false;
       }
     },

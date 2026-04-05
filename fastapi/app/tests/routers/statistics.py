@@ -34,9 +34,9 @@ def test_get_user_leaderboard(users, contracts, normal_user_auth_header):
             "contractsChecked": len([c for c in contracts if c.checkingUserId == user.id]),
             "contractsReturned": len([c for c in contracts if c.returnAcceptingUserId == user.id]),
             "depositsCollected": len([c for c in contracts if c.depositCollectingUserId == user.id]),
-            "depositAmountCollected": sum([c.depositAmountCollected for c in contracts if c.depositCollectingUserId == user.id]),
+            "depositAmountCollected": sum([c.depositAmountCollectedRestricted for c in contracts if c.depositCollectingUserId == user.id]),
             "depositsReturned": len([c for c in contracts if c.depositReturningUserId == user.id]),
-            "depositAmountReturned": sum([c.depositAmountReturned for c in contracts if c.depositReturningUserId == user.id])
+            "depositAmountReturned": sum([c.depositAmountReturnedRestricted for c in contracts if c.depositReturningUserId == user.id])
         })
 
     response = test_client.get("/statistics/users/leaderboard", headers=normal_user_auth_header)
