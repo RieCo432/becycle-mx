@@ -227,7 +227,6 @@ export const topMenu = [
         childlink: '/admin/appointment-settings',
         show: ['user'],
       },
-      
       {
         childtitle: 'Duplicate Clients',
         childicon: 'heroicons-outline:users',
