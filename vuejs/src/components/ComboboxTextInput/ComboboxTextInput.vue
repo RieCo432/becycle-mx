@@ -35,9 +35,9 @@
         } `"
                   :value="modelValue"
                   @keydown.esc="() => (showSuggestions = false)"
-                  @keydown.down="() => (activeIndex = (activeIndex + 1) % suggestions.length)"
-                  @keydown.up="() => (activeIndex = (activeIndex + suggestions.length - 1) % suggestions.length)"
-                  @keydown.enter="onEnter"
+                  @keydown.down="() => stepActiveIndex(1)"
+                  @keydown.up="() => stepActiveIndex(-1)"
+                  @keydown.enter.prevent.stop="onEnter"
                   @input="(event) => {$emit('update:modelValue', event.target.value); if (event.target.value === '') $emit('emptied')}"
                   :error="error"
                   :id="name"
@@ -275,11 +275,26 @@ export default {
       this.types = this.types === 'text' ? 'password' : 'text';
     },
     onEnter() {
+      this.showSuggestions = false;
       if (this.activeIndex === -1 && this.allowNew) {
-        this.selectedCallback(null, this.fieldModelValue);
+        this.selectedCallback(null, -1);
       } else if (this.activeIndex >= 0) {
-        this.selectedCallback(null, this.suggestions[this.activeIndex]);
+        this.showSuggestions = false;
+        this.selectedCallback(null, this.activeIndex);
       }
+    },
+    stepActiveIndex(step) {
+      if (this.suggestions.length === 0) {
+        return;
+      }
+      let newIndex = this.activeIndex + step;
+      if (newIndex < (this.allowNew ? -1 : 0)) {
+        newIndex = this.suggestions.length - 1;
+      }
+      else if (newIndex >= this.suggestions.length) {
+        newIndex = (this.allowNew ? -1 : 0);
+      }
+      this.activeIndex = newIndex;
     },
   },
 };
