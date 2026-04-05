@@ -608,7 +608,7 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{ checkingUsername ?? 'REDACTED' }}</p>
                 </div>
                 <DashButton v-if="isUser &&
-                filtered_deposit_settled_liability_account_suggestions.length > -1"
+                filtered_deposit_settled_liability_account_suggestions.length > 0"
                             class="mt-5"
                             @click="patchContractExtend">
                   Extend Contract
