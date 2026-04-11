@@ -57,6 +57,7 @@ class Contract(Base):
 
     detailsSent: Mapped[bool] = mapped_column("detailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     expiryReminderSent: Mapped[bool] = mapped_column("expiryremindersent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+    liabilityDormantSent: Mapped[bool] = mapped_column("liabilitydormantsent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returndetailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
 
     crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
@@ -163,11 +164,26 @@ class Contract(Base):
         )
 
     def send_return_email(self):
-        # TODO: deposit information needs to use new model
         email_html_content = services.email_helpers.render_template(template_name="contract_returned", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Bike Rental Has Ended",
+            content=email_html_content
+        )
+        
+    def send_grace_period_ended_email(self):
+        email_html_content = services.email_helpers.render_template(template_name="contract_grace_period_ended", client=self.client, contract=self)
+        services.email_helpers.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Bike Rental Has Expired!",
+            content=email_html_content
+        )
+        
+    def send_deposit_forfeited_email(self):
+        email_html_content = services.email_helpers.render_template(template_name="contract_deposit_forfeited", client=self.client, contract=self)
+        services.email_helpers.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Bike Rental Deposit Has Been Forfeited",
             content=email_html_content
         )
 

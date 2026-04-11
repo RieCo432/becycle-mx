@@ -567,3 +567,17 @@ def get_client_restricted_contracts(db: Session, client_id: UUID) -> list[schema
         get_client_restricted_contract(db=db, client_id=client_id, contract=contract)
         for contract in contracts
     ]
+
+
+def send_liability_dormant_emails(db: Session) -> None:
+    unnotified_contracts_with_dormant_liabilities = [_ for _ in db.scalars(
+        select(models.Contract)
+        .join(models.TransactionHeader)
+        .where(models.TransactionHeader.event == "liability_dormant")
+        .where(models.Contract.liabilityDormantSent == False)
+    )]
+    
+    for contract in unnotified_contracts_with_dormant_liabilities:
+        contract.send_liability_dormant_email()
+        contract.liabilityDormantSent = True
+        db.commit()
