@@ -43,7 +43,7 @@ export default {
 
     const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: false});
     const userSelectionOptionsStatic = ref(true);
-    
+
     function fetchAssetAccounts() {
       requests.getAccounts([
         {name: 'types', value: 'asset'},
@@ -105,7 +105,6 @@ export default {
     assetAccount.value = {name: null, id: null};
     expenseAccount.value = {name: null, id: null};
 
-    
 
     const submitNewExpense = handleSubmit(() => {
       if (!expenseDate.value || !expenseDate.value.length) {
@@ -113,7 +112,7 @@ export default {
         return;
       }
 
-      const totalAmount = amount.value * 100;
+      const totalAmount = Math.round(amount.value * 100);
       const amountFromAdvance = assetAccount.value.id ? Math.min(totalAmount, assetAccount.value.balance) : 0;
       const amountFromLiability = totalAmount - amountFromAdvance;
 
@@ -122,9 +121,20 @@ export default {
           event: 'expense_claimed',
         },
         transactionLines: [
-          {amount: totalAmount, accountId: expenseAccount.value.id},
-          ...(amountFromAdvance > 0 ? [{amount: -amountFromAdvance, accountId: assetAccount.value.id}] : []),
-          ...(amountFromLiability > 0 ? [{amount: -amountFromLiability, accountId: liabilityAccount.value.id}] : []),
+          {
+            amount: totalAmount,
+            accountId: expenseAccount.value.id,
+          },
+          ...(amountFromAdvance > 0 ?
+            [{
+              amount: -amountFromAdvance,
+              accountId: assetAccount.value.id,
+            }] : []),
+          ...(amountFromLiability > 0 ?
+            [{
+              amount: -amountFromLiability,
+              accountId: liabilityAccount.value.id,
+            }] : []),
         ],
         attemptAutoPost: false,
       };

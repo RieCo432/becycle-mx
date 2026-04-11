@@ -168,7 +168,7 @@ export default {
           event: event.value,
         },
         transactionLines: transactionLines.value.map((transactionLine) => {
-          const amount = transactionLine.value.amount * 100 * (transactionLine.value.type === 'debit' ? 1 : -1);
+          const amount = Math.round(transactionLine.value.amount * 100) * (transactionLine.value.type === 'debit' ? 1 : -1);
           transactionBalance += amount;
           return {
             accountId: transactionLine.value.account.id,

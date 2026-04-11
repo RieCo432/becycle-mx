@@ -167,12 +167,17 @@ export default {
             event: 'deposit_settled',
           },
           transactionLines: [
-            {amount: depositAmountCollected.value, accountId: depositSettledLiabilityAccount.value.id},
-            {amount: -depositAmountReturned.value * 100, accountId: depositSettledAssetAccount.value.id},
+            {
+              amount: depositAmountCollected.value,
+              accountId: depositSettledLiabilityAccount.value.id,
+            },
+            {
+              amount: -Math.round(depositAmountReturned.value * 100),
+              accountId: depositSettledAssetAccount.value.id},
 
             ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
               [{
-                amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
+                amount: -Math.round(depositAmountCollected.value - depositAmountReturned.value * 100),
                 accountId: depositSettledRevenueAccount.value.id,
               }] :
               []

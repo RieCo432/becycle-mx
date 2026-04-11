@@ -121,8 +121,8 @@ export default {
           event: event.value,
         },
         transactionLines: [
-          {accountId: revenueAccount.value.id, amount: -amount.value * 100},
-          {accountId: assetAccount.value.id, amount: amount.value * 100},
+          {accountId: revenueAccount.value.id, amount: -Math.round(amount.value * 100)},
+          {accountId: assetAccount.value.id, amount: Math.round(amount.value * 100)},
         ],
         attemptAutoPost: true,
       };
