@@ -421,7 +421,7 @@ export default {
 
       requests.putUpdateCatalogueItemSaleLine(line.id, {
         quantity: line.quantity,
-        salePrice: this.newSalePrice * 100,
+        salePrice: Math.round(this.newSalePrice * 100),
       }).then((response) => {
         const indexInArr = this.currentSale.catalogueItemSaleLines
           .findIndex((line) => line.id === response.data.id);
@@ -477,7 +477,7 @@ export default {
     setNewBikeSalePrice() {
       const bikeSaleLine = this.currentSale.bikeSaleLines.find((line) => line.bike.id === this.selectedBike.id);
       requests.putUpdateBikeSaleLine(bikeSaleLine.id, {
-        salePrice: this.newSalePrice * 100,
+        salePrice: Math.round(this.newSalePrice * 100),
       }).then((response) => {
         const indexInArr = this.currentSale.bikeSaleLines.findIndex((line) => line.id === response.data.id);
         this.currentSale.bikeSaleLines.splice(indexInArr, 1, response.data);

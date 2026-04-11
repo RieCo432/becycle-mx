@@ -66,8 +66,8 @@ export default {
           event: 'expense_reimbursed',
         },
         transactionLines: [
-          {amount: -amount.value * 100, accountId: assetAccount.value.id},
-          {amount: amount.value * 100, accountId: liabilityAccountId},
+          {amount: -Math.round(amount.value * 100), accountId: assetAccount.value.id},
+          {amount: Math.round(amount.value * 100), accountId: liabilityAccountId},
         ],
         attemptAutoPost: false,
       };

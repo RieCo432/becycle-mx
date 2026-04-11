@@ -146,9 +146,17 @@ export default {
           event: event.value,
         },
         transactionLines: [
-          {accountId: sourceAssetAccount.value.id, amount: -amountPayout.value * 100},
-          {accountId: destinationAssetAccount.value.id, amount: (amountPayout.value - (hasFee.value ? amountFee.value : 0)) * 100},
-          ...(hasFee.value ? [{accountId: feeExpenseAccount.value.id, amount: amountFee.value * 100}] : []),
+          {
+            accountId: sourceAssetAccount.value.id,
+            amount: -Math.round(amountPayout.value * 100)},
+          {
+            accountId: destinationAssetAccount.value.id,
+            amount: Math.round((amountPayout.value - (hasFee.value ? amountFee.value : 0)) * 100)},
+          ...(hasFee.value ?
+            [{
+              accountId: feeExpenseAccount.value.id,
+              amount: Math.round(amountFee.value * 100)}] :
+            []),
         ],
         attemptAutoPost: true,
       };
