@@ -124,6 +124,7 @@ export default {
           {accountId: revenueAccount.value.id, amount: -amount.value * 100},
           {accountId: assetAccount.value.id, amount: amount.value * 100},
         ],
+        attemptAutoPost: true,
       };
 
       requests.createTransaction(transactionDraft).then((response) => {

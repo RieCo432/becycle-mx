@@ -150,6 +150,7 @@ export default {
           {accountId: destinationAssetAccount.value.id, amount: (amountPayout.value - (hasFee.value ? amountFee.value : 0)) * 100},
           ...(hasFee.value ? [{accountId: feeExpenseAccount.value.id, amount: amountFee.value * 100}] : []),
         ],
+        attemptAutoPost: true,
       };
 
       requests.createTransaction(transactionDraft).then((response) => {
