@@ -141,11 +141,13 @@ def can_transaction_line_be_posted(db: Session, transaction_line_id: UUID, user:
     return True
         
     
-def post_transaction_header(db: Session, transaction_header_id: UUID, user: models.User, additional_users: list[models.User] | None = None) -> models.TransactionHeader:
+def post_transaction_header(db: Session, transaction_header_id: UUID, user: models.User, additional_users: list[models.User] | None = None, override_access: bool = False) -> models.TransactionHeader:
     transaction_header = db.scalar(
             select(models.TransactionHeader)
             .where(models.TransactionHeader.id == transaction_header_id)
     )
+    if transaction_header is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Transaction header not found"})
     
     if transaction_header.postedOn is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "This transaction has already been posted!"})
@@ -160,7 +162,7 @@ def post_transaction_header(db: Session, transaction_header_id: UUID, user: mode
 
         can_all_lines_be_posted &= can_line_be_posted
         
-    if not can_all_lines_be_posted:
+    if not can_all_lines_be_posted and not override_access:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "You are not allowed to post transactions on one of these accounts"})
     
