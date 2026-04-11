@@ -177,7 +177,7 @@ export default {
           {accountId: creditAccount.value.id, amount: -amount.value * 100},
           {accountId: debitAccount.value.id, amount: amount.value * 100},
         ],
-        attemptAutoPost: false,
+        attemptAutoPost: true,
       };
 
       const additionalData = [];
