@@ -74,6 +74,10 @@ class Contract(Base):
         return 0.0
     
     @property
+    def liability_collected_string(self) -> str:
+        return f"{self.liability_collected:.2f}"
+    
+    @property
     def deposit_amount_returned(self) -> float:
         for th in self.depositTransactionHeaders:
             if th.event == "deposit_settled":
@@ -81,6 +85,10 @@ class Contract(Base):
                     if tl.account.type == AccountTypes.ASSET:
                         return abs(tl.amount) / 100
         return 0.0
+    
+    @property
+    def deposit_amount_returned_string(self) -> str:
+        return f"{self.deposit_amount_returned:.2f}"
 
     def __eq__dict(self, other: dict):
         return all([

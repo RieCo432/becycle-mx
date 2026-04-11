@@ -7,7 +7,7 @@
 <span>{{ contract.bike.colours_names_string }}</span>
 <p>Serial number: {{ contract.bike.serialNumber }}</p>
 <h2>Contract Details</h2>
-<p>Deposit paid: &#163;{{ contract.liability_collected }}
+<p>Deposit paid: &#163;{{ contract.liability_collected_string }}
 <p>Valid from: {{ contract.startDate.strftime("%d %B %Y") }}</p>
 <p>Valid until: {{ contract.endDate.strftime("%d %B %Y") }}</p>
 <p>Notes: {{ contract.notes }}</p>
