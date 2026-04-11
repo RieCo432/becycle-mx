@@ -11,7 +11,7 @@ export default {
 </script>
 
 <template>
-  <table class="border-collapse border dark:border-slate-400 min-w-full">
+  <table class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
     <thead>
     <tr class=" dark:bg-slate-700">
       <th class="border dark:border-slate-500">Account</th>
@@ -22,8 +22,8 @@ export default {
     <tbody>
     <tr v-for="line in transactionHeader.transactionLines" :key="line.id">
       <td class="border dark:border-slate-500">{{line.account.name}}</td>
-      <td class="border dark:border-slate-500">{{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}</td>
-      <td class="border dark:border-slate-500">{{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}</td>
+      <td class="border dark:border-slate-500">{{ line.amount <= 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}</td>
+      <td class="border dark:border-slate-500">{{ line.amount >= 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}</td>
     </tr>
     </tbody>
   </table>
