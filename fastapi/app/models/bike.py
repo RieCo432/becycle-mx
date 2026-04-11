@@ -34,6 +34,14 @@ class Bike(Base):
     
     bikeSaleLines: Mapped[List["SaleLine"]] = relationship("BikeSaleLine", back_populates="bike")
 
+    @property
+    def params_for_colour_bar_endpoint(self) -> str:
+        return "colours_hex=" + "&colours_hex=".join([c.hex.lstrip("#") for c in self.colours])
+    
+    @property
+    def colours_names_string(self) -> str:
+        return " + ".join([c.name for c in self.colours])
+
     def __eq__(self, other: dict):
         return all([
             str(self.id) == str(other.get("id", None)),
