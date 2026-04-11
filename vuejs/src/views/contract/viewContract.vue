@@ -497,7 +497,7 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">{{ bike.serialNumber }}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{ bike.disposition }}</p>
                   <p class="text-slate-600 dark:text-slate-300" v-if="isUser">
-                    Rough Value: {{ bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a' }}
+                    Rough Value: {{ bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a' }} (this is not the deposit)
                   </p>
                 </div>
                 <div class="col-span-12 col-start-1">
