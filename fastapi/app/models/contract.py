@@ -65,31 +65,31 @@ class Contract(Base):
     depositTransactionHeaders: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.contractId], back_populates="contract")
 
     @property
-    def liability_collected(self) -> float:
+    def liability_collected(self) -> int:
         for th in self.depositTransactionHeaders:
             if th.event == "deposit_collected":
                 for tl in th.transactionLines:
                     if tl.account.type == AccountTypes.LIABILITY:
-                        return abs(tl.amount) / 100
+                        return abs(tl.amount)
                     
-        return 0.0
+        return 0
     
     @property
     def liability_collected_string(self) -> str:
-        return f"{self.liability_collected:.2f}"
+        return f"{(self.liability_collected / 100):.2f}"
     
     @property
-    def deposit_amount_returned(self) -> float:
+    def deposit_amount_returned(self) -> int:
         for th in self.depositTransactionHeaders:
             if th.event == "deposit_settled":
                 for tl in th.transactionLines:
                     if tl.account.type == AccountTypes.ASSET:
-                        return abs(tl.amount) / 100
-        return 0.0
+                        return abs(tl.amount)
+        return 0
     
     @property
     def deposit_amount_returned_string(self) -> str:
-        return f"{self.deposit_amount_returned:.2f}"
+        return f"{(self.deposit_amount_returned / 100):.2f}"
 
     def __eq__dict(self, other: dict):
         return all([
@@ -146,7 +146,6 @@ class Contract(Base):
         ])
 
     def send_creation_email(self):
-        # TODO: deposit information needs to use new model
         email_html_content = services.email_helpers.render_template(template_name="contract_created", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
@@ -155,7 +154,6 @@ class Contract(Base):
         )
 
     def send_expiry_reminder_email(self):
-        # TODO: deposit information needs to use new model
         email_html_content = services.email_helpers.render_template(template_name="contract_expiry_reminder", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
@@ -171,7 +169,7 @@ class Contract(Base):
             content=email_html_content
         )
         
-    def send_grace_period_ended_email(self):
+    def send_contract_grace_period_ended_email(self):
         email_html_content = services.email_helpers.render_template(template_name="contract_grace_period_ended", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,

@@ -58,14 +58,14 @@ if os.environ["PRODUCTION"] == "true":
     db = SessionLocal()
     crud.send_expiry_emails(db=db)
     crud.send_appointment_reminders(db=db)
+    crud.make_all_old_liabilities_dormant(db=db)
+    crud.send_contract_grace_period_ended_emails(db=db)
     db.close()
 
 db = SessionLocal()
 crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
 crud.fully_prune_tree(db=db)
 crud.ensure_default_admin_permissions_exist(db=db)
-# crud.make_all_old_liabilities_dormant(db=db)
-crud.send_liability_dormant_emails(db=db)
 db.close()
 
 if __name__ == "__main__":
