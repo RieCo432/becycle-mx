@@ -1,3 +1,4 @@
+import os
 import socket
 from datetime import date, datetime, timezone
 from uuid import UUID
@@ -12,7 +13,7 @@ import app.schemas as schemas
 
 from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
 
-from .transactions import get_transaction_header
+from .transactions import get_transaction_header, post_transaction_header
 from app.services.accounts_helpers import AccountTypes
 from app.models import TransactionHeader, TransactionLine
 
@@ -193,8 +194,8 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
     
     last_deposit_transaction_header = sorted(contract.depositTransactionHeaders, key=lambda th: th.postedOn, reverse=True)[0]
     if last_deposit_transaction_header.event == "liability_dormant":
-        admin_id = db.scalar(select(models.User.id).where(models.User.username == "admin"))
-        if admin_id is None:
+        admin = db.scalar(select(models.User).where(models.User.username == "admin"))
+        if admin is None:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail={"description": "Something went wrong while re-activating the deposit liability!"},
@@ -202,9 +203,7 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
         liability_reactivated_transaction_header = TransactionHeader(
             contractId=contract.id,
             event="liability_reactivated",
-            createdByUserId=admin_id,
-            postedOn=datetime.now(timezone.utc),
-            postedByUserId=admin_id,
+            createdByUserId=admin.id,
         )
         db.add(liability_reactivated_transaction_header)
         db.flush()
@@ -216,6 +215,10 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
                 amount=-tl.amount
             )
             db.add(transaction_line)
+        db.commit()
+        
+        post_transaction_header(db=db, transaction_header_id=liability_reactivated_transaction_header.id, user=admin, override_access=True)
+        contract.liabilityDormantSent = False
         db.commit()
 
     contract.endDate = (datetime.utcnow() + relativedelta(months=6)).date()
@@ -567,3 +570,116 @@ def get_client_restricted_contracts(db: Session, client_id: UUID) -> list[schema
         get_client_restricted_contract(db=db, client_id=client_id, contract=contract)
         for contract in contracts
     ]
+
+
+def make_contract_liability_dormant(db: Session, contract_id: UUID, active_liability_account_id: UUID, dormant_liability_account_id: UUID, admin_user: models.User) -> None:
+    contract = get_contract(db=db, contract_id=contract_id)
+
+    liability_made_dormant_transaction_header = TransactionHeader(
+        contractId=contract.id,
+        event="liability_dormant",
+        createdByUserId=admin_user.id,
+    )
+    db.add(liability_made_dormant_transaction_header)
+    db.flush()
+
+    remove_active_liability_transaction_line = TransactionLine(
+        transactionHeaderId=liability_made_dormant_transaction_header.id,
+        accountId=active_liability_account_id,
+        amount=contract.liability_collected
+    )
+
+    add_dormant_liability_transaction_line = TransactionLine(
+        transactionHeaderId=liability_made_dormant_transaction_header.id,
+        accountId=dormant_liability_account_id,
+        amount=-contract.liability_collected
+    )
+
+    db.add(remove_active_liability_transaction_line)
+    db.add(add_dormant_liability_transaction_line)
+
+    db.commit()
+
+    post_transaction_header(db=db, transaction_header_id=liability_made_dormant_transaction_header.id, user=admin_user, override_access=True)
+
+
+def make_all_old_liabilities_dormant(db: Session) -> None:
+    # Gather the grace period
+    try:
+        grace_period = int(os.environ.get("CONTRACT_EXPIRY_GRACE_PERIOD_MONTHS", 6))
+    except Exception as e:
+        print(e, " Exiting liabilities dormancy process...")
+        return
+
+    # Get the admin account, the transactions will be done under its name
+    admin_user = db.scalar(
+        select(models.User)
+        .where(models.User.username == "admin")
+    )
+    if admin_user is None:
+        print("Admin user not found! Exiting liabilities dormancy process...")
+        grace_period = 6
+
+
+    # find the active deposit liability account
+    active_bike_deposits_liability_accounts = [account for account in db.scalars(
+        select (models.Account)
+        .where(models.Account.type == AccountTypes.LIABILITY)
+        .where(models.Account.name.like("%active%"))
+    ) if "return" in account.showInUis]
+    if len(active_bike_deposits_liability_accounts) != 1:
+        print("Active bike deposits liability account not found! Exiting liabilities dormancy process...")
+        return
+    active_bike_deposits_liability_account = active_bike_deposits_liability_accounts[0]
+
+    # find the dormant deposit liability account
+    dormant_bike_deposits_liability_accounts = [account for account in db.scalars(
+        select (models.Account)
+        .where(models.Account.type == AccountTypes.LIABILITY)
+        .where(models.Account.name.like("%dormant%"))
+    ) if "return" in account.showInUis]
+    if len(dormant_bike_deposits_liability_accounts) != 1:
+        print("Dormant bike deposits liability account not found! Exiting liabilities dormancy process...")
+        return
+    dormant_bike_deposits_liability_account = dormant_bike_deposits_liability_accounts[0]
+
+
+    # get unreturned contracts past the grace period
+    contracts_past_grace_period = [_ for _ in db.scalars(
+        select(models.Contract)
+        .where(models.Contract.endDate < (datetime.now(timezone.utc) - relativedelta(months=grace_period)))
+        .where(models.Contract.returnedDate == None)
+    )]
+
+    for contract in contracts_past_grace_period:
+        last_transaction_header = sorted(contract.depositTransactionHeaders, key=lambda th: th.postedOn)[-1]
+        # last transaction should be one of "deposit_collected", "deposit_settled", "liability_reactivated", "liability_dormant", "deposit_forfeited", or 
+        # the liability should only be made dormant if the last transaction is deposit collection, or liability reactivation
+        if last_transaction_header.event in ["deposit_collected", "liability_reactivated"]:
+            try:
+                make_contract_liability_dormant(
+                    db=db,
+                    contract_id=contract.id,
+                    active_liability_account_id=active_bike_deposits_liability_account.id,
+                    dormant_liability_account_id=dormant_bike_deposits_liability_account.id,
+                    admin_user=admin_user
+                )
+            except Exception as e:
+                print(
+                    f"Error making contract {contract.id} liability dormant: {e}",
+                )
+
+
+def send_contract_grace_period_ended_emails(db: Session) -> None:
+    unnotified_contracts_with_dormant_liabilities = [_ for _ in db.scalars(
+        select(models.Contract)
+        .join(models.TransactionHeader)
+        .where(models.TransactionHeader.event == "liability_dormant")
+        .where(models.Contract.liabilityDormantSent == False)
+        .distinct(models.Contract.id)
+    )]
+    
+    for contract in unnotified_contracts_with_dormant_liabilities:
+        contract.send_contract_grace_period_ended_email()
+        contract.liabilityDormantSent = True
+        db.commit()

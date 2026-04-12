@@ -58,6 +58,8 @@ if os.environ["PRODUCTION"] == "true":
     db = SessionLocal()
     crud.send_expiry_emails(db=db)
     crud.send_appointment_reminders(db=db)
+    crud.make_all_old_liabilities_dormant(db=db)
+    crud.send_contract_grace_period_ended_emails(db=db)
     db.close()
 
 db = SessionLocal()

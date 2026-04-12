@@ -57,6 +57,7 @@ class Contract(Base):
 
     detailsSent: Mapped[bool] = mapped_column("detailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     expiryReminderSent: Mapped[bool] = mapped_column("expiryremindersent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+    liabilityDormantSent: Mapped[bool] = mapped_column("liabilitydormantsent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returndetailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
 
     crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
@@ -64,31 +65,31 @@ class Contract(Base):
     depositTransactionHeaders: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.contractId], back_populates="contract")
 
     @property
-    def liability_collected(self) -> float:
+    def liability_collected(self) -> int:
         for th in self.depositTransactionHeaders:
             if th.event == "deposit_collected":
                 for tl in th.transactionLines:
                     if tl.account.type == AccountTypes.LIABILITY:
-                        return abs(tl.amount) / 100
+                        return abs(tl.amount)
                     
-        return 0.0
+        return 0
     
     @property
     def liability_collected_string(self) -> str:
-        return f"{self.liability_collected:.2f}"
+        return f"{(self.liability_collected / 100):.2f}"
     
     @property
-    def deposit_amount_returned(self) -> float:
+    def deposit_amount_returned(self) -> int:
         for th in self.depositTransactionHeaders:
             if th.event == "deposit_settled":
                 for tl in th.transactionLines:
                     if tl.account.type == AccountTypes.ASSET:
-                        return abs(tl.amount) / 100
-        return 0.0
+                        return abs(tl.amount)
+        return 0
     
     @property
     def deposit_amount_returned_string(self) -> str:
-        return f"{self.deposit_amount_returned:.2f}"
+        return f"{(self.deposit_amount_returned / 100):.2f}"
 
     def __eq__dict(self, other: dict):
         return all([
@@ -145,7 +146,6 @@ class Contract(Base):
         ])
 
     def send_creation_email(self):
-        # TODO: deposit information needs to use new model
         email_html_content = services.email_helpers.render_template(template_name="contract_created", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
@@ -154,7 +154,6 @@ class Contract(Base):
         )
 
     def send_expiry_reminder_email(self):
-        # TODO: deposit information needs to use new model
         email_html_content = services.email_helpers.render_template(template_name="contract_expiry_reminder", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
@@ -163,11 +162,26 @@ class Contract(Base):
         )
 
     def send_return_email(self):
-        # TODO: deposit information needs to use new model
         email_html_content = services.email_helpers.render_template(template_name="contract_returned", client=self.client, contract=self)
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Bike Rental Has Ended",
+            content=email_html_content
+        )
+        
+    def send_contract_grace_period_ended_email(self):
+        email_html_content = services.email_helpers.render_template(template_name="contract_grace_period_ended", client=self.client, contract=self)
+        services.email_helpers.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Bike Rental Has Expired!",
+            content=email_html_content
+        )
+        
+    def send_deposit_forfeited_email(self):
+        email_html_content = services.email_helpers.render_template(template_name="contract_deposit_forfeited", client=self.client, contract=self)
+        services.email_helpers.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Bike Rental Deposit Has Been Forfeited",
             content=email_html_content
         )
 
