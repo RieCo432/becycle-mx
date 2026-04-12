@@ -1094,8 +1094,8 @@ export default {
               event: 'deposit_collected',
             },
             transactionLines: [
-              {amount: -depositAmountCollected.value * 100, accountId: depositCollectedLiabilityAccount.value.id},
-              {amount: depositAmountCollected.value * 100, accountId: depositCollectedAssetAccount.value.id},
+              {amount: -Math.round(depositAmountCollected.value * 100), accountId: depositCollectedLiabilityAccount.value.id},
+              {amount: Math.round(depositAmountCollected.value * 100), accountId: depositCollectedAssetAccount.value.id},
             ],
             attemptAutoPost: true,
           };

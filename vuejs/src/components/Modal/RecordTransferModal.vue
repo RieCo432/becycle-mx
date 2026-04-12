@@ -174,10 +174,10 @@ export default {
           event: event.value,
         },
         transactionLines: [
-          {accountId: creditAccount.value.id, amount: -amount.value * 100},
-          {accountId: debitAccount.value.id, amount: amount.value * 100},
+          {accountId: creditAccount.value.id, amount: -Math.round(amount.value * 100)},
+          {accountId: debitAccount.value.id, amount: Math.round(amount.value * 100)},
         ],
-        attemptAutoPost: false,
+        attemptAutoPost: true,
       };
 
       const additionalData = [];
@@ -187,7 +187,7 @@ export default {
       if (!loggedInUserCanSignDebitAccount.value) {
         additionalData.push({username: debitAccountUsername.value, password: debitAccountPassword.value});
       }
-      
+
       requests.createTransaction(transactionDraft, additionalData).then((response) => {
         toast.success('Transaction created and posted successfully', {timeout: 2000});
         resetNewTransferForm();

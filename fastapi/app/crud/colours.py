@@ -13,7 +13,10 @@ def get_colours(db : Session) -> list[models.Colour]:
 
 
 def get_colours_bar_image(colours_hex: List[str], width: int=300, height: int=40, border_radius: int=20, border_color:str="#e0e0e0", border_width:int=0) -> dict[str, str]:
-    image_file_name = f"colour_bar_" + "_".join(colours_hex) + ".png"
+    
+    # for the filename, sort the colours according to their integer value, so that different permutations can still use the same file
+    colours_sorted = sorted(colours_hex, key=lambda c: models.Colour.getintvalue(c))
+    image_file_name = f"colour_bar_" + "_".join(colours_sorted) + ".png"
 
     current_dir = os.path.dirname(__file__)
     temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")

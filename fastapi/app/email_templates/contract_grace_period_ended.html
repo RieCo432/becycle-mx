@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 style='color:#ff0000'>The {{ env["CONTRACT_GRACE_PERIOD_AFTER_EXPIRY_MONTHS"] }} month grace period for late returns has ended.</h2><br>
+<p>
+  Please visit us as soon as possible with your bike to return it or to extend the contract. 
+  If you do not return within {{ env["CONTRACT_FORFEIT_AFTER_GRACE_PERIOD_MONTHS"] }} months, we reserve the right to forfeit your deposit. 
+  At that point, you will no longer be able to claim your deposit or extend the contract.
+</p>
+
+{% include "partials/contract_info.html" %}
+
+{% include "partials/contract_terms.html" %}
+
+{% endblock %}

@@ -17,12 +17,14 @@ import {useToast} from 'vue-toastification';
 import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
+import TransactionLinesTable from '@/components/Tables/TransactionLinesTable.vue';
 
 const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    TransactionLinesTable,
     Modal,
     Tooltip,
     SubmitCrimeReportCard,
@@ -167,12 +169,17 @@ export default {
             event: 'deposit_settled',
           },
           transactionLines: [
-            {amount: depositAmountCollected.value, accountId: depositSettledLiabilityAccount.value.id},
-            {amount: -depositAmountReturned.value * 100, accountId: depositSettledAssetAccount.value.id},
+            {
+              amount: depositAmountCollected.value,
+              accountId: depositSettledLiabilityAccount.value.id,
+            },
+            {
+              amount: -Math.round(depositAmountReturned.value * 100),
+              accountId: depositSettledAssetAccount.value.id},
 
             ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
               [{
-                amount: -(depositAmountCollected.value - depositAmountReturned.value * 100),
+                amount: -Math.round(depositAmountCollected.value - depositAmountReturned.value * 100),
                 accountId: depositSettledRevenueAccount.value.id,
               }] :
               []
@@ -492,7 +499,7 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300">{{ bike.serialNumber }}</p>
                   <p class="text-slate-600 dark:text-slate-300">{{ bike.disposition }}</p>
                   <p class="text-slate-600 dark:text-slate-300" v-if="isUser">
-                    Rough Value: {{ bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a' }}
+                    Rough Value: {{ bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a' }} (this is not the deposit)
                   </p>
                 </div>
                 <div class="col-span-12 col-start-1">
@@ -582,28 +589,13 @@ export default {
                   <p class="text-slate-600 dark:text-slate-300 w-100">
                     Deposit:
                   </p>
-                  <table v-if="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected')"
-                         class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
-                    <tr class=" dark:bg-slate-700">
-                      <th class="border dark:border-slate-500">Account</th>
-                      <th class="border dark:border-slate-500">Credit</th>
-                      <th class="border dark:border-slate-500">Debit</th>
-                    </tr>
-                    <tr v-for="line in contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected').transactionLines" 
-                        :key="line.id">
-                      <td class="border dark:border-slate-500">{{ line.account.name }}</td>
-                      <td class="border dark:border-slate-500">
-                        {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
-                      </td>
-                      <td class="border dark:border-slate-500">
-                        {{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}
-                      </td>
-                    </tr>
-                  </table>
+                  <TransactionLinesTable
+                    v-if="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected')"
+                    :transaction-header="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected')"/>
                   <p v-else class="text-slate-600 dark:text-slate-300">&#163;
-                    {{ contract.depositAmountCollectedRestricted ? (contract.depositAmountCollectedRestricted / 100).toFixed(2) : 'ERROR' }}</p>
-
-
+                    {{ contract.depositAmountCollectedRestricted ?
+                      (contract.depositAmountCollectedRestricted / 100).toFixed(2) :
+                      'ERROR' }}</p>
                   <p class="text-slate-600 dark:text-slate-300">Done by: {{ workingUsername ?? 'REDACTED' }}</p>
                   <p class="text-slate-600 dark:text-slate-300">Checked by: {{ checkingUsername ?? 'REDACTED' }}</p>
                 </div>
@@ -813,25 +805,13 @@ export default {
               <p class="text-slate-600 dark:text-slate-300 w-100">
                 Deposit Settlement:
               </p>
-              <table v-if="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_settled')"
-                     class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
-                <tr class=" dark:bg-slate-700">
-                  <th class="border dark:border-slate-500">Account</th>
-                  <th class="border dark:border-slate-500">Credit</th>
-                  <th class="border dark:border-slate-500">Debit</th>
-                </tr>
-                <tr v-for="line in contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_settled').transactionLines" 
-                    :key="line.id">
-                  <td class="border dark:border-slate-500">{{ line.account.name }}</td>
-                  <td class="border dark:border-slate-500">
-                    {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
-                  </td>
-                  <td class="border dark:border-slate-500">
-                    {{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}
-                  </td>
-                </tr>
-              </table>
-              <p v-else class="text-slate-600 dark:text-slate-300">&#163; {{ contract.depositAmountReturnedRestricted ? (contract.depositAmountReturnedRestricted / 100).toFixed(2) : 'ERROR' }}</p>
+              <TransactionLinesTable
+                v-if="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_settled')"
+                :transaction-header="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_settled')"/>
+              <p v-else class="text-slate-600 dark:text-slate-300">
+                &#163; {{ contract.depositAmountReturnedRestricted ?
+                (contract.depositAmountReturnedRestricted / 100).toFixed(2) :
+                'ERROR' }}</p>
               <p class="text-slate-600 dark:text-slate-300">Received by {{ returnAcceptedByUsername ?? 'REDACTED' }}</p>
             </div>
           </Card>
@@ -898,32 +878,14 @@ export default {
       </div>
     </div>
     <Modal title="Deposit Transactions" :active-modal="showDepositTransactions" @close="() => showDepositTransactions = false">
-      <table class="border-collapse border dark:border-slate-400 min-w-full text-slate-600 dark:text-slate-300">
-        <tr class=" dark:bg-slate-700">
-          <th class="border dark:border-slate-500">Account</th>
-          <th class="border dark:border-slate-500">Credit</th>
-          <th class="border dark:border-slate-500">Debit</th>
-        </tr>
-        <template v-for="transactionHeader in contract.depositTransactionHeaders?.toSorted((a, b) => new Date(Date.parse(a.createdOn)) - new Date(Date.parse(b.createdOn)))" :key="transactionHeader.id">
-          <tr class=" dark:bg-slate-600">
-            <td class="border dark:border-slate-500">{{ transactionHeader.event }}</td>
-            <td class="border dark:border-slate-500">{{ new Date(Date.parse(transactionHeader.postedOn))
-              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}</td>
-            <td></td>
-          </tr>
-          <tr v-for="line in transactionHeader.transactionLines" :key="line.id">
-            <td class="border dark:border-slate-500">{{ line.account.name }}</td>
-            <td class="border dark:border-slate-500">
-              {{ line.amount < 0 ? `&#163; ${(-line.amount / 100).toFixed(2)}` : '' }}
-            </td>
-            <td class="border dark:border-slate-500">
-              {{ line.amount > 0 ? `&#163; ${(line.amount / 100).toFixed(2)}` : '' }}
-            </td>
-          </tr>
-        </template>
-      </table>
+      <template
+        v-for="transactionHeader in contract
+         .depositTransactionHeaders?.toSorted(
+           (a, b) => new Date(Date.parse(a.createdOn)) - new Date(Date.parse(b.createdOn)))"
+        :key="transactionHeader.id">
+        <TransactionLinesTable :transaction-header="transactionHeader"/>
+      </template>
     </Modal>
-    
   </div>
 </template>
 
