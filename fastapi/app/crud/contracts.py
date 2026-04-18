@@ -1,5 +1,5 @@
 import os
-import socket
+
 from datetime import date, datetime, timezone
 from uuid import UUID
 
@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
 
-from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
 
 from .transactions import get_transaction_header, post_transaction_header
 from app.services.accounts_helpers import AccountTypes
@@ -322,16 +321,8 @@ def get_contracts_for_expiry_email(db: Session) -> list[models.Contract]:
 
 def send_expiry_emails(db: Session):
     for contract in get_contracts_for_expiry_email(db=db):
-        try:
-            contract.send_expiry_reminder_email()
-            contract.expiryReminderSent = True
-        except SMTPRecipientsRefused as e:
-            print(contract.client.emailAddress)
-            print(e)
-        except SMTPServerDisconnected as e:
-            print(e)
-        except socket.gaierror as e:
-            print(e)
+        contract.expiryReminderSent = contract.send_expiry_reminder_email()
+
 
     db.commit()
 
@@ -618,7 +609,8 @@ def make_all_old_liabilities_dormant(db: Session) -> None:
     )
     if admin_user is None:
         print("Admin user not found! Exiting liabilities dormancy process...")
-        grace_period = 6
+        return
+        
 
 
     # find the active deposit liability account
@@ -664,6 +656,7 @@ def make_all_old_liabilities_dormant(db: Session) -> None:
                     dormant_liability_account_id=dormant_bike_deposits_liability_account.id,
                     admin_user=admin_user
                 )
+                print(f"Liability made dormant for contract {contract.id}")
             except Exception as e:
                 print(
                     f"Error making contract {contract.id} liability dormant: {e}",
@@ -680,6 +673,5 @@ def send_contract_grace_period_ended_emails(db: Session) -> None:
     )]
     
     for contract in unnotified_contracts_with_dormant_liabilities:
-        contract.send_contract_grace_period_ended_email()
-        contract.liabilityDormantSent = True
+        contract.liabilityDormantSent = contract.send_contract_grace_period_ended_email()
         db.commit()

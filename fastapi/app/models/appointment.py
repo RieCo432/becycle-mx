@@ -100,9 +100,9 @@ class Appointment(Base):
             content=email_html_content
         )
 
-    def send_reminder_email(self):
+    def send_reminder_email(self) -> bool:
         email_html_content = services.email_helpers.render_template(template_name="appointment_reminder", client=self.client, appointment=self)
-        services.send_email(
+        return services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Reminder",
             content=email_html_content
