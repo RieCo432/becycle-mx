@@ -153,9 +153,9 @@ class Contract(Base):
             content=email_html_content
         )
 
-    def send_expiry_reminder_email(self):
+    def send_expiry_reminder_email(self) -> bool:
         email_html_content = services.email_helpers.render_template(template_name="contract_expiry_reminder", client=self.client, contract=self)
-        services.email_helpers.send_email(
+        return services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Bike Rental Expiry Reminder",
             content=email_html_content
@@ -169,17 +169,17 @@ class Contract(Base):
             content=email_html_content
         )
         
-    def send_contract_grace_period_ended_email(self):
+    def send_contract_grace_period_ended_email(self) -> bool:
         email_html_content = services.email_helpers.render_template(template_name="contract_grace_period_ended", client=self.client, contract=self)
-        services.email_helpers.send_email(
+        return services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Bike Rental Has Expired!",
             content=email_html_content
         )
         
-    def send_deposit_forfeited_email(self):
+    def send_deposit_forfeited_email(self) -> bool:
         email_html_content = services.email_helpers.render_template(template_name="contract_deposit_forfeited", client=self.client, contract=self)
-        services.email_helpers.send_email(
+        return services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Bike Rental Deposit Has Been Forfeited",
             content=email_html_content
