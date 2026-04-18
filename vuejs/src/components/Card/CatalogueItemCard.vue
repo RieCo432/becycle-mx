@@ -139,8 +139,7 @@ export default {
       <div class="grid grid-cols-4 md:grid-cols-3 lg:grid-cols-1 flex-shrink">
         <div class="col-span-1 row-span-5 lg:row-span-1">
           <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Item Picture" class="aspect-square rounded-3xl h-full w-full"/>
-          <img v-if="!inEditMode && !photoUrl" src="@/assets/images/defaultProfilePicture.jpg"
-               alt="Item Picture" class="h-full w-full aspect-square rounded-3xl"/>
+          <Icon v-if="!inEditMode && !photoUrl" icon="tabler:photo-off" class="h-full w-full aspect-square rounded-3xl dark:text-slate-300 text-slate-700"/>
         </div>
         <div class="col-span-3 md:col-span-2 lg:col-span-1 p-2">
           <p class="w-full col-span-8 text-slate-700 dark:text-slate-300 text-2xl font-semibold">
