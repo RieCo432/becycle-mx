@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 import bcrypt
@@ -296,3 +296,17 @@ def delete_user_presentation_card(db: Session, user: models.User) -> models.User
     db.commit()
 
     return user_presentation_card
+
+
+def keep_admin_account_active(db: Session) -> None:
+    admin_user = db.scalar(
+        select(models.User)
+        .where(models.User.username == "admin")
+    )
+    if admin_user is None:
+        print("Admin user not found! Cannot keep admin account active...")
+        return
+    
+    admin_user.lastAuthenticated = datetime.now(timezone.utc)
+    db.commit()
+    print("Admin account kept active")

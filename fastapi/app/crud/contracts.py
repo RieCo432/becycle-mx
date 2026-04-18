@@ -609,7 +609,8 @@ def make_all_old_liabilities_dormant(db: Session) -> None:
     )
     if admin_user is None:
         print("Admin user not found! Exiting liabilities dormancy process...")
-        grace_period = 6
+        return
+        
 
 
     # find the active deposit liability account
@@ -655,6 +656,7 @@ def make_all_old_liabilities_dormant(db: Session) -> None:
                     dormant_liability_account_id=dormant_bike_deposits_liability_account.id,
                     admin_user=admin_user
                 )
+                print(f"Liability made dormant for contract {contract.id}")
             except Exception as e:
                 print(
                     f"Error making contract {contract.id} liability dormant: {e}",
