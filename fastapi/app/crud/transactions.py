@@ -166,7 +166,7 @@ def post_transaction_header(db: Session, transaction_header_id: UUID, user: mode
         db.rollback()
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "You are not allowed to post transactions on one of these accounts"})
     
-    if can_all_lines_be_posted:
+    else:
         transaction_header.postedOn = datetime.now(timezone.utc)
         transaction_header.postedByUserId = user.id
     
