@@ -51,7 +51,7 @@
           <div
               class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
           >
-            <form @submit.prevent="submit" @keydown.enter="submit">
+            <form @submit.prevent="submit" @keydown.enter="() => {}">
               <div v-if="stepNumber === 0">
                 <div class="grid grid-cols-1 2xl:grid-cols-2 gap-5">
                   <div class="col-span-1">
@@ -203,9 +203,7 @@
                         @click.prevent="() => {modelNotInList = !modelNotInList}"
                     />
                   </div>
-
-
-                  <!-- TODO: colour suggestions should be shown as coloured dots -->
+                  
                   <div class="col-span-6 xl:col-span-4 xl:row-span-4 xl:row-start-3 col-start-1">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"
@@ -360,8 +358,8 @@
                 </div>
               </div>
               <div v-if="stepNumber === 4">
-                <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="lg:col-span-3 md:col-span-2 col-span-1">
+                <div class="grid 2xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-5">
+                  <div class="col-span-full">
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Deposit Collection
                     </h4>
@@ -378,18 +376,33 @@
                   />
 
                   <ComboboxTextInput
-                      :field-model-value="depositCollectingUser"
-                      :suggestions="filtered_deposit_collecting_user_suggestions"
-                      :selected-callback="selectDepositCollectingUser"
+                      :field-model-value="depositCollectedLiabilityAccount.name"
+                      :suggestions="filtered_deposit_collected_liability_account_suggestions.map(makeAccountLegible)"
+                      :selected-callback="selectDepositCollectedLiabilityAccount"
                       :allow-new="false"
                       :open-by-default="userSelectionOptionsStatic"
-                      label="Deposit Collector"
+                      label="Liability Account"
                       type="text"
                       placeholder="workshop"
-                      name="depositCollectingUser"
-                      v-model="depositCollectingUser"
-                      :error="depositCollectingUserError"
+                      name="depositCollectedLiabilityAccount"
+                      v-model="depositCollectedLiabilityAccount.name"
+                      :error="depositCollectedLiabilityAccountError"
                       @change="() => {}"
+                  />
+
+                  <ComboboxTextInput
+                    :field-model-value="depositCollectedAssetAccount.name"
+                    :suggestions="filtered_deposit_collected_asset_account_suggestions.map(makeAccountLegible)"
+                    :selected-callback="selectDepositCollectedAssetAccount"
+                    :allow-new="false"
+                    :open-by-default="userSelectionOptionsStatic"
+                    label="Asset Account"
+                    type="text"
+                    placeholder="workshop"
+                    name="depositCollectedAssetAccount"
+                    v-model="depositCollectedAssetAccount.name"
+                    :error="depositCollectedAssetAccountError"
+                    @change="() => {}"
                   />
 
                   <TextInput
@@ -554,121 +567,6 @@
                 </div>
               </div>
 
-              <div v-if="stepNumber === 7">
-                <div class="grid lg:grid-cols-2 grid-cols-1 gap-5">
-                  <div class="col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h4>
-                    <table class="w-full text-base text-slate-800 dark:text-slate-300 border border-collapse border-slate-500 bg-slate-700">
-                      <thead>
-                        <tr class="border border-slate-500">Lendee Details</tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td class="border border-slate-500">Name</td>
-                          <td class="border border-slate-500">{{firstName}} {{lastName}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Email Address</td>
-                          <td class="border border-slate-500">{{emailAddress}}</td>
-                        </tr>
-                      </tbody>
-                      <thead>
-                        <tr class="border border-slate-500">Bike Details</tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td class="border border-slate-500">Make</td>
-                          <td class="border border-slate-500">{{make}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Model</td>
-                          <td class="border border-slate-500">{{model}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Colour</td>
-                          <td class="border border-slate-500">
-                            <div class="h-10 rounded-full overflow-hidden">
-                              <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${colours.length}`">
-                                <template
-                                    v-for="c in colours"
-                                    :key="c.name"
-                                >
-                                  <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
-                                    <template #button>
-                                      <div class="w-full h-full"></div>
-                                    </template>
-                                    <span>{{ c.name }} ({{ c.hex }})</span>
-                                  </Tooltip>
-                                </template>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Decals</td>
-                          <td class="border border-slate-500">{{decals}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Serial Number</td>
-                          <td class="border border-slate-500">{{serialNumber}}</td>
-                        </tr>
-                      </tbody>
-                      <thead>
-                      <tr class="border border-slate-500">Additional Details</tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td class="border border-slate-500">Lease Start</td>
-                          <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Lease End</td>
-                          <td class="border border-slate-500">{{datePlusSixMonths().toDateString()}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Deposit</td>
-                          <td class="border border-slate-500">&#163;{{depositAmountCollected}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Contract Type</td>
-                          <td class="border border-slate-500">{{type}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Bike Condition</td>
-                          <td class="border border-slate-500">{{condition}}</td>
-                        </tr>
-                        <tr>
-                          <td class="border border-slate-500">Notes</td>
-                          <td class="border border-slate-500">{{notes}}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Terms of Loan</h4>
-                    <p class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                      Bicycle (Bike) Release Form: Terms of Loan) The agreed deposit is made and kept as a retainer against the value
-                      of the bike and released back to You (Keeper) upon the return of the borrowed bike – in satisfactory condition.
-                      {{ OFFICIAL_NAME }} reserves the right to deduct money from the deposit if and when any damage or excessive
-                      wear and tear occurs to the bike – and/or the bike was kept by You over the agreed rental period. The bike, when
-                      loaned is the full and sole responsibility of You (Keeper) therefore You are entrusted with the burden of
-                      ownership, maintenance, and upkeep. It is completely at your own risk that the bike is maintained and operated
-                      within reasonable use – to ensure Your personal safety.
-                    </p>
-                  </div>
-                  <div class="col-span-1">
-                    <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">Agreement</h4>
-                    <Checkbox
-                        label="I confirm all details are correct and I agree to the terms of the loan!"
-                        name="everythingCorrect"
-                        activeClass="ring-primary-500 bg-primary-500"
-                        v-model="everythingCorrect"
-                        :error="everythingCorrectError"/>
-                    <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
-                  </div>
-                </div>
-              </div>
-
               <div
                   class="mt-10"
                   :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
@@ -681,9 +579,11 @@
                 />
                 <Button
                     v-if="stepNumber !== 0"
-                    :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                     btnClass="btn-dark"
-                />
+                    :disabled="stepIsLoading">
+                  <span v-if="!stepIsLoading">{{stepNumber !== this.steps.length - 1 ? 'next' : 'submit'}}</span>
+                  <VueSpinner v-if="stepIsLoading" size="20px" class="text-sky-500"/>
+                </Button>
               </div>
             </form>
           </div>
@@ -709,14 +609,13 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import Checkbox from '@/components/Checkbox/index.vue';
 import {useRouter} from 'vue-router';
 import DashButton from '@/components/Button/index.vue';
-// import nfc from '@/nfc';
 import levenshtein from '@/util/levenshtein';
 import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
-import Tooltip from '@/components/Tooltip/index.vue';
 import ColourSetSuggestion from '@/components/ComboBoxColourPicker/ColourSetSuggestion.vue';
 import colourSuggestionSort from '@/util/colourSuggestionSort';
 import ContractDraftCard from '@/components/Card/ContractDraftCard.vue';
 import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
+import {VueSpinner} from 'vue3-spinners';
 
 const toast = useToast();
 const OFFICIAL_NAME = import.meta.env.VITE_OFFICIAL_NAME;
@@ -724,10 +623,10 @@ const OFFICIAL_NAME = import.meta.env.VITE_OFFICIAL_NAME;
 export default {
   name: 'newContract',
   components: {
+    VueSpinner,
     BikeOverviewCard,
     ContractDraftCard,
     ColourSetSuggestion,
-    Tooltip,
     ComboboxColourPicker,
     DashButton,
     Checkbox,
@@ -770,10 +669,6 @@ export default {
         id: 7,
         title: 'Safety Check',
       },
-      {
-        id: 8,
-        title: 'Summary',
-      },
     ];
 
     const contractTypes = ref([]);
@@ -795,17 +690,18 @@ export default {
 
     const makeSuggestions = ref([]);
     const modelSuggestions = ref([]);
-    const colourSuggestions = ref([]);
     const coloursSuggestions = ref([]);
     const serialNumberSuggestions = ref([]);
 
-    const depositBearers = ref([]);
+    const depositLiabilityAccounts = ref([]);
+    const depositAssetAccounts = ref([]);
     const rentalCheckers = ref([]);
     const activeUsers = ref([]);
 
     const router = useRouter();
 
     const userSelectionOptionsStatic = ref(true);
+    const stepIsLoading = ref(false);
 
     // step by step yup schema
     const clientSchema = yup.object().shape({
@@ -852,7 +748,14 @@ export default {
 
     const depositCollectionSchema = yup.object().shape({
       depositAmountCollected: yup.number().min(0, 'Must not be negative').integer().required(' Deposit Amount is required '),
-      depositCollectingUser: yup.string().required(' Deposit Collector Username is required '),
+      depositCollectedLiabilityAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The deposit liability account id is required '),
+        name: yup.string().required(' The deposit liability account name is required '),
+      }).required(' The deposit liability account is required '),
+      depositCollectedAssetAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The deposit asset account id is required '),
+        name: yup.string().required(' The deposit asset account name is required '),
+      }).required(' The deposit asset account is required '),
       depositCollectingPassword: yup.string().required(),
     });
 
@@ -893,10 +796,6 @@ export default {
         .required('Is there no play in the headset, does it steer easily and smoothly, and does it resist twisting?'),
     });
 
-    const reviewSchema = yup.object().shape({
-      everythingCorrect: yup.boolean().oneOf([true], 'This check is required').required('This check is required!'),
-    });
-
 
     // find current step schema
     const currentSchema = computed(() => {
@@ -913,8 +812,6 @@ export default {
         return workingUserSchema;
       case 6:
         return checkingUserSchema;
-      case 7:
-        return reviewSchema;
       default:
         return clientSchema;
       }
@@ -949,9 +846,21 @@ export default {
     const {value: notes, errorMessage: notesError} = useField('notes');
 
     const {value: depositAmountCollected, errorMessage: depositAmountCollectedError} = useField('depositAmountCollected');
-    const {value: depositCollectingUser, errorMessage: depositCollectingUserError} = useField('depositCollectingUser');
+    const {
+      value: depositCollectedLiabilityAccount,
+      errorMessage: depositCollectedLiabilityAccountError,
+    } = useField('depositCollectedLiabilityAccount');
+    const {
+      value: depositCollectedAssetAccount,
+      errorMessage: depositCollectedAssetAccountError,
+    } = useField('depositCollectedAssetAccount');
     const {value: depositCollectingPassword, errorMessage: depositCollectingPasswordError,
       setErrors: depositCollectingPasswordSetErrors} = useField('depositCollectingPassword');
+
+    const depositCollectedTransactionHeader = ref({});
+    depositCollectedAssetAccount.value = {name: null, id: null};
+    depositCollectedLiabilityAccount.value = {name: null, id: null};
+
 
     const {value: workingUser, errorMessage: workingUserError} = useField('workingUser');
     const {value: workingPasswordOrPin, errorMessage: workingPasswordOrPinError,
@@ -970,21 +879,19 @@ export default {
     const {value: mCheckSeatPost, errorMessage: mCheckSeatPostError} = useField('mCheckSeatPost');
     const {value: mCheckHeadset, errorMessage: mCheckHeadsetError} = useField('mCheckHeadset');
 
-    const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
 
-    depositCollectingUser.value = '';
     workingUser.value = '';
     checkingUser.value = '';
 
     function workingUserSelected() {
       workingPasswordOrPin.value = null;
-      if (workingUser.value === depositCollectingUser.value) {
+      if (workingUser.value === depositCollectedAssetAccount.value.ownerUser.username) {
         workingPasswordOrPin.value = depositCollectingPassword.value;
       }
     }
     function checkingUserSelected() {
       checkingPasswordOrPin.value = null;
-      if (checkingUser.value === depositCollectingUser.value) {
+      if (checkingUser.value === depositCollectedAssetAccount.value.ownerUser.username) {
         checkingPasswordOrPin.value = depositCollectingPassword.value;
       }
     }
@@ -1015,6 +922,9 @@ export default {
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
           });
       }
     }
@@ -1033,6 +943,9 @@ export default {
           })
           .catch((error) => {
             toast.error(error.response.data.detail.description, {timeout: 5000});
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
           });
       }
     }
@@ -1058,126 +971,210 @@ export default {
       }
     }
 
+    function promoteDraft() {
+      requests.postSubmitDraftContract(activeDraft.value.id)
+        .then((response) => {
+          toast.success('Contract Recorded!', {timeout: 1000});
+          router.push({path: `/contracts/${response.data.id}`, query: {showTerms: 1}});
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 5000});
+        }).finally(() => {
+          stepIsLoading.value = false;
+        });
+    }
+
+    function getActiveUsers() {
+      requests.getActiveUsers().then((response) => {
+        activeUsers.value = response.data.map((user) => (user.username));
+        userSelectionOptionsStatic.value = true;
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 5000});
+      });
+    }
+
+    function getRentalCheckers() {
+      requests.getRentalCheckers().then((response) => {
+        rentalCheckers.value = response.data.map((user) => (user.username));
+        userSelectionOptionsStatic.value = true;
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 5000});
+      });
+    }
+
     const submit = handleSubmit(() => {
+      if (stepIsLoading.value) {
+        toast.error('Please wait for the previous step to complete', {timeout: 5000});
+        return;
+      }
+      stepIsLoading.value = true;
       // next step until last step. if last step then submit form
-      if (stepNumber.value === steps.length - 1) {
-        requests.postSubmitDraftContract(activeDraft.value.id)
+      if (stepNumber.value === 1) {
+        // Client details processing
+        requests.getClientByEmail(emailAddress.value)
           .then((response) => {
-            toast.success('Contract Recorded!', {timeout: 1000});
-            router.push({path: `/contracts/${response.data.id}`});
-          }).catch((error) => {
-            toast.error(error.response.data.detail.description, {timeout: 5000});
-          });
-      } else {
-        if (stepNumber.value === 1) {
-          // Client details processing
-          requests.getClientByEmail(emailAddress.value)
-            .then((response) => {
-              clientId.value = response.data[0]['id'];
-              setClient();
-            })
-            .catch((error) => {
-              if (error.response.status === 404) {
-                requests.postNewClient({
-                  firstName: firstName.value,
-                  lastName: lastName.value,
-                  emailAddress: emailAddress.value,
-                }).then((response) => {
-                  toast.success('New Client Created!', {timeout: 1000});
-                  clientId.value = response.data['id'];
-                  setClient();
-                });
-              }
-            });
-        } else if (stepNumber.value === 2) {
-          // Bike details processing
-          if (matchWithBikeId.value === 'new') {
-            requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value)
-              .then((response) => {
-                toast.success('New Bike Created!', {timeout: 1000});
-                bikeId.value = response.data['id'];
-                setBike();
+            clientId.value = response.data[0]['id'];
+            setClient();
+          })
+          .catch((error) => {
+            if (error.response.status === 404) {
+              requests.postNewClient({
+                firstName: firstName.value,
+                lastName: lastName.value,
+                emailAddress: emailAddress.value,
+              }).then((response) => {
+                toast.success('New Client Created!', {timeout: 1000});
+                clientId.value = response.data['id'];
+                setClient();
               });
-          } else {
-            bikeId.value = matchWithBikeId.value;
-            setBike();
-          }
-        } else if (stepNumber.value === 3) {
-          requests.putDraftContractDetails(activeDraft.value.id, type.value, condition.value, notes.value)
+            }
+          });
+      } else if (stepNumber.value === 2) {
+        // Bike details processing
+        if (matchWithBikeId.value === 'new') {
+          requests.postNewBike(make.value, model.value, colours.value, decals.value, serialNumber.value, 'rental')
             .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Contract Details Updated!', {timeout: 1000});
-              stepNumber.value = 4;
-              requests.getDepositBearers().then((response) =>
-                (depositBearers.value = response.data.map((user) => (user.username))));
-              if (activeDraft.value.depositCollectingUser !== null && activeDraft.value.depositAmountCollected !== null) {
-                stepNumber.value = 5;
-              }
-              if (activeDraft.value.workingUser !== null) {
-                stepNumber.value = 6;
-              }
-              if (activeDraft.value.checkingUser !== null) {
-                stepNumber.value = 7;
-              }
+              toast.success('New Bike Created!', {timeout: 1000});
+              bikeId.value = response.data['id'];
+              setBike();
             })
             .catch((error) => {
               toast.error(error.response.data.detail.description, {timeout: 5000});
             });
-        } else if (stepNumber.value === 4) {
-          // Check password of deposit collector
-          requests.putDraftContractDeposit(
-            activeDraft.value.id,
-            depositAmountCollected.value,
-            depositCollectingUser.value,
-            depositCollectingPassword.value)
-            .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Deposit Details Updated!', {timeout: 1000});
-              stepNumber.value = 5;
-              requests.getActiveUsers().then((response) => (activeUsers.value = response.data.map((user) => (user.username))));
-              userSelectionOptionsStatic.value = true;
-            })
-            .catch((error) => {
-              if (error.response.status === 400) {
-                depositCollectingPasswordSetErrors('Wrong Password!');
-              } else {
-                toast.error(error.response.data.detail.description, {timeout: 5000});
-              }
-            });
-        } else if (stepNumber.value === 5) {
-          // check password or pin of working volunteer
-          requests.putDraftContractWorkingUser(activeDraft.value.id, workingUser.value, workingPasswordOrPin.value)
-            .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Working Volunteer Updated!', {timeout: 1000});
-              stepNumber.value = 6;
-              requests.getRentalCheckers().then((response) => (rentalCheckers.value = response.data.map((user) => (user.username))));
-              userSelectionOptionsStatic.value = true;
-            })
-            .catch((error) => {
-              if (error.response.status === 400) {
-                workingPasswordOrPinSetErrors('Wrong Password!');
-              } else {
-                toast.error(error.response.data.detail.description, {timeout: 5000});
-              }
-            });
-        } else if (stepNumber.value === 6) {
-          // check password or pin of checking volunteer
-          requests.putDraftContractCheckingUser(activeDraft.value.id, checkingUser.value, checkingPasswordOrPin.value)
-            .then((response) => {
-              activeDraft.value = response.data;
-              toast.success('Checking Volunteer Updated!', {timeout: 1000});
-              userSelectionOptionsStatic.value = true;
-              stepNumber.value = 7;
-            })
-            .catch((error) => {
-              if (error.response.status === 400) {
-                checkingPasswordOrPinSetErrors('Wrong Password!');
-              } else {
-                toast.error(error.response.data.detail.description, {timeout: 5000});
-              }
-            });
+        } else {
+          bikeId.value = matchWithBikeId.value;
+          setBike();
         }
+      } else if (stepNumber.value === 3) {
+        requests.putDraftContractDetails(activeDraft.value.id, type.value, condition.value, notes.value)
+          .then((response) => {
+            activeDraft.value = response.data;
+            toast.success('Contract Details Updated!', {timeout: 1000});
+            stepNumber.value = 4;
+            requests.getAccounts([{name: 'types', value: 'asset'}, {name: 'ui_filters', value: 'deposit'}]).then((response) => {
+              depositAssetAccounts.value = response.data;
+            }).catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            });
+
+            requests.getAccounts([{name: 'types', value: 'liability'}, {name: 'ui_filters', value: 'deposit'}]).then((response) => {
+              depositLiabilityAccounts.value = response.data;
+            }).catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            });
+
+            if (activeDraft.value.depositCollectedTransactionHeaderId != null) {
+              toast.success('Deposit Already Collected!', {timeout: 1000});
+              getActiveUsers();
+
+              stepNumber.value = 5;
+              stepIsLoading.value = false;
+            }
+            if (activeDraft.value.workingUser !== null) {
+              toast.success('Working User Already Selected!', {timeout: 1000});
+              getRentalCheckers();
+              stepNumber.value = 6;
+              stepIsLoading.value = false;
+            }
+            if (activeDraft.value.checkingUser !== null) {
+              toast.success('Checking User Already Selected!', {timeout: 1000});
+              stepIsLoading.value = false;
+              promoteDraft();
+            }
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 5000});
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
+          });
+      } else if (stepNumber.value === 4) {
+        if (!activeDraft.value.depositCollectedTransactionId) {
+          const depositCollectedTransactionDraft = {
+            transactionHeader: {
+              event: 'deposit_collected',
+            },
+            transactionLines: [
+              {amount: -Math.round(depositAmountCollected.value * 100), accountId: depositCollectedLiabilityAccount.value.id},
+              {amount: Math.round(depositAmountCollected.value * 100), accountId: depositCollectedAssetAccount.value.id},
+            ],
+            attemptAutoPost: true,
+          };
+          const transactionAuthDetails = [{
+            username: depositCollectedAssetAccount.value.ownerUser.username,
+            password: depositCollectingPassword.value,
+          }];
+          requests.createTransaction(depositCollectedTransactionDraft, transactionAuthDetails).then((response) => {
+            depositCollectedTransactionHeader.value = response.data;
+            toast.success('Deposit Collected!', {timeout: 1000});
+
+            requests.putDraftContractDeposit(
+              activeDraft.value.id,
+              depositCollectedTransactionHeader.value.id,
+              depositCollectedAssetAccount.value.ownerUser.username,
+              depositCollectingPassword.value)
+              .then((response) => {
+                activeDraft.value = response.data;
+                toast.success('Deposit Details Updated!', {timeout: 1000});
+                stepNumber.value = 5;
+                getActiveUsers();
+              })
+              .catch((error) => {
+                toast.error(error.response.data.detail.description, {timeout: 5000});
+                if (error.response.status === 400) {
+                  depositCollectingPasswordSetErrors('Wrong Password!');
+                }
+              });
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 5000});
+            if (
+              error.response.status === 400 &&
+              (error.response.data.detail.username ?? '') === depositCollectedAssetAccount.value.ownerUser.username) {
+              depositCollectingPasswordSetErrors('Wrong Password!');
+            }
+          }).finally(() => {
+            stepIsLoading.value = false;
+          });
+        } else {
+          toast.success('Deposit Details Already Done!', {timeout: 1000});
+          stepNumber.value = 5;
+          stepIsLoading.value = false;
+        }
+      } else if (stepNumber.value === 5) {
+        // check password or pin of working volunteer
+        requests.putDraftContractWorkingUser(activeDraft.value.id, workingUser.value, workingPasswordOrPin.value)
+          .then((response) => {
+            activeDraft.value = response.data;
+            toast.success('Working Volunteer Updated!', {timeout: 1000});
+            stepNumber.value = 6;
+            getRentalCheckers();
+          })
+          .catch((error) => {
+            if (error.response.status === 400) {
+              workingPasswordOrPinSetErrors('Wrong Password!');
+            } else {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            }
+          })
+          .finally(() => {
+            stepIsLoading.value = false;
+          });
+      } else if (stepNumber.value === 6) {
+        // check password or pin of checking volunteer
+        requests.putDraftContractCheckingUser(activeDraft.value.id, checkingUser.value, checkingPasswordOrPin.value)
+          .then((response) => {
+            activeDraft.value = response.data;
+            toast.success('Checking Volunteer Updated!', {timeout: 1000});
+            userSelectionOptionsStatic.value = true;
+            promoteDraft();
+          })
+          .catch((error) => {
+            if (error.response.status === 400) {
+              checkingPasswordOrPinSetErrors('Wrong Password!');
+            } else {
+              toast.error(error.response.data.detail.description, {timeout: 5000});
+            }
+            stepIsLoading.value = false;
+          });
       }
     });
 
@@ -1205,7 +1202,8 @@ export default {
       lastNameSetValue,
       clientId,
 
-      depositBearers,
+      depositAssetAccounts,
+      depositLiabilityAccounts,
       activeUsers,
       rentalCheckers,
 
@@ -1246,8 +1244,10 @@ export default {
 
       depositAmountCollected,
       depositAmountCollectedError,
-      depositCollectingUser,
-      depositCollectingUserError,
+      depositCollectedLiabilityAccount,
+      depositCollectedLiabilityAccountError,
+      depositCollectedAssetAccount,
+      depositCollectedAssetAccountError,
       depositCollectingPassword,
       depositCollectingPasswordError,
 
@@ -1279,9 +1279,6 @@ export default {
       mCheckHeadset,
       mCheckHeadsetError,
 
-      everythingCorrect,
-      everythingCorrectError,
-
       workingUserSelected,
       checkingUserSelected,
 
@@ -1292,6 +1289,7 @@ export default {
       stepNumber,
       prev,
       tryMatchingBike,
+      stepIsLoading,
     };
   },
   data() {
@@ -1420,7 +1418,22 @@ export default {
         this.colours.splice(0, this.colours.length, ...this.filtered_colours_suggestions[i]);
       }
     },
-    selectDepositCollectingUser(event, i) {
+    selectDepositCollectedLiabilityAccount(event, i) {
+      if (i !== -1) {
+        this.depositCollectedLiabilityAccount = this.filtered_deposit_collected_liability_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectDepositCollectedAssetAccount(event, i) {
+      if (i !== -1) {
+        this.depositCollectedAssetAccount = this.filtered_deposit_collected_asset_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    makeAccountLegible(account) {
+      return `${account.name}`;
+    },
+    select(event, i) {
       if (i !== -1) {
         this.depositCollectingUser = this.filtered_deposit_collecting_user_suggestions[i];
         this.userSelectionOptionsStatic = false;
@@ -1678,14 +1691,25 @@ export default {
         this.filtered_serial_number_suggestions = result.slice(0, 6);
       });
     },
+    stepNumber() {
+      this.stepIsLoading = false;
+    },
   },
   computed: {
-    filtered_deposit_collecting_user_suggestions() {
-      return this.depositBearers
-        .filter((suggestion) => suggestion
+    filtered_deposit_collected_liability_account_suggestions() {
+      return this.depositLiabilityAccounts
+        .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith(this.depositCollectingUser.toLowerCase()))
-        .sort(this.userSortingFunction)
+          .startsWith((this.depositCollectedLiabilityAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_deposit_collected_asset_account_suggestions() {
+      return this.depositAssetAccounts
+        .filter((suggestion) => suggestion.name
+          .toLowerCase()
+          .startsWith((this.depositCollectedAssetAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
     filtered_working_user_suggestions() {

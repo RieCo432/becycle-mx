@@ -5,7 +5,7 @@
           v-if="!loadingPresentationCard"
           :presentation-card-details="presentationCardDetails"
           editable
-          :update-card-details="updateMyCardDetails"
+          :update-item-details="updateMyCardDetails"
           :delete-card="deleteMyCard"
       />
     </div>

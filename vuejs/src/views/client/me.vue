@@ -14,7 +14,7 @@
         :open-edit-details-modal="() => showEditDetailsModal = true"
         :loading-client-details="loadingClientDetails"
     ></client-view>
-    <EditMyDetailsModal v-if="!loadingClientDetails"
+    <EditMyDetailsModal v-if="!loadingClientDetails && showEditDetailsModal"
                         :client="client"
                         :show-modal="showEditDetailsModal"
                         :close-modal="() => showEditDetailsModal = false"

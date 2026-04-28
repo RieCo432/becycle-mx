@@ -50,7 +50,7 @@ export default {
       <UserPresentationCard
           :key="userPresentationCardDetails.id"
           :editable="isUserAdmin"
-          :update-card-details="(name, bio, photo) => updateUserPresentationCard(userPresentationCardDetails.id, name, bio, photo)"
+          :update-item-details="(name, bio, photo) => updateUserPresentationCard(userPresentationCardDetails.id, name, bio, photo)"
           :presentation-card-details="userPresentationCardDetails"
           :delete-card="() => deleteUserPresentationCard(userPresentationCardDetails.id)"
       ></UserPresentationCard>

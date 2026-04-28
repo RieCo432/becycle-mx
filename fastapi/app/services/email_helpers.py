@@ -1,5 +1,6 @@
 import os
 import smtplib
+import socket
 import ssl
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
@@ -7,6 +8,7 @@ from email.mime.text import MIMEText
 from email.utils import formataddr
 from uuid import UUID
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+import inspect
 
 import app.schemas as schemas
 
@@ -27,7 +29,7 @@ env = Environment(
 )
 
 
-def send_email(destination: str, subject: str, content: str) -> None:
+def send_email(destination: str, subject: str, content: str) -> bool:
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
     message["From"] = formataddr((SENDER_NAME, EMAIL_FROM))
@@ -36,15 +38,42 @@ def send_email(destination: str, subject: str, content: str) -> None:
     message.attach(MIMEText(content, "html"))
 
     if PRODUCTION:
-
-        context = ssl.create_default_context()
-
-        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
-            server.login(GOOGLE_ACCOUNT, GOOGLE_APP_PASSWORD)
-            server.sendmail(GOOGLE_ACCOUNT, destination, message.as_string())
-
+        try:
+            context = ssl.create_default_context()
+    
+            with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+                server.login(GOOGLE_ACCOUNT, GOOGLE_APP_PASSWORD)
+                server.sendmail(GOOGLE_ACCOUNT, destination, message.as_string())
+                
+            return True
+        except smtplib.SMTPRecipientsRefused:
+            current_frame = inspect.currentframe()
+            caller_frame = inspect.getouterframes(current_frame, 2)
+            print(f"Failed to send email to {destination} for {caller_frame[1][3]}: Recipients refused")
+            return False
+        except smtplib.SMTPAuthenticationError:
+            current_frame = inspect.currentframe()
+            caller_frame = inspect.getouterframes(current_frame, 2)
+            print(f"Failed to send email to {destination} for {caller_frame[1][3]}: Authentication error")
+            return False
+        except smtplib.SMTPServerDisconnected:
+            current_frame = inspect.currentframe()
+            caller_frame = inspect.getouterframes(current_frame, 2)
+            print(f"Failed to send email to {destination} for {caller_frame[1][3]}: Server disconnected")
+            return False
+        except socket.gaierror:
+            current_frame = inspect.currentframe()
+            caller_frame = inspect.getouterframes(current_frame, 2)
+            print(f"Failed to send email to {destination} for {caller_frame[1][3]}: DNS error")
+            return False
+        except Exception as e:
+            current_frame = inspect.currentframe()
+            caller_frame = inspect.getouterframes(current_frame, 2)
+            print(f"Failed to send email to {destination} for {caller_frame[1][3]}: {e}")
+            return False
     else:
         print(destination, subject, content)
+        return True
         
         
 def render_template(template_name: str, client: "Client", **kwargs) -> str:

@@ -13,12 +13,12 @@
     <!-- main sidebar end -->
     <Transition name="mobilemenu">
       <mobile-sidebar
-        v-if="window.width < 1280 && this.$store.themeSettingsStore.mobielSidebar"
+        v-if="window.width <= 1280 && this.$store.themeSettingsStore.mobielSidebar"
       />
     </Transition>
     <Transition name="overlay-fade">
       <div
-        v-if="window.width < 1280 && this.$store.themeSettingsStore.mobielSidebar"
+        v-if="window.width <= 1280 && this.$store.themeSettingsStore.mobielSidebar"
         class="overlay bg-slate-900 bg-opacity-70 backdrop-filter backdrop-blur-[3px] backdrop-brightness-10 fixed inset-0 z-[999]"
         @click="this.$store.themeSettingsStore.mobielSidebar = false"
       ></div>
@@ -28,26 +28,13 @@
 
     <div
       class="content-wrapper transition-all duration-150"
-      :class="window.width > 1280 ? switchHeaderClass() : ''"
-    >
-      <div
-        class="page-content"
-        :class="this.$route.meta.appheight ? 'h-full' : 'page-min-height'"
-      >
-        <div
-          :class="` transition-all duration-150 ${
-            this.$store.themeSettingsStore.cWidth === 'boxed'
-              ? 'container mx-auto'
-              : 'container-fluid'
-          }`"
-        >
-          <Breadcrumbs v-if="!this.$route.meta.hide" />
+      :class="window.width > 1280 ? switchHeaderClass() : ''">
+      <div class="page-content page-min-height h-full">
           <router-view v-slot="{ Component }">
             <transition name="router-animation" mode="out-in" appear>
               <component :is="Component"></component>
             </transition>
           </router-view>
-        </div>
       </div>
     </div>
     <Footer
@@ -92,6 +79,9 @@ export default {
 };
 </script>
 <style lang="scss">
+.transition-all {
+  min-height: calc(100% - 133px);
+}
 .router-animation-enter-active {
   animation: coming 0.2s;
   animation-delay: 0.1s;
@@ -139,9 +129,11 @@ export default {
 }
 
 .page-content {
+  @apply flex flex-col; // Add this
   @apply md:pt-6 md:pb-[37px] md:px-6 pt-[15px] px-[15px] pb-24;
 }
 .page-min-height {
-  min-height: calc(var(--vh, 1vh) * 100 - 132px);
+  @apply flex flex-col; // Add this
+  min-height: calc(var(--vh, 1vh) * 100 - 133px);
 }
 </style>

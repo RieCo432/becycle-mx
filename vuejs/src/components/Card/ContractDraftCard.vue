@@ -58,7 +58,8 @@ export default {
       <div class="col-span-1">
         <span class="block part-label">Deposit Collector</span>
         <span class="block part-text">
-          {{draft.depositCollectingUser !== null ? `${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}` : '-'}}
+          <!-- TODO: sort this out -->
+<!--          {{draft.depositCollectingUser !== null ? `${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}` : '-'}}-->
         </span>
       </div>
       <div class="col-span-1">

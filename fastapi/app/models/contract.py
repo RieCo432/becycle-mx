@@ -10,6 +10,8 @@ import app.services as services
 from app.database.db import Base
 
 from typing import Self, List
+from .transactions import TransactionHeader
+from ..services.accounts_helpers import AccountTypes
 
 CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
@@ -31,22 +33,22 @@ class Contract(Base):
     checkingUserId: Mapped[UUID] = mapped_column("checkinguserid", ForeignKey("users.id"), nullable=False, quote=False)
     checkingUser: Mapped["User"] = relationship("User", foreign_keys=[checkingUserId], back_populates="checkedContracts")
 
-    depositCollectingUserId: Mapped[UUID] = mapped_column("depositcollectinguserid", ForeignKey("users.id"), nullable=False, quote=False)
-    depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")
+    depositCollectingUserId: Mapped[UUID] = mapped_column("depositcollectinguserid", ForeignKey("users.id"), nullable=True, quote=False)  # TODO: needs removed long-term
+    depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")  # TODO: needs removed long-term
 
     returnAcceptingUserId: Mapped[UUID] = mapped_column("returnacceptinguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
     returnAcceptingUser: Mapped["User"] = relationship("User", foreign_keys=[returnAcceptingUserId], back_populates="returnedContracts")
 
-    depositReturningUserId: Mapped[UUID] = mapped_column("depositreturninguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
-    depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")
+    depositReturningUserId: Mapped[UUID] = mapped_column("depositreturninguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)  # TODO: needs removed long-term
+    depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")  # TODO: needs removed long-term
 
     startDate: Mapped[date] = mapped_column("startdate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, index=True, quote=False)
     endDate: Mapped[date] = mapped_column("enddate", Date, default=datetime.utcnow().date() + relativedelta(months=CONTRACT_EXPIRE_MONTHS), server_default=text("(current_date at time zone 'utc' + make_interval(months => {:d}))".format(CONTRACT_EXPIRE_MONTHS)), nullable=False, index=True, quote=False)
 
     returnedDate: Mapped[date] = mapped_column("returneddate", Date, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
-    depositAmountCollected: Mapped[int] = mapped_column("depositamountcollected", Integer, nullable=False, quote=False)
-    depositAmountReturned: Mapped[int] = mapped_column("depositamountreturned", Integer, nullable=True, quote=False, server_default=text("NULL"), default=None)
+    depositAmountCollected: Mapped[int] = mapped_column("depositamountcollected", Integer, nullable=True, quote=False)  # TODO: needs removed long-term
+    depositAmountReturned: Mapped[int] = mapped_column("depositamountreturned", Integer, nullable=True, quote=False, server_default=text("NULL"), default=None)  # TODO: needs removed long-term
 
     conditionOfBike: Mapped[str] = mapped_column("conditionofbike", String(20), nullable=False, quote=False)
     contractType: Mapped[str] = mapped_column("contracttype", String(20), nullable=False, quote=False)
@@ -55,12 +57,43 @@ class Contract(Base):
 
     detailsSent: Mapped[bool] = mapped_column("detailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     expiryReminderSent: Mapped[bool] = mapped_column("expiryremindersent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+    liabilityDormantSent: Mapped[bool] = mapped_column("liabilitydormantsent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returndetailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
 
     crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
 
+    depositTransactionHeaders: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.contractId], back_populates="contract")
+
+    @property
+    def liability_collected(self) -> int:
+        for th in self.depositTransactionHeaders:
+            if th.event == "deposit_collected":
+                for tl in th.transactionLines:
+                    if tl.account.type == AccountTypes.LIABILITY:
+                        return abs(tl.amount)
+                    
+        return 0
+    
+    @property
+    def liability_collected_string(self) -> str:
+        return f"{(self.liability_collected / 100):.2f}"
+    
+    @property
+    def deposit_amount_returned(self) -> int:
+        for th in self.depositTransactionHeaders:
+            if th.event == "deposit_settled":
+                for tl in th.transactionLines:
+                    if tl.account.type == AccountTypes.ASSET:
+                        return abs(tl.amount)
+        return 0
+    
+    @property
+    def deposit_amount_returned_string(self) -> str:
+        return f"{(self.deposit_amount_returned / 100):.2f}"
+
     def __eq__dict(self, other: dict):
         return all([
+            # TODO: deposit information needs to use new model
             str(self.id) == str(other.get("id")),
             str(self.clientId) == str(other.get("clientId")),
             str(self.bikeId) == str(other.get("bikeId")),
@@ -80,12 +113,15 @@ class Contract(Base):
             str(self.detailsSent) == str(other.get("detailsSent")),
             str(self.expiryReminderSent) == str(other.get("expiryReminderSent")),
             str(self.returnDetailsSent) == str(other.get("returnDetailsSent")),
+            str(self.depositCollectedTransactionHeaderId) == str(other.get("depositCollectedTransactionHeaderId")),
+            str(self.depositSettledTransactionHeaderId) == str(other.get("depositSettledTransactionHeaderId")),
         ])
 
     def __eq__(self, other):
         if type(other) is dict:
             return self.__eq__dict(other)
         return all([
+            # TODO: deposit information needs to use new model
             str(self.id) == str(other.id),
             str(self.clientId) == str(other.clientId),
             str(self.bikeId) == str(other.bikeId),
@@ -97,14 +133,16 @@ class Contract(Base):
             str(self.startDate) == str(other.startDate),
             str(self.endDate) == str(other.endDate),
             str(self.returnedDate) == str(other.returnedDate),
-            str(self.depositAmountCollected) == str(other.depositAmountCollected),
-            str(self.depositAmountReturned) == str(other.depositAmountReturned),
+            str(self.depositAmountCollected) == str(other.depositAmountCollectedRestricted),
+            str(self.depositAmountReturned) == str(other.depositAmountReturnedRestricted),
             str(self.conditionOfBike) == str(other.conditionOfBike),
             str(self.contractType) == str(other.contractType),
             str(self.notes) == str(other.notes),
             str(self.detailsSent) == str(other.detailsSent),
             str(self.expiryReminderSent) == str(other.expiryReminderSent),
             str(self.returnDetailsSent) == str(other.returnDetailsSent),
+            str(self.depositCollectedTransactionHeaderId) == str(other.depositCollectedTransactionHeaderId),
+            str(self.depositSettledTransactionHeaderId) == str(other.depositSettledTransactionHeaderId),
         ])
 
     def send_creation_email(self):
@@ -115,9 +153,9 @@ class Contract(Base):
             content=email_html_content
         )
 
-    def send_expiry_reminder_email(self):
+    def send_expiry_reminder_email(self) -> bool:
         email_html_content = services.email_helpers.render_template(template_name="contract_expiry_reminder", client=self.client, contract=self)
-        services.email_helpers.send_email(
+        return services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Bike Rental Expiry Reminder",
             content=email_html_content
@@ -128,6 +166,22 @@ class Contract(Base):
         services.email_helpers.send_email(
             destination=self.client.emailAddress,
             subject="Your Bike Rental Has Ended",
+            content=email_html_content
+        )
+        
+    def send_contract_grace_period_ended_email(self) -> bool:
+        email_html_content = services.email_helpers.render_template(template_name="contract_grace_period_ended", client=self.client, contract=self)
+        return services.email_helpers.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Bike Rental Has Expired!",
+            content=email_html_content
+        )
+        
+    def send_deposit_forfeited_email(self) -> bool:
+        email_html_content = services.email_helpers.render_template(template_name="contract_deposit_forfeited", client=self.client, contract=self)
+        return services.email_helpers.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Bike Rental Deposit Has Been Forfeited",
             content=email_html_content
         )
 
@@ -154,6 +208,7 @@ class Contract(Base):
             "Contract Type": self.contractType,
             "Working Volunteer": self.workingUser.username if self.workingUser is not None else "UNKNOWN",
             "Checking Volunteer": self.checkingUser.username if self.checkingUser is not None else "UNKNOWN",
+            # TODO: deposit information needs to use new model
             "Deposit Amount Collected": self.depositAmountCollected,
             "Deposit Collected By": self.depositCollectingUser.username if self.depositCollectingUser is not None else "UNKNOWN",
             "Returned Date": self.returnedDate,

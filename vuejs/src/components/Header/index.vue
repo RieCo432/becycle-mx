@@ -32,7 +32,7 @@
           </button>
           <!--<MobileLogo v-if="window.width < 1280" />-->
           <handle-mobile-menu
-            v-if="window.width < 1280"
+            v-if="window.width <= 1280"
           />
         </div>
         <div
@@ -41,7 +41,7 @@
         >
           <Logo v-if="window.width > 1280" />
           <MobileLogo v-else />
-          <handle-mobile-menu v-if="window.width < 1280" />
+          <handle-mobile-menu v-if="window.width <= 1280" />
         </div>
         <MainNav
           v-if="

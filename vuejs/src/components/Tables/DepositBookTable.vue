@@ -99,6 +99,8 @@ import Pagination from '@/components/Pagination';
 import Tooltip from '@/components/Tooltip';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 
+// TODO: this needs deleted
+
 export default {
   components: {
     Pagination,

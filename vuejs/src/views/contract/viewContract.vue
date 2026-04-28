@@ -2,10 +2,9 @@
 import TextInput from '@/components/TextInput/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
-import Checkbox from '@/components/Switch/index.vue';
 import {computed, ref, toRef} from 'vue';
 import * as yup from 'yup';
-import {useField, useForm, ErrorMessage} from 'vee-validate';
+import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import {useCredentialsStore} from '@/store/credentialsStore';
 import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
@@ -16,29 +15,41 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
-import Tooltip from "@/components/Tooltip/index.vue";
+import Tooltip from '@/components/Tooltip/index.vue';
+import Modal from '@/components/Modal/Modal.vue';
+import TransactionLinesTable from '@/components/Tables/TransactionLinesTable.vue';
 
 const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    TransactionLinesTable,
+    Modal,
     Tooltip,
     SubmitCrimeReportCard,
     ComboboxTextInput,
-    Checkbox,
     Card,
     DashButton,
     TextInput,
     ContractClientCardSkeleton,
     ContractBikeCardSkeleton,
     ContractCardSkeleton,
-    ErrorMessage,
     Icon,
   },
   setup(props, context) {
     const credentialsStore = useCredentialsStore();
     const contractData = toRef(props, 'contract');
+    const showDepositTransactions = ref(false);
+    const depositAmountCollected = computed(() => {
+      return Math.abs(
+        contractData.value.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected') ?
+          contractData.value.depositTransactionHeaders.find((header) => header.event === 'deposit_collected')
+            .transactionLines
+            .find((l) => l.account.type === 'liability').amount :
+          0,
+      );
+    });
     const patchContractReturn = toRef(props, 'patchContractReturn');
     const isInWriteMode = ref(false);
     const userSelectionOptionsStatic = ref(true);
@@ -52,10 +63,6 @@ export default {
         id: 2,
         title: 'Deposit Return',
       },
-      {
-        id: 3,
-        title: 'Review',
-      },
     ];
 
     const stepNumber = ref(0);
@@ -63,17 +70,29 @@ export default {
     const depositReturningSchema = yup.object().shape({
       depositAmountReturned: yup.number().min(0, 'Must be positive').integer()
         .required(' Deposit Amount is required '),
-      depositReturningUser: yup.string().required(' Deposit Returner Username is required '),
+      depositSettledLiabilityAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The deposit liability account id is required '),
+        name: yup.string().required(' The deposit liability account name is required '),
+      }).required(' The deposit liability account is required '),
+      depositSettledAssetAccount: yup.object().shape({
+        id: yup.string().uuid().required(' The deposit asset account id is required '),
+        name: yup.string().required(' The deposit asset account name is required '),
+      }).required(' The deposit asset account is required '),
+      depositSettledRevenueAccount: yup.object().when('depositAmountReturned', {
+        is: (value) => value * 100 < depositAmountCollected.value,
+        then: () => yup.object().shape({
+          id: yup.string().uuid().required(' The deposit asset account id is required '),
+          name: yup.string().required(' The deposit asset account name is required '),
+        })
+          .required('This is required if the deposit is not returned in full.'),
+        otherwise: () => yup.object().nullable(),
+      }),
       depositReturningPassword: yup.string().required(),
     });
 
     const returnAcceptingUserSchema = yup.object().shape({
       returnAcceptingUser: yup.string().required(' Return Accepting Username is required '),
       returnAcceptingPasswordOrPin: yup.string().required(' Password or Pin is required '),
-    });
-
-    const reviewSchema = yup.object().shape({
-      everythingCorrect: yup.boolean().oneOf([true], 'This check is required').required('This check is required!'),
     });
 
 
@@ -83,8 +102,6 @@ export default {
         return returnAcceptingUserSchema;
       case 1:
         return depositReturningSchema;
-      case 2:
-        return reviewSchema;
       default:
         return depositReturningSchema;
       }
@@ -95,36 +112,44 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: depositAmountReturned, errorMessage: depositAmountReturnedError,
-      setErrors: depositAmountReturnedSetErrors} = useField('depositAmountReturned');
-    const {value: depositReturningUser, errorMessage: depositReturningUserError} = useField('depositReturningUser');
-    const {value: depositReturningPassword, errorMessage: depositReturningPasswordError,
-      setErrors: depositReturningPasswordSetErrors} = useField('depositReturningPassword');
+    const {
+      value: depositAmountReturned, errorMessage: depositAmountReturnedError,
+      setErrors: depositAmountReturnedSetErrors,
+    } = useField('depositAmountReturned');
+    const {
+      value: depositSettledLiabilityAccount,
+      errorMessage: depositSettledLiabilityAccountError,
+    } = useField('depositSettledLiabilityAccount');
+    const {
+      value: depositSettledAssetAccount,
+      errorMessage: depositSettledAssetAccountError,
+    } = useField('depositSettledAssetAccount');
+    const {
+      value: depositSettledRevenueAccount,
+      errorMessage: depositSettledRevenueAccountError,
+    } = useField('depositSettledRevenueAccount');
+    const {
+      value: depositReturningPassword, errorMessage: depositReturningPasswordError,
+      setErrors: depositReturningPasswordSetErrors,
+    } = useField('depositReturningPassword');
+
+    const depositSettledTransactionHeader = ref({});
+
+    depositSettledLiabilityAccount.value = {name: null, id: null};
+    depositSettledAssetAccount.value = {name: null, id: null};
+    depositSettledRevenueAccount.value = {name: null, id: null};
 
     const {value: returnAcceptingUser, errorMessage: returnAcceptingUserError} = useField('returnAcceptingUser');
-    const {value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError,
-      setErrors: returnAcceptingPasswordOrPinSetErrors} = useField('returnAcceptingPasswordOrPin');
+    const {
+      value: returnAcceptingPasswordOrPin, errorMessage: returnAcceptingPasswordOrPinError,
+      setErrors: returnAcceptingPasswordOrPinSetErrors,
+    } = useField('returnAcceptingPasswordOrPin');
 
-
-    const {value: everythingCorrect, errorMessage: everythingCorrectError} = useField('everythingCorrect');
-
-    depositReturningUser.value = '';
     returnAcceptingUser.value = '';
-
-    function returnAcceptingUserSelected() {
-      returnAcceptingPasswordOrPin.value = null;
-      if (returnAcceptingUser.value === depositReturningUser.value) {
-        returnAcceptingPasswordOrPin.value = depositReturningPassword.value;
-      }
-    }
 
     const submit = handleSubmit(() => {
       // next step until last step . if last step then submit form
-      if (stepNumber.value === steps.length - 1) {
-        // handle submit
-        patchContractReturn.value(depositAmountReturned.value, depositReturningUser.value, depositReturningPassword.value,
-          returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
-      } else if (stepNumber.value === 0) {
+      if (stepNumber.value === 0) {
         // handle return accepting user
         requests.checkUserPasswordOrPin(returnAcceptingUser.value, returnAcceptingPasswordOrPin.value).then((response) => {
           if (response.data) {
@@ -134,17 +159,56 @@ export default {
           }
         });
       } else if (stepNumber.value === 1) {
-        if (depositAmountReturned.value > contractData.value.depositAmountCollected) {
+        if (depositAmountReturned.value * 100 > depositAmountCollected.value) {
           depositAmountReturnedSetErrors('Must not be larger than the deposit collected!');
           return;
         }
-        requests.checkUserPassword(depositReturningUser.value, depositReturningPassword.value).then((response) => {
-          if (response.data) {
-            stepNumber.value = 2;
-            userSelectionOptionsStatic.value = true;
-          } else {
+
+        const depositSettledTransactionDraft = {
+          transactionHeader: {
+            event: 'deposit_settled',
+          },
+          transactionLines: [
+            {
+              amount: depositAmountCollected.value,
+              accountId: depositSettledLiabilityAccount.value.id,
+            },
+            {
+              amount: -Math.round(depositAmountReturned.value * 100),
+              accountId: depositSettledAssetAccount.value.id},
+
+            ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
+              [{
+                amount: -Math.round(depositAmountCollected.value - depositAmountReturned.value * 100),
+                accountId: depositSettledRevenueAccount.value.id,
+              }] :
+              []
+            ),
+          ],
+          attemptAutoPost: true,
+        };
+
+        const transactionAuthDetails = [{
+          username: depositSettledAssetAccount.value.ownerUser.username,
+          password: depositReturningPassword.value,
+        }];
+
+        requests.createTransaction(depositSettledTransactionDraft, transactionAuthDetails).then((response) => {
+          depositSettledTransactionHeader.value = response.data;
+          toast.success('Deposit Settled Successfully!');
+
+          patchContractReturn.value(
+            depositSettledTransactionHeader.value.id,
+            depositSettledAssetAccount.value.ownerUser.username,
+            depositReturningPassword.value,
+            returnAcceptingUser.value, returnAcceptingPasswordOrPin.value);
+        }).catch((error) => {
+          if (
+            error.response.status === 400 &&
+            (error.response.data.detail.username ?? '') === depositSettledAssetAccount.value.ownerUser.username) {
             depositReturningPasswordSetErrors('Wrong Password!');
           }
+          toast.error(error.response.data.detail.description, {timeout: 1000});
         });
       }
     });
@@ -156,11 +220,16 @@ export default {
     return {
       isInWriteMode,
       contractData,
+      depositAmountCollected,
       credentialsStore,
       depositAmountReturned,
       depositAmountReturnedError,
-      depositReturningUser,
-      depositReturningUserError,
+      depositSettledLiabilityAccount,
+      depositSettledLiabilityAccountError,
+      depositSettledAssetAccount,
+      depositSettledAssetAccountError,
+      depositSettledRevenueAccount,
+      depositSettledRevenueAccountError,
       depositReturningPassword,
       depositReturningPasswordError,
 
@@ -169,18 +238,13 @@ export default {
       returnAcceptingPasswordOrPin,
       returnAcceptingPasswordOrPinError,
 
-      everythingCorrect,
-      everythingCorrectError,
-
-      returnAcceptingUserSelected,
       userSelectionOptionsStatic,
 
       submit,
       steps,
       stepNumber,
       prev,
-
-
+      showDepositTransactions,
     };
   },
   methods: {
@@ -196,18 +260,32 @@ export default {
       if (user1.toLowerCase() < user2.toLowerCase()) return -1;
       return 0;
     },
-    selectDepositReturningUser(event, i) {
+    selectdepositSettledLiabilityAccount(event, i) {
       if (i !== -1) {
-        this.depositReturningUser = this.filtered_deposit_returning_user_suggestions[i];
+        this.depositSettledLiabilityAccount = this.filtered_deposit_settled_liability_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectdepositSettledAssetAccount(event, i) {
+      if (i !== -1) {
+        this.depositSettledAssetAccount = this.filtered_deposit_settled_asset_account_suggestions[i];
+        this.userSelectionOptionsStatic = false;
+      }
+    },
+    selectdepositSettledRevenueAccount(event, i) {
+      if (i !== -1) {
+        this.depositSettledRevenueAccount = this.filtered_deposit_settled_revenue_account_suggestions[i];
         this.userSelectionOptionsStatic = false;
       }
     },
     selectReturnAcceptingUser(event, i) {
       if (i !== -1) {
         this.returnAcceptingUser = this.filtered_return_accepting_user_suggestions[i];
-        this.returnAcceptingUserSelected();
         this.userSelectionOptionsStatic = false;
       }
+    },
+    makeAccountLegible(account) {
+      return `${account.name}`;
     },
     writeBikeDetailsToNfcTag() {
       this.isInWriteMode = true;
@@ -241,31 +319,33 @@ export default {
       type: Object,
       required: true,
     },
-    depositCollectingUsername: {
-      type: String,
-      required: true,
-    },
     workingUsername: {
       type: String,
-      required: true,
+      required: false,
     },
     checkingUsername: {
       type: String,
-      required: true,
+      required: false,
     },
     contract: {
       type: Object,
       required: true,
     },
-    depositReturnedByUsername: {
-      type: String,
-      required: false,
-    },
     returnAcceptedByUsername: {
       type: String,
       required: false,
     },
-    depositBearers: {
+    depositLiabilityAccounts: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    depositAssetAccounts: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    depositRevenueAccounts: {
       type: Array,
       required: false,
       default: () => [],
@@ -289,11 +369,13 @@ export default {
     },
     patchContractReturn: {
       type: Function,
-      default: () => {},
+      default: () => {
+      },
     },
     patchContractExtend: {
       type: Function,
-      default: () => {},
+      default: () => {
+      },
     },
     isUser: {
       type: Boolean,
@@ -309,28 +391,61 @@ export default {
     },
     goToBike: {
       type: Function,
-      default: () => {},
+      default: () => {
+      },
     },
     openEditBikeDetailsModal: {
       type: Function,
-      default: () => {},
+      default: () => {
+      },
     },
     openEditContractDetailsModal: {
       type: Function,
-      default: () => {},
+      default: () => {
+      },
     },
     patchCloseCrimeReport: {
       type: Function,
-      default: () => {},
+      default: () => {
+      },
     },
   },
   computed: {
-    filtered_deposit_returning_user_suggestions() {
-      return this.depositBearers
-        .filter((suggestion) => suggestion
+    forfeitedDate() {
+      return this.contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_forfeited').postedOn;
+    },
+    filtered_deposit_settled_liability_account_suggestions() {
+      const liabilityAccountContractBalances = {};
+      this.contract.depositTransactionHeaders?.forEach((header) => {
+        header.transactionLines.forEach((line) => {
+          if (line.account.type === 'liability') {
+            liabilityAccountContractBalances[line.account.id] = (liabilityAccountContractBalances[line.account.id] ?? 0) + line.amount;
+          }
+        });
+      });
+      return this.depositLiabilityAccounts
+        .filter((suggestion) =>
+          Math.abs(liabilityAccountContractBalances[suggestion.id] ?? 0) === this.depositAmountCollected &&
+          suggestion.name
+            .toLowerCase()
+            .startsWith((this.depositSettledLiabilityAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_deposit_settled_asset_account_suggestions() {
+      return this.depositAssetAccounts
+        .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith(this.depositReturningUser.toLowerCase()))
-        .sort(this.userSortingFunction)
+          .startsWith((this.depositSettledAssetAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
+        .slice(0, 10);
+    },
+    filtered_deposit_settled_revenue_account_suggestions() {
+      return this.depositRevenueAccounts
+        .filter((suggestion) => suggestion.name
+          .toLowerCase()
+          .startsWith((this.depositSettledRevenueAccount.name ?? '').toLowerCase()))
+        // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
     filtered_return_accepting_user_suggestions() {
@@ -355,9 +470,9 @@ export default {
             <ContractClientCardSkeleton v-if="loadingClient" count="1"></ContractClientCardSkeleton>
             <template v-else>
               <div class="grid grid-cols-12 h-full gap-5">
-                <div class="col-span-12" >
-                  <p class="text-slate-600 dark:text-slate-300">{{client.firstName}} {{client.lastName}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">{{client.emailAddress}}</p>
+                <div class="col-span-12">
+                  <p class="text-slate-600 dark:text-slate-300">{{ client.firstName }} {{ client.lastName }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{ client.emailAddress }}</p>
                 </div>
                 <div class="col-span-6 mt-auto">
                   <DashButton class="w-full" @click="goToClient">
@@ -379,18 +494,23 @@ export default {
             <template v-else>
               <div class="grid grid-cols-12 h-full gap-5">
                 <div class="col-span-12 col-start-1">
-                  <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{ bike.make }} {{ bike.model }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{ bike.colour }} {{ bike.decals }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{ bike.serialNumber }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">{{ bike.disposition }}</p>
+                  <p class="text-slate-600 dark:text-slate-300" v-if="isUser">
+                    Rough Value: {{ bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a' }} (this is not the deposit)
+                  </p>
                 </div>
                 <div class="col-span-12 col-start-1">
                   <div class="h-10 rounded-full overflow-hidden">
                     <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${bike.colours.length}`">
                       <template
-                          v-for="c in bike.colours"
-                          :key="c.name"
+                        v-for="c in bike.colours"
+                        :key="c.name"
                       >
-                        <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
+                        <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1"
+                                 :btn-style="{backgroundColor: c.hex}">
                           <template #button>
                             <div class="w-full h-full"></div>
                           </template>
@@ -410,22 +530,29 @@ export default {
                     Edit Details
                   </DashButton>
                 </div>
-<!--                <div v-if="isUser" class="col-span-4 mt-auto">-->
-<!--                  <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">-->
-<!--                    Write To NFC-->
-<!--                  </DashButton>-->
-<!--                </div>-->
+                <!--                <div v-if="isUser" class="col-span-4 mt-auto">-->
+                <!--                  <DashButton class="w-full" @click="writeBikeDetailsToNfcTag">-->
+                <!--                    Write To NFC-->
+                <!--                  </DashButton>-->
+                <!--                </div>-->
               </div>
             </template>
           </Card>
         </div>
         <div class="col-span-12 lg:col-span-4 gap-5">
           <Card title="Contract">
-            <template #header v-if="isUserAdmin && !loadingContract">
-              <div  class="col-span-6 mt-auto">
-                <DashButton class="w-full btn-sm bg-danger-600" @click="openEditContractDetailsModal">
-                  Edit Details
-                </DashButton>
+            <template #header v-if="!loadingContract && isUser">
+              <div class="grid grid-cols-12 gap-2">
+                <div class="col-span-6 mt-auto">
+                  <DashButton class="w-full btn-sm bg-danger-600" @click="() => showDepositTransactions = true">
+                    Show Txs
+                  </DashButton>
+                </div>
+                <div v-if="isUserAdmin" class="col-span-6 mt-auto">
+                  <DashButton class="w-full btn-sm bg-danger-600" @click="openEditContractDetailsModal">
+                    Edit Details
+                  </DashButton>
+                </div>
               </div>
             </template>
             <template v-if="loadingContract">
@@ -435,23 +562,47 @@ export default {
               <div class="flex flex-col h-full">
                 <div class="flex-1">
                   <p class="text-slate-600 dark:text-slate-300">
-                      From: {{new Date(Date.parse(contract.startDate))
-                      .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                    From: {{
+                      new Date(Date.parse(contract.startDate))
+                        .toLocaleDateString(undefined, {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })
+                    }}
                   </p>
                   <p class="text-slate-600 dark:text-slate-300">
-                      Until: {{new Date(Date.parse(contract.endDate))
-                      .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                    Until: {{
+                      new Date(Date.parse(contract.endDate))
+                        .toLocaleDateString(undefined, {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })
+                    }}
                   </p>
-                  <p class="text-slate-600 dark:text-slate-300">Notes: {{contract.notes}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">Contract Type: {{contract.contractType}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">Condition: {{contract.conditionOfBike}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">
-                      Deposit: &#163;{{contract.depositAmountCollected}} to {{depositCollectingUsername}}
+                  <p class="text-slate-600 dark:text-slate-300">Notes: {{ contract.notes }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Contract Type: {{ contract.contractType }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Condition: {{ contract.conditionOfBike }}</p>
+                  <p class="text-slate-600 dark:text-slate-300 w-100">
+                    Deposit:
                   </p>
-                  <p class="text-slate-600 dark:text-slate-300">Done by: {{workingUsername}}</p>
-                  <p class="text-slate-600 dark:text-slate-300">Checked by: {{checkingUsername}}</p>
+                  <TransactionLinesTable
+                    v-if="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected')"
+                    :transaction-header="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected')"/>
+                  <p v-else class="text-slate-600 dark:text-slate-300">&#163;
+                    {{ contract.depositAmountCollectedRestricted ?
+                      (contract.depositAmountCollectedRestricted / 100).toFixed(2) :
+                      'ERROR' }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Done by: {{ workingUsername ?? 'REDACTED' }}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Checked by: {{ checkingUsername ?? 'REDACTED' }}</p>
                 </div>
-                <DashButton v-if="isUser" class="mt-5" @click="patchContractExtend">
+                <DashButton v-if="isUser &&
+                filtered_deposit_settled_liability_account_suggestions.length > 0"
+                            class="mt-5"
+                            @click="patchContractExtend">
                   Extend Contract
                 </DashButton>
               </div>
@@ -463,42 +614,42 @@ export default {
         (((contract.returnedDate == null) && isUser) || (contract.returnedDate != null)) &&
         contract.crimeReports.filter((report) => (report.closedOn === null)).length === 0">
           <Card title="Return">
-            <div v-if="(contract.returnedDate == null) && isUser">
+            <div v-if="(contract.returnedDate == null) && isUser && filtered_deposit_settled_liability_account_suggestions.length > 0">
               <div class="flex z-[5] items-center relative justify-center md:mx-8">
                 <div
-                    class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
-                    v-for="(item, i) in steps"
-                    :key="i"
+                  class="relative z-[1] items-center item flex flex-start flex-1 last:flex-none group"
+                  v-for="(item, i) in steps"
+                  :key="i"
                 >
                   <div
-                      :class="`   ${
+                    :class="`   ${
             stepNumber >= i
               ? 'bg-slate-900 text-white ring-slate-900 ring-offset-2 dark:ring-offset-slate-500 ' +
                 'dark:bg-slate-900 dark:ring-slate-900'
               : 'bg-white ring-slate-900 ring-opacity-70  text-slate-900 dark:text-slate-300 ' +
                 'dark:bg-slate-600 dark:ring-slate-600 text-opacity-70'
           }`"
-                      class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col
+                    class="transition duration-150 icon-box md:h-12 md:w-12 h-7 w-7 rounded-full flex flex-col
                              items-center justify-center relative z-[66] ring-1 md:text-lg text-base font-medium"
                   >
                     <span v-if="stepNumber <= i"> {{ i + 1 }}</span>
                     <span v-else class="text-3xl">
-            <Icon icon="bx:check-double" />
+            <Icon icon="bx:check-double"/>
           </span>
                   </div>
 
                   <div
-                      class="absolute top-1/2 h-[2px] w-full"
-                      :class="
+                    class="absolute top-1/2 h-[2px] w-full"
+                    :class="
             stepNumber >= i
               ? 'bg-slate-900 dark:bg-slate-900'
               : 'bg-[#E0EAFF] dark:bg-slate-700'
           "
                   ></div>
                   <div
-                      class="absolute top-full text-base md:leading-6 mt-3 transition duration-150
+                    class="absolute top-full text-base md:leading-6 mt-3 transition duration-150
                              md:opacity-100 opacity-0 group-hover:opacity-100"
-                      :class="
+                    :class="
             stepNumber >= i
               ? ' text-slate-900 dark:text-slate-300'
               : 'text-slate-500 dark:text-slate-300 dark:text-opacity-40'
@@ -510,9 +661,9 @@ export default {
               </div>
 
               <div
-                  class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
+                class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
               >
-                <form @submit.prevent="submit"  @keydown.enter="submit">
+                <form @submit.prevent="submit" @keydown.enter="submit">
                   <div v-if="stepNumber === 0">
                     <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
                       <div class="md:col-span-2 col-span-1">
@@ -522,28 +673,28 @@ export default {
                       </div>
 
                       <ComboboxTextInput
-                          :field-model-value="returnAcceptingUser"
-                          :suggestions="filtered_return_accepting_user_suggestions"
-                          :selected-callback="selectReturnAcceptingUser"
-                          :allow-new="false"
-                          :open-by-default="false"
-                          label="Return Accepting Volunteer"
-                          type="text"
-                          placeholder="workshop"
-                          name="returnAcceptingUser"
-                          v-model="returnAcceptingUser"
-                          :error="returnAcceptingUserError"
-                          @input="() => {}"
+                        :field-model-value="returnAcceptingUser"
+                        :suggestions="filtered_return_accepting_user_suggestions"
+                        :selected-callback="selectReturnAcceptingUser"
+                        :allow-new="false"
+                        :open-by-default="false"
+                        label="Return Accepting Volunteer"
+                        type="text"
+                        placeholder="workshop"
+                        name="returnAcceptingUser"
+                        v-model="returnAcceptingUser"
+                        :error="returnAcceptingUserError"
+                        @input="() => {}"
                       />
 
                       <TextInput
-                          label="Password or Pin"
-                          type="password"
-                          placeholder="Password or Pin"
-                          name="returnAcceptingUserPasswordOrPin"
-                          v-model="returnAcceptingPasswordOrPin"
-                          :error="returnAcceptingPasswordOrPinError"
-                          hasicon/>
+                        label="Password or Pin"
+                        type="password"
+                        placeholder="Password or Pin"
+                        name="returnAcceptingUserPasswordOrPin"
+                        v-model="returnAcceptingPasswordOrPin"
+                        :error="returnAcceptingPasswordOrPinError"
+                        hasicon/>
                     </div>
                   </div>
                   <div v-if="stepNumber === 1">
@@ -554,101 +705,114 @@ export default {
                         </h4>
                       </div>
                       <TextInput
-                          label="Deposit Amount (&pound;)"
-                          type="number"
-                          placeholder="40"
-                          name="depositAmountReturned"
-                          v-model="depositAmountReturned"
-                          :error="depositAmountReturnedError"
+                        label="Deposit Amount (&pound;)"
+                        type="number"
+                        placeholder="40"
+                        name="depositAmountReturned"
+                        v-model="depositAmountReturned"
+                        :error="depositAmountReturnedError"
                       />
 
                       <ComboboxTextInput
-                          :field-model-value="depositReturningUser"
-                          :suggestions="filtered_deposit_returning_user_suggestions"
-                          :selected-callback="selectDepositReturningUser"
-                          :allow-new="false"
-                          :open-by-default="userSelectionOptionsStatic"
-                          label="Deposit Returner"
-                          type="text"
-                          placeholder="workshop"
-                          name="depositReturningUser"
-                          v-model="depositReturningUser"
-                          :error="depositReturningUserError"
-                          @input="() => {}"
+                        :field-model-value="depositSettledLiabilityAccount.name"
+                        :suggestions="filtered_deposit_settled_liability_account_suggestions.map(makeAccountLegible)"
+                        :selected-callback="selectdepositSettledLiabilityAccount"
+                        :allow-new="false"
+                        :open-by-default="userSelectionOptionsStatic"
+                        label="Liability Account"
+                        type="text"
+                        placeholder="workshop"
+                        name="depositSettledLiabilityAccount"
+                        v-model="depositSettledLiabilityAccount.name"
+                        :error="depositSettledLiabilityAccountError"
+                        @change="() => {}"
+                      />
+
+                      <ComboboxTextInput
+                        :field-model-value="depositSettledAssetAccount.name"
+                        :suggestions="filtered_deposit_settled_asset_account_suggestions.map(makeAccountLegible)"
+                        :selected-callback="selectdepositSettledAssetAccount"
+                        :allow-new="false"
+                        :open-by-default="userSelectionOptionsStatic"
+                        label="Asset Account"
+                        type="text"
+                        placeholder="workshop"
+                        name="depositSettledAssetAccount"
+                        v-model="depositSettledAssetAccount.name"
+                        :error="depositSettledAssetAccountError"
+                        @change="() => {}"
+                      />
+
+                      <ComboboxTextInput v-if="depositAmountReturned * 100 < depositAmountCollected"
+                                         :field-model-value="depositSettledRevenueAccount.name"
+                                         :suggestions="filtered_deposit_settled_revenue_account_suggestions.map(makeAccountLegible)"
+                                         :selected-callback="selectdepositSettledRevenueAccount"
+                                         :allow-new="false"
+                                         :open-by-default="userSelectionOptionsStatic"
+                                         label="Revenue Account"
+                                         type="text"
+                                         placeholder="workshop"
+                                         name="depositSettledRevenueAccount"
+                                         v-model="depositSettledRevenueAccount.name"
+                                         :error="depositSettledRevenueAccountError"
+                                         @change="() => {}"
                       />
 
                       <TextInput
-                          label="Deposit Returner Password"
-                          type="password"
-                          placeholder="Password"
-                          name="depositReturningPassword"
-                          v-model="depositReturningPassword"
-                          :error="depositReturningPasswordError"
-                          hasicon/>
-                    </div>
-                  </div>
-                  <div v-if="stepNumber === 2">
-                    <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
-                      <div class="lg:col-span-3 md:col-span-2 col-span-1">
-                        <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
-                          Final Check
-                        </h4>
-                        <table class="w-full text-base text-slate-800 dark:text-slate-300 border
-                                      border-collapse border-slate-500 bg-slate-700">
-                          <thead>
-                          <tr class="border border-slate-500">Return Details</tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td class="border border-slate-500">Return Date</td>
-                              <td class="border border-slate-500">{{new Date().toDateString()}}</td>
-                            </tr>
-                            <tr>
-                              <td class="border border-slate-500">Deposit Returned</td>
-                              <td class="border border-slate-500">&#163;{{depositAmountReturned}}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="col-span-1">
-                        <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Please check all the details!</h5>
-                        <Checkbox
-                            label="I confirm that this information is correct and the deposit was returned to the lendee!"
-                            name="everythingCorrect"
-                            v-model="everythingCorrect"
-                            :error="everythingCorrectError"/>
-                        <ErrorMessage name="everythingCorrect" :error="everythingCorrectError" class="text-danger-500"/>
-                      </div>
+                        label="Deposit Returner Password"
+                        type="password"
+                        placeholder="Password"
+                        name="depositReturningPassword"
+                        v-model="depositReturningPassword"
+                        :error="depositReturningPasswordError"
+                        hasicon/>
                     </div>
                   </div>
 
                   <div
-                      class="mt-10"
-                      :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
+                    class="mt-10"
+                    :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"
                   >
                     <DashButton
-                        @click.prevent="prev()"
-                        text="prev"
-                        btnClass="btn-dark"
-                        v-if="this.stepNumber !== 0"
+                      @click.prevent="prev()"
+                      text="prev"
+                      btnClass="btn-dark"
+                      v-if="this.stepNumber !== 0"
                     />
                     <DashButton
-                        :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
-                        btnClass="btn-dark"
+                      :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
+                      btnClass="btn-dark"
                     />
                   </div>
                 </form>
               </div>
             </div>
+            <div v-else-if="contract.returnedDate == null &&
+              filtered_deposit_settled_liability_account_suggestions.length === 0">
+              <p class="text-danger-500 dark:text-danger-500">
+                This contract was forfeited on {{ new Date(Date.parse(forfeitedDate))
+                .toLocaleDateString(undefined, {weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})
+                }} and can no longer be returned.
+              </p>
+            </div>
             <div v-else-if="contract.returnedDate != null">
               <p class="text-slate-600 dark:text-slate-300">
-                  Returned on {{new Date(Date.parse(contract.returnedDate))
-                  .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                Returned on {{
+                  new Date(Date.parse(contract.returnedDate))
+                    .toLocaleDateString(undefined, {weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})
+                }}
               </p>
-              <p class="text-slate-600 dark:text-slate-300">
-                  Deposit returned: &#163; {{contract.depositAmountReturned}} by {{depositReturnedByUsername}}
+              <p class="text-slate-600 dark:text-slate-300 w-100">
+                Deposit Settlement:
               </p>
-              <p class="text-slate-600 dark:text-slate-300">Received by {{returnAcceptedByUsername}}</p>
+              <TransactionLinesTable
+                v-if="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_settled')"
+                :transaction-header="contract.depositTransactionHeaders?.find((header) => header.event === 'deposit_settled')"/>
+              <p v-else class="text-slate-600 dark:text-slate-300">
+                &#163; {{ contract.depositAmountReturnedRestricted ?
+                (contract.depositAmountReturnedRestricted / 100).toFixed(2) :
+                'ERROR' }}</p>
+              <p class="text-slate-600 dark:text-slate-300">Received by {{ returnAcceptedByUsername ?? 'REDACTED' }}</p>
             </div>
           </Card>
         </div>
@@ -659,37 +823,51 @@ export default {
           contractData.crimeReports.filter((report) => (report.closedOn === null)).length === 0">
             <div class="col-span-12 lg:col-span-4 gap-5">
               <SubmitCrimeReportCard
-              :contract-id="contract.id"
-              @crime-report-added="(report) => $emit('crimeReportAdded', report)"/>
+                :contract-id="contract.id"
+                @crime-report-added="(report) => $emit('crimeReportAdded', report)"/>
             </div>
           </template>
           <div
-              v-for="crimeReport in contract.crimeReports.toSorted((report) => (report.createdOn)).reverse()"
-              :key="crimeReport.id"
-              class="col-span-12 lg:col-span-4 gap-5" >
+            v-for="crimeReport in contract.crimeReports.toSorted((report) => (report.createdOn)).reverse()"
+            :key="crimeReport.id"
+            class="col-span-12 lg:col-span-4 gap-5">
             <Card
-                :key="crimeReport.id"
-                  title="Crime Report">
+              :key="crimeReport.id"
+              title="Crime Report">
               <div class="flex flex-col h-full">
                 <div class="flex-1">
                   <p class="text-slate-600 dark:text-slate-300">
-                    Created: {{new Date(Date.parse(crimeReport.createdOn))
-                      .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                    Created: {{
+                      new Date(Date.parse(crimeReport.createdOn))
+                        .toLocaleDateString(undefined, {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })
+                    }}
                   </p>
                   <p class="text-slate-600 dark:text-slate-300">
-                    Crime Number: {{crimeReport.crimeNumber}}
+                    Crime Number: {{ crimeReport.crimeNumber }}
                   </p>
                   <p
-                      v-if="crimeReport.closedOn !== null"
-                      class="text-slate-600 dark:text-slate-300">
-                    Closed: {{new Date(Date.parse(crimeReport.closedOn))
-                      .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}}
+                    v-if="crimeReport.closedOn !== null"
+                    class="text-slate-600 dark:text-slate-300">
+                    Closed: {{
+                      new Date(Date.parse(crimeReport.closedOn))
+                        .toLocaleDateString(undefined, {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })
+                    }}
                   </p>
                 </div>
                 <DashButton
-                    v-if="isUser && crimeReport.closedOn === null"
-                    class="mt-5"
-                    @click="() => patchCloseCrimeReport(crimeReport.id)">
+                  v-if="isUser && crimeReport.closedOn === null"
+                  class="mt-5"
+                  @click="() => patchCloseCrimeReport(crimeReport.id)">
                   Close Crime Report
                 </DashButton>
               </div>
@@ -699,6 +877,15 @@ export default {
         </template>
       </div>
     </div>
+    <Modal title="Deposit Transactions" :active-modal="showDepositTransactions" @close="() => showDepositTransactions = false">
+      <template
+        v-for="transactionHeader in contract
+         .depositTransactionHeaders?.toSorted(
+           (a, b) => new Date(Date.parse(a.createdOn)) - new Date(Date.parse(b.createdOn)))"
+        :key="transactionHeader.id">
+        <TransactionLinesTable :transaction-header="transactionHeader"/>
+      </template>
+    </Modal>
   </div>
 </template>
 

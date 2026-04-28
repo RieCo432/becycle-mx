@@ -16,7 +16,6 @@ expenses = APIRouter(
     responses={404: {"description": "Not Found"}}
 )
 
-
 @expenses.post("/expenses")
 async def post_expense(
         amount: Annotated[float, Body(embed=True)],
@@ -44,6 +43,29 @@ async def post_expense(
     return crud.create_expense(db=db, expense_user=expense_user, expense_data=expense_data, receipt_file=receipt_file)
 
 
+@expenses.post("/expenses/claims")
+async def post_expense_claim(
+        notes: Annotated[str, Body(embed=True)],
+        expense_date: Annotated[date, Body(embed=True)],
+        expense_claim_transaction_header_id: Annotated[UUID, Body(embed=True)],
+        receipt_file: UploadFile,
+        user: schemas.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)) -> schemas.ExpenseClaim:
+    
+    expense_claim_data = schemas.ExpenseClaimCreate(notes=notes, expenseTransactionHeaderId=expense_claim_transaction_header_id, expenseDate=expense_date)
+    
+    crud.post_transaction_header(db=db, transaction_header_id=expense_claim_data.expenseTransactionHeaderId, user=user)
+    
+    return crud.create_expense_claim(db=db, expense_claim_data=expense_claim_data, receipt_file=receipt_file)
+
+
+@expenses.get("/expenses/claims/{expense_claim_id}/receipt")
+async def get_expense_claim_receipt(
+        expense_claim_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> FileResponse:
+    return FileResponse(**crud.get_expense_claim_receipt_file(db=db, expense_claim_id=expense_claim_id))
+
 @expenses.get("/expenses/{expense_id}/receipt")
 async def get_expense_receipt(
         expense_id: UUID,
@@ -64,6 +86,40 @@ async def get_expenses(
 ) -> list[schemas.Expense]:
     return crud.get_expenses(db=db, tag_id=tag)
 
+
+@expenses.get("/expenses/claims")
+async def get_expenses(
+        tag: str | None = None,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.ExpenseClaim]:
+    return crud.get_expense_claims(db=db)
+
+
+@expenses.delete("/expenses/claims/{expense_claim_id}")
+async def delete_expense_claim(
+        expense_claim_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> None:
+    crud.delete_expense_claim(db=db, expense_claim_id=expense_claim_id)
+
+
+@expenses.patch("/expenses/claims/{expense_claim_id}/reimburse")
+async def patch_expense_claim_reimbursed(
+        expense_claim_id: UUID,
+        reimbursement_transaction_header_id: Annotated[UUID, Body(embed=True)],
+        db: Session = Depends(dep.get_db),
+        user: models.User = Depends(dep.get_current_active_user)
+) -> schemas.ExpenseClaim:
+    crud.post_transaction_header(db=db, transaction_header_id=reimbursement_transaction_header_id, user=user)
+    return crud.patch_expense_claim_reimburse(db=db, expense_claim_id=expense_claim_id, reimbursement_transaction_header_id=reimbursement_transaction_header_id)
+
+@expenses.put("/expenses/claims/{expense_claim_id}")
+async def patch_expense_claim(
+        updated_expense_claim_data: schemas.ExpenseClaimUpdate,
+        expense_claim_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.ExpenseClaim:
+    return crud.update_expense_claim(db=db, expense_claim_id=expense_claim_id, updated_expense_claim_data=updated_expense_claim_data)
 
 @expenses.delete("/expenses/{expense_id}")
 async def delete_expense(

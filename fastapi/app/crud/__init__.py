@@ -14,3 +14,7 @@ from .permissions import *
 from .groups import *
 from .crimeReports import *
 from .colours import *
+from .accounts import *
+from .transactions import *
+from .catalogue import *
+from .sales import *

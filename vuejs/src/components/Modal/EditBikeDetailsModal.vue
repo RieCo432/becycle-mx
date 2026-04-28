@@ -2,27 +2,48 @@
 import Modal from '@/components/Modal/Modal.vue';
 import Button from '@/components/Button/index.vue';
 import TextInput from '@/components/TextInput/index.vue';
-import {toRef} from 'vue';
+import {ref, toRef} from 'vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import ComboboxColourPicker from '@/components/ComboBoxColourPicker/ComboboxColourPicker.vue';
+import Select from '@/components/Select/index.vue';
 
 const toast = useToast();
 
 export default {
   name: 'EditBikeDetailsModal',
-  components: {ComboboxColourPicker, TextInput, Button, Modal},
+  components: {Select, ComboboxColourPicker, TextInput, Button, Modal},
   setup(props, context) {
     const closeModal = toRef(props, 'closeModal');
     const bike = toRef(props, 'bike');
+
+    const dispositions = ref([
+      {
+        value: 'rental',
+        label: 'Rental',
+      }, {
+        value: 'sale',
+        label: 'Sale',
+      },
+    ]);
+    
     const newDetailsSchema = yup.object().shape({
       make: yup.string().required('Make is required'),
       model: yup.string().required('Modal is required'),
       colours: yup.array().required('Colour is required').max(3, 'Maximum of 3 colours.').min(1, 'Minimum of 1 colour.'),
       decals: yup.string().nullable(),
       serialNumber: yup.string().required('Serial Number is required'),
+      disposition: yup
+        .string()
+        .required(' Disposition is required ')
+        .oneOf(dispositions.value.map((d) => d.value), 'Please choose a value from the list.'),
+      roughValue: yup
+        .number()
+        .min(0, 'Rough Value must be positive')
+        .nullable()
+        .transform((value) => Number.isNaN(value) ? null : value ),
     });
 
     const {handleSubmit} = useForm({
@@ -35,6 +56,8 @@ export default {
     const {value: colours, errorMessage: coloursError} = useField('colours');
     const {value: decals, errorMessage: decalsError} = useField('decals');
     const {value: serialNumber, errorMessage: serialNumberError} = useField('serialNumber');
+    const {value: disposition, errorMessage: dispositionError} = useField('disposition');
+    const {value: roughValue, errorMessage: roughValueError} = useField('roughValue');
 
     const submitChangeDetails = handleSubmit(() => {
       requests.patchBikeChangeDetails(bike.value.id, {
@@ -43,6 +66,8 @@ export default {
         colours: colours.value,
         decals: decals.value,
         serialNumber: serialNumber.value,
+        disposition: disposition.value,
+        roughValue: roughValue.value * 100,
       }).then((response) => {
         toast.success('Bike Details updated', {timeout: 2000});
         context.emit('bikeDetailsUpdated', response.data);
@@ -64,7 +89,12 @@ export default {
       decalsError,
       serialNumber,
       serialNumberError,
+      disposition,
+      dispositionError,
+      roughValue,
+      roughValueError,
       submitChangeDetails,
+      dispositions,
     };
   },
   emits: [
@@ -91,6 +121,8 @@ export default {
     this.colour = this.bike.colours;
     this.decals = this.bike.decals;
     this.serialNumber = this.bike.serialNumber;
+    this.disposition = this.bike.disposition;
+    this.roughValue = this.bike.roughValue ? this.bike.roughValue / 100 : null;
   },
 };
 </script>
@@ -150,6 +182,26 @@ export default {
               name="serialNumber"
               v-model="serialNumber"
               :error="serialNumberError"
+          />
+        </div>
+        <div class="col-span-full">
+          <Select
+            :options="dispositions"
+            label="Disposition"
+            v-model="disposition"
+            name="tagId"
+            :error="dispositionError"
+          />
+        </div>
+
+        <div class="col-span-full">
+          <TextInput
+            label="Rough Value (£)"
+            type="text"
+            placeholder="40.00"
+            name="roughValue"
+            v-model="roughValue"
+            :error="roughValueError"
           />
         </div>
         <div class="col-span-12">

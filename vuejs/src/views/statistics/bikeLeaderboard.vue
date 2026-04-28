@@ -5,6 +5,8 @@ import requests from '@/requests';
 import VueSelect from '@/components/Select/VueSelect.vue';
 import {sum} from 'lodash-es';
 
+// TODO: this is broken
+
 export default {
   name: 'bikeLeaderboard',
   components: {VueSelect, Card, AdvancedTable},

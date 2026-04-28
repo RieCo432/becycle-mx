@@ -5,6 +5,8 @@ import VueSlider from 'vue-slider-component';
 import requests from '@/requests';
 import {useThemeSettingsStore} from '@/store/themeSettings';
 
+// TODO: this needs updated
+
 const themeSettingsStore = useThemeSettingsStore();
 
 export default {

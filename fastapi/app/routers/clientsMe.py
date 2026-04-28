@@ -6,7 +6,7 @@ import app.crud as crud
 import app.dependencies as dep
 import app.models as models
 import app.schemas as schemas
-
+from app.services.accounts_helpers import AccountTypes
 
 clients_me = APIRouter(
     tags=["clients"],
@@ -31,15 +31,11 @@ async def update_client_me(
     return client
 
 
-# TODO: Implement query parameters for pagination
 @clients_me.get("/clients/me/contracts")
 async def get_my_contracts(
-        open: bool = True,
-        closed: bool = True,
-        expired: bool = True,
         client: models.Client = Depends(dep.get_current_client),
-        db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
-    return crud.get_contracts(db=db, client_id=client.id, open=open, closed=closed, expired=expired)
+        db: Session = Depends(dep.get_db)) -> list[schemas.ContractRestricted]:
+    return crud.get_client_restricted_contracts(db=db, client_id=client.id)
 
 
 @clients_me.get("/clients/me/contracts/{contract_id}")
@@ -47,41 +43,9 @@ async def get_my_contract(
         contract_id: UUID,
         client: models.Client = Depends(dep.get_current_client),
         db: Session = Depends(dep.get_db)) -> schemas.ContractRestricted:
-    contract = crud.get_client_contract(db=db, client_id=client.id, contract_id=contract_id)
-
-    return schemas.ContractRestricted(
-        workingUsername=contract.workingUser.username,
-        checkingUsername=contract.checkingUser.username,
-        depositCollectingUsername=contract.depositCollectingUser.username,
-        returnAcceptingUsername=contract.returnAcceptingUser.username if contract.returnAcceptingUser else None,
-        depositReturningUsername=contract.depositReturningUser.username if contract.depositReturningUser else None,
-        id=contract.id,
-        startDate=contract.startDate,
-        endDate=contract.endDate,
-        returnedDate=contract.returnedDate,
-        depositAmountReturned=contract.depositAmountReturned,
-        detailsSent=contract.detailsSent,
-        expiryReminderSent=contract.expiryReminderSent,
-        returnDetailsSent=contract.returnDetailsSent,
-        clientId=contract.clientId,
-        bikeId=contract.bikeId,
-        depositAmountCollected=contract.depositAmountCollected,
-        conditionOfBike=contract.conditionOfBike,
-        contractType=contract.contractType,
-        notes=contract.notes,
-        crimeReports=[
-            schemas.CrimeReport(
-                id=report.id,
-                crimeNumber=report.crimeNumber,
-                createdOn=report.createdOn,
-                closedOn=report.closedOn,
-                contractId=report.contractId
-            ) for report in contract.crimeReports
-        ]
-    )
+    return crud.get_client_restricted_contract(db=db, client_id=client.id, contract_id=contract_id)
 
 
-# TODO: Implement query parameters for pagination
 @clients_me.get("/clients/me/appointments")
 async def get_my_appointments(
         client: models.Client = Depends(dep.get_current_client),

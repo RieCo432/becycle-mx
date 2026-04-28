@@ -85,13 +85,22 @@ export default {
     requests.getBikeContracts(this.$route.params.bikeId, true, true, true).then((response) => {
       Promise.all(response.data.map((contract) => {
         return requests.getClient(contract.clientId).then((clientResponse) => {
-          let status = 'open';
-          if (contract.returnedDate != null) {
+          const lastDepositTransaction = contract.depositTransactionHeaders
+            .toSorted((thA, thB) =>
+              new Date(thB.postedOn) - new Date(thA.postedOn))[0];
+          let status = 'undetermined';
+          if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
+            status = 'stolen';
+          } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_settled')) {
             status = 'closed';
+          } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_forfeited')) {
+            status = 'forfeited';
+          } else if (lastDepositTransaction.event === 'liability_dormant') {
+            status = 'dormant';
+          } else if (lastDepositTransaction.event === 'liability_reactivated') {
+            status = 'active';
           } else {
-            if (new Date(contract.endDate).getTime() < new Date().getTime()) {
-              status = 'expired';
-            }
+            status = 'active';
           }
           return {
             id: contract.id,
@@ -162,6 +171,8 @@ export default {
               <p class="text-slate-600 dark:text-slate-300">{{bike.make}} {{bike.model}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.colour}} {{bike.decals}}</p>
               <p class="text-slate-600 dark:text-slate-300">{{bike.serialNumber}}</p>
+              <p class="text-slate-600 dark:text-slate-300">{{bike.disposition}}</p>
+              <p class="text-slate-600 dark:text-slate-300">{{bike.roughValue ? `£ ${(bike.roughValue / 100)?.toFixed(2)}` : 'n/a'}}</p>
             </div>
             <div class="col-span-4 col-start-1">
               <div class="h-10 rounded-full overflow-hidden">

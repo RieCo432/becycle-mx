@@ -83,15 +83,20 @@ export default {
 
       this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
         const bike = (await requests.getBike(contract.bikeId)).data;
-        let status = 'open';
-        if (contract.returnedDate != null) {
-          status = 'closed';
-        } else if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
+        const lastDepositTransaction = contract.depositTransactionHeaders
+          .toSorted((thA, thB) =>
+            new Date(thB.postedOn) - new Date(thA.postedOn))[0];
+        let status = 'active';
+        if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
           status = 'stolen';
-        } else {
-          if (new Date(contract.endDate).getTime() < new Date().getTime()) {
-            status = 'expired';
-          }
+        } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_settled')) {
+          status = 'closed';
+        } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_forfeited')) {
+          status = 'forfeited';
+        } else if (lastDepositTransaction.event === 'liability_dormant') {
+          status = 'dormant';
+        } else if (lastDepositTransaction.event === 'liability_reactivated') {
+          status = 'active';
         }
         return {
           id: contract.id,
@@ -153,7 +158,7 @@ export default {
         :open-edit-details-modal="() => showEditDetailsModal = true"
         :loading-client-details="loadingClientDetails"
     ></client-view>
-    <EditClientDetailsModal v-if="!loadingClientDetails"
+    <EditClientDetailsModal v-if="!loadingClientDetails && showEditDetailsModal"
                             :close-modal="() => showEditDetailsModal = false"
                             :show-modal="showEditDetailsModal"
                             :client="client"

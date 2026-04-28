@@ -7,6 +7,7 @@ from starlette import status
 
 import app.models as models
 import app.schemas as schemas
+from app.extensions.disposition import Disposition
 
 
 def get_bike(db: Session, bike_id: UUID) -> models.Bike:
@@ -55,7 +56,7 @@ def find_similar_bikes(db: Session, make: str, model: str, colours: list[str], s
     return bikes
 
 
-def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, colours: list[str] | None = None, decals: str | None = None, serialNumber: str | None = None, max_distance: int = 4) -> list[schemas.Bike]:
+def get_potential_bike_matches(db: Session, make: str | None = None, model: str | None = None, colour: str | None = None, colours: list[str] | None = None, decals: str | None = None, serialNumber: str | None = None, dispositions: list[Disposition] | None = None,max_distance: int = 4) -> list[schemas.Bike]:
     query_filter = []
     if make is not None:
         query_filter.append(models.Bike.make.contains(make.lower()) | (func.levenshtein(models.Bike.make, make) <= max_distance))
@@ -65,6 +66,9 @@ def get_potential_bike_matches(db: Session, make: str | None = None, model: str 
         query_filter.append(models.Bike.colour.contains(colour.lower()) | (func.levenshtein(models.Bike.colour, colour) <= max_distance))
     if serialNumber is not None:
         query_filter.append(models.Bike.serialNumber.contains(serialNumber.lower()) | (func.levenshtein(models.Bike.serialNumber, serialNumber) <= max_distance))
+        
+    if dispositions is not None:
+        query_filter.append(models.Bike.disposition.in_(dispositions))
 
     if colours is not None:
         colour_values = [models.Colour.getintvalue(colour) for colour in colours]
@@ -103,7 +107,9 @@ def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
         colour=str.join(', ', [c.name for c in colours]),
         colours=colours,
         decals=bike_data.decals.lower() if bike_data.decals is not None else None,
-        serialNumber=bike_data.serialNumber.lower()
+        serialNumber=bike_data.serialNumber.lower(),
+        disposition=bike_data.disposition,
+        roughValue=bike_data.roughValue,
     )
     db.add(bike)
     db.commit()
@@ -194,6 +200,11 @@ def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase)
         for bike_with_this_tag in bikes_with_this_tag:
             if bike_with_this_tag.id != bike_id:
                 bike_with_this_tag.rfidTagSerialNumber = "MOVED TO ANOTHER BIKE"
+    if updated_bike_data.disposition is not None:
+        bike.disposition = updated_bike_data.disposition
+        
+    if updated_bike_data.roughValue is not None:
+        bike.roughValue = updated_bike_data.roughValue
 
 
     db.commit()

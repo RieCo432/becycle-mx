@@ -74,8 +74,6 @@ async def update_client_full(
                               new_last_name=updated_client_data.lastName,
                               new_email_address=updated_client_data.emailAddress)
 
-
-# TODO: Implement query parameters for pagination
 @clients.get("/clients/{client_id}/contracts")
 async def get_client_contracts(
         client_id: UUID,
@@ -86,7 +84,6 @@ async def get_client_contracts(
     return crud.get_contracts(db=db, client_id=client_id, open=open, closed=closed, expired=expired)
 
 
-# TODO: Implement query parameters for pagination
 @clients.get("/clients/{client_id}/appointments")
 async def get_client_appointments(
         client_id: UUID,

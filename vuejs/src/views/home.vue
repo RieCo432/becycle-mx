@@ -98,7 +98,7 @@
               <div class="grid grid-cols-12 gap-5">
                 <div class="col-span-12">
                   <Calendar
-                      v-if="!loadingClosedDays && !loadingOpenDays"
+                      v-if="!loadingOpenDays"
                       expanded
                       :is-dark="themeSettingsStore.isDark"
                       :columns="numCalendarColumns"
@@ -178,7 +178,6 @@ export default {
       INSTAGRAM_LINK: INSTAGRAM_LINK,
       PAYPAL_BUTTON_ID: PAYPAL_BUTTON_ID,
       loadingOpeningTimes: true,
-      loadingClosedDays: true,
       loadingOpenDays: true,
       loadingAddress: true,
       openingTimes: null,
@@ -189,7 +188,13 @@ export default {
       aboutUsHtml: null,
       quillContent: null,
       themeSettingsStore: themeSettingsStore,
-      calendarAttributes: [],
+      calendarAttributes: [{
+        key: 'default-look',
+        dates: {repeat: {every: 'day'}},
+        content: {
+          class: 'opacity-20',
+        },
+      }],
       numCalendarColumns: mapCurrent({xs: 1, sm: 2, md: 2, lg: 1, xxl: 2}, 1),
       columns: [
         {
@@ -239,41 +244,17 @@ export default {
       this.openingTimes = response.data;
       this.loadingOpeningTimes = false;
     });
-    requests.getUpcomingClosures().then((response) => {
-      const closedDays = response.data.filter((closure) => closure.type === 'day')
-        .map((closure) => (new Date(Date.parse(closure.item.date))));
-      const closedPeriods = response.data.filter((closure) => closure.type === 'period')
-        .map((closure) => (
-          [
-            new Date(Date.parse(closure.item.date)),
-            new Date(Date.parse(closure.item.untilDate)),
-          ]));
-      this.calendarAttributes.push({
-        key: 'closedDays',
-        dates: closedDays,
-        highlight: {
-          color: 'red',
-          fillMode: 'light',
-        },
-      });
-      this.calendarAttributes.push({
-        key: 'closedPeriods',
-        dates: closedPeriods,
-        highlight: {
-          color: 'red',
-          fillMode: 'light',
-        },
-      });
-      this.loadingClosedDays = false;
-    });
     requests.getUpcomingOpenDates().then((response) => {
       response.data.forEach((openDay) => {
         this.calendarAttributes.push({
           key: 'openDays' + openDay,
           dates: new Date(Date.parse(openDay)),
+          content: {
+            class: 'opacity-100',
+          },
           highlight: {
-            color: 'green',
-            fillMode: 'light',
+            color: 'white',
+            fillMode: 'outline',
           },
         });
       });
