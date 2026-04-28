@@ -33,7 +33,7 @@ BECYCLE Workshop SCIO is a small, wholly volunteer operated and donations based 
 The following are required if you wish to run the vuejs app and python api directly, instead of running the docker container:
 - [Python](https://www.python.org/downloads/)
 	- The fastapi docker file is using version [3.11.7](https://www.python.org/downloads/release/python-3117/), so if you have any problems try using this version.
-	- (*Optional*) Would recommend using [pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation), instead of directly installing a specfic version, as it will make managing python versions easier if you need to change them.
+	- (*Optional*) Would recommend using [pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation) for linux, or for windows [pyenv-win](https://github.com/pyenv-win/pyenv-win), instead of directly installing a specfic version, as it will make managing python versions easier if you need to change them.
 - [NodeJS](https://nodejs.org/en/download)
 	- [Yarn](https://classic.yarnpkg.com/en/) `npm install -g yarn`
 	- (*Optional*) Would recommend using [NVM](https://github.com/nvm-sh/nvm), instead of directly installing a specfic version, as it will make managing node versions easier if you need to change them.
@@ -75,7 +75,7 @@ The following are required if you wish to run the vuejs app and python api direc
 
 #### Running the code
 
-The easiest way to get started is to just run: `sudo docker-compose up`. This isn't the easiest to develop for however, as the docker files don't handle hot reloads (may be possible, you can make a PR if you now how to, *wink wink nudge nudge*).
+The easiest way to get started is to just run: `sudo docker-compose up`. This isn't the easiest to develop for however, as the docker files don't handle hot reloads.
 
 ##### Individual docker images
 
@@ -87,12 +87,24 @@ If you want to run only specific images you can do the following:
 
 ##### Backend API
 
+###### Windows
+
+1. Run `python -m venv venv`, you now have a virtual environment called `venv` (the `venv` folder will be ignored in git).
+	- May need to be `python3` instead of `python`.
+2. Now run `./venv/Scripts/pip.exe install -r ./fastapi/requirements.txt`, this will install all of the python packages for fastapi.
+3. Move into the fastapi folder `cd fastapi`.
+4. Run `../venv/Scripts/alembic.exe upgrade head` within your virtual environment to make sure your local database is up-to-date with all the most recent migrations.
+5. Run `../venv/Scripts/uvicorn.exe app.main:app --reload --env-file local-api.env` to run the api.
+
+###### Linux
+
 1. Run `python -m venv venv`, you now have a virtual environment called `venv` (the `venv` folder will be ignored in git).
 	- May need to be `python3` instead of `python`.
 2. Now run `./venv/bin/pip install -r ./fastapi/requirements.txt`, this will install all of the python packages for fastapi.
-	- If you're running on linux, and encounter an error installing `psycopg2`, you may need to install `libpq-dev`.
+	- If you encounter an error installing `psycopg2`, you may need to install `libpq-dev`.
 3. Move into the fastapi folder `cd fastapi`.
 4. Run `../venv/bin/alembic upgrade head` within your virtual environment to make sure your local database is up-to-date with all the most recent migrations.
+5. Run `../venv/bin/uvicorn app.main:app --reload --env-file local-api.env` to run the api.
 
 ##### Frontend VueJS
 
