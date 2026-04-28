@@ -10,6 +10,8 @@ import app.models as models
 import app.schemas as schemas
 from psycopg2.errors import UniqueViolation
 
+import hashlib
+
 
 def get_all_clients(db: Session) -> list[schemas.Client]:
     return [_ for _ in db.scalars(
@@ -200,3 +202,15 @@ def get_client_logins(db: Session, client_id: UUID) -> list[models.ClientLogin]:
         select(models.ClientLogin)
         .where(models.ClientLogin.clientId == client_id)
     )]
+
+def anoymise_client(db: Session, client_id: UUID) -> models.Client:
+    client = get_client(db=db, client_id=client_id)
+    client.firstName = hashlib.md5(client.firstName.encode("utf-8")).hexdigest()
+    client.lastName = hashlib.md5(client.lastName.encode("utf-8")).hexdigest()
+
+    splitEmail = client.emailAddress.split("@")
+    client.emailAddress = hashlib.md5(splitEmail[0].encode("utf-8")).hexdigest() + "@" + hashlib.md5(splitEmail[1].encode("utf-8")).hexdigest()
+
+    db.commit()
+
+    return client

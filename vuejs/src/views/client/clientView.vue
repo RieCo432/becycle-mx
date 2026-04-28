@@ -75,6 +75,10 @@ export default {
       type: Function,
       required: true,
     },
+    confirmAnonymiseData: {
+      type: Function,
+      required: false
+    }
   },
 
   data() {
@@ -209,15 +213,16 @@ export default {
         <Card title="Details">
           <ContractClientCardSkeleton v-if="loadingClientDetails"></ContractClientCardSkeleton>
           <template v-else>
-            <div class="grid grid-cols-12 gap-5">
+            <div class="grid grid-cols-12 md:grid-cols-4  gap-5">
               <div class="col-span-full">
                 <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ client.firstName }} {{ client.lastName }}</p>
               </div>
               <div class="col-span-full">
-                <p class="text-base text-slate-700 dark:text-slate-300">{{ client.emailAddress }}</p>
+                <p class="text-base text-slate-700 dark:text-slate-300 break-all">{{ client.emailAddress }}</p>
               </div>
-              <div class="col-span-full">
+              <div class="col-span-12">
                 <DashButton @click="openEditDetailsModal">Edit Details</DashButton>
+                <DashButton class="ml-2 bg-danger-600 dark:bg-danger-600" @click="confirmAnonymiseData">Anonymise Details</DashButton>
               </div>
             </div>
           </template>

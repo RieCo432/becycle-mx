@@ -74,6 +74,12 @@ async def update_client_full(
                               new_last_name=updated_client_data.lastName,
                               new_email_address=updated_client_data.emailAddress)
 
+@clients.patch("/clients/{client_id}/anonymise")
+async def anonymise_client(
+        client_id: UUID,
+        db: Session = Depends(dep.get_db)) -> schemas.Client:
+    return crud.anoymise_client(db=db, client_id=client_id)
+
 @clients.get("/clients/{client_id}/contracts")
 async def get_client_contracts(
         client_id: UUID,
