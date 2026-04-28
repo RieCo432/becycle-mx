@@ -5,6 +5,7 @@ import requests from '@/requests';
 import {debounce} from 'lodash-es';
 import Button from '@/components/Button/index.vue';
 import levenshtein from '@/util/levenshtein';
+import MD5 from 'crypto-js/md5';
 
 export default {
   name: 'findClient',
@@ -52,9 +53,33 @@ export default {
         lastName: this.selectedClient.lastName ? this.selectedClient.lastName : '',
         emailAddress: this.selectedClient.emailAddress ? this.selectedClient.emailAddress : '',
       };
-      levenshtein.filterSortObject(this.clientSuggestions, client, 4).then((result) => {
-        this.filtered_client_suggestions = result;
-      });
+      const regularFilter = levenshtein.filterSortObject(this.clientSuggestions, client, 4)
+
+      let hashedFilter = null
+      if(client.firstName || client.lastName || client.emailAddress) {
+        const emailSplit = this.selectedClient.emailAddress.split('@')
+        let hashedEmail = null
+        if(emailSplit.length > 1) {
+          hashedEmail = MD5(emailSplit[0]).toString() + "@" + MD5(emailSplit[1]).toString()
+        }
+        const hashedClient = {
+          firstName: this.selectedClient.firstName ? MD5(this.selectedClient.firstName).toString() : '',
+          lastName: this.selectedClient.lastName ? MD5(this.selectedClient.lastName).toString() : '',
+          emailAddress: hashedEmail ? hashedEmail : '',
+        };
+        hashedFilter = levenshtein.filterSortObject(this.clientSuggestions, hashedClient, 4);
+      }
+
+      let promises = [regularFilter]
+      if(hashedFilter != null)
+        promises.push(hashedFilter)
+
+      Promise.all(promises).then((results) => {
+        this.filtered_client_suggestions = []
+        for (let result of results) {
+          this.filtered_client_suggestions = this.filtered_client_suggestions.concat(result);
+        }
+      })
     },
     handleInput() {
       this.fetchClients();
