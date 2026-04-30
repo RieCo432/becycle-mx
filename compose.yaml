@@ -12,6 +12,9 @@ services:
             - secrets/organisation.env
         depends_on:
             - postgres
+        environment:
+            # Fix for running python inside the docker container
+            - PYTHONPATH=/code
             
     postgres:
         image: postgres:16.1
