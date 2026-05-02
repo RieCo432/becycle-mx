@@ -52,11 +52,15 @@ export default {
           <p>Name: {{appointment.client.firstName}} {{appointment.client.lastName}}</p>
           <p>Type: {{appointment.type.title}}</p>
           <p>
-            Time: {{startDateTime.getHours().toString()
-              .padStart(2, '0')}}:{{startDateTime.getMinutes().toString()
-              .padStart(2, '0')}} - {{endDateTime.getHours().toString()
-              .padStart(2, '0')}}:{{endDateTime.getMinutes().toString()
-              .padStart(2, '0')}}</p>
+            Date and Time: {{
+            new Date(Date.parse(appointment.startDateTime))
+            .toLocaleString(undefined, {weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+                hour: "2-digit", minute: "2-digit", hour12: false})
+            }} - {{
+              new Date(Date.parse(appointment.endDateTime))
+                  .toLocaleString(undefined, {hour: "2-digit", minute: "2-digit", hour12: false})
+            }}
+          </p>
           <p>Confirmed: {{appointment.confirmed ? 'Yes' : 'No'}}</p>
           <p>Notes: {{appointment.notes}}</p>
           <br>

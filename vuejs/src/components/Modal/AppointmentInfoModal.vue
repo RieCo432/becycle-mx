@@ -50,11 +50,14 @@
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Name: {{appointment.clientName}}</p>
                 <p>Type: {{appointment.typeTitle}}</p>
                 <p v-if="appointment.typeTitle !== 'Closed Day'">
-                    Time: {{appointment.startDateTime.getHours().toString()
-                    .padStart(2, '0')}}:{{appointment.startDateTime.getMinutes().toString()
-                    .padStart(2, '0')}} - {{appointment.endDateTime.getHours().toString()
-                    .padStart(2, '0')}}:{{appointment.endDateTime.getMinutes().toString()
-                    .padStart(2, '0')}}</p>
+                    Time:
+                  {{
+                    new Date(Date.parse(appointment.startDateTime))
+                        .toLocaleString(undefined, {hour: "2-digit", minute: "2-digit", hour12: false, timeZone: 'UTC' })
+                  }} - {{
+                    new Date(Date.parse(appointment.endDateTime))
+                        .toLocaleString(undefined, {hour: "2-digit", minute: "2-digit", hour12: false, timeZone: 'UTC' })
+                  }}</p>
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Confirmed: {{appointment.confirmed ? 'Yes' : 'No'}}</p>
                 <p>Notes: {{appointment.notes}}</p>
               </div>
@@ -121,7 +124,7 @@ import {
   DialogPanel,
 } from '@headlessui/vue';
 import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
-import AppointmentCancellationModal from "@/components/Modal/AppointmentCancellationModal.vue";
+import AppointmentCancellationModal from '@/components/Modal/AppointmentCancellationModal.vue';
 
 const toast = useToast();
 
