@@ -2,6 +2,8 @@ from datetime import date
 from uuid import UUID
 
 from pydantic import BaseModel
+
+from . import TransactionHeader
 from .client import ClientBase
 from .bike import BikeBase
 from .user import UserBase
@@ -23,4 +25,5 @@ class ContractDraft(BaseModel):
     checkingUserId: UUID | None = None
     checkingUser: UserBase | None = None
     depositCollectedTransactionHeaderId: UUID | None = None
+    depositCollectedTransactionHeader: TransactionHeader | None = None
     depositAmountCollected: int | None = None
