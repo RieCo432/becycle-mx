@@ -170,7 +170,9 @@
                       Add New
                     </label>
                     <DashButton
-                        :class="`btn-sm ${makeNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'} w-full`"
+                        :class="`btn-sm ${makeNotInList
+                          ? 'bg-success-500 dark:bg-success-500'
+                          : 'bg-primary-500 dark:bg-primary-500'} w-full`"
                         :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
                         @click.prevent="() => {makeNotInList = !makeNotInList}"
                     />
@@ -198,12 +200,14 @@
                       Add New
                     </label>
                     <DashButton
-                        :class="`btn-sm ${modelNotInList ? 'bg-success-500 dark:bg-success-500' : 'bg-primary-500 dark:bg-primary-500'} w-full`"
+                        :class="`btn-sm ${modelNotInList
+                          ? 'bg-success-500 dark:bg-success-500'
+                          : 'bg-primary-500 dark:bg-primary-500'} w-full`"
                         :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
                         @click.prevent="() => {modelNotInList = !modelNotInList}"
                     />
                   </div>
-                  
+
                   <div class="col-span-6 xl:col-span-4 xl:row-span-4 xl:row-start-3 col-start-1">
                     <ComboboxColourPicker
                         :suggestions="filtered_colours_suggestions"
@@ -363,6 +367,11 @@
                     <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
                       Deposit Collection
                     </h4>
+                    <h4
+                        class="text-base mb-6 dark:text-danger-500 text-danger-500"
+                        v-if="activeDraft.depositCollectedTransactionHeaderId !== null">
+                      Deposit has already been collected. This step is read-only.
+                    </h4>
                   </div>
 
 
@@ -373,14 +382,18 @@
                       name="depositAmountCollected"
                       v-model="depositAmountCollected"
                       :error="depositAmountCollectedError"
+                      :is-readonly="activeDraft.depositCollectedTransactionHeaderId !== null"
                   />
 
                   <ComboboxTextInput
                       :field-model-value="depositCollectedLiabilityAccount.name"
-                      :suggestions="filtered_deposit_collected_liability_account_suggestions.map(makeAccountLegible)"
+                      :suggestions="activeDraft.depositCollectedTransactionHeaderId === null
+                        ? filtered_deposit_collected_liability_account_suggestions.map(makeAccountLegible)
+                        : []"
                       :selected-callback="selectDepositCollectedLiabilityAccount"
                       :allow-new="false"
-                      :open-by-default="userSelectionOptionsStatic"
+                      :open-by-default="userSelectionOptionsStatic
+                        && activeDraft.depositCollectedTransactionHeaderId === null"
                       label="Liability Account"
                       type="text"
                       placeholder="workshop"
@@ -388,14 +401,18 @@
                       v-model="depositCollectedLiabilityAccount.name"
                       :error="depositCollectedLiabilityAccountError"
                       @change="() => {}"
+                      :is-readonly="activeDraft.depositCollectedTransactionHeaderId !== null"
                   />
 
                   <ComboboxTextInput
                     :field-model-value="depositCollectedAssetAccount.name"
-                    :suggestions="filtered_deposit_collected_asset_account_suggestions.map(makeAccountLegible)"
+                    :suggestions="activeDraft.depositCollectedTransactionHeaderId === null
+                      ? filtered_deposit_collected_asset_account_suggestions.map(makeAccountLegible)
+                      : []"
                     :selected-callback="selectDepositCollectedAssetAccount"
                     :allow-new="false"
-                    :open-by-default="userSelectionOptionsStatic"
+                    :open-by-default="userSelectionOptionsStatic
+                      && activeDraft.depositCollectedTransactionHeaderId === null"
                     label="Asset Account"
                     type="text"
                     placeholder="workshop"
@@ -403,6 +420,7 @@
                     v-model="depositCollectedAssetAccount.name"
                     :error="depositCollectedAssetAccountError"
                     @change="() => {}"
+                    :is-readonly="activeDraft.depositCollectedTransactionHeaderId !== null"
                   />
 
                   <TextInput
@@ -412,6 +430,7 @@
                       name="depositCollectingPassword"
                       v-model="depositCollectingPassword"
                       :error="depositCollectingPasswordError"
+                      :is-readonly="activeDraft.depositCollectedTransactionHeaderId !== null"
                       hasicon/>
                 </div>
               </div>
@@ -1062,13 +1081,6 @@ export default {
               toast.error(error.response.data.detail.description, {timeout: 5000});
             });
 
-            if (activeDraft.value.depositCollectedTransactionHeaderId != null) {
-              toast.success('Deposit Already Collected!', {timeout: 1000});
-              getActiveUsers();
-
-              stepNumber.value = 5;
-              stepIsLoading.value = false;
-            }
             if (activeDraft.value.workingUser !== null) {
               toast.success('Working User Already Selected!', {timeout: 1000});
               getRentalCheckers();
@@ -1088,7 +1100,7 @@ export default {
             stepIsLoading.value = false;
           });
       } else if (stepNumber.value === 4) {
-        if (!activeDraft.value.depositCollectedTransactionId) {
+        if (activeDraft.value.depositCollectedTransactionHeaderId === null) {
           const depositCollectedTransactionDraft = {
             transactionHeader: {
               event: 'deposit_collected',
@@ -1105,6 +1117,8 @@ export default {
           }];
           requests.createTransaction(depositCollectedTransactionDraft, transactionAuthDetails).then((response) => {
             depositCollectedTransactionHeader.value = response.data;
+            activeDraft.value.depositCollectedTransactionHeaderId = response.data.id;
+            activeDraft.value.depositCollectedTransactionHeader = response.data;
             toast.success('Deposit Collected!', {timeout: 1000});
 
             requests.putDraftContractDeposit(
@@ -1564,6 +1578,28 @@ export default {
           this.clientId = this.activeDraft.clientId;
           this.bikeId = this.activeDraft.bikeId;
           this.matchWithBikeId = this.activeDraft.bikeId;
+
+          this.depositAmountCollected = this.activeDraft
+            .depositCollectedTransactionHeader
+            .transactionLines
+            .filter((line) => line.account.type === 'asset')
+            .reduce((total, line) => total + line.amount, 0) / 100;
+          this.depositCollectedLiabilityAccount = this.activeDraft
+            .depositCollectedTransactionHeader
+            .transactionLines
+            .find((line) => line.account.type === 'liability')
+            ?.account;
+          this.depositCollectedAssetAccount = this.activeDraft
+            .depositCollectedTransactionHeader
+            .transactionLines
+            .find((line) => line.account.type === 'asset')
+            ?.account;
+          this.depositCollectingPassword = 'xxxxxxx';
+
+          console.log('Deposit collected asset account:', this.depositCollectedAssetAccount);
+          console.log('Deposit collected liability account:', this.depositCollectedLiabilityAccount);
+          console.log('Deposit amount collected:', this.depositAmountCollected);
+          console.log('Deposit Collected T Header', this.activeDraft.depositCollectedTransactionHeader);
 
           this.stepNumber = 1;
           this.clientSuggestions.push(this.activeDraft.client);
