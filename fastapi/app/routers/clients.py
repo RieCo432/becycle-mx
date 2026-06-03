@@ -78,7 +78,7 @@ async def update_client_full(
 async def anonymise_client(
         client_id: UUID,
         db: Session = Depends(dep.get_db)) -> schemas.Client:
-    return crud.anoymise_client(db=db, client_id=client_id)
+    return crud.anonymise_client(db=db, client_id=client_id)
 
 @clients.get("/clients/{client_id}/contracts")
 async def get_client_contracts(

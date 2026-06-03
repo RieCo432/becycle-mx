@@ -11,6 +11,7 @@ class ClientBase(BaseModel):
     firstName: str
     lastName: str
     emailAddress: str
+    anonymised: bool
 
 
 class ClientCreate(ClientBase):

@@ -210,7 +210,7 @@ def get_client_logins(db: Session, client_id: UUID) -> list[models.ClientLogin]:
         .where(models.ClientLogin.clientId == client_id)
     )]
 
-def anoymise_client(db: Session, client_id: UUID) -> models.Client:
+def anonymise_client(db: Session, client_id: UUID) -> models.Client:
     client = get_client(db=db, client_id=client_id)
     client.firstName = hashlib.md5(client.firstName.encode("utf-8")).hexdigest()
     client.lastName = hashlib.md5(client.lastName.encode("utf-8")).hexdigest()
@@ -218,6 +218,34 @@ def anoymise_client(db: Session, client_id: UUID) -> models.Client:
     splitEmail = client.emailAddress.split("@")
     client.emailAddress = hashlib.md5(splitEmail[0].encode("utf-8")).hexdigest() + "@" + hashlib.md5(splitEmail[1].encode("utf-8")).hexdigest()
 
+    client.anonymised = True
+
     db.commit()
 
     return client
+
+def anonymise_old_clients(db: Session) -> None:
+    clients = db.scalars(
+        select(models.Client)
+        .where(models.Client.anonymised == False)
+    )
+
+    for client in clients:
+        recent_appointments = [_ for _ in db.scalars(
+            select(models.Appointment)
+            .where(models.Appointment.clientId == client.id)
+            .where(models.Appointment.startDateTime > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2*365))
+        )]
+
+        recent_contracts = [_ for _ in db.scalars(
+            select(models.Contract)
+            .where(models.Contract.clientId == client.id)
+            .where(
+                    (models.Contract.returnedDate == None) |
+                    (models.Contract.returnedDate > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2*365))
+            )
+            .where(models.Contract.endDate > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2*365))
+        )]
+
+        if len(recent_appointments) == 0 and len(recent_contracts) == 0:
+            anonymise_client(db=db, client_id=client.id)

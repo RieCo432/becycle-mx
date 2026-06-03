@@ -222,7 +222,10 @@ export default {
               </div>
               <div class="col-span-12">
                 <DashButton @click="openEditDetailsModal">Edit Details</DashButton>
-                <DashButton class="ml-2 bg-danger-600 dark:bg-danger-600" @click="confirmAnonymiseData">Anonymise Details</DashButton>
+                <DashButton
+                    v-if="!client.anonymised"
+                    class="ml-2 bg-danger-600 dark:bg-danger-600"
+                    @click="confirmAnonymiseData">Anonymise Details</DashButton>
               </div>
             </div>
           </template>
