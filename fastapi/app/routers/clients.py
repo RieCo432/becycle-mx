@@ -1,6 +1,9 @@
+import os
 from uuid import UUID
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from starlette import status
+
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
@@ -54,6 +57,14 @@ async def find_client(
         max_distance: int = 10,
         db: Session = Depends(dep.get_db)) -> list[schemas.Client]:
     return crud.get_potential_client_matches(db=db, first_name=first_name, last_name=last_name, email_address=email_address, max_distance=max_distance)
+
+
+@clients.patch("/clients/anonymise-all")
+async def anonymise_all_clients(db: Session = Depends(dep.get_db)) -> None:
+    if os.environ["PRODUCTION"].lower() == "false":
+        crud.anonymise_all_clients(db=db)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"description": "Anonymisation of all clients is not allowed in production mode."})
 
 
 @clients.get("/clients/{client_id}")

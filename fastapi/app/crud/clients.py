@@ -212,6 +212,10 @@ def get_client_logins(db: Session, client_id: UUID) -> list[models.ClientLogin]:
 
 def anonymise_client(db: Session, client_id: UUID) -> models.Client:
     client = get_client(db=db, client_id=client_id)
+    
+    if client.anonymised:
+        return client
+    
     client.firstName = hashlib.md5(client.firstName.encode("utf-8")).hexdigest()
     client.lastName = hashlib.md5(client.lastName.encode("utf-8")).hexdigest()
 
@@ -249,3 +253,11 @@ def anonymise_old_clients(db: Session) -> None:
 
         if len(recent_appointments) == 0 and len(recent_contracts) == 0:
             anonymise_client(db=db, client_id=client.id)
+            
+            
+def anonymise_all_clients(db: Session) -> None:
+    for client in db.scalars(
+        select(models.Client)
+        .where(models.Client.anonymised == False)
+    ):
+        anonymise_client(db=db, client_id=client.id)
