@@ -67,6 +67,7 @@ crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes i
 crud.fully_prune_tree(db=db)
 crud.ensure_default_admin_permissions_exist(db=db)
 crud.keep_admin_account_active(db=db)
+crud.anonymise_old_clients(db=db)
 db.close()
 
 if __name__ == "__main__":
