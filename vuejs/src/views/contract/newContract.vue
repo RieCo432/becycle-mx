@@ -64,6 +64,13 @@
                 @go-back="goBack"
               />
             </div>
+            <div v-if="currentStepNumber === 2">
+              <NewContractBikeForm 
+                :draft="currentContractDraft"
+                @update:draft="updateDraft"
+                @go-back="goBack"
+              />
+            </div>
 <!--            <form @submit.prevent="submit" @keydown.enter="() => {}">-->
 <!--              -->
 
@@ -121,7 +128,7 @@ import {VueSpinner} from 'vue3-spinners';
 
 import NewContractStartForm from '@/components/Forms/NewContractStartForm.vue';
 import NewContractClientForm from '@/components/Forms/NewContractClientForm.vue';
-// import NewContractBikeForm from '@/components/Forms/NewContractBikeForm.vue';
+import NewContractBikeForm from '@/components/Forms/NewContractBikeForm.vue';
 // import NewContractDetailsForm from '@/components/Forms/NewContractDetailsForm.vue';
 // import NewContractWorkingVolunteerForm from '@/components/Forms/NewContractWorkingVolunteerForm.vue';
 // import NewContractCheckingVolunteerForm from '@/components/Forms/NewContractCheckingVolunteerForm.vue';
@@ -183,6 +190,7 @@ function updateDraft(draft) {
 function nextStep() {
   if (currentContractDraft.value.id) currentStepNumber.value = 1;
   if (currentContractDraft.value.clientId) currentStepNumber.value = 2;
+  if (currentContractDraft.value.bikeId) currentStepNumber.value = 3;
 }
 
 
