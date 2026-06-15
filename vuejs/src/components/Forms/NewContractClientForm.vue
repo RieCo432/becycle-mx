@@ -44,8 +44,71 @@ const clientSchema = yup.object().shape({
     .oneOf([yup.ref('emailAddress')], 'Email Addresses must match'),
 });
 
-function setClient(client) {
-  console.log('setClient', client);
+const {handleSubmit} = useForm({
+  validationSchema: clientSchema,
+  keepValuesOnUnmount: true,
+});
+
+const {value: emailAddress, errorMessage: emailAddressError} = useField('emailAddress');
+const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError} = useField('confirmEmailAddress');
+const {value: firstName, errorMessage: firstNameError} = useField('firstName');
+const {value: lastName, errorMessage: lastNameError} = useField('lastName');
+
+
+const submit = handleSubmit(() => {
+  if (checkCurrentlyProcessing()) return;
+  processingSubmit.value = true;
+
+  requests.getClientByEmail(emailAddress.value)
+    .then((response) => {
+      setDraftClient(response.data[0]);
+    })
+    .catch((error) => {
+      if (error.response.status === 404) {
+        requests.postNewClient({
+          firstName: firstName.value,
+          lastName: lastName.value,
+          emailAddress: emailAddress.value,
+        }).then((response) => {
+          toast.success('New Client Created!', {timeout: 1000});
+          setDraftClient(response.data);
+        });
+      }
+    });
+});
+
+
+onMounted(() => {
+  if (props.draft.client) {
+    emailAddress.value = props.draft.client.emailAddress;
+    confirmEmailAddress.value = props.draft.client.emailAddress;
+    firstName.value = props.draft.client.firstName;
+    lastName.value = props.draft.client.lastName;
+  }
+});
+
+watch(props.draft, async (newValue, oldValue) => {
+  firstName.value = newValue.client.firstName;
+  lastName.value = newValue.client.lastName;
+  emailAddress.value = newValue.client.emailAddress;
+  confirmEmailAddress.value = newValue.client.emailAddress;
+});
+
+const clientSuggestions = ref([]);
+const filteredClientSuggestions = ref([]);
+
+
+function selectClientFromSuggestions(event, i) {
+  const draft = props.draft;
+  if (i === -1) {
+    draft.client = {id: null, firstName: firstName.value, lastName: lastName.value, emailAddress: emailAddress.value};
+  } else {
+    draft.client = filteredClientSuggestions.value[i];
+  }
+  emit('update:draft', draft);
+}
+
+function setDraftClient(client) {
   requests.putDraftContractClient(props.draft.id, client.id)
     .then((response) => {
       emit('update:draft', response.data);
@@ -59,53 +122,6 @@ function setClient(client) {
     });
 }
 
-
-const {handleSubmit} = useForm({
-  validationSchema: clientSchema,
-  keepValuesOnUnmount: true,
-});
-
-const {value: emailAddress, errorMessage: emailAddressError} = useField('emailAddress');
-const {value: confirmEmailAddress, errorMessage: confirmEmailAddressError} = useField('confirmEmailAddress');
-const {value: firstName, errorMessage: firstNameError} = useField('firstName');
-const {value: lastName, errorMessage: lastNameError} = useField('lastName');
-
-
-onMounted(() => {
-  if (props.draft.client) {
-    emailAddress.value = props.draft.client.emailAddress;
-    confirmEmailAddress.value = props.draft.client.emailAddress;
-    firstName.value = props.draft.client.firstName;
-    lastName.value = props.draft.client.lastName;
-  }
-});
-
-const submit = handleSubmit(() => {
-  if (checkCurrentlyProcessing()) return;
-  processingSubmit.value = true;
-
-  requests.getClientByEmail(emailAddress.value)
-    .then((response) => {
-      setClient(response.data[0]);
-    })
-    .catch((error) => {
-      if (error.response.status === 404) {
-        requests.postNewClient({
-          firstName: firstName.value,
-          lastName: lastName.value,
-          emailAddress: emailAddress.value,
-        }).then((response) => {
-          toast.success('New Client Created!', {timeout: 1000});
-          setClient(response.data);
-        });
-      }
-    });
-});
-
-const clientSuggestions = ref([]);
-const filteredClientSuggestions = ref([]);
-
-
 async function runFilter() {
   const client = {
     firstName: firstName.value ? firstName.value : '',
@@ -117,8 +133,7 @@ async function runFilter() {
   });
 }
 
-
-function fetchClientSuggestions() {
+const fetchClientSuggestionsDebounced = debounce(() => {
   if ((
     (firstName.value ? firstName.value.length : 0) +
     (lastName.value ? lastName.value.length : 0) +
@@ -134,9 +149,7 @@ function fetchClientSuggestions() {
         runFilter();
       });
   }
-}
-
-const fetchClientSuggestionsDebounced = debounce(fetchClientSuggestions, 500, {leading: false, trailing: true});
+}, 500, {leading: false, trailing: true});
 
 function resetClientComboBoxes() {
   filteredClientSuggestions.value = [];
@@ -145,29 +158,9 @@ function resetClientComboBoxes() {
   emit('update:draft', draft);
 }
 
-watch(props.draft, async (newValue, oldValue) => {
-  console.log('watch draft', newValue);
-  firstName.value = newValue.client.firstName;
-  lastName.value = newValue.client.lastName;
-  emailAddress.value = newValue.client.emailAddress;
-  confirmEmailAddress.value = newValue.client.emailAddress;
-});
-
 const filteredClientSuggestionsLegible = computed(() => {
   return filteredClientSuggestions.value.map((client) => (`${client.firstName} ${client.lastName} ${client.emailAddress}`));
 });
-
-
-function selectClient(event, i) {
-  console.log('selectClient', i, filteredClientSuggestions.value[i]);
-  const draft = props.draft;
-  if (i === -1) {
-    draft.client = {id: null, firstName: firstName.value, lastName: lastName.value, emailAddress: emailAddress.value};
-  } else {
-    draft.client = filteredClientSuggestions.value[i];
-  }
-  emit('update:draft', draft);
-}
 
 
 function goBack() {
@@ -190,7 +183,7 @@ function goBack() {
         <ComboboxTextInput
           :field-model-value="emailAddress"
           :suggestions="filteredClientSuggestionsLegible"
-          :selected-callback="selectClient"
+          :selected-callback="selectClientFromSuggestions"
           label="Email" type="email" placeholder="Type your email"
           name="emailAddress"
           v-model="emailAddress"
@@ -215,7 +208,7 @@ function goBack() {
         <ComboboxTextInput
           :field-model-value="firstName"
           :suggestions="filteredClientSuggestionsLegible"
-          :selected-callback="selectClient"
+          :selected-callback="selectClientFromSuggestions"
           label="First name"
           type="text"
           placeholder="First name"
@@ -231,7 +224,7 @@ function goBack() {
         <ComboboxTextInput
           :field-model-value="lastName"
           :suggestions="filteredClientSuggestionsLegible"
-          :selected-callback="selectClient"
+          :selected-callback="selectClientFromSuggestions"
           label="Last name"
           type="text"
           placeholder="Last name"
