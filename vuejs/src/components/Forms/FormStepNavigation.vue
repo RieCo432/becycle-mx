@@ -2,6 +2,7 @@
 
 import Button from '@/components/Button/index.vue';
 import {defineProps} from 'vue';
+import {VueSpinner} from 'vue3-spinners';
 
 const props = defineProps({
   goBack: {
@@ -21,6 +22,7 @@ const props = defineProps({
 </script>
 
 <template>
+  <!-- TODO: this has some layout issues and need to ensure we cannot navigate while processing -->
   <div
     class="mt-10 flex justify-between"
   >
