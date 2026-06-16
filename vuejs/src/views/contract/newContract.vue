@@ -127,25 +127,17 @@
 </template>
 <script setup>
 import Card from '@/components/Card';
-import Button from '@/components/Button';
 import Icon from '@/components/Icon';
 
 import {ref} from 'vue';
-import {useToast} from 'vue-toastification';
-
-import {VueSpinner} from 'vue3-spinners';
 
 import NewContractStartForm from '@/components/Forms/NewContractStartForm.vue';
 import NewContractClientForm from '@/components/Forms/NewContractClientForm.vue';
 import NewContractBikeForm from '@/components/Forms/NewContractBikeForm.vue';
 import NewContractDetailsForm from '@/components/Forms/NewContractDetailsForm.vue';
 import NewContractWorkingVolunteerForm from '@/components/Forms/NewContractWorkingVolunteerForm.vue';
-// import NewContractCheckingVolunteerForm from '@/components/Forms/NewContractCheckingVolunteerForm.vue';
-// import NewContractDepositForm from '@/components/Forms/NewContractDepositForm.vue';
-
-const toast = useToast();
-const OFFICIAL_NAME = import.meta.env.VITE_OFFICIAL_NAME;
-
+import NewContractCheckingVolunteerForm from '@/components/Forms/NewContractCheckingVolunteerForm.vue';
+import NewContractDepositForm from '@/components/Forms/NewContractDepositForm.vue';
 
 const steps = [
   {
@@ -195,15 +187,36 @@ function updateDraft(draft) {
 }
 
 function nextStep() {
-  if (currentContractDraft.value.id) currentStepNumber.value = 1;
-  if (currentContractDraft.value.clientId) currentStepNumber.value = 2;
-  if (currentContractDraft.value.bikeId) currentStepNumber.value = 3;
-  if (
-    currentContractDraft.value.contractType != null &&
-    currentContractDraft.value.conditionOfBike != null) {
-    currentStepNumber.value = 4;
+  if (!currentContractDraft.value.id) {
+    currentStepNumber.value = 0;
+    return;
   }
-  if (currentContractDraft.value.workingUserId) currentStepNumber.value = 5;
+  if (!currentContractDraft.value.clientId) {
+    currentStepNumber.value = 1;
+    return;
+  }
+  if (!currentContractDraft.value.bikeId) {
+    currentStepNumber.value = 2;
+    return;
+  }
+  if (
+    currentContractDraft.value.contractType == null ||
+    currentContractDraft.value.conditionOfBike == null) {
+    currentStepNumber.value = 3;
+    return;
+  }
+  if (!currentContractDraft.value.workingUserId) {
+    currentStepNumber.value = 4;
+    return;
+  }
+  if (!currentContractDraft.value.checkingUserId) {
+    currentStepNumber.value = 5;
+    return;
+  }
+  if (!currentContractDraft.value.depositCollectedTransactionHeaderId) {
+    currentStepNumber.value = 6;
+    return;
+  }
 }
 
 function userSortingFunction(user1, user2) {
