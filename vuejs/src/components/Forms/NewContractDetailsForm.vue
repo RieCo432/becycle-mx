@@ -3,7 +3,7 @@
 import Radio from '@/components/Radio/index.vue';
 import Textarea from '@/components/Textarea/index.vue';
 import {useToast} from 'vue-toastification';
-import {ref} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import {ErrorMessage, useField, useForm} from 'vee-validate';
 import * as yup from 'yup';
 import requests from '@/requests';
@@ -70,6 +70,20 @@ const submit = handleSubmit(() => {
     .finally(() => {
       processingSubmit.value = false;
     });
+});
+
+function applyDraftValues(draft) {
+  if (draft.contractType) type.value = draft.contractType;
+  if (draft.conditionOfBike) condition.value = draft.conditionOfBike;
+  if (draft.notes) notes.value = draft.notes;
+}
+
+watch(props.draft, async (newValue) => {
+  applyDraftValues(newValue);
+});
+
+onMounted(() => {
+  applyDraftValues(props.draft);
 });
 
 function goBack() {
