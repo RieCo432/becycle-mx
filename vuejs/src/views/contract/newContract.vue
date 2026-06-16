@@ -78,13 +78,17 @@
                 @go-back="goBack"
               />
             </div>
+            <div v-if="currentStepNumber === 4">
+              <NewContractWorkingVolunteerForm
+                :userSortingFunction="userSortingFunction"
+                :draft="currentContractDraft"
+                @update:draft="updateDraft"
+                @go-back="goBack"
+              />
+            </div>
 <!--            <form @submit.prevent="submit" @keydown.enter="() => {}">-->
 <!--              -->
-
-
-<!--              <div v-if="stepNumber === 3">-->
-<!--                <NewContractDetailsForm />-->
-<!--              </div>-->
+            
 <!--              <div v-if="stepNumber === 4">-->
 <!--                <NewContractWorkingVolunteerForm />-->
 <!--              </div>-->
@@ -135,7 +139,7 @@ import NewContractStartForm from '@/components/Forms/NewContractStartForm.vue';
 import NewContractClientForm from '@/components/Forms/NewContractClientForm.vue';
 import NewContractBikeForm from '@/components/Forms/NewContractBikeForm.vue';
 import NewContractDetailsForm from '@/components/Forms/NewContractDetailsForm.vue';
-// import NewContractWorkingVolunteerForm from '@/components/Forms/NewContractWorkingVolunteerForm.vue';
+import NewContractWorkingVolunteerForm from '@/components/Forms/NewContractWorkingVolunteerForm.vue';
 // import NewContractCheckingVolunteerForm from '@/components/Forms/NewContractCheckingVolunteerForm.vue';
 // import NewContractDepositForm from '@/components/Forms/NewContractDepositForm.vue';
 
@@ -199,6 +203,13 @@ function nextStep() {
     currentContractDraft.value.conditionOfBike != null) {
     currentStepNumber.value = 4;
   }
+  if (currentContractDraft.value.workingUserId) currentStepNumber.value = 5;
+}
+
+function userSortingFunction(user1, user2) {
+  if (user1.toLowerCase() > user2.toLowerCase()) return 1;
+  if (user1.toLowerCase() < user2.toLowerCase()) return -1;
+  return 0;
 }
 
 
