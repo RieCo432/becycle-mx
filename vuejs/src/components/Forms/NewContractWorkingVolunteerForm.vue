@@ -32,7 +32,6 @@ function checkCurrentlyProcessing() {
   return false;
 }
 
-const userSelectionOptionsStatic = ref(true);
 const activeUsers = ref([]);
 
 const filteredWorkingUserSuggestions = computed(() => activeUsers.value
@@ -46,14 +45,14 @@ const filteredWorkingUserSuggestions = computed(() => activeUsers.value
 
 requests.getActiveUsers().then((response) => {
   activeUsers.value = response.data.map((user) => (user.username));
-  userSelectionOptionsStatic.value = true;
 }).catch((error) => {
   toast.error(error.response.data.detail.description, {timeout: 5000});
 });
 
 
 const workingUserSchema = yup.object().shape({
-  workingUser: yup.string().required(' Main mechanic Username is required '),
+  workingUser: yup.string().required(' Main mechanic Username is required ')
+    .notOneOf([props.draft.checkingUser?.username], 'Working volunteer must be different from checking volunteer'),
   workingPasswordOrPin: yup.string().required(' Password or Pin is required '),
 });
 
@@ -97,7 +96,6 @@ function goBack() {
 function selectWorkingUser(event, i) {
   if (i !== -1) {
     workingUser.value = filteredWorkingUserSuggestions.value[i];
-    userSelectionOptionsStatic.value = false;
     workingPasswordOrPin.value = null;
   }
 }
@@ -106,12 +104,27 @@ function selectWorkingUser(event, i) {
 </script>
 
 <template>
-  <form @submit.prevent="submit" @keydown.enter="() => {}">
+  <form
+    @submit.prevent="() => {
+      if (!props.draft.workingUserId || (workingUser && workingUser !== '') ) {
+        submit()
+      } else {
+        emit('update:draft', props.draft)
+      }
+    }"
+    @keydown.enter="() => {}">
     <div class="grid md:grid-cols-2 grid-cols-1 gap-5">
       <div class="col-span-full">
         <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
           Main Mechanic
         </h4>
+      </div>
+      <div
+        v-if="props.draft.workingUserId"
+        class="col-span-full">
+        <h5 class="text-danger-500 dark:text-danger-500">
+          This step has already been signed by {{ props.draft.workingUser.username }}. You can still overwrite it.
+        </h5>
       </div>
       <div class="col-span-1">
         <ComboboxTextInput
@@ -119,7 +132,6 @@ function selectWorkingUser(event, i) {
           :suggestions="filteredWorkingUserSuggestions"
           :selected-callback="selectWorkingUser"
           :allow-new="false"
-          :open-by-default="userSelectionOptionsStatic"
           label="Working Volunteer"
           type="text"
           placeholder="workshop"
