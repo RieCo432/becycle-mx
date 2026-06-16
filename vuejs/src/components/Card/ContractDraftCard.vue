@@ -13,9 +13,9 @@ export default {
     },
     draft: {
       type: Object,
-      required: true
+      required: true,
     },
-  }
+  },
 };
 </script>
 
@@ -91,7 +91,9 @@ export default {
         <span class="block part-label">Deposit Collector</span>
         <span class="block part-text">
           <!-- TODO: sort this out -->
-          <!--          {{draft.depositCollectingUser !== null ? `${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}` : '-'}}-->
+          <!-- {{ draft.depositCollectingUser !== null -->
+          <!--  ? `${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}` -->
+          <!--  : '-' }}-->
         </span>
       </div>
       <div class="col-span-full">
