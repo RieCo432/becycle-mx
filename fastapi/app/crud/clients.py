@@ -232,6 +232,7 @@ def anonymise_old_clients(db: Session) -> None:
     clients = db.scalars(
         select(models.Client)
         .where(models.Client.anonymised == False)
+        .where(models.Client.createdOn < datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2*365))
     )
 
     for client in clients:
