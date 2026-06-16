@@ -56,12 +56,25 @@ export default {
         <span class="block part-text">{{draft.bike !== null ? `${draft.bike.serialNumber}` : '-'}}</span>
       </div>
       <div class="col-span-1">
-        <span class="block part-label">Deposit Collector</span>
+        <span class="block part-label">Contract Type</span>
         <span class="block part-text">
-          <!-- TODO: sort this out -->
-<!--          {{draft.depositCollectingUser !== null ? `${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}` : '-'}}-->
+          {{ draft.contractType ?? '-' }}
         </span>
       </div>
+      <div class="col-span-1">
+        <span class="block part-label">Bike Condition</span>
+        <span class="block part-text">
+          {{ draft.conditionOfBike ?? '-' }}
+        </span>
+      </div>
+
+      <div class="col-span-1">
+        <span class="block part-label">Notes</span>
+        <span class="block part-text">
+          {{ draft.notes ?? '-'}}
+        </span>
+      </div>
+
       <div class="col-span-1">
         <span class="block part-label">Working Volunteer</span>
         <span class="block part-text">
@@ -72,6 +85,13 @@ export default {
         <span class="block part-label">Checking Volunteer</span>
         <span class="block part-text">
           {{draft.checkingUser !== null ? draft.checkingUser.username : '-'}}
+        </span>
+      </div>
+      <div class="col-span-1">
+        <span class="block part-label">Deposit Collector</span>
+        <span class="block part-text">
+          <!-- TODO: sort this out -->
+          <!--          {{draft.depositCollectingUser !== null ? `${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}` : '-'}}-->
         </span>
       </div>
       <div class="col-span-full">

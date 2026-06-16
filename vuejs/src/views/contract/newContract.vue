@@ -65,7 +65,14 @@
               />
             </div>
             <div v-if="currentStepNumber === 2">
-              <NewContractBikeForm 
+              <NewContractBikeForm
+                :draft="currentContractDraft"
+                @update:draft="updateDraft"
+                @go-back="goBack"
+              />
+            </div>
+            <div v-if="currentStepNumber === 3">
+              <NewContractDetailsForm
                 :draft="currentContractDraft"
                 @update:draft="updateDraft"
                 @go-back="goBack"
@@ -74,9 +81,7 @@
 <!--            <form @submit.prevent="submit" @keydown.enter="() => {}">-->
 <!--              -->
 
-<!--              <div v-if="stepNumber === 2">-->
-<!--                <NewContractBikeForm />-->
-<!--              </div>-->
+
 <!--              <div v-if="stepNumber === 3">-->
 <!--                <NewContractDetailsForm />-->
 <!--              </div>-->
@@ -129,7 +134,7 @@ import {VueSpinner} from 'vue3-spinners';
 import NewContractStartForm from '@/components/Forms/NewContractStartForm.vue';
 import NewContractClientForm from '@/components/Forms/NewContractClientForm.vue';
 import NewContractBikeForm from '@/components/Forms/NewContractBikeForm.vue';
-// import NewContractDetailsForm from '@/components/Forms/NewContractDetailsForm.vue';
+import NewContractDetailsForm from '@/components/Forms/NewContractDetailsForm.vue';
 // import NewContractWorkingVolunteerForm from '@/components/Forms/NewContractWorkingVolunteerForm.vue';
 // import NewContractCheckingVolunteerForm from '@/components/Forms/NewContractCheckingVolunteerForm.vue';
 // import NewContractDepositForm from '@/components/Forms/NewContractDepositForm.vue';
@@ -157,24 +162,22 @@ const steps = [
   },
   {
     id: 5,
-    title: 'Deposit',
-  },
-  {
-    id: 6,
     title: 'Mechanic',
   },
   {
-    id: 7,
+    id: 6,
     title: 'Safety Check',
+  },
+  {
+    id: 7,
+    title: 'Deposit',
   },
 ];
 
 const currentStepNumber = ref(0);
 
 
-
 const currentContractDraft = defineModel();
-
 
 
 function goBack() {
@@ -191,6 +194,11 @@ function nextStep() {
   if (currentContractDraft.value.id) currentStepNumber.value = 1;
   if (currentContractDraft.value.clientId) currentStepNumber.value = 2;
   if (currentContractDraft.value.bikeId) currentStepNumber.value = 3;
+  if (
+    currentContractDraft.value.contractType != null &&
+    currentContractDraft.value.conditionOfBike != null) {
+    currentStepNumber.value = 4;
+  }
 }
 
 
