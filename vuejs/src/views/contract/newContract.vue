@@ -51,48 +51,60 @@
           <div
               class="content-box mt-14 border-t border-slate-100 dark:border-slate-700 -mx-6 px-6 pt-6"
           >
-            <div v-if="currentStepNumber === 0">
-              <NewContractStartForm
-                :current-contract-draft="currentContractDraft"
-                @update:currentContractDraft="updateDraft"
-              />
-            </div>
-            <div v-if="currentStepNumber === 1">
-              <NewContractClientForm
-                :draft="currentContractDraft"
-                @update:draft="updateDraft"
-                @go-back="goBack"
-              />
-            </div>
-            <div v-if="currentStepNumber === 2">
-              <NewContractBikeForm
-                :draft="currentContractDraft"
-                @update:draft="updateDraft"
-                @go-back="goBack"
-              />
-            </div>
-            <div v-if="currentStepNumber === 3">
-              <NewContractDetailsForm
-                :draft="currentContractDraft"
-                @update:draft="updateDraft"
-                @go-back="goBack"
-              />
-            </div>
-            <div v-if="currentStepNumber === 4">
-              <NewContractWorkingVolunteerForm
-                :user-sorting-function="userSortingFunction"
-                :draft="currentContractDraft"
-                @update:draft="updateDraft"
-                @go-back="goBack"
-              />
-            </div>
-            <div v-if="currentStepNumber === 5">
-              <NewContractCheckingVolunteerForm
-                :user-sorting-function="userSortingFunction"
-                :draft="currentContractDraft"
-                @update:draft="updateDraft"
-                @go-back="goBack"
-              />
+            <template v-if="!promoting">
+              <div v-if="currentStepNumber === 0">
+                <NewContractStartForm
+                  :current-contract-draft="currentContractDraft"
+                  @update:currentContractDraft="updateDraft"
+                />
+              </div>
+              <div v-if="currentStepNumber === 1">
+                <NewContractClientForm
+                  :draft="currentContractDraft"
+                  @update:draft="updateDraft"
+                  @go-back="goBack"
+                />
+              </div>
+              <div v-if="currentStepNumber === 2">
+                <NewContractBikeForm
+                  :draft="currentContractDraft"
+                  @update:draft="updateDraft"
+                  @go-back="goBack"
+                />
+              </div>
+              <div v-if="currentStepNumber === 3">
+                <NewContractDetailsForm
+                  :draft="currentContractDraft"
+                  @update:draft="updateDraft"
+                  @go-back="goBack"
+                />
+              </div>
+              <div v-if="currentStepNumber === 4">
+                <NewContractWorkingVolunteerForm
+                  :user-sorting-function="userSortingFunction"
+                  :draft="currentContractDraft"
+                  @update:draft="updateDraft"
+                  @go-back="goBack"
+                />
+              </div>
+              <div v-if="currentStepNumber === 5">
+                <NewContractCheckingVolunteerForm
+                  :user-sorting-function="userSortingFunction"
+                  :draft="currentContractDraft"
+                  @update:draft="updateDraft"
+                  @go-back="goBack"
+                />
+              </div>
+              <div v-if="currentStepNumber === 6">
+                <NewContractDepositForm
+                  :draft="currentContractDraft"
+                  @update:draft="updateDraft"
+                  @go-back="goBack"
+                />
+              </div>
+            </template>
+            <div v-if="promoting">
+              <VueSpinner size="100px" class="text-sky-500"/>
             </div>
           </div>
         </div>
@@ -105,6 +117,7 @@ import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 
 import {ref} from 'vue';
+import {useToast} from 'vue-toastification';
 
 import NewContractStartForm from '@/components/Forms/NewContractStartForm.vue';
 import NewContractClientForm from '@/components/Forms/NewContractClientForm.vue';
@@ -113,6 +126,11 @@ import NewContractDetailsForm from '@/components/Forms/NewContractDetailsForm.vu
 import NewContractWorkingVolunteerForm from '@/components/Forms/NewContractWorkingVolunteerForm.vue';
 import NewContractCheckingVolunteerForm from '@/components/Forms/NewContractCheckingVolunteerForm.vue';
 import NewContractDepositForm from '@/components/Forms/NewContractDepositForm.vue';
+import requests from '@/requests';
+import router from '@/router';
+import {VueSpinner} from 'vue3-spinners';
+
+const toast = useToast();
 
 const steps = [
   {
@@ -146,6 +164,7 @@ const steps = [
 ];
 
 const currentStepNumber = ref(0);
+const promoting = ref(false);
 
 
 const currentContractDraft = defineModel();
@@ -192,6 +211,20 @@ function nextStep() {
     currentStepNumber.value = 6;
     return;
   }
+  promoteDraft();
+}
+
+function promoteDraft() {
+  promoting.value = true;
+  requests.postSubmitDraftContract(currentContractDraft.value.id)
+    .then((response) => {
+      toast.success('Contract Recorded!', {timeout: 1000});
+      router.push({path: `/contracts/${response.data.id}`, query: {showTerms: 1}});
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 5000});
+    }).finally(() => {
+      promoting.value = false;
+    });
 }
 
 function userSortingFunction(user1, user2) {
