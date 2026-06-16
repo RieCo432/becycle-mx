@@ -140,38 +140,44 @@ function filterAndSortColourSuggestions() {
 
 onMounted(() => {
   if (props.draft.bike) {
+    console.log('mounted', props.draft.bike);
     make.value = props.draft.bike.make;
     makeNotInList.value = !makeSuggestions.value.includes(make.value);
     model.value = props.draft.bike.model;
     modelNotInList.value = !modelSuggestions.value.includes(model.value);
-    colours.value = props.draft.bike.colours;
+    colours.value = props.draft.bike.colours ?? [];
     decals.value = props.draft.bike.decals;
     serialNumber.value = props.draft.bike.serialNumber;
     bikePhotoTaken.value = props.draft.bikeId != null;
     stickerOnBike.value = props.draft.bikeId != null;
     bikeToBeLinked.value = props.draft.bike;
     matchWithBikeId.value = props.draft.bikeId;
+
+    fetchMakeSuggestions();
+    fetchModelSuggestions();
+    fetchSerialNumberSuggestions();
+    fetchColoursSuggestions();
   }
 });
 
 watch(props.draft, async (newValue) => {
-  make.value = newValue.bike.make;
-  model.value = newValue.bike.model;
-  colours.value = newValue.bike.colours;
-  decals.value = newValue.bike.decals;
-  serialNumber.value = newValue.bike.serialNumber;
-  bikePhotoTaken.value = newValue.bikeId != null;
-  stickerOnBike.value = newValue.bikeId != null;
-  bikeToBeLinked.value = newValue.bike;
-  matchWithBikeId.value = newValue.bike.id;
+  if (newValue.bike) {
+    console.log('watch draft', newValue.bike);
+    make.value = newValue.bike.make;
+    model.value = newValue.bike.model;
+    colours.value = newValue.bike.colours ?? [];
+    decals.value = newValue.bike.decals;
+    serialNumber.value = newValue.bike.serialNumber;
+    bikePhotoTaken.value = newValue.bikeId != null;
+    stickerOnBike.value = newValue.bikeId != null;
+    bikeToBeLinked.value = newValue.bike;
+    matchWithBikeId.value = newValue.bike.id;
 
-  fetchMakeSuggestionsDebounced();
-  fetchModelSuggestionsDebounced();
-  fetchSerialNumberSuggestionsDebounced();
-  fetchColoursSuggestionsDebounced();
-
-  makeNotInList.value = false; // newValue.bike.make && !makeSuggestions.value.includes(make.value);
-  modelNotInList.value = false; // newValue.bike.model && !modelSuggestions.value.includes(model.value);
+    fetchMakeSuggestions();
+    fetchModelSuggestions();
+    fetchSerialNumberSuggestions();
+    fetchColoursSuggestions();
+  }
 });
 
 watch(make, async (newValue) => {
@@ -225,40 +231,61 @@ function tryMatchingBike() {
   }
 }
 
+function fetchMakeSuggestions() {
+  if (make.value && make.value !== '') {
+    requests.getBikeMakeSuggestions(make.value.toLowerCase(), 4)
+      .then((response) => {
+        makeSuggestions.value = response.data;
+      });
+  }
+}
+const fetchMakeSuggestionsDebounced = debounce(fetchMakeSuggestions, 500, {leading: true, trailing: true});
 
-const fetchMakeSuggestionsDebounced = debounce(() => {
-  requests.getBikeMakeSuggestions(make.value.toLowerCase(), 4)
-    .then((response) => {
-      makeSuggestions.value = response.data;
-    });
-}, 500, {leading: true, trailing: true});
+function fetchModelSuggestions() {
+  if (model.value && model.value !== '') {
+    requests.getBikeModelSuggestions(model.value.toLowerCase(), 4)
+      .then((response) => {
+        modelSuggestions.value = response.data;
+      });
+  }
+}
+const fetchModelSuggestionsDebounced = debounce(fetchModelSuggestions, 500, {leading: true, trailing: true});
 
-const fetchModelSuggestionsDebounced = debounce(() => {
-  requests.getBikeModelSuggestions(model.value.toLowerCase(), 4)
-    .then((response) => {
-      modelSuggestions.value = response.data;
-    });
-}, 500, {leading: true, trailing: true});
 
-const fetchSerialNumberSuggestionsDebounced = debounce(() => {
-  requests.getBikeSerialNumberSuggestions(serialNumber.value.toLowerCase(), 4)
-    .then((response) => {
-      serialNumberSuggestions.value = response.data;
-    });
-}, 500, {leading: true, trailing: true});
+function fetchSerialNumberSuggestions() {
+  if (serialNumber.value && serialNumber.value !== '') {
+    requests.getBikeSerialNumberSuggestions(serialNumber.value.toLowerCase(), 4)
+      .then((response) => {
+        serialNumberSuggestions.value = response.data;
+      });
+  }
+}
+const fetchSerialNumberSuggestionsDebounced = debounce(fetchSerialNumberSuggestions, 500, {leading: true, trailing: true});
 
-const fetchColoursSuggestionsDebounced = debounce(() => {
+function fetchColoursSuggestions() {
   if (colours.value && colours.value.length > 0) {
     requests.getBikeColoursSuggestions(colours.value.map((c) => c.hex)
       .join('|'), 2).then((response) => {
       coloursSuggestions.value = response.data;
     });
   }
-}, 500, {leading: true, trailing: true});
+}
+const fetchColoursSuggestionsDebounced = debounce(fetchColoursSuggestions, 500, {leading: true, trailing: true});
+
+
+function getEmptyBike() {
+  return {
+    make: null,
+    model: null,
+    colours: [],
+    serialNumber: null,
+    decals: null,
+  };
+}
 
 function selectMake(event, i) {
   const draft = props.draft;
-  if (draft.bike == null) draft.bike = {};
+  if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     draft.bike.make = filteredMakeSuggestions.value[i];
   } else {
@@ -269,7 +296,7 @@ function selectMake(event, i) {
 
 function selectModel(event, i) {
   const draft = props.draft;
-  if (draft.bike == null) draft.bike = {};
+  if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     draft.bike.model = filteredModelSuggestions.value[i];
   } else {
@@ -280,7 +307,7 @@ function selectModel(event, i) {
 
 function selectSerialNumber(event, i) {
   const draft = props.draft;
-  if (draft.bike == null) draft.bike = {};
+  if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     draft.bike.serialNumber = filteredSerialNumberSuggestions.value[i];
   } else {
@@ -291,7 +318,7 @@ function selectSerialNumber(event, i) {
 
 function selectColours(event, i) {
   const draft = props.draft;
-  if (draft.bike == null) draft.bike = {};
+  if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     draft.bike.colours = filteredColoursSuggestions.value[i];
   } else {
