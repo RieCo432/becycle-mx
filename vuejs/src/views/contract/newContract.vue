@@ -80,45 +80,20 @@
             </div>
             <div v-if="currentStepNumber === 4">
               <NewContractWorkingVolunteerForm
-                :userSortingFunction="userSortingFunction"
+                :user-sorting-function="userSortingFunction"
                 :draft="currentContractDraft"
                 @update:draft="updateDraft"
                 @go-back="goBack"
               />
             </div>
-<!--            <form @submit.prevent="submit" @keydown.enter="() => {}">-->
-<!--              -->
-            
-<!--              <div v-if="stepNumber === 4">-->
-<!--                <NewContractWorkingVolunteerForm />-->
-<!--              </div>-->
-<!--              <div v-if="stepNumber === 5">-->
-<!--                <NewContractCheckingVolunteerForm />-->
-<!--              </div>-->
-<!--              <div v-if="stepNumber === 6">-->
-<!--                <NewContractDepositForm />-->
-<!--              </div>-->
-<!--              -->
-
-<!--              <div-->
-<!--                  class="mt-10"-->
-<!--                  :class="stepNumber > 0 ? 'flex justify-between' : ' text-right'"-->
-<!--              >-->
-<!--                <Button-->
-<!--                    @click.prevent="prev()"-->
-<!--                    text="prev"-->
-<!--                    btnClass="btn-dark"-->
-<!--                    v-if="this.stepNumber !== 0"-->
-<!--                />-->
-<!--                <Button-->
-<!--                    v-if="stepNumber !== 0"-->
-<!--                    btnClass="btn-dark"-->
-<!--                    :disabled="stepIsLoading">-->
-<!--                  <span v-if="!stepIsLoading">{{stepNumber !== this.steps.length - 1 ? 'next' : 'submit'}}</span>-->
-<!--                  <VueSpinner v-if="stepIsLoading" size="20px" class="text-sky-500"/>-->
-<!--                </Button>-->
-<!--              </div>-->
-<!--            </form>-->
+            <div v-if="currentStepNumber === 5">
+              <NewContractCheckingVolunteerForm
+                :user-sorting-function="userSortingFunction"
+                :draft="currentContractDraft"
+                @update:draft="updateDraft"
+                @go-back="goBack"
+              />
+            </div>
           </div>
         </div>
       </Card>
