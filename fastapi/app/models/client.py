@@ -36,6 +36,7 @@ class Client(Base):
     appointments: Mapped[List["Appointment"]] = relationship("Appointment", back_populates="client")
 
     createdOn: Mapped[DateTime] = mapped_column("createdon", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=False, quote=False)
+    anonymised: Mapped[bool] = mapped_column("anonymised", Boolean, default=False, nullable=False, quote=False, server_default=text("FALSE"))
 
     def __eq_dict__(self, other: dict):
         return all([

@@ -2,10 +2,11 @@
 import DashButton from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
+import TransactionLinesTable from '@/components/Tables/TransactionLinesTable.vue';
 
 export default {
   name: 'ContractDraftCard',
-  components: {Tooltip, Card, DashButton},
+  components: {TransactionLinesTable, Tooltip, Card, DashButton},
   props: {
     continueDraftFunction: {
       type: Function,
@@ -13,9 +14,9 @@ export default {
     },
     draft: {
       type: Object,
-      required: true
+      required: true,
     },
-  }
+  },
 };
 </script>
 
@@ -56,12 +57,25 @@ export default {
         <span class="block part-text">{{draft.bike !== null ? `${draft.bike.serialNumber}` : '-'}}</span>
       </div>
       <div class="col-span-1">
-        <span class="block part-label">Deposit Collector</span>
+        <span class="block part-label">Contract Type</span>
         <span class="block part-text">
-          <!-- TODO: sort this out -->
-<!--          {{draft.depositCollectingUser !== null ? `${draft.depositCollectingUser.username} &#163;${draft.depositAmountCollected}` : '-'}}-->
+          {{ draft.contractType ?? '-' }}
         </span>
       </div>
+      <div class="col-span-1">
+        <span class="block part-label">Bike Condition</span>
+        <span class="block part-text">
+          {{ draft.conditionOfBike ?? '-' }}
+        </span>
+      </div>
+
+      <div class="col-span-1">
+        <span class="block part-label">Notes</span>
+        <span class="block part-text">
+          {{ draft.notes ?? '-'}}
+        </span>
+      </div>
+
       <div class="col-span-1">
         <span class="block part-label">Working Volunteer</span>
         <span class="block part-text">
@@ -73,6 +87,13 @@ export default {
         <span class="block part-text">
           {{draft.checkingUser !== null ? draft.checkingUser.username : '-'}}
         </span>
+      </div>
+      <div class="col-span-1">
+        <span class="block part-label">Deposit</span>
+        <TransactionLinesTable
+          v-if="draft.depositCollectedTransactionHeader"
+          :transaction-header="draft.depositCollectedTransactionHeader"/>
+        <p v-else class="text-slate-600 dark:text-slate-300">-</p>
       </div>
       <div class="col-span-full">
         <DashButton

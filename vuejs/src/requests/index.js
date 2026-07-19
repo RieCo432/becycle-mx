@@ -744,6 +744,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  patchAnonymiseClient(clientId) {
+    return axiosClient.patch(`/clients/${clientId}/anonymise`, null, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   patchBikeChangeDetails(bikeId, patchData) {
     return axiosClient.patch(`/bikes/${bikeId}`, patchData, {
       headers: credentialsStore.getApiRequestHeader(),

@@ -10,6 +10,8 @@ import app.models as models
 import app.schemas as schemas
 from psycopg2.errors import UniqueViolation
 
+import hashlib
+
 
 def get_all_clients(db: Session) -> list[schemas.Client]:
     return [_ for _ in db.scalars(
@@ -158,11 +160,18 @@ def get_similar_email_addresses(db: Session, email_address: str) -> list[str]:
 def get_potential_client_matches(db: Session, first_name: str | None, last_name: str | None, email_address: str | None, max_distance: int = 10) -> list[models.Client]:
     query_filter = []
     if first_name is not None and first_name != "":
-        query_filter.append(models.Client.firstName.contains(first_name) | (func.levenshtein(models.Client.firstName, first_name) <= max_distance))
+        hashed_first_name = hashlib.md5(first_name.encode("utf-8")).hexdigest()
+        query_filter.append(models.Client.firstName.contains(first_name) | (func.levenshtein(models.Client.firstName, first_name) <= max_distance) | (models.Client.firstName == hashed_first_name))
     if last_name is not None and last_name != "":
-        query_filter.append(models.Client.lastName.contains(last_name) | (func.levenshtein(models.Client.lastName, last_name) <= max_distance))
+        hashed_last_name = hashlib.md5(last_name.encode("utf-8")).hexdigest()
+        query_filter.append(models.Client.lastName.contains(last_name) | (func.levenshtein(models.Client.lastName, last_name) <= max_distance) | (models.Client.lastName == hashed_last_name))
     if email_address is not None and email_address != "":
-        query_filter.append(models.Client.emailAddress.contains(email_address) | (func.levenshtein(models.Client.emailAddress, email_address) <= max_distance))
+        split_email = email_address.split("@")
+        if len(split_email) == 2:
+            hashed_email = hashlib.md5(split_email[0].encode("utf-8")).hexdigest() + "@" + hashlib.md5(split_email[1].encode("utf-8")).hexdigest()
+            query_filter.append(models.Client.emailAddress.contains(email_address) | (func.levenshtein(models.Client.emailAddress, email_address) <= max_distance) | (models.Client.emailAddress == hashed_email))
+        else:
+            query_filter.append(models.Client.emailAddress.contains(email_address) | (func.levenshtein(models.Client.emailAddress, email_address) <= max_distance))
 
     potential_matches = [_ for _ in db.scalars(
             select(models.Client)
@@ -200,3 +209,56 @@ def get_client_logins(db: Session, client_id: UUID) -> list[models.ClientLogin]:
         select(models.ClientLogin)
         .where(models.ClientLogin.clientId == client_id)
     )]
+
+def anonymise_client(db: Session, client_id: UUID) -> models.Client:
+    client = get_client(db=db, client_id=client_id)
+    
+    if client.anonymised:
+        return client
+    
+    client.firstName = hashlib.md5(client.firstName.encode("utf-8")).hexdigest()
+    client.lastName = hashlib.md5(client.lastName.encode("utf-8")).hexdigest()
+
+    splitEmail = client.emailAddress.split("@")
+    client.emailAddress = hashlib.md5(splitEmail[0].encode("utf-8")).hexdigest() + "@" + hashlib.md5(splitEmail[1].encode("utf-8")).hexdigest()
+
+    client.anonymised = True
+
+    db.commit()
+
+    return client
+
+def anonymise_old_clients(db: Session) -> None:
+    clients = db.scalars(
+        select(models.Client)
+        .where(models.Client.anonymised == False)
+        .where(models.Client.createdOn < datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2*365))
+    )
+
+    for client in clients:
+        recent_appointments = [_ for _ in db.scalars(
+            select(models.Appointment)
+            .where(models.Appointment.clientId == client.id)
+            .where(models.Appointment.startDateTime > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2*365))
+        )]
+
+        recent_contracts = [_ for _ in db.scalars(
+            select(models.Contract)
+            .where(models.Contract.clientId == client.id)
+            .where(
+                    (models.Contract.returnedDate == None) |
+                    (models.Contract.returnedDate > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2*365))
+            )
+            .where(models.Contract.endDate > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2*365))
+        )]
+
+        if len(recent_appointments) == 0 and len(recent_contracts) == 0:
+            anonymise_client(db=db, client_id=client.id)
+            
+            
+def anonymise_all_clients(db: Session) -> None:
+    for client in db.scalars(
+        select(models.Client)
+        .where(models.Client.anonymised == False)
+    ):
+        anonymise_client(db=db, client_id=client.id)
