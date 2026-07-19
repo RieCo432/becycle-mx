@@ -198,6 +198,11 @@ def update_client(db: Session, client_id: UUID, new_first_name: str, new_last_na
         
         client.emailAddress = new_email_address.lower()
 
+    # check if the firstname, lastname, and emailaddress strings are not md5 hash values then set anonymised to false
+    client_info = [client.firstName, client.lastName, *(client.emailAddress.split("@"))]
+    if not any([len(part.__str__()) == 32 and part.__str__().isalnum() for part in client_info]):
+        client.anonymised = False
+
     db.commit()
 
 
