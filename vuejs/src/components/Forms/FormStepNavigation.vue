@@ -22,7 +22,6 @@ const props = defineProps({
 </script>
 
 <template>
-  <!-- TODO: this has some layout issues and need to ensure we cannot navigate while processing -->
   <div
     class="mt-10 flex justify-between"
   >
@@ -34,10 +33,14 @@ const props = defineProps({
     />
     <Button
       btnClass="btn-dark"
-      :disabled="processingSubmit"
-      text="Next"
-    />
-    <VueSpinner v-if="processingSubmit" size="20px" class="text-sky-500"/>
+      :disabled="processingSubmit">
+      <template v-if="!processingSubmit">
+        Next
+      </template>
+      <template v-else>
+        <VueSpinner size="20px" class="text-sky-500"/>
+      </template>
+      </Button>
   </div>
 </template>
 
