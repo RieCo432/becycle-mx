@@ -287,9 +287,9 @@ function selectMake(event, i) {
   const draft = props.draft;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
-    draft.bike.make = filteredMakeSuggestions.value[i];
+    make.value = draft.bike.make = filteredMakeSuggestions.value[i];
   } else {
-    draft.bike.make = make.value;
+    make.value = draft.bike.make = make.value;
   }
   emit('update:draft', props.draft);
 }
@@ -298,9 +298,9 @@ function selectModel(event, i) {
   const draft = props.draft;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
-    draft.bike.model = filteredModelSuggestions.value[i];
+    model.value = draft.bike.model = filteredModelSuggestions.value[i];
   } else {
-    draft.bike.model = model.value;
+    model.value = draft.bike.model = model.value;
   }
   emit('update:draft', props.draft);
 }
@@ -309,9 +309,9 @@ function selectSerialNumber(event, i) {
   const draft = props.draft;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
-    draft.bike.serialNumber = filteredSerialNumberSuggestions.value[i];
+    serialNumber.value = draft.bike.serialNumber = filteredSerialNumberSuggestions.value[i];
   } else {
-    draft.bike.serialNumber = serialNumber.value;
+    serialNumber.value = draft.bike.serialNumber = serialNumber.value;
   }
   emit('update:draft', props.draft);
 }
@@ -320,9 +320,9 @@ function selectColours(event, i) {
   const draft = props.draft;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
-    draft.bike.colours = filteredColoursSuggestions.value[i];
+    colours.value = draft.bike.colours = filteredColoursSuggestions.value[i];
   } else {
-    draft.bike.colours = colours.value;
+    colours.value = draft.bike.colours = colours.value;
   }
   emit('update:draft', props.draft);
 }
