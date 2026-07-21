@@ -132,7 +132,11 @@ const submit = handleSubmit(() => {
           if (error.response.status === 400) {
             depositCollectingPasswordSetErrors('Wrong Password!');
           }
-        });
+        })
+        .finally(() => {
+          processingSubmit.value = false;
+        })
+      ;
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 5000});
       if (
@@ -140,7 +144,6 @@ const submit = handleSubmit(() => {
         (error.response.data.detail.username ?? '') === depositCollectedAssetAccount.value.ownerUser.username) {
         depositCollectingPasswordSetErrors('Wrong Password!');
       }
-    }).finally(() => {
       processingSubmit.value = false;
     });
   } else {

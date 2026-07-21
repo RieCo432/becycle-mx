@@ -103,8 +103,13 @@
                 />
               </div>
             </template>
-            <div v-if="promoting">
-              <VueSpinner size="100px" class="text-sky-500"/>
+            <div v-if="promoting" class="flex flex-col items-center text-center">
+              <div>
+                <h3>Finalising Contract, please wait...</h3>
+              </div>
+              <div>
+                <VueSpinner size="100px" class="block text-sky-500" />
+              </div>
             </div>
           </div>
         </div>
@@ -222,7 +227,6 @@ function promoteDraft() {
       router.push({path: `/contracts/${response.data.id}`, query: {showTerms: 1}});
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 5000});
-    }).finally(() => {
       promoting.value = false;
     });
 }
