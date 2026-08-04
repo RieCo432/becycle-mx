@@ -147,8 +147,20 @@ export default {
           label: 'Confirm Appointment',
           id: 'confirm',
           icon: 'heroicons-outline:check',
+          showIf: (appointment) => {
+            return true;
+          },
           func: (appointmentId) => this.acceptAppointment(appointmentId),
         }] : [],
+        {
+          label: 'Reschedule Appointment',
+          id: 'reschedule',
+          icon: 'heroicons-outline:calendar',
+          showIf: (appointment) => {
+            return Date.parse(appointment.startDateTime) > Date.now();
+          },
+          func: (appointmentId) => this.rescheduleAppointment(appointmentId),
+        },
         {
           label: 'Cancel Appointment',
           id: 'cancel',

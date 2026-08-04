@@ -12,6 +12,10 @@ class AppointmentBase(BaseModel):
 
 class AppointmentCreate(AppointmentBase):
     clientId: UUID
+    
+
+class AppointmentReschedule(AppointmentBase):
+    pass
 
 
 class AppointmentRequest(AppointmentBase):

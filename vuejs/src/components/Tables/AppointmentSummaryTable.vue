@@ -72,7 +72,7 @@
                                            hour: "2-digit", minute: "2-digit", hour12: false, }) }}
           </span>
           <div v-if="props.column.field === 'action'" class="flex space-x-3 rtl:space-x-reverse">
-            <template v-for="action in actions">
+            <template v-for="action in actions.filter((action) => !action.showIf || action.showIf(props.row))">
               <Tooltip placement="top" arrow theme="dark" :key="action.id"
                        v-if="new Date(Date.parse(props.row.startDateTime)) > new Date() && (isClient || userIsAppointmentManager)">
                 <template #button >

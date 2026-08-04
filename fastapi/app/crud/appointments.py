@@ -1,4 +1,4 @@
-import datetime
+from datetime import timezone, datetime
 import math
 import socket
 from uuid import UUID
@@ -25,7 +25,7 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.utcnow(),
+    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.now(timezone.utc),
                                                     client_id=appointment_data.clientId, cancelled=False,
                                                     confirmed=False)
     if len(pending_appointment_requests) >= 2:
@@ -47,12 +47,63 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
     return appointment
 
 
+def reschedule_appointment(
+        db: Session, 
+        reschedule_appointment_id: UUID, 
+        appointment_data: schemas.AppointmentReschedule, 
+        auto_confirm: bool = False, 
+        ignore_limits: bool = False) -> models.Appointment:
+    appointment_to_reschedule = get_appointment(db=db, appointment_id=reschedule_appointment_id)
+    if appointment_to_reschedule is None:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    if appointment_to_reschedule.startDateTime.astimezone(timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Cannot reschedule a past appointment")
+
+    # auto_confirm can be used if appointment is created by staff directly
+    appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
+
+    required_consecutive_slots = math.ceil(appointment_type.duration / get_slot_duration(db=db))
+
+    remaining_concurrent_appointments_for_each_slot = get_remaining_concurrent_appointments_for_each_slot(db=db)
+
+    if (not ignore_limits
+            and not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots,
+                                                                dt=appointment_data.startDateTime,
+                                                                remaining_concurrent_appointments_for_each_slot=remaining_concurrent_appointments_for_each_slot)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Someone just requested this slot. Refreshing list... Please choose a new slot."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.now(timezone.utc),
+                                                    client_id=appointment_to_reschedule.clientId, cancelled=False,
+                                                    confirmed=False)
+    if len(pending_appointment_requests) >= 2:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={
+            "description": "You cannot have more than 2 pending appointment requests. Please wait for pending requests to get denied or accepted!"})
+    
+    appointment_to_reschedule.confirmed = auto_confirm
+    appointment_to_reschedule.cancelled = False
+    appointment_to_reschedule.cancellationReason = None
+    appointment_to_reschedule.reminderSent = False
+    
+    appointment_to_reschedule.startDateTime = appointment_data.startDateTime
+    appointment_to_reschedule.endDateTime = appointment_data.startDateTime + relativedelta(minutes=appointment_type.duration)
+    appointment_to_reschedule.typeId = appointment_data.typeId
+    appointment_to_reschedule.notes = appointment_data.notes if appointment_data.notes else appointment_to_reschedule.notes
+
+    db.commit()
+
+    return appointment_to_reschedule
+
+
 def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment:
     appointment = db.scalar(
         select(models.Appointment)
         .where(
             (models.Appointment.id == appointment_id)
-            & (models.Appointment.startDateTime > datetime.utcnow())
+            & (models.Appointment.startDateTime > datetime.now(timezone.utc))
         )
     )
 
@@ -72,7 +123,7 @@ def cancel_appointment(db: Session, appointment_id: UUID, cancellation_detail: s
         select(models.Appointment)
         .where(
             (models.Appointment.id == appointment_id)
-            & (models.Appointment.startDateTime > datetime.utcnow())
+            & (models.Appointment.startDateTime > datetime.now(timezone.utc))
         )
     )
 
@@ -94,7 +145,7 @@ def cancel_my_appointment(db: Session, client: models.Client, appointment_id: UU
         .where(
             (models.Appointment.id == appointment_id)
             & (models.Appointment.clientId == client.id)
-            & (models.Appointment.startDateTime > datetime.utcnow())
+            & (models.Appointment.startDateTime > datetime.now(timezone.utc))
         )
     )
 

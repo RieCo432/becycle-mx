@@ -571,6 +571,17 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  patchAppointmentReschedule(appointmentId, typeId, startDateTime, notes, ignoreLimits=undefined) {
+    return axiosClient.patch(`/appointments/${appointmentId}/reschedule`, {
+      typeId: typeId,
+      startDateTime: startDateTime,
+      notes: notes,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      params: ignoreLimits && {ignore_limits: ignoreLimits},
+    });
+  },
   getDepositBalances(onlyAssetAccounts=true, onlyDepositBearerAccounts=true) {
     return axiosClient.get('/finances/deposit-accounts', {
       params: {
@@ -1698,6 +1709,12 @@ export default {
   },
   deleteSale(saleId) {
     return axiosClient.delete(`/sales/${saleId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getAppointment(appointmentId) {
+    return axiosClient.get(`/appointments/${appointmentId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
