@@ -78,8 +78,6 @@
                 <template #button >
                   <div class="action-btn">
                     <Icon
-                        v-if="props.row.status !== 'cancelled' &&
-                         !(props.row.status === 'confirmed' && action.id === 'confirm')"
                         :icon="action.icon" @click="action.func(props.row.id)"/>
                   </div>
                 </template>

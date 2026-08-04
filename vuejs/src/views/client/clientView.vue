@@ -143,15 +143,6 @@ export default {
       ],
 
       appointmentActions: [
-        ...!this.isClient ? [{
-          label: 'Confirm Appointment',
-          id: 'confirm',
-          icon: 'heroicons-outline:check',
-          showIf: (appointment) => {
-            return true;
-          },
-          func: (appointmentId) => this.acceptAppointment(appointmentId),
-        }] : [],
         {
           label: 'Reschedule Appointment',
           id: 'reschedule',
@@ -161,10 +152,22 @@ export default {
           },
           func: (appointmentId) => this.rescheduleAppointment(appointmentId),
         },
+        ...!this.isClient ? [{
+          label: 'Confirm Appointment',
+          id: 'confirm',
+          icon: 'heroicons-outline:check',
+          showIf: (appointment) => {
+            return appointment.status === 'pending';
+          },
+          func: (appointmentId) => this.acceptAppointment(appointmentId),
+        }] : [],
         {
           label: 'Cancel Appointment',
           id: 'cancel',
           icon: 'heroicons-outline:x-mark',
+          showIf: (appointment) => {
+            return appointment.status === 'pending';
+          },
           func: (appointmentId) => {
             this.cancelAppointmentModalId = appointmentId;
             this.cancelAppointmentModalInfo = this.appointmentSummaries.find((appointment) => appointment.id === appointmentId);
