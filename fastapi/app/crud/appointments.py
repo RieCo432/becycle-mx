@@ -1,9 +1,8 @@
 from datetime import timezone, datetime
 import math
-import socket
 from uuid import UUID
-
 from .settings import *
+from sqlalchemy.orm import Session
 
 
 def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
@@ -11,26 +10,8 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
     # auto_confirm can be used if appointment is created by staff directly
     appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
 
-    required_consecutive_slots = math.ceil(appointment_type.duration / get_slot_duration(db=db))
-
-    remaining_concurrent_appointments_for_each_slot = get_remaining_concurrent_appointments_for_each_slot(db=db)
-
-    if (not ignore_limits
-            and not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots,
-                                                                dt=appointment_data.startDateTime,
-                                                                remaining_concurrent_appointments_for_each_slot=remaining_concurrent_appointments_for_each_slot)):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Someone just requested this slot. Refreshing list... Please choose a new slot."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.now(timezone.utc),
-                                                    client_id=appointment_data.clientId, cancelled=False,
-                                                    confirmed=False)
-    if len(pending_appointment_requests) >= 2:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={
-            "description": "You cannot have more than 2 pending appointment requests. Please wait for pending requests to get denied or accepted!"})
+    ensure_appointment_slot_is_available(db=db, appointment_type=appointment_type, start_datetime=appointment_data.startDateTime, ignore_limits=ignore_limits)
+    ensure_client_does_not_have_too_many_pending_appointments(appointment_data.clientId, db)
 
     appointment = models.Appointment(
         clientId=appointment_data.clientId,
@@ -62,27 +43,9 @@ def reschedule_appointment(
     # auto_confirm can be used if appointment is created by staff directly
     appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
 
-    required_consecutive_slots = math.ceil(appointment_type.duration / get_slot_duration(db=db))
+    ensure_appointment_slot_is_available(db=db, appointment_type=appointment_type, start_datetime=appointment_data.startDateTime, ignore_limits=ignore_limits)
+    ensure_client_does_not_have_too_many_pending_appointments(appointment_to_reschedule.clientId, db)
 
-    remaining_concurrent_appointments_for_each_slot = get_remaining_concurrent_appointments_for_each_slot(db=db)
-
-    if (not ignore_limits
-            and not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots,
-                                                                dt=appointment_data.startDateTime,
-                                                                remaining_concurrent_appointments_for_each_slot=remaining_concurrent_appointments_for_each_slot)):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Someone just requested this slot. Refreshing list... Please choose a new slot."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.now(timezone.utc),
-                                                    client_id=appointment_to_reschedule.clientId, cancelled=False,
-                                                    confirmed=False)
-    if len(pending_appointment_requests) >= 2:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={
-            "description": "You cannot have more than 2 pending appointment requests. Please wait for pending requests to get denied or accepted!"})
-    
     appointment_to_reschedule.confirmed = auto_confirm
     appointment_to_reschedule.cancelled = False
     appointment_to_reschedule.cancellationReason = None
@@ -96,6 +59,31 @@ def reschedule_appointment(
     db.commit()
 
     return appointment_to_reschedule
+
+
+def ensure_client_does_not_have_too_many_pending_appointments(client_id: UUID, db: Session):
+    pending_appointment_requests = get_appointments(db=db, start_datetime=datetime.now(timezone.utc),
+                                                    client_id=client_id, cancelled=False,
+                                                    confirmed=False)
+    if len(pending_appointment_requests) >= 2:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={
+            "description": "You cannot have more than 2 pending appointment requests. Please wait for pending requests to get denied or accepted!"})
+
+
+def ensure_appointment_slot_is_available(db: Session, start_datetime: datetime, appointment_type: models.AppointmentType, ignore_limits: bool):
+    required_consecutive_slots = math.ceil(appointment_type.duration / get_slot_duration(db=db))
+
+    remaining_concurrent_appointments_for_each_slot = get_remaining_concurrent_appointments_for_each_slot(db=db)
+
+    if (not ignore_limits
+            and not are_consecutive_slots_available_on_datetime(db=db, n_slots=required_consecutive_slots,
+                                                                dt=start_datetime,
+                                                                remaining_concurrent_appointments_for_each_slot=remaining_concurrent_appointments_for_each_slot)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Someone just requested this slot. Refreshing list... Please choose a new slot."},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
 
 def confirm_appointment(db: Session, appointment_id: UUID) -> models.Appointment:

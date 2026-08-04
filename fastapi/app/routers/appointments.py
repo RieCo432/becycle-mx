@@ -95,11 +95,11 @@ async def reschedule_appointment(
     if appointment_to_reschedule.startDateTime.astimezone(timezone.utc) < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Cannot reschedule a past appointment")
 
+    appointment = crud.reschedule_appointment(db=db, reschedule_appointment_id=reschedule_appointment_id, appointment_data=appointment_data, auto_confirm=True, ignore_limits=ignore_limits)
+
     email_tasks.add_task(appointment_to_reschedule.send_confirmation_email)
     
-    return crud.reschedule_appointment(db=db, reschedule_appointment_id=reschedule_appointment_id, appointment_data=appointment_data, auto_confirm=True, ignore_limits=ignore_limits)
-
-
+    return appointment
 
 
 @appointments.post("/appointments/types")
