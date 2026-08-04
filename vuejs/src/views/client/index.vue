@@ -73,17 +73,17 @@ export default {
       this.client = updatedDetails;
     },
     confirmAnonymiseData() {
-      const anonymise = confirm("Are you sure you want to anonymise this client?");
-      if(!anonymise)
+      const anonymise = confirm('Are you sure you want to anonymise this client?');
+      if (!anonymise) {
         return;
-
+      }
       requests.patchAnonymiseClient(this.client.id).then(async (response) => {
-        this.client = response.data
-        toast.success('Client anonymised successfully', {timeout: 2000})
+        this.client = response.data;
+        toast.success('Client anonymised successfully', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
-      })
-    }
+      });
+    },
   },
   async created() {
     requests.getClient(this.$route.params.clientId).then( async (response) => {
