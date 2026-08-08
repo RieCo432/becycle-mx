@@ -43,22 +43,20 @@ def reschedule_appointment(
     # auto_confirm can be used if appointment is created by staff directly
     appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
 
-    ensure_appointment_slot_is_available(db=db, appointment_type=appointment_type, start_datetime=appointment_data.startDateTime, ignore_limits=ignore_limits)
-    ensure_client_does_not_have_too_many_pending_appointments(appointment_to_reschedule.clientId, db)
-
-    appointment_to_reschedule.confirmed = auto_confirm
-    appointment_to_reschedule.cancelled = False
-    appointment_to_reschedule.cancellationReason = None
-    appointment_to_reschedule.reminderSent = False
+    # book a new appointemnt    
+    new_appointment = create_appointment(
+        db=db,
+        appointment_data=schemas.AppointmentCreate(clientId=appointment_to_reschedule.clientId, **appointment_data.model_dump()),
+        auto_confirm=auto_confirm,
+        ignore_limits=ignore_limits,
+    )
     
-    appointment_to_reschedule.startDateTime = appointment_data.startDateTime
-    appointment_to_reschedule.endDateTime = appointment_data.startDateTime + relativedelta(minutes=appointment_type.duration)
-    appointment_to_reschedule.typeId = appointment_data.typeId
-    appointment_to_reschedule.notes = appointment_data.notes if appointment_data.notes else appointment_to_reschedule.notes
+    # cancel the existing appointment
+    cancel_appointment(db=db, appointment_id=appointment_to_reschedule.id, cancellation_detail=schemas.AppointmentCancellationDetail(reason="Rescheduled"))
 
     db.commit()
 
-    return appointment_to_reschedule
+    return new_appointment
 
 
 def ensure_client_does_not_have_too_many_pending_appointments(client_id: UUID, db: Session):

@@ -97,7 +97,7 @@ async def reschedule_appointment(
 
     appointment = crud.reschedule_appointment(db=db, reschedule_appointment_id=reschedule_appointment_id, appointment_data=appointment_data, auto_confirm=True, ignore_limits=ignore_limits)
 
-    email_tasks.add_task(appointment_to_reschedule.send_confirmation_email)
+    email_tasks.add_task(appointment.send_rescheduled_email(appointment_to_reschedule))
     
     return appointment
 
