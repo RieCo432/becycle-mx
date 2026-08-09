@@ -82,6 +82,7 @@ export default {
             requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
               availableSlots.value = response.data;
             });
+            submitting.value = false;
             stepNumber.value = 1;
           });
         } else {
@@ -96,6 +97,7 @@ export default {
             })
             .catch((error) => {
               toast.error(error.response.data.detail.description, {timeout: 2000});
+              submitting.value = false;
             });
         }
       } else {

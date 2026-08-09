@@ -113,6 +113,7 @@ export default {
             requests.getAvailableAppointmentSlots(appointmentType.value, true).then((response) => {
               availableSlots.value = response.data;
             });
+            submitting.value = false;
             stepNumber.value--;
           });
         } else {
@@ -125,6 +126,7 @@ export default {
             requests.getAvailableAppointmentSlots(appointmentType.value, true).then((response) => {
               availableSlots.value = response.data;
             });
+            submitting.value = false;
             stepNumber.value--;
           });
         }

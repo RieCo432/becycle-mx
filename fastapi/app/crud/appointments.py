@@ -38,14 +38,16 @@ def reschedule_appointment(
         ignore_limits: bool = False) -> models.Appointment:
     appointment_to_reschedule = get_appointment(db=db, appointment_id=reschedule_appointment_id)
     if appointment_to_reschedule is None:
-        raise HTTPException(status_code=404, detail="Appointment not found")
+        raise HTTPException(status_code=404, detail={"description": "Appointment not found"})
     if appointment_to_reschedule.startDateTime.astimezone(timezone.utc) < datetime.now(timezone.utc):
-        raise HTTPException(status_code=400, detail="Cannot reschedule a past appointment")
+        raise HTTPException(status_code=400, detail={"description": "Cannot reschedule a past appointment"})
+    if appointment_to_reschedule.cancellationReason is not None and appointment_to_reschedule.cancellationReason.lower() == "rescheduled":
+        raise HTTPException(status_code=400, detail={"description": "Cannot reschedule an already rescheduled appointment"})
 
     # auto_confirm can be used if appointment is created by staff directly
     appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
 
-    # book a new appointemnt    
+    # book a new appointment    
     new_appointment = create_appointment(
         db=db,
         appointment_data=schemas.AppointmentCreate(clientId=appointment_to_reschedule.clientId, **appointment_data.model_dump()),
@@ -331,7 +333,6 @@ def verify_appointment_hyperlink_parameters(db: Session, appointment_id: UUID, c
             (models.Appointment.id == appointment_id)
             & (models.Appointment.clientId == client_id)
             & (models.Appointment.startDateTime > datetime.utcnow())
-            & (~models.Appointment.cancelled)
         )
     )
     if appointment is None:

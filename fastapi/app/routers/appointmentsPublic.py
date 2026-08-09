@@ -45,7 +45,6 @@ async def reschedule_via_hyperlink(
         email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)
 ) -> None:
-    print("reschedule_via_hyperlink")
     crud.verify_appointment_hyperlink_parameters(db=db, appointment_id=appointment_id, client_id=client_id)
     
     appointment_to_reschedule = crud.get_appointment(db=db, appointment_id=appointment_id)

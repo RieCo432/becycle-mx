@@ -7,7 +7,7 @@ import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
 import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
 import Modal from '@/components/Modal/Modal.vue';
-import AppointmentCancellationModal from "@/components/Modal/AppointmentCancellationModal.vue";
+import AppointmentCancellationModal from '@/components/Modal/AppointmentCancellationModal.vue';
 
 const credentialsStore = useCredentialsStore();
 
@@ -148,7 +148,13 @@ export default {
           id: 'reschedule',
           icon: 'heroicons-outline:calendar',
           showIf: (appointment) => {
-            return Date.parse(appointment.startDateTime) > Date.now();
+            return (
+              Date.parse(appointment.startDateTime) > Date.now() &&
+              (
+                !appointment.cancellationReason ||
+                appointment.cancellationReason.toLowerCase() !== 'rescheduled'
+              )
+            );
           },
           func: (appointmentId) => this.rescheduleAppointment(appointmentId),
         },
