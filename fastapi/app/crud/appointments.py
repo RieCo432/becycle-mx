@@ -6,12 +6,14 @@ from sqlalchemy.orm import Session
 
 
 def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
-                       auto_confirm: bool = False, ignore_limits: bool = False) -> models.Appointment:
+                       auto_confirm: bool = False, ignore_limits: bool = False, is_rescheduling: bool=False) -> models.Appointment:
     # auto_confirm can be used if appointment is created by staff directly
     appointment_type = get_appointment_type(db=db, appointment_type_id=appointment_data.typeId)
 
     ensure_appointment_slot_is_available(db=db, appointment_type=appointment_type, start_datetime=appointment_data.startDateTime, ignore_limits=ignore_limits)
-    ensure_client_does_not_have_too_many_pending_appointments(appointment_data.clientId, db)
+    
+    if not is_rescheduling:
+        ensure_client_does_not_have_too_many_pending_appointments(appointment_data.clientId, db)
 
     appointment = models.Appointment(
         clientId=appointment_data.clientId,

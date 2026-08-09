@@ -468,7 +468,7 @@ export default {
     });
   },
   getAppointmentTypes(inactive=false) {
-    return axiosClient.get('/appointments/types', {
+    return axiosClient.get('/public/appointments/types', {
       params: {
         inactive: inactive,
       },
@@ -476,7 +476,8 @@ export default {
     });
   },
   getAvailableAppointmentSlots(appointmentTypeId, ignoreLimits=undefined) {
-    return axiosClient.get('/appointments/available', {
+    console.log('get available appointment slots');
+    return axiosClient.get('/public/appointments/available', {
       params: {
         appointment_type_id: appointmentTypeId,
         ...ignoreLimits && {ignore_limits: ignoreLimits},
@@ -492,6 +493,20 @@ export default {
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchRescheduleAppointmentViaHyperlink(rescheduleAppointmentId, clientId, typeId, startDateTime, notes) {
+    return axiosClient.patch('/public/appointment/reschedule', {
+      typeId: typeId,
+      startDateTime: startDateTime,
+      notes: notes,
+    }, {
+      params: {
+        appointment_id: rescheduleAppointmentId,
+        client_id: clientId,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
   postAppointment(clientId, typeId, startDateTime, notes, ignoreLimits=undefined) {
@@ -519,7 +534,7 @@ export default {
     });
   },
   getAppointmentType(typeId) {
-    return axiosClient.get(`/appointments/types/${typeId}`, {
+    return axiosClient.get(`/public/appointments/types/${typeId}`, {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
@@ -1361,7 +1376,7 @@ export default {
     });
   },
   getAppointmentViaHyperlink(appointmentId, clientId) {
-    return axiosClient.get('/appointments', {
+    return axiosClient.get('/public/appointments', {
       params: {
         appointment_id: appointmentId,
         client_id: clientId,
@@ -1370,7 +1385,7 @@ export default {
     });
   },
   cancelAppointmentViaHyperlink(appointmentId, clientId) {
-    return axiosClient.patch('/appointments/cancel', {}, {
+    return axiosClient.patch('/public/appointments/cancel', {}, {
       params: {
         appointment_id: appointmentId,
         client_id: clientId,

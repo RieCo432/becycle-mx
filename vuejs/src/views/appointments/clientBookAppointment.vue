@@ -6,10 +6,11 @@ import Button from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import {useToast} from 'vue-toastification';
-import {useRouter} from 'vue-router';
+import {useRouter, useRoute} from 'vue-router';
 import AppointmentTypeCardSkeleton from '@/components/Skeleton/AppointmentTypeCardSkeleton.vue';
 import AppointmentDateCardSkeleton from '@/components/Skeleton/AppointmentDateCardSkeleton.vue';
 import Icon from '@/components/Icon';
+import {useCredentialsStore} from '@/store/credentialsStore';
 
 export default {
   name: 'bookAppointment',
@@ -40,6 +41,8 @@ export default {
 
     const toast = useToast();
     const router = useRouter();
+    const route = useRoute();
+    const credentialStore = useCredentialsStore();
 
     const stepNumber = ref(0);
     const appointmentType = ref('');
@@ -47,22 +50,48 @@ export default {
     const appointmentDatetime = ref(new Date());
     const appointmentNotes = ref('');
 
+    const rescheduleAppointmentId = ref(null);
+    const clientId = ref(null);
+    
+    function notifySuccessAndRedirect() {
+      toast.success('Appointment Request submitted! Kindly wait for us to accept or deny your request.', {timeout: 5000});
+      if (credentialStore.isClientLoggedIn()) {
+        router.push('/clients/me');
+      } else {
+        router.push('/home');
+      }
+    }
+
 
     const submit = () => {
       // next step until last step . if last step then submit form
       if (stepNumber.value === steps.length - 1) {
         // handle submit
-        requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(),
-          appointmentNotes.value).then(() => {
-          toast.success('Appointment Request submitted! Kindly wait for us to accept or deny your request.', {timeout: 2000});
-          router.push('/clients/me');
-        }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-          requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
-            availableSlots.value = response.data;
+        if (!rescheduleAppointmentId.value) {
+          requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(),
+            appointmentNotes.value).then(() => {
+            notifySuccessAndRedirect();
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+            requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
+              availableSlots.value = response.data;
+            });
+            stepNumber.value = 1;
           });
-          stepNumber.value = 1;
-        });
+        } else {
+          requests.patchRescheduleAppointmentViaHyperlink(
+            rescheduleAppointmentId.value,
+            clientId.value,
+            appointmentType.value,
+            appointmentDatetime.value.toISOString(),
+            appointmentNotes.value)
+            .then((response) => {
+              notifySuccessAndRedirect();
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 2000});
+            });
+        }
       } else {
         if (stepNumber.value === 0) {
           stepNumber.value = 1;
@@ -81,12 +110,24 @@ export default {
       stepNumber.value--;
     };
 
+    if (route.query.rescheduleAppointmentId && route.query.clientId) {
+      rescheduleAppointmentId.value = route.query.rescheduleAppointmentId;
+      clientId.value = route.query.clientId;
+      console.log(rescheduleAppointmentId.value, clientId.value);
+      requests.getAppointmentViaHyperlink(rescheduleAppointmentId.value, clientId.value).then((response) => {
+        appointmentType.value = response.data.type.id;
+        appointmentNotes.value = response.data.notes;
+        submit();
+      });
+    }
+
     return {
       appointmentNotes,
       appointmentDatetime,
       appointmentType,
 
       availableSlots,
+      rescheduleAppointmentId,
 
       submit,
       steps,
@@ -100,7 +141,6 @@ export default {
     };
   },
   created() {
-    requests.getClientMe(); // if this returns 401 the client will get redirected to login page
     requests.getAppointmentTypes().then((response) => {
       this.appointmentTypes = response.data.sort((a, b) => (a.orderIndex - b.orderIndex));
     });
@@ -111,7 +151,7 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
-      <Card title="Book Appointment">
+      <Card :title="`${rescheduleAppointmentId ? 'Reschedule' : 'Book'} Appointment`">
         <div>
           <div class="flex z-[5] items-center relative justify-center md:mx-8">
             <div

@@ -3,6 +3,9 @@
     <li><span style="text-decoration: line-through"> {{ original_appointment.startDateTime.strftime("%A, %d %B %Y at %H:%M") }}</span></li>
     <li>{{ appointment.startDateTime.strftime("%A, %d %B %Y at %H:%M") }}</li>
   </ul>
+  {% if not appointment.confirmed %}
+    <p>Please note that the appointment has not been confirmed yet. We aim to confirm it as soon as possible.</p>
+  {% endif %}
 </p>
 <p>Appointment notes: {{ appointment.notes }}</p>
 {% if appointment.typeId == "rent" %}
