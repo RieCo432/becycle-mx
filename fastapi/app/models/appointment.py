@@ -107,3 +107,11 @@ class Appointment(Base):
             subject="Your Appointment Reminder",
             content=email_html_content
         )
+    
+    def send_rescheduled_email(self, original_appointment):
+        email_html_content = services.email_helpers.render_template(template_name="appointment_rescheduled", client=self.client, original_appointment=original_appointment, appointment=self)
+        services.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Appointment Has Been Rescheduled",
+            content=email_html_content
+        )

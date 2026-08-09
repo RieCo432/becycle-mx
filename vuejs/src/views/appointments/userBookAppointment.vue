@@ -6,7 +6,7 @@ import Button from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import {useToast} from 'vue-toastification';
-import {useRouter} from 'vue-router';
+import {useRouter, useRoute} from 'vue-router';
 import AppointmentTypeCardSkeleton from '@/components/Skeleton/AppointmentTypeCardSkeleton.vue';
 import AppointmentDateCardSkeleton from '@/components/Skeleton/AppointmentDateCardSkeleton.vue';
 import Icon from '@/components/Icon';
@@ -14,10 +14,12 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
+import {VueSpinner} from 'vue3-spinners';
 
 export default {
   name: 'bookAppointment',
   components: {
+    VueSpinner,
     ComboboxTextInput,
     DashButton,
     Card,
@@ -49,6 +51,9 @@ export default {
 
     const toast = useToast();
     const router = useRouter();
+    const route = useRoute();
+
+    const rescheduleAppointmentId = ref(null);
 
     const clientId = ref('');
     const stepNumber = ref(0);
@@ -56,6 +61,7 @@ export default {
     const availableSlots = ref(null);
     const appointmentDatetime = ref(new Date());
     const appointmentNotes = ref('');
+    const submitting = ref(false);
 
     const clientSchema = yup.object().shape({
       firstName: yup.string().required('First name is required'),
@@ -94,24 +100,43 @@ export default {
     const submit = () => {
       // next step until last step. if last step then submit form
       if (stepNumber.value === steps.length - 1) {
+        if (submitting.value) return;
+        submitting.value = true;
         // handle submit
-        requests.postAppointment(clientId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
-          appointmentNotes.value, true).then(() => {
-          toast.success('Appointment created.', {timeout: 2000});
-          router.push(`/clients/${clientId.value}`);
-        }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-          requests.getAvailableAppointmentSlots(appointmentType.value, true).then((response) => {
-            availableSlots.value = response.data;
+        if (rescheduleAppointmentId.value) {
+          requests.patchAppointmentReschedule(rescheduleAppointmentId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
+            appointmentNotes.value, true).then(() => {
+            toast.success('Appointment rescheduled.', {timeout: 2000});
+            router.push(`/clients/${clientId.value}`);
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+            requests.getAvailableAppointmentSlots(appointmentType.value, true).then((response) => {
+              availableSlots.value = response.data;
+            });
+            submitting.value = false;
+            stepNumber.value--;
           });
-          stepNumber.value--;
-        });
+        } else {
+          requests.postAppointment(clientId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
+            appointmentNotes.value, true).then(() => {
+            toast.success('Appointment created.', {timeout: 2000});
+            router.push(`/clients/${clientId.value}`);
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+            requests.getAvailableAppointmentSlots(appointmentType.value, true).then((response) => {
+              availableSlots.value = response.data;
+            });
+            submitting.value = false;
+            stepNumber.value--;
+          });
+        }
       } else {
         if (stepNumber.value === 0) {
           // Client details processing
           requests.getClientByEmail(emailAddress.value).then((response) => {
             clientId.value = response.data[0]['id'];
             stepNumber.value = 1;
+            if (appointmentType.value) submit();
           }).catch((error) => {
             if (error.response.status === 404) {
               requests.postNewClient({
@@ -122,6 +147,7 @@ export default {
                 toast.success('New Client Created!', {timeout: 1000});
                 clientId.value = response.data['id'];
                 stepNumber.value = 1;
+                if (appointmentType.value) submit();
               });
             }
           });
@@ -141,6 +167,32 @@ export default {
       stepNumber.value--;
     };
 
+    if (route.query.rescheduleAppointmentId) {
+      rescheduleAppointmentId.value = route.query.rescheduleAppointmentId;
+      requests.getAppointment(rescheduleAppointmentId.value)
+        .then((response) => {
+          const appointment = response.data;
+          requests.getClient(appointment.clientId)
+            .then((response) => {
+              const client = response.data;
+              firstName.value = client.firstName;
+              lastName.value = client.lastName;
+              emailAddress.value = client.emailAddress;
+              confirmEmailAddress.value = client.emailAddress;
+
+              appointmentType.value = appointment.typeId;
+              appointmentNotes.value = appointment.notes;
+              submit();
+            })
+            .catch((error) => {
+              toast.warning(error.response.data.detail.description, {timeout: 2000});
+            });
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+    }
+
     return {
       emailAddress,
       emailAddressError,
@@ -154,7 +206,8 @@ export default {
       appointmentNotes,
       appointmentDatetime,
       appointmentType,
-
+      rescheduleAppointmentId,
+      submitting,
       availableSlots,
 
       submit,
@@ -224,7 +277,7 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
-      <Card title="Book Appointment">
+      <Card :title="`${rescheduleAppointmentId ? 'Reschedule' : 'Book'} Appointment`">
         <div>
           <div class="flex z-[5] items-center relative justify-center md:mx-8">
             <div
@@ -462,9 +515,15 @@ export default {
                 />
                 <Button
                     v-if="(stepNumber !== 1) && (stepNumber !== 2)"
-                    :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                     btnClass="btn-dark"
-                />
+                >
+                  <template v-if="!submitting">
+                    {{ stepNumber !== this.steps.length - 1 ? 'next' : 'submit' }}
+                  </template>
+                  <template v-else>
+                    <VueSpinner size="20px" class="text-sky-500"/>
+                  </template>
+                </Button>
               </div>
             </form>
           </div>

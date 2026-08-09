@@ -45,6 +45,7 @@
                   :disabled="disabled"
                   :validate="validate"
                   v-if="!isMask"
+                  autocomplete="off"
               />
             </div>
             <cleave
