@@ -11,10 +11,12 @@ import AppointmentTypeCardSkeleton from '@/components/Skeleton/AppointmentTypeCa
 import AppointmentDateCardSkeleton from '@/components/Skeleton/AppointmentDateCardSkeleton.vue';
 import Icon from '@/components/Icon';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import {VueSpinner} from 'vue3-spinners';
 
 export default {
   name: 'bookAppointment',
   components: {
+    VueSpinner,
     DashButton,
     Card,
     Button,
@@ -46,13 +48,15 @@ export default {
 
     const stepNumber = ref(0);
     const appointmentType = ref('');
-    const availableSlots = ref(null);
+    const availableSlots = ref({});
     const appointmentDatetime = ref(new Date());
     const appointmentNotes = ref('');
 
     const rescheduleAppointmentId = ref(null);
     const clientId = ref(null);
-    
+
+    const submitting = ref(false);
+
     function notifySuccessAndRedirect() {
       toast.success('Appointment Request submitted! Kindly wait for us to accept or deny your request.', {timeout: 5000});
       if (credentialStore.isClientLoggedIn()) {
@@ -66,6 +70,8 @@ export default {
     const submit = () => {
       // next step until last step . if last step then submit form
       if (stepNumber.value === steps.length - 1) {
+        if (submitting.value) return;
+        submitting.value = true;
         // handle submit
         if (!rescheduleAppointmentId.value) {
           requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(),
@@ -95,7 +101,7 @@ export default {
       } else {
         if (stepNumber.value === 0) {
           stepNumber.value = 1;
-          availableSlots.value = null;
+          availableSlots.value = {};
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
@@ -110,16 +116,29 @@ export default {
       stepNumber.value--;
     };
 
-    if (route.query.rescheduleAppointmentId && route.query.clientId) {
-      rescheduleAppointmentId.value = route.query.rescheduleAppointmentId;
-      clientId.value = route.query.clientId;
-      console.log(rescheduleAppointmentId.value, clientId.value);
-      requests.getAppointmentViaHyperlink(rescheduleAppointmentId.value, clientId.value).then((response) => {
-        appointmentType.value = response.data.type.id;
-        appointmentNotes.value = response.data.notes;
-        submit();
-      });
+
+    async function setupReschedule() {
+      if (route.query.rescheduleAppointmentId) {
+        rescheduleAppointmentId.value = route.query.rescheduleAppointmentId;
+        if (route.query.clientId) {
+          clientId.value = route.query.clientId;
+        } else {
+          clientId.value = (await requests.getClientMe()).data.id;
+        }
+        requests.getAppointmentViaHyperlink(rescheduleAppointmentId.value, clientId.value)
+          .then((response) => {
+            appointmentType.value = response.data.type.id;
+            appointmentNotes.value = response.data.notes;
+            submit();
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description);
+          });
+      }
     }
+
+    setupReschedule();
+
 
     return {
       appointmentNotes,
@@ -129,6 +148,7 @@ export default {
       availableSlots,
       rescheduleAppointmentId,
 
+      submitting,
       submit,
       steps,
       stepNumber,
@@ -329,10 +349,18 @@ export default {
                     v-if="this.stepNumber !== 0"
                 />
                 <Button
+                    :disabled="submitting"
                     v-if="stepNumber === this.steps.length - 1"
                     text="submit"
                     btnClass="btn-dark"
-                />
+                >
+                  <template v-if="!submitting">
+                    Submit
+                  </template>
+                  <template v-else>
+                    <VueSpinner size="20px" class="text-sky-500"/>
+                  </template>
+                </Button>
               </div>
             </form>
           </div>

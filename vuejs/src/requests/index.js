@@ -476,7 +476,6 @@ export default {
     });
   },
   getAvailableAppointmentSlots(appointmentTypeId, ignoreLimits=undefined) {
-    console.log('get available appointment slots');
     return axiosClient.get('/public/appointments/available', {
       params: {
         appointment_type_id: appointmentTypeId,

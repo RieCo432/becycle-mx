@@ -77,8 +77,8 @@ export default {
     },
     confirmAnonymiseData: {
       type: Function,
-      required: false
-    }
+      required: false,
+    },
   },
 
   data() {
@@ -166,7 +166,7 @@ export default {
           id: 'cancel',
           icon: 'heroicons-outline:x-mark',
           showIf: (appointment) => {
-            return appointment.status === 'pending';
+            return appointment.status !== 'cancelled' && appointment.status !== 'past';
           },
           func: (appointmentId) => {
             this.cancelAppointmentModalId = appointmentId;

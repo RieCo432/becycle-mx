@@ -14,10 +14,12 @@ import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import {debounce} from 'lodash-es';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
+import {VueSpinner} from 'vue3-spinners';
 
 export default {
   name: 'bookAppointment',
   components: {
+    VueSpinner,
     ComboboxTextInput,
     DashButton,
     Card,
@@ -59,6 +61,7 @@ export default {
     const availableSlots = ref(null);
     const appointmentDatetime = ref(new Date());
     const appointmentNotes = ref('');
+    const submitting = ref(false);
 
     const clientSchema = yup.object().shape({
       firstName: yup.string().required('First name is required'),
@@ -97,6 +100,8 @@ export default {
     const submit = () => {
       // next step until last step. if last step then submit form
       if (stepNumber.value === steps.length - 1) {
+        if (submitting.value) return;
+        submitting.value = true;
         // handle submit
         if (rescheduleAppointmentId.value) {
           requests.patchAppointmentReschedule(rescheduleAppointmentId.value, appointmentType.value, appointmentDatetime.value.toISOString(),
@@ -200,7 +205,7 @@ export default {
       appointmentDatetime,
       appointmentType,
       rescheduleAppointmentId,
-
+      submitting,
       availableSlots,
 
       submit,
@@ -508,9 +513,15 @@ export default {
                 />
                 <Button
                     v-if="(stepNumber !== 1) && (stepNumber !== 2)"
-                    :text="stepNumber !== this.steps.length - 1 ? 'next' : 'submit'"
                     btnClass="btn-dark"
-                />
+                >
+                  <template v-if="!submitting">
+                    {{ stepNumber !== this.steps.length - 1 ? 'next' : 'submit' }}
+                  </template>
+                  <template v-else>
+                    <VueSpinner size="20px" class="text-sky-500"/>
+                  </template>
+                </Button>
               </div>
             </form>
           </div>

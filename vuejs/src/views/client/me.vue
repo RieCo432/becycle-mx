@@ -85,7 +85,7 @@ export default {
       // TODO
     },
     rescheduleMyAppointment(appointmentId) {
-      // TODO
+      this.$router.push({path: '/appointments/reschedule', query: {rescheduleAppointmentId: appointmentId}});
     },
     viewContract(contractId) {
       this.$router.push(`/clients/me/contracts/${contractId}`);
