@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>We are testing a new feature. Please forgive any mistakes.</p>
+
+    <p>Our records show that you did 
+      {% if not self.didClientShowUp %}
+        <span style="color: red;">not</span>
+      {% endif %}
+       not attend your appointment:</p>
+    {% include "partials/appointment_info.html" %}
+    <p>If you believe this is incorrect, please let us know so we can correct this.</p>
+{% endblock %}
+

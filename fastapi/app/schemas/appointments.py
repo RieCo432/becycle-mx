@@ -30,6 +30,7 @@ class Appointment(AppointmentBase):
     cancelled: bool = False
     reminderSent: bool = False
     cancellationReason: str | None = None
+    didClientShowUp: bool | None = None
 
 
 class AppointmentCancellationDetail(BaseModel):

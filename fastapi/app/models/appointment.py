@@ -29,6 +29,7 @@ class Appointment(Base):
     reminderSent: Mapped[bool] = mapped_column("remindersent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
     cancellationReason: Mapped[str] = mapped_column("cancellationreason", Text, nullable=True, quote=False)
+    didClientShowUp: Mapped[bool] = mapped_column("didclientshowup", Boolean, default=False, server_default=text("NULL"), nullable=True, quote=False)
 
 
     def __eq_dict__(self, other: dict):
@@ -113,5 +114,13 @@ class Appointment(Base):
         services.send_email(
             destination=self.client.emailAddress,
             subject="Your Appointment Has Been Rescheduled",
+            content=email_html_content
+        )
+
+    def send_appointment_attendance_email(self):
+        email_html_content = services.email_helpers.render_template(template_name="appointment_attendance", client=self.client, appointment=self)
+        services.send_email(
+            destination=self.client.emailAddress,
+            subject="Your Appointment Attendance",
             content=email_html_content
         )
