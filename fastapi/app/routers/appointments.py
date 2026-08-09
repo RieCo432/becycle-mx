@@ -85,9 +85,13 @@ async def cancel_appointment(
 async def patch_appointment_showup(
         appointment_id: UUID,
         did_client_show_up: Annotated[bool, Body(embed=True)],
+        email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)
 ) -> schemas.Appointment:
     appointment = crud.patch_appointment_showup(db=db, appointment_id=appointment_id, did_client_show_up=did_client_show_up)
+    
+    if not appointment.didClientShowUp:
+        email_tasks.add_task(appointment.send_appointment_attendance_email)
 
     return appointment
 
