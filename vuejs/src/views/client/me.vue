@@ -150,6 +150,7 @@ export default {
         duration: appointmentType['duration'],
         notes: appointment.notes,
         cancellationReason: appointment.cancellationReason,
+        didClientShowUp: appointment.didClientShowUp,
       };
     })));
     this.loadingAppointments = false;

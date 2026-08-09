@@ -203,6 +203,10 @@ export default {
           field: 'notes',
         },
         {
+          label: 'Showed Up',
+          field: 'didClientShowUp',
+        },
+        {
           label: 'Cancellation Reason',
           field: 'cancellationReason',
         },
