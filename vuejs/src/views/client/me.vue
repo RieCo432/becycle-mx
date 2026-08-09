@@ -149,6 +149,7 @@ export default {
         type: appointmentType['title'],
         duration: appointmentType['duration'],
         notes: appointment.notes,
+        cancellationReason: appointment.cancellationReason,
       };
     })));
     this.loadingAppointments = false;

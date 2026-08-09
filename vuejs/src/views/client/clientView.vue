@@ -197,6 +197,10 @@ export default {
           field: 'notes',
         },
         {
+          label: 'Cancellation Reason',
+          field: 'cancellationReason',
+        },
+        {
           label: 'Action',
           field: 'action',
         },

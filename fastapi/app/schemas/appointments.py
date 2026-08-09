@@ -29,6 +29,7 @@ class Appointment(AppointmentBase):
     confirmed: bool = False
     cancelled: bool = False
     reminderSent: bool = False
+    cancellationReason: str | None = None
 
 
 class AppointmentCancellationDetail(BaseModel):
