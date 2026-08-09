@@ -251,25 +251,20 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
     return deleted_permission_ids
 
 
-def check_user_permission(user: User, permission: Permission) -> bool:
+def check_permission_tree(permission_holder: User | Group, permission: Permission) -> bool:
+    visited = set()
     while permission is not None:
-        if permission in user.permissions:
+        if permission.id in visited:
+            print(f"Permission checking cycle detected after {len(visited)} visited nodes")
+            return False
+        visited.add(permission.id)
+        if permission in permission_holder.permissions:
             return True
         else:
             permission = permission.parentPermission
-
-    return False
-
-
-def check_group_permission(group: Group, permission: Permission) -> bool:
-    while permission is not None:
-        if permission in group.permissions:
-            return True
-        else:
-            permission = permission.parentPermission
-
     return False
 
 
 def check_permission(db: Session, user: User, permission: Permission) -> bool:
-    return check_user_permission(user=user, permission=permission) or any([check_group_permission(group=group, permission=permission) for group in user.groups])
+    return (check_permission_tree(permission_holder=user, permission=permission) 
+            or any([check_permission_tree(permission_holder=group, permission=permission) for group in user.groups]))
