@@ -585,6 +585,14 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  patchAppointmentDidClientShowUp(appointmentId, didShowUp) {
+    return axiosClient.patch(`/appointments/${appointmentId}/showup`, {
+      did_client_show_up: didShowUp,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   patchAppointmentReschedule(appointmentId, typeId, startDateTime, notes, ignoreLimits=undefined) {
     return axiosClient.patch(`/appointments/${appointmentId}/reschedule`, {
       typeId: typeId,

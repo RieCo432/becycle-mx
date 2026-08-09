@@ -81,6 +81,17 @@ async def cancel_appointment(
     return appointment
 
 
+@appointments.patch("/appointments/{appointment_id}/showup")
+async def patch_appointment_showup(
+        appointment_id: UUID,
+        did_client_show_up: Annotated[bool, Body(embed=True)],
+        db: Session = Depends(dep.get_db)
+) -> schemas.Appointment:
+    appointment = crud.patch_appointment_showup(db=db, appointment_id=appointment_id, did_client_show_up=did_client_show_up)
+
+    return appointment
+
+
 @appointments.patch("/appointments/{reschedule_appointment_id}/reschedule")
 async def reschedule_appointment(
         reschedule_appointment_id: UUID,

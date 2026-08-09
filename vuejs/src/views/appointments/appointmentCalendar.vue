@@ -74,6 +74,7 @@ export default {
           cancelled: eventClickInfo.event.extendedProps.cancelled,
           clientName: eventClickInfo.event.extendedProps.clientName,
           typeTitle: eventClickInfo.event.extendedProps.typeTitle,
+          didClientShowUp: eventClickInfo.event.extendedProps.didClientShowUp,
         };
       }
       this.showAppointmentModal = true;
@@ -122,6 +123,7 @@ export default {
                 typeTitle: appointment['type']['title'],
                 client: appointment['client'],
                 clientName: `${appointment['client']['firstName']} ${appointment['client']['lastName']}`,
+                didClientShowUp: appointment['didClientShowUp'],
               })));
 
           appointmentSummaries.push(...responseClosedDays.data
