@@ -383,7 +383,7 @@ def update_contract_draft_deposit(db: Session, contract_id: UUID, deposit_collec
     deposit_amount = abs([tl.amount for tl in transaction_header.transactionLines if tl.account.type == AccountTypes.LIABILITY][0])
     
     
-    contract_draft.bike.roughValue = max(deposit_amount, 40)
+    contract_draft.bike.roughValue = max(deposit_amount, 4000)
     transaction_header.contractId = contract_id
     db.commit()
     return contract_draft
