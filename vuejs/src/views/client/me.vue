@@ -98,14 +98,17 @@ export default {
   async created() {
     this.client = (await requests.getClientMe()).data;
     this.loadingClientDetails = false;
-    this.contracts = (await requests.getMyContracts(true, true, true)).data;
+    this.contracts = (await requests.getMyContracts()).data;
     this.appointments = (await requests.getMyAppointments(true, true)).data;
 
 
     this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
       const bike = (await requests.getClientBike(contract.bikeId)).data;
-      let status = 'open';
-      if (contract.returnedDate != null) {
+      let status = 'active';
+      console.log('my contract', contract);
+      if (contract.isDraft) {
+        status = 'draft';
+      } else if (contract.returnedDate != null) {
         status = 'closed';
       } else if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
         status = 'stolen';

@@ -58,31 +58,38 @@ export default {
       this.loadingContract = true;
       this.loadingBike = true;
       this.loadingClient = true;
-      requests.getContract(this.$route.params.contractId).then((response) => {
-        this.contract = response.data;
-        requests.getBike(this.contract.bikeId).then((response) => {
-          this.bike = response.data;
-          this.loadingBike = false;
+      requests.getContract(this.$route.params.contractId)
+        .then((response) => {
+          this.contract = response.data;
+          requests.getBike(this.contract.bikeId).then((response) => {
+            this.bike = response.data;
+            this.loadingBike = false;
+          });
+          requests.getClient(this.contract.clientId).then((response) => {
+            this.client = response.data;
+            this.loadingClient = false;
+          });
+          Promise.all([
+            requests.getUser(this.contract['workingUserId']),
+            requests.getUser(this.contract['checkingUserId']),
+            ...(this.contract['returnAcceptingUserId'] ? [requests.getUser(this.contract['returnAcceptingUserId'])] : []),
+          ]).then(([
+            workingUserResponse,
+            checkingUserResponse,
+            returnAcceptedByUserResponse,
+          ]) => {
+            this.workingUser = workingUserResponse.data;
+            this.checkingUser = checkingUserResponse.data;
+            this.returnAcceptedByUser = returnAcceptedByUserResponse ? returnAcceptedByUserResponse.data : null;
+            this.loadingContract = false;
+            if (this.$route.query.showTerms === '1') {
+              this.showTermsModal = true;
+            }
+          });
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
         });
-        requests.getClient(this.contract.clientId).then((response) => {
-          this.client = response.data;
-          this.loadingClient = false;
-        });
-        Promise.all([
-          requests.getUser(this.contract['workingUserId']),
-          requests.getUser(this.contract['checkingUserId']),
-          ...(this.contract['returnAcceptingUserId'] ? [requests.getUser(this.contract['returnAcceptingUserId'])] : []),
-        ]).then(([
-          workingUserResponse,
-          checkingUserResponse,
-          returnAcceptedByUserResponse,
-        ]) => {
-          this.workingUser = workingUserResponse.data;
-          this.checkingUser = checkingUserResponse.data;
-          this.returnAcceptedByUser = returnAcceptedByUserResponse ? returnAcceptedByUserResponse.data : null;
-          this.loadingContract = false;
-        });
-      });
     },
     patchContractReturn(depositSettledTransactionHeaderId, depositReturningUser, depositReturningPassword,
       returnAcceptingUser, returnAcceptingPasswordOrPin) {
@@ -118,9 +125,6 @@ export default {
     },
   },
   mounted() {
-    if (this.$route.query.showTerms === '1') {
-      this.showTermsModal = true;
-    }
     this.getContract();
 
     requests.getAccounts([{name: 'types', value: 'liability'}, {name: 'ui_filters', value: 'return'}]).then((response) => {

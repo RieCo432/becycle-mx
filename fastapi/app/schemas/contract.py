@@ -4,7 +4,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 from .transactions import TransactionHeader
-
+from .user import User
+from .client import Client
+from .bike import Bike
 
 class CrimeReportBase(BaseModel):
     crimeNumber: str
@@ -21,11 +23,11 @@ class CrimeReport(CrimeReportBase):
 
 
 class ContractBase(BaseModel):
-    clientId: UUID
-    bikeId: UUID
+    clientId: UUID | None = None
+    bikeId: UUID | None = None
 
-    conditionOfBike: str
-    contractType: str
+    conditionOfBike: str | None = None
+    contractType: str | None = None
     notes: str | None = None
 
 
@@ -37,28 +39,35 @@ class ContractCreate(ContractBase):
 class ContractPublic(ContractBase):
     id: UUID
 
-    startDate: date
-    endDate: date
+    startDate: date | None = None
+    endDate: date | None = None
 
     returnedDate: date | None = None
     detailsSent: bool = False
     expiryReminderSent: bool = False
     returnDetailsSent: bool = False
+    isDraft: bool = False
     crimeReports: List[CrimeReport] = []
 
 
 class Contract(ContractPublic):
-    workingUserId: UUID
-    checkingUserId: UUID
-
+    workingUserId: UUID | None = None
+    checkingUserId: UUID | None = None
     returnAcceptingUserId: UUID | None = None
+
+    workingUser: User | None = None
+    checkingUser: User | None = None
+    returnAcceptingUser: User | None = None
+    
+    client: Client | None = None
+    bike: Bike | None = None
 
     depositTransactionHeaders: List[TransactionHeader] = []
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class ContractDraftDetails(BaseModel):
+class ContractDetails(BaseModel):
     conditionOfBike: str
     contractType: str
     notes: str | None = None

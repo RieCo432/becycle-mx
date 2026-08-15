@@ -90,7 +90,7 @@ export default {
       this.client = response.data;
       this.loadingClientDetails = false;
 
-      this.contracts = (await requests.getClientContracts(this.client.id, true, true, true)).data;
+      this.contracts = (await requests.getClientContracts(this.client.id, true, true, true, true)).data;
       this.appointments = (await requests.getClientAppointments(this.client.id, true, true)).data;
 
       this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
@@ -99,7 +99,11 @@ export default {
           .toSorted((thA, thB) =>
             new Date(thB.postedOn) - new Date(thA.postedOn))[0];
         let status = 'active';
-        if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
+        if (contract.isDraft) {
+          status = 'draft';
+        } else if (!lastDepositTransaction) {
+          status = 'ERROR';
+        } else if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
           status = 'stolen';
         } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_settled')) {
           status = 'closed';

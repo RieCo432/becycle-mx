@@ -13,7 +13,7 @@ const toast = useToast();
 
 const emit = defineEmits(['goBack', 'update:draft']);
 const props = defineProps({
-  draft: {
+  contract: {
     type: Object,
     required: true,
   },
@@ -52,7 +52,7 @@ requests.getActiveUsers().then((response) => {
 
 const workingUserSchema = yup.object().shape({
   workingUser: yup.string().required(' Main mechanic Username is required ')
-    .notOneOf([props.draft.checkingUser?.username], 'Working volunteer must be different from checking volunteer'),
+    .notOneOf([props.contract.checkingUser?.username], 'Working volunteer must be different from checking volunteer'),
   workingPasswordOrPin: yup.string().required(' Password or Pin is required '),
 });
 
@@ -71,7 +71,7 @@ const submit = handleSubmit(() => {
   if (checkCurrentlyProcessing()) return;
   processingSubmit.value = true;
 
-  requests.putDraftContractWorkingUser(props.draft.id, workingUser.value, workingPasswordOrPin.value)
+  requests.putDraftContractWorkingUser(props.contract.id, workingUser.value, workingPasswordOrPin.value)
     .then((response) => {
       toast.success('Working Volunteer Updated!', {timeout: 1000});
       emit('update:draft', response.data);
@@ -106,10 +106,10 @@ function selectWorkingUser(event, i) {
 <template>
   <form
     @submit.prevent="() => {
-      if (!props.draft.workingUserId || (workingUser && workingUser !== '') ) {
+      if (!props.contract.workingUserId || (workingUser && workingUser !== '') ) {
         submit()
       } else {
-        emit('update:draft', props.draft)
+        emit('update:draft', props.contract)
       }
     }"
     @keydown.enter="() => {}">
@@ -120,10 +120,10 @@ function selectWorkingUser(event, i) {
         </h4>
       </div>
       <div
-        v-if="props.draft.workingUserId"
+        v-if="props.contract.workingUserId"
         class="col-span-full">
         <h5 class="text-danger-500 dark:text-danger-500">
-          This step has already been signed by {{ props.draft.workingUser.username }}. You can still overwrite it.
+          This step has already been signed by {{ props.contract.workingUser.username }}. You can still overwrite it.
         </h5>
       </div>
       <div class="col-span-1">
