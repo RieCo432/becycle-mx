@@ -17,9 +17,6 @@ const existingContractDrafts = ref([]);
 const stepLoading = ref(true);
 
 
-
-
-
 const processingSubmit = ref(false);
 function checkCurrentlyProcessing() {
   if (processingSubmit.value) {
@@ -57,7 +54,7 @@ function selectDraft(draftId) {
 }
 
 onMounted(() => {
-  requests.getContracts(true)
+  requests.getContracts(false, false, false, true)
     .then((response) => {
       existingContractDrafts.value.splice(0, existingContractDrafts.value.length, ...response.data);
       stepLoading.value = false;

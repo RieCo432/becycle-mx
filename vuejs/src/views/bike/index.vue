@@ -82,14 +82,18 @@ export default {
       this.bike = response.data;
       this.loadingBikeDetails = false;
     });
-    requests.getBikeContracts(this.$route.params.bikeId, true, true, true).then((response) => {
+    requests.getBikeContracts(this.$route.params.bikeId, true, true, true, true).then((response) => {
       Promise.all(response.data.map((contract) => {
         return requests.getClient(contract.clientId).then((clientResponse) => {
           const lastDepositTransaction = contract.depositTransactionHeaders
             .toSorted((thA, thB) =>
               new Date(thB.postedOn) - new Date(thA.postedOn))[0];
-          let status = 'undetermined';
-          if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
+          let status = 'active';
+          if (contract.isDraft) {
+            status = 'draft';
+          } else if (!lastDepositTransaction) {
+            status = 'ERROR';
+          } else if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
             status = 'stolen';
           } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_settled')) {
             status = 'closed';
@@ -98,8 +102,6 @@ export default {
           } else if (lastDepositTransaction.event === 'liability_dormant') {
             status = 'dormant';
           } else if (lastDepositTransaction.event === 'liability_reactivated') {
-            status = 'active';
-          } else {
             status = 'active';
           }
           return {

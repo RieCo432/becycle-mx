@@ -31,11 +31,11 @@ def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | No
         select(models.Contract)
         .where(
             and_(*primary_query_filter)
-            & (models.Contract.isDraft == draft)
             & (
                 ((models.Contract.returnedDate != None) & closed)
-                | ((models.Contract.returnedDate == None) & ((models.Contract.endDate == None) | (models.Contract.endDate < datetime.utcnow().date())) & expired)
-                | ((models.Contract.returnedDate == None) & ((models.Contract.endDate == None) | (models.Contract.endDate >= datetime.utcnow().date())) & open)
+                | ((models.Contract.returnedDate == None) & (models.Contract.endDate != None) & (models.Contract.endDate < datetime.utcnow().date()) & expired)
+                | ((models.Contract.returnedDate == None) & (models.Contract.endDate != None) & (models.Contract.endDate >= datetime.utcnow().date()) & open)
+                | (models.Contract.isDraft == draft)
             )
         )
     )]
@@ -82,7 +82,7 @@ def get_contracts_grouped_by_returned_date(db: Session) -> dict[date, list[model
     return contracts_by_returned_date
 
 
-def get_contract(db: Session, contract_id: UUID) -> models.Contract:
+def get_contract(db: Session, contract_id: UUID, throw_on_draft: bool = True) -> models.Contract:
     contract = db.scalar(
         select(models.Contract)
         .where(models.Contract.id == contract_id)
@@ -90,7 +90,7 @@ def get_contract(db: Session, contract_id: UUID) -> models.Contract:
     if contract is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": f"Contract with id {contract_id} not found."})
     
-    if contract.isDraft:
+    if throw_on_draft and contract.isDraft:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": f"Contract with id {contract_id} is a draft."})
     
     return contract
@@ -444,7 +444,7 @@ def submit_contract(db: Session, contract_id: UUID) -> models.Contract:
 
 
 def get_collected_and_returned_deposit_amounts(db: Session, contract_id: UUID) -> tuple[int, int | None]:
-    contract = get_contract(db=db, contract_id=contract_id)
+    contract = get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
     if contract is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -516,11 +516,12 @@ def get_client_restricted_contract(db: Session, client_id: UUID, contract: model
             ) for report in contract.crimeReports
         ],
         depositAmountCollectedRestricted=deposit_amount_collected,
-        depositAmountReturnedRestricted=deposit_amount_returned
+        depositAmountReturnedRestricted=deposit_amount_returned,
+        isDraft=contract.isDraft
     )
 
 def get_client_restricted_contracts(db: Session, client_id: UUID) -> list[schemas.ContractRestricted]:
-    contracts = get_contracts(db=db, client_id=client_id)
+    contracts = get_contracts(db=db, client_id=client_id, open=True, closed=True, expired=True, draft=True)
     
     return [
         get_client_restricted_contract(db=db, client_id=client_id, contract=contract)

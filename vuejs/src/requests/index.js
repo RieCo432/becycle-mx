@@ -371,7 +371,7 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getClientContracts(clientId, open, closed, expired) {
+  getClientContracts(clientId, open, closed, expired, draft=true) {
     return axiosClient.get(`/clients/${clientId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -379,10 +379,11 @@ export default {
         open: open,
         closed: closed,
         expired: expired,
+        draft: draft,
       },
     });
   },
-  getBikeContracts(bikeId, open, closed, expired) {
+  getBikeContracts(bikeId, open, closed, expired, draft) {
     return axiosClient.get(`/bikes/${bikeId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -390,18 +391,14 @@ export default {
         open: open,
         closed: closed,
         expired: expired,
+        draft: draft,
       },
     });
   },
-  getMyContracts(open, closed, expired) {
+  getMyContracts() {
     return axiosClient.get('/clients/me/contracts', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
-      params: {
-        open: open,
-        closed: closed,
-        expired: expired,
-      },
     });
   },
   getContract(contractId) {
@@ -920,9 +917,12 @@ export default {
       responseType: 'blob',
     });
   },
-  getContracts(draft=false) {
+  getContracts(open=true, expired=true, closed=true, draft=false) {
     return axiosClient.get('/contracts', {
       params: {
+        open: open,
+        expired: expired,
+        closed: closed,
         draft: draft,
       },
       headers: credentialsStore.getApiRequestHeader(),
