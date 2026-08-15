@@ -3,7 +3,7 @@ from datetime import datetime, date
 from uuid import uuid4
 
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean
+from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import app.services as services
@@ -18,40 +18,42 @@ CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
 class Contract(Base):
     __tablename__ = "contracts"
+    __table_args__ = (
+        CheckConstraint("startdate <= enddate"),
+        CheckConstraint("isdraft = true OR clientid NOT NULL"),
+        CheckConstraint("isdraft = true OR bikeid NOT NULL"),
+        CheckConstraint("isdraft = true OR workinguserid NOT NULL"),
+        CheckConstraint("isdraft = true OR checkinguserid NOT NULL"),
+        CheckConstraint("isdraft = true OR startdate NOT NULL"),
+        CheckConstraint("isdraft = true OR enddate NOT NULL"),
+        CheckConstraint("isdraft = true OR conditionofbike NOT NULL"),
+        CheckConstraint("isdraft = true OR contracttype NOT NULL")
+    )
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
-    clientId: Mapped[UUID] = mapped_column("clientid", ForeignKey("clients.id"), nullable=False, quote=False)
+    clientId: Mapped[UUID] = mapped_column("clientid", ForeignKey("clients.id"), nullable=True, quote=False)
     client: Mapped["Client"] = relationship("Client", back_populates="contracts")
 
-    bikeId: Mapped[UUID] = mapped_column("bikeid", ForeignKey("bikes.id"), nullable=False, quote=False)
+    bikeId: Mapped[UUID] = mapped_column("bikeid", ForeignKey("bikes.id"), nullable=True, quote=False)
     bike: Mapped["Bike"] = relationship("Bike", back_populates="contracts")
 
-    workingUserId: Mapped[UUID] = mapped_column("workinguserid", ForeignKey("users.id"), nullable=False, quote=False)
+    workingUserId: Mapped[UUID] = mapped_column("workinguserid", ForeignKey("users.id"), nullable=True, quote=False)
     workingUser: Mapped["User"] = relationship("User", foreign_keys=[workingUserId], back_populates="workedContracts")
 
-    checkingUserId: Mapped[UUID] = mapped_column("checkinguserid", ForeignKey("users.id"), nullable=False, quote=False)
+    checkingUserId: Mapped[UUID] = mapped_column("checkinguserid", ForeignKey("users.id"), nullable=True, quote=False)
     checkingUser: Mapped["User"] = relationship("User", foreign_keys=[checkingUserId], back_populates="checkedContracts")
-
-    depositCollectingUserId: Mapped[UUID] = mapped_column("depositcollectinguserid", ForeignKey("users.id"), nullable=True, quote=False)  # TODO: needs removed long-term
-    depositCollectingUser: Mapped["User"] = relationship("User", foreign_keys=[depositCollectingUserId], back_populates="depositCollectedContracts")  # TODO: needs removed long-term
 
     returnAcceptingUserId: Mapped[UUID] = mapped_column("returnacceptinguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)
     returnAcceptingUser: Mapped["User"] = relationship("User", foreign_keys=[returnAcceptingUserId], back_populates="returnedContracts")
 
-    depositReturningUserId: Mapped[UUID] = mapped_column("depositreturninguserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False)  # TODO: needs removed long-term
-    depositReturningUser: Mapped["User"] = relationship("User", foreign_keys=[depositReturningUserId], back_populates="depositReturnedContracts")  # TODO: needs removed long-term
-
-    startDate: Mapped[date] = mapped_column("startdate", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, index=True, quote=False)
-    endDate: Mapped[date] = mapped_column("enddate", Date, default=datetime.utcnow().date() + relativedelta(months=CONTRACT_EXPIRE_MONTHS), server_default=text("(current_date at time zone 'utc' + make_interval(months => {:d}))".format(CONTRACT_EXPIRE_MONTHS)), nullable=False, index=True, quote=False)
+    startDate: Mapped[date] = mapped_column("startdate", Date, nullable=True, index=True, quote=False)
+    endDate: Mapped[date] = mapped_column("enddate", Date, nullable=True, index=True, quote=False)
 
     returnedDate: Mapped[date] = mapped_column("returneddate", Date, nullable=True, quote=False, server_default=text("NULL"), default=None)
 
-    depositAmountCollected: Mapped[int] = mapped_column("depositamountcollected", Integer, nullable=True, quote=False)  # TODO: needs removed long-term
-    depositAmountReturned: Mapped[int] = mapped_column("depositamountreturned", Integer, nullable=True, quote=False, server_default=text("NULL"), default=None)  # TODO: needs removed long-term
-
-    conditionOfBike: Mapped[str] = mapped_column("conditionofbike", String(20), nullable=False, quote=False)
-    contractType: Mapped[str] = mapped_column("contracttype", String(20), nullable=False, quote=False)
+    conditionOfBike: Mapped[str] = mapped_column("conditionofbike", String(20), nullable=True, quote=False)
+    contractType: Mapped[str] = mapped_column("contracttype", String(20), nullable=True, quote=False)
 
     notes: Mapped[str] = mapped_column("notes", Text, nullable=True, quote=False)
 
@@ -59,6 +61,7 @@ class Contract(Base):
     expiryReminderSent: Mapped[bool] = mapped_column("expiryremindersent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     liabilityDormantSent: Mapped[bool] = mapped_column("liabilitydormantsent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     returnDetailsSent: Mapped[bool] = mapped_column("returndetailssent", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+    isDraft: Mapped[bool] = mapped_column("isdraft", Boolean, nullable=False, default=True, server_default=text("TRUE"), quote=False)
 
     crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
 
@@ -99,22 +102,16 @@ class Contract(Base):
             str(self.bikeId) == str(other.get("bikeId")),
             str(self.workingUserId) == str(other.get("workingUserId")),
             str(self.checkingUserId) == str(other.get("checkingUserId")),
-            str(self.depositCollectingUserId) == str(other.get("depositCollectingUserId")),
             str(self.returnAcceptingUserId) == str(other.get("returnAcceptingUserId")),
-            str(self.depositReturningUserId) == str(other.get("depositReturningUserId")),
             str(self.startDate) == str(other.get("startDate")),
             str(self.endDate) == str(other.get("endDate")),
             str(self.returnedDate) == str(other.get("returnedDate")),
-            str(self.depositAmountCollected) == str(other.get("depositAmountCollected")),
-            str(self.depositAmountReturned) == str(other.get("depositAmountReturned")),
             str(self.conditionOfBike) == str(other.get("conditionOfBike")),
             str(self.contractType) == str(other.get("contractType")),
             str(self.notes) == str(other.get("notes")),
             str(self.detailsSent) == str(other.get("detailsSent")),
             str(self.expiryReminderSent) == str(other.get("expiryReminderSent")),
             str(self.returnDetailsSent) == str(other.get("returnDetailsSent")),
-            str(self.depositCollectedTransactionHeaderId) == str(other.get("depositCollectedTransactionHeaderId")),
-            str(self.depositSettledTransactionHeaderId) == str(other.get("depositSettledTransactionHeaderId")),
         ])
 
     def __eq__(self, other):
@@ -127,22 +124,16 @@ class Contract(Base):
             str(self.bikeId) == str(other.bikeId),
             str(self.workingUserId) == str(other.workingUserId),
             str(self.checkingUserId) == str(other.checkingUserId),
-            str(self.depositCollectingUserId) == str(other.depositCollectingUserId),
             str(self.returnAcceptingUserId) == str(other.returnAcceptingUserId),
-            str(self.depositReturningUserId) == str(other.depositReturningUserId),
             str(self.startDate) == str(other.startDate),
             str(self.endDate) == str(other.endDate),
             str(self.returnedDate) == str(other.returnedDate),
-            str(self.depositAmountCollected) == str(other.depositAmountCollectedRestricted),
-            str(self.depositAmountReturned) == str(other.depositAmountReturnedRestricted),
             str(self.conditionOfBike) == str(other.conditionOfBike),
             str(self.contractType) == str(other.contractType),
             str(self.notes) == str(other.notes),
             str(self.detailsSent) == str(other.detailsSent),
             str(self.expiryReminderSent) == str(other.expiryReminderSent),
             str(self.returnDetailsSent) == str(other.returnDetailsSent),
-            str(self.depositCollectedTransactionHeaderId) == str(other.depositCollectedTransactionHeaderId),
-            str(self.depositSettledTransactionHeaderId) == str(other.depositSettledTransactionHeaderId),
         ])
 
     def send_creation_email(self):

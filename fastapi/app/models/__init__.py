@@ -13,7 +13,6 @@ from .userPermission import *
 from .group import *
 from .groupUser import *
 from .groupPermission import *
-from .contractDraft import *
 from .crimeReports import *
 from .colours import *
 from .bikeColours import *
