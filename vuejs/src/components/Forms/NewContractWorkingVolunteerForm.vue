@@ -147,6 +147,7 @@ function selectWorkingUser(event, i) {
           type="password"
           placeholder="Password or Pin"
           name="workingUserPasswordOrPin"
+          @keydown.enter.stop.prevent="submit"
           v-model="workingPasswordOrPin"
           :error="workingPasswordOrPinError"
           hasicon/>

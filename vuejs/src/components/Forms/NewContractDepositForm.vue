@@ -117,10 +117,8 @@ onMounted(() => {
 });
 
 const submit = handleSubmit(() => {
-  console.log('submit deposit form, is deposit already collected?', hasDepositCollectedTransactionHeader, ' is currently processing?', checkCurrentlyProcessing());
   if (checkCurrentlyProcessing()) return;
   processingSubmit.value = true;
-  
   if (!hasDepositCollectedTransactionHeader.value) {
     const depositCollectedTransactionDraft = {
       transactionHeader: {
@@ -227,6 +225,7 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
         type="number"
         placeholder="40"
         name="depositAmountCollected"
+        @keydown.enter.stop.prevent
         v-model="depositAmountCollected"
         :error="depositAmountCollectedError"
         :is-readonly="hasDepositCollectedTransactionHeader"
@@ -271,6 +270,7 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
         type="password"
         placeholder="Password"
         name="depositCollectingPassword"
+        @keydown.enter.stop.prevent="submit"
         v-model="depositCollectingPassword"
         :error="depositCollectingPasswordError"
         :is-readonly="hasDepositCollectedTransactionHeader"
