@@ -16,8 +16,10 @@ from .transactions import get_transaction_header, post_transaction_header
 from app.services.accounts_helpers import AccountTypes
 from app.models import TransactionHeader, TransactionLine
 
+CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
-def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True) -> list[models.Contract]:
+
+def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True, draft: bool = False) -> list[models.Contract]:
     primary_query_filter = []
 
     if client_id is not None:
@@ -29,10 +31,11 @@ def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | No
         select(models.Contract)
         .where(
             and_(*primary_query_filter)
+            & (models.Contract.isDraft == draft)
             & (
                 ((models.Contract.returnedDate != None) & closed)
-                | ((models.Contract.returnedDate == None) & (models.Contract.endDate < datetime.utcnow().date()) & expired)
-                | ((models.Contract.returnedDate == None) & (models.Contract.endDate >= datetime.utcnow().date()) & open)
+                | ((models.Contract.returnedDate == None) & ((models.Contract.endDate == None) | (models.Contract.endDate < datetime.utcnow().date())) & expired)
+                | ((models.Contract.returnedDate == None) & ((models.Contract.endDate == None) | (models.Contract.endDate >= datetime.utcnow().date())) & open)
             )
         )
     )]
@@ -80,30 +83,16 @@ def get_contracts_grouped_by_returned_date(db: Session) -> dict[date, list[model
 
 
 def get_contract(db: Session, contract_id: UUID) -> models.Contract:
-    return db.scalar(
+    contract = db.scalar(
         select(models.Contract)
         .where(models.Contract.id == contract_id)
     )
-
-
-def create_contract(
-        contract_data: schemas.ContractCreate,
-        working_user_id: UUID,
-        checking_user_id: UUID,
-        db: Session) -> models.Contract:
-
-    contract = models.Contract(
-        clientId=contract_data.clientId,
-        bikeId=contract_data.bikeId,
-        workingUserId=working_user_id,
-        checkingUserId=checking_user_id,
-        conditionOfBike=contract_data.conditionOfBike,
-        contractType=contract_data.contractType,
-        notes=contract_data.notes
-    )
-
-    db.add(contract)
-    db.commit()
+    if contract is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": f"Contract with id {contract_id} not found."})
+    
+    if contract.isDraft:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": f"Contract with id {contract_id} is a draft."})
+    
     return contract
 
 
@@ -228,13 +217,16 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
 
 
 def get_client_contract(db: Session, client_id: UUID, contract_id: UUID) -> models.Contract:
-    return db.scalar(
+    contract = db.scalar(
         select(models.Contract)
         .where(
             (models.Contract.id == contract_id)
             & (models.Contract.clientId == client_id)
         )
     )
+    if contract is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": f"Contract with id {contract_id} not found."})
+    return contract
 
 
 def get_paper_contract_suggestions(db: Session, old_id: str) -> list[str]:
@@ -245,10 +237,13 @@ def get_paper_contract_suggestions(db: Session, old_id: str) -> list[str]:
 
 
 def get_paper_contract(db: Session, paper_id: str) -> UUID:
-    return db.scalar(
+    id = db.scalar(
         select(models.PaperContract.contractId)
         .where(models.PaperContract.id == paper_id)
     )
+    if id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": f"Paper Contract with id {paper_id} not found."})
+    return id
 
 
 def delete_contract(db: Session, contract_id: UUID) -> None:
@@ -327,47 +322,54 @@ def send_expiry_emails(db: Session):
     db.commit()
 
 
-def start_new_contract(db: Session) -> models.ContractDraft:
-    contract_draft = models.ContractDraft()
+def start_new_contract(db: Session) -> models.Contract:
+    contract_draft = models.Contract(
+        isDraft=True
+    )
 
     db.add(contract_draft)
     db.commit()
 
     return contract_draft
 
-def get_contract_draft(db: Session, contract_draft_id: UUID) -> models.ContractDraft:
-    return db.scalar(
-        select(models.ContractDraft)
-        .where(models.ContractDraft.id == contract_draft_id)
+def get_contract_draft(db: Session, contract_id: UUID) -> models.Contract:
+    contract_draft = db.scalar(
+        select(models.Contract)
+        .where(models.Contract.id == contract_id)
+        .where(models.Contract.isDraft == True)
     )
+    if contract_draft is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract draft not found"})
+
+    return contract_draft
 
 
 def does_contract_draft_exist(db: Session, contract_draft_id: UUID) -> bool:
-    return get_contract_draft(db=db, contract_draft_id=contract_draft_id) is not None
+    return get_contract_draft(db=db, contract_id=contract_draft_id) is not None
 
 
-def update_contract_draft_client(db: Session, contract_draft_id: UUID, client_id: UUID) -> models.ContractDraft:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+def update_contract_draft_client(db: Session, contract_id: UUID, client_id: UUID) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
     contract_draft.clientId = client_id
     db.commit()
     return contract_draft
 
-def update_contract_draft_bike(db: Session, contract_draft_id: UUID, bike_id: UUID) -> models.ContractDraft:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+def update_contract_draft_bike(db: Session, contract_id: UUID, bike_id: UUID) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
     contract_draft.bikeId = bike_id
     db.commit()
     return contract_draft
 
-def update_contract_draft_details(db: Session, contract_draft_id: UUID, contract_draft_details: schemas.ContractDraftDetails) -> models.ContractDraft:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
-    contract_draft.conditionOfBike = contract_draft_details.conditionOfBike
-    contract_draft.contractType = contract_draft_details.contractType
-    contract_draft.notes = contract_draft_details.notes
+def update_contract_draft_details(db: Session, contract_id: UUID, contract_details: schemas.ContractDetails) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
+    contract_draft.conditionOfBike = contract_details.conditionOfBike
+    contract_draft.contractType = contract_details.contractType
+    contract_draft.notes = contract_details.notes
     db.commit()
     return contract_draft
 
-def update_contract_draft_deposit(db: Session, contract_draft_id: UUID, deposit_collected_transaction_header_id: UUID) -> models.ContractDraft:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+def update_contract_draft_deposit(db: Session, contract_id: UUID, deposit_collected_transaction_header_id: UUID) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
     
     transaction_header = db.get(models.TransactionHeader, deposit_collected_transaction_header_id)
     
@@ -382,28 +384,28 @@ def update_contract_draft_deposit(db: Session, contract_draft_id: UUID, deposit_
     
     
     contract_draft.bike.roughValue = max(deposit_amount, 40)
-    contract_draft.depositCollectedTransactionHeaderId = deposit_collected_transaction_header_id
+    transaction_header.contractId = contract_id
     db.commit()
     return contract_draft
 
-def update_contract_draft_working_user(db: Session, contract_draft_id: UUID, working_user: models.User) -> models.ContractDraft:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+def update_contract_draft_working_user(db: Session, contract_draft_id: UUID, working_user: models.User) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_draft_id)
     contract_draft.workingUserId = working_user.id
     db.commit()
     return contract_draft
 
 def is_checking_user_same_as_working_user(db: Session, contract_draft_id: UUID, checking_user: models.User) -> bool:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+    contract_draft = get_contract_draft(db=db, contract_id=contract_draft_id)
     return contract_draft.workingUserId == checking_user.id
 
-def update_contract_draft_checking_user(db: Session, contract_draft_id: UUID, checking_user: models.User) -> models.ContractDraft:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+def update_contract_draft_checking_user(db: Session, contract_id: UUID, checking_user: models.User) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
     contract_draft.checkingUserId = checking_user.id
     db.commit()
     return contract_draft
 
-def does_contract_exist_already(db: Session, contract_draft_id: UUID) -> bool:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+def does_contract_exist_already(db: Session, contract_id: UUID) -> bool:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
 
     matching_contract = db.scalar(
         select(models.Contract)
@@ -411,71 +413,34 @@ def does_contract_exist_already(db: Session, contract_draft_id: UUID) -> bool:
             (models.Contract.clientId == contract_draft.clientId)
             & (models.Contract.bikeId == contract_draft.bikeId)
             & (models.Contract.startDate == contract_draft.startDate)
+            & (models.Contract.id != contract_draft.id)
         )
     )
 
     return matching_contract is not None
 
-def submit_contract(db: Session, contract_draft_id: UUID) -> models.Contract:
-    contract_draft = get_contract_draft(db=db, contract_draft_id=contract_draft_id)
+def submit_contract(db: Session, contract_id: UUID) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
     
-    transaction_header = get_transaction_header(db=db, transaction_header_id=contract_draft.depositCollectedTransactionHeaderId)
-    if transaction_header is None:
+    deposit_collected_transaction_headers = [_ for _ in filter(lambda header: header.event == "deposit_collected", contract_draft.depositTransactionHeaders)]
+    if deposit_collected_transaction_headers is None or len(deposit_collected_transaction_headers) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"description": "Deposit transaction header not found!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    
+    transaction_header = deposit_collected_transaction_headers[0]    
     if transaction_header.postedOn is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Deposit transaction header must be posted before it can be used to collect deposit!"},
         )
     
-    
-    contract = create_contract(
-        contract_data=schemas.ContractCreate(
-            clientId=contract_draft.clientId,
-            bikeId=contract_draft.bikeId,
-            conditionOfBike=contract_draft.conditionOfBike,
-            contractType=contract_draft.contractType,
-            notes=contract_draft.notes
-        ),
-        working_user_id=contract_draft.workingUserId,
-        checking_user_id=contract_draft.checkingUserId,
-        db=db
-    )
-    transaction_header.contractId = contract.id
-
-    db.delete(contract_draft)
+    contract_draft.startDate = datetime.now(timezone.utc).date()
+    contract_draft.endDate = datetime.now(timezone.utc) + relativedelta(months=CONTRACT_EXPIRE_MONTHS)
+    contract_draft.isDraft = False
     db.commit()
-    return contract
-
-
-def get_contract_drafts(db: Session) -> list[models.ContractDraft]:
-    return [_ for _ in db.scalars(
-        select(models.ContractDraft)
-    )]
-
-
-def get_contract_draft_start_dates(db: Session) -> list[date]:
-    return [_ for _ in db.scalars(
-        select(models.ContractDraft.startDate)
-        .distinct()
-    )]
-
-
-def get_contract_drafts_by_start_date(db: Session, start_date: date) -> list[models.ContractDraft]:
-    return [_ for _ in db.scalars(
-        select(models.ContractDraft)
-        .where(models.ContractDraft.startDate == start_date)
-    )]
-
-
-def get_contract_drafts_grouped_by_start_date(db: Session) -> dict[date, list[models.ContractDraft]]:
-    contract_drafts_by_start_date = {start_date: get_contract_drafts_by_start_date(db=db, start_date=start_date) for start_date in get_contract_draft_start_dates(db=db)}
-    return contract_drafts_by_start_date
+    return contract_draft
 
 
 def get_collected_and_returned_deposit_amounts(db: Session, contract_id: UUID) -> tuple[int, int | None]:

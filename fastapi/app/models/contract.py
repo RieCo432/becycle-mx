@@ -13,8 +13,6 @@ from typing import Self, List
 from .transactions import TransactionHeader
 from ..services.accounts_helpers import AccountTypes
 
-CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
-
 
 class Contract(Base):
     __tablename__ = "contracts"

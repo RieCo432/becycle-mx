@@ -24,7 +24,7 @@ const route = useRoute();
 
 const emit = defineEmits(['goBack', 'update:draft']);
 const props = defineProps({
-  draft: {
+  contract: {
     type: Object,
     required: true,
   },
@@ -93,7 +93,7 @@ modelNotInList.value = false;
 
 
 function setDraftBike(bike) {
-  requests.putDraftContractBike(props.draft.id, bike.id)
+  requests.putDraftContractBike(props.contract.id, bike.id)
     .then((response) => {
       emit('update:draft', response.data);
       toast.success('Bike Updated!', {timeout: 5000});
@@ -139,19 +139,19 @@ function filterAndSortColourSuggestions() {
 
 
 onMounted(() => {
-  if (props.draft.bike) {
-    console.log('mounted', props.draft.bike);
-    make.value = props.draft.bike.make;
+  if (props.contract.bike) {
+    console.log('mounted', props.contract.bike);
+    make.value = props.contract.bike.make;
     makeNotInList.value = !makeSuggestions.value.includes(make.value);
-    model.value = props.draft.bike.model;
+    model.value = props.contract.bike.model;
     modelNotInList.value = !modelSuggestions.value.includes(model.value);
-    colours.value = props.draft.bike.colours ?? [];
-    decals.value = props.draft.bike.decals;
-    serialNumber.value = props.draft.bike.serialNumber;
-    bikePhotoTaken.value = props.draft.bikeId != null;
-    stickerOnBike.value = props.draft.bikeId != null;
-    bikeToBeLinked.value = props.draft.bike;
-    matchWithBikeId.value = props.draft.bikeId;
+    colours.value = props.contract.bike.colours ?? [];
+    decals.value = props.contract.bike.decals;
+    serialNumber.value = props.contract.bike.serialNumber;
+    bikePhotoTaken.value = props.contract.bikeId != null;
+    stickerOnBike.value = props.contract.bikeId != null;
+    bikeToBeLinked.value = props.contract.bike;
+    matchWithBikeId.value = props.contract.bikeId;
 
     fetchMakeSuggestions();
     fetchModelSuggestions();
@@ -160,7 +160,7 @@ onMounted(() => {
   }
 });
 
-watch(props.draft, async (newValue) => {
+watch(props.contract, async (newValue) => {
   if (newValue.bike) {
     console.log('watch draft', newValue.bike);
     make.value = newValue.bike.make;
@@ -284,53 +284,53 @@ function getEmptyBike() {
 }
 
 function selectMake(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     make.value = draft.bike.make = filteredMakeSuggestions.value[i];
   } else {
     make.value = draft.bike.make = make.value;
   }
-  emit('update:draft', props.draft);
+  emit('update:draft', props.contract);
 }
 
 function selectModel(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     model.value = draft.bike.model = filteredModelSuggestions.value[i];
   } else {
     model.value = draft.bike.model = model.value;
   }
-  emit('update:draft', props.draft);
+  emit('update:draft', props.contract);
 }
 
 function selectSerialNumber(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     serialNumber.value = draft.bike.serialNumber = filteredSerialNumberSuggestions.value[i];
   } else {
     serialNumber.value = draft.bike.serialNumber = serialNumber.value;
   }
-  emit('update:draft', props.draft);
+  emit('update:draft', props.contract);
 }
 
 function selectColours(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     colours.value = draft.bike.colours = filteredColoursSuggestions.value[i];
   } else {
     colours.value = draft.bike.colours = colours.value;
   }
-  emit('update:draft', props.draft);
+  emit('update:draft', props.contract);
 }
 
 if (route.query.bikeId) {
   requests.getBike(route.query.bikeId)
     .then((response) => {
-      const draft = props.draft;
+      const draft = props.contract;
       draft.bike = response.data;
       bikeToBeLinked.value = response.data;
       emit('update:draft', draft);

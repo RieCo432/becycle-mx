@@ -1,7 +1,7 @@
 <script setup>
 
 import DashButton from '@/components/Button/index.vue';
-import ContractDraftCard from '@/components/Card/ContractDraftCard.vue';
+import ContractCard from '@/components/Card/ContractDraftCard.vue';
 import {defineEmits, ref, onMounted} from 'vue';
 import requests from '@/requests';
 import {VueSpinner} from 'vue3-spinners';
@@ -57,7 +57,7 @@ function selectDraft(draftId) {
 }
 
 onMounted(() => {
-  requests.getContractDrafts()
+  requests.getContracts(true)
     .then((response) => {
       existingContractDrafts.value.splice(0, existingContractDrafts.value.length, ...response.data);
       stepLoading.value = false;
@@ -90,9 +90,9 @@ onMounted(() => {
     </div>
     <template v-for="draft in existingContractDrafts" :key="draft.id">
       <div class="col-span-1">
-        <ContractDraftCard
-          :draft="draft"
-          :continue-draft-function="selectDraft"
+        <ContractCard
+          :contract="draft"
+          :select-contract-function="selectDraft"
         />
       </div>
     </template>
