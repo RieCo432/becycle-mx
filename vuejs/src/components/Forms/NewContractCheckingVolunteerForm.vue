@@ -299,6 +299,7 @@ function selectCheckingUser(event, i) {
           type="password"
           placeholder="Password Or Pin"
           name="checkingPasswordOrPin"
+          @keydown.enter.stop.prevent="submit"
           v-model="checkingPasswordOrPin"
           :error="checkingPasswordOrPinError"
           hasicon/>
