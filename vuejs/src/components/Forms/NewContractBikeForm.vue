@@ -140,7 +140,6 @@ function filterAndSortColourSuggestions() {
 
 onMounted(() => {
   if (props.contract.bike) {
-    console.log('mounted', props.contract.bike);
     make.value = props.contract.bike.make;
     makeNotInList.value = !makeSuggestions.value.includes(make.value);
     model.value = props.contract.bike.model;
@@ -162,7 +161,6 @@ onMounted(() => {
 
 watch(props.contract, async (newValue) => {
   if (newValue.bike) {
-    console.log('watch draft', newValue.bike);
     make.value = newValue.bike.make;
     model.value = newValue.bike.model;
     colours.value = newValue.bike.colours ?? [];

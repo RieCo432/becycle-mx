@@ -186,7 +186,6 @@ function goBack() {
 }
 
 function updateDraft(draft) {
-  console.log('updateDraft', draft);
   currentContractDraft.value = draft;
   nextStep();
 }
