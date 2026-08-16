@@ -3,6 +3,7 @@ import DashButton from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import TransactionLinesTable from '@/components/Tables/TransactionLinesTable.vue';
+import requests from '@/requests';
 
 export default {
   name: 'ContractDraftCard',
@@ -16,6 +17,37 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  data() {
+    return {
+      photoUrls: [],
+      loadingContractPhotos: true,
+    };
+  },
+  methods: {
+    getContractPhoto(photoId) {
+      requests.getContractPhotoUrl(this.contract.id, photoId)
+        .then((response) => {
+          this.photoUrls.push(
+            {
+              id: photoId,
+              url: window.URL.createObjectURL(new Blob([response.data], {type: response.headers['content-type']})),
+            });
+        });
+    },
+    getContractPhotos() {
+      this.loadingContractPhotos = true;
+      requests.getContractPhotoIds(this.contract.id)
+        .then((response) => {
+          for (const photoId of response.data) {
+            this.getContractPhoto(photoId);
+          }
+          this.loadingContractPhotos = false;
+        });
+    },
+  },
+  mounted() {
+    this.getContractPhotos();
   },
 };
 </script>
@@ -38,12 +70,12 @@ export default {
             v-if="contract.bike && contract.bike.colours.length > 0">
           <div :class="`w-full rounded-full overflow-hidden grid grid-cols-${contract.bike.colours.length}`">
             <template
-                v-for="c in contract.bike.colours"
-                :key="c.name"
+              v-for="c in contract.bike.colours"
+              :key="c.name"
             >
               <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
                 <template #button>
-                  <div class="w-full h-5"></div>
+                  <div class="w-full h-5"/>
                 </template>
                 <span>{{ c.name }} ({{ c.hex }})</span>
               </Tooltip>
@@ -94,6 +126,16 @@ export default {
           v-if="contract.depositTransactionHeaders.length > 0"
           :transaction-header="contract.depositTransactionHeaders.find(th => th.event === 'deposit_collected')"/>
         <p v-else class="text-slate-600 dark:text-slate-300">-</p>
+      </div>
+      <div class="col-span-full" v-if="!loadingContractPhotos">
+        <span class="block part-label">Photos</span>
+        <div class="block part-text">
+          <div class="grid grid-cols-8 gap-5">
+            <div v-for="photoUrl in photoUrls" class="col-span-4 lg:col-span-2 min-h-full" :key="photoUrl.id">
+              <img :src="photoUrl.url" alt="Photo" class="w-full h-full"/>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="col-span-full">
         <DashButton

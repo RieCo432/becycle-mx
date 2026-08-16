@@ -115,6 +115,11 @@
         </div>
       </Card>
     </div>
+    <div v-if="!promoting && currentContractDraft" class="col-span-12">
+      <ContractPhotosCard
+        :contract-id="currentContractDraft.id"
+      />
+    </div>
   </div>
 </template>
 <script setup>
@@ -134,6 +139,7 @@ import NewContractDepositForm from '@/components/Forms/NewContractDepositForm.vu
 import requests from '@/requests';
 import router from '@/router';
 import {VueSpinner} from 'vue3-spinners';
+import ContractPhotosCard from '@/components/Card/ContractPhotosCard.vue';
 
 const toast = useToast();
 

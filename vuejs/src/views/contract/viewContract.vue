@@ -18,13 +18,14 @@ import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import TransactionLinesTable from '@/components/Tables/TransactionLinesTable.vue';
-import {useDropzone} from 'vue3-dropzone';
+import ContractPhotosCard from '@/components/Card/ContractPhotosCard.vue';
 
 const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    ContractPhotosCard,
     TransactionLinesTable,
     Modal,
     Tooltip,
@@ -42,22 +43,6 @@ export default {
     const credentialsStore = useCredentialsStore();
     const contractData = toRef(props, 'contract');
     const showDepositTransactions = ref(false);
-    const filesToUpload = ref([]);
-    const fileError = ref(null);
-    function onDrop(acceptFiles) {
-      filesToUpload.value = acceptFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-          contentType: file.type,
-        }),
-      );
-      requests.postNewContractPhotos(contractData.value.id, filesToUpload.value).then((response) => {
-        toast.success('Contract photos uploaded successfully', {timeout: 2000});
-        filesToUpload.value = [];
-        context.emit('contractPhotosUploaded', response.data);
-      });
-    }
-    const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: true});
     const depositAmountCollected = computed(() => {
       return Math.abs(
         contractData.value.depositTransactionHeaders?.find((header) => header.event === 'deposit_collected') ?
@@ -256,11 +241,6 @@ export default {
       returnAcceptingPasswordOrPinError,
 
       userSelectionOptionsStatic,
-      getInputProps,
-      getRootProps,
-      fileError,
-      filesToUpload,
-      ...rest,
 
       submit,
       steps,
@@ -853,55 +833,7 @@ export default {
             </div>
           </Card>
         </div>
-        <template v-if="!loadingContractPhotos && isUser">
-          <div class="col-span-12">
-            <Card title="Photos">
-              <div class="grid grid-cols-12 gap-5">
-                <div v-for="photoUrl in photoUrls" class="col-span-4 lg:col-span-2 min-h-full" :key="photoUrl.id">
-                  <img :src="photoUrl.url" alt="Photo" class="w-full h-auto"/>
-                  <DashButton @click="deleteContractPhoto(photoUrl.id)" class="bg-danger-500 dark:bg-danger-500" >
-                    <Icon icon="heroicons-outline:trash" />
-                  </DashButton>
-                </div>
-                <div class="col-span-4 lg:col-span-2 h-full">
-                  <div class="h-full">
-                    <div
-                      v-bind="getRootProps()"
-                      :class="'w-full h-full text-center border rounded flex flex-col justify-center items-center '
-                    + (fileError ? 'border-danger-500 border-solid' : 'border-secondary-500 border-dashed')
-                    "
-                    >
-                      <div v-if="filesToUpload.length === 0" class="h-full w-full">
-                        <input v-bind="getInputProps()" class="hidden" />
-                        <img src="@/assets/images/svg/upload.svg" alt="" class="mx-auto mb-4" />
-                        <p
-                          v-if="isDragActive"
-                          class="text-sm text-slate-500 dark:text-slate-300 font-light"
-                        >
-                          Drop the files here ...
-                        </p>
-                        <p v-else class="text-sm text-slate-500 dark:text-slate-300 font-light">
-                          Drop files here or click to upload.
-                        </p>
-                      </div>
-                      <div v-else class="flex w-full h-full justify-center align-middle">
-                        <div v-for="fileToUpload in filesToUpload" :key="fileToUpload.name">
-                          <img
-                            v-if="fileToUpload.contentType.startsWith('image/')"
-                            :src="fileToUpload.preview"
-                            class="object-contain block rounded-md"
-                            alt="Photo"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-<!--                  <ErrorMessage name="file" :error="fileError" class="text-danger-500"/>-->
-                </div>
-              </div>
-            </Card>
-          </div>
-        </template>
+        <ContractPhotosCard v-if="isUser && !loadingContract" :contract-id="contract.id"/>
         <template v-if="!loadingContract">
           <template v-if="
           isUser &&
@@ -975,6 +907,3 @@ export default {
   </div>
 </template>
 
-<style scoped lang="scss">
-
-</style>
