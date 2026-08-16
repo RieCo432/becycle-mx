@@ -2,7 +2,6 @@
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import Icon from '@/components/Icon/index.vue';
-import {string} from 'yup';
 import requests from '@/requests';
 import {useDropzone} from 'vue3-dropzone';
 import {onMounted, ref, toRef} from 'vue';
@@ -25,11 +24,10 @@ export default {
     const fileError = ref(null);
     const photoUrls = ref([]);
     const loadingContractPhotos = ref(false);
-    
+
     function getContractPhoto(photoId) {
       requests.getContractPhotoUrl(contractId.value, photoId)
         .then((response) => {
-          console.log(response, response.headers['content-type']);
           photoUrls.value.push(
             {
               id: photoId,
@@ -54,7 +52,7 @@ export default {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         });
     }
-    
+
     function deleteContractPhoto(photoId) {
       if (confirm('Are you sure you want to delete this photo?')) {
         requests.deleteContractPhoto(contractId.value, photoId).then((response) => {
@@ -65,7 +63,11 @@ export default {
         });
       }
     }
-    
+
+    function openPhoto(url) {
+      window.open(url, '_blank');
+    }
+
     function onDrop(acceptFiles) {
       filesToUpload.value = acceptFiles.map((file) =>
         Object.assign(file, {
@@ -82,11 +84,11 @@ export default {
       });
     }
     const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: true});
-    
+
     onMounted(() => {
       getContractPhotos();
     });
-    
+
     return {
       getInputProps,
       getRootProps,
@@ -96,6 +98,7 @@ export default {
       photoUrls,
       deleteContractPhoto,
       loadingContractPhotos,
+      openPhoto,
     };
   },
 };
@@ -115,7 +118,7 @@ export default {
                 <Icon icon="heroicons-outline:trash"/>
               </DashButton>
               <div class="w-full h-auto rounded-md p-4">
-                <img :src="photoUrl.url" alt="Photo" class="w-full h-full"/>
+                <img :src="photoUrl.url" alt="Photo" class="w-full h-full" @click="() => openPhoto(photoUrl.url)"/>
               </div>
 
             </div>

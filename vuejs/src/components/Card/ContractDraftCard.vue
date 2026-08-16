@@ -45,6 +45,9 @@ export default {
           this.loadingContractPhotos = false;
         });
     },
+    openPhoto(url) {
+      window.open(url, '_blank');
+    },
   },
   mounted() {
     this.getContractPhotos();
@@ -132,7 +135,7 @@ export default {
         <div class="block part-text">
           <div class="grid grid-cols-8 gap-5">
             <div v-for="photoUrl in photoUrls" class="col-span-4 lg:col-span-2 min-h-full" :key="photoUrl.id">
-              <img :src="photoUrl.url" alt="Photo" class="w-full h-full"/>
+              <img :src="photoUrl.url" alt="Photo" class="w-full h-full" @click="() => openPhoto(photoUrl.url)"/>
             </div>
           </div>
         </div>
