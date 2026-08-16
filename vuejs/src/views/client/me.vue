@@ -105,7 +105,6 @@ export default {
     this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
       const bike = (await requests.getClientBike(contract.bikeId)).data;
       let status = 'active';
-      console.log('my contract', contract);
       if (contract.isDraft) {
         status = 'draft';
       } else if (contract.returnedDate != null) {

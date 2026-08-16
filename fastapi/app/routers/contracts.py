@@ -1,7 +1,9 @@
 from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+
 import app.crud as crud
 import app.dependencies as dep
 import app.models as models
@@ -166,6 +168,55 @@ async def patch_contract(
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
     return crud.patch_contract_details(db=db, contract_id=contract_id, contract_patch_data=contract_patch_data)
+
+
+@contracts.get("/contracts/{contract_id}/photos")
+async def get_contract_photos(
+        contract_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> list[UUID]:
+    contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    return crud.get_contract_photos_ids(db=db, contract_id=contract_id)
+
+
+@contracts.get("/contracts/{contract_id}/photos/{contract_photo_id}")
+async def get_contract_photo(
+        contract_id: UUID,
+        contract_photo_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> FileResponse:
+    contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    return FileResponse(**crud.get_contract_photo(db=db, contract_id=contract_id, contract_photo_id=contract_photo_id))
+
+
+@contracts.post("/contracts/{contract_id}/photos")
+async def post_contract_photos(
+        contract_id: UUID,
+        photos: list[UploadFile],
+        db: Session = Depends(dep.get_db)
+) -> list[UUID]:
+
+    contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    return crud.add_photos_to_contract(db=db, contract_id=contract_id, photos=photos)
+
+
+@contracts.delete("/contracts/{contract_id}/photos/{contract_photo_id}")
+async def delete_contract_photo(
+        contract_id: UUID,
+        contract_photo_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> None:
+    contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    
+    crud.delete_contract_photo(db=db, contract_id=contract_id, contract_photo_id=contract_photo_id)
 
 
 @contracts.patch("/contracts/{contract_id}/return")

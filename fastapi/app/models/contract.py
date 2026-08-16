@@ -10,6 +10,8 @@ import app.services as services
 from app.database.db import Base
 
 from typing import Self, List
+
+from .contractPhoto import ContractPhoto
 from .transactions import TransactionHeader
 from ..services.accounts_helpers import AccountTypes
 
@@ -64,6 +66,7 @@ class Contract(Base):
     crimeReports: Mapped[List["CrimeReport"]] = relationship("CrimeReport", back_populates="contract")
 
     depositTransactionHeaders: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.contractId], back_populates="contract")
+    photos: Mapped[List["ContractPhoto"]] = relationship("ContractPhoto", foreign_keys=[ContractPhoto.contractId], back_populates="contract")
 
     @property
     def liability_collected(self) -> int:

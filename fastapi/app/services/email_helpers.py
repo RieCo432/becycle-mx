@@ -37,7 +37,7 @@ def send_email(destination: str, subject: str, content: str) -> bool:
 
     message.attach(MIMEText(content, "html"))
 
-    if True or PRODUCTION:
+    if PRODUCTION:
         try:
             context = ssl.create_default_context()
     

@@ -9,6 +9,7 @@ import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 import nfc from '@/nfc';
 import {useToast} from 'vue-toastification';
 import Tooltip from '@/components/Tooltip/index.vue';
+import {Icon} from '@iconify/vue';
 
 const credentialsStore = useCredentialsStore();
 const toast = useToast();
@@ -16,6 +17,7 @@ const toast = useToast();
 export default {
   name: 'clientView',
   components: {
+    Icon,
     Tooltip,
     EditBikeDetailsModal,
     ContractBikeCardSkeleton,
@@ -31,6 +33,7 @@ export default {
       loadingBikeDetails: true,
       showEditBikeDetailsModal: false,
       isInWriteMode: false,
+      photoUrls: [],
       contractActions: [
         {
           name: 'View',
@@ -118,6 +121,7 @@ export default {
       })).then((contractSummaries) => {
         this.contractSummaries = contractSummaries;
         this.loadingContracts = false;
+        this.getAllBikePhotos();
       });
     });
   },
@@ -132,6 +136,43 @@ export default {
     },
     openEditBikeDetailsModal() {
       this.showEditBikeDetailsModal = true;
+    },
+    getContractPhoto(contractId, photoId) {
+      requests.getContractPhotoUrl(contractId, photoId)
+        .then((response) => {
+          this.photoUrls.push(
+            {
+              id: photoId,
+              contractId: contractId,
+              url: window.URL.createObjectURL(new Blob([response.data], {type: response.headers['content-type']})),
+            });
+        });
+    },
+    getContractPhotos(contractId) {
+      requests.getContractPhotoIds(contractId)
+        .then((response) => {
+          for (const photoId of response.data) {
+            this.getContractPhoto(contractId, photoId);
+          }
+        });
+    },
+    getAllBikePhotos() {
+      this.contractSummaries.forEach((contractSummary) => {
+        this.getContractPhotos(contractSummary.id);
+      });
+    },
+    deleteContractPhoto(contractId, photoId) {
+      if (confirm('Are you sure you want to delete this photo?')) {
+        requests.deleteContractPhoto(contractId, photoId).then((response) => {
+          toast.success('Contract photo deleted successfully', {timeout: 2000});
+          this.photoUrls.splice(this.photoUrls.findIndex((photoUrl) => photoUrl.id === photoId), 1);
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+      }
+    },
+    openPhoto(url) {
+      window.open(url, '_blank');
     },
     writeBikeDetailsToNfcTag() {
       this.isInWriteMode = true;
@@ -224,6 +265,25 @@ export default {
                 title="Contracts"
                 :view-contract="viewContract">
             </ContractSummaryTable>
+          </div>
+        </div>
+      </Card>
+    </div>
+    <div class="col-span-full">
+      <Card title="Photos">
+        <div class="grid grid-cols-12 gap-5">
+          <div v-for="photoUrl in photoUrls" class="col-span-4 lg:col-span-2 min-h-full" :key="photoUrl.id">
+            <div class="relative inline-block w-full">
+              <DashButton
+                @click="() => deleteContractPhoto(photoUrl.contractId, photoUrl.id)"
+                class="absolute top-0 right-0 z-10 rounded-full bg-danger-500 dark:bg-danger-500 shadow-lg"
+              >
+                <Icon icon="heroicons-outline:trash"/>
+              </DashButton>
+              <div class="w-full h-auto rounded-md p-4">
+                <img :src="photoUrl.url" alt="Photo" class="w-full h-full" @click="() => openPhoto(photoUrl.url)"/>
+              </div>
+            </div>
           </div>
         </div>
       </Card>

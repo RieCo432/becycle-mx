@@ -1,16 +1,16 @@
 import os
 
 from datetime import date, datetime, timezone
+from math import ceil
 from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 
 import app.models as models
 import app.schemas as schemas
-
 
 from .transactions import get_transaction_header, post_transaction_header
 from app.services.accounts_helpers import AccountTypes
@@ -641,3 +641,100 @@ def send_contract_grace_period_ended_emails(db: Session) -> None:
     for contract in unnotified_contracts_with_dormant_liabilities:
         contract.liabilityDormantSent = contract.send_contract_grace_period_ended_email()
         db.commit()
+
+
+def save_contract_photo(db: Session, contract_id: UUID, photo: UploadFile, auto_commit: bool = True) -> models.ContractPhoto:
+    if get_contract(db=db, contract_id=contract_id, throw_on_draft=False) is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    
+    if not photo.content_type.startswith("image"):
+        raise HTTPException(status_code=400, detail={"description": "Invalid file type"})
+        
+    from PIL import Image
+
+    current_dir = os.path.dirname(__file__)
+    temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
+    output_file_path = os.path.join(temp_data_dir, photo.filename)
+
+    with Image.open(photo.file) as image:
+        larger = max(image.size)
+
+        if larger > 4096:
+            ratio = int(ceil(larger / 4096))
+            image = image.reduce(ratio)
+
+        image.save(output_file_path)
+
+    with open(output_file_path, "rb") as fin:
+        new_contract_photo = models.ContractPhoto(
+            contractId=contract_id,
+            contentType=photo.content_type,
+            content=fin.read(),
+        )
+
+    db.add(new_contract_photo)
+    if auto_commit:
+        db.commit()
+    
+    return new_contract_photo
+
+
+def add_photos_to_contract(db: Session, contract_id: UUID, photos: list[UploadFile]) -> list[UUID]:
+    contract = get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    
+    contract_photos = []
+    for photo in photos:
+        new_photo = save_contract_photo(db=db, contract_id=contract_id, photo=photo, auto_commit=False)
+        contract_photos.append(new_photo)
+    
+    db.commit()
+    for photo in contract_photos:
+        db.refresh(photo)
+        
+    return [photo.id for photo in contract_photos]
+
+
+def delete_contract_photo(db: Session, contract_id: UUID, contract_photo_id: UUID) -> None:
+    contract = get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    
+    photo = db.scalar(
+        select(models.ContractPhoto)
+        .where(models.ContractPhoto.contractId == contract_id)
+        .where(models.ContractPhoto.id == contract_photo_id)
+    )
+    db.delete(photo)
+    db.commit()
+    
+    
+def get_contract_photo(db: Session, contract_id: UUID, contract_photo_id: UUID) -> dict[str, str]:
+    contract = get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    
+    photo = db.scalar(
+        select(models.ContractPhoto)
+        .where(models.ContractPhoto.contractId == contract_id)
+        .where(models.ContractPhoto.id == contract_photo_id)
+    )
+    
+    current_dir = os.path.dirname(__file__)
+    temp_data_dir = os.path.join(os.path.dirname(current_dir), "data", "temp")
+
+    output_file_path = os.path.join(temp_data_dir, str(photo.id))
+
+    with open(output_file_path, "wb") as fout:
+        fout.write(photo.content)
+
+    return {"path": output_file_path, "media_type": photo.contentType}
+
+
+def get_contract_photos_ids(db: Session, contract_id: UUID) -> list[UUID]:
+    photos_ids = db.scalars(
+        select(models.ContractPhoto.id)
+        .where(models.ContractPhoto.contractId == contract_id)
+    )
+
+    return [photo_id for photo_id in photos_ids]
+        

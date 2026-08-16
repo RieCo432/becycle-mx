@@ -6,12 +6,14 @@ import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vu
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 import EditContractDetailsModal from '@/components/Modal/EditContractDetailsModal.vue';
 import Modal from '@/components/Modal/Modal.vue';
+import Card from '@/components/Card/index.vue';
 
 const toast = useToast();
 
 export default {
   name: 'contractIndex',
   components: {
+    Card,
     Modal,
     EditContractDetailsModal,
     EditBikeDetailsModal,
@@ -46,6 +48,9 @@ export default {
       showEditBikeDetailsModal: false,
       showEditContractDetailsModal: false,
       isUserAdmin: false,
+      photoUrls: [],
+      loadingContractPhotos: false,
+      photoUrl: null,
     };
   },
   methods: {
@@ -180,6 +185,8 @@ export default {
         :open-edit-contract-details-modal="() => showEditContractDetailsModal = true"
         :patch-close-crime-report="patchCloseCrimeReport"
         @crime-report-added="(crimeReport) => (contract.crimeReports.push(crimeReport))"
+        :loading-contract-photos="loadingContractPhotos"
+        :photo-urls="photoUrls"
     ></view-contract>
     <EditClientDetailsModal v-if="!loadingClient"
                             :close-modal="() => showEditClientDetailsModal = false"
