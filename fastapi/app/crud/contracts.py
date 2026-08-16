@@ -679,20 +679,31 @@ def save_contract_photo(db: Session, contract_id: UUID, photo: UploadFile, auto_
     return new_contract_photo
 
 
-def add_photos_to_contract(db: Session, contract_id: UUID, photos: list[UploadFile]) -> models.Contract:
+def add_photos_to_contract(db: Session, contract_id: UUID, photos: list[UploadFile]) -> list[UUID]:
     contract = get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
     
+    contract_photos = []
     for photo in photos:
-        save_contract_photo(db=db, contract_id=contract_id, photo=photo, auto_commit=False)
+        new_photo = save_contract_photo(db=db, contract_id=contract_id, photo=photo, auto_commit=False)
+        contract_photos.append(new_photo)
     
     db.commit()
-    return contract
+    for photo in contract_photos:
+        db.refresh(photo)
+        
+    return [photo.id for photo in contract_photos]
 
 
 def delete_contract_photo(db: Session, contract_id: UUID, contract_photo_id: UUID) -> None:
-    photo = get_contract_photo(db=db, contract_id=contract_id, contract_photo_id=contract_photo_id)
-    if photo is None:
-        raise HTTPException(status_code=404, detail={"description": "Contract photo not found"})
+    contract = get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    
+    photo = db.scalar(
+        select(models.ContractPhoto)
+        .where(models.ContractPhoto.contractId == contract_id)
+        .where(models.ContractPhoto.id == contract_photo_id)
+    )
     db.delete(photo)
     db.commit()
     

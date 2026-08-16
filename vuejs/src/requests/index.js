@@ -1732,4 +1732,36 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getContractPhotoIds(contractId) {
+    return axiosClient.get(`/contracts/${contractId}/photos`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getContractPhotoUrl(contractId, photoId) {
+    return axiosClient.get(`/contracts/${contractId}/photos/${photoId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  postNewContractPhotos(contractId, photos) {
+    const formData = new FormData();
+    photos.forEach((file) => {
+      formData.append('photos', file);
+    });
+    return axiosClient.post(`/contracts/${contractId}/photos`, formData, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteContractPhoto(contractId, photoId) {
+    return axiosClient.delete(`/contracts/${contractId}/photos/${photoId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

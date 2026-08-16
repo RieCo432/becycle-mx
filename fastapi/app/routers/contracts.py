@@ -198,7 +198,7 @@ async def post_contract_photos(
         contract_id: UUID,
         photos: list[UploadFile],
         db: Session = Depends(dep.get_db)
-) -> schemas.Contract:
+) -> list[UUID]:
 
     contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
     if contract is None:

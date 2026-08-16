@@ -6,12 +6,14 @@ import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vu
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 import EditContractDetailsModal from '@/components/Modal/EditContractDetailsModal.vue';
 import Modal from '@/components/Modal/Modal.vue';
+import Card from '@/components/Card/index.vue';
 
 const toast = useToast();
 
 export default {
   name: 'contractIndex',
   components: {
+    Card,
     Modal,
     EditContractDetailsModal,
     EditBikeDetailsModal,
@@ -46,6 +48,9 @@ export default {
       showEditBikeDetailsModal: false,
       showEditContractDetailsModal: false,
       isUserAdmin: false,
+      photoUrls: [],
+      loadingContractPhotos: false,
+      photoUrl: null,
     };
   },
   methods: {
@@ -91,6 +96,48 @@ export default {
           toast.error(error.response.data.detail.description, {timeout: 2000});
         });
     },
+    getContractPhoto(photoId) {
+      requests.getContractPhotoUrl(this.$route.params.contractId, photoId)
+        .then((response) => {
+          console.log(response, response.headers['content-type']);
+          this.photoUrls.push(
+            {
+              id: photoId,
+              url: window.URL.createObjectURL(new Blob([response.data], {type: response.headers['content-type']})),
+            });
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+    },
+    getContractPhotos() {
+      this.loadingContractPhotos = true;
+      requests.getContractPhotoIds(this.$route.params.contractId)
+        .then((response) => {
+          for (const photoId of response.data) {
+            this.getContractPhoto(photoId);
+          }
+          this.loadingContractPhotos = false;
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+    },
+    handleNewContractPhotosUploaded(newPhotoIds) {
+      newPhotoIds.forEach((photoId) => {
+        this.getContractPhoto(photoId);
+      });
+    },
+    deleteContractPhoto(photoId) {
+      if (confirm('Are you sure you want to delete this photo?')) {
+        requests.deleteContractPhoto(this.contract.id, photoId).then((response) => {
+          toast.success('Contract photo deleted successfully', {timeout: 2000});
+          this.photoUrls.splice(this.photoUrls.findIndex((photoUrl) => photoUrl.id === photoId), 1);
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+      }
+    },
     patchContractReturn(depositSettledTransactionHeaderId, depositReturningUser, depositReturningPassword,
       returnAcceptingUser, returnAcceptingPasswordOrPin) {
       requests.patchReturnContract(this.contract.id, depositSettledTransactionHeaderId,
@@ -126,6 +173,7 @@ export default {
   },
   mounted() {
     this.getContract();
+    this.getContractPhotos();
 
     requests.getAccounts([{name: 'types', value: 'liability'}, {name: 'ui_filters', value: 'return'}]).then((response) => {
       this.depositLiabilityAccounts = response.data;
@@ -180,6 +228,10 @@ export default {
         :open-edit-contract-details-modal="() => showEditContractDetailsModal = true"
         :patch-close-crime-report="patchCloseCrimeReport"
         @crime-report-added="(crimeReport) => (contract.crimeReports.push(crimeReport))"
+        :loading-contract-photos="loadingContractPhotos"
+        :photo-urls="photoUrls"
+        @contract-photos-uploaded="handleNewContractPhotosUploaded"
+        :delete-contract-photo="deleteContractPhoto"
     ></view-contract>
     <EditClientDetailsModal v-if="!loadingClient"
                             :close-modal="() => showEditClientDetailsModal = false"
