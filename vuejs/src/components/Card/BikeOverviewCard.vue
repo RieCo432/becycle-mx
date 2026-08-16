@@ -3,12 +3,13 @@ import Card from '@/components/Card/index.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import TextLabelWithPillBadgeIndicatingMatch from '@/components/Card/TextLabelWithPillBadgeIndicatingMatch.vue';
 import requests from '@/requests';
-import DashButton from '@/components/Button/index.vue';
 import Badge from '@/components/Badge/index.vue';
+import {VueSpinner} from 'vue3-spinners';
+import {Icon} from '@iconify/vue';
 
 export default {
   name: 'BikeOverviewCard',
-  components: {Badge, DashButton, TextLabelWithPillBadgeIndicatingMatch, Tooltip, Card},
+  components: {Icon, VueSpinner, Badge, TextLabelWithPillBadgeIndicatingMatch, Tooltip, Card},
   props: {
     bike: {
       type: Object,
@@ -27,39 +28,46 @@ export default {
   },
   data() {
     return {
-      loadedPhotos: false,
       photoUrls: [],
     };
   },
   methods: {
-    getContractPhoto(contractId, photoId) {
-      requests.getContractPhotoUrl(contractId, photoId)
+    getContractPhoto(photo) {
+      if (this.photoUrls.find((photoUrl) => photoUrl.id === photo.id).url !== null) {
+        return;
+      }
+      requests.getContractPhotoUrl(photo.contractId, photo.id)
         .then((response) => {
-          this.photoUrls.push(
-            {
-              id: photoId,
-              contractId: contractId,
-              url: window.URL.createObjectURL(new Blob([response.data], {type: response.headers['content-type']})),
-            });
-        });
-    },
-    getContractPhotos(contractId) {
-      requests.getContractPhotoIds(contractId)
-        .then((response) => {
-          for (const photoId of response.data) {
-            if (!this.photoUrls.some((photoUrl) => photoUrl.id === photoId)) {
-              this.getContractPhoto(contractId, photoId);
-            }
-          }
+          photo.url = window.URL.createObjectURL(new Blob([response.data], {type: response.headers['content-type']}));
+          photo.loading = false;
+          this.photoUrls.splice(this.photoUrls.findIndex((photoUrl) => photoUrl.id === photo.id), 1, photo);
+        })
+        .catch((error) => {
+          photo.loading = false;
+          this.photoUrls.splice(this.photoUrls.findIndex((photoUrl) => photoUrl.id === photo.id), 1, photo);
         });
     },
     getAllBikePhotos() {
       if (this.bike) {
         requests.getBikeContracts(this.bike.id, true, true, true, true)
           .then((response) => {
-            response.data.forEach((contract) => {
-              this.getContractPhotos(contract.id);
-            });
+            this.photoUrls.splice(0, this.photoUrls.length);
+            const contractIds = response.data.map((contract) => contract.id);
+            Promise.all(response.data.map((contract) => (requests.getContractPhotoIds(contract.id))))
+              .then((responses) => {
+                responses.forEach((response, i) => {
+                  const contractId = contractIds[i];
+                  this.photoUrls.push(...response.data.map((photoId) => ({
+                    id: photoId,
+                    contractId: contractId,
+                    loading: true,
+                    url: null,
+                  })));
+                });
+                this.photoUrls.forEach((photoUrl) => {
+                  this.getContractPhoto(photoUrl);
+                });
+              });
           });
       }
     },
@@ -81,8 +89,8 @@ export default {
     this.getAllBikePhotos();
   },
   watch: {
-    bike(newValue) {
-      if (newValue) {
+    bike(newValue, oldValue) {
+      if (!oldValue && newValue) {
         this.getAllBikePhotos();
       }
     },
@@ -117,7 +125,13 @@ export default {
         <div class="col-span-2">
           <TextLabelWithPillBadgeIndicatingMatch
               :field-data="bike.decals && bike.decals !== '' ? bike.decals : null"
-              :search-data="bikeSearch ? (bikeSearch.decals && bikeSearch.decals !== '' ? bikeSearch.decals : null) : bike.decals && bike.decals !== '' ? bike.decals : null"
+              :search-data="bikeSearch
+                ? (bikeSearch.decals && bikeSearch.decals !== ''
+                  ? bikeSearch.decals
+                  : null)
+                : bike.decals && bike.decals !== ''
+                  ? bike.decals
+                  : null"
               field-name="Decals"/>
         </div>
         <div class="col-span-2">
@@ -159,10 +173,23 @@ export default {
             label="Photos"
             badgeClass="bg-opacity-[0.12] pill bg-primary-500 text-primary-500"
           />
-          <div class="mt-2 grid grid-cols-12 gap-5">
-            <div v-for="photoUrl in photoUrls" class="col-span-4 lg:col-span-3 min-h-full" :key="photoUrl.id">
+          <div class="mt-2 grid grid-cols-3 lg:grid-cols-4 gap-5">
+            <div v-for="photoUrl in photoUrls" class="col-span-1 min-h-full" :key="photoUrl.id">
               <div class="w-full h-auto rounded-md">
-                <img :src="photoUrl.url" alt="Photo" class="w-full h-full" @click="() => openPhoto(photoUrl.url)"/>
+                <VueSpinner
+                  v-if="photoUrl.loading"
+                  size="20px"
+                  class="text-sky-500"/>
+                <img
+                  v-if="photoUrl.url && !photoUrl.loading"
+                  :src="photoUrl.url"
+                  alt="Photo"
+                  class="w-full h-full"
+                  @click="() => openPhoto(photoUrl.url)"/>
+                <Icon
+                  icon="heroicons-outline:exclamation-circle"
+                  class="h-full w-full p-5 text-danger-700 dark:text-danger-400"
+                  v-if="!photoUrl.url && !photoUrl.loading"></Icon>
               </div>
             </div>
           </div>
