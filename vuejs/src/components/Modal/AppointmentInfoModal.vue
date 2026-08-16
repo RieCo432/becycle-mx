@@ -95,11 +95,11 @@
                 <template v-if="appointment.startDateTime < new Date()">
                   <DashButton
                       class="bg-danger-500 dark:bg-danger-500"
-                      @click="() => markDidClientShowUp(false)"
+                      @click="() => markDidClientShowUp(appointment.didClientShowUp === false ? null : false)"
                   >
-                    <NoInputCheckbox 
-                      :value="!appointment.didClientShowUp" 
-                      active-class=" ring-danger-500  bg-danger-900 dark:bg-danger-700 
+                    <NoInputCheckbox
+                      :value="appointment.didClientShowUp === false"
+                      active-class=" ring-danger-500  bg-danger-900 dark:bg-danger-700
                         dark:ring-danger-700 ring-offset-2 dark:ring-offset-danger-800 "
                       inactive-class=" bg-danger-100 dark:bg-danger-600 dark:border-danger-600 "
                       text-class=" text-white dark:text-white "
@@ -108,11 +108,11 @@
                   </DashButton>
                   <DashButton
                     class="bg-success-500 dark:bg-success-500"
-                    @click="() => markDidClientShowUp(true)"
+                    @click="() => markDidClientShowUp(appointment.didClientShowUp === true ? null : true)"
                   >
-                    <NoInputCheckbox 
+                    <NoInputCheckbox
                       :value="appointment.didClientShowUp"
-                      active-class=" ring-success-500  bg-success-900 dark:bg-success-700 
+                      active-class=" ring-success-500  bg-success-900 dark:bg-success-700
                         dark:ring-success-700 ring-offset-2 dark:ring-offset-success-800 "
                       inactive-class=" bg-success-100 dark:bg-success-600 dark:border-success-600 "
                       text-class=" text-white dark:text-white "
@@ -153,7 +153,6 @@ import {
 } from '@headlessui/vue';
 import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
 import AppointmentCancellationModal from '@/components/Modal/AppointmentCancellationModal.vue';
-import Checkbox from '@/components/Checkbox/index.vue';
 import NoInputCheckbox from '@/components/NoInputCheckbox/NoInputCheckbox.vue';
 
 const toast = useToast();
@@ -162,7 +161,6 @@ export default {
   name: 'appointmentInfoModal',
   components: {
     NoInputCheckbox,
-    Checkbox,
     AppointmentCancellationModal,
     Icon,
     TransitionRoot,
