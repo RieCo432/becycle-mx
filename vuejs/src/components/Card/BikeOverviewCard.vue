@@ -2,10 +2,13 @@
 import Card from '@/components/Card/index.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import TextLabelWithPillBadgeIndicatingMatch from '@/components/Card/TextLabelWithPillBadgeIndicatingMatch.vue';
+import requests from '@/requests';
+import DashButton from '@/components/Button/index.vue';
+import Badge from '@/components/Badge/index.vue';
 
 export default {
   name: 'BikeOverviewCard',
-  components: {TextLabelWithPillBadgeIndicatingMatch, Tooltip, Card},
+  components: {Badge, DashButton, TextLabelWithPillBadgeIndicatingMatch, Tooltip, Card},
   props: {
     bike: {
       type: Object,
@@ -20,6 +23,68 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+  },
+  data() {
+    return {
+      loadedPhotos: false,
+      photoUrls: [],
+    };
+  },
+  methods: {
+    getContractPhoto(contractId, photoId) {
+      requests.getContractPhotoUrl(contractId, photoId)
+        .then((response) => {
+          this.photoUrls.push(
+            {
+              id: photoId,
+              contractId: contractId,
+              url: window.URL.createObjectURL(new Blob([response.data], {type: response.headers['content-type']})),
+            });
+        });
+    },
+    getContractPhotos(contractId) {
+      requests.getContractPhotoIds(contractId)
+        .then((response) => {
+          for (const photoId of response.data) {
+            if (!this.photoUrls.some((photoUrl) => photoUrl.id === photoId)) {
+              this.getContractPhoto(contractId, photoId);
+            }
+          }
+        });
+    },
+    getAllBikePhotos() {
+      if (this.bike) {
+        requests.getBikeContracts(this.bike.id, true, true, true, true)
+          .then((response) => {
+            response.data.forEach((contract) => {
+              this.getContractPhotos(contract.id);
+            });
+          });
+      }
+    },
+    deleteContractPhoto(contractId, photoId) {
+      if (confirm('Are you sure you want to delete this photo?')) {
+        requests.deleteContractPhoto(contractId, photoId).then((response) => {
+          toast.success('Contract photo deleted successfully', {timeout: 2000});
+          this.photoUrls.splice(this.photoUrls.findIndex((photoUrl) => photoUrl.id === photoId), 1);
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+      }
+    },
+    openPhoto(url) {
+      window.open(url, '_blank');
+    },
+  },
+  mounted() {
+    this.getAllBikePhotos();
+  },
+  watch: {
+    bike(newValue) {
+      if (newValue) {
+        this.getAllBikePhotos();
+      }
     },
   },
 };
@@ -72,7 +137,7 @@ export default {
               :search-data="bikeSearch ? bikeSearch.colours?.map((c) => c.hex) : bike.colours?.map((c) => c.hex)"
               :field-data="bike.colours?.map((c) => c.hex)"
               field-name="Colours">
-            <div class="h-10 rounded-full overflow-hidden">
+            <div class="mt-2 h-10 rounded-full overflow-hidden">
               <div :class="`w-full h-full rounded-full overflow-hidden grid grid-cols-${bike.colours.length}`">
                 <template
                     v-for="c in bike.colours"
@@ -88,6 +153,19 @@ export default {
               </div>
             </div>
           </TextLabelWithPillBadgeIndicatingMatch>
+        </div>
+        <div class="col-span-full">
+          <Badge
+            label="Photos"
+            badgeClass="bg-opacity-[0.12] pill bg-primary-500 text-primary-500"
+          />
+          <div class="mt-2 grid grid-cols-12 gap-5">
+            <div v-for="photoUrl in photoUrls" class="col-span-4 lg:col-span-3 min-h-full" :key="photoUrl.id">
+              <div class="w-full h-auto rounded-md">
+                <img :src="photoUrl.url" alt="Photo" class="w-full h-full" @click="() => openPhoto(photoUrl.url)"/>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="col-span-4">
           <slot name="footer"/>
