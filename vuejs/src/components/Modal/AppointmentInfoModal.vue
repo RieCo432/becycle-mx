@@ -111,7 +111,7 @@
                     @click="() => markDidClientShowUp(appointment.didClientShowUp === true ? null : true)"
                   >
                     <NoInputCheckbox
-                      :value="appointment.didClientShowUp"
+                      :value="!!appointment.didClientShowUp"
                       active-class=" ring-success-500  bg-success-900 dark:bg-success-700
                         dark:ring-success-700 ring-offset-2 dark:ring-offset-success-800 "
                       inactive-class=" bg-success-100 dark:bg-success-600 dark:border-success-600 "
