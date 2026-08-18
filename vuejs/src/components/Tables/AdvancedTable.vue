@@ -18,7 +18,7 @@
                       :columns="columns"
                       styleClass=" vgt-table bordered centered"
                       :rows="data"
-                      :line-numbers="true"
+                      :line-numbers="lineNumbers"
                       row-style-class="bg-slate-800"
                       expanded-row-classes="bg-slate-800"
                       :pagination-options="{
@@ -29,16 +29,16 @@
                         enabled: true,
                         externalQuery: searchTerm,
                         }"
-                      :select-options="{
-                        enabled: false,
-                        selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
-                        }"
+                      :select-options="selectOptions"
                       :group-options="{
                         enabled: groupedTable,
                         headerPosition: 'top',
                         collapsable: groupedTable,
                       }"
       >
+        <template v-slot:selected-row-actions>
+          <slot name="selectedRowActions"></slot>
+        </template>
         <template v-slot:table-row="props">
           <div v-if="props.column.field === 'actions'" class="flex space-x-3 rtl:space-x-reverse">
             <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
@@ -110,6 +110,20 @@ export default {
       type: Boolean,
       default: false,
     },
+    lineNumbers: {
+      type: Boolean,
+      default: true
+    },
+    selectOptions: {
+      type: Object,
+      required: false,
+      default: () => {
+        return {
+          enabled: false,
+          selectOnCheckboxOnly: true
+        };
+      }
+    }
   },
   data() {
     return {

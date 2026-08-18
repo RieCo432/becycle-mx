@@ -41,9 +41,8 @@ async def patch_bug_report(bug_report_id: UUID,
                            db: Session = Depends(dep.get_db)) -> schemas.BugReport:
     return crud.update_bug_report(db=db, bug_report_id=bug_report_id, bug_report_update_data=bug_report_update_data)
 
+
 @bug_reports.delete("/bugreports/{bug_report_id}")
 async def delete_bug_report(bug_report_id: UUID,
-                           db: Session = Depends(dep.get_db)) -> None:
+                            db: Session = Depends(dep.get_db)) -> None:
     crud.delete_bug_report(db=db, bug_report_id=bug_report_id)
-
-

@@ -12,12 +12,14 @@ import app.schemas as schemas
 def get_bug_reports(db: Session) -> list[models.BugReport]:
     return [_ for _ in db.scalars(
         select(models.BugReport)
+        .join(models.User)
     )]
 
 
 def get_bug_report(db: Session, bug_report_id: UUID) -> models.BugReport | None:
     return db.scalar(
         select(models.BugReport)
+        .join(models.User)
         .where(models.BugReport.id == bug_report_id)
     )
 
