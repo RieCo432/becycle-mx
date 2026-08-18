@@ -11,7 +11,6 @@ const API_PORT = import.meta.env.VITE_API_PORT;
 const API_SUBDIR = import.meta.env.VITE_API_SUBDIR;
 const toast = useToast();
 
-
 function validateCommonHTTPErrorCodes(status, options) {
   options = options ?? {};
   options.clientLoginRequired = options.clientLoginRequired ?? false;
@@ -24,9 +23,12 @@ function validateCommonHTTPErrorCodes(status, options) {
     toast.error('Authentication required. Please log in.', {timeout: 3000});
     credentialsStore.logout();
     router.push('/users/login');
+  } else if (options.userLoginRequired && status === 403) {
+    toast.error('You do not have permission to access this resource. Please contact your administrator.', {timeout: 3000});
   } else if (status === 503) {
     toast.error('Service Temporarily Unavailable. Please try again later.', {timeout: false});
   } else return status < 300;
+  return false;
 }
 
 const axiosClient = axios.create({
