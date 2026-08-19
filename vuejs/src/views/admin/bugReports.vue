@@ -3,6 +3,9 @@ import Card from "@/components/Card/index.vue";
 import requests from "@/requests";
 import AdvancedTable from "@/components/Tables/AdvancedTable.vue";
 import Modal from "@/components/Modal/Modal.vue";
+import {useToast} from "vue-toastification";
+
+const toast = useToast();
 
 export default {
   name: "bugReports",
@@ -45,6 +48,11 @@ export default {
           icon: 'heroicons-outline:eye',
           func: (bugReportId) => this.viewBugReport(bugReportId),
         },
+        {
+          label: 'Delete Bug Report',
+          icon: 'heroicons-outline:trash',
+          func: (bugReportId) => this.deleteBugReport(bugReportId),
+        },
       ]
     };
   },
@@ -60,14 +68,27 @@ export default {
     }
   },
   methods: {
-    viewBugReport(bugReportId) {
-      const bugReport = this.bugReports.find(bugReport => bugReport.id === bugReportId)
-      this.$store.bugReportingStore.openModal(bugReport);
-    },
     formatDescription(description) {
       if (description.length > 50)
         return description.substring(0, 50) + '...';
       return description
+    },
+    viewBugReport(bugReportId) {
+      const bugReport = this.bugReports.find(bugReport => bugReport.id === bugReportId)
+      this.$store.bugReportingStore.openModal(bugReport);
+    },
+    deleteBugReport(bugReportId) {
+      const shouldDelete = confirm('Are you sure to delete this bug report?')
+      if (!shouldDelete)
+        return;
+
+      requests.deleteBugReport(bugReportId).then(() => {
+        const index = this.bugReports.findIndex(bugReport => bugReport.id === bugReportId)
+        this.bugReports.splice(index, 1);
+        toast.success('Bug report deleted', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     }
   },
   watch: {
