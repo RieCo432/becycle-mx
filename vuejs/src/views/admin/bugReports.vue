@@ -32,6 +32,7 @@ export default {
           field: 'description',
           label: 'Description',
           type: 'string',
+          formatFn: this.formatDescription
         },
         {
           field: 'actions',
@@ -62,13 +63,20 @@ export default {
     viewBugReport(bugReportId) {
       const bugReport = this.bugReports.find(bugReport => bugReport.id === bugReportId)
       this.$store.bugReportingStore.openModal(bugReport);
+    },
+    formatDescription(description) {
+      if (description.length > 50)
+        return description.substring(0, 50) + '...';
+      return description
     }
   },
   watch: {
     shouldUpdateBugReport(newValue) {
       if (newValue === true) {
         const index = this.bugReports.findIndex(bugReport => bugReport.id === this.$store.bugReportingStore.bugReport.id)
-        if (index !== -1)
+        if (index === -1)
+          this.bugReports.push(this.$store.bugReportingStore.bugReport);
+        else
           this.bugReports.splice(index, 1, this.$store.bugReportingStore.bugReport);
         this.$store.bugReportingStore.shouldUpdateBugReport = false
       }

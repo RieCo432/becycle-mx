@@ -18,6 +18,7 @@ import './assets/scss/tailwind.scss';
 import router from '@/router';
 import {createPinia} from 'pinia';
 import {setupCalendar} from 'v-calendar';
+import '@/util/console-history';
 
 const pinia = createPinia();
 
