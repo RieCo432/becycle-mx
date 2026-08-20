@@ -35,6 +35,7 @@
                         headerPosition: 'top',
                         collapsable: groupedTable,
                       }"
+                      @selected-rows-change="selectedRowsChanged"
       >
         <template v-slot:selected-row-actions>
           <slot name="selectedRowActions"></slot>
@@ -133,6 +134,11 @@ export default {
       searchTerm: '',
     };
   },
+  methods: {
+    selectedRowsChanged(selection) {
+      this.$emit('selected-rows-change', selection.selectedRows);
+    }
+  }
 };
 </script>
 <style lang="scss">

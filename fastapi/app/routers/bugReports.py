@@ -1,7 +1,7 @@
 import os
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 import app.crud as crud
@@ -46,3 +46,9 @@ async def patch_bug_report(bug_report_id: UUID,
 async def delete_bug_report(bug_report_id: UUID,
                             db: Session = Depends(dep.get_db)) -> None:
     crud.delete_bug_report(db=db, bug_report_id=bug_report_id)
+
+
+@bug_reports.post("/bugreports/merge")
+async def merge_bug_reports(ids: list[UUID] = Query(min_length=2),
+                            db: Session = Depends(dep.get_db)) -> schemas.BugReport:
+    return crud.merge_bug_reports(db=db, bug_report_ids=ids)

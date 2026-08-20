@@ -1,3 +1,4 @@
+import json
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -9,7 +10,13 @@ import app.models as models
 import app.schemas as schemas
 
 
-def get_bug_reports(db: Session) -> list[models.BugReport]:
+def get_bug_reports(db: Session, bug_report_ids: list[UUID] = None) -> list[models.BugReport]:
+    if bug_report_ids is not None:
+        return [_ for _ in db.scalars(
+            select(models.BugReport)
+            .join(models.User)
+            .where(models.BugReport.id.in_(bug_report_ids))
+        )]
     return [_ for _ in db.scalars(
         select(models.BugReport)
         .join(models.User)
@@ -65,3 +72,28 @@ def delete_bug_report(db: Session, bug_report_id: UUID) -> None:
 
     db.delete(bug_report)
     db.commit()
+
+
+def merge_bug_reports(db: Session, bug_report_ids: list[UUID]) -> models.BugReport:
+    bug_reports = get_bug_reports(db, bug_report_ids)
+    if len(bug_reports) != len(bug_report_ids):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail={"description": "Couldn't find the bug reports to merge"})
+    merge_bug_report = bug_reports[0]
+
+    merge_console_history = json.loads(merge_bug_report.consoleHistory)
+
+    for bug_report in bug_reports[1:]:
+        if (merge_bug_report.pageAddress != bug_report.pageAddress
+                and len(f"{merge_bug_report.pageAddress} | {bug_report.pageAddress}") <= 255):
+            merge_bug_report.pageAddress += f" | {bug_report.pageAddress}"
+        if (merge_bug_report.description != bug_report.description
+                and len(f"{merge_bug_report.description}\n{bug_report.description}") <= 1024):
+            merge_bug_report.description += f"\n{bug_report.description}"
+        merge_console_history.extend(json.loads(merge_bug_report.consoleHistory))
+        db.delete(bug_report)
+
+    merge_bug_report.consoleHistory = json.dumps(merge_console_history)
+    db.commit()
+
+    return merge_bug_report

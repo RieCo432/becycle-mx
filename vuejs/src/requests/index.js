@@ -1771,4 +1771,16 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  mergeBugReports(bugReportIds) {
+    return axiosClient.post(`/bugreports/merge`, null, {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        ids: bugReportIds
+      },
+      paramsSerializer: {
+        indexes: null,
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

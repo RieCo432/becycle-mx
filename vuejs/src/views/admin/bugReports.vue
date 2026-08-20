@@ -4,12 +4,13 @@ import requests from "@/requests";
 import AdvancedTable from "@/components/Tables/AdvancedTable.vue";
 import Modal from "@/components/Modal/Modal.vue";
 import {useToast} from "vue-toastification";
+import DashButton from "@/components/Button/index.vue";
 
 const toast = useToast();
 
 export default {
   name: "bugReports",
-  components: {Modal, AdvancedTable, Card},
+  components: {DashButton, Modal, AdvancedTable, Card},
   data() {
     return {
       loading: true,
@@ -53,7 +54,8 @@ export default {
           icon: 'heroicons-outline:trash',
           func: (bugReportId) => this.deleteBugReport(bugReportId),
         },
-      ]
+      ],
+      selectedRows: [],
     };
   },
   created() {
@@ -89,6 +91,31 @@ export default {
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
+    },
+    selectedRowsChanged(selectedRows) {
+      this.selectedRows = selectedRows
+    },
+    mergeBugReports() {
+      const shouldMerge = confirm('Are you sure to merge these bug reports?')
+      if (!shouldMerge)
+        return;
+
+      const bugReportIds = this.selectedRows.map((bugReport) => bugReport.id);
+
+      requests.mergeBugReports(bugReportIds).then((response) => {
+        const mergedIndex = this.bugReports.findIndex(bugReport => bugReport.id === response.data.id)
+        this.bugReports.splice(mergedIndex, 1, response.data);
+
+        for (let id of bugReportIds) {
+          if (id === response.data.id)
+            continue;
+          const index = this.bugReports.findIndex(bugReport => bugReport.id === id)
+          this.bugReports.splice(index, 1);
+        }
+        toast.success('Bug reports merged', {timeout: 2000});
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
     }
   },
   watch: {
@@ -113,6 +140,7 @@ export default {
         <div class="grid grid-cols-12">
           <div class="col-span-12">
             <AdvancedTable
+                ref="bugReportsTable"
                 :loading="loading"
                 :columns="columns"
                 :data="bugReports"
@@ -123,8 +151,12 @@ export default {
                   enabled: true,
                   selectOnCheckboxOnly: true
                 }"
+                @selected-rows-change="selectedRowsChanged"
             >
               <template v-slot:selectedRowActions>
+                <DashButton text="Merge Selected Bug Reports"
+                            :isDisabled="selectedRows.length < 2"
+                            @click="mergeBugReports"></DashButton>
               </template>
             </AdvancedTable>
           </div>
@@ -135,6 +167,16 @@ export default {
 </template>
 
 <style scoped lang="scss">
+:deep(.vgt-selection-info-row) {
+  display: flex;
+  align-items: center;
+  height: 60px;
+}
+
+:deep(.vgt-pull-right) {
+  margin-left: auto;
+}
+
 :deep(.vgt-table td) {
   text-transform: none;
 }
