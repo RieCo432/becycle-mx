@@ -60,21 +60,21 @@
               </div>
               <div v-if="currentStepNumber === 1">
                 <NewContractClientForm
-                  :draft="currentContractDraft"
+                  :contract="currentContractDraft"
                   @update:draft="updateDraft"
                   @go-back="goBack"
                 />
               </div>
               <div v-if="currentStepNumber === 2">
                 <NewContractBikeForm
-                  :draft="currentContractDraft"
+                  :contract="currentContractDraft"
                   @update:draft="updateDraft"
                   @go-back="goBack"
                 />
               </div>
               <div v-if="currentStepNumber === 3">
                 <NewContractDetailsForm
-                  :draft="currentContractDraft"
+                  :contract="currentContractDraft"
                   @update:draft="updateDraft"
                   @go-back="goBack"
                 />
@@ -82,7 +82,7 @@
               <div v-if="currentStepNumber === 4">
                 <NewContractWorkingVolunteerForm
                   :user-sorting-function="userSortingFunction"
-                  :draft="currentContractDraft"
+                  :contract="currentContractDraft"
                   @update:draft="updateDraft"
                   @go-back="goBack"
                 />
@@ -90,14 +90,14 @@
               <div v-if="currentStepNumber === 5">
                 <NewContractCheckingVolunteerForm
                   :user-sorting-function="userSortingFunction"
-                  :draft="currentContractDraft"
+                  :contract="currentContractDraft"
                   @update:draft="updateDraft"
                   @go-back="goBack"
                 />
               </div>
               <div v-if="currentStepNumber === 6">
                 <NewContractDepositForm
-                  :draft="currentContractDraft"
+                  :contract="currentContractDraft"
                   @update:draft="updateDraft"
                   @go-back="goBack"
                 />
@@ -114,6 +114,11 @@
           </div>
         </div>
       </Card>
+    </div>
+    <div v-if="!promoting && currentContractDraft" class="col-span-12">
+      <ContractPhotosCard
+        :contract-id="currentContractDraft.id"
+      />
     </div>
   </div>
 </template>
@@ -134,6 +139,7 @@ import NewContractDepositForm from '@/components/Forms/NewContractDepositForm.vu
 import requests from '@/requests';
 import router from '@/router';
 import {VueSpinner} from 'vue3-spinners';
+import ContractPhotosCard from '@/components/Card/ContractPhotosCard.vue';
 
 const toast = useToast();
 
@@ -180,7 +186,6 @@ function goBack() {
 }
 
 function updateDraft(draft) {
-  console.log('updateDraft', draft);
   currentContractDraft.value = draft;
   nextStep();
 }
@@ -212,7 +217,7 @@ function nextStep() {
     currentStepNumber.value = 5;
     return;
   }
-  if (!currentContractDraft.value.depositCollectedTransactionHeaderId) {
+  if (!currentContractDraft.value.depositTransactionHeaders.find((th) => th.event === 'deposit_collected')) {
     currentStepNumber.value = 6;
     return;
   }
@@ -221,7 +226,7 @@ function nextStep() {
 
 function promoteDraft() {
   promoting.value = true;
-  requests.postSubmitDraftContract(currentContractDraft.value.id)
+  requests.patchSubmitDraftContract(currentContractDraft.value.id)
     .then((response) => {
       toast.success('Contract Recorded!', {timeout: 1000});
       router.push({path: `/contracts/${response.data.id}`, query: {showTerms: 1}});

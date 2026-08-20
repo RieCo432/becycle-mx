@@ -4,7 +4,7 @@ import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.
 import TextInput from '@/components/TextInput/index.vue';
 import FormStepNavigation from '@/components/Forms/FormStepNavigation.vue';
 import {useToast} from 'vue-toastification';
-import {ref, computed} from 'vue';
+import {ref, computed, onMounted} from 'vue';
 import * as yup from 'yup';
 import requests from '@/requests';
 import {useField, useForm} from 'vee-validate';
@@ -13,7 +13,7 @@ const toast = useToast();
 
 const emit = defineEmits(['goBack', 'update:draft']);
 const props = defineProps({
-  draft: {
+  contract: {
     type: Object,
     required: true,
   },
@@ -94,12 +94,32 @@ function makeAccountLegible(account) {
   return `${account.name}`;
 }
 
+const draftDepositCollectedTransactionHeader = computed(() => {
+  return props.contract.depositTransactionHeaders.find((th) => th.event === 'deposit_collected');
+});
+
+const hasDepositCollectedTransactionHeader = computed(() => {
+  return !!draftDepositCollectedTransactionHeader.value;
+});
+
+onMounted(() => {
+  if (hasDepositCollectedTransactionHeader.value) {
+    const liabilityTransactionLine =
+      draftDepositCollectedTransactionHeader.value.transactionLines
+        .find((tl) => tl.account.type === 'liability');
+    const assetTransactionLine =
+      draftDepositCollectedTransactionHeader.value.transactionLines
+        .find((tl) => tl.account.type === 'asset');
+    depositAmountCollected.value = assetTransactionLine.amount / 100;
+    depositCollectedAssetAccount.value = assetTransactionLine.account;
+    depositCollectedLiabilityAccount.value = liabilityTransactionLine.account;
+  }
+});
+
 const submit = handleSubmit(() => {
   if (checkCurrentlyProcessing()) return;
   processingSubmit.value = true;
-
-
-  if (props.draft.depositCollectedTransactionHeaderId === null) {
+  if (!hasDepositCollectedTransactionHeader.value) {
     const depositCollectedTransactionDraft = {
       transactionHeader: {
         event: 'deposit_collected',
@@ -119,7 +139,7 @@ const submit = handleSubmit(() => {
 
       toast.success('Deposit Collected!', {timeout: 1000});
       requests.putDraftContractDeposit(
-        props.draft.id,
+        props.contract.id,
         depositCollectedTransactionHeader.value.id,
         depositCollectedAssetAccount.value.ownerUser.username,
         depositCollectingPassword.value)
@@ -149,7 +169,7 @@ const submit = handleSubmit(() => {
   } else {
     toast.success('Deposit Details Already Done!', {timeout: 5000});
     processingSubmit.value = false;
-    emit('update:draft', props.draft);
+    emit('update:draft', props.contract);
   }
 });
 
@@ -180,10 +200,10 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
 <template>
   <form
     @submit.prevent="() => {
-      if (!props.draft.depositCollectedTransactionHeaderId) {
+      if (!hasDepositCollectedTransactionHeader) {
         submit();
       } else {
-        emit('update:draft', props.draft)
+        emit('update:draft', props.contract)
       }
     }"
     @keydown.enter="() => {}">
@@ -194,7 +214,7 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
         </h4>
       </div>
       <div
-        v-if="props.draft.depositCollectedTransactionHeaderId"
+        v-if="hasDepositCollectedTransactionHeader"
         class="col-span-full">
         <h5 class="text-danger-500 dark:text-danger-500">
           Deposit has already been collected. This step is read-only.
@@ -205,14 +225,15 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
         type="number"
         placeholder="40"
         name="depositAmountCollected"
+        @keydown.enter.stop.prevent
         v-model="depositAmountCollected"
         :error="depositAmountCollectedError"
-        :is-readonly="props.draft.depositCollectedTransactionHeaderId !== null"
+        :is-readonly="hasDepositCollectedTransactionHeader"
       />
 
       <ComboboxTextInput
         :field-model-value="depositCollectedLiabilityAccount.name"
-        :suggestions="props.draft.depositCollectedTransactionHeaderId === null
+        :suggestions="!hasDepositCollectedTransactionHeader
                           ? filteredDepositCollectedLiabilityAccountSuggestions.map(makeAccountLegible)
                           : []"
         :selected-callback="selectDepositCollectedLiabilityAccount"
@@ -224,12 +245,12 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
         v-model="depositCollectedLiabilityAccount.name"
         :error="depositCollectedLiabilityAccountError"
         @change="() => {}"
-        :is-readonly="props.draft.depositCollectedTransactionHeaderId !== null"
+        :is-readonly="hasDepositCollectedTransactionHeader"
       />
 
       <ComboboxTextInput
         :field-model-value="depositCollectedAssetAccount.name"
-        :suggestions="props.draft.depositCollectedTransactionHeaderId === null
+        :suggestions="!hasDepositCollectedTransactionHeader
                         ? filteredDepositCollectedAssetAccountSuggestions.map(makeAccountLegible)
                         : []"
         :selected-callback="selectDepositCollectedAssetAccount"
@@ -241,7 +262,7 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
         v-model="depositCollectedAssetAccount.name"
         :error="depositCollectedAssetAccountError"
         @change="() => {}"
-        :is-readonly="props.draft.depositCollectedTransactionHeaderId !== null"
+        :is-readonly="hasDepositCollectedTransactionHeader"
       />
 
       <TextInput
@@ -249,9 +270,10 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
         type="password"
         placeholder="Password"
         name="depositCollectingPassword"
+        @keydown.enter.stop.prevent="submit"
         v-model="depositCollectingPassword"
         :error="depositCollectingPasswordError"
-        :is-readonly="props.draft.depositCollectedTransactionHeaderId !== null"
+        :is-readonly="hasDepositCollectedTransactionHeader"
         hasicon/>
       <div class="col-span-full">
         <FormStepNavigation

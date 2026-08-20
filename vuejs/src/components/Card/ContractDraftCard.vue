@@ -3,19 +3,54 @@ import DashButton from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import TransactionLinesTable from '@/components/Tables/TransactionLinesTable.vue';
+import requests from '@/requests';
 
 export default {
   name: 'ContractDraftCard',
   components: {TransactionLinesTable, Tooltip, Card, DashButton},
   props: {
-    continueDraftFunction: {
+    selectContractFunction: {
       type: Function,
       default: () => {},
     },
-    draft: {
+    contract: {
       type: Object,
       required: true,
     },
+  },
+  data() {
+    return {
+      photoUrls: [],
+      loadingContractPhotos: true,
+    };
+  },
+  methods: {
+    getContractPhoto(photoId) {
+      requests.getContractPhotoUrl(this.contract.id, photoId)
+        .then((response) => {
+          this.photoUrls.push(
+            {
+              id: photoId,
+              url: window.URL.createObjectURL(new Blob([response.data], {type: response.headers['content-type']})),
+            });
+        });
+    },
+    getContractPhotos() {
+      this.loadingContractPhotos = true;
+      requests.getContractPhotoIds(this.contract.id)
+        .then((response) => {
+          for (const photoId of response.data) {
+            this.getContractPhoto(photoId);
+          }
+          this.loadingContractPhotos = false;
+        });
+    },
+    openPhoto(url) {
+      window.open(url, '_blank');
+    },
+  },
+  mounted() {
+    this.getContractPhotos();
   },
 };
 </script>
@@ -26,24 +61,24 @@ export default {
       <div class="col-span-1">
         <span class="block part-label">Client</span>
         <span class="block part-text">
-          {{draft.client !== null ? `${draft.client.firstName} ${draft.client.lastName}` : '-'}}
+          {{ contract.client ? `${contract.client.firstName} ${contract.client.lastName}` : '-' }}
           <br>
-          {{draft.client !== null ? draft.client.emailAddress : '-'}}
+          {{ contract.client ? contract.client.emailAddress : '-' }}
         </span>
       </div>
       <div class="col-span-1">
         <span class="block part-label">Bike</span>
-        <span class="block part-text">{{draft.bike !== null ? `${draft.bike.make} ${draft.bike.model}` : '-'}}</span>
+        <span class="block part-text">{{ contract.bike ? `${contract.bike.make} ${contract.bike.model}` : '-' }}</span>
         <template
-            v-if="draft.bike !== null && draft.bike.colours.length > 0">
-          <div :class="`w-full rounded-full overflow-hidden grid grid-cols-${draft.bike.colours.length}`">
+            v-if="contract.bike && contract.bike.colours.length > 0">
+          <div :class="`w-full rounded-full overflow-hidden grid grid-cols-${contract.bike.colours.length}`">
             <template
-                v-for="c in draft.bike.colours"
-                :key="c.name"
+              v-for="c in contract.bike.colours"
+              :key="c.name"
             >
               <Tooltip placement="top" arrow theme="dark" btn-class="col-span-1" :btn-style="{backgroundColor: c.hex}">
                 <template #button>
-                  <div class="w-full h-5"></div>
+                  <div class="w-full h-5"/>
                 </template>
                 <span>{{ c.name }} ({{ c.hex }})</span>
               </Tooltip>
@@ -53,52 +88,62 @@ export default {
         <template v-else>
           <span class="block part-text">-</span>
         </template>
-        <span class="block part-text">{{draft.bike !== null ? `${draft.bike.decals !== null ? draft.bike.decals : '-'}` : '-'}}</span>
-        <span class="block part-text">{{draft.bike !== null ? `${draft.bike.serialNumber}` : '-'}}</span>
+        <span class="block part-text">{{ contract.bike ? `${contract.bike.decals !== null ? contract.bike.decals : '-'}` : '-' }}</span>
+        <span class="block part-text">{{ contract.bike ? `${contract.bike.serialNumber}` : '-' }}</span>
       </div>
       <div class="col-span-1">
         <span class="block part-label">Contract Type</span>
         <span class="block part-text">
-          {{ draft.contractType ?? '-' }}
+          {{ contract.contractType ?? '-' }}
         </span>
       </div>
       <div class="col-span-1">
         <span class="block part-label">Bike Condition</span>
         <span class="block part-text">
-          {{ draft.conditionOfBike ?? '-' }}
+          {{ contract.conditionOfBike ?? '-' }}
         </span>
       </div>
 
       <div class="col-span-1">
         <span class="block part-label">Notes</span>
         <span class="block part-text">
-          {{ draft.notes ?? '-'}}
+          {{ contract.notes ?? '-' }}
         </span>
       </div>
 
       <div class="col-span-1">
         <span class="block part-label">Working Volunteer</span>
         <span class="block part-text">
-          {{draft.workingUser !== null ? draft.workingUser.username : '-'}}
+          {{ contract.workingUser ? contract.workingUser.username : '-' }}
         </span>
       </div>
       <div class="col-span-1">
         <span class="block part-label">Checking Volunteer</span>
         <span class="block part-text">
-          {{draft.checkingUser !== null ? draft.checkingUser.username : '-'}}
+          {{ contract.checkingUser ? contract.checkingUser.username : '-' }}
         </span>
       </div>
       <div class="col-span-1">
         <span class="block part-label">Deposit</span>
         <TransactionLinesTable
-          v-if="draft.depositCollectedTransactionHeader"
-          :transaction-header="draft.depositCollectedTransactionHeader"/>
+          v-if="contract.depositTransactionHeaders.length > 0"
+          :transaction-header="contract.depositTransactionHeaders.find(th => th.event === 'deposit_collected')"/>
         <p v-else class="text-slate-600 dark:text-slate-300">-</p>
+      </div>
+      <div class="col-span-full" v-if="!loadingContractPhotos">
+        <span class="block part-label">Photos</span>
+        <div class="block part-text">
+          <div class="grid grid-cols-8 gap-5">
+            <div v-for="photoUrl in photoUrls" class="col-span-4 lg:col-span-2 min-h-full" :key="photoUrl.id">
+              <img :src="photoUrl.url" alt="Photo" class="w-full h-full" @click="() => openPhoto(photoUrl.url)"/>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="col-span-full">
         <DashButton
             class='w-full h-full'
-            @click="() => continueDraftFunction(draft.id)">
+            @click="() => selectContractFunction(contract.id)">
           Continue
         </DashButton>
       </div>

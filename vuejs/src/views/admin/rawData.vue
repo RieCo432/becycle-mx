@@ -129,7 +129,7 @@ export default {
     },
     getContracts() {
       this.loadingContracts = true;
-      requests.getContracts().then((response) => {
+      requests.getContracts(true, true, true, true).then((response) => {
         this.rawContractData = response.data;
         this.loadingContracts = false;
       });

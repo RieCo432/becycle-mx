@@ -1,7 +1,9 @@
 from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+
 import app.crud as crud
 import app.dependencies as dep
 import app.models as models
@@ -18,164 +20,113 @@ contracts = APIRouter(
 async def get_contracts(open: bool = True,
                         closed: bool = True,
                         expired: bool = True,
+                        draft: bool = False,
                         db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
-    return crud.get_contracts(db=db, open=open, closed=closed, expired=expired)
+    return crud.get_contracts(db=db, open=open, closed=closed, expired=expired, draft=draft)
 
 
 @contracts.post("/contracts")
-async def create_contract(
-        contract_data: schemas.ContractCreate,
-        email_tasks: BackgroundTasks,
-        working_user: models.User = Depends(dep.get_working_user),
-        checking_user: models.User = Depends(dep.get_checking_user),
-        deposit_collecting_user: models.User = Depends(dep.get_deposit_receiving_user),
-        db: Session = Depends(dep.get_db)) -> schemas.Contract:
-
-    raise HTTPException(status_code=status.HTTP_410_GONE, detail={"description": "This endpoint is deprecated."})
-
-
-@contracts.get("/contracts/drafts")
-async def get_contract_drafts(db: Session = Depends(dep.get_db)) -> list[schemas.ContractDraft]:
-    return crud.get_contract_drafts(db=db)
-
-
-@contracts.get("/contracts/drafts/{contract_draft_id}")
-async def get_contract_draft(contract_draft_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.ContractDraft:
-    return crud.get_contract_draft(db=db, contract_draft_id=contract_draft_id)
-
-
-@contracts.post("/contracts/drafts")
-async def new_contract_draft(
+async def new_contract(
         db: Session = Depends(dep.get_db)
-) -> schemas.ContractDraft:
+) -> schemas.Contract:
 
     contract = crud.start_new_contract(db=db)
 
     return contract
 
 
-@contracts.put("/contracts/drafts/{contract_draft_id}/client")
+@contracts.get("/contracts/drafts/{contract_id}")
+async def get_contract_draft(contract_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.Contract:
+    return crud.get_contract_draft(db=db, contract_id=contract_id)
+
+
+@contracts.put("/contracts/drafts/{contract_id}/client")
 async def update_contract_draft_client(
-        contract_draft_id: UUID,
+        contract_id: UUID,
         client_id: Annotated[UUID, Body(embed=True)],
         db: Session = Depends(dep.get_db)
-) -> schemas.ContractDraft:
-    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"description": "Contract draft not found."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    return crud.update_contract_draft_client(db=db, contract_draft_id=contract_draft_id, client_id=client_id)
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    return crud.update_contract_draft_client(db=db, contract_id=contract_draft.id, client_id=client_id)
 
 
-@contracts.put("/contracts/drafts/{contract_draft_id}/bike")
+@contracts.put("/contracts/drafts/{contract_id}/bike")
 async def update_contract_draft_bike(
-        contract_draft_id: UUID,
+        contract_id: UUID,
         bike_id: Annotated[UUID, Body(embed=True)],
         db: Session = Depends(dep.get_db)
-) -> schemas.ContractDraft:
-    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"description": "Contract draft not found."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    return crud.update_contract_draft_bike(db=db, contract_draft_id=contract_draft_id, bike_id=bike_id)
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    return crud.update_contract_draft_bike(db=db, contract_id=contract_draft.id, bike_id=bike_id)
 
 
-@contracts.put("/contracts/drafts/{contract_draft_id}/details")
+@contracts.put("/contracts/drafts/{contract_id}/details")
 async def update_contract_draft_details(
-        contract_draft_id: UUID,
-        contract_draft_details: schemas.ContractDraftDetails,
+        contract_id: UUID,
+        contract_details: schemas.ContractDetails,
         db: Session = Depends(dep.get_db)
-) -> schemas.ContractDraft:
-    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"description": "Contract draft not found."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    return crud.update_contract_draft_details(db=db, contract_draft_id=contract_draft_id, contract_draft_details=contract_draft_details)
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    return crud.update_contract_draft_details(db=db, contract_id=contract_draft.id, contract_details=contract_details)
 
 
-@contracts.put("/contracts/drafts/{contract_draft_id}/deposit")
+@contracts.put("/contracts/drafts/{contract_id}/deposit")
 async def update_contract_draft_deposit(
-        contract_draft_id: UUID,
+        contract_id: UUID,
         deposit_collected_transaction_header_id: Annotated[UUID, Body(embed=True)],
         deposit_collecting_user: models.User = Depends(dep.get_deposit_receiving_user),
         db: Session = Depends(dep.get_db)
-) -> schemas.ContractDraft:
-    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"description": "Contract draft not found."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
     # crud.post_transaction_header(db=db, transaction_header_id=deposit_collected_transaction_header_id, user=deposit_collecting_user)
-    return crud.update_contract_draft_deposit(db=db, contract_draft_id=contract_draft_id, deposit_collected_transaction_header_id=deposit_collected_transaction_header_id)
+    return crud.update_contract_draft_deposit(db=db, contract_id=contract_id, deposit_collected_transaction_header_id=deposit_collected_transaction_header_id)
 
 
-@contracts.put("/contracts/drafts/{contract_draft_id}/working-user")
+@contracts.put("/contracts/drafts/{contract_id}/working-user")
 async def update_contract_draft_working_user(
-        contract_draft_id: UUID,
+        contract_id: UUID,
         working_user: models.User = Depends(dep.get_working_user),
         db: Session = Depends(dep.get_db)
-) -> schemas.ContractDraft:
-    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"description": "Contract draft not found."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    return crud.update_contract_draft_working_user(db=db, contract_draft_id=contract_draft_id, working_user=working_user)
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    return crud.update_contract_draft_working_user(db=db, contract_draft_id=contract_draft.id, working_user=working_user)
 
 
-@contracts.put("/contracts/drafts/{contract_draft_id}/checking-user")
+@contracts.put("/contracts/drafts/{contract_id}/checking-user")
 async def update_contract_draft_checking_user(
-        contract_draft_id: UUID,
+        contract_id: UUID,
         checking_user: models.User = Depends(dep.get_checking_user),
         db: Session = Depends(dep.get_db)
-) -> schemas.ContractDraft:
-    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"description": "Contract draft not found."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    if crud.is_checking_user_same_as_working_user(db=db, contract_draft_id=contract_draft_id, checking_user=checking_user):
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    if crud.is_checking_user_same_as_working_user(db=db, contract_draft_id=contract_id, checking_user=checking_user):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Checking user cannot be the same as working user!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    return crud.update_contract_draft_checking_user(db=db, contract_draft_id=contract_draft_id,
+    return crud.update_contract_draft_checking_user(db=db, contract_id=contract_draft.id,
                                                     checking_user=checking_user)
 
 
-@contracts.post("/contracts/drafts/{contract_draft_id}/submit")
+@contracts.patch("/contracts/drafts/{contract_id}/submit")
 async def submit_contract(
-        contract_draft_id: UUID,
+        contract_id: UUID,
         email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)
 ) -> schemas.Contract:
-    if not crud.does_contract_draft_exist(db=db, contract_draft_id=contract_draft_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"description": "Contract draft not found."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    if crud.does_contract_exist_already(db=db, contract_draft_id=contract_draft_id):
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    if crud.does_contract_exist_already(db=db, contract_id=contract_draft.id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={"description": "Contract already exists!"},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    contract = crud.submit_contract(db=db, contract_draft_id=contract_draft_id)
+    contract = crud.submit_contract(db=db, contract_id=contract_id)
 
     email_tasks.add_task(contract.send_creation_email)
 
-    return contract
+    return contract_draft
 
 
 @contracts.get("/contracts/types")
@@ -217,6 +168,55 @@ async def patch_contract(
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
     return crud.patch_contract_details(db=db, contract_id=contract_id, contract_patch_data=contract_patch_data)
+
+
+@contracts.get("/contracts/{contract_id}/photos")
+async def get_contract_photos(
+        contract_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> list[UUID]:
+    contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    return crud.get_contract_photos_ids(db=db, contract_id=contract_id)
+
+
+@contracts.get("/contracts/{contract_id}/photos/{contract_photo_id}")
+async def get_contract_photo(
+        contract_id: UUID,
+        contract_photo_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> FileResponse:
+    contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    return FileResponse(**crud.get_contract_photo(db=db, contract_id=contract_id, contract_photo_id=contract_photo_id))
+
+
+@contracts.post("/contracts/{contract_id}/photos")
+async def post_contract_photos(
+        contract_id: UUID,
+        photos: list[UploadFile],
+        db: Session = Depends(dep.get_db)
+) -> list[UUID]:
+
+    contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    return crud.add_photos_to_contract(db=db, contract_id=contract_id, photos=photos)
+
+
+@contracts.delete("/contracts/{contract_id}/photos/{contract_photo_id}")
+async def delete_contract_photo(
+        contract_id: UUID,
+        contract_photo_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> None:
+    contract = crud.get_contract(db=db, contract_id=contract_id, throw_on_draft=False)
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    
+    crud.delete_contract_photo(db=db, contract_id=contract_id, contract_photo_id=contract_photo_id)
 
 
 @contracts.patch("/contracts/{contract_id}/return")

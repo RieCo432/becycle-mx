@@ -56,13 +56,22 @@ export default {
       requests.getUserToken(this.username, this.password)
         .then((response) => {
           credentialsStore.login(response.data['access_token'], 'user');
-          requests.getUserMe().then((response) => {
-            credentialsStore.setName(response.data['username']);
-            this.$router.push('/me');
-          });
+          credentialsStore.setName(this.username);
+          requests.getUserMe()
+            .then((response) => {
+              this.$router.push('/me');
+            })
+            .catch((error) => {
+              if (error.response.status === 403) {
+                this.$router.push('/home');
+              }
+            });
         }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-          this.passwordError = 'Wrong password or username';
+          if (error.response.status !== 403) {
+            console.error('error', error);
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+            this.passwordError = 'Wrong password or username';
+          }
         });
     },
   },

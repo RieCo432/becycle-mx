@@ -338,7 +338,7 @@ def verify_appointment_hyperlink_parameters(db: Session, appointment_id: UUID, c
     if appointment is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Appointment not found."})
     
-def patch_appointment_showup(db: Session, appointment_id: UUID, did_client_show_up: bool) -> models.Appointment:
+def patch_appointment_showup(db: Session, appointment_id: UUID, did_client_show_up: bool | None) -> models.Appointment:
     appointment = get_appointment(db=db, appointment_id=appointment_id)
     appointment.didClientShowUp = did_client_show_up
     db.commit()

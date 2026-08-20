@@ -24,7 +24,7 @@ const route = useRoute();
 
 const emit = defineEmits(['goBack', 'update:draft']);
 const props = defineProps({
-  draft: {
+  contract: {
     type: Object,
     required: true,
   },
@@ -93,7 +93,7 @@ modelNotInList.value = false;
 
 
 function setDraftBike(bike) {
-  requests.putDraftContractBike(props.draft.id, bike.id)
+  requests.putDraftContractBike(props.contract.id, bike.id)
     .then((response) => {
       emit('update:draft', response.data);
       toast.success('Bike Updated!', {timeout: 5000});
@@ -139,19 +139,18 @@ function filterAndSortColourSuggestions() {
 
 
 onMounted(() => {
-  if (props.draft.bike) {
-    console.log('mounted', props.draft.bike);
-    make.value = props.draft.bike.make;
+  if (props.contract.bike) {
+    make.value = props.contract.bike.make;
     makeNotInList.value = !makeSuggestions.value.includes(make.value);
-    model.value = props.draft.bike.model;
+    model.value = props.contract.bike.model;
     modelNotInList.value = !modelSuggestions.value.includes(model.value);
-    colours.value = props.draft.bike.colours ?? [];
-    decals.value = props.draft.bike.decals;
-    serialNumber.value = props.draft.bike.serialNumber;
-    bikePhotoTaken.value = props.draft.bikeId != null;
-    stickerOnBike.value = props.draft.bikeId != null;
-    bikeToBeLinked.value = props.draft.bike;
-    matchWithBikeId.value = props.draft.bikeId;
+    colours.value = props.contract.bike.colours ?? [];
+    decals.value = props.contract.bike.decals;
+    serialNumber.value = props.contract.bike.serialNumber;
+    bikePhotoTaken.value = props.contract.bikeId != null;
+    stickerOnBike.value = props.contract.bikeId != null;
+    bikeToBeLinked.value = props.contract.bike;
+    matchWithBikeId.value = props.contract.bikeId;
 
     fetchMakeSuggestions();
     fetchModelSuggestions();
@@ -160,9 +159,8 @@ onMounted(() => {
   }
 });
 
-watch(props.draft, async (newValue) => {
+watch(props.contract, async (newValue) => {
   if (newValue.bike) {
-    console.log('watch draft', newValue.bike);
     make.value = newValue.bike.make;
     model.value = newValue.bike.model;
     colours.value = newValue.bike.colours ?? [];
@@ -284,53 +282,53 @@ function getEmptyBike() {
 }
 
 function selectMake(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     make.value = draft.bike.make = filteredMakeSuggestions.value[i];
   } else {
     make.value = draft.bike.make = make.value;
   }
-  emit('update:draft', props.draft);
+  emit('update:draft', props.contract);
 }
 
 function selectModel(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     model.value = draft.bike.model = filteredModelSuggestions.value[i];
   } else {
     model.value = draft.bike.model = model.value;
   }
-  emit('update:draft', props.draft);
+  emit('update:draft', props.contract);
 }
 
 function selectSerialNumber(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     serialNumber.value = draft.bike.serialNumber = filteredSerialNumberSuggestions.value[i];
   } else {
     serialNumber.value = draft.bike.serialNumber = serialNumber.value;
   }
-  emit('update:draft', props.draft);
+  emit('update:draft', props.contract);
 }
 
 function selectColours(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (draft.bike == null) draft.bike = getEmptyBike();
   if (i !== -1) {
     colours.value = draft.bike.colours = filteredColoursSuggestions.value[i];
   } else {
     colours.value = draft.bike.colours = colours.value;
   }
-  emit('update:draft', props.draft);
+  emit('update:draft', props.contract);
 }
 
 if (route.query.bikeId) {
   requests.getBike(route.query.bikeId)
     .then((response) => {
-      const draft = props.draft;
+      const draft = props.contract;
       draft.bike = response.data;
       bikeToBeLinked.value = response.data;
       emit('update:draft', draft);
@@ -353,158 +351,162 @@ function goBack() {
 
 <template>
   <form @submit.prevent="submit" @keydown.enter="() => {}">
-    <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
+    <div class="grid grid-cols-4 md:grid-cols-8 2xl:grid-cols-12 gap-5">
       <div class="col-span-full row-start-1">
         <h4 class="text-base text-slate-800 dark:text-slate-300 mb-6">
           Enter the bike's details
         </h4>
       </div>
-      <div class="col-span-4 xl:col-span-3 xl:row-start-2">
-        <ComboboxTextInput
-          :allow-new="makeNotInList"
-          :field-model-value="make"
-          :suggestions="filteredMakeSuggestions"
-          :selected-callback="selectMake"
-          label="Make"
-          type="text"
-          placeholder="Make"
-          name="make"
-          v-model="make"
-          :error="makeError"
-          @input="fetchMakeSuggestionsDebounced"
-        />
-      </div>
-      <div class="col-span-2 xl:col-span-1 xl:row-start-2">
-        <label
-          class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
-          Add New
-        </label>
-        <DashButton
-          :class="`btn-sm ${makeNotInList
+      <div class="col-span-4 2xl:col-span-8 grid grid-cols-6 2xl:grid-cols-12 gap-5">
+        <div class="col-span-4">
+          <ComboboxTextInput
+            :allow-new="makeNotInList"
+            :field-model-value="make"
+            :suggestions="filteredMakeSuggestions"
+            :selected-callback="selectMake"
+            label="Make"
+            type="text"
+            placeholder="Make"
+            name="make"
+            v-model="make"
+            :error="makeError"
+            @input="fetchMakeSuggestionsDebounced"
+          />
+        </div>
+        <div class="col-span-2">
+          <label
+            class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+            Add New
+          </label>
+          <DashButton
+            :class="`btn-sm ${makeNotInList
                             ? 'bg-success-500 dark:bg-success-500'
                             : 'bg-primary-500 dark:bg-primary-500'} w-full`"
-          :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
-          @click.prevent="() => {makeNotInList = !makeNotInList}"
-        />
-      </div>
-      <div class="col-span-4 xl:col-span-3 xl:row-start-2">
-        <ComboboxTextInput
-          :allow-new="modelNotInList"
-          :field-model-value="model"
-          :suggestions="filteredModelSuggestions"
-          :selected-callback="selectModel"
-          label="Model"
-          type="text"
-          placeholder="Model"
-          name="model"
-          v-model="model"
-          :error="modelError"
-          @input="fetchModelSuggestionsDebounced"
-        />
-      </div>
-      <div class="col-span-2 xl:col-span-1 xl:row-start-2">
-        <label
-          class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
-          Add New
-        </label>
-        <DashButton
-          :class="`btn-sm ${modelNotInList
+            :icon="makeNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
+            @click.prevent="() => {makeNotInList = !makeNotInList}"
+          />
+        </div>
+        <div class="col-span-4">
+          <ComboboxTextInput
+            :allow-new="modelNotInList"
+            :field-model-value="model"
+            :suggestions="filteredModelSuggestions"
+            :selected-callback="selectModel"
+            label="Model"
+            type="text"
+            placeholder="Model"
+            name="model"
+            v-model="model"
+            :error="modelError"
+            @input="fetchModelSuggestionsDebounced"
+          />
+        </div>
+        <div class="col-span-2">
+          <label
+            class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
+            Add New
+          </label>
+          <DashButton
+            :class="`btn-sm ${modelNotInList
                             ? 'bg-success-500 dark:bg-success-500'
                             : 'bg-primary-500 dark:bg-primary-500'} w-full`"
-          :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
-          @click.prevent="() => {modelNotInList = !modelNotInList}"
-        />
+            :icon="modelNotInList ? 'heroicons-outline:check' : 'heroicons-outline:plus'"
+            @click.prevent="() => {modelNotInList = !modelNotInList}"
+          />
+        </div>
+        <div class="col-span-6 2xl:row-span-6">
+          <ComboboxColourPicker
+            :suggestions="filteredColoursSuggestions"
+            :selected-callback="selectColours"
+            :allow-new=true
+            :error="coloursError"
+            label="Colours"
+            name="colours"
+            @update:modelValue="(newValue) => {fetchColoursSuggestionsDebounced(); }"
+            v-model="colours"
+            @click.prevent="() => {}"
+          >
+            <template #suggestion="{ suggestion, active }">
+              <ColourSetSuggestion
+                :suggestion="suggestion"
+                :active="active"/>
+            </template>
+          </ComboboxColourPicker>
+        </div>
+        <div class="col-span-6">
+          <TextInput
+            label="Decals"
+            type="text"
+            placeholder="Decals"
+            name="decals"
+            v-model="decals"
+            :error="decalsError"
+          />
+        </div>
+        <div class="col-span-6">
+          <ComboboxTextInput
+            :field-model-value="serialNumber"
+            :suggestions="filteredSerialNumberSuggestions"
+            :selected-callback="selectSerialNumber"
+            label="Serial Number"
+            type="text"
+            placeholder="Serial Number"
+            name="serialnumber"
+            v-model="serialNumber"
+            :error="serialNumberError"
+            @input="fetchSerialNumberSuggestionsDebounced"
+          />
+        </div>
+        <div class="col-span-3">
+          <Checkbox
+            label="Photo of bike taken?"
+            name="bikePhotoTaken"
+            activeClass="ring-primary-500 bg-primary-500"
+            v-model="bikePhotoTaken"
+            :error="bikePhotoTakenError"/>
+          <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
+        </div>
+        <div class="col-span-3">
+          <Checkbox
+            label="Sticker on bike?"
+            name="stickerOnBike"
+            activeClass="ring-primary-500 bg-primary-500"
+            v-model="stickerOnBike"
+            :error="stickerOnBikeError"/>
+          <ErrorMessage name="stickerOnBike" :error="stickerOnBikeError" class="text-danger-500"/>
+        </div>
       </div>
-      <div class="col-span-6 xl:col-span-4 xl:row-span-4 xl:row-start-3 col-start-1">
-        <ComboboxColourPicker
-          :suggestions="filteredColoursSuggestions"
-          :selected-callback="selectColours"
-          :allow-new=true
-          :error="coloursError"
-          label="Colours"
-          name="colours"
-          @update:modelValue="(newValue) => {fetchColoursSuggestionsDebounced(); }"
-          v-model="colours"
-          @click.prevent="() => {}"
-        >
-          <template #suggestion="{ suggestion, active }">
-            <ColourSetSuggestion
-              :suggestion="suggestion"
-              :active="active"/>
-          </template>
-        </ComboboxColourPicker>
-      </div>
-      <div class="col-span-6 xl:col-span-4 xl:col-start-5 xl:row-start-3">
-        <TextInput
-          label="Decals"
-          type="text"
-          placeholder="Decals"
-          name="decals"
-          v-model="decals"
-          :error="decalsError"
-        />
-      </div>
-      <div class="col-span-6 xl:col-span-4 xl:col-start-5 xl:row-start-4">
-        <ComboboxTextInput
-          :field-model-value="serialNumber"
-          :suggestions="filteredSerialNumberSuggestions"
-          :selected-callback="selectSerialNumber"
-          label="Serial Number"
-          type="text"
-          placeholder="Serial Number"
-          name="serialnumber"
-          v-model="serialNumber"
-          :error="serialNumberError"
-          @input="fetchSerialNumberSuggestionsDebounced"
-        />
-      </div>
-      <div class="col-span-6 xl:col-span-4 xl:row-span-5 xl:col-start-9 xl:row-start-2">
-        <BikeOverviewCard
-          :bike="bikeToBeLinked"
-          :bike-search="{
+      <div class="col-span-4 grid grid-cols-12 gap-5">
+        <div class="col-span-full row-span-6">
+          <BikeOverviewCard
+            :bike="bikeToBeLinked"
+            :bike-search="{
                             make: make,
                             model: model,
                             decals: decals,
                             colours: colours,
                             serialNumber: serialNumber
                           }"/>
-      </div>
-      <div class="col-span-6 xl:col-span-4 xl:col-start-9 xl:row-start-7">
-        <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Use this bike or create new?</h5>
-        <Radio
-          v-if="bikeToBeLinked"
-          label="Use this bike"
-          class="mb-5"
-          name="matchWithBikeId"
-          v-model="matchWithBikeId"
-          :value="bikeToBeLinked.id"
-        />
-        <Radio
-          label="Create New Bike"
-          class="mb-5"
-          name="matchWithBikeId"
-          v-model="matchWithBikeId"
-          value="new"
-        />
-        <ErrorMessage name="matchWithBikeId" :error="matchWithBikeIdError" class="text-danger-500"/>
-      </div>
-      <div class="col-span-6 xl:col-span-2 xl:col-start-5 xl:row-start-5">
-        <Checkbox
-          label="Photo of bike taken?"
-          name="bikePhotoTaken"
-          activeClass="ring-primary-500 bg-primary-500"
-          v-model="bikePhotoTaken"
-          :error="bikePhotoTakenError"/>
-        <ErrorMessage name="bikePhotoTaken" :error="bikePhotoTakenError" class="text-danger-500"/>
-      </div>
-      <div class="col-span-6 xl:col-span-2 xl:col-start-7 xl:row-start-5">
-        <Checkbox
-          label="Sticker on bike?"
-          name="stickerOnBike"
-          activeClass="ring-primary-500 bg-primary-500"
-          v-model="stickerOnBike"
-          :error="stickerOnBikeError"/>
-        <ErrorMessage name="stickerOnBike" :error="stickerOnBikeError" class="text-danger-500"/>
+        </div>
+        <div class="col-span-6">
+          <h5 class="text-base text-slate-800 dark:text-slate-300 mb-6">Use this bike or create new?</h5>
+          <Radio
+            v-if="bikeToBeLinked"
+            label="Use this bike"
+            class="mb-5"
+            name="matchWithBikeId"
+            v-model="matchWithBikeId"
+            :value="bikeToBeLinked.id"
+          />
+          <Radio
+            label="Create New Bike"
+            class="mb-5"
+            name="matchWithBikeId"
+            v-model="matchWithBikeId"
+            value="new"
+          />
+          <ErrorMessage name="matchWithBikeId" :error="matchWithBikeIdError" class="text-danger-500"/>
+        </div>
       </div>
       <div class="col-span-full">
         <FormStepNavigation

@@ -2,7 +2,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from .contract import Contract
 from .colours import Colour
 from app.extensions.disposition import Disposition
 
@@ -29,7 +28,11 @@ class Bike(BikeBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ContractBrief(BaseModel):
+    id: UUID
+
+
 class BikeExtended(Bike):
     model_config = ConfigDict(from_attributes=True)
 
-    contracts: list[Contract]
+    contracts: list[ContractBrief]

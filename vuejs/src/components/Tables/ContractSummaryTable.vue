@@ -54,22 +54,34 @@
             v-if="props.column.field === 'startDate'"
             class="text-slate-500 dark:text-slate-300"
           >
-            {{ new Date(Date.parse(props.row.startDate))
-              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+            {{
+              props.row.startDate
+                ? new Date(Date.parse(props.row.startDate))
+                  .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})
+                : 'n/a'
+            }}
           </span>
           <span
               v-if="props.column.field === 'endDate'"
               class="text-slate-500 dark:text-slate-300"
           >
-            {{ new Date(Date.parse(props.row.endDate))
-              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) }}
+            {{
+              props.row.endDate
+                ? new Date(Date.parse(props.row.endDate))
+                  .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})
+                : 'n/a'
+            }}
           </span>
           <span
               v-if="props.column.field === 'returnedDate'"
               class="text-slate-500 dark:text-slate-300"
           >
-            {{ props.row.returnedDate ? new Date(Date.parse(props.row.returnedDate))
-              .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}) : 'n/a' }}
+            {{
+              props.row.returnedDate
+                ? new Date(Date.parse(props.row.returnedDate))
+                  .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})
+                : 'n/a'
+            }}
           </span>
           <span v-if="props.column.field === 'status'" class="block w-full">
             <span
@@ -85,7 +97,7 @@
                 : ''
             }
             ${
-              props.row.status === 'forfeited'
+              props.row.status === 'forfeited' || props.row.status === 'ERROR'
                 ? 'text-danger-500 bg-danger-500'
                 : ''
             }
@@ -97,6 +109,11 @@
             ${
               props.row.status === 'stolen'
                 ? 'text-purple-500 bg-purple-500'
+                : ''
+            }
+            ${
+              props.row.status === 'draft'
+                ? 'text-success-200 bg-success-200'
                 : ''
             }
 

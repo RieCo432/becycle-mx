@@ -141,4 +141,4 @@ async def get_bike_contracts(
         bike_id: UUID,
         db: Session = Depends(dep.get_db)
 ) -> list[schemas.Contract]:
-    return crud.get_contracts(db=db, bike_id=bike_id)
+    return crud.get_contracts(db=db, bike_id=bike_id, open=True, expired=True, closed=True, draft=True)

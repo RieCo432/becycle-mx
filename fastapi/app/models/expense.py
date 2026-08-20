@@ -1,13 +1,9 @@
-import os
-from datetime import datetime, date
-from typing import List
+from datetime import date
 from uuid import uuid4
 
-from dateutil.relativedelta import relativedelta
-from sqlalchemy import String, UUID, text, ForeignKey, Date, Integer, Text, Boolean, LargeBinary, Float
+from sqlalchemy import String, UUID, text, ForeignKey, Date, Text, Boolean, LargeBinary, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-import app.services as services
 from app.database.db import Base
 
 
