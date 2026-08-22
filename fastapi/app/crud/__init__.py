@@ -19,3 +19,4 @@ from .transactions import *
 from .catalogue import *
 from .sales import *
 from .bugReports import *
+from .photos import *
