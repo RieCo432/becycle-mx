@@ -360,7 +360,7 @@ export default {
       });
     },
     async copyPhoto(photo) {
-      const url = `http://localhost:8000/public/photos/${photo.id}`;
+      const url = `${requests.getApiBaseUrl()}/public/photos/${photo.id}`;
 
       const html = `<img src="${url}" alt="photo">`;
 

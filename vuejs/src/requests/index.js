@@ -31,11 +31,18 @@ function validateCommonHTTPErrorCodes(status, options) {
   return false;
 }
 
+const apiBaseUrl = `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}`;
+
 const axiosClient = axios.create({
-  baseURL: `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}`,
+  baseURL: apiBaseUrl,
 });
 
+console.log(apiBaseUrl);
+
 export default {
+  getApiBaseUrl() {
+    return apiBaseUrl;
+  },
   getOpeningTimes() {
     return axiosClient.get('/public/opening-times');
   },
