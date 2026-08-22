@@ -23,3 +23,4 @@ from .expenseClaims import *
 from .catalogueItems import *
 from .sales import *
 from .bugReport import *
+from .photo import *

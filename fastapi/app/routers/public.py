@@ -2,7 +2,7 @@ import datetime
 from datetime import time
 from typing import Annotated, List
 from uuid import UUID
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import app.crud as crud
@@ -93,3 +93,25 @@ async def get_colours_bar(
         colours_hex: Annotated[List[str], Query()],
 ) -> FileResponse:
     return FileResponse(**crud.get_colours_bar_image(colours_hex=colours_hex))
+
+
+@public.get("/public/photos/{photo_id}")
+async def get_photo(
+        photo_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> FileResponse:
+    photo = crud.get_photo(db=db, photo_id=photo_id)
+    if photo is None:
+        raise HTTPException(status_code=404, detail={"description": "Photo not found"})
+    return FileResponse(**crud.get_file_response(photo.content, photo.contentType))
+
+
+@public.get("/public/photos/{photo_id}/thumbnail")
+async def get_photo_thumbnail(
+        photo_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> FileResponse:
+    photo = crud.get_photo(db=db, photo_id=photo_id)
+    if photo is None:
+        raise HTTPException(status_code=404, detail={"description": "Photo not found"})
+    return FileResponse(**crud.get_file_response(photo.thumbnail, photo.contentType))

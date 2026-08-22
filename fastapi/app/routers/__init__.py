@@ -23,3 +23,4 @@ from .transactions import transactions
 from .catalogue import catalogue
 from .sales import sales
 from .bugReports import bug_reports
+from .photos import photos

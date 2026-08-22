@@ -9,6 +9,7 @@ from app.database.db import Base
 from .contract import Contract
 from .depositExchange import DepositExchange
 from .expense import Expense
+from .photos import Photo
 from .userPermission import user_permission_association_table
 from .groupUser import group_user_association_table
 from .accounts import Account
@@ -93,6 +94,7 @@ class User(Base):
     saleHeadersCreated: Mapped[List["SaleHeader"]] = relationship("SaleHeader", foreign_keys=[SaleHeader.createdByUserId], back_populates="createdByUser")
 
     bugReports: Mapped[List["BugReport"]] = relationship("BugReport", foreign_keys=[BugReport.reportedByUserId], back_populates="reportedByUser")
+    photos: Mapped[List["Photo"]] = relationship("Photo", foreign_keys=[Photo.userId], back_populates="user")
 
 
     def __eq_dict__(self, other: dict):

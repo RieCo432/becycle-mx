@@ -1800,11 +1800,50 @@ export default {
     return axiosClient.post(`/bugreports/merge`, null, {
       headers: credentialsStore.getApiRequestHeader(),
       params: {
-        ids: bugReportIds
+        ids: bugReportIds,
       },
       paramsSerializer: {
         indexes: null,
       },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getPhotos() {
+    return axiosClient.get(`/photos`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getPhoto(photoId) {
+    return axiosClient.get(`/photos/${photoId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  getPhotoThumbnail(photoId) {
+    return axiosClient.get(`/photos/${photoId}/thumbnail`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  postNewPhotos(photos) {
+    const formData = new FormData();
+    photos.forEach((file) => {
+      formData.append('uploaded_photos', file);
+    });
+    return axiosClient.post(`/photos`, formData, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deletePhoto(photoId) {
+    return axiosClient.delete(`/photos/${photoId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
