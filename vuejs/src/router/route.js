@@ -339,6 +339,15 @@ const routes = [
         component: () => import('@/views/admin/rawData.vue'),
       },
       {
+        path: '/admin/bug-reports',
+        name: 'Bug Reports',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/bug-reports',
+        },
+        component: () => import('@/views/admin/bugReports.vue'),
+      },
+      {
         path: '/admin/basic-settings',
         name: 'Basic Settings',
         meta: {

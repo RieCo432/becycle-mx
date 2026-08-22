@@ -14,6 +14,7 @@ from .groupUser import group_user_association_table
 from .accounts import Account
 from .transactions import TransactionHeader, TransactionLine
 from .sales import SaleHeader
+from .bugReports import BugReport
 
 
 class UserPhoto(Base):
@@ -90,6 +91,8 @@ class User(Base):
     transactionHeadersPosted: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.postedByUserId], back_populates="postedByUser")
     
     saleHeadersCreated: Mapped[List["SaleHeader"]] = relationship("SaleHeader", foreign_keys=[SaleHeader.createdByUserId], back_populates="createdByUser")
+
+    bugReports: Mapped[List["BugReport"]] = relationship("BugReport", foreign_keys=[BugReport.reportedByUserId], back_populates="reportedByUser")
 
 
     def __eq_dict__(self, other: dict):
