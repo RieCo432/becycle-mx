@@ -22,6 +22,9 @@
               </div>
             </div>
             <div v-if="editorActive && editAllowed" class="grid grid-cols-3 col-span-full gap-5 justify-items-stretch mt-20">
+              <div class="col-span-full">
+                <DashButton class="w-full" @click="openPhotoManager">Photos</DashButton>
+              </div>
               <div  class="justify-self-start">
                 <DashButton class="w-full btn-danger" @click="cancelEditor">Cancel</DashButton>
               </div>
@@ -92,7 +95,6 @@
                 </div>
             </Card>
         </div>
-
         <div class="lg:col-span-6 col-span-12">
             <Card title="Opening Days and Times">
               <div class="grid grid-cols-12 gap-5">
@@ -124,7 +126,75 @@
               </div>
             </Card>
         </div>
+      <Modal title="Photo Manager" :active-modal="photoManagerOpen" @close="photoManagerOpen = false" size-class="max-w-[1000px]">
+        <div class="grid grid-cols-6 gap-4">
+          <div class="col-span-full">
+            <p class="text-slate-700 dark:text-slate-300">
+              Click on a photo to copy it to your clipboard. You can then paste it into the editor.
+            </p>
+          </div>
 
+          <div class="col-span-full max-h-[55vh] overflow-y-auto">
+            <div class="grid grid-cols-6 gap-4">
+              <div
+                v-for="photo in photos.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn))"
+                :key="photo.id"
+                class="col-span-1">
+
+                <div class="relative inline-block w-full">
+                  <DashButton
+                    @click="() => deletePhoto(photo.id)"
+                    class="absolute top-0 right-0 z-10 rounded-full bg-danger-500 dark:bg-danger-500 shadow-lg"
+                  >
+                    <Icon icon="heroicons-outline:trash"/>
+                  </DashButton>
+                  <div class="w-full h-auto rounded-md p-4">
+                    <img
+                      :src="photo.thumbnailUrl"
+                      alt="Photo Thumbnail"
+                      class="w-full h-full object-cover"
+                      @click="() => copyPhoto(photo)">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-full">
+            <div class="h-full">
+              <div
+                v-bind="getRootProps()"
+                class="w-full h-full text-center border rounded flex flex-col justify-center items-center 
+                border-secondary-500 border-dashed"
+              >
+                <div v-if="filesToUpload.length === 0" class="h-full w-full">
+                  <input v-bind="getInputProps()" class="hidden"/>
+                  <img src="../assets/images/svg/upload.svg" alt="" class="mx-auto mb-4"/>
+                  <p
+                    v-if="isDragActive"
+                    class="text-sm text-slate-500 dark:text-slate-300 font-light"
+                  >
+                    Drop the files here ...
+                  </p>
+                  <p v-else class="text-sm text-slate-500 dark:text-slate-300 font-light">
+                    Drop files here or click to upload.
+                  </p>
+                </div>
+                <div v-else class="flex w-full h-full justify-center align-middle">
+                  <div v-for="fileToUpload in filesToUpload" :key="fileToUpload.name">
+                    <img
+                      v-if="fileToUpload.contentType.startsWith('image/')"
+                      :src="fileToUpload.preview"
+                      class="object-contain block rounded-md"
+                      alt="Photo"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
 </template>
 
@@ -142,6 +212,10 @@ import {QuillEditor} from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import {useToast} from 'vue-toastification';
 import Switch from '@/components/Switch';
+import Modal from '@/components/Modal/Modal.vue';
+import {Icon} from '@iconify/vue';
+import {useDropzone} from 'vue3-dropzone';
+import {ref} from 'vue';
 
 const COMMON_NAME = import.meta.env.VITE_COMMON_NAME;
 const QUICK_INFO = import.meta.env.VITE_QUICK_INFO;
@@ -163,12 +237,57 @@ const {mapCurrent} = useScreens({
 
 export default {
   components: {
+    Modal,
     Switch,
     TableSkeleton,
     DashButton,
     Card,
     Calendar,
     QuillEditor,
+    Icon,
+  },
+  setup() {
+    const filesToUpload = ref([]);
+    const photos = ref([]);
+
+    function pushPhotoObject(photo) {
+      requests.getPhotoThumbnail(photo.id).then((response) => {
+        const blob = new Blob([response.data], {type: response.headers['content-type']});
+        photos.value.push({
+          id: photo.id,
+          createdOn: new Date(photo.createdOn),
+          userId: photo.userId,
+          thumbnailBlob: blob,
+          contentType: response.headers['content-type'],
+          thumbnailUrl: window.URL.createObjectURL(blob),
+        });
+      });
+    }
+    function onDrop(acceptFiles) {
+      filesToUpload.value = acceptFiles.map((file) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+          contentType: file.type,
+        }),
+      );
+      requests.postNewPhotos(filesToUpload.value).then((response) => {
+        toast.success('Photos uploaded successfully', {timeout: 2000});
+        filesToUpload.value = [];
+        response.data.forEach((photoId) => {
+          pushPhotoObject(photoId);
+        });
+      });
+    }
+    const {getRootProps, getInputProps, ...rest} = useDropzone({onDrop, multiple: true});
+
+    return {
+      photos,
+      filesToUpload,
+      pushPhotoObject,
+      getRootProps,
+      getInputProps,
+      ...rest,
+    };
   },
   data() {
     return {
@@ -210,6 +329,7 @@ export default {
           field: 'close',
         },
       ],
+      photoManagerOpen: false,
     };
   },
   methods: {
@@ -229,6 +349,48 @@ export default {
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
+    },
+    openPhotoManager() {
+      requests.getPhotos().then((response) => {
+        this.photos = [];
+        for (const photo of response.data) {
+          this.pushPhotoObject(photo);
+        }
+        this.photoManagerOpen = true;
+      });
+    },
+    async copyPhoto(photo) {
+      const url = `http://localhost:8000/public/photos/${photo.id}`;
+
+      const html = `
+      <img
+        src="${url}"
+        data-photo-id="${photo.id}"
+        alt=""
+      >`;
+
+      const item = {
+        'text/html': new Blob([html], {type: 'text/html'}),
+      };
+      const clipboardItem = new ClipboardItem(item);
+
+      await navigator.clipboard.write([clipboardItem]);
+      this.photoManagerOpen = false;
+      toast.success('Photo copied to clipboard', {timeout: 2000});
+    },
+    loadAsync(url, callback) {
+      const s = document.createElement('script');
+      s.setAttribute('src', url); s.onload = callback;
+      document.head.insertBefore(s, document.head.firstElementChild);
+    },
+    deletePhoto(photoId) {
+      requests.deletePhoto(photoId)
+        .then(() => {
+          this.photos = this.photos.filter((photo) => photo.id !== photoId);
+          toast.success('Photo deleted', {timeout: 2000});
+        }).catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
     },
   },
   mounted() {
@@ -264,14 +426,8 @@ export default {
       this.address = response.data;
       this.loadingAddress = false;
     });
-    function loadAsync(url, callback) {
-      const s = document.createElement('script');
-      s.setAttribute('src', url); s.onload = callback;
-      document.head.insertBefore(s, document.head.firstElementChild);
-    }
-
     if (PAYPAL_BUTTON_ID) {
-      loadAsync('https://www.paypalobjects.com/donate/sdk/donate-sdk.js', function() {
+      this.loadAsync('https://www.paypalobjects.com/donate/sdk/donate-sdk.js', function() {
         // eslint-disable-next-line new-cap
         PayPal.Donation.Button({
           env: 'production',
@@ -284,8 +440,9 @@ export default {
         }).render('#donate-button');
       });
     }
-
-    loadAsync('https://app.termly.io/resource-blocker/cfac8041-9e2d-4f64-9c8b-1ba418ea07a1?autoBlock=on');
+  },
+  created() {
+    this.loadAsync('https://app.termly.io/resource-blocker/cfac8041-9e2d-4f64-9c8b-1ba418ea07a1?autoBlock=on');
   },
 };
 

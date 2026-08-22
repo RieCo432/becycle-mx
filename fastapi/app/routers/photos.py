@@ -43,7 +43,7 @@ async def get_photo(
 
 
 @photos.get("/photos/{photo_id}/thumbnail")
-async def get_photo(
+async def get_photo_thumbnail(
         photo_id: UUID,
         db: Session = Depends(dep.get_db)
 ) -> FileResponse:
@@ -54,10 +54,10 @@ async def get_photo(
 
 
 @photos.post("/photos")
-async def post_contract_photos(
+async def post_photos(
         uploaded_photos: list[UploadFile],
         user: schemas.User = Depends(dep.get_current_user),
         db: Session = Depends(dep.get_db)
-) -> list[UUID]:
+) -> list[schemas.Photo]:
 
     return crud.create_photos(db=db, photos=uploaded_photos, user=user)

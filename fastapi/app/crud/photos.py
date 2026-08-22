@@ -88,7 +88,7 @@ def save_photo(db: Session, photo: UploadFile, user: models.User, auto_commit: b
     return new_contract_photo
 
 
-def create_photos(db: Session, photos: List[UploadFile], user: models.User) -> List[UUID]:
+def create_photos(db: Session, photos: List[UploadFile], user: models.User) -> List[models.Photo]:
     added_photos = []
     for photo in photos:
         new_photo = save_photo(db=db, photo=photo, user=user, auto_commit=False)
@@ -98,7 +98,7 @@ def create_photos(db: Session, photos: List[UploadFile], user: models.User) -> L
     for photo in added_photos:
         db.refresh(photo)
 
-    return [photo.id for photo in added_photos]
+    return added_photos
 
 
 def delete_photo(db: Session, photo_id: UUID) -> None:
