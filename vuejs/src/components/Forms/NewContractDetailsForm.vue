@@ -13,7 +13,7 @@ const toast = useToast();
 
 const emit = defineEmits(['goBack', 'update:draft']);
 const props = defineProps({
-  draft: {
+  contract: {
     type: Object,
     required: true,
   },
@@ -59,7 +59,7 @@ const submit = handleSubmit(() => {
   if (checkCurrentlyProcessing()) return;
   processingSubmit.value = true;
 
-  requests.putDraftContractDetails(props.draft.id, type.value, condition.value, notes.value)
+  requests.putDraftContractDetails(props.contract.id, type.value, condition.value, notes.value)
     .then((response) => {
       toast.success('Contract Details Updated!', {timeout: 1000});
       emit('update:draft', response.data);
@@ -78,12 +78,12 @@ function applyDraftValues(draft) {
   if (draft.notes) notes.value = draft.notes;
 }
 
-watch(props.draft, async (newValue) => {
+watch(props.contract, async (newValue) => {
   applyDraftValues(newValue);
 });
 
 onMounted(() => {
-  applyDraftValues(props.draft);
+  applyDraftValues(props.contract);
 });
 
 function goBack() {

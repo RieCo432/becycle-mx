@@ -12,7 +12,7 @@ appointments_public = APIRouter(
     responses={404: {"description": "Not Found"}}
 )
 
-@appointments_public.get("/appointments")
+@appointments_public.get("/public/appointments")
 async def get_appointment_via_hyperlink(
         appointment_id: UUID,
         client_id: UUID,
@@ -22,7 +22,7 @@ async def get_appointment_via_hyperlink(
     return crud.get_appointment(db=db, appointment_id=appointment_id)
 
 
-@appointments_public.patch("/appointments/cancel")
+@appointments_public.patch("/public/appointments/cancel")
 async def cancel_appointment_via_hyperlink(
         appointment_id: UUID,
         client_id: UUID,
@@ -35,10 +35,26 @@ async def cancel_appointment_via_hyperlink(
     ))
 
     email_tasks.add_task(appointment.send_client_cancellation_email)
+    
+    
+@appointments_public.patch("/public/appointment/reschedule")
+async def reschedule_via_hyperlink(
+        appointment_id: UUID,
+        client_id: UUID,
+        new_appointment_info: schemas.AppointmentReschedule,
+        email_tasks: BackgroundTasks,
+        db: Session = Depends(dep.get_db)
+) -> None:
+    crud.verify_appointment_hyperlink_parameters(db=db, appointment_id=appointment_id, client_id=client_id)
+    
+    appointment_to_reschedule = crud.get_appointment(db=db, appointment_id=appointment_id)
+    
+    appointment = crud.reschedule_appointment(db=db, reschedule_appointment_id=appointment_id, appointment_data=new_appointment_info, auto_confirm=False, ignore_limits=False)
+    email_tasks.add_task(appointment.send_rescheduled_email(appointment_to_reschedule))
 
 
 
-@appointments_public.get("/appointments/available")
+@appointments_public.get("/public/appointments/available")
 async def get_available_appointments(
         appointment_type_id: str,
         ignore_limits: bool = False,
@@ -50,11 +66,11 @@ async def get_available_appointments(
     return available_slots
 
 
-@appointments_public.get("/appointments/types")
+@appointments_public.get("/public/appointments/types")
 async def get_appointment_types(inactive: bool = False, db: Session = Depends(dep.get_db)) -> list[schemas.AppointmentType]:
     return crud.get_appointment_types(db=db, inactive=inactive)
 
 
-@appointments_public.get("/appointments/types/{type_id}")
+@appointments_public.get("/public/appointments/types/{type_id}")
 async def get_appointment_type(type_id: str, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
     return crud.get_appointment_type(db=db, appointment_type_id=type_id)

@@ -80,7 +80,7 @@
     "@babel/eslint-parser": "^7.12.16",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.17.0",
-    "@iconify/vue": "^3.2.1",
+    "@iconify/vue": "^5.0.1",
     "@stylistic/eslint-plugin": "^2.12.1",
     "@types/video.js": "^7.3.58",
     "eslint": "^8.57.1",

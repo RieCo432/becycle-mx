@@ -4,35 +4,30 @@
          @focusin="() => (showSuggestions = true)"
          @focusout="(evt) => {
            showSuggestions = false;
-         }"
-    >
+         }">
       <div class="relative w-full">
         <div
             class="fromGroup relative"
             :class="`${error ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
-      validate ? 'is-valid' : ''
-    } `"
-        >
+              validate ? 'is-valid' : ''
+              } `">
           <label
               v-if="label"
               :class="`${classLabel} ${
-        horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
-      }  ltr:inline-block rtl:block input-label `"
-              :for="name"
-          >
-            {{ label }}</label
-          >
+                horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
+                }  ltr:inline-block rtl:block input-label `"
+              :for="name">
+            {{ label }}
+          </label>
           <div class="relative" :class="horizontal ? 'flex-1' : ''">
-
-            <div
-            >
+            <div>
               <input
                   :type="types"
                   :name="name"
                   :placeholder="placeholder"
                   :class="`${classInput} input-control w-full block focus:outline-none h-[40px] ${
-          hasicon ? 'ltr:pr-10 rtl:pl-10' : ''
-        } `"
+                    hasicon ? 'ltr:pr-10 rtl:pl-10' : ''
+                    } `"
                   :value="modelValue"
                   @keydown.esc="() => (showSuggestions = false)"
                   @keydown.down="() => stepActiveIndex(1)"
@@ -45,6 +40,7 @@
                   :disabled="disabled"
                   :validate="validate"
                   v-if="!isMask"
+                  autocomplete="off"
               />
             </div>
             <cleave
@@ -87,36 +83,32 @@
               v-if="error"
               class="mt-2"
               :class="
-        msgTooltip
-          ? ' inline-block bg-danger-500 text-white text-[10px] px-2 py-1 rounded'
-          : ' text-danger-500 block text-sm'
-      "
-          >{{ error }}</span
-          >
+                msgTooltip
+                  ? ' inline-block bg-danger-500 text-white text-[10px] px-2 py-1 rounded'
+                  : ' text-danger-500 block text-sm'">
+            {{ error }}
+          </span>
           <span
               v-if="validate"
               class="mt-2"
               :class="
-        msgTooltip
-          ? ' inline-block bg-success-500 text-white text-[10px] px-2 py-1 rounded'
-          : ' text-success-500 block text-sm'
-      "
-          >{{ validate }}</span
-          >
+                msgTooltip
+                  ? ' inline-block bg-success-500 text-white text-[10px] px-2 py-1 rounded'
+                  : ' text-success-500 block text-sm'">
+            {{ validate }}
+          </span>
           <span
               class="block text-secondary-500 font-light leading-4 text-xs mt-2"
-              v-if="description"
-          >{{ description }}</span
-          >
+              v-if="description">
+            {{ description }}
+          </span>
         </div>
-
       </div>
         <div
             class="absolute w-full mt-1 max-h-60 overflow-auto rounded-md py-1 text-base ring-1 ring-black/5
                  focus:outline-none sm:text-sm bg-white dark:bg-slate-800 dark:border dark:border-slate-700
                  shadow-dropdown z-[9999]"
-            v-if="openByDefault || showSuggestions"
-        >
+            v-if="openByDefault || showSuggestions">
           <ul>
             <li
                 v-if="((suggestions.indexOf(fieldModelValue) === -1) && allowNew)"
@@ -125,11 +117,10 @@
                       'text-slate-600 dark:text-slate-300': activeIndex !== -1,
                       }"
                 class="relative w-full cursor-default select-none py-2 px-4"
-                @mouseenter="() => (activeIndex = -1)"
-            >
-                      <span class="block">
-                        Create {{ fieldModelValue }}
-                      </span>
+                @mouseenter="() => (activeIndex = -1)">
+              <span class="block">
+                Create {{ fieldModelValue }}
+              </span>
             </li>
             <li
                 v-for="(suggestion, i) in suggestions"
@@ -140,8 +131,7 @@
                       }"
                 class="relative cursor-default select-none py-2 px-4"
                 @mouseenter="() => (activeIndex = i)"
-                @mousedown.prevent="(event) => selected(event, suggestion)"
-            >
+                @mousedown.prevent="(event) => selected(event, suggestion)">
               <slot name="suggestion" :suggestion="suggestion" :index="i" :active="activeIndex === i">
                 <span class="block">
                   {{ prettyPrintFunction(suggestion) }}

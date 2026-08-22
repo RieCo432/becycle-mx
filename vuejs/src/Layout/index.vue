@@ -42,6 +42,7 @@
       v-if="window.width > 768"
     />
   </main>
+  <BugReportModal @bugReportSubmitted="bugReportSubmitted"/>
 </template>
 <script>
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -51,10 +52,12 @@ import Settings from '../components/Settings';
 import Sidebar from '../components/Sidebar/';
 import window from '@/mixins/window';
 import MobileSidebar from '@/components/Sidebar/MobileSidebar.vue';
+import BugReportModal from "@/components/Modal/BugReportModal.vue";
 
 export default {
   mixins: [window],
   components: {
+    BugReportModal,
     Header,
     Footer,
     Sidebar,
@@ -75,6 +78,11 @@ export default {
         return 'ltr:ml-[248px] rtl:mr-[248px]';
       }
     },
+    bugReportSubmitted(bugReport) {
+      this.$store.bugReportingStore.bugReport = bugReport;
+      this.$store.bugReportingStore.shouldUpdateBugReport = true;
+      this.$store.bugReportingStore.closeModal();
+    }
   },
 };
 </script>

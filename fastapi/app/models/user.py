@@ -9,11 +9,13 @@ from app.database.db import Base
 from .contract import Contract
 from .depositExchange import DepositExchange
 from .expense import Expense
+from .photos import Photo
 from .userPermission import user_permission_association_table
 from .groupUser import group_user_association_table
 from .accounts import Account
 from .transactions import TransactionHeader, TransactionLine
 from .sales import SaleHeader
+from .bugReports import BugReport
 
 
 class UserPhoto(Base):
@@ -69,9 +71,7 @@ class User(Base):
 
     workedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.workingUserId], back_populates="workingUser")
     checkedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.checkingUserId], back_populates="checkingUser")
-    depositCollectedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.depositCollectingUserId], back_populates="depositCollectingUser")
     returnedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.returnAcceptingUserId], back_populates="returnAcceptingUser")
-    depositReturnedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.depositReturningUserId], back_populates="depositReturningUser")
 
     depositExchangesReceived: Mapped[List[DepositExchange]] = relationship("DepositExchange", foreign_keys=[DepositExchange.toUserId], back_populates="toUser")
     depositExchangesGiven: Mapped[List[DepositExchange]] = relationship("DepositExchange", foreign_keys=[DepositExchange.fromUserId], back_populates="fromUser")
@@ -92,6 +92,9 @@ class User(Base):
     transactionHeadersPosted: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.postedByUserId], back_populates="postedByUser")
     
     saleHeadersCreated: Mapped[List["SaleHeader"]] = relationship("SaleHeader", foreign_keys=[SaleHeader.createdByUserId], back_populates="createdByUser")
+
+    bugReports: Mapped[List["BugReport"]] = relationship("BugReport", foreign_keys=[BugReport.reportedByUserId], back_populates="reportedByUser")
+    photos: Mapped[List["Photo"]] = relationship("Photo", foreign_keys=[Photo.userId], back_populates="user")
 
 
     def __eq_dict__(self, other: dict):

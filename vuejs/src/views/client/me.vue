@@ -85,7 +85,7 @@ export default {
       // TODO
     },
     rescheduleMyAppointment(appointmentId) {
-      // TODO
+      this.$router.push({path: '/appointments/reschedule', query: {rescheduleAppointmentId: appointmentId}});
     },
     viewContract(contractId) {
       this.$router.push(`/clients/me/contracts/${contractId}`);
@@ -98,14 +98,16 @@ export default {
   async created() {
     this.client = (await requests.getClientMe()).data;
     this.loadingClientDetails = false;
-    this.contracts = (await requests.getMyContracts(true, true, true)).data;
+    this.contracts = (await requests.getMyContracts()).data;
     this.appointments = (await requests.getMyAppointments(true, true)).data;
 
 
     this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
       const bike = (await requests.getClientBike(contract.bikeId)).data;
-      let status = 'open';
-      if (contract.returnedDate != null) {
+      let status = 'active';
+      if (contract.isDraft) {
+        status = 'draft';
+      } else if (contract.returnedDate != null) {
         status = 'closed';
       } else if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
         status = 'stolen';
@@ -149,6 +151,8 @@ export default {
         type: appointmentType['title'],
         duration: appointmentType['duration'],
         notes: appointment.notes,
+        cancellationReason: appointment.cancellationReason,
+        didClientShowUp: appointment.didClientShowUp,
       };
     })));
     this.loadingAppointments = false;

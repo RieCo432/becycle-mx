@@ -92,6 +92,34 @@
                       @click="showCancellationModal = true"
                   >{{ appointment.confirmed ? 'Cancel' : 'Deny'}} Appointment</DashButton>
                 </template>
+                <template v-if="appointment.startDateTime < new Date()">
+                  <DashButton
+                      class="bg-danger-500 dark:bg-danger-500"
+                      @click="() => markDidClientShowUp(appointment.didClientShowUp === false ? null : false)"
+                  >
+                    <NoInputCheckbox
+                      :value="appointment.didClientShowUp === false"
+                      active-class=" ring-danger-500  bg-danger-900 dark:bg-danger-700
+                        dark:ring-danger-700 ring-offset-2 dark:ring-offset-danger-800 "
+                      inactive-class=" bg-danger-100 dark:bg-danger-600 dark:border-danger-600 "
+                      text-class=" text-white dark:text-white "
+                      border-class=" border-danger-100 dark:border-danger-800 "
+                      label="No Show"/>
+                  </DashButton>
+                  <DashButton
+                    class="bg-success-500 dark:bg-success-500"
+                    @click="() => markDidClientShowUp(appointment.didClientShowUp === true ? null : true)"
+                  >
+                    <NoInputCheckbox
+                      :value="!!appointment.didClientShowUp"
+                      active-class=" ring-success-500  bg-success-900 dark:bg-success-700
+                        dark:ring-success-700 ring-offset-2 dark:ring-offset-success-800 "
+                      inactive-class=" bg-success-100 dark:bg-success-600 dark:border-success-600 "
+                      text-class=" text-white dark:text-white "
+                      border-class=" border-success-100 dark:border-success-800 "
+                      label="Did Show"/>
+                  </DashButton>
+                </template>
               </div>
               <div v-else class="px-4 justify-end py-3 flex space-x-3 border-t border-slate-100 dark:border-slate-700">
                 <DashButton
@@ -125,12 +153,14 @@ import {
 } from '@headlessui/vue';
 import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
 import AppointmentCancellationModal from '@/components/Modal/AppointmentCancellationModal.vue';
+import NoInputCheckbox from '@/components/NoInputCheckbox/NoInputCheckbox.vue';
 
 const toast = useToast();
 
 export default {
   name: 'appointmentInfoModal',
   components: {
+    NoInputCheckbox,
     AppointmentCancellationModal,
     Icon,
     TransitionRoot,
@@ -168,6 +198,15 @@ export default {
     viewClient() {
       const routeData = this.$router.resolve({path: `/clients/${this.appointment.client.id}`});
       window.open(routeData.href, '_blank');
+    },
+    markDidClientShowUp(didShowUp) {
+      requests.patchAppointmentDidClientShowUp(this.appointment.id, didShowUp).then(() => {
+        toast.success('Appointment Updated', {timeout: 2000});
+        this.$emit('appointmentsUpdated');
+      }).catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 2000});
+      });
+      this.close();
     },
   },
   emits: ['appointmentsUpdated'],

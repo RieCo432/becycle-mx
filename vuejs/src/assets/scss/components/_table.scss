@@ -112,7 +112,7 @@ table.vgt-table td {
     before:inset-0 before:rounded;
 }
 .vgt-table .vgt-checkbox-col {
-  padding-left: 20px !important;
+  padding: 0 20px 0 20px !important;
 }
 .vgt-table input[type="checkbox"]:checked {
   @apply before:bg-slate-900;

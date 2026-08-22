@@ -7,7 +7,7 @@ import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
 import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
 import Modal from '@/components/Modal/Modal.vue';
-import AppointmentCancellationModal from "@/components/Modal/AppointmentCancellationModal.vue";
+import AppointmentCancellationModal from '@/components/Modal/AppointmentCancellationModal.vue';
 
 const credentialsStore = useCredentialsStore();
 
@@ -77,8 +77,8 @@ export default {
     },
     confirmAnonymiseData: {
       type: Function,
-      required: false
-    }
+      required: false,
+    },
   },
 
   data() {
@@ -143,16 +143,37 @@ export default {
       ],
 
       appointmentActions: [
+        {
+          label: 'Reschedule Appointment',
+          id: 'reschedule',
+          icon: 'heroicons-outline:calendar',
+          showIf: (appointment) => {
+            return (
+              Date.parse(appointment.startDateTime) > Date.now() &&
+              (
+                !appointment.cancellationReason ||
+                appointment.cancellationReason.toLowerCase() !== 'rescheduled'
+              )
+            );
+          },
+          func: (appointmentId) => this.rescheduleAppointment(appointmentId),
+        },
         ...!this.isClient ? [{
           label: 'Confirm Appointment',
           id: 'confirm',
           icon: 'heroicons-outline:check',
+          showIf: (appointment) => {
+            return appointment.status === 'pending';
+          },
           func: (appointmentId) => this.acceptAppointment(appointmentId),
         }] : [],
         {
           label: 'Cancel Appointment',
           id: 'cancel',
           icon: 'heroicons-outline:x-mark',
+          showIf: (appointment) => {
+            return appointment.status !== 'cancelled' && appointment.status !== 'past';
+          },
           func: (appointmentId) => {
             this.cancelAppointmentModalId = appointmentId;
             this.cancelAppointmentModalInfo = this.appointmentSummaries.find((appointment) => appointment.id === appointmentId);
@@ -180,6 +201,14 @@ export default {
         {
           label: 'Notes',
           field: 'notes',
+        },
+        {
+          label: 'Showed Up',
+          field: 'didClientShowUp',
+        },
+        {
+          label: 'Cancellation Reason',
+          field: 'cancellationReason',
         },
         {
           label: 'Action',

@@ -51,6 +51,7 @@
         <div
           class="nav-tools flex items-center lg:space-x-6 space-x-3 rtl:space-x-reverse"
         >
+          <ReportBug v-if="isUserLoggedIn" />
           <LanguageVue />
           <SwitchDark />
           <Profile v-if="showProfileDropdown" :name="profileName" />
@@ -70,12 +71,14 @@ import MobileLogo from './Navtools/MobileLogo.vue';
 import window from '@/mixins/window';
 import HandleMobileMenu from './Navtools/HandleMobileMenu.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import ReportBug from "@/components/Header/Navtools/ReportBug.vue";
 
 const credentialsStore = useCredentialsStore();
 
 export default {
   mixins: [window],
   components: {
+    ReportBug,
     Profile,
     SwitchDark,
     MainNav: MainNav,
@@ -93,6 +96,9 @@ export default {
     showProfileDropdown() {
       return (credentialsStore.name !== null);
     },
+    isUserLoggedIn() {
+      return credentialsStore.isUserLoggedIn();
+    }
   },
 
   methods: {

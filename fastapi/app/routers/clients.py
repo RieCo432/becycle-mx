@@ -97,8 +97,9 @@ async def get_client_contracts(
         open: bool = True,
         closed: bool = True,
         expired: bool = True,
+        draft: bool = True,
         db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
-    return crud.get_contracts(db=db, client_id=client_id, open=open, closed=closed, expired=expired)
+    return crud.get_contracts(db=db, client_id=client_id, open=open, closed=closed, expired=expired, draft=draft)
 
 
 @clients.get("/clients/{client_id}/appointments")

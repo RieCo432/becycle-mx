@@ -245,6 +245,12 @@ export const topMenu = [
         childlink: '/admin/raw-data',
         show: ['user'],
       },
+      {
+        childtitle: 'Bug Reports',
+        childicon: 'heroicons:bug-ant',
+        childlink: '/admin/bug-reports',
+        show: ['user'],
+      },
     ],
   },
   {

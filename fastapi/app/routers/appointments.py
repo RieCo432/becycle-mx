@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, date
 from typing import Annotated
 from uuid import UUID
 from dateutil import relativedelta
@@ -27,6 +27,26 @@ async def create_appointment(
     appointment = crud.create_appointment(db=db, appointment_data=appointment_data, auto_confirm=True, ignore_limits=ignore_limits)
 
     email_tasks.add_task(appointment.send_confirmation_email)
+
+    return appointment
+
+
+@appointments.get("/appointments/calendar")
+async def get_appointments(
+        start_datetime: datetime = datetime.utcnow(),
+        end_datetime: datetime = datetime.utcnow() + relativedelta.relativedelta(weeks=1),
+        db: Session = Depends(dep.get_db)) -> list[schemas.AppointmentFull]:
+    booked_appointments = crud.get_appointments(db=db, start_datetime=start_datetime, end_datetime=end_datetime)
+
+    return booked_appointments
+
+
+@appointments.get("/appointments/{appointment_id}")
+async def get_appointment(
+        appointment_id: UUID,
+        db: Session = Depends(dep.get_db)) -> schemas.Appointment:
+
+    appointment = crud.get_appointment(db=db, appointment_id=appointment_id)
 
     return appointment
 
@@ -61,6 +81,42 @@ async def cancel_appointment(
     return appointment
 
 
+@appointments.patch("/appointments/{appointment_id}/showup")
+async def patch_appointment_showup(
+        appointment_id: UUID,
+        email_tasks: BackgroundTasks,
+        did_client_show_up: Annotated[bool | None, Body(embed=True)] = None,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Appointment:
+    appointment = crud.patch_appointment_showup(db=db, appointment_id=appointment_id, did_client_show_up=did_client_show_up)
+    
+    if not appointment.didClientShowUp:
+        email_tasks.add_task(appointment.send_appointment_attendance_email)
+
+    return appointment
+
+
+@appointments.patch("/appointments/{reschedule_appointment_id}/reschedule")
+async def reschedule_appointment(
+        reschedule_appointment_id: UUID,
+        appointment_data: schemas.AppointmentReschedule,
+        email_tasks: BackgroundTasks,
+        ignore_limits: bool = False,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Appointment:
+    appointment_to_reschedule = crud.get_appointment(db=db, appointment_id=reschedule_appointment_id)
+    if appointment_to_reschedule is None:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    if appointment_to_reschedule.startDateTime.astimezone(timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Cannot reschedule a past appointment")
+
+    appointment = crud.reschedule_appointment(db=db, reschedule_appointment_id=reschedule_appointment_id, appointment_data=appointment_data, auto_confirm=True, ignore_limits=ignore_limits)
+
+    email_tasks.add_task(appointment.send_rescheduled_email(appointment_to_reschedule))
+    
+    return appointment
+
+
 @appointments.post("/appointments/types")
 async def create_appointment_type(new_appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(dep.get_db)) -> schemas.AppointmentType:
     return crud.create_appointment_type(db=db, appointment_type_data=new_appointment_type)
@@ -86,12 +142,3 @@ async def update_appointment_type(
     appointment_type = crud.get_appointment_type(db=db, appointment_type_id=type_id)
     return crud.update_appointment_type(db=db, appointment_type=appointment_type, updated_appointment_type_data=updated_appointment_type_data)
 
-
-@appointments.get("/appointments/calendar")
-async def get_appointments(
-        start_datetime: datetime = datetime.utcnow(),
-        end_datetime: datetime = datetime.utcnow() + relativedelta.relativedelta(weeks=1),
-        db: Session = Depends(dep.get_db)) -> list[schemas.AppointmentFull]:
-    booked_appointments = crud.get_appointments(db=db, start_datetime=start_datetime, end_datetime=end_datetime)
-
-    return booked_appointments

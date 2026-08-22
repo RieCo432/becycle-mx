@@ -18,12 +18,14 @@ import SubmitCrimeReportCard from '@/components/Card/SubmitCrimeReportCard.vue';
 import Tooltip from '@/components/Tooltip/index.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import TransactionLinesTable from '@/components/Tables/TransactionLinesTable.vue';
+import ContractPhotosCard from '@/components/Card/ContractPhotosCard.vue';
 
 const toast = useToast();
 
 export default {
   name: 'viewContract',
   components: {
+    ContractPhotosCard,
     TransactionLinesTable,
     Modal,
     Tooltip,
@@ -409,6 +411,21 @@ export default {
       default: () => {
       },
     },
+    photoUrls: {
+      type: Array,
+      default: () => [],
+      required: false,
+    },
+    loadingContractPhotos: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
+    deleteContractPhoto: {
+      type: Function,
+      default: () => {
+      },
+    },
   },
   computed: {
     forfeitedDate() {
@@ -457,7 +474,7 @@ export default {
         .slice(0, 10);
     },
   },
-  emits: ['crimeReportAdded'],
+  emits: ['crimeReportAdded', 'contractPhotosUploaded'],
 };
 </script>
 
@@ -816,6 +833,7 @@ export default {
             </div>
           </Card>
         </div>
+        <ContractPhotosCard v-if="isUser && !loadingContract" :contract-id="contract.id"/>
         <template v-if="!loadingContract">
           <template v-if="
           isUser &&
@@ -889,6 +907,3 @@ export default {
   </div>
 </template>
 
-<style scoped lang="scss">
-
-</style>

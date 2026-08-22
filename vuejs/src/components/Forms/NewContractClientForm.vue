@@ -15,7 +15,7 @@ const toast = useToast();
 
 const emit = defineEmits(['goBack', 'update:draft']);
 const props = defineProps({
-  draft: {
+  contract: {
     type: Object,
     required: true,
   },
@@ -79,7 +79,7 @@ const submit = handleSubmit(() => {
 
 
 onMounted(() => {
-  if (props.draft.client) {
+  if (props.contract.client) {
     emailAddress.value = props.draft.client.emailAddress;
     confirmEmailAddress.value = props.draft.client.emailAddress;
     firstName.value = props.draft.client.firstName;
@@ -87,7 +87,7 @@ onMounted(() => {
   }
 });
 
-watch(props.draft, async (newValue, oldValue) => {
+watch(props.contract, async (newValue, oldValue) => {
   firstName.value = newValue.client.firstName;
   lastName.value = newValue.client.lastName;
   emailAddress.value = newValue.client.emailAddress;
@@ -99,7 +99,7 @@ const filteredClientSuggestions = ref([]);
 
 
 function selectClientFromSuggestions(event, i) {
-  const draft = props.draft;
+  const draft = props.contract;
   if (i === -1) {
     draft.client = {id: null, firstName: firstName.value, lastName: lastName.value, emailAddress: emailAddress.value};
   } else {
@@ -109,7 +109,7 @@ function selectClientFromSuggestions(event, i) {
 }
 
 function setDraftClient(client) {
-  requests.putDraftContractClient(props.draft.id, client.id)
+  requests.putDraftContractClient(props.contract.id, client.id)
     .then((response) => {
       emit('update:draft', response.data);
       toast.success('Client updated', {timeout: 5000});
@@ -153,7 +153,7 @@ const fetchClientSuggestionsDebounced = debounce(() => {
 
 function resetClientComboBoxes() {
   filteredClientSuggestions.value = [];
-  const draft = props.draft;
+  const draft = props.contract;
   draft.client = {firstName: '', lastName: '', emailAddress: ''};
   emit('update:draft', draft);
 }

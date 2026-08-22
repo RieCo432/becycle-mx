@@ -11,7 +11,6 @@ const API_PORT = import.meta.env.VITE_API_PORT;
 const API_SUBDIR = import.meta.env.VITE_API_SUBDIR;
 const toast = useToast();
 
-
 function validateCommonHTTPErrorCodes(status, options) {
   options = options ?? {};
   options.clientLoginRequired = options.clientLoginRequired ?? false;
@@ -24,16 +23,26 @@ function validateCommonHTTPErrorCodes(status, options) {
     toast.error('Authentication required. Please log in.', {timeout: 3000});
     credentialsStore.logout();
     router.push('/users/login');
+  } else if (options.userLoginRequired && status === 403) {
+    toast.error('You do not have permission to access this resource. Please contact your administrator.', {timeout: 3000});
   } else if (status === 503) {
     toast.error('Service Temporarily Unavailable. Please try again later.', {timeout: false});
   } else return status < 300;
+  return false;
 }
 
+const apiBaseUrl = `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}`;
+
 const axiosClient = axios.create({
-  baseURL: `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}`,
+  baseURL: apiBaseUrl,
 });
 
+console.log(apiBaseUrl);
+
 export default {
+  getApiBaseUrl() {
+    return apiBaseUrl;
+  },
   getOpeningTimes() {
     return axiosClient.get('/public/opening-times');
   },
@@ -287,42 +296,30 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getContractDrafts() {
-    return axiosClient.get('/contracts/drafts', {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getContractDraft(draftContractId) {
-    return axiosClient.get(`/contracts/drafts/${draftContractId}`, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
   postNewContractDraft() {
-    return axiosClient.post('/contracts/drafts', null, {
+    return axiosClient.post('/contracts', null, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putDraftContractClient(draftContractId, clientId) {
-    return axiosClient.put(`/contracts/drafts/${draftContractId}/client`, {
+  putDraftContractClient(contractId, clientId) {
+    return axiosClient.put(`/contracts/drafts/${contractId}/client`, {
       client_id: clientId,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putDraftContractBike(draftContractId, bikeId) {
-    return axiosClient.put(`/contracts/drafts/${draftContractId}/bike`, {
+  putDraftContractBike(contractId, bikeId) {
+    return axiosClient.put(`/contracts/drafts/${contractId}/bike`, {
       bike_id: bikeId,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putDraftContractDetails(draftContractId, contractType, conditionOfBike, notes) {
-    return axiosClient.put(`/contracts/drafts/${draftContractId}/details`, {
+  putDraftContractDetails(contractId, contractType, conditionOfBike, notes) {
+    return axiosClient.put(`/contracts/drafts/${contractId}/details`, {
       conditionOfBike: conditionOfBike,
       contractType: contractType,
       notes: notes,
@@ -331,8 +328,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putDraftContractDeposit(draftContractId, depositCollectedTransactionHeaderId, depositCollectingUser, depositCollectingPassword) {
-    return axiosClient.put(`/contracts/drafts/${draftContractId}/deposit`, {
+  putDraftContractDeposit(contractId, depositCollectedTransactionHeaderId, depositCollectingUser, depositCollectingPassword) {
+    return axiosClient.put(`/contracts/drafts/${contractId}/deposit`, {
       deposit_collected_transaction_header_id: depositCollectedTransactionHeaderId,
       deposit_receiving_username: depositCollectingUser,
       deposit_receiving_user_password: depositCollectingPassword,
@@ -341,8 +338,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putDraftContractWorkingUser(draftContractId, workingUser, workingPasswordOrPin) {
-    return axiosClient.put(`/contracts/drafts/${draftContractId}/working-user`, {
+  putDraftContractWorkingUser(contractId, workingUser, workingPasswordOrPin) {
+    return axiosClient.put(`/contracts/drafts/${contractId}/working-user`, {
       working_username: workingUser,
       working_user_password_or_pin: workingPasswordOrPin,
     }, {
@@ -350,8 +347,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  putDraftContractCheckingUser(draftContractId, checkingUser, checkingPasswordOrPin) {
-    return axiosClient.put(`/contracts/drafts/${draftContractId}/checking-user`, {
+  putDraftContractCheckingUser(contractId, checkingUser, checkingPasswordOrPin) {
+    return axiosClient.put(`/contracts/drafts/${contractId}/checking-user`, {
       checking_username: checkingUser,
       checking_user_password_or_pin: checkingPasswordOrPin,
     }, {
@@ -359,8 +356,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  postSubmitDraftContract(draftContractId) {
-    return axiosClient.post(`/contracts/drafts/${draftContractId}/submit`, null, {
+  patchSubmitDraftContract(contractId) {
+    return axiosClient.patch(`/contracts/drafts/${contractId}/submit`, null, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -383,7 +380,7 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getClientContracts(clientId, open, closed, expired) {
+  getClientContracts(clientId, open, closed, expired, draft=true) {
     return axiosClient.get(`/clients/${clientId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -391,10 +388,11 @@ export default {
         open: open,
         closed: closed,
         expired: expired,
+        draft: draft,
       },
     });
   },
-  getBikeContracts(bikeId, open, closed, expired) {
+  getBikeContracts(bikeId, open, closed, expired, draft) {
     return axiosClient.get(`/bikes/${bikeId}/contracts`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -402,18 +400,14 @@ export default {
         open: open,
         closed: closed,
         expired: expired,
+        draft: draft,
       },
     });
   },
-  getMyContracts(open, closed, expired) {
+  getMyContracts() {
     return axiosClient.get('/clients/me/contracts', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
-      params: {
-        open: open,
-        closed: closed,
-        expired: expired,
-      },
     });
   },
   getContract(contractId) {
@@ -468,7 +462,7 @@ export default {
     });
   },
   getAppointmentTypes(inactive=false) {
-    return axiosClient.get('/appointments/types', {
+    return axiosClient.get('/public/appointments/types', {
       params: {
         inactive: inactive,
       },
@@ -476,7 +470,7 @@ export default {
     });
   },
   getAvailableAppointmentSlots(appointmentTypeId, ignoreLimits=undefined) {
-    return axiosClient.get('/appointments/available', {
+    return axiosClient.get('/public/appointments/available', {
       params: {
         appointment_type_id: appointmentTypeId,
         ...ignoreLimits && {ignore_limits: ignoreLimits},
@@ -492,6 +486,20 @@ export default {
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchRescheduleAppointmentViaHyperlink(rescheduleAppointmentId, clientId, typeId, startDateTime, notes) {
+    return axiosClient.patch('/public/appointment/reschedule', {
+      typeId: typeId,
+      startDateTime: startDateTime,
+      notes: notes,
+    }, {
+      params: {
+        appointment_id: rescheduleAppointmentId,
+        client_id: clientId,
+      },
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
   postAppointment(clientId, typeId, startDateTime, notes, ignoreLimits=undefined) {
@@ -519,7 +527,7 @@ export default {
     });
   },
   getAppointmentType(typeId) {
-    return axiosClient.get(`/appointments/types/${typeId}`, {
+    return axiosClient.get(`/public/appointments/types/${typeId}`, {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
@@ -569,6 +577,25 @@ export default {
     return axiosClient.patch(`/appointments/${appointmentId}/cancel`, data, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchAppointmentDidClientShowUp(appointmentId, didShowUp) {
+    return axiosClient.patch(`/appointments/${appointmentId}/showup`, {
+      did_client_show_up: didShowUp,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchAppointmentReschedule(appointmentId, typeId, startDateTime, notes, ignoreLimits=undefined) {
+    return axiosClient.patch(`/appointments/${appointmentId}/reschedule`, {
+      typeId: typeId,
+      startDateTime: startDateTime,
+      notes: notes,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      params: ignoreLimits && {ignore_limits: ignoreLimits},
     });
   },
   getDepositBalances(onlyAssetAccounts=true, onlyDepositBearerAccounts=true) {
@@ -899,8 +926,14 @@ export default {
       responseType: 'blob',
     });
   },
-  getContracts() {
+  getContracts(open=true, expired=true, closed=true, draft=false) {
     return axiosClient.get('/contracts', {
+      params: {
+        open: open,
+        expired: expired,
+        closed: closed,
+        draft: draft,
+      },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -1350,7 +1383,7 @@ export default {
     });
   },
   getAppointmentViaHyperlink(appointmentId, clientId) {
-    return axiosClient.get('/appointments', {
+    return axiosClient.get('/public/appointments', {
       params: {
         appointment_id: appointmentId,
         client_id: clientId,
@@ -1359,7 +1392,7 @@ export default {
     });
   },
   cancelAppointmentViaHyperlink(appointmentId, clientId) {
-    return axiosClient.patch('/appointments/cancel', {}, {
+    return axiosClient.patch('/public/appointments/cancel', {}, {
       params: {
         appointment_id: appointmentId,
         client_id: clientId,
@@ -1698,6 +1731,125 @@ export default {
   },
   deleteSale(saleId) {
     return axiosClient.delete(`/sales/${saleId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getAppointment(appointmentId) {
+    return axiosClient.get(`/appointments/${appointmentId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getContractPhotoIds(contractId) {
+    return axiosClient.get(`/contracts/${contractId}/photos`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getContractPhotoUrl(contractId, photoId) {
+    return axiosClient.get(`/contracts/${contractId}/photos/${photoId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  postNewContractPhotos(contractId, photos) {
+    const formData = new FormData();
+    photos.forEach((file) => {
+      formData.append('photos', file);
+    });
+    return axiosClient.post(`/contracts/${contractId}/photos`, formData, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteContractPhoto(contractId, photoId) {
+    return axiosClient.delete(`/contracts/${contractId}/photos/${photoId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getBugReports() {
+    return axiosClient.get(`/bugreports`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getBugReport(bugReportId) {
+    return axiosClient.get(`/bugreports/${bugReportId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  createBugReport(bugReport) {
+    return axiosClient.post(`/bugreports`, bugReport, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchBugReport(bugReport) {
+    return axiosClient.patch(`/bugreports/${bugReport.id}`, bugReport, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteBugReport(bugReportId) {
+    return axiosClient.delete(`/bugreports/${bugReportId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  mergeBugReports(bugReportIds) {
+    return axiosClient.post(`/bugreports/merge`, null, {
+      headers: credentialsStore.getApiRequestHeader(),
+      params: {
+        ids: bugReportIds,
+      },
+      paramsSerializer: {
+        indexes: null,
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getPhotos() {
+    return axiosClient.get(`/photos`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getPhoto(photoId) {
+    return axiosClient.get(`/photos/${photoId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  getPhotoThumbnail(photoId) {
+    return axiosClient.get(`/photos/${photoId}/thumbnail`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      responseType: 'blob',
+    });
+  },
+  postNewPhotos(photos) {
+    const formData = new FormData();
+    photos.forEach((file) => {
+      formData.append('uploaded_photos', file);
+    });
+    return axiosClient.post(`/photos`, formData, {
+      headers: {
+        ...credentialsStore.getApiRequestHeader(),
+        'Content-Type': 'multipart/form-data',
+      },
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deletePhoto(photoId) {
+    return axiosClient.delete(`/photos/${photoId}`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

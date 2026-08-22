@@ -64,7 +64,7 @@ export default {
       // TODO
     },
     rescheduleAppointment(appointmentId) {
-      // TODO
+      this.$router.push({path: '/appointments/inperson-book', query: {rescheduleAppointmentId: appointmentId}});
     },
     viewContract(contractId) {
       this.$router.push(`/contracts/${contractId}`);
@@ -73,24 +73,24 @@ export default {
       this.client = updatedDetails;
     },
     confirmAnonymiseData() {
-      const anonymise = confirm("Are you sure you want to anonymise this client?");
-      if(!anonymise)
+      const anonymise = confirm('Are you sure you want to anonymise this client?');
+      if (!anonymise) {
         return;
-
+      }
       requests.patchAnonymiseClient(this.client.id).then(async (response) => {
-        this.client = response.data
-        toast.success('Client anonymised successfully', {timeout: 2000})
+        this.client = response.data;
+        toast.success('Client anonymised successfully', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
-      })
-    }
+      });
+    },
   },
   async created() {
     requests.getClient(this.$route.params.clientId).then( async (response) => {
       this.client = response.data;
       this.loadingClientDetails = false;
 
-      this.contracts = (await requests.getClientContracts(this.client.id, true, true, true)).data;
+      this.contracts = (await requests.getClientContracts(this.client.id, true, true, true, true)).data;
       this.appointments = (await requests.getClientAppointments(this.client.id, true, true)).data;
 
       this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
@@ -99,7 +99,11 @@ export default {
           .toSorted((thA, thB) =>
             new Date(thB.postedOn) - new Date(thA.postedOn))[0];
         let status = 'active';
-        if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
+        if (contract.isDraft) {
+          status = 'draft';
+        } else if (!lastDepositTransaction) {
+          status = 'ERROR';
+        } else if (contract.crimeReports.filter((report) => report.closedOn === null).length > 0) {
           status = 'stolen';
         } else if (contract.depositTransactionHeaders.find((th) => th.event === 'deposit_settled')) {
           status = 'closed';
@@ -145,6 +149,8 @@ export default {
           type: appointmentType['title'],
           duration: appointmentType['duration'],
           notes: appointment.notes,
+          cancellationReason: appointment.cancellationReason,
+          didClientShowUp: appointment.didClientShowUp,
         };
       })));
       this.loadingAppointments = false;

@@ -159,6 +159,15 @@ const routes = [
         component: () => import('@/views/appointments/cancel.vue'),
       },
       {
+        path: '/appointments/reschedule',
+        name: 'Reschedule Appointment',
+        meta: {
+          restrictTo: null,
+          selectNavPath: '/home',
+        },
+        component: () => import('@/views/appointments/clientBookAppointment.vue'),
+      },
+      {
         path: '/appointments/book',
         name: 'Book Appointment',
         meta: {
@@ -328,6 +337,15 @@ const routes = [
           selectNavPath: '/admin/raw-data',
         },
         component: () => import('@/views/admin/rawData.vue'),
+      },
+      {
+        path: '/admin/bug-reports',
+        name: 'Bug Reports',
+        meta: {
+          restrictTo: ['user'],
+          selectNavPath: '/admin/bug-reports',
+        },
+        component: () => import('@/views/admin/bugReports.vue'),
       },
       {
         path: '/admin/basic-settings',

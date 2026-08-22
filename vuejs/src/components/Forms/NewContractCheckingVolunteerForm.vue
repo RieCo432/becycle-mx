@@ -14,7 +14,7 @@ const toast = useToast();
 
 const emit = defineEmits(['goBack', 'update:draft']);
 const props = defineProps({
-  draft: {
+  contract: {
     type: Object,
     required: true,
   },
@@ -53,7 +53,7 @@ requests.getRentalCheckers().then((response) => {
 
 const checkingUserSchema = yup.object().shape({
   checkingUser: yup.string().required(' Checking Username is required ')
-    .notOneOf([props.draft.workingUser?.username], 'Checking volunteer must be different from working volunteer'),
+    .notOneOf([props.contract.workingUser?.username], 'Checking volunteer must be different from working volunteer'),
   checkingPasswordOrPin: yup.string().required(' Password or Pin is required '),
   mCheckFrontWheelHub: yup.boolean().oneOf([true],
     'Is there no play in the front wheel and is it tightened correctly?')
@@ -108,7 +108,7 @@ const submit = handleSubmit(() => {
   if (checkCurrentlyProcessing()) return;
   processingSubmit.value = true;
 
-  requests.putDraftContractCheckingUser(props.draft.id, checkingUser.value, checkingPasswordOrPin.value)
+  requests.putDraftContractCheckingUser(props.contract.id, checkingUser.value, checkingPasswordOrPin.value)
     .then((response) => {
       toast.success('Checking Volunteer Updated!', {timeout: 1000});
       emit('update:draft', response.data);
@@ -143,10 +143,10 @@ function selectCheckingUser(event, i) {
 <template>
   <form
     @submit.prevent="() => {
-      if (!props.draft.checkingUserId || (checkingUser && checkingUser !== '') ) {
+      if (!props.contract.checkingUserId || (checkingUser && checkingUser !== '') ) {
         submit()
       } else {
-        emit('update:draft', props.draft)
+        emit('update:draft', props.contract)
       }
     }"
     @keydown.enter="() => {}">
@@ -157,10 +157,10 @@ function selectCheckingUser(event, i) {
         </h4>
       </div>
       <div
-        v-if="props.draft.checkingUserId"
+        v-if="props.contract.checkingUserId"
         class="col-span-full">
         <h5 class="text-danger-500 dark:text-danger-500">
-          This step has already been signed by {{ props.draft.checkingUser.username }}. You can still overwrite it.
+          This step has already been signed by {{ props.contract.checkingUser.username }}. You can still overwrite it.
         </h5>
       </div>
       <div class="col-span-full grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -299,6 +299,7 @@ function selectCheckingUser(event, i) {
           type="password"
           placeholder="Password Or Pin"
           name="checkingPasswordOrPin"
+          @keydown.enter.stop.prevent="submit"
           v-model="checkingPasswordOrPin"
           :error="checkingPasswordOrPinError"
           hasicon/>

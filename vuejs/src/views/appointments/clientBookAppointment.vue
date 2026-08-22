@@ -6,14 +6,17 @@ import Button from '@/components/Button/index.vue';
 import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import {useToast} from 'vue-toastification';
-import {useRouter} from 'vue-router';
+import {useRouter, useRoute} from 'vue-router';
 import AppointmentTypeCardSkeleton from '@/components/Skeleton/AppointmentTypeCardSkeleton.vue';
 import AppointmentDateCardSkeleton from '@/components/Skeleton/AppointmentDateCardSkeleton.vue';
 import Icon from '@/components/Icon';
+import {useCredentialsStore} from '@/store/credentialsStore';
+import {VueSpinner} from 'vue3-spinners';
 
 export default {
   name: 'bookAppointment',
   components: {
+    VueSpinner,
     DashButton,
     Card,
     Button,
@@ -40,33 +43,67 @@ export default {
 
     const toast = useToast();
     const router = useRouter();
+    const route = useRoute();
+    const credentialStore = useCredentialsStore();
 
     const stepNumber = ref(0);
     const appointmentType = ref('');
-    const availableSlots = ref(null);
+    const availableSlots = ref({});
     const appointmentDatetime = ref(new Date());
     const appointmentNotes = ref('');
+
+    const rescheduleAppointmentId = ref(null);
+    const clientId = ref(null);
+
+    const submitting = ref(false);
+
+    function notifySuccessAndRedirect() {
+      toast.success('Appointment Request submitted! Kindly wait for us to accept or deny your request.', {timeout: 5000});
+      if (credentialStore.isClientLoggedIn()) {
+        router.push('/clients/me');
+      } else {
+        router.push('/home');
+      }
+    }
 
 
     const submit = () => {
       // next step until last step . if last step then submit form
       if (stepNumber.value === steps.length - 1) {
+        if (submitting.value) return;
+        submitting.value = true;
         // handle submit
-        requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(),
-          appointmentNotes.value).then(() => {
-          toast.success('Appointment Request submitted! Kindly wait for us to accept or deny your request.', {timeout: 2000});
-          router.push('/clients/me');
-        }).catch((error) => {
-          toast.error(error.response.data.detail.description, {timeout: 2000});
-          requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
-            availableSlots.value = response.data;
+        if (!rescheduleAppointmentId.value) {
+          requests.postAppointmentRequest(appointmentType.value, appointmentDatetime.value.toISOString(),
+            appointmentNotes.value).then(() => {
+            notifySuccessAndRedirect();
+          }).catch((error) => {
+            toast.error(error.response.data.detail.description, {timeout: 2000});
+            requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
+              availableSlots.value = response.data;
+            });
+            submitting.value = false;
+            stepNumber.value = 1;
           });
-          stepNumber.value = 1;
-        });
+        } else {
+          requests.patchRescheduleAppointmentViaHyperlink(
+            rescheduleAppointmentId.value,
+            clientId.value,
+            appointmentType.value,
+            appointmentDatetime.value.toISOString(),
+            appointmentNotes.value)
+            .then((response) => {
+              notifySuccessAndRedirect();
+            })
+            .catch((error) => {
+              toast.error(error.response.data.detail.description, {timeout: 2000});
+              submitting.value = false;
+            });
+        }
       } else {
         if (stepNumber.value === 0) {
           stepNumber.value = 1;
-          availableSlots.value = null;
+          availableSlots.value = {};
           requests.getAvailableAppointmentSlots(appointmentType.value).then((response) => {
             availableSlots.value = response.data;
           });
@@ -81,13 +118,39 @@ export default {
       stepNumber.value--;
     };
 
+
+    async function setupReschedule() {
+      if (route.query.rescheduleAppointmentId) {
+        rescheduleAppointmentId.value = route.query.rescheduleAppointmentId;
+        if (route.query.clientId) {
+          clientId.value = route.query.clientId;
+        } else {
+          clientId.value = (await requests.getClientMe()).data.id;
+        }
+        requests.getAppointmentViaHyperlink(rescheduleAppointmentId.value, clientId.value)
+          .then((response) => {
+            appointmentType.value = response.data.type.id;
+            appointmentNotes.value = response.data.notes;
+            submit();
+          })
+          .catch((error) => {
+            toast.error(error.response.data.detail.description);
+          });
+      }
+    }
+
+    setupReschedule();
+
+
     return {
       appointmentNotes,
       appointmentDatetime,
       appointmentType,
 
       availableSlots,
+      rescheduleAppointmentId,
 
+      submitting,
       submit,
       steps,
       stepNumber,
@@ -100,7 +163,6 @@ export default {
     };
   },
   created() {
-    requests.getClientMe(); // if this returns 401 the client will get redirected to login page
     requests.getAppointmentTypes().then((response) => {
       this.appointmentTypes = response.data.sort((a, b) => (a.orderIndex - b.orderIndex));
     });
@@ -111,7 +173,7 @@ export default {
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
-      <Card title="Book Appointment">
+      <Card :title="`${rescheduleAppointmentId ? 'Reschedule' : 'Book'} Appointment`">
         <div>
           <div class="flex z-[5] items-center relative justify-center md:mx-8">
             <div
@@ -289,10 +351,18 @@ export default {
                     v-if="this.stepNumber !== 0"
                 />
                 <Button
+                    :disabled="submitting"
                     v-if="stepNumber === this.steps.length - 1"
                     text="submit"
                     btnClass="btn-dark"
-                />
+                >
+                  <template v-if="!submitting">
+                    Submit
+                  </template>
+                  <template v-else>
+                    <VueSpinner size="20px" class="text-sky-500"/>
+                  </template>
+                </Button>
               </div>
             </form>
           </div>
