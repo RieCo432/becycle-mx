@@ -244,9 +244,10 @@ export const topMenu = [
         childicon: 'heroicons-outline:circle-stack',
         childlink: '/admin/raw-data',
         show: ['user'],
-      },      {
+      },
+      {
         childtitle: 'Bug Reports',
-        childicon: 'heroicons-outline:code',
+        childicon: 'heroicons:bug-ant',
         childlink: '/admin/bug-reports',
         show: ['user'],
       },
