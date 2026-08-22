@@ -407,18 +407,15 @@ export default {
       this.loadingOpeningTimes = false;
     });
     requests.getUpcomingOpenDates().then((response) => {
-      response.data.forEach((openDay) => {
-        this.calendarAttributes.push({
-          key: 'openDays' + openDay,
-          dates: new Date(Date.parse(openDay)),
-          content: {
-            class: 'opacity-100',
-          },
-          highlight: {
-            color: 'white',
-            fillMode: 'outline',
-          },
-        });
+      this.calendarAttributes = [];
+      this.calendarAttributes = response.data.map((openDay, index) => {
+        const utcDate = new Date(`${openDay}T00:00:00Z`);
+        return {
+          key: `openDay-${index}`,
+          dates: utcDate,
+          content: {class: 'opacity-100'},
+          highlight: {color: 'white', fillMode: 'outline'},
+        };
       });
       this.loadingOpenDays = false;
     });
