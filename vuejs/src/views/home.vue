@@ -6,12 +6,12 @@
             <div class="grid grid-cols-12 gap-5">
               <div class="col-span-12">
                 <QuillEditor
-                    v-if="editorActive && editorHtmlMode"
+                    v-if="editorActive && !editorHtmlMode"
                     toolbar="full"
                     v-model:content="quillContent"
                     content-type="html"/>
                 <QuillEditor
-                    v-if="editorActive && !editorHtmlMode"
+                    v-if="editorActive && editorHtmlMode"
                     toolbar="full"
                     v-model:content="quillContent"
                     content-type="text"/>
@@ -30,20 +30,20 @@
               </div>
               <div class="justify-self-center my-auto">
                 <div class="grid grid-cols-3">
-                  <div>
-                    <span class="text-slate-700 dark:text-slate-300 me-1">HTML</span>
+                  <div class="col-span-1 justify-items-end">
+                    <span class="text-slate-700 dark:text-slate-300">WYSIWYG</span>
                   </div>
-                  <div>
+                  <div class="col-span-1 justify-items-center">
                     <Switch
                         v-model:model-value="editorHtmlMode"
-                        class="w-full"
+                        class="w-auto"
                         badge
                         icon
-                        prev-icon="heroicons-outline:document-text"
-                        next-icon="heroicons-outline:code-bracket"/>
+                        next-icon="heroicons-outline:document-text"
+                        prev-icon="heroicons-outline:code-bracket"/>
                   </div>
-                  <div>
-                    <span class="text-slate-700 dark:text-slate-300 ms-1">WYSIWYG</span>
+                  <div class="col-span-1 justify-items-start">
+                    <span class="text-slate-700 dark:text-slate-300">HTML</span>
                   </div>
                 </div>
               </div>
@@ -164,7 +164,7 @@
             <div class="h-full">
               <div
                 v-bind="getRootProps()"
-                class="w-full h-full text-center border rounded flex flex-col justify-center items-center 
+                class="w-full h-full text-center border rounded flex flex-col justify-center items-center
                 border-secondary-500 border-dashed"
               >
                 <div v-if="filesToUpload.length === 0" class="h-full w-full">
@@ -303,7 +303,7 @@ export default {
       address: null,
       editAllowed: false,
       editorActive: false,
-      editorHtmlMode: true,
+      editorHtmlMode: false,
       aboutUsHtml: null,
       quillContent: null,
       themeSettingsStore: themeSettingsStore,
@@ -362,19 +362,19 @@ export default {
     async copyPhoto(photo) {
       const url = `http://localhost:8000/public/photos/${photo.id}`;
 
-      const html = `
-      <img
-        src="${url}"
-        data-photo-id="${photo.id}"
-        alt=""
-      >`;
+      const html = `<img src="${url}" alt="photo">`;
 
-      const item = {
-        'text/html': new Blob([html], {type: 'text/html'}),
-      };
-      const clipboardItem = new ClipboardItem(item);
+      console.log('html mode', this.editorHtmlMode);
+      if (this.editorHtmlMode) {
+        await navigator.clipboard.writeText(html);
+      } else {
+        const item = {
+          'text/html': new Blob([html], {type: 'text/html'}),
+        };
+        const clipboardItem = new ClipboardItem(item);
+        await navigator.clipboard.write([clipboardItem]);
+      }
 
-      await navigator.clipboard.write([clipboardItem]);
       this.photoManagerOpen = false;
       toast.success('Photo copied to clipboard', {timeout: 2000});
     },
