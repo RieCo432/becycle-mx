@@ -81,8 +81,8 @@ def upgrade() -> None:
     op.alter_column('contracts', 'contracttype',
                     existing_type=sa.VARCHAR(length=20),
                     nullable=True)
-    op.drop_constraint('contracts_depositReturningUserId_fkey', 'contracts', type_='foreignkey')
-    op.drop_constraint('contracts_depositCollectingUserId_fkey', 'contracts', type_='foreignkey')
+    op.drop_constraint('contracts_depositreturninguserid_fkey', 'contracts', type_='foreignkey')
+    op.drop_constraint('contracts_depositcollectinguserid_fkey', 'contracts', type_='foreignkey')
     op.drop_column('contracts', 'depositreturninguserid')
     op.drop_column('contracts', 'depositamountcollected')
     op.drop_column('contracts', 'depositamountreturned')
@@ -168,8 +168,8 @@ def downgrade() -> None:
     op.add_column('contracts', sa.Column('depositamountreturned', sa.INTEGER(), autoincrement=False, nullable=True))
     op.add_column('contracts', sa.Column('depositamountcollected', sa.INTEGER(), autoincrement=False, nullable=True))
     op.add_column('contracts', sa.Column('depositreturninguserid', sa.UUID(), autoincrement=False, nullable=True))
-    op.create_foreign_key('contracts_depositCollectingUserId_fkey', 'contracts', 'users', ['depositcollectinguserid'], ['id'])
-    op.create_foreign_key('contracts_depositReturningUserId_fkey', 'contracts', 'users', ['depositreturninguserid'], ['id'])
+    op.create_foreign_key('contracts_depositcollectinguserId_fkey', 'contracts', 'users', ['depositcollectinguserid'], ['id'])
+    op.create_foreign_key('contracts_depositreturninguserId_fkey', 'contracts', 'users', ['depositreturninguserid'], ['id'])
 
     op.drop_constraint('contracts_isdraftOrContracttype', 'contracts', type_='check')
     op.drop_constraint('contracts_isdraftOrConditionofbike', 'contracts', type_='check')
