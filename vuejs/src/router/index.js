@@ -19,14 +19,13 @@ const router = createRouter({
 });
 router.beforeEach((to, from, next) => {
   const credentialsStore = useCredentialsStore();
-  const titleText = to.name;
-  const words = titleText.split(' ');
-  const wordslength = words.length;
-  for (let i = 0; i < wordslength; i++) {
-    words[i] = words[i][0].toUpperCase() + words[i].substring(1);
-  }
 
-  document.title = `${import.meta.env.VITE_COMMON_NAME} - ${words}`;
+  let title = to?.meta?.title
+  if (title == null) {
+    console.error("This route is missing it's page title, make sure it has been added to the router")
+    title = ''
+  }
+  document.title = `${import.meta.env.VITE_COMMON_NAME} - ${title}`;
 
   if (to.meta.restrictTo == null) {
     next();
