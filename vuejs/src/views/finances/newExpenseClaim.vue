@@ -113,7 +113,7 @@ export default {
       }
 
       const totalAmount = Math.round(amount.value * 100);
-      const amountFromAdvance = assetAccount.value.id ? Math.min(totalAmount, assetAccount.value.balance) : 0;
+      const amountFromAdvance = assetAccount.value.id && useAdvance.value ? Math.min(totalAmount, assetAccount.value.balance) : 0;
       const amountFromLiability = totalAmount - amountFromAdvance;
 
       const expenseTransactionsHeaderDraft = {
@@ -368,7 +368,11 @@ export default {
             </div>
 
             <div class="col-span-1">
-              <span v-if="assetAccount != null && assetAccount.name" class="text-gray-500">Balance: &#163; {{ (assetAccount.balance / 100).toFixed(2) }}</span>
+              <span
+                v-if="assetAccount != null && assetAccount.name && useAdvance"
+                class="text-gray-500">
+                Balance: &#163; {{ (assetAccount.balance / 100).toFixed(2) }}
+              </span>
             </div>
 
             <div class="col-span-6" >
