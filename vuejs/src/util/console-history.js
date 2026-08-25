@@ -100,11 +100,17 @@ console._collect = function(type, args) {
     }
   }
 
-  if (console.history.size() === 20) {
+  while (console.history.size() >= 20) {
     console.history.dequeue();
   }
 
+  const argsReduced = [];
+  Object.values(args).forEach((value) => {
+    if (typeof value !== 'object' || typeof value === 'object' && JSON.stringify(value).length < 10000) {
+      argsReduced.push(value);
+    }
+  });
   // Add the log to our history.
-  console.history.enqueue({type: type, timestamp: time, arguments: args, stack: stack});
+  console.history.enqueue({type: type, timestamp: time, arguments: argsReduced, stack: stack});
   localStorage.setItem('bugReportConsoleHistory', JSON.stringify(console.history));
 };
