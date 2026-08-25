@@ -14,6 +14,7 @@ const routes = [
         path: '/home',
         name: 'home',
         meta: {
+          title: 'Home',
           restrictTo: null,
           selectNavPath: '/home',
         },
@@ -23,6 +24,7 @@ const routes = [
         path: '/privacy-policy',
         name: 'privacyPolicy',
         meta: {
+          title: 'Privacy Policy',
           restrictTo: null,
           selectNavPath: '/privacy-policy',
         },
@@ -32,6 +34,7 @@ const routes = [
         path: '/me',
         name: 'Profile',
         meta: {
+          title: 'Profile',
           restrictTo: ['client', 'user'],
           selectNavPath: '/me',
         },
@@ -41,6 +44,7 @@ const routes = [
         path: '/template',
         name: 'template',
         meta: {
+          title: 'Template',
           restrictTo: null,
           selectNavPath: '/template',
         },
@@ -50,6 +54,7 @@ const routes = [
         path: '/volunteers',
         name: 'Volunteers',
         meta: {
+          title: 'Volunteers',
           restrictTo: null,
           selectNavPath: '/volunteers',
         },
@@ -59,6 +64,7 @@ const routes = [
         path: '/faq',
         name: 'FAQ',
         meta: {
+          title: 'FAQ',
           restrictTo: null,
           selectNavPath: '/faq',
         },
@@ -68,6 +74,7 @@ const routes = [
         path: '/users/login',
         name: 'Volunteer Login',
         meta: {
+          title: 'Volunteer Login',
           restrictTo: null,
           selectNavPath: '/login',
         },
@@ -77,6 +84,7 @@ const routes = [
         path: '/clients/login',
         name: 'Client Login',
         meta: {
+          title: 'Client Login',
           restrictTo: null,
           selectNavPath: '/login',
         },
@@ -86,6 +94,7 @@ const routes = [
         path: '/users/me',
         name: 'User',
         meta: {
+          title: 'User',
           restrictTo: ['user'],
           selectNavPath: '/me',
         },
@@ -95,6 +104,7 @@ const routes = [
         path: '/clients/me',
         name: 'Me',
         meta: {
+          title: 'Me',
           restrictTo: ['client'],
           selectNavPath: '/me',
         },
@@ -104,6 +114,7 @@ const routes = [
         path: '/clients/:clientId',
         name: 'Client',
         meta: {
+          title: 'Client',
           restrictTo: ['user'],
           selectNavPath: '/clients',
         },
@@ -113,6 +124,7 @@ const routes = [
         path: '/clients/me/contracts/:contractId',
         name: 'Me',
         meta: {
+          title: 'Me',
           restrictTo: ['client'],
           selectNavPath: '/me',
         },
@@ -122,6 +134,7 @@ const routes = [
         path: '/contracts/:contractId',
         name: 'Contract',
         meta: {
+          title: 'Contract',
           restrictTo: ['user'],
           selectNavPath: '/contracts',
         },
@@ -132,6 +145,7 @@ const routes = [
         path: '/contracts/new',
         name: 'New Contract',
         meta: {
+          title: 'New Contract',
           restrictTo: ['user'],
           hide: true,
           selectNavPath: '/contracts/new',
@@ -142,6 +156,7 @@ const routes = [
         path: '/clients',
         name: 'Find Client',
         meta: {
+          title: 'Find Client',
           restrictTo: ['user'],
           hide: true,
           selectNavPath: '/clients',
@@ -153,6 +168,7 @@ const routes = [
         path: '/appointments/cancel',
         name: 'Cancel Appointment',
         meta: {
+          title: 'Cancel Appointment',
           restrictTo: null,
           selectNavPath: '/home',
         },
@@ -162,6 +178,7 @@ const routes = [
         path: '/appointments/reschedule',
         name: 'Reschedule Appointment',
         meta: {
+          title: 'Reschedule Appointment',
           restrictTo: null,
           selectNavPath: '/home',
         },
@@ -171,6 +188,7 @@ const routes = [
         path: '/appointments/book',
         name: 'Book Appointment',
         meta: {
+          title: 'Book Appointment',
           restrictTo: ['client'],
           selectNavPath: '/appointments/book',
         },
@@ -180,6 +198,7 @@ const routes = [
         path: '/appointments/inperson-book',
         name: 'Book Appointment In-Person',
         meta: {
+          title: 'Book Appointment In-Person',
           restrictTo: ['user'],
           selectNavPath: '/appointments/inperson-book',
         },
@@ -189,6 +208,7 @@ const routes = [
         path: '/appointments',
         name: 'Appointment Calendar',
         meta: {
+          title: 'Appointment Calendar',
           restrictTo: ['user'],
           selectNavPath: '/appointments',
         },
@@ -198,6 +218,7 @@ const routes = [
         path: '/finances/deposits',
         name: 'Deposit Balances',
         meta: {
+          title: 'Deposit Balances',
           restrictTo: ['user'],
           selectNavPath: '/finances/deposits',
         },
@@ -207,6 +228,7 @@ const routes = [
         path: '/finances/deposit-charts',
         name: 'Deposit Charts',
         meta: {
+          title: 'Deposit Charts',
           restrictTo: ['user'],
           selectNavPath: '/finances/deposit-charts',
         },
@@ -216,6 +238,7 @@ const routes = [
         path: '/finances/cash-flow',
         name: 'Cash Flow',
         meta: {
+          title: 'Cash Flow',
           restrictTo: ['user'],
           selectNavPath: '/finances/cash-flow',
         },
@@ -225,6 +248,7 @@ const routes = [
         path: '/finances/expenses/submit', // TODO: this needs deleted
         name: 'Submit Expense',
         meta: {
+          title: 'Submit Expense',
           restrictTo: ['user'],
           selectNavPath: '/finances/expenses/submit',
         },
@@ -234,6 +258,7 @@ const routes = [
         path: '/finances/expenses/claim',
         name: 'Claim Expense',
         meta: {
+          title: 'Claim Expense',
           restrictTo: ['user'],
           selectNavPath: '/finances/expenses/claim',
         },
@@ -243,6 +268,7 @@ const routes = [
         path: '/finances/expenses/manage', // TODO: this needs deleted
         name: 'Manage Expenses',
         meta: {
+          title: 'Manage Expenses',
           restrictTo: ['user'],
           selectNavPath: '/finances/expenses/manage',
         },
@@ -252,6 +278,7 @@ const routes = [
         path: '/finances/expenses/claims/manage',
         name: 'Manage Expense Claims',
         meta: {
+          title: 'Manage Expense Claims',
           restrictTo: ['user'],
           selectNavPath: '/finances/expenses/claims/manage',
         },
@@ -261,6 +288,7 @@ const routes = [
         path: '/finances/transactions',
         name: 'Transaction History',
         meta: {
+          title: 'Transaction History',
           restrictTo: ['user'],
           selectNavPath: '/finances/transactions',
         },
@@ -270,6 +298,7 @@ const routes = [
         path: '/finances/transactions/record',
         name: 'Record Transaction',
         meta: {
+          title: 'Record Transaction',
           restrictTo: ['user'],
           selectNavPath: '/finances/transactions/record',
         },
@@ -279,6 +308,7 @@ const routes = [
         path: '/finances/sales',
         name: 'Sales History',
         meta: {
+          title: 'Sales History',
           restrictTo: ['user'],
           selectNavPath: '/finances/sales',
         },
@@ -288,6 +318,7 @@ const routes = [
         path: '/point-of-sale',
         name: 'Point of Sale',
         meta: {
+          title: 'Point of Sale',
           restrictTo: ['user'],
           selectNavPath: '/point-of-sale',
         },
@@ -297,6 +328,7 @@ const routes = [
         path: '/admin/users',
         name: 'User Management',
         meta: {
+          title: 'User Management',
           restrictTo: ['user'],
           selectNavPath: '/admin/users',
         },
@@ -306,6 +338,7 @@ const routes = [
         path: '/admin/clock-in',
         name: 'Clock-In',
         meta: {
+          title: 'Clock-In',
           restrictTo: ['user'],
           selectNavPath: '/admin/clock-in',
         },
@@ -315,6 +348,7 @@ const routes = [
         path: '/admin/appointment-types',
         name: 'Appointment Types',
         meta: {
+          title: 'Appointment Types',
           restrictTo: ['user'],
           selectNavPath: '/admin/appointment-types',
         },
@@ -324,6 +358,7 @@ const routes = [
         path: '/admin/appointment-settings',
         name: 'Appointment Settings',
         meta: {
+          title: 'Appointment Settings',
           restrictTo: ['user'],
           selectNavPath: '/admin/appointment-settings',
         },
@@ -333,6 +368,7 @@ const routes = [
         path: '/admin/raw-data',
         name: 'Raw Data Access',
         meta: {
+          title: 'Raw Data Access',
           restrictTo: ['user'],
           selectNavPath: '/admin/raw-data',
         },
@@ -342,6 +378,7 @@ const routes = [
         path: '/admin/bug-reports',
         name: 'Bug Reports',
         meta: {
+          title: 'Bug Reports',
           restrictTo: ['user'],
           selectNavPath: '/admin/bug-reports',
         },
@@ -351,6 +388,7 @@ const routes = [
         path: '/admin/basic-settings',
         name: 'Basic Settings',
         meta: {
+          title: 'Basic Settings',
           restrictTo: ['user'],
           selectNavPath: '/admin/basic-settings',
         },
@@ -360,6 +398,7 @@ const routes = [
         path: '/contracts/find-paper-contract',
         name: 'Find Paper Contract',
         meta: {
+          title: 'Find Paper Contract',
           restrictTo: ['user'],
           selectNavPath: '/contracts/find-paper-contract',
         },
@@ -369,6 +408,7 @@ const routes = [
         path: '/statistics/users/leaderboard',
         name: 'Volunteer Leaderboard',
         meta: {
+          title: 'Volunteer Leaderboard',
           restrictTo: ['user'],
           selectNavPath: '/statistics/users/leaderboard',
         },
@@ -378,6 +418,7 @@ const routes = [
         path: '/statistics/clients/leaderboard',
         name: 'Client Leaderboard',
         meta: {
+          title: 'Client Leaderboard',
           restrictTo: ['user'],
           selectNavPath: '/statistics/clients/leaderboard',
         },
@@ -387,6 +428,7 @@ const routes = [
         path: '/statistics/bikes/leaderboard',
         name: 'Bike Leaderboard',
         meta: {
+          title: 'Bike Leaderboard',
           restrictTo: ['user'],
           selectNavPath: '/statistics/bikes/leaderboard',
         },
@@ -396,6 +438,7 @@ const routes = [
         path: '/bikes/:bikeId',
         name: 'Bike',
         meta: {
+          title: 'Bike',
           restrictTo: ['user'],
           selectNavPath: '/bikes',
         },
@@ -405,6 +448,7 @@ const routes = [
         path: '/bikes',
         name: 'Find Bike',
         meta: {
+          title: 'Find Bike',
           restrictTo: ['user'],
           selectNavPath: '/bikes',
         },
@@ -414,6 +458,7 @@ const routes = [
         path: '/statistics/contracts',
         name: 'Contract Charts',
         meta: {
+          title: 'Contract Charts',
           restrictTo: ['user'],
           selectNavPath: '/statistics/contracts',
         },
@@ -423,6 +468,7 @@ const routes = [
         path: '/surveys/map',
         name: 'Cycling Suitability Map',
         meta: {
+          title: 'Cycling Suitability Map',
           restrictTo: null,
           selectNavPath: '/surveys/map',
         },
@@ -432,6 +478,7 @@ const routes = [
         path: '/admin/duplicates/clients',
         name: 'Manage Potential Duplicate Clients',
         meta: {
+          title: 'Manage Potential Duplicate Clients',
           restrictTo: ['user'],
           selectNavPath: '/admin/duplicates/clients',
         },
@@ -441,6 +488,7 @@ const routes = [
         path: '/admin/duplicates/bikes',
         name: 'Manage Potential Duplicate Bikes',
         meta: {
+          title: 'Manage Potential Duplicate Bikes',
           restrictTo: ['user'],
           selectNavPath: '/admin/duplicates/bikes',
         },
@@ -450,6 +498,7 @@ const routes = [
         path: '/admin/user-groups',
         name: 'Manage User Groups',
         meta: {
+          title: 'Manage User Groups',
           restrictTo: ['user'],
           selectNavPath: '/admin/user-groups',
         },
@@ -459,6 +508,7 @@ const routes = [
         path: '/admin/accounts',
         name: 'Manage Accounts',
         meta: {
+          title: 'Manage Accounts',
           restrictTo: ['user'],
           selectNavPath: '/admin/accounts',
         },
@@ -468,6 +518,7 @@ const routes = [
         path: '/admin/catalogue',
         name: 'Manage Catalogue',
         meta: {
+          title: 'Manage Catalogue',
           restrictTo: ['user'],
           selectNavPath: '/admin/catalogue',
         },
@@ -477,6 +528,7 @@ const routes = [
         path: '/crimereports',
         name: 'Find Crime Reports',
         meta: {
+          title: 'Find Crime Reports',
           restrictTo: ['user'],
           selectNavPath: '/crimereports',
         },

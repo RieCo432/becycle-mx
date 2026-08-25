@@ -29,7 +29,7 @@ class Appointment(Base):
     reminderSent: Mapped[bool] = mapped_column("remindersent", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
 
     cancellationReason: Mapped[str] = mapped_column("cancellationreason", Text, nullable=True, quote=False)
-    didClientShowUp: Mapped[bool | None] = mapped_column("didclientshowup", Boolean, default=False, server_default=text("NULL"), nullable=True, quote=False)
+    didClientShowUp: Mapped[bool | None] = mapped_column("didclientshowup", Boolean, default=None, server_default=text("NULL"), nullable=True, quote=False)
 
 
     def __eq_dict__(self, other: dict):
