@@ -70,22 +70,28 @@ def create_transaction(db: Session, transaction_data: schemas.TransactionCreate,
     for transaction_line_data in transaction_data.transactionLines:
         
         account = crud.accounts.get_account(db, transaction_line_data.accountId)
+        fund = crud.accounts.get_fund(db, transaction_line_data.fundId)
         if account is None:
             db.rollback()
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Account not found"})
         if account.closedOn is not None:
             db.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": f"Account {account.name} is closed"})
+        if fund is None:
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Fund not found"})
         
         transaction_line = models.TransactionLine(
             transactionHeaderId=transaction_header.id,
             accountId=transaction_line_data.accountId,
-            amount=transaction_line_data.amount
+            amount=transaction_line_data.amount,
+            fundId=fund.id
         )
         db.add(transaction_line)
     
     db.flush()
     
+    # TODO: a per-fund balance check should also be done
     for transaction_line in transaction_header.transactionLines:
         if transaction_line.account.normalisedBalance < 0 and not transaction_line.account.isAllowedNegative:
             account_name = transaction_line.account.name

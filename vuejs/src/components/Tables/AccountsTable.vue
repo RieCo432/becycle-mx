@@ -206,10 +206,6 @@ export default {
           field: 'showInUis',
         },
         {
-          label: 'Project',
-          field: 'restrictedToProject.id',
-        },
-        {
           label: 'Actions',
           field: 'actions',
           sortable: false,

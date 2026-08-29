@@ -19,6 +19,15 @@ const props = defineProps({
   },
 });
 
+let fundId = null;
+requests.getFunds()
+  .then((response) => {
+    fundId = response.data.find((fund) => fund.isDefault).id;
+  })
+  .catch((error) => {
+    toast.error(error.response.data.detail.description, {timeout: 5000});
+  });
+
 const processingSubmit = ref(false);
 function checkCurrentlyProcessing() {
   if (processingSubmit.value) {
@@ -125,8 +134,8 @@ const submit = handleSubmit(() => {
         event: 'deposit_collected',
       },
       transactionLines: [
-        {amount: -Math.round(depositAmountCollected.value * 100), accountId: depositCollectedLiabilityAccount.value.id},
-        {amount: Math.round(depositAmountCollected.value * 100), accountId: depositCollectedAssetAccount.value.id},
+        {amount: -Math.round(depositAmountCollected.value * 100), accountId: depositCollectedLiabilityAccount.value.id, fundId: fundId},
+        {amount: Math.round(depositAmountCollected.value * 100), accountId: depositCollectedAssetAccount.value.id, fundId: fundId},
       ],
       attemptAutoPost: true,
     };

@@ -56,7 +56,7 @@ export default {
     }
 
     const newExpenseSchemas = yup.object().shape({
-      projectId: yup.string().required(),
+      fundId: yup.string().required(),
       notes: yup.string().required(),
       amount: yup.number().required(),
 
@@ -90,7 +90,7 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: projectId, errorMessage: projectIdError} = useField('projectId');
+    const {value: fundId, errorMessage: fundIdError} = useField('fundId');
     const {value: notes, errorMessage: notesError} = useField('notes');
     const {value: amount, errorMessage: amountError} = useField('amount');
     const {value: useAdvance, errorMessage: useAdvanceError} = useField('useAdvance');
@@ -124,16 +124,19 @@ export default {
           {
             amount: totalAmount,
             accountId: expenseAccount.value.id,
+            fundId: fundId.value,
           },
           ...(amountFromAdvance > 0 ?
             [{
               amount: -amountFromAdvance,
               accountId: assetAccount.value.id,
+              fundId: fundId.value,
             }] : []),
           ...(amountFromLiability > 0 ?
             [{
               amount: -amountFromLiability,
               accountId: liabilityAccount.value.id,
+              fundId: fundId.value,
             }] : []),
         ],
         attemptAutoPost: false,
@@ -173,8 +176,8 @@ export default {
       liabilityAccounts,
       expenseAccounts,
       files,
-      projectId,
-      projectIdError,
+      fundId,
+      fundIdError,
       useAdvance,
       useAdvanceError,
       expenseAccount,
@@ -195,26 +198,24 @@ export default {
   },
   data() {
     return {
-      projects: [],
+      funds: [],
     };
   },
   created() {
     this.fetchLiabilityAccounts();
     this.fetchExpenseAccounts();
     this.fetchAssetAccounts();
-    this.fetchProjects();
+    this.fetchFunds();
   },
   methods: {
-    fetchProjects() {
-      requests.getProjects().then((response) => {
-        this.projects = [
-          {label: 'No Project', value: 'null'},
-          ...response.data.map((t) => (
-            {
-              label: `${t.id} --- ${t.description}`,
-              value: t.id,
-            }
-          ))];
+    fetchFunds() {
+      requests.getFunds().then((response) => {
+        this.funds = response.data.map((t) => (
+          {
+            label: t.name,
+            value: t.id,
+          }
+        ));
       });
     },
     fetchLiabilityAccounts() {
@@ -232,7 +233,6 @@ export default {
         {name: 'types', value: 'expense'},
         {name: 'for_user', value: true},
         {name: 'ui_filters', value: 'expense'},
-        ...(this.projectId && this.projectId !== 'null' ? [{name: 'project_id', value: this.projectId}] : []),
       ]).then((response) => {
         this.expenseAccounts = response.data;
       }).catch((error) => {
@@ -301,13 +301,12 @@ export default {
 
             <div class="col-span-6">
               <Select
-                :options="projects"
-                label="Tag/Project"
-                v-model="projectId"
-                name="projectId"
-                placeholder="Is this for a specific project? If so, select it here."
-                :error="projectIdError"
-                @change="fetchExpenseAccounts"
+                :options="funds"
+                label="Fund"
+                v-model="fundId"
+                name="fundId"
+                placeholder="Which fund?"
+                :error="fundIdError"
               />
             </div>
 

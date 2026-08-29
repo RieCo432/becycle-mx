@@ -28,6 +28,7 @@ export default {
     const loggedInUsername = ref(null);
     const doesTransactionBalance = ref(true);
     const currentSetOfUsernames = ref([]);
+    const allFunds = ref([]);
 
     requests.getTransactionEvents().then((response) => {
       eventSuggestions.value = response.data;
@@ -43,6 +44,17 @@ export default {
 
     requests.getActiveUsers().then((response) => {
       allUsers.value.splice(0, allUsers.value.length, ...response.data);
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
+
+    requests.getFunds().then((response) => {
+      allFunds.value = response.data.map((t) => (
+        {
+          label: t.name,
+          value: t.id,
+        }
+      ));
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
@@ -71,6 +83,9 @@ export default {
         .typeError('Amount must be a number')
         .positive('Amount must be positive')
         .required('Amount is required'),
+      
+      fundId: yup.string()
+        .required(' The fund is required '),
 
       canBePostedByCurrentSetOfUsers: yup.boolean()
         .oneOf([true], 'None of the current users can post to this account.'),
@@ -103,6 +118,7 @@ export default {
         account: {id: null, name: null},
         type: null,
         amount: null,
+        fundId: null,
         canBePostedByCurrentSetOfUsers: true,
       };
     }
@@ -173,6 +189,7 @@ export default {
           return {
             accountId: transactionLine.value.account.id,
             amount: amount,
+            fundId: transactionLine.value.fundId,
           };
         }),
         attemptAutoPost: true,
@@ -223,6 +240,7 @@ export default {
       setFieldError,
       doesTransactionBalance,
       currentSetOfUsernames,
+      allFunds,
     };
   },
   props: {
@@ -421,7 +439,7 @@ export default {
           class="col-span-full ps-2 grid grid-cols-12 rounded-md gap-5 bg-slate-300 dark:bg-slate-700"
           v-for="(transactionLine, index) in transactionLines"
           :key="index">
-          <div class="col-span-6 mb-2">
+          <div class="col-span-4 mb-2">
             <ComboboxTextInput
               :field-model-value="transactionLine.value.account.name"
               :suggestions="filtered_account_suggestions[index]
@@ -470,6 +488,21 @@ export default {
               ''"
               @update:modelValue="(newValue) => {
                 setFieldValue(`transactionLines[${index}].amount`, newValue);
+              }"
+            />
+          </div>
+          <div class="col-span-2">
+            <Select
+              :options="allFunds"
+              label="Fund"
+              v-model="transactionLine.fundId"
+              :name="`transactionLines[${index}].fundId`"
+              placeholder="Which fund?"
+              :error="errors[`transactionLines[${index}].fundId`] ?
+              errors[`transactionLines[${index}].fundId`] :
+              ''"
+              @update:modelValue="(newValue) => {
+                setFieldValue(`transactionLines[${index}].fundId`, newValue);
               }"
             />
           </div>

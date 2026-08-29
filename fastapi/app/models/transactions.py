@@ -6,6 +6,7 @@ from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean, ARRAY,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
+from .funds import Fund
 
 
 class TransactionHeader(Base):
@@ -41,6 +42,15 @@ class TransactionHeader(Base):
     @property
     def doesBalance(self) -> bool:
         return sum([transaction_line.amount for transaction_line in self.transactionLines]) == 0
+
+    @property
+    def doesBalancePerFund(self) -> bool:
+        involved_fund_ids = set([tl.fundId for tl in self.transactionLines])
+        return all(
+            sum(
+                [transaction_line.amount for transaction_line in self.transactionLines if transaction_line.fundId == fund_id]
+            ) == 0
+            for fund_id in involved_fund_ids)
     
     def is_posted(self) -> bool:
         return all([transaction_line.is_posted() for transaction_line in self.transactionLines])
@@ -56,6 +66,9 @@ class TransactionLine(Base):
     account: Mapped["Account"] = relationship("Account", foreign_keys=[accountId], back_populates="transactionLines")
     
     amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)  # value in the smallest unit (penny), positive for debit, negative for credit
+    
+    fundId: Mapped[UUID] = mapped_column("fundid", ForeignKey(Fund.id), nullable=True, quote=False, default=None, server_default=text("NULL"))
+    fund: Mapped["Fund"] = relationship(Fund, foreign_keys=[fundId], back_populates="transactionLines")
     
     
     def __eq__(self, other: dict):

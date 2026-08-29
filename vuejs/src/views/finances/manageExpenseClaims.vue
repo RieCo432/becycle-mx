@@ -46,10 +46,6 @@ export default {
           field: 'amount',
         },
         {
-          label: 'Project',
-          field: 'projectId',
-        },
-        {
           label: 'Added By',
           field: 'expenseTransactionHeader.postedByUser.username',
         },
@@ -152,12 +148,6 @@ export default {
       return this.expenseClaims.map((expenseClaim) => ({
         ...expenseClaim,
         status: this.getExpenseStatus(expenseClaim),
-        projectId: expenseClaim
-          .expenseTransactionHeader
-          .transactionLines
-          .find((line) => line.account.type === 'expense')
-          .account
-          .restrictedToProjectId,
       }));
     },
   },
