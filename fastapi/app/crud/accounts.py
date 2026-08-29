@@ -116,9 +116,9 @@ def get_fund(db: Session, fund_id: UUID) -> models.Fund | None:
     return fund
 
 
-def get_accounts_balance_moment(db: Session, series: schemas.DashboardPartQuerySeries, moment: date) -> schemas.DashboardDataSeries:
+def get_accounts_balance_moment(db: Session, series: schemas.DashboardPartQuerySeries, moment: date, fund_id: UUID | None) -> schemas.DashboardDataSeries:
     account_ids = get_accounts_list_for_series_query(db=db, query=series.query)
-    total_balance = get_accounts_balance_moment_raw(db, moment, account_ids)
+    total_balance = get_accounts_balance_moment_raw(db=db, moment=moment, account_ids=account_ids, fund_id=fund_id)
 
     series_data = schemas.DashboardDataSeries(
         name=series.name,
@@ -128,7 +128,7 @@ def get_accounts_balance_moment(db: Session, series: schemas.DashboardPartQueryS
     return series_data
 
 
-def get_accounts_balance_moment_raw(db: Session, moment: date, account_ids: list[UUID]) -> int:
+def get_accounts_balance_moment_raw(db: Session, moment: date, account_ids: list[UUID], fund_id: UUID | None) -> int:
     total_balance = 0
     before_what_day = moment + relativedelta(days=1)
 
@@ -139,6 +139,7 @@ def get_accounts_balance_moment_raw(db: Session, moment: date, account_ids: list
         .where(
             (models.Account.id.in_(account_ids))
             & (models.TransactionHeader.postedOn < before_what_day)
+            & ((models.TransactionLine.fundId == fund_id) | (fund_id is None))
         )
     )
 
@@ -147,14 +148,14 @@ def get_accounts_balance_moment_raw(db: Session, moment: date, account_ids: list
     return total_balance
 
 
-def get_accounts_accounts_balance_period(db: Session, series: schemas.DashboardPartQuerySeries, start_date: date, end_date: date, interval: str) -> schemas.DashboardDataSeries:
+def get_accounts_accounts_balance_period(db: Session, series: schemas.DashboardPartQuerySeries, start_date: date, end_date: date, interval: str, fund_id: UUID | None) -> schemas.DashboardDataSeries:
     data: list[schemas.DataPoint] = []
     account_ids = get_accounts_list_for_series_query(db=db, query=series.query)
     
     current_period_before: date = end_date
     
     while current_period_before >= start_date:
-        balance = get_accounts_balance_moment_raw(db=db, moment=current_period_before, account_ids=account_ids)
+        balance = get_accounts_balance_moment_raw(db=db, moment=current_period_before, account_ids=account_ids, fund_id=fund_id)
         data_point = schemas.DataPoint(
             date=current_period_before - relativedelta(days=1),
             value=balance
@@ -179,7 +180,7 @@ class CashFlow:
         self.net = credit + debit
 
 
-def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], period_start_date: date, period_end_date: date) -> CashFlow:
+def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], period_start_date: date, period_end_date: date, fund_id: UUID | None) -> CashFlow:
     cashflow_credit: int = 0
     cashflow_debit: int = 0
     
@@ -195,6 +196,7 @@ def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], perio
             & (models.TransactionHeader.postedOn >= after)
             & (models.TransactionHeader.postedOn < before)
             & (models.TransactionLine.amount < 0)
+            & ((models.TransactionLine.fundId == fund_id) | (fund_id is None))
         )
     )
     if credit is not None and isinstance(credit, int):
@@ -209,6 +211,7 @@ def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], perio
             & (models.TransactionHeader.postedOn >= after)
             & (models.TransactionHeader.postedOn < before)
             & (models.TransactionLine.amount > 0)
+            & ((models.TransactionLine.fundId == fund_id) | (fund_id is None))
         )
     )
     
@@ -218,7 +221,7 @@ def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], perio
     return CashFlow(credit=cashflow_credit, debit=cashflow_debit)
 
 
-def get_accounts_cashflow_period(db: Session, series: schemas.DashboardPartQuerySeries, start_date: date, end_date: date, interval: str) -> tuple[schemas.DashboardDataSeries, schemas.DashboardDataSeries, schemas.DashboardDataSeries]:
+def get_accounts_cashflow_period(db: Session, series: schemas.DashboardPartQuerySeries, start_date: date, end_date: date, interval: str, fund_id: UUID | None) -> tuple[schemas.DashboardDataSeries, schemas.DashboardDataSeries, schemas.DashboardDataSeries]:
     data_credit: list[schemas.DataPoint] = []
     data_debit: list[schemas.DataPoint] = []
     data_net: list[schemas.DataPoint] = []
@@ -228,7 +231,13 @@ def get_accounts_cashflow_period(db: Session, series: schemas.DashboardPartQuery
     current_period_since: date = current_period_before - get_interval_timedelta(interval)
     
     while current_period_before > start_date:
-        cashflow = get_accounts_cashflow_period_raw(db=db, account_ids=account_ids, period_start_date=current_period_since, period_end_date=current_period_before)
+        cashflow = get_accounts_cashflow_period_raw(
+            db=db,
+            account_ids=account_ids,
+            period_start_date=current_period_since, 
+            period_end_date=current_period_before,
+            fund_id=fund_id
+        )
         
         data_credit.append(schemas.DataPoint(date=current_period_before, value=cashflow.credit))
         data_debit.append(schemas.DataPoint(date=current_period_before, value=cashflow.debit))
@@ -274,13 +283,26 @@ def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.Dashboar
     dashboard_part_series: list[schemas.DashboardDataSeries] = []
     
     for series in dashboard_query.series:
-        series_data: schemas.DashboardDataSeries | None = None
         if dashboard_query.dimension == DashboardDimensions.BALANCE:
-            series_data = get_accounts_accounts_balance_period(db=db, series=series, start_date=dashboard_query.startDate, end_date=dashboard_query.endDate, interval=dashboard_query.interval)
+            series_data = get_accounts_accounts_balance_period(
+                db=db, 
+                series=series, 
+                start_date=dashboard_query.startDate, 
+                end_date=dashboard_query.endDate, 
+                interval=dashboard_query.interval,
+                fund_id=dashboard_query.fundId
+            )
             if series_data is not None:
                 dashboard_part_series.append(series_data)
         elif dashboard_query.dimension == DashboardDimensions.CASHFLOW:
-            series_data_credit, series_data_debit, series_data_net = get_accounts_cashflow_period(db=db, series=series, start_date=dashboard_query.startDate, end_date=dashboard_query.endDate, interval=dashboard_query.interval)
+            series_data_credit, series_data_debit, series_data_net = get_accounts_cashflow_period(
+                db=db, 
+                series=series, 
+                start_date=dashboard_query.startDate,
+                end_date=dashboard_query.endDate, 
+                interval=dashboard_query.interval,
+                fund_id=dashboard_query.fundId
+            )
             if series_data_credit is not None:
                 dashboard_part_series.append(series_data_credit)
             if series_data_debit is not None:
@@ -299,7 +321,7 @@ def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.Dashboar
     dashboard_part_series: list[schemas.DashboardDataSeries] = []
     for series in dashboard_query.series:
         if dashboard_query.dimension == DashboardDimensions.BALANCE:
-            series_data = get_accounts_balance_moment(db=db, series=series, moment=dashboard_query.moment)
+            series_data = get_accounts_balance_moment(db=db, series=series, moment=dashboard_query.moment, fund_id=dashboard_query.fundId)
             dashboard_part_series.append(series_data)
         if dashboard_query.dimension == DashboardDimensions.CASHFLOW:
             raise HTTPException(status_code=400, detail={"description": "Cashflow dimension is not supported for moment dashboard part"})
