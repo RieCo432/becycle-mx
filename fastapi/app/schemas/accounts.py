@@ -45,6 +45,11 @@ class AccountUpdate(AccountBase):
 DashboardAccountsList = list[UUID]
 DashboardSeriesQuery = DashboardAccountsList | str
 
+
+class DashboardDataSeriesMeta(BaseModel):
+    flow: str
+
+
 class DataPoint(BaseModel):
     date: date
     value: int | float
@@ -52,6 +57,7 @@ class DataPoint(BaseModel):
 
 class DashboardDataSeries(BaseModel):
     name: str
+    meta: DashboardDataSeriesMeta | None = None
     data: list[DataPoint]
 
 class DashboardPart(BaseModel):
@@ -82,8 +88,8 @@ class DashboardPartMomentQuery(DashboardPartQueryBase):
     
 class DashboardPartPeriodQuery(DashboardPartQueryBase):
     mode: str = "period"
-    startDate: date
-    endDate: date
+    startDate: date | None
+    endDate: date | None
     interval: str
 
 class DashboardQuery(BaseModel):

@@ -12,6 +12,8 @@ from uuid import UUID
 from app.services.accounts_helpers import AccountsHelpers
 from typing import List
 
+from schemas import DashboardPartQuerySeries
+from services import get_interval_timedelta
 from services.accounts_helpers import AccountTypes, DashboardDimensions
 
 
@@ -114,34 +116,148 @@ def get_fund(db: Session, fund_id: UUID) -> models.Fund | None:
     return fund
 
 
-def get_accounts_dashboard_series(db: Session, series: schemas.DashboardPartQuerySeries, moment: date) -> schemas.DashboardDataSeries:
-    total_balance = 0
-    before_what_day = moment + relativedelta(days=1)
-    
-    account_list = get_accounts_list_for_series_query(db=db, query=series.query)
-    
-    for account in account_list:
-        balance = db.scalar(
-            select(func.cast(func.SUM(models.TransactionLine.amount), Integer))
-            .join(models.TransactionHeader)
-            .join(models.Account)
-            .where(
-                (models.Account.id == account.id) 
-                & (models.TransactionHeader.postedOn < before_what_day)
-            )
-        )
-        if balance is not None and (isinstance(balance, int) or isinstance(balance, float)):
-            total_balance += balance
-        
-    data = schemas.DashboardDataSeries(
+def get_accounts_balance_moment(db: Session, series: schemas.DashboardPartQuerySeries, moment: date) -> schemas.DashboardDataSeries:
+    account_ids = get_accounts_list_for_series_query(db=db, query=series.query)
+    total_balance = get_accounts_balance_moment_raw(db, moment, account_ids)
+
+    series_data = schemas.DashboardDataSeries(
         name=series.name,
         data=[schemas.DataPoint(date=moment, value=total_balance)]
     )
     
-    return data
+    return series_data
 
 
-def get_accounts_list_for_series_query(db: Session, query: schemas.DashboardSeriesQuery) -> list[models.Account]:
+def get_accounts_balance_moment_raw(db: Session, moment: date, account_ids: list[UUID]) -> int:
+    total_balance = 0
+    before_what_day = moment + relativedelta(days=1)
+
+    sum_of_accounts_balances = db.scalar(
+        select(func.cast(func.sum(models.TransactionLine.amount), Integer))
+        .join(models.TransactionHeader)
+        .join(models.Account)
+        .where(
+            (models.Account.id.in_(account_ids))
+            & (models.TransactionHeader.postedOn < before_what_day)
+        )
+    )
+
+    if sum_of_accounts_balances is not None and isinstance(sum_of_accounts_balances, int):
+        total_balance = sum_of_accounts_balances
+    return total_balance
+
+
+def get_accounts_accounts_balance_period(db: Session, series: schemas.DashboardPartQuerySeries, start_date: date, end_date: date, interval: str) -> schemas.DashboardDataSeries:
+    data: list[schemas.DataPoint] = []
+    account_ids = get_accounts_list_for_series_query(db=db, query=series.query)
+    
+    current_period_before: date = end_date
+    
+    while current_period_before >= start_date:
+        balance = get_accounts_balance_moment_raw(db=db, moment=current_period_before, account_ids=account_ids)
+        data_point = schemas.DataPoint(
+            date=current_period_before - relativedelta(days=1),
+            value=balance
+        )
+        data.append(data_point)
+        current_period_before -= get_interval_timedelta(interval)
+    
+    
+    series_data = schemas.DashboardDataSeries(
+        name=series.name,
+        data=data
+    )
+
+    return series_data
+
+
+
+class CashFlow:
+    def __init__(self, credit: int, debit: int):
+        self.credit = credit
+        self.debit = debit
+        self.net = credit + debit
+
+
+def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], period_start_date: date, period_end_date: date) -> CashFlow:
+    cashflow_credit: int = 0
+    cashflow_debit: int = 0
+    
+    before: date = period_end_date + relativedelta(days=1)
+    after: date = period_start_date + relativedelta(days=1)
+
+    credit = db.scalar(
+        select(func.cast(func.sum(models.TransactionLine.amount), Integer))
+        .join(models.TransactionHeader)
+        .join(models.Account)
+        .where(
+            (models.Account.id.in_(account_ids))
+            & (models.TransactionHeader.postedOn >= after)
+            & (models.TransactionHeader.postedOn < before)
+            & (models.TransactionLine.amount < 0)
+        )
+    )
+    if credit is not None and isinstance(credit, int):
+        cashflow_credit = credit
+    
+    debit = db.scalar(
+        select(func.cast(func.sum(models.TransactionLine.amount), Integer))
+        .join(models.TransactionHeader)
+        .join(models.Account)
+        .where(
+            (models.Account.id.in_(account_ids))
+            & (models.TransactionHeader.postedOn >= after)
+            & (models.TransactionHeader.postedOn < before)
+            & (models.TransactionLine.amount > 0)
+        )
+    )
+    
+    if debit is not None and isinstance(debit, int):
+        cashflow_debit = debit
+
+    return CashFlow(credit=cashflow_credit, debit=cashflow_debit)
+
+
+def get_accounts_cashflow_period(db: Session, series: schemas.DashboardPartQuerySeries, start_date: date, end_date: date, interval: str) -> tuple[schemas.DashboardDataSeries, schemas.DashboardDataSeries, schemas.DashboardDataSeries]:
+    data_credit: list[schemas.DataPoint] = []
+    data_debit: list[schemas.DataPoint] = []
+    data_net: list[schemas.DataPoint] = []
+    account_ids = get_accounts_list_for_series_query(db=db, query=series.query)
+    
+    current_period_before: date = end_date
+    current_period_since: date = current_period_before - get_interval_timedelta(interval)
+    
+    while current_period_before > start_date:
+        cashflow = get_accounts_cashflow_period_raw(db=db, account_ids=account_ids, period_start_date=current_period_since, period_end_date=current_period_before)
+        
+        data_credit.append(schemas.DataPoint(date=current_period_before, value=cashflow.credit))
+        data_debit.append(schemas.DataPoint(date=current_period_before, value=cashflow.debit))
+        data_net.append(schemas.DataPoint(date=current_period_before, value=cashflow.net))
+
+        current_period_before = current_period_since
+        current_period_since = current_period_before - get_interval_timedelta(interval)
+        
+
+    return  (
+        schemas.DashboardDataSeries(
+            name=series.name,
+            data=data_credit,
+            meta=schemas.DashboardDataSeriesMeta(flow="credit")
+        ), 
+        schemas.DashboardDataSeries(
+            name=series.name, 
+            data=data_debit,
+            meta=schemas.DashboardDataSeriesMeta(flow="debit")
+        ), 
+        schemas.DashboardDataSeries(
+            name=series.name, 
+            data=data_net,
+            meta=schemas.DashboardDataSeriesMeta(flow="net")
+        )
+    )
+
+
+def get_accounts_list_for_series_query(db: Session, query: schemas.DashboardSeriesQuery) -> list[UUID]:
     accounts: list[models.Account]
     
     if isinstance(query, list) and all([isinstance(_, UUID) for _ in query]):
@@ -151,17 +267,27 @@ def get_accounts_list_for_series_query(db: Session, query: schemas.DashboardSeri
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Invalid dashboard series"})
     
-    return accounts
+    return [a.id for a in accounts]
 
 
 def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.DashboardPartPeriodQuery) -> schemas.DashboardPart:
     dashboard_part_series: list[schemas.DashboardDataSeries] = []
     
     for series in dashboard_query.series:
+        series_data: schemas.DashboardDataSeries | None = None
         if dashboard_query.dimension == DashboardDimensions.BALANCE:
-            raise HTTPException(status_code=400, detail={"description": "Balance dimension is not supported for period dashboard part"})
-        if dashboard_query.dimension == DashboardDimensions.CASHFLOW:
-            raise HTTPException(status_code=400, detail={"description": "Cashflow dimension is not supported for period dashboard part"})
+            series_data = get_accounts_accounts_balance_period(db=db, series=series, start_date=dashboard_query.startDate, end_date=dashboard_query.endDate, interval=dashboard_query.interval)
+            if series_data is not None:
+                dashboard_part_series.append(series_data)
+        elif dashboard_query.dimension == DashboardDimensions.CASHFLOW:
+            series_data_credit, series_data_debit, series_data_net = get_accounts_cashflow_period(db=db, series=series, start_date=dashboard_query.startDate, end_date=dashboard_query.endDate, interval=dashboard_query.interval)
+            if series_data_credit is not None:
+                dashboard_part_series.append(series_data_credit)
+            if series_data_debit is not None:
+                dashboard_part_series.append(series_data_debit)
+            if series_data_net is not None:
+                dashboard_part_series.append(series_data_net)
+        
 
     return schemas.DashboardPart(
         name=dashboard_query.dimension,
@@ -173,7 +299,7 @@ def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.Dashboar
     dashboard_part_series: list[schemas.DashboardDataSeries] = []
     for series in dashboard_query.series:
         if dashboard_query.dimension == DashboardDimensions.BALANCE:
-            series_data = get_accounts_dashboard_series(db=db, series=series, moment=dashboard_query.moment)
+            series_data = get_accounts_balance_moment(db=db, series=series, moment=dashboard_query.moment)
             dashboard_part_series.append(series_data)
         if dashboard_query.dimension == DashboardDimensions.CASHFLOW:
             raise HTTPException(status_code=400, detail={"description": "Cashflow dimension is not supported for moment dashboard part"})
@@ -187,9 +313,24 @@ def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.Dashboar
 
 def get_accounts_dashboard(db: Session, dashboard_queries: schemas.DashboardQuery) -> schemas.Dashboard:
     dashboard_parts: list[schemas.DashboardPart] = []
+
+
+    last_ditch_start_date: date
+    _ = db.scalar(
+        select(func.min(models.TransactionHeader.postedOn))
+    )
+    if _ is not None and isinstance(_, datetime):
+        last_ditch_start_date = _.date()
+    else:
+        raise HTTPException(status_code=400, detail={"description": "No transactions found"})
     
     for dashboard_query in dashboard_queries.queries:
         if dashboard_query.mode == "period" and isinstance(dashboard_query, schemas.DashboardPartPeriodQuery):
+            if dashboard_query.startDate is None:
+                dashboard_query.startDate = last_ditch_start_date
+            if dashboard_query.endDate is None:
+                dashboard_query.endDate = datetime.now(timezone.utc).date()
+                
             dashboard_parts.append(get_accounts_dashboard_period(db=db, dashboard_query=dashboard_query))
         elif dashboard_query.mode == "moment" and isinstance(dashboard_query, schemas.DashboardPartMomentQuery):
             dashboard_parts.append(get_accounts_dashboard_moment(db=db, dashboard_query=dashboard_query))

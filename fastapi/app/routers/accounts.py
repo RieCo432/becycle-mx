@@ -74,8 +74,8 @@ async def reopen_account(account_id: UUID, db: Session = Depends(dep.get_db)) ->
     return crud.reopen_account(db=db, account_id=account_id)
 
 
-@accounts.post("/accounts/statements")
-async def get_accounts_statements(
+@accounts.post("/accounts/dashboard")
+async def get_accounts_dashboard(
         dashboard_queries: schemas.DashboardQuery,
         db: Session = Depends(dep.get_db)
 ) -> schemas.Dashboard:
