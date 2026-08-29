@@ -37,8 +37,6 @@ const axiosClient = axios.create({
   baseURL: apiBaseUrl,
 });
 
-console.log(apiBaseUrl);
-
 export default {
   getApiBaseUrl() {
     return apiBaseUrl;
