@@ -1,8 +1,9 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
+from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func, Integer
 from starlette import status
 
 from app import schemas, models, crud
@@ -10,6 +11,8 @@ from uuid import UUID
 
 from app.services.accounts_helpers import AccountsHelpers
 from typing import List
+
+from services.accounts_helpers import AccountTypes, DashboardDimensions
 
 
 def get_account(db: Session, account_id: UUID) -> models.Account | None:
@@ -109,3 +112,78 @@ def get_fund(db: Session, fund_id: UUID) -> models.Fund | None:
         select(models.Fund).where(models.Fund.id == fund_id)
     )
     return fund
+
+
+def get_accounts_dashboard_series(db: Session, series: schemas.DashboardPartQuerySeries, moment: date) -> schemas.DashboardDataSeries:
+    total_balance = 0
+    before_what_day = moment + relativedelta(days=1)
+    
+    account_list = get_accounts_list_for_series_query(db=db, query=series.query)
+    
+    for account in account_list:
+        balance = db.scalar(
+            select(func.cast(func.SUM(models.TransactionLine.amount), Integer))
+            .join(models.TransactionHeader)
+            .join(models.Account)
+            .where(
+                (models.Account.id == account.id) 
+                & (models.TransactionHeader.postedOn < before_what_day)
+            )
+        )
+        if balance is not None and (isinstance(balance, int) or isinstance(balance, float)):
+            total_balance += balance
+        
+    data = schemas.DashboardDataSeries(
+        name=series.name,
+        data=[schemas.DataPoint(date=moment, value=total_balance)]
+    )
+    
+    return data
+
+
+
+
+def get_accounts_list_for_series_query(db: Session, query: schemas.DashboardSeriesQuery) -> list[models.Account]:
+    accounts: list[models.Account] = []
+    
+    if isinstance(query, list) and all([isinstance(_, UUID) for _ in query]):
+        accounts = [_ for _ in db.scalars(select(models.Account).where(models.Account.id.in_(query)))]
+    elif isinstance(query, str):
+        accounts = [_ for _ in db.scalars(select(models.Account).where(models.Account.type == query))]
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Invalid dashboard series"})
+    
+    return accounts
+
+
+def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.DashboardPartPeriodPartQuery) -> schemas.DashboardPart:
+    pass
+
+
+def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.DashboardPartMomentPartQuery) -> schemas.DashboardPart:
+    dashboard_part_series: list[schemas.DashboardDataSeries] = []
+    for series in dashboard_query.series:
+        # accounts = get_accounts_list_for_series_query(db=db, query=series.query)
+        
+        
+        if dashboard_query.dimension == DashboardDimensions.BALANCE:
+            series_data = get_accounts_dashboard_series(db=db, series=series, moment=dashboard_query.moment)
+            dashboard_part_series.append(series_data)
+        
+    
+    return schemas.DashboardPart(name=dashboard_query.name, series=dashboard_part_series)
+
+
+def get_accounts_dashboard(db: Session, dashboard_queries: schemas.DashboardQuery) -> schemas.Dashboard:
+    dashboard_parts: list[schemas.DashboardPart] = []
+    
+    for dashboard_query in dashboard_queries.queries:
+        if dashboard_query.mode == "period" and isinstance(dashboard_query, schemas.DashboardPartPeriodPartQuery):
+            dashboard_parts.append(get_accounts_dashboard_period(db=db, dashboard_query=dashboard_query))
+        elif dashboard_query.mode == "moment" and isinstance(dashboard_query, schemas.DashboardPartMomentPartQuery):
+            dashboard_parts.append(get_accounts_dashboard_moment(db=db, dashboard_query=dashboard_query))
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": f"Invalid dashboard mode"})
+            
+    return schemas.Dashboard(name=dashboard_queries.name, parts=dashboard_parts)
+        

@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 from typing import List
 from .user import User
 from .group import Group
+from app.services.accounts_helpers import AccountTypes, DashboardDimensions, DashboardIntervals
 
 
 class Fund(BaseModel):
@@ -39,3 +40,52 @@ class Account(AccountCreate):
     
 class AccountUpdate(AccountBase):
     pass
+
+
+DashboardAccountsList = list[UUID]
+DashboardSeriesQuery = DashboardAccountsList | str
+
+class DataPoint(BaseModel):
+    date: date
+    value: int | float
+    
+
+class DashboardDataSeries(BaseModel):
+    name: str
+    data: list[DataPoint]
+
+class DashboardPart(BaseModel):
+    name: str
+    series: list[DashboardDataSeries]
+    
+    
+class Dashboard(BaseModel):
+    name: str
+    parts: list[DashboardPart]
+
+
+
+class DashboardPartQuerySeries(BaseModel):
+    name: str
+    query: DashboardSeriesQuery
+    
+    
+class DashboardPartQueryBase(BaseModel):
+    name: str
+    series: list[DashboardPartQuerySeries]
+    dimension: str
+    fundId: UUID | None = None
+
+class DashboardPartMomentPartQuery(DashboardPartQueryBase):
+    mode: str = "moment"
+    moment: date
+    
+class DashboardPartPeriodPartQuery(DashboardPartQueryBase):
+    mode: str = "period"
+    startDate: date
+    endDate: date
+    interval: str
+
+class DashboardQuery(BaseModel):
+    name: str
+    queries: list[DashboardPartMomentPartQuery | DashboardPartPeriodPartQuery]
