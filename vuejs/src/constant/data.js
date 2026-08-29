@@ -122,9 +122,15 @@ export const topMenu = [
     show: ['user'],
     child: [
       {
-        childtitle: 'Deposit Accounting',
+        childtitle: 'Deposit Book',
         childicon: 'heroicons-outline:banknotes',
         childlink: '/finances/deposits',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Dashboards',
+        childicon: 'heroicons:rocket-launch',
+        childlink: '/finances/dashboards',
         show: ['user'],
       },
       {

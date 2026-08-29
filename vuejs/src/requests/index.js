@@ -1851,4 +1851,10 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getDashboard(dashboardQuery) {
+    return axiosClient.post(`/accounts/dashboard`, dashboardQuery, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };
