@@ -111,7 +111,12 @@ def get_total_contracts_statistics(db: Session, interval: str, start_date: date 
     interval_timedelta = get_interval_timedelta(interval=interval)
 
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(models.Contract.contractType)
+        db.query(
+            models.Contract.contractType, 
+            func.count(models.Contract.contractType)
+        )
+        .where(models.Contract.isDraft == False)
+        .group_by(models.Contract.contractType)
     )]
 
     all_series = []
@@ -121,7 +126,10 @@ def get_total_contracts_statistics(db: Session, interval: str, start_date: date 
         query = db.query(models.Contract.contractType, func.count(models.Contract.contractType))
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
-                                                             query.where(models.Contract.startDate <= end_date)
+                                                             query.where(
+                                                                 (models.Contract.startDate <= end_date) 
+                                                                 & (models.Contract.isDraft == False)
+                                                             )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
         for breakdown in all_categories:
@@ -154,8 +162,12 @@ def get_active_contracts_statistics(db: Session, interval: str, grace_period: in
     interval_timedelta = get_interval_timedelta(interval=interval)
 
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
-            models.Contract.contractType)
+        db.query(
+            models.Contract.contractType,
+            func.count(models.Contract.contractType)
+        )
+        .where(models.Contract.isDraft == False)
+        .group_by(models.Contract.contractType)
     )]
 
     all_series = []
@@ -175,6 +187,7 @@ def get_active_contracts_statistics(db: Session, interval: str, grace_period: in
                                                                  & (
                                                                              models.Contract.endDate >= end_date - relativedelta(
                                                                          days=grace_period))
+                                                                 & (models.Contract.isDraft == False)
                                                              )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
@@ -208,8 +221,12 @@ def get_new_contracts_statistics(db: Session, interval: str, start_date: date | 
     interval_timedelta = get_interval_timedelta(interval=interval)
 
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
-            models.Contract.contractType)
+        db.query(
+            models.Contract.contractType,
+            func.count(models.Contract.contractType)
+        )
+        .where(models.Contract.isDraft == False)
+        .group_by(models.Contract.contractType)
     )]
 
     all_series = []
@@ -225,6 +242,7 @@ def get_new_contracts_statistics(db: Session, interval: str, start_date: date | 
                                                              .where(
                                                                  (models.Contract.startDate > period_start_date)
                                                                  & (models.Contract.startDate <= period_end_date)
+                                                                 & (models.Contract.isDraft == False)
                                                              )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
@@ -260,8 +278,12 @@ list[schemas.DataSeries]:
     interval_timedelta = get_interval_timedelta(interval=interval)
 
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
-            models.Contract.contractType)
+        db.query(
+            models.Contract.contractType,
+            func.count(models.Contract.contractType)
+        )
+        .where(models.Contract.isDraft == False)
+        .group_by(models.Contract.contractType)
     )]
 
     all_series = []
@@ -278,6 +300,7 @@ list[schemas.DataSeries]:
                                                                  (models.Contract.returnedDate != None)
                                                                  & (models.Contract.returnedDate > period_start_date)
                                                                  & (models.Contract.returnedDate <= period_end_date)
+                                                                 & (models.Contract.isDraft == False)
                                                              )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
