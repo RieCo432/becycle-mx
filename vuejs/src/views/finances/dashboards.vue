@@ -12,70 +12,72 @@ const toast = useToast();
 
 const themeSettingsStore = useThemeSettingsStore();
 
-const timeSeriesChartOptions = {
-  chart: {
-    type: 'area',
-    height: 300,
-    stacked: true,
-    zoom: {
-      enabled: true,
-      allowMouseWheelZoom: false,
+function getTimeSeriesChartOptions(yAxisLabel) {
+  return {
+    chart: {
+      type: 'area',
+      height: 300,
+      zoom: {
+        enabled: true,
+        allowMouseWheelZoom: false,
+      },
     },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    curve: 'smooth',
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      opacityFrom: 0.6,
-      opacityTo: 0.8,
+    dataLabels: {
+      enabled: false,
     },
-  },
-  legend: {
-    position: 'top',
-    horizontalAlign: 'left',
-    labels: {
-      colors: '#CBD5E1',
+    stroke: {
+      curve: 'smooth',
     },
-  },
-  tooltip: {
-    theme: themeSettingsStore.theme,
-  },
-  xaxis: {
-    show: true,
-    type: 'datetime',
-    labels: {
-      style: {
+    fill: {
+      type: 'gradient',
+      gradient: {
+        opacityFrom: 0.6,
+        opacityTo: 0.8,
+      },
+    },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'left',
+      labels: {
         colors: '#CBD5E1',
       },
     },
-    axisTicks: {
-      color: '#CBD5E1',
+    tooltip: {
+      theme: themeSettingsStore.theme,
     },
-  },
-  yaxis: {
-    show: true,
-    labels: {
-      style: {
-        colors: '#CBD5E1',
+    xaxis: {
+      show: true,
+      type: 'datetime',
+      labels: {
+        style: {
+          colors: '#CBD5E1',
+        },
       },
-      formatter: (val) => (`\u00A3${val}`),
-    },
-    axisTicks: {
-      color: '#CBD5E1',
-    },
-    title: {
-      text: 'Value of Deposits',
-      style: {
+      axisTicks: {
         color: '#CBD5E1',
       },
     },
-  },
-};
+    yaxis: {
+      show: true,
+      labels: {
+        style: {
+          colors: '#CBD5E1',
+        },
+        formatter: (val) => (`\u00A3${val}`),
+      },
+      axisTicks: {
+        color: '#CBD5E1',
+      },
+      title: {
+        text: yAxisLabel,
+        style: {
+          color: '#CBD5E1',
+        },
+      },
+    },
+  };
+}
+
 
 const dashboards = ref([
   {
@@ -97,7 +99,7 @@ const dashboards = ref([
         fundId: 'c96937cd-d61b-40dc-98b1-0dc21cac015f',
         mode: 'period',
         endDate: '2026-08-31',
-        startDate: '2026-01-01',
+        startDate: '2026-05-01',
         interval: 'monthly',
       },
       {
@@ -116,7 +118,7 @@ const dashboards = ref([
         fundId: 'c96937cd-d61b-40dc-98b1-0dc21cac015f',
         mode: 'period',
         endDate: '2026-08-31',
-        startDate: '2026-01-01',
+        startDate: '2026-05-01',
         interval: 'monthly',
       },
       {
@@ -183,9 +185,10 @@ function fetchDashboard() {
       (response) => {
         dashboardData.value = response.data;
 
-        seriesData.value = dashboardData.value.parts.map((dashboardDataPart) => {
+        seriesData.value = dashboardData.value.parts.map((dashboardDataPart, index) => {
           return {
             name: dashboardDataPart.name,
+            yAxisLabel: dashboards.value[selectedDashboard.value].queries[index].dimension,
             series: dashboardDataPart.series.map(
               (seriesData) => ({
                 name: `${seriesData.name}${seriesData.meta?.flow? `_${seriesData.meta.flow}` : ''}`,
@@ -274,7 +277,7 @@ function fetchDashboard() {
       </Card>
     </div>
     <div
-      v-if="dashboardData"
+      v-if="seriesData"
       class="col-span-full grid grid-cols-12 gap-5"
     >
       <div
@@ -289,7 +292,7 @@ function fetchDashboard() {
                 @zoomed="handleSelection"
                 class="text-slate-700 dark:text-slate-300"
                 type="area"
-                :options="timeSeriesChartOptions"
+                :options="getTimeSeriesChartOptions(dashboardPart.yAxisLabel)"
                 :series="dashboardPart.series"></apexchart>
             </div>
           </div>
