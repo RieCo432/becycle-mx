@@ -14,11 +14,13 @@ import {useField, useForm} from 'vee-validate';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import SaleSummaryCard from '@/components/Card/SaleSummaryCard.vue';
 import {VueSpinner} from 'vue3-spinners';
+import Select from '@/components/Select/index.vue';
 
 const toast = useToast();
 export default {
   name: 'PointOfSale',
   components: {
+    Select,
     SaleSummaryCard,
     ComboboxTextInput,
     BikeOverviewCard,
@@ -55,7 +57,10 @@ export default {
     const quantityError = ref(null);
     const processingSale = ref(false);
 
+    const funds = ref([]);
+
     const saleCheckoutSchema = yup.object().shape({
+      fundId: yup.string().required(' The fund is required '),
       hasCatalogueItemSaleLines: yup.boolean(),
       catalogueItemRevenueAccount: yup.object().when('hasCatalogueItemSaleLines', {
         is: true,
@@ -91,6 +96,10 @@ export default {
     });
 
     const {
+      value: fundId,
+      errorMessage: fundIdError,
+    } = useField('fundId');
+    const {
       value: hasCatalogueItemSaleLines,
       errorMessage: hasCatalogueItemSaleLinesError,
     } = useField('hasCatalogueItemSaleLines');
@@ -119,6 +128,18 @@ export default {
       errorMessage: passwordError,
       setErrors: passwordSetErrors,
     } = useField('password');
+
+    requests.getFunds().then((response) => {
+      funds.value = response.data.map((t) => (
+        {
+          label: t.name,
+          value: t.id,
+        }
+      ));
+      fundId.value = response.data.find((f) => f.isDefault).id;
+    }).catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
 
     function getSales() {
       requests.getSales(true, false)
@@ -183,17 +204,20 @@ export default {
           {
             amount: totalSalePrice,
             accountId: paymentAssetAccount.value.id,
+            fundId: fundId.value,
           },
           ...(hasCatalogueItemSaleLines.value ?
             [{
               amount: -catalogueItemTotalSalePrice,
               accountId: catalogueItemRevenueAccount.value.id,
+              fundId: fundId.value,
             }] :
             []),
           ...(hasBikeSaleLines.value ?
             [{
               amount: -bikeTotalSalePrice,
               accountId: bikeRevenueAccount.value.id,
+              fundId: fundId.value,
             }] :
             []),
         ],
@@ -204,6 +228,8 @@ export default {
         username: username.value,
         password: password.value,
       }];
+      
+      console.log('transactionAuthDetails', saleTransactionsHeaderDraft);
 
       requests.createTransaction(saleTransactionsHeaderDraft, transactionAuthDetails)
         .then((response) => {
@@ -276,6 +302,9 @@ export default {
       closeSale,
       quantityError,
       processingSale,
+      funds,
+      fundId,
+      fundIdError,
     };
   },
   created() {
@@ -775,6 +804,16 @@ export default {
               <template v-else>
                 <form @submit.prevent="submitSaleCheckout">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="col-span-full">
+                      <Select
+                        :options="funds"
+                        label="Fund"
+                        v-model="fundId"
+                        name="fundId"
+                        placeholder="Which fund?"
+                        :error="fundIdError"
+                      />
+                    </div>
                     <div
                       v-if="hasCatalogueItemSaleLines"
                       :class="`col-span-${revenueAccountsColSpan}`">

@@ -1547,7 +1547,7 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  postNewAccount(name, description, type, owneruserId, ownerGroupId, scheduledClosureDate, isInternal, showInUis, restrictedToProjectId) {
+  postNewAccount(name, description, type, owneruserId, ownerGroupId, scheduledClosureDate, isInternal, showInUis) {
     return axiosClient.post('/accounts', {
       name: name,
       description: description,
@@ -1557,7 +1557,6 @@ export default {
       scheduledClosureDate: scheduledClosureDate,
       isInternal: isInternal,
       showInUis: showInUis,
-      restrictedToProjectId: restrictedToProjectId,
     },
     {
       headers: credentialsStore.getApiRequestHeader(),
@@ -1603,8 +1602,8 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getProjects() {
-    return axiosClient.get('/settings/projects', {
+  getFunds() {
+    return axiosClient.get('/settings/funds', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

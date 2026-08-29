@@ -42,21 +42,18 @@ def create_account(new_account_data: schemas.AccountCreate, db: Session) -> mode
         scheduledClosureDate=new_account_data.scheduledClosureDate,
         type=new_account_data.type.lower(),
         isInternal=new_account_data.isInternal,
-        restrictedToProjectId=new_account_data.restrictedToProjectId
     )
     db.add(db_account)
     db.commit()
     db.refresh(db_account)
     return db_account
 
-def get_accounts(db: Session, ui_filters: List[str] | None = None, types: List[str] | None = None, projectId: str | None = None, for_user: models.User | None = None) -> list[models.Account]:
+def get_accounts(db: Session, ui_filters: List[str] | None = None, types: List[str] | None = None, for_user: models.User | None = None) -> list[models.Account]:
     filter_query = []
     if ui_filters is not None:
         filter_query.append(models.Account.showInUis.op('&&')(ui_filters))
     if types is not None:
         filter_query.append(models.Account.type.in_(types))
-    
-    filter_query.append(models.Account.restrictedToProjectId == projectId)
     
     accounts = [_ for _ in db.scalars(
         select(models.Account)
@@ -99,7 +96,16 @@ def reopen_account(account_id: UUID, db: Session) -> models.Account:
     db.refresh(account)
     return account
 
-def get_all_projects(db: Session) -> list[models.Project]: # TODO: this should be able to filter by active status
-    return [_ for _ in db.scalars(
-        select(models.Project)
+def get_all_funds(db: Session) -> list[models.Fund]: # TODO: this should be able to filter by active status
+    funds = [_ for _ in db.scalars(
+        select(models.Fund)
     )]
+    
+    return funds
+
+
+def get_fund(db: Session, fund_id: UUID) -> models.Fund | None:
+    fund = db.scalar(
+        select(models.Fund).where(models.Fund.id == fund_id)
+    )
+    return fund
