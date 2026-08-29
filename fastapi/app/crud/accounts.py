@@ -141,10 +141,8 @@ def get_accounts_dashboard_series(db: Session, series: schemas.DashboardPartQuer
     return data
 
 
-
-
 def get_accounts_list_for_series_query(db: Session, query: schemas.DashboardSeriesQuery) -> list[models.Account]:
-    accounts: list[models.Account] = []
+    accounts: list[models.Account]
     
     if isinstance(query, list) and all([isinstance(_, UUID) for _ in query]):
         accounts = [_ for _ in db.scalars(select(models.Account).where(models.Account.id.in_(query)))]
@@ -156,31 +154,44 @@ def get_accounts_list_for_series_query(db: Session, query: schemas.DashboardSeri
     return accounts
 
 
-def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.DashboardPartPeriodPartQuery) -> schemas.DashboardPart:
-    pass
+def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.DashboardPartPeriodQuery) -> schemas.DashboardPart:
+    dashboard_part_series: list[schemas.DashboardDataSeries] = []
+    
+    for series in dashboard_query.series:
+        if dashboard_query.dimension == DashboardDimensions.BALANCE:
+            raise HTTPException(status_code=400, detail={"description": "Balance dimension is not supported for period dashboard part"})
+        if dashboard_query.dimension == DashboardDimensions.CASHFLOW:
+            raise HTTPException(status_code=400, detail={"description": "Cashflow dimension is not supported for period dashboard part"})
+
+    return schemas.DashboardPart(
+        name=dashboard_query.dimension,
+        series=dashboard_part_series,
+    )
 
 
-def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.DashboardPartMomentPartQuery) -> schemas.DashboardPart:
+def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.DashboardPartMomentQuery) -> schemas.DashboardPart:
     dashboard_part_series: list[schemas.DashboardDataSeries] = []
     for series in dashboard_query.series:
-        # accounts = get_accounts_list_for_series_query(db=db, query=series.query)
-        
-        
         if dashboard_query.dimension == DashboardDimensions.BALANCE:
             series_data = get_accounts_dashboard_series(db=db, series=series, moment=dashboard_query.moment)
             dashboard_part_series.append(series_data)
+        if dashboard_query.dimension == DashboardDimensions.CASHFLOW:
+            raise HTTPException(status_code=400, detail={"description": "Cashflow dimension is not supported for moment dashboard part"})
         
     
-    return schemas.DashboardPart(name=dashboard_query.name, series=dashboard_part_series)
+    return schemas.DashboardPart(
+        name=dashboard_query.name, 
+        series=dashboard_part_series
+    )
 
 
 def get_accounts_dashboard(db: Session, dashboard_queries: schemas.DashboardQuery) -> schemas.Dashboard:
     dashboard_parts: list[schemas.DashboardPart] = []
     
     for dashboard_query in dashboard_queries.queries:
-        if dashboard_query.mode == "period" and isinstance(dashboard_query, schemas.DashboardPartPeriodPartQuery):
+        if dashboard_query.mode == "period" and isinstance(dashboard_query, schemas.DashboardPartPeriodQuery):
             dashboard_parts.append(get_accounts_dashboard_period(db=db, dashboard_query=dashboard_query))
-        elif dashboard_query.mode == "moment" and isinstance(dashboard_query, schemas.DashboardPartMomentPartQuery):
+        elif dashboard_query.mode == "moment" and isinstance(dashboard_query, schemas.DashboardPartMomentQuery):
             dashboard_parts.append(get_accounts_dashboard_moment(db=db, dashboard_query=dashboard_query))
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": f"Invalid dashboard mode"})

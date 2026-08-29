@@ -76,11 +76,11 @@ class DashboardPartQueryBase(BaseModel):
     dimension: str
     fundId: UUID | None = None
 
-class DashboardPartMomentPartQuery(DashboardPartQueryBase):
+class DashboardPartMomentQuery(DashboardPartQueryBase):
     mode: str = "moment"
     moment: date
     
-class DashboardPartPeriodPartQuery(DashboardPartQueryBase):
+class DashboardPartPeriodQuery(DashboardPartQueryBase):
     mode: str = "period"
     startDate: date
     endDate: date
@@ -88,4 +88,4 @@ class DashboardPartPeriodPartQuery(DashboardPartQueryBase):
 
 class DashboardQuery(BaseModel):
     name: str
-    queries: list[DashboardPartMomentPartQuery | DashboardPartPeriodPartQuery]
+    queries: list[DashboardPartMomentQuery | DashboardPartPeriodQuery]
