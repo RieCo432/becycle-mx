@@ -312,7 +312,7 @@ def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.Dashboar
         
 
     return schemas.DashboardDataPart(
-        name=dashboard_query.dimension,
+        name=dashboard_query.name,
         series=dashboard_part_series,
     )
 

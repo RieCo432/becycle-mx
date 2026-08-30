@@ -8,6 +8,7 @@ import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import VueSlider from 'vue-slider-component';
 import DashButton from '@/components/Button/index.vue';
+import Icon from '@/components/Icon';
 
 const toast = useToast();
 
@@ -23,13 +24,17 @@ const intervalLabels = ref(['daily', 'weekly', 'fortnightly', 'monthly', 'quarte
 const dashboardParts = ref([]);
 
 
+function parseDashboard(dashboard) {
+  return {
+    id: dashboard.id,
+    name: dashboard.name,
+    layout: JSON.parse(dashboard.layout),
+  };
+}
+
+
 requests.getDashboards().then((response) => {
-  dashboards.value = response.data.map((dashboard) => {
-    return {
-      name: dashboard.name,
-      layout: JSON.parse(dashboard.layout),
-    };
-  });
+  dashboards.value = response.data.map((dashboard) => (parseDashboard(dashboard)));
 });
 
 
@@ -66,7 +71,7 @@ function fetchDashboard() {
   if (selectedDashboard.value < 0) {
     return;
   }
-  
+
   const dashboard = dashboards.value[selectedDashboard.value];
   const dashboardQueries = dashboard.layout.map((layout) => layout.query);
   console.log('dashboardQueries', JSON.stringify(dashboardQueries));
@@ -74,12 +79,12 @@ function fetchDashboard() {
     .replaceAll('#enddate#', endDate.value)
     .replaceAll('#interval#', interval.value);
   console.log('queryString', queryString.replaceAll('#startdate#', startDate.value));
-  
+
   const dashboardQuery = {
     name: 'My Dashboard',
     queries: JSON.parse(queryString),
   };
-  
+
   console.log('dashboardQuery', dashboardQueries);
 
   dashboardParts.value = null;
@@ -117,6 +122,89 @@ function fetchDashboard() {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       },
     );
+}
+
+const editDataSource = ref(null);
+const editChartOptions = ref(null);
+const editingIndex = ref(null);
+const currentlyEditing = ref(null);
+
+
+function startEdit(index) {
+  editingIndex.value = index;
+  editDataSource.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].query);
+  editChartOptions.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].chartOptions);
+}
+
+function editData(index) {
+  startEdit(index);
+  currentlyEditing.value = 'query';
+}
+
+function editChart(index) {
+  startEdit(index);
+  currentlyEditing.value = 'options';
+}
+
+function resetEditing() {
+  editingIndex.value = null;
+  currentlyEditing.value = null;
+  editDataSource.value = null;
+  editChartOptions.value = null;
+}
+
+function cancelChanges() {
+  resetEditing();
+  toast.error('Changes canceled', {timeout: 2000});
+}
+
+function saveChanges() {
+  console.log('saving changes', editDataSource.value, editChartOptions.value);
+  dashboards.value[selectedDashboard.value].layout[editingIndex.value].query = JSON.parse(editDataSource.value);
+  dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = JSON.parse(editChartOptions.value);
+  
+  console.log('dashboard layout', dashboards.value[selectedDashboard.value].layout);
+  
+  const newLayout = JSON.stringify(dashboards.value[selectedDashboard.value].layout);
+  console.log('dashboard id', dashboards.value[selectedDashboard.value].id);
+  
+  requests.putDashboardUpdate(dashboards.value[selectedDashboard.value].id, {name: dashboards.value[selectedDashboard.value].name, layout: newLayout})
+    .then((response) => {
+      dashboards.value.splice(selectedDashboard.value, 1, parseDashboard(response.data));
+      toast.success('Changes saved', {timeout: 2000});
+      fetchDashboard();
+    })
+    .catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
+  
+  
+  
+  resetEditing();
+}
+
+function addDashboardPart() {
+  dashboards.value[selectedDashboard.value].layout.push({
+    query: {
+      name: 'New graph',
+      series: [],
+      startDate: '#startdate#',
+      endDate: '#enddate#',
+      interval: '#interval#',
+      mode: 'period',
+      dimension: 'cashflow',
+      type: 'area',
+      fundId: null,
+    },
+    chartOptions: {
+      chart: {
+        type: 'area',
+      },
+    },
+  });
+  console.log('layout', dashboards.value[selectedDashboard.value].layout);
+  editData(dashboards.value[selectedDashboard.value].layout.length - 1);
+  console.log('editDataSource', dashboards.value[selectedDashboard.value].layout[editingIndex.value].query.name);
 }
 
 </script>
@@ -183,30 +271,78 @@ function fetchDashboard() {
       </Card>
     </div>
     <div
-      v-if="dashboardParts"
+      v-if="dashboardParts && dashboardParts.length"
       class="col-span-full grid grid-cols-12 gap-5"
     >
-      <div
-        v-for="dashboardPart in dashboardParts"
+      <template
+        v-for="(dashboardPart, index) in dashboardParts"
         :key="dashboardPart.name"
-        class="col-span-12 lg:col-span-6"
       >
-        <Card :title=dashboardPart.name>
-          <template #header>
-            <DashButton class="btn-sm" text="Edit Data"/>
-            <DashButton class="btn-sm mx-5" text="Edit Chart"/>
-          </template>
-          <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-full">
-              <apexchart
-                @zoomed="handleSelection"
-                class="text-slate-700 dark:text-slate-300"
-                :type="dashboardPart.chartOptions.chart.type"
-                :options="dashboardPart.chartOptions"
-                :series="dashboardPart.series"></apexchart>
-            </div>
+        <template v-if="editingIndex === null || editingIndex === index">
+          <div class="col-span-12 lg:col-span-6">
+            <Card :title=dashboardPart.name>
+              <template #header>
+                <DashButton class="btn-sm mx-5" text="Edit Data" @click="editData(index)"/>
+                <DashButton class="btn-sm mx-5" text="Edit Chart" @click="editChart(index)"/>
+              </template>
+              <div class="grid grid-cols-12 gap-5">
+                <div class="col-span-full">
+                  <apexchart
+                    @zoomed="handleSelection"
+                    class="text-slate-700 dark:text-slate-300"
+                    :type="dashboardPart.chartOptions.chart.type"
+                    :options="dashboardPart.chartOptions"
+                    :series="dashboardPart.series"></apexchart>
+                </div>
+              </div>
+            </Card>
           </div>
-        </Card>
+
+        </template>
+       
+
+      </template>
+      <template v-if="editingIndex !== null && currentlyEditing === 'query'">
+        <div class="col-span-12 lg:col-span-6">
+          <Card :title="`Editing Query for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
+            <template #header>
+              <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
+              <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
+            </template>
+            <textarea
+              class="w-full"
+              v-model="editDataSource"
+              placeholder="Enter your query here"
+            ></textarea>
+          </Card>
+        </div>
+
+
+      </template>
+      <template v-if="editingIndex !== null  && currentlyEditing === 'options'">
+        <div class="col-span-12 lg:col-span-6">
+          <Card :title="`Editing Chart Options for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
+            <template #header>
+              <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
+              <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
+            </template>
+            <textarea
+              class="w-full"
+              v-model="editChartOptions"
+              placeholder="Enter your chart options here"
+            ></textarea>
+          </Card>
+        </div>
+
+
+      </template>
+      <div v-if="editingIndex === null" class="col-span-12 lg:col-span-6">
+        <DashButton
+          class="btn-dark h-full w-full"
+          @click="addDashboardPart"
+        >
+          <Icon icon="heroicons-outline:plus"/>
+        </DashButton>
       </div>
     </div>
   </div>

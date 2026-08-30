@@ -1863,4 +1863,10 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  putDashboardUpdate(dashboardId, dashboardLayout) {
+    return axiosClient.put(`/dashboards/${dashboardId}`, dashboardLayout, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };
