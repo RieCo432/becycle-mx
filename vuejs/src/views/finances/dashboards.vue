@@ -1,6 +1,6 @@
 <script setup>
 import 'vue-slider-component/theme/antd.css';
-import {ref, computed} from 'vue';
+import {ref, computed, watch} from 'vue';
 import Card from '@/components/Card/index.vue';
 import {useThemeSettingsStore} from '@/store/themeSettings';
 import Select from '@/components/Select/index.vue';
@@ -12,10 +12,10 @@ const toast = useToast();
 
 const themeSettingsStore = useThemeSettingsStore();
 
-function getTimeSeriesChartOptions(yAxisLabel) {
+function getChartOptions(type, yAxisLabel) {
   return {
     chart: {
-      type: 'area',
+      type: type,
       height: 300,
       zoom: {
         enabled: true,
@@ -47,7 +47,7 @@ function getTimeSeriesChartOptions(yAxisLabel) {
     },
     xaxis: {
       show: true,
-      type: 'datetime',
+      type: type === 'area' ? 'datetime' : 'category',
       labels: {
         style: {
           colors: '#CBD5E1',
@@ -63,7 +63,7 @@ function getTimeSeriesChartOptions(yAxisLabel) {
         style: {
           colors: '#CBD5E1',
         },
-        formatter: (val) => (`\u00A3${val}`),
+        formatter: (val) => (`\u00A3 ${val}`),
       },
       axisTicks: {
         color: '#CBD5E1',
@@ -98,9 +98,10 @@ const dashboards = ref([
         dimension: 'balance',
         fundId: 'c96937cd-d61b-40dc-98b1-0dc21cac015f',
         mode: 'period',
-        endDate: '2026-08-31',
-        startDate: '2026-05-01',
-        interval: 'monthly',
+        endDate: '#enddate#',
+        startDate: '#startdate#',
+        interval: '#interval#',
+        type: 'area',
       },
       {
         name: 'Second Graph',
@@ -117,9 +118,10 @@ const dashboards = ref([
         dimension: 'cashflow',
         fundId: 'c96937cd-d61b-40dc-98b1-0dc21cac015f',
         mode: 'period',
-        endDate: '2026-08-31',
-        startDate: '2026-05-01',
-        interval: 'monthly',
+        endDate: '#enddate#',
+        startDate: '#startdate#',
+        interval: '#interval#',
+        type: 'area',
       },
       {
         name: 'Third Graph',
@@ -143,7 +145,8 @@ const dashboards = ref([
         dimension: 'balance',
         fundId: 'c96937cd-d61b-40dc-98b1-0dc21cac015f',
         mode: 'moment',
-        moment: '2026-08-29',
+        moment: '#enddate#',
+        type: 'bar',
       },
     ],
   },
@@ -151,13 +154,12 @@ const dashboards = ref([
 
 const dashboardData = ref(null);
 const selectedDashboard = ref(-1);
-const startDate = ref(null);
-const endDate = ref(null);
-const interval = ref(0);
+const startDate = ref((new Date()).toISOString().split('T')[0]);
+const endDate = ref((new Date()).toISOString().split('T')[0]);
+const interval = ref('monthly');
+const intervalLabels = ref(['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']);
 
-function openDashboard(dashboard) {
-  console.log(dashboard);
-}
+
 
 const seriesData = ref([]);
 
@@ -179,25 +181,47 @@ function handleSelection(chart, {xaxis}) {
   // this.fetchAllSeries();
 }
 
+watch(startDate, () => {
+  fetchDashboard();
+});
+watch(endDate, () => {
+  fetchDashboard();
+});
+watch(interval, () => {
+  fetchDashboard();
+});
+
 function fetchDashboard() {
-  requests.getDashboard(dashboards.value[selectedDashboard.value])
+  console.log('fetchDashboard', interval.value, intervalLabels.value);
+  const dashboardQueries = dashboards.value[selectedDashboard.value];
+
+  requests.getDashboard(
+    JSON.parse(
+      JSON.stringify(dashboardQueries)
+        .replaceAll('#startdate#', startDate.value)
+        .replaceAll('#enddate#', endDate.value)
+        .replaceAll('#interval#', interval.value),
+    ),
+  )
     .then(
       (response) => {
         dashboardData.value = response.data;
 
         seriesData.value = dashboardData.value.parts.map((dashboardDataPart, index) => {
+          const chartType = dashboards.value[selectedDashboard.value].queries[index].type;
           return {
             name: dashboardDataPart.name,
             yAxisLabel: dashboards.value[selectedDashboard.value].queries[index].dimension,
+            type: chartType,
             series: dashboardDataPart.series.map(
               (seriesData) => ({
                 name: `${seriesData.name}${seriesData.meta?.flow? `_${seriesData.meta.flow}` : ''}`,
                 data: seriesData.data.map(
                   (dataPoint) => (
-                    [
-                      dataPoint.date,
-                      dataPoint.value / 100,
-                    ]
+                    {
+                      x: dataPoint.date,
+                      y: dataPoint.value / 100,
+                    }
                   ),
                 ),
               }),
@@ -235,7 +259,7 @@ function fetchDashboard() {
           <div class="col-span-12 lg:col-span-6 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
-              :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
+              :data="intervalLabels"
               name="interval"
               v-model="interval"
               direction="ltr"
@@ -291,8 +315,8 @@ function fetchDashboard() {
               <apexchart
                 @zoomed="handleSelection"
                 class="text-slate-700 dark:text-slate-300"
-                type="area"
-                :options="getTimeSeriesChartOptions(dashboardPart.yAxisLabel)"
+                :type="dashboardPart.type"
+                :options="getChartOptions(dashboardPart.type, dashboardPart.yAxisLabel, dashboardPart.series.map(seriesData => seriesData.name))"
                 :series="dashboardPart.series"></apexchart>
             </div>
           </div>
