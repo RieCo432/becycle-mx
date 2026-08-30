@@ -78,5 +78,5 @@ async def reopen_account(account_id: UUID, db: Session = Depends(dep.get_db)) ->
 async def get_accounts_dashboard(
         dashboard_queries: schemas.DashboardQuery,
         db: Session = Depends(dep.get_db)
-) -> schemas.Dashboard:
+) -> schemas.DashboardData:
     return crud.get_accounts_dashboard(db=db, dashboard_queries=dashboard_queries)

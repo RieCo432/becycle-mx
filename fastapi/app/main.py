@@ -53,6 +53,7 @@ app.include_router(routers.catalogue)
 app.include_router(routers.sales)
 app.include_router(routers.bug_reports)
 app.include_router(routers.photos)
+app.include_router(routers.dashboards)
 
 
 

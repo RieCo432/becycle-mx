@@ -24,3 +24,4 @@ from .catalogueItems import *
 from .sales import *
 from .bugReport import *
 from .photo import *
+from .dashboards import *

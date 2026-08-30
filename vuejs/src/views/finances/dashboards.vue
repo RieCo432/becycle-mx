@@ -7,161 +7,31 @@ import Select from '@/components/Select/index.vue';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import VueSlider from 'vue-slider-component';
+import DashButton from '@/components/Button/index.vue';
 
 const toast = useToast();
 
 const themeSettingsStore = useThemeSettingsStore();
 
-function getChartOptions(type, yAxisLabel) {
-  return {
-    chart: {
-      type: type,
-      height: 300,
-      zoom: {
-        enabled: true,
-        allowMouseWheelZoom: false,
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      curve: 'smooth',
-    },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        opacityFrom: 0.6,
-        opacityTo: 0.8,
-      },
-    },
-    legend: {
-      position: 'top',
-      horizontalAlign: 'left',
-      labels: {
-        colors: '#CBD5E1',
-      },
-    },
-    tooltip: {
-      theme: themeSettingsStore.theme,
-    },
-    xaxis: {
-      show: true,
-      type: type === 'area' ? 'datetime' : 'category',
-      labels: {
-        style: {
-          colors: '#CBD5E1',
-        },
-      },
-      axisTicks: {
-        color: '#CBD5E1',
-      },
-    },
-    yaxis: {
-      show: true,
-      labels: {
-        style: {
-          colors: '#CBD5E1',
-        },
-        formatter: (val) => (`\u00A3 ${val}`),
-      },
-      axisTicks: {
-        color: '#CBD5E1',
-      },
-      title: {
-        text: yAxisLabel,
-        style: {
-          color: '#CBD5E1',
-        },
-      },
-    },
-  };
-}
-
-
-const dashboards = ref([
-  {
-    name: 'My Dashboard',
-    queries: [
-      {
-        name: 'First Graph',
-        series: [
-          {
-            name: 'asset',
-            query: 'asset',
-          },
-          {
-            name: 'liability',
-            query: 'liability',
-          },
-        ],
-        dimension: 'balance',
-        fundId: 'c96937cd-d61b-40dc-98b1-0dc21cac015f',
-        mode: 'period',
-        endDate: '#enddate#',
-        startDate: '#startdate#',
-        interval: '#interval#',
-        type: 'area',
-      },
-      {
-        name: 'Second Graph',
-        series: [
-          {
-            name: 'asset',
-            query: 'asset',
-          },
-          {
-            name: 'liability',
-            query: 'liability',
-          },
-        ],
-        dimension: 'cashflow',
-        fundId: 'c96937cd-d61b-40dc-98b1-0dc21cac015f',
-        mode: 'period',
-        endDate: '#enddate#',
-        startDate: '#startdate#',
-        interval: '#interval#',
-        type: 'area',
-      },
-      {
-        name: 'Third Graph',
-        series: [
-          {
-            name: 'series 1',
-            query: [
-              'f8b20739-cc25-4d4b-9169-3591c5699a70',
-              '50d8e47a-6fbb-4252-87ec-8f5714150b43',
-              '07460f20-bcfa-45c3-b50e-06e1c082a3d8',
-            ],
-          },
-          {
-            name: 'series 2',
-            query: [
-              '40d232f8-ca8e-4066-900f-1a643f8a0c5a',
-              '989b20ae-6902-484a-bb84-8476dc667509',
-            ],
-          },
-        ],
-        dimension: 'balance',
-        fundId: 'c96937cd-d61b-40dc-98b1-0dc21cac015f',
-        mode: 'moment',
-        moment: '#enddate#',
-        type: 'bar',
-      },
-    ],
-  },
-]);
-
+const dashboards = ref([]);
 const dashboardData = ref(null);
 const selectedDashboard = ref(-1);
 const startDate = ref((new Date()).toISOString().split('T')[0]);
 const endDate = ref((new Date()).toISOString().split('T')[0]);
 const interval = ref('monthly');
 const intervalLabels = ref(['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']);
+const dashboardParts = ref([]);
 
 
+requests.getDashboards().then((response) => {
+  dashboards.value = response.data.map((dashboard) => {
+    return {
+      name: dashboard.name,
+      layout: JSON.parse(dashboard.layout),
+    };
+  });
+});
 
-const seriesData = ref([]);
 
 function handleSelection(chart, {xaxis}) {
   // if (xaxis.min) {
@@ -192,27 +62,39 @@ watch(interval, () => {
 });
 
 function fetchDashboard() {
-  console.log('fetchDashboard', interval.value, intervalLabels.value);
-  const dashboardQueries = dashboards.value[selectedDashboard.value];
+  console.log('fetchDashboard', selectedDashboard.value);
+  if (selectedDashboard.value < 0) {
+    return;
+  }
+  
+  const dashboard = dashboards.value[selectedDashboard.value];
+  const dashboardQueries = dashboard.layout.map((layout) => layout.query);
+  console.log('dashboardQueries', JSON.stringify(dashboardQueries));
+  const queryString = JSON.stringify(dashboardQueries).replaceAll('#startdate#', startDate.value)
+    .replaceAll('#enddate#', endDate.value)
+    .replaceAll('#interval#', interval.value);
+  console.log('queryString', queryString.replaceAll('#startdate#', startDate.value));
+  
+  const dashboardQuery = {
+    name: 'My Dashboard',
+    queries: JSON.parse(queryString),
+  };
+  
+  console.log('dashboardQuery', dashboardQueries);
 
-  requests.getDashboard(
-    JSON.parse(
-      JSON.stringify(dashboardQueries)
-        .replaceAll('#startdate#', startDate.value)
-        .replaceAll('#enddate#', endDate.value)
-        .replaceAll('#interval#', interval.value),
-    ),
-  )
+  dashboardParts.value = null;
+
+  requests.getDashboard(dashboardQuery)
     .then(
       (response) => {
         dashboardData.value = response.data;
+        console.log('dashboardData', response.data);
 
-        seriesData.value = dashboardData.value.parts.map((dashboardDataPart, index) => {
-          const chartType = dashboards.value[selectedDashboard.value].queries[index].type;
+        dashboardParts.value = response.data.parts.map((dashboardDataPart, index) => {
+          console.log('chart options', dashboard.layout[index].chartOptions);
           return {
             name: dashboardDataPart.name,
-            yAxisLabel: dashboards.value[selectedDashboard.value].queries[index].dimension,
-            type: chartType,
+            chartOptions: dashboard.layout[index].chartOptions,
             series: dashboardDataPart.series.map(
               (seriesData) => ({
                 name: `${seriesData.name}${seriesData.meta?.flow? `_${seriesData.meta.flow}` : ''}`,
@@ -223,7 +105,7 @@ function fetchDashboard() {
                       y: dataPoint.value / 100,
                     }
                   ),
-                ),
+                ).toSorted((a, b) => Date.parse(a.x) - Date.parse(b.x)),
               }),
             ),
           };
@@ -301,22 +183,26 @@ function fetchDashboard() {
       </Card>
     </div>
     <div
-      v-if="seriesData"
+      v-if="dashboardParts"
       class="col-span-full grid grid-cols-12 gap-5"
     >
       <div
-        v-for="dashboardPart in seriesData"
+        v-for="dashboardPart in dashboardParts"
         :key="dashboardPart.name"
         class="col-span-12 lg:col-span-6"
       >
         <Card :title=dashboardPart.name>
+          <template #header>
+            <DashButton class="btn-sm" text="Edit Data"/>
+            <DashButton class="btn-sm mx-5" text="Edit Chart"/>
+          </template>
           <div class="grid grid-cols-12 gap-5">
             <div class="col-span-full">
               <apexchart
                 @zoomed="handleSelection"
                 class="text-slate-700 dark:text-slate-300"
-                :type="dashboardPart.type"
-                :options="getChartOptions(dashboardPart.type, dashboardPart.yAxisLabel, dashboardPart.series.map(seriesData => seriesData.name))"
+                :type="dashboardPart.chartOptions.chart.type"
+                :options="dashboardPart.chartOptions"
                 :series="dashboardPart.series"></apexchart>
             </div>
           </div>

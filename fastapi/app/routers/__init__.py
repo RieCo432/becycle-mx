@@ -24,3 +24,4 @@ from .catalogue import catalogue
 from .sales import sales
 from .bugReports import bug_reports
 from .photos import photos
+from .dashboards import dashboards

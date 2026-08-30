@@ -279,7 +279,7 @@ def get_accounts_list_for_series_query(db: Session, query: schemas.DashboardSeri
     return [a.id for a in accounts]
 
 
-def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.DashboardPartPeriodQuery) -> schemas.DashboardPart:
+def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.DashboardPartPeriodQuery) -> schemas.DashboardDataPart:
     dashboard_part_series: list[schemas.DashboardDataSeries] = []
     
     for series in dashboard_query.series:
@@ -311,13 +311,13 @@ def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.Dashboar
                 dashboard_part_series.append(series_data_net)
         
 
-    return schemas.DashboardPart(
+    return schemas.DashboardDataPart(
         name=dashboard_query.dimension,
         series=dashboard_part_series,
     )
 
 
-def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.DashboardPartMomentQuery) -> schemas.DashboardPart:
+def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.DashboardPartMomentQuery) -> schemas.DashboardDataPart:
     dashboard_part_series: list[schemas.DashboardDataSeries] = []
     for series in dashboard_query.series:
         if dashboard_query.dimension == DashboardDimensions.BALANCE:
@@ -327,14 +327,14 @@ def get_accounts_dashboard_moment(db: Session, dashboard_query: schemas.Dashboar
             raise HTTPException(status_code=400, detail={"description": "Cashflow dimension is not supported for moment dashboard part"})
         
     
-    return schemas.DashboardPart(
+    return schemas.DashboardDataPart(
         name=dashboard_query.name, 
         series=dashboard_part_series
     )
 
 
-def get_accounts_dashboard(db: Session, dashboard_queries: schemas.DashboardQuery) -> schemas.Dashboard:
-    dashboard_parts: list[schemas.DashboardPart] = []
+def get_accounts_dashboard(db: Session, dashboard_queries: schemas.DashboardQuery) -> schemas.DashboardData:
+    dashboard_parts: list[schemas.DashboardDataPart] = []
 
 
     last_ditch_start_date: date
@@ -359,5 +359,5 @@ def get_accounts_dashboard(db: Session, dashboard_queries: schemas.DashboardQuer
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": f"Invalid dashboard mode"})
             
-    return schemas.Dashboard(name=dashboard_queries.name, parts=dashboard_parts)
+    return schemas.DashboardData(name=dashboard_queries.name, parts=dashboard_parts)
         

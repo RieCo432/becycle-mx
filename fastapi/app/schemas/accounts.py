@@ -60,14 +60,14 @@ class DashboardDataSeries(BaseModel):
     meta: DashboardDataSeriesMeta | None = None
     data: list[DataPoint]
 
-class DashboardPart(BaseModel):
+class DashboardDataPart(BaseModel):
     name: str
     series: list[DashboardDataSeries]
     
     
-class Dashboard(BaseModel):
+class DashboardData(BaseModel):
     name: str
-    parts: list[DashboardPart]
+    parts: list[DashboardDataPart]
 
 
 
