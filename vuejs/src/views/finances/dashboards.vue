@@ -132,8 +132,8 @@ const currentlyEditing = ref(null);
 
 function startEdit(index) {
   editingIndex.value = index;
-  editDataSource.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].query);
-  editChartOptions.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].chartOptions);
+  editDataSource.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].query, null, 2);
+  editChartOptions.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].chartOptions, null, 2);
 }
 
 function editData(index) {
@@ -310,7 +310,7 @@ function addDashboardPart() {
               <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
             </template>
             <textarea
-              class="w-full"
+              class="w-full h-full"
               v-model="editDataSource"
               placeholder="Enter your query here"
             ></textarea>
@@ -327,7 +327,7 @@ function addDashboardPart() {
               <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
             </template>
             <textarea
-              class="w-full"
+              class="w-full h-full"
               v-model="editChartOptions"
               placeholder="Enter your chart options here"
             ></textarea>
