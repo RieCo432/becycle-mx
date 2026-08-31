@@ -27,6 +27,17 @@ const fundOptions = ref([
   },
 ]);
 
+const modeOptions = [
+  {
+    label: 'Moment',
+    value: 'moment',
+  },
+  {
+    label: 'Period',
+    value: 'period',
+  },
+];
+
 requests.getFunds()
   .then((response) => {
     fundOptions.value.push(
@@ -87,12 +98,25 @@ const queryModeTypeOptions = [
   },
 ];
 
+
+const accountsSortingFunction = (a, b) => {
+  if (a.type !== b.type) {
+    return (
+      queryModeTypeOptions.findIndex((option) => option.value === a.type) -
+      queryModeTypeOptions.findIndex((option) => option.value === b.type)
+    );
+  }
+  return a.name.localeCompare(b.name);
+};
+
+
 const queryModeListOptions = ref([]);
 requests.getAccounts().then((response) => {
-  queryModeListOptions.value = response.data.map((account) => ({
+  queryModeListOptions.value = response.data.toSorted(accountsSortingFunction).map((account) => ({
     label: account.name,
     value: account.id,
   }));
+  queryModeListOptions.value.push('cat');
 });
 
 const queryModes = computed({
@@ -114,29 +138,52 @@ function setQueryModeList(i, value) {
   graphQuery.value.series[i].query = value.map((item) => item.value);
 }
 
+function changeQueryMode(evt) {
+  if (evt.target.value === 'moment') {
+    delete graphQuery.value['startDate'];
+    delete graphQuery.value['endDate'];
+    graphQuery.value['moment'] = '#enddate#';
+  } else if (evt.target.value === 'period') {
+    delete graphQuery.value['moment'];
+    graphQuery.value['startDate'] = '#startdate#';
+    graphQuery.value['endDate'] = '#enddate#';
+  }
+}
+
 </script>
 
 <template>
   <div class="w-full grid grid-cols-12 gap-3">
-    <div class="col-span-4">
+    <div class="col-span-3">
       <TextInput
         label="Graph Name"
         v-model="graphQuery.name"/>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-3">
       <Select
         label="Dimension"
         v-model="graphQuery.dimension"
         :options="dimensionOptions"/>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-3">
+      <Select
+        label="Mode"
+        v-model="graphQuery.mode"
+        :options="modeOptions"
+        @change="changeQueryMode"
+      />
+    </div>
+    <div class="col-span-3">
       <Select
         label="Fund"
         v-model="fundId"
         :options="fundOptions"/>
     </div>
+    <div class="col-span-full">
+      <h5 class="text-base text-bold">Series</h5>
+    </div>
     <template v-for="(series, i) in graphQuery.series" :key="i">
-      <div class="col-span-full grid grid-cols-12 gap-2" >
+      <div class="col-span-full grid grid-cols-12 gap-2">
         <div class="col-span-4">
           <TextInput
             label="Name"

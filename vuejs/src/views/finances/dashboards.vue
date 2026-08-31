@@ -10,6 +10,8 @@ import VueSlider from 'vue-slider-component';
 import DashButton from '@/components/Button/index.vue';
 import Icon from '@/components/Icon';
 import DashboardQueryEditor from '@/components/Editors/DashboardQueryEditor.vue';
+import TextArea from '@/components/TextArea/index.vue';
+import Switch from '@/components/Switch/index.vue';
 
 const toast = useToast();
 
@@ -163,12 +165,12 @@ function saveChanges() {
   console.log('saving changes', editDataSource.value, editChartOptions.value);
   dashboards.value[selectedDashboard.value].layout[editingIndex.value].query = editDataSource.value;
   dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = JSON.parse(editChartOptions.value);
-  
+
   console.log('dashboard layout', dashboards.value[selectedDashboard.value].layout);
-  
+
   const newLayout = JSON.stringify(dashboards.value[selectedDashboard.value].layout);
   console.log('dashboard id', dashboards.value[selectedDashboard.value].id);
-  
+
   requests.putDashboardUpdate(dashboards.value[selectedDashboard.value].id, {name: dashboards.value[selectedDashboard.value].name, layout: newLayout})
     .then((response) => {
       dashboards.value.splice(selectedDashboard.value, 1, parseDashboard(response.data));
@@ -178,9 +180,8 @@ function saveChanges() {
     .catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
-  
-  
-  
+
+
   resetEditing();
 }
 
@@ -194,7 +195,6 @@ function addDashboardPart() {
       interval: '#interval#',
       mode: 'period',
       dimension: 'cashflow',
-      type: 'area',
       fundId: null,
     },
     chartOptions: {
@@ -207,6 +207,8 @@ function addDashboardPart() {
   editData(dashboards.value[selectedDashboard.value].layout.length - 1);
   console.log('editDataSource', dashboards.value[selectedDashboard.value].layout[editingIndex.value].query.name);
 }
+
+const editingModeRaw = ref(false);
 
 </script>
 
@@ -291,7 +293,6 @@ function addDashboardPart() {
                   <apexchart
                     @zoomed="handleSelection"
                     class="text-slate-700 dark:text-slate-300"
-                    :type="dashboardPart.chartOptions.chart.type"
                     :options="dashboardPart.chartOptions"
                     :series="dashboardPart.series"></apexchart>
                 </div>
@@ -301,37 +302,37 @@ function addDashboardPart() {
 
         </template>
       </template>
-      
-      
-      
+
+
       <template v-if="editingIndex !== null && currentlyEditing === 'query'">
         <div class="col-span-12 lg:col-span-4">
           <Card :title="`Editing Query for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
             <template #header>
-              <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
-              <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
+              <div class="grid grid-cols-3">
+                <div class="pt-1">
+                  <Switch class="d-inline-block mt-4" v-model="editingModeRaw" label="Raw"/>
+                </div>
+                <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
+                <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
+              </div>
             </template>
-            <div class="w-full h-full">
+            <div class="w-full h-full" v-if="!editingModeRaw">
               <DashboardQueryEditor v-model="editDataSource"/>
+            </div>
+            <div
+              class="w-full h-full"
+              v-if="editingModeRaw">
+              <TextArea
+                classInput="w-full h-full"
+                :modelValue="JSON.stringify(editDataSource, null, 2)"
+                @update:modelValue="(v) => editDataSource = JSON.parse(v)"
+              ></TextArea>
             </div>
           </Card>
         </div>
       </template>
-      <template v-if="editingIndex !== null && currentlyEditing === 'query'">
-        <div class="col-span-12 lg:col-span-4">
-          <Card :title="`Editing Query for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
-            <template #header>
-              <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
-              <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
-            </template>
-            <p
-              class="w-full h-full"
-            >{{JSON.stringify(editDataSource, null, 2)}}</p>
-          </Card>
-        </div>
-      </template>
-      
-      
+
+
       <template v-if="editingIndex !== null  && currentlyEditing === 'options'">
         <div class="col-span-12 lg:col-span-4">
           <Card :title="`Editing Chart Options for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
@@ -362,7 +363,7 @@ function addDashboardPart() {
           </Card>
         </div>
       </template>
-      
+
       <div v-if="editingIndex === null" class="col-span-12 lg:col-span-4">
         <DashButton
           class="btn-dark h-full w-full"
