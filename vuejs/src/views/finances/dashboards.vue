@@ -9,6 +9,7 @@ import {useToast} from 'vue-toastification';
 import VueSlider from 'vue-slider-component';
 import DashButton from '@/components/Button/index.vue';
 import Icon from '@/components/Icon';
+import DashboardQueryEditor from '@/components/Editors/DashboardQueryEditor.vue';
 
 const toast = useToast();
 
@@ -132,7 +133,7 @@ const currentlyEditing = ref(null);
 
 function startEdit(index) {
   editingIndex.value = index;
-  editDataSource.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].query, null, 2);
+  editDataSource.value = dashboards.value[selectedDashboard.value].layout[index].query;
   editChartOptions.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].chartOptions, null, 2);
 }
 
@@ -160,7 +161,7 @@ function cancelChanges() {
 
 function saveChanges() {
   console.log('saving changes', editDataSource.value, editChartOptions.value);
-  dashboards.value[selectedDashboard.value].layout[editingIndex.value].query = JSON.parse(editDataSource.value);
+  dashboards.value[selectedDashboard.value].layout[editingIndex.value].query = editDataSource.value;
   dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = JSON.parse(editChartOptions.value);
   
   console.log('dashboard layout', dashboards.value[selectedDashboard.value].layout);
@@ -279,7 +280,7 @@ function addDashboardPart() {
         :key="dashboardPart.name"
       >
         <template v-if="editingIndex === null || editingIndex === index">
-          <div class="col-span-12 lg:col-span-6">
+          <div class="col-span-12 lg:col-span-4">
             <Card :title=dashboardPart.name>
               <template #header>
                 <DashButton class="btn-sm mx-5" text="Edit Data" @click="editData(index)"/>
@@ -299,28 +300,40 @@ function addDashboardPart() {
           </div>
 
         </template>
-       
-
       </template>
+      
+      
+      
       <template v-if="editingIndex !== null && currentlyEditing === 'query'">
-        <div class="col-span-12 lg:col-span-6">
+        <div class="col-span-12 lg:col-span-4">
           <Card :title="`Editing Query for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
             <template #header>
               <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
               <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
             </template>
-            <textarea
-              class="w-full h-full"
-              v-model="editDataSource"
-              placeholder="Enter your query here"
-            ></textarea>
+            <div class="w-full h-full">
+              <DashboardQueryEditor v-model="editDataSource"/>
+            </div>
           </Card>
         </div>
-
-
       </template>
+      <template v-if="editingIndex !== null && currentlyEditing === 'query'">
+        <div class="col-span-12 lg:col-span-4">
+          <Card :title="`Editing Query for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
+            <template #header>
+              <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
+              <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
+            </template>
+            <p
+              class="w-full h-full"
+            >{{JSON.stringify(editDataSource, null, 2)}}</p>
+          </Card>
+        </div>
+      </template>
+      
+      
       <template v-if="editingIndex !== null  && currentlyEditing === 'options'">
-        <div class="col-span-12 lg:col-span-6">
+        <div class="col-span-12 lg:col-span-4">
           <Card :title="`Editing Chart Options for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
             <template #header>
               <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
@@ -333,10 +346,24 @@ function addDashboardPart() {
             ></textarea>
           </Card>
         </div>
-
-
       </template>
-      <div v-if="editingIndex === null" class="col-span-12 lg:col-span-6">
+      <template v-if="editingIndex !== null  && currentlyEditing === 'options'">
+        <div class="col-span-12 lg:col-span-4">
+          <Card :title="`Editing Chart Options for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
+            <template #header>
+              <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
+              <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
+            </template>
+            <textarea
+              class="w-full h-full"
+              v-model="editChartOptions"
+              placeholder="Enter your chart options here"
+            ></textarea>
+          </Card>
+        </div>
+      </template>
+      
+      <div v-if="editingIndex === null" class="col-span-12 lg:col-span-4">
         <DashButton
           class="btn-dark h-full w-full"
           @click="addDashboardPart"

@@ -1,0 +1,194 @@
+<script setup>
+import {computed, ref} from 'vue';
+import TextInput from '@/components/TextInput/index.vue';
+import Select from '@/components/Select/index.vue';
+import requests from '@/requests';
+import {Icon} from '@iconify/vue';
+import DashButton from '@/components/Button/index.vue';
+import Radio from '@/components/Radio/index.vue';
+import VueSelect from '@/components/Select/VueSelect.vue';
+
+
+const graphQuery = defineModel();
+const dimensionOptions = [
+  {
+    label: 'Cash Flow',
+    value: 'cashflow',
+  },
+  {
+    label: 'Balance',
+    value: 'balance',
+  },
+];
+const fundOptions = ref([
+  {
+    label: 'All',
+    value: 'null',
+  },
+]);
+
+requests.getFunds()
+  .then((response) => {
+    fundOptions.value.push(
+      ...response.data.map((fund) => ({
+        label: fund.name,
+        value: fund.id,
+      })),
+    );
+  })
+  .catch((error) => {
+    toast.error(error.response.data.detail.description, {timeout: 2000});
+  });
+
+
+const fundId = computed({
+  get: () => graphQuery.value.fundId ?? 'null',
+  set: (value) => {
+    graphQuery.value.fundId = value === 'null' ? null : value;
+  },
+});
+
+
+const queryModeOptions = [
+  {
+    label: 'Type',
+    value: 'type',
+  },
+  {
+    label: 'List',
+    value: 'list',
+  },
+];
+
+const queryModeTypeOptions = [
+  {
+    label: 'Dividend',
+    value: 'dividend',
+  },
+  {
+    label: 'Expense',
+    value: 'expense',
+  },
+  {
+    label: 'Asset',
+    value: 'asset',
+  },
+  {
+    label: 'Liability',
+    value: 'liability',
+  },
+  {
+    label: 'Equity',
+    value: 'equity',
+  },
+  {
+    label: 'Revenue',
+    value: 'revenue',
+  },
+];
+
+const queryModeListOptions = ref([]);
+requests.getAccounts().then((response) => {
+  queryModeListOptions.value = response.data.map((account) => ({
+    label: account.name,
+    value: account.id,
+  }));
+});
+
+const queryModes = computed({
+  get: () => graphQuery.value.series.map((series) => typeof series.query === 'string' ? 'type' : 'list'),
+});
+
+function setQueryMode(i, value) {
+  graphQuery.value.series[i].query = value === 'list' ? [] : '';
+}
+
+const queryModeList = computed({
+  get: () => graphQuery.value.series.map((series) => typeof series.query === 'string' ? [] : series.query.map((accountId) => ({
+    label: queryModeListOptions.value.find((option) => option.value === accountId)?.label,
+    value: accountId,
+  }))),
+});
+
+function setQueryModeList(i, value) {
+  graphQuery.value.series[i].query = value.map((item) => item.value);
+}
+
+</script>
+
+<template>
+  <div class="w-full grid grid-cols-12 gap-3">
+    <div class="col-span-4">
+      <TextInput
+        label="Graph Name"
+        v-model="graphQuery.name"/>
+    </div>
+    <div class="col-span-4">
+      <Select
+        label="Dimension"
+        v-model="graphQuery.dimension"
+        :options="dimensionOptions"/>
+    </div>
+    <div class="col-span-4">
+      <Select
+        label="Fund"
+        v-model="fundId"
+        :options="fundOptions"/>
+    </div>
+    <template v-for="(series, i) in graphQuery.series" :key="i">
+      <div class="col-span-full grid grid-cols-12 gap-2" >
+        <div class="col-span-4">
+          <TextInput
+            label="Name"
+            v-model="series.name"/>
+        </div>
+        <div class="col-span-2">
+          <label class="input-label">Accounts By</label>
+          <Radio
+            v-for="(selector, j) in queryModeOptions"
+            :key="j"
+            name="querySelector"
+            class="mb-5"
+            :modelValue="queryModes[i]"
+            @update:modelValue="(v) => setQueryMode(i, v)"
+            :value="selector.value"
+            :label="selector.label"
+          />
+        </div>
+        <div class="col-span-5">
+          <template v-if="queryModes[i] === 'list'">
+            <VueSelect
+              label="Account List"
+              :modelValue="queryModeList[i]"
+              @update:modelValue="(v) => setQueryModeList(i, v)"
+              :options="queryModeListOptions"
+              multiple
+            />
+          </template>
+          <template v-else-if="queryModes[i] === 'type'">
+            <Select
+              label="Account Type"
+              v-model="graphQuery.series[i].query"
+              :options="queryModeTypeOptions"
+            />
+          </template>
+        </div>
+        <div class="col-span-1">
+          <DashButton class="dark:btn-danger w-full" @click="graphQuery.series.splice(i, 1)">
+            <Icon icon="heroicons-outline:trash"/>
+          </DashButton>
+        </div>
+      </div>
+    </template>
+    <div class="col-span-full">
+      <DashButton class="w-full" @click="graphQuery.series.push({name: '', query: ''})">
+        <Icon icon="heroicons-outline:plus"/>
+      </DashButton>
+    </div>
+  </div>
+
+</template>
+
+<style scoped lang="scss">
+
+</style>
