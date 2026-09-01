@@ -187,17 +187,14 @@ function closeEditor() {
   toast.error('Changes canceled', {timeout: 2000});
 }
 
-function saveChanges() {
-  console.log('saving changes', editDataSource.value, editChartOptions.value);
-  dashboards.value[selectedDashboard.value].layout[editingIndex.value].query = editDataSource.value;
-  dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = editChartOptions.value;
-
-  console.log('dashboard layout', dashboards.value[selectedDashboard.value].layout);
-
+function submitChanges() {
   const newLayout = JSON.stringify(dashboards.value[selectedDashboard.value].layout);
   console.log('dashboard id', dashboards.value[selectedDashboard.value].id);
 
-  requests.putDashboardUpdate(dashboards.value[selectedDashboard.value].id, {name: dashboards.value[selectedDashboard.value].name, layout: newLayout})
+  requests.putDashboardUpdate(dashboards.value[selectedDashboard.value].id, {
+    name: dashboards.value[selectedDashboard.value].name,
+    layout: newLayout,
+  })
     .then((response) => {
       dashboards.value.splice(selectedDashboard.value, 1, parseDashboard(response.data));
       toast.success('Changes saved', {timeout: 2000});
@@ -206,8 +203,16 @@ function saveChanges() {
     .catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
+}
 
+function saveChanges() {
+  console.log('saving changes', editDataSource.value, editChartOptions.value);
+  dashboards.value[selectedDashboard.value].layout[editingIndex.value].query = editDataSource.value;
+  dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = editChartOptions.value;
 
+  console.log('dashboard layout', dashboards.value[selectedDashboard.value].layout);
+
+  submitChanges();
   // resetEditing();
 }
 
@@ -250,6 +255,14 @@ const editingModeRaw = ref(false);
 watch(editChartOptions, (newValue) => {
   livePreviewChartOptions(newValue);
 });
+
+function deleteDashboardPart(index) {
+  if (confirm('Are you sure you want to delete this dashboard part?')) {
+    resetEditing();
+    dashboards.value[selectedDashboard.value].layout.splice(index, 1);
+    submitChanges();
+  }
+}
 
 </script>
 
@@ -326,8 +339,11 @@ watch(editChartOptions, (newValue) => {
           <div class="col-span-12 lg:col-span-4">
             <Card :title=dashboardPart.name>
               <template #header>
-                <DashButton class="btn-sm mx-5" text="Edit Data" @click="editData(index)"/>
-                <DashButton class="btn-sm mx-5" text="Edit Chart" @click="editChart(index)"/>
+                <DashButton v-if="editingIndex === index" class="btn-sm dark:btn-danger mx-3" @click="deleteDashboardPart(index)">
+                  <Icon icon="heroicons-outline:trash"/>
+                </DashButton>
+                <DashButton class="btn-sm mx-3" text="Edit Data" @click="editData(index)"/>
+                <DashButton class="btn-sm mx-3" text="Edit Chart" @click="editChart(index)"/>
               </template>
               <div class="grid grid-cols-12 gap-5">
                 <div class="col-span-full">
