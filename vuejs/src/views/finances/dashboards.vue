@@ -12,6 +12,7 @@ import Icon from '@/components/Icon';
 import DashboardQueryEditor from '@/components/Editors/DashboardQueryEditor.vue';
 import TextArea from '@/components/TextArea/index.vue';
 import Switch from '@/components/Switch/index.vue';
+import DashboardChartEditor from '@/components/Editors/DashboardChartEditor.vue';
 
 const toast = useToast();
 
@@ -161,7 +162,7 @@ const currentlyEditing = ref(null);
 function startEdit(index) {
   editingIndex.value = index;
   editDataSource.value = dashboards.value[selectedDashboard.value].layout[index].query;
-  editChartOptions.value = JSON.stringify(dashboards.value[selectedDashboard.value].layout[index].chartOptions, null, 2);
+  editChartOptions.value = dashboards.value[selectedDashboard.value].layout[index].chartOptions;
 }
 
 function editData(index) {
@@ -189,7 +190,7 @@ function closeEditor() {
 function saveChanges() {
   console.log('saving changes', editDataSource.value, editChartOptions.value);
   dashboards.value[selectedDashboard.value].layout[editingIndex.value].query = editDataSource.value;
-  dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = JSON.parse(editChartOptions.value);
+  dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = editChartOptions.value;
 
   console.log('dashboard layout', dashboards.value[selectedDashboard.value].layout);
 
@@ -208,6 +209,17 @@ function saveChanges() {
 
 
   // resetEditing();
+}
+
+function livePreviewChartOptions(chartOptions) {
+  console.log('livepreview', dashboardParts.value, selectedDashboard.value, dashboardParts.value[editingIndex.value], editingIndex.value);
+  if (dashboardParts.value &&
+    editingIndex.value >= 0 &&
+    dashboardParts.value[editingIndex.value]
+  ) {
+    console.log('chartOptions', chartOptions);
+    dashboardParts.value[editingIndex.value]['chartOptions'] = chartOptions;
+  }
 }
 
 function addDashboardPart() {
@@ -234,6 +246,10 @@ function addDashboardPart() {
 }
 
 const editingModeRaw = ref(false);
+
+watch(editChartOptions, (newValue) => {
+  livePreviewChartOptions(newValue);
+});
 
 </script>
 
@@ -358,34 +374,30 @@ const editingModeRaw = ref(false);
         </div>
       </template>
 
-
       <template v-if="editingIndex !== null  && currentlyEditing === 'options'">
         <div class="col-span-12 lg:col-span-4">
           <Card :title="`Editing Chart Options for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
             <template #header>
-              <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
-              <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
+              <div class="grid grid-cols-3">
+                <div class="pt-1">
+                  <Switch class="d-inline-block mt-4" v-model="editingModeRaw" label="Raw"/>
+                </div>
+                <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
+                <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="closeEditor"/>
+              </div>
             </template>
-            <textarea
+            <div class="w-full h-full" v-if="!editingModeRaw">
+              <DashboardChartEditor v-model="editChartOptions"
+              @update:modelValue="(v) => livePreviewChartOptions(v)"/>
+            </div>
+            <div
               class="w-full h-full"
-              v-model="editChartOptions"
-              placeholder="Enter your chart options here"
-            ></textarea>
-          </Card>
-        </div>
-      </template>
-      <template v-if="editingIndex !== null  && currentlyEditing === 'options'">
-        <div class="col-span-12 lg:col-span-4">
-          <Card :title="`Editing Chart Options for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
-            <template #header>
-              <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
-              <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
-            </template>
-            <textarea
-              class="w-full h-full"
-              v-model="editChartOptions"
-              placeholder="Enter your chart options here"
-            ></textarea>
+              v-if="editingModeRaw">
+              <TextArea
+                classInput="w-full h-full"
+                :modelValue="JSON.stringify(editChartOptions, null, 2)"
+                @update:modelValue="(v) => {editChartOptions = JSON.parse(v)}"/>
+            </div>
           </Card>
         </div>
       </template>
