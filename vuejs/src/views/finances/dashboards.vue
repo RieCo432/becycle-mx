@@ -28,6 +28,7 @@ const startDate = ref(d.toISOString().split('T')[0]);
 const interval = ref('monthly');
 const intervalLabels = ref(['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']);
 const dashboardParts = ref([]);
+const editMode = ref(false);
 
 
 function parseDashboard(dashboard) {
@@ -264,12 +265,25 @@ function deleteDashboardPart(index) {
   }
 }
 
+function addNewDashboard() {
+  toast.info('Not implemented yet');
+}
+
 </script>
 
 <template>
   <div class="grid grid-cols-12 gap-5">
     <div class="col-span-12">
       <Card title="Controls">
+        <template #header>
+          <div class="grid grid-cols-3">
+            <DashButton v-if="editMode" class="btn-sm mx-5" text="New" @click="addNewDashboard()"/>
+            <div v-else></div>
+            <div class="pt-1">
+              <Switch class="d-inline-block mt-4" v-model="editMode" label="Edit Mode"/>
+            </div>
+          </div>
+        </template>
         <div class="grid grid-cols-12 gap-5">
           <div class="col-span-12 lg:col-span-6 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Dashboard</label>
@@ -338,7 +352,7 @@ function deleteDashboardPart(index) {
         <template v-if="editingIndex === null || editingIndex === index">
           <div class="col-span-12 lg:col-span-4">
             <Card :title=dashboardPart.name>
-              <template #header>
+              <template #header v-if="editMode">
                 <DashButton v-if="editingIndex === index" class="btn-sm dark:btn-danger mx-3" @click="deleteDashboardPart(index)">
                   <Icon icon="heroicons-outline:trash"/>
                 </DashButton>
@@ -418,12 +432,12 @@ function deleteDashboardPart(index) {
         </div>
       </template>
 
-      <div v-if="editingIndex === null" class="col-span-12 lg:col-span-4">
+      <div v-if="editMode && editingIndex === null" class="col-span-12 lg:col-span-4">
         <DashButton
-          class="btn-dark h-full w-full"
+          class="btn-dark h-full w-full flex items-center justify-center"
           @click="addDashboardPart"
         >
-          <Icon icon="heroicons-outline:plus"/>
+          <Icon class="text-[8rem]" icon="heroicons-outline:plus"/>
         </DashButton>
       </div>
     </div>
