@@ -90,15 +90,12 @@ function fetchDashboard() {
 
   console.log('dashboardQuery', dashboardQueries);
 
-  dashboardParts.value = null;
-
   requests.getDashboard(dashboardQuery)
     .then(
       (response) => {
         dashboardData.value = response.data;
         console.log('dashboardData', response.data);
-
-        dashboardParts.value = response.data.parts.map((dashboardDataPart, index) => {
+        dashboardParts.value.splice(0, dashboardParts.value.length, ...response.data.parts.map((dashboardDataPart, index) => {
           console.log('chart options', dashboard.layout[index].chartOptions);
           return {
             name: dashboardDataPart.name,
@@ -117,7 +114,7 @@ function fetchDashboard() {
               }),
             ),
           };
-        });
+        }));
       },
     )
     .catch(
