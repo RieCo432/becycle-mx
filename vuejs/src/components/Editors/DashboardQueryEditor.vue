@@ -150,6 +150,18 @@ function changeQueryMode(evt) {
   }
 }
 
+function moveSeriesDown(index) {
+  const temp = graphQuery.value.series[index];
+  graphQuery.value.series[index] = graphQuery.value.series[index + 1];
+  graphQuery.value.series[index + 1] = temp;
+}
+
+function moveSeriesUp(index) {
+  const temp = graphQuery.value.series[index];
+  graphQuery.value.series[index] = graphQuery.value.series[index - 1];
+  graphQuery.value.series[index - 1] = temp;
+}
+
 </script>
 
 <template>
@@ -184,7 +196,7 @@ function changeQueryMode(evt) {
     </div>
     <template v-for="(series, i) in graphQuery.series" :key="i">
       <div class="col-span-full grid grid-cols-12 gap-2">
-        <div class="col-span-4">
+        <div class="col-span-3">
           <TextInput
             label="Name"
             v-model="series.name"/>
@@ -202,7 +214,7 @@ function changeQueryMode(evt) {
             :label="selector.label"
           />
         </div>
-        <div class="col-span-5">
+        <div class="col-span-4">
           <template v-if="queryModes[i] === 'list'">
             <VueSelect
               label="Account List"
@@ -219,6 +231,16 @@ function changeQueryMode(evt) {
               :options="queryModeTypeOptions"
             />
           </template>
+        </div>
+        <div class="col-span-1">
+          <DashButton v-if="i < graphQuery.series.length - 1" class="w-full" @click="() => moveSeriesDown(i)">
+            <Icon icon="heroicons-outline:arrow-down"/>
+          </DashButton>
+        </div>
+        <div class="col-span-1">
+          <DashButton v-if="i > 0" class="w-full" @click="() => moveSeriesUp(i)">
+            <Icon icon="heroicons-outline:arrow-up"/>
+          </DashButton>
         </div>
         <div class="col-span-1">
           <DashButton class="dark:btn-danger w-full" @click="graphQuery.series.splice(i, 1)">
