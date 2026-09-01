@@ -96,23 +96,34 @@ function fetchDashboard() {
         dashboardData.value = response.data;
         console.log('dashboardData', response.data);
         dashboardParts.value.splice(0, dashboardParts.value.length, ...response.data.parts.map((dashboardDataPart, index) => {
-          console.log('chart options', dashboard.layout[index].chartOptions);
+          console.log('dashboard layout', dashboard.layout[index]);
           return {
             name: dashboardDataPart.name,
             chartOptions: dashboard.layout[index].chartOptions,
-            series: dashboardDataPart.series.map(
-              (seriesData) => ({
-                name: `${seriesData.name}${seriesData.meta?.flow? `_${seriesData.meta.flow}` : ''}`,
-                data: seriesData.data.map(
-                  (dataPoint) => (
+            series: dashboard.layout[index].query.mode === 'period' ?
+              dashboardDataPart.series.map(
+                (seriesData) => ({
+                  name: `${seriesData.name}${seriesData.meta?.flow? `_${seriesData.meta.flow}` : ''}`,
+                  data: seriesData.data.map(
+                    (dataPoint) => (
+                      {
+                        x: dataPoint.date,
+                        y: dataPoint.value / 100,
+                      }
+                    ),
+                  ).toSorted((a, b) => Date.parse(a.x) - Date.parse(b.x)),
+                }),
+              ) :
+              [{
+                data: dashboardDataPart.series.map(
+                  (seriesData) => (
                     {
-                      x: dataPoint.date,
-                      y: dataPoint.value / 100,
+                      x: seriesData.name,
+                      y: seriesData.data[0].value / 100,
                     }
                   ),
-                ).toSorted((a, b) => Date.parse(a.x) - Date.parse(b.x)),
-              }),
-            ),
+                ),
+              }],
           };
         }));
       },
