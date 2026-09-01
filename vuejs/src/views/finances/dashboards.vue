@@ -20,8 +20,10 @@ const themeSettingsStore = useThemeSettingsStore();
 const dashboards = ref([]);
 const dashboardData = ref(null);
 const selectedDashboard = ref(-1);
-const startDate = ref((new Date()).toISOString().split('T')[0]);
+const d = new Date();
+d.setMonth(d.getMonth()-5);
 const endDate = ref((new Date()).toISOString().split('T')[0]);
+const startDate = ref(d.toISOString().split('T')[0]);
 const interval = ref('monthly');
 const intervalLabels = ref(['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']);
 const dashboardParts = ref([]);
@@ -36,8 +38,23 @@ function parseDashboard(dashboard) {
 }
 
 
+function adjustChartOptions() {
+  dashboards.value.forEach((dashboard) => {
+    console.log('dashboard', dashboard);
+    dashboard.layout.forEach((part) => {
+      if (part.chartOptions?.tooltip?.theme) {
+        part.chartOptions.tooltip.theme = themeSettingsStore.theme;
+      }
+    });
+  });
+}
+
+
 requests.getDashboards().then((response) => {
   dashboards.value = response.data.map((dashboard) => (parseDashboard(dashboard)));
+  adjustChartOptions();
+  selectedDashboard.value = 0;
+  fetchDashboard();
 });
 
 
@@ -164,7 +181,7 @@ function resetEditing() {
   editChartOptions.value = null;
 }
 
-function cancelChanges() {
+function closeEditor() {
   resetEditing();
   toast.error('Changes canceled', {timeout: 2000});
 }
@@ -190,7 +207,7 @@ function saveChanges() {
     });
 
 
-  resetEditing();
+  // resetEditing();
 }
 
 function addDashboardPart() {
@@ -301,6 +318,7 @@ const editingModeRaw = ref(false);
                   <apexchart
                     @zoomed="handleSelection"
                     class="text-slate-700 dark:text-slate-300"
+                    :type="dashboardPart.chartOptions.chart.type"
                     :options="dashboardPart.chartOptions"
                     :series="dashboardPart.series"></apexchart>
                 </div>
@@ -321,7 +339,7 @@ const editingModeRaw = ref(false);
                   <Switch class="d-inline-block mt-4" v-model="editingModeRaw" label="Raw"/>
                 </div>
                 <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
-                <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="cancelChanges"/>
+                <DashButton class="btn-sm mx-5 dark:btn-danger" text="Close" @click="closeEditor"/>
               </div>
             </template>
             <div class="w-full h-full" v-if="!editingModeRaw">
