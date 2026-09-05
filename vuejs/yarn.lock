@@ -201,6 +201,11 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.27.1"
 
+"@cyhnkckali/vue3-color-picker@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@cyhnkckali/vue3-color-picker/-/vue3-color-picker-2.1.7.tgz#6c701ecfad7590c1ce87a00cc876e1c3f3bfdf4f"
+  integrity sha512-Vw4IM4aKHbJkNwuLsyVdfLm727uIkazpbFjHFOwsj03J2uZqy4TKwmX+83zHIXp2+ELCXFNULXgbETiFUzS+Eg==
+
 "@esbuild/aix-ppc64@0.25.4":
   version "0.25.4"
   resolved "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.25.4.tgz"

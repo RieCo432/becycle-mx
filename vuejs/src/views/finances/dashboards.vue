@@ -108,6 +108,11 @@ function fetchDashboard() {
   };
 
   console.log('dashboardQuery', dashboardQueries);
+  
+  function applyDefaultChartOptions(chartOptions) {
+    chartOptions.yaxis[0].labels.formatter = (val) => (`\u00A3 ${val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
+    return chartOptions;
+  }
 
   requests.getDashboard(dashboardQuery)
     .then(
@@ -118,7 +123,7 @@ function fetchDashboard() {
           console.log('dashboard layout', dashboard.layout[index]);
           return {
             name: dashboardDataPart.name,
-            chartOptions: dashboard.layout[index].chartOptions,
+            chartOptions: applyDefaultChartOptions(dashboard.layout[index].chartOptions),
             series: dashboard.layout[index].query.mode === 'period' ?
               dashboardDataPart.series.map(
                 (seriesData) => ({
@@ -362,11 +367,12 @@ function addNewDashboard() {
               <div class="grid grid-cols-12 gap-5">
                 <div class="col-span-full">
                   <apexchart
-                    @zoomed="handleSelection"
                     class="text-slate-700 dark:text-slate-300"
                     :type="dashboardPart.chartOptions.chart.type"
                     :options="dashboardPart.chartOptions"
-                    :series="dashboardPart.series"></apexchart>
+                    :series="dashboardPart.series"
+                    height="auto"
+                  />
                 </div>
               </div>
             </Card>
