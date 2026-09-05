@@ -39,32 +39,11 @@ function parseDashboard(dashboard) {
   };
 }
 
-
-
 requests.getDashboards().then((response) => {
   dashboards.value = response.data.map((dashboard) => (parseDashboard(dashboard)));
   selectedDashboard.value = 0;
   fetchDashboard();
 });
-
-
-function handleSelection(chart, {xaxis}) {
-  // if (xaxis.min) {
-  //   const newStartDate = new Date(xaxis.min);
-  //   this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString()
-  //     .padStart(2, '0')}-${newStartDate.getUTCDate().toString().padStart(2, '0')}`;
-  // } else {
-  //   this.startDate = null;
-  // }
-  // if (xaxis.max) {
-  //   const newEndDate = new Date(xaxis.max);
-  //   this.endDate = `${newEndDate.getUTCFullYear()}-${(newEndDate.getUTCMonth() + 1).toString()
-  //     .padStart(2, '0')}-${newEndDate.getUTCDate().toString().padStart(2, '0')}`;
-  // } else {
-  //   this.endDate = null;
-  // }
-  // this.fetchAllSeries();
-}
 
 watch(startDate, () => {
   fetchDashboard();
@@ -176,26 +155,21 @@ function getBlankChartOptions() {
 }
 
 function fetchDashboard() {
-  console.log('fetchDashboard', selectedDashboard.value);
   if (selectedDashboard.value < 0) {
     return;
   }
 
   const dashboard = dashboards.value[selectedDashboard.value];
   const dashboardQueries = dashboard.layout.map((layout) => layout.query);
-  console.log('dashboardQueries', JSON.stringify(dashboardQueries));
   const queryString = JSON.stringify(dashboardQueries).replaceAll('#startdate#', startDate.value)
     .replaceAll('#enddate#', endDate.value)
     .replaceAll('#interval#', interval.value);
-  console.log('queryString', queryString.replaceAll('#startdate#', startDate.value));
 
   const dashboardQuery = {
     name: 'My Dashboard',
     queries: JSON.parse(queryString),
   };
 
-  console.log('dashboardQuery', dashboardQueries);
-  
   function applyDefaultChartOptions(chartOptions) {
     chartOptions.yaxis[0].labels.formatter = (val) => (`\u00A3 ${val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
     if (chartOptions?.tooltip?.theme) {
@@ -208,9 +182,7 @@ function fetchDashboard() {
     .then(
       (response) => {
         dashboardData.value = response.data;
-        console.log('dashboardData', response.data);
         dashboardParts.value.splice(0, dashboardParts.value.length, ...response.data.parts.map((dashboardDataPart, index) => {
-          console.log('dashboard layout', dashboard.layout[index]);
           return {
             name: dashboardDataPart.name,
             chartOptions: applyDefaultChartOptions(dashboard.layout[index].chartOptions),
@@ -287,7 +259,6 @@ function closeEditor() {
 
 function submitChanges() {
   const newLayout = JSON.stringify(dashboards.value[selectedDashboard.value].layout);
-  console.log('dashboard id', dashboards.value[selectedDashboard.value].id);
 
   requests.putDashboardUpdate(dashboards.value[selectedDashboard.value].id, {
     name: dashboards.value[selectedDashboard.value].name,
@@ -304,23 +275,18 @@ function submitChanges() {
 }
 
 function saveChanges() {
-  console.log('saving changes', editDataSource.value, editChartOptions.value);
   dashboards.value[selectedDashboard.value].layout[editingIndex.value].query = editDataSource.value;
   dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = editChartOptions.value;
-
-  console.log('dashboard layout', dashboards.value[selectedDashboard.value].layout);
 
   submitChanges();
   // resetEditing();
 }
 
 function livePreviewChartOptions(chartOptions) {
-  console.log('livepreview', dashboardParts.value, selectedDashboard.value, dashboardParts.value[editingIndex.value], editingIndex.value);
   if (dashboardParts.value &&
     editingIndex.value >= 0 &&
     dashboardParts.value[editingIndex.value]
   ) {
-    console.log('chartOptions', chartOptions);
     dashboardParts.value[editingIndex.value]['chartOptions'] = chartOptions;
   }
 }
@@ -339,9 +305,7 @@ function addDashboardPart() {
     },
     chartOptions: getBlankChartOptions(),
   });
-  console.log('layout', dashboards.value[selectedDashboard.value].layout);
   editData(dashboards.value[selectedDashboard.value].layout.length - 1);
-  console.log('editDataSource', dashboards.value[selectedDashboard.value].layout[editingIndex.value].query.name);
 }
 
 const editingModeRaw = ref(false);
