@@ -8,6 +8,7 @@ class DashboardBase(BaseModel):
 
     name: str
     layout: str
+    index: int | None = None
     
     
 class DashboardCreate(DashboardBase):

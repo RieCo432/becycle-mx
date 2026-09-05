@@ -1881,4 +1881,16 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  patchMoveDashboardUp(dashboardId) {
+    return axiosClient.patch(`/dashboards/${dashboardId}/up`, {}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchMoveDashboardDown(dashboardId) {
+    return axiosClient.patch(`/dashboards/${dashboardId}/down`, {}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

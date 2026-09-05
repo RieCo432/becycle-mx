@@ -37,12 +37,14 @@ function parseDashboard(dashboard) {
     id: dashboard.id,
     name: dashboard.name,
     layout: JSON.parse(dashboard.layout),
+    index: dashboard.index,
   };
 }
 
 requests.getDashboards().then((response) => {
-  dashboards.value = response.data.map((dashboard) => (parseDashboard(dashboard)));
-  selectedDashboard.value = 0;
+  dashboards.value = response.data
+    .map((dashboard) => (parseDashboard(dashboard)))
+    .sort((a, b) => a.index - b.index);
   fetchDashboard();
 });
 
@@ -381,6 +383,34 @@ function deleteDashboard() {
     });
 }
 
+function moveDashboardUp() {
+  requests.patchMoveDashboardUp(dashboards.value[selectedDashboard.value].id)
+    .then((response) => {
+      const dashboard = dashboards.value[selectedDashboard.value];
+      dashboards.value.splice(selectedDashboard.value, 1);
+      dashboards.value.splice(selectedDashboard.value-1, 0, dashboard);
+      selectedDashboard.value--;
+      toast.success('Dashboard moved up', {timeout: 2000});
+    })
+    .catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
+}
+
+function moveDashboardDown() {
+  requests.patchMoveDashboardDown(dashboards.value[selectedDashboard.value].id)
+    .then((response) => {
+      const dashboard = dashboards.value[selectedDashboard.value];
+      dashboards.value.splice(selectedDashboard.value, 1);
+      dashboards.value.splice(selectedDashboard.value+1, 0, dashboard);
+      selectedDashboard.value++;
+      toast.success('Dashboard moved down', {timeout: 2000});
+    })
+    .catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
+}
+
 
 </script>
 
@@ -447,22 +477,33 @@ function deleteDashboard() {
             >
             </flat-pickr>
           </div>
-          <div class="col-span-1 grid grid-cols-2 gap-5">
+          <div v-if="editMode" class="col-span-1 grid grid-cols-2 gap-5">
             <DashButton
-              v-if="editMode"
+              v-if="selectedDashboard !== -1"
+              class="btn-sm mx-5"
+              @click="moveDashboardUp">
+              <Icon icon="heroicons-outline:arrow-up"/>
+            </DashButton>
+            <DashButton
+              v-if="selectedDashboard !== -1"
+              class="btn-sm mx-5"
+              @click="moveDashboardDown">
+              <Icon icon="heroicons-outline:arrow-down"/>
+            </DashButton>
+            <DashButton
+              v-if="selectedDashboard !== -1"
               class="btn-sm mx-5"
               text="Rename"
               @click="() => openNewRenameDashboardModal(true)"/>
             <DashButton
-              v-if="editMode && selectedDashboard !== -1"
+              v-if="selectedDashboard !== -1"
               class="btn-sm mx-5 btn-danger dark:btn-danger"
               text="Delete"
               @click="deleteDashboard"/>
             <DashButton
-              v-if="editMode"
               class="btn-sm mx-5"
               text="New"
-              @click="openNewRenameDashboardModal"/>
+              @click="openNewRenameDashboardModal(false)"/>
           </div>
         </div>
       </Card>
@@ -572,7 +613,7 @@ function deleteDashboard() {
         </div>
       </template>
 
-      <div v-if="editMode && editingIndex === null" class="col-span-12 lg:col-span-4">
+      <div v-if="editMode && editingIndex === null && selectedDashboard >= 0" class="col-span-12 lg:col-span-4">
         <DashButton
           class="btn-dark h-full w-full flex items-center justify-center"
           @click="addDashboardPart"

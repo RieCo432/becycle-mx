@@ -35,8 +35,23 @@ async def update_dashboard(
     return crud.update_dashboard(db=db, dashboards_id=dashboards_id, updated_dashboard_data=updated_dashboard_data)
 
 
-@dashboards.delete("/dashboards/{dashboards_id}")
+@dashboards.delete("/dashboards/{dashboard_id}")
 async def delete_dashboard(
-        dashboards_id: UUID,
+        dashboard_id: UUID,
         db: Session = Depends(dep.get_db)) -> None:
-    crud.delete_dashboard(db=db, dashboards_id=dashboards_id)
+    crud.delete_dashboard(db=db, dashboard_id=dashboard_id)
+    
+    
+@dashboards.patch("/dashboards/{dashboard_id}/up")
+async def move_dashboard_up(
+        dashboard_id: UUID,
+        db: Session = Depends(dep.get_db)) -> None:
+    crud.move_dashboard_up(db=db, dashboard_id=dashboard_id)
+    
+    
+@dashboards.patch("/dashboards/{dashboard_id}/down")
+async def move_dashboard_down(
+        dashboard_id: UUID,
+        db: Session = Depends(dep.get_db)) -> None:
+    crud.move_dashboard_down(db=db, dashboard_id=dashboard_id)
+    
