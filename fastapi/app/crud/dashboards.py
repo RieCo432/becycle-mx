@@ -41,3 +41,9 @@ def update_dashboard(db: Session, dashboards_id: UUID, updated_dashboard_data: s
     db.commit()
     db.refresh(dashboard)
     return dashboard
+
+
+def delete_dashboard(db: Session, dashboards_id: UUID) -> None:
+    dashboard = get_dashboard(db=db, dashboards_id=dashboards_id)
+    db.delete(dashboard)
+    db.commit()

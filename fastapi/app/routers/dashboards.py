@@ -33,3 +33,10 @@ async def update_dashboard(
         updated_dashboard_data: schemas.DashboardCreate, 
         db: Session = Depends(dep.get_db)) -> schemas.Dashboard:
     return crud.update_dashboard(db=db, dashboards_id=dashboards_id, updated_dashboard_data=updated_dashboard_data)
+
+
+@dashboards.delete("/dashboards/{dashboards_id}")
+async def delete_dashboard(
+        dashboards_id: UUID,
+        db: Session = Depends(dep.get_db)) -> None:
+    crud.delete_dashboard(db=db, dashboards_id=dashboards_id)

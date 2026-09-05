@@ -10,7 +10,7 @@ import VueSlider from 'vue-slider-component';
 import DashButton from '@/components/Button/index.vue';
 import Icon from '@/components/Icon';
 import DashboardQueryEditor from '@/components/Editors/DashboardQueryEditor.vue';
-import TextArea from '@/components/TextArea/index.vue';
+import TextArea from '@/components/Textarea/index.vue';
 import Switch from '@/components/Switch/index.vue';
 import DashboardChartEditor from '@/components/Editors/DashboardChartEditor.vue';
 
@@ -325,6 +325,18 @@ function deleteDashboardPart(index) {
 function addNewDashboard() {
   toast.info('Not implemented yet');
 }
+function deleteDashboard() {
+  requests.deleteDashboard(dashboards.value[selectedDashboard.value].id)
+    .then(() => {
+      dashboards.value.splice(selectedDashboard.value, 1);
+      selectedDashboard.value = -1;
+      toast.success('Dashboard deleted', {timeout: 2000});
+    })
+    .catch((error) => {
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
+}
+
 
 </script>
 
@@ -335,6 +347,11 @@ function addNewDashboard() {
         <template #header>
           <div class="grid grid-cols-3">
             <DashButton v-if="editMode" class="btn-sm mx-5" text="New" @click="addNewDashboard()"/>
+            <DashButton
+              v-if="editMode && selectedDashboard !== -1"
+              class="btn-sm mx-5 btn-danger dark:btn-danger"
+              text="Delete"
+              @click="deleteDashboard"/>
             <div v-else></div>
             <div class="pt-1">
               <Switch class="d-inline-block mt-4" v-model="editMode" label="Edit Mode"/>
