@@ -74,6 +74,9 @@ class DashboardData(BaseModel):
 class DashboardPartQuerySeries(BaseModel):
     name: str
     query: DashboardSeriesQuery
+    credit: bool = False
+    debit: bool = False
+    net: bool = False
     
     
 class DashboardPartQueryBase(BaseModel):

@@ -135,6 +135,7 @@ const queryModeList = computed({
 });
 
 function setQueryModeList(i, value) {
+  console.log(value);
   graphQuery.value.series[i].query = value.map((item) => item.value);
 }
 
@@ -160,6 +161,49 @@ function moveSeriesUp(index) {
   const temp = graphQuery.value.series[index];
   graphQuery.value.series[index] = graphQuery.value.series[index - 1];
   graphQuery.value.series[index - 1] = temp;
+}
+
+const cashflowOptions = [
+  {
+    label: 'credit',
+    value: 'credit',
+  },
+  {
+    label: 'debit',
+    value: 'debit',
+  },
+  {
+    label: 'net',
+    value: 'net',
+  },
+];
+
+const cashflowDirectionsList = computed({
+  get: () => graphQuery.value.series.map((series) => {
+    console.log(series);
+    return cashflowOptions.filter((option) => series[option.value]);
+  }),
+});
+
+function setCashflowDirectionsList(index, valueRaw) {
+  console.log(valueRaw);
+  const value = valueRaw.map((item) => item.value);
+  console.log(value);
+  if (!value.includes('credit')) {
+    delete graphQuery.value.series[index].credit;
+  } else {
+    graphQuery.value.series[index].credit = true;
+  }
+  if (!value.includes('debit')) {
+    delete graphQuery.value.series[index].debit;
+  } else {
+    graphQuery.value.series[index].debit = true;
+  }
+  if (!value.includes('net')) {
+    delete graphQuery.value.series[index].net;
+  } else {
+    graphQuery.value.series[index].net = true;
+  }
 }
 
 </script>
@@ -214,7 +258,7 @@ function moveSeriesUp(index) {
             :label="selector.label"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-3">
           <template v-if="queryModes[i] === 'list'">
             <VueSelect
               label="Account List"
@@ -232,20 +276,31 @@ function moveSeriesUp(index) {
             />
           </template>
         </div>
-        <div class="col-span-1">
-          <DashButton v-if="i < graphQuery.series.length - 1" class="w-full" @click="() => moveSeriesDown(i)">
-            <Icon icon="heroicons-outline:arrow-down"/>
-          </DashButton>
+        <div class="col-span-2" v-if="graphQuery.dimension === 'cashflow'">
+          <VueSelect
+            label="Cashflow Directions"
+            :modelValue="cashflowDirectionsList[i]"
+            @update:modelValue="(v) => setCashflowDirectionsList(i, v)"
+            :options="cashflowOptions"
+            multiple
+          />
         </div>
-        <div class="col-span-1">
-          <DashButton v-if="i > 0" class="w-full" @click="() => moveSeriesUp(i)">
-            <Icon icon="heroicons-outline:arrow-up"/>
-          </DashButton>
-        </div>
-        <div class="col-span-1">
-          <DashButton class="dark:btn-danger w-full" @click="graphQuery.series.splice(i, 1)">
-            <Icon icon="heroicons-outline:trash"/>
-          </DashButton>
+        <div class="col-span-2 grid grid-cols-3">
+          <div class="col-span-1">
+            <DashButton v-if="i < graphQuery.series.length - 1" class="w-full" @click="() => moveSeriesDown(i)">
+              <Icon icon="heroicons-outline:arrow-down"/>
+            </DashButton>
+          </div>
+          <div class="col-span-1">
+            <DashButton v-if="i > 0" class="w-full" @click="() => moveSeriesUp(i)">
+              <Icon icon="heroicons-outline:arrow-up"/>
+            </DashButton>
+          </div>
+          <div class="col-span-1">
+            <DashButton class="dark:btn-danger w-full" @click="graphQuery.series.splice(i, 1)">
+              <Icon icon="heroicons-outline:trash"/>
+            </DashButton>
+          </div>
         </div>
       </div>
     </template>

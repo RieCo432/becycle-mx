@@ -126,7 +126,7 @@ function fetchDashboard() {
                   data: seriesData.data.map(
                     (dataPoint) => (
                       {
-                        x: dataPoint.date,
+                        x: new Date(dataPoint.date).getTime(),
                         y: dataPoint.value / 100,
                       }
                     ),
@@ -350,7 +350,7 @@ function addNewDashboard() {
         :key="dashboardPart.name"
       >
         <template v-if="editingIndex === null || editingIndex === index">
-          <div class="col-span-12 lg:col-span-4">
+          <div class="col-span-12 2xl:col-span-4">
             <Card :title=dashboardPart.name>
               <template #header v-if="editMode">
                 <DashButton v-if="editingIndex === index" class="btn-sm dark:btn-danger mx-3" @click="deleteDashboardPart(index)">
@@ -377,7 +377,7 @@ function addNewDashboard() {
 
 
       <template v-if="editingIndex !== null && currentlyEditing === 'query'">
-        <div class="col-span-12 lg:col-span-4">
+        <div class="col-span-12 2xl:col-span-8">
           <Card :title="`Editing Query for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
             <template #header>
               <div class="grid grid-cols-3">
@@ -405,7 +405,7 @@ function addNewDashboard() {
       </template>
 
       <template v-if="editingIndex !== null  && currentlyEditing === 'options'">
-        <div class="col-span-12 lg:col-span-4">
+        <div class="col-span-12 2xl:col-span-8">
           <Card :title="`Editing Chart Options for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
             <template #header>
               <div class="grid grid-cols-3">

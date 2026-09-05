@@ -303,11 +303,11 @@ def get_accounts_dashboard_period(db: Session, dashboard_query: schemas.Dashboar
                 interval=dashboard_query.interval,
                 fund_id=dashboard_query.fundId
             )
-            if series_data_credit is not None:
+            if series_data_credit is not None and series.credit:
                 dashboard_part_series.append(series_data_credit)
-            if series_data_debit is not None:
+            if series_data_debit is not None and series.debit:
                 dashboard_part_series.append(series_data_debit)
-            if series_data_net is not None:
+            if series_data_net is not None and series.net:
                 dashboard_part_series.append(series_data_net)
         
 
