@@ -210,6 +210,24 @@ const strokeCurveOptions = [
           v-model="chartOptions.yaxis[0].title.text"
         />
       </div>
+      <div class="w-full">
+        <TextInput
+          label="Title Size"
+          v-model="chartOptions.yaxis[0].title.style.fontSize"
+        />
+      </div>
+      <div class="w-full">
+        <TextInput
+          label="Title Weight"
+          v-model="chartOptions.yaxis[0].title.style.fontWeight"
+        />
+      </div>
+      <div class="w-full">
+        <TextInput
+          label="Label Size"
+          v-model="chartOptions.yaxis[0].labels.style.fontSize"
+        />
+      </div>
     </div>
 
   </div>

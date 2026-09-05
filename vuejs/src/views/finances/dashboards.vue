@@ -113,7 +113,7 @@ function getBlankChartOptions() {
           show: true,
           style: {
             colors: '#CBD5E1',
-            fontSize: '11px',
+            fontSize: '14px',
             fontWeight: 400,
             cssClass: '',
           },
@@ -131,10 +131,11 @@ function getBlankChartOptions() {
         title: {
           text: 'cashflow',
           rotate: -90,
+          offsetY: -5,
           style: {
             color: '#CBD5E1',
-            fontSize: '11px',
-            fontWeight: 900,
+            fontSize: '20px',
+            fontWeight: 800,
             cssClass: '',
           },
         },
