@@ -11,8 +11,10 @@ import DashButton from '@/components/Button/index.vue';
 import Icon from '@/components/Icon';
 import DashboardQueryEditor from '@/components/Editors/DashboardQueryEditor.vue';
 import TextArea from '@/components/Textarea/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Switch from '@/components/Switch/index.vue';
 import DashboardChartEditor from '@/components/Editors/DashboardChartEditor.vue';
+import Modal from '@/components/Modal/Modal.vue';
 
 const toast = useToast();
 
@@ -28,8 +30,7 @@ const startDate = ref(d.toISOString().split('T')[0]);
 const interval = ref('monthly');
 const intervalLabels = ref(['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']);
 const dashboardParts = ref([]);
-const editMode = ref(false);
-
+const editMode = ref(true);
 
 function parseDashboard(dashboard) {
   return {
@@ -58,7 +59,7 @@ watch(interval, () => {
 function getBlankChartOptions() {
   return {
     chart: {
-      type: 'bar',
+      type: 'area',
       zoom: {
         enabled: false,
         allowMouseWheelZoom: false,
@@ -77,7 +78,7 @@ function getBlankChartOptions() {
       curve: 'smooth',
     },
     fill: {
-      type: 'solid',
+      type: 'gradient',
       gradient: {
         opacityFrom: 0.6,
         opacityTo: 0.8,
@@ -322,9 +323,31 @@ function deleteDashboardPart(index) {
   }
 }
 
-function addNewDashboard() {
-  toast.info('Not implemented yet');
+
+const showNewDashboardModal = ref(false);
+const newDashboardName = ref('');
+
+function openNewDashboardModal() {
+  newDashboardName.value = '';
+  showNewDashboardModal.value = true;
 }
+
+function addNewDashboard() {
+  requests.postNewDashboard({name: newDashboardName.value, layout: '[]'})
+    .then((response) => {
+      dashboards.value.push(parseDashboard(response.data));
+      showNewDashboardModal.value = false;
+      selectedDashboard.value = dashboards.value.findIndex((dashboard) => dashboard.name === newDashboardName.value);
+      fetchDashboard();
+      newDashboardName.value = '';
+      toast.success('Dashboard created', {timeout: 2000});
+    })
+    .catch((error) => {
+      showNewDashboardModal.value = false;
+      toast.error(error.response.data.detail.description, {timeout: 2000});
+    });
+}
+
 function deleteDashboard() {
   requests.deleteDashboard(dashboards.value[selectedDashboard.value].id)
     .then(() => {
@@ -346,7 +369,11 @@ function deleteDashboard() {
       <Card title="Controls">
         <template #header>
           <div class="grid grid-cols-3">
-            <DashButton v-if="editMode" class="btn-sm mx-5" text="New" @click="addNewDashboard()"/>
+            <DashButton
+              v-if="editMode"
+              class="btn-sm mx-5"
+              text="New"
+              @click="openNewDashboardModal"/>
             <DashButton
               v-if="editMode && selectedDashboard !== -1"
               class="btn-sm mx-5 btn-danger dark:btn-danger"
@@ -415,40 +442,44 @@ function deleteDashboard() {
         </div>
       </Card>
     </div>
-    <div
-      v-if="dashboardParts && dashboardParts.length"
-      class="col-span-full grid grid-cols-12 gap-5"
-    >
-      <template
-        v-for="(dashboardPart, index) in dashboardParts"
-      >
-        <template v-if="editingIndex === null || editingIndex === index">
-          <div class="col-span-12 2xl:col-span-4" :key="dashboardPart.name">
-            <Card :title=dashboardPart.name>
-              <template #header v-if="editMode">
-                <DashButton v-if="editingIndex === index" class="btn-sm dark:btn-danger mx-3" @click="deleteDashboardPart(index)">
-                  <Icon icon="heroicons-outline:trash"/>
-                </DashButton>
-                <DashButton class="btn-sm mx-3" text="Edit Data" @click="editData(index)"/>
-                <DashButton class="btn-sm mx-3" text="Edit Chart" @click="editChart(index)"/>
-              </template>
-              <div class="grid grid-cols-12 gap-5">
-                <div class="col-span-full">
-                  <apexchart
-                    class="text-slate-700 dark:text-slate-300"
-                    :type="dashboardPart.chartOptions.chart.type"
-                    :options="dashboardPart.chartOptions"
-                    :series="dashboardPart.series"
-                    height="auto"
-                  />
+    <div class="col-span-full grid grid-cols-12 gap-5">
+      <template v-if="dashboardParts && dashboardParts.length">
+        <template v-for="(dashboardPart, index) in dashboardParts">
+          <template v-if="editingIndex === null || editingIndex === index">
+            <div class="col-span-12 2xl:col-span-4" :key="dashboardPart.name">
+              <Card :title=dashboardPart.name>
+                <template #header v-if="editMode">
+                  <DashButton
+                    v-if="editingIndex === index"
+                    class="btn-sm dark:btn-danger mx-3"
+                    @click="deleteDashboardPart(index)">
+                    <Icon icon="heroicons-outline:trash"/>
+                  </DashButton>
+                  <DashButton
+                    class="btn-sm mx-3"
+                    text="Edit Data"
+                    @click="editData(index)"/>
+                  <DashButton
+                    class="btn-sm mx-3"
+                    text="Edit Chart"
+                    @click="editChart(index)"/>
+                </template>
+                <div class="grid grid-cols-12 gap-5">
+                  <div class="col-span-full">
+                    <apexchart
+                      class="text-slate-700 dark:text-slate-300"
+                      :type="dashboardPart.chartOptions.chart.type"
+                      :options="dashboardPart.chartOptions"
+                      :series="dashboardPart.series"
+                      height="auto"
+                    />
+                  </div>
                 </div>
-              </div>
-            </Card>
-          </div>
-
+              </Card>
+            </div>
+          </template>
         </template>
       </template>
-
 
       <template v-if="editingIndex !== null && currentlyEditing === 'query'">
         <div class="col-span-12 2xl:col-span-8">
@@ -458,8 +489,14 @@ function deleteDashboard() {
                 <div class="pt-1">
                   <Switch class="d-inline-block mt-4" v-model="editingModeRaw" label="Raw"/>
                 </div>
-                <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
-                <DashButton class="btn-sm mx-5 dark:btn-danger" text="Close" @click="closeEditor"/>
+                <DashButton
+                  class="btn-sm mx-5 dark:btn-success"
+                  text="Save"
+                  @click="saveChanges"/>
+                <DashButton
+                  class="btn-sm mx-5 dark:btn-danger"
+                  text="Close"
+                  @click="closeEditor"/>
               </div>
             </template>
             <div class="w-full h-full" v-if="!editingModeRaw">
@@ -477,7 +514,6 @@ function deleteDashboard() {
           </Card>
         </div>
       </template>
-
       <template v-if="editingIndex !== null  && currentlyEditing === 'options'">
         <div class="col-span-12 2xl:col-span-8">
           <Card :title="`Editing Chart Options for ${dashboards[selectedDashboard].layout[editingIndex].query.name}`">
@@ -486,13 +522,18 @@ function deleteDashboard() {
                 <div class="pt-1">
                   <Switch class="d-inline-block mt-4" v-model="editingModeRaw" label="Raw"/>
                 </div>
-                <DashButton class="btn-sm mx-5 dark:btn-success" text="Save" @click="saveChanges"/>
-                <DashButton class="btn-sm mx-5 dark:btn-danger" text="Cancel" @click="closeEditor"/>
+                <DashButton
+                  class="btn-sm mx-5 dark:btn-success"
+                  text="Save"
+                  @click="saveChanges"/>
+                <DashButton
+                  class="btn-sm mx-5 dark:btn-danger"
+                  text="Cancel"
+                  @click="closeEditor"/>
               </div>
             </template>
             <div class="w-full h-full" v-if="!editingModeRaw">
-              <DashboardChartEditor v-model="editChartOptions"
-              @update:modelValue="(v) => livePreviewChartOptions(v)"/>
+              <DashboardChartEditor v-model="editChartOptions" @update:modelValue="(v) => livePreviewChartOptions(v)"/>
             </div>
             <div
               class="w-full h-full"
@@ -515,6 +556,26 @@ function deleteDashboard() {
         </DashButton>
       </div>
     </div>
+    <Modal
+      title="New Dashboard"
+      :active-modal="showNewDashboardModal"
+      @close="showNewDashboardModal = false">
+      <div class="w-full h-full grid grid-cols-12 gap-5">
+        <div class="col-span-12">
+          <TextInput
+            label="Dashboard Name"
+            class="w-full"
+            v-model="newDashboardName"
+            placeholder="Dashboard Name"/>
+        </div>
+        <div class="col-span-12">
+          <DashButton
+            class="btn-dark h-full w-full flex items-center justify-center"
+            @click="addNewDashboard"
+            text="Submit"/>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 

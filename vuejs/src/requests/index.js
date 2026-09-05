@@ -1869,4 +1869,16 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  postNewDashboard(dashboard) {
+    return axiosClient.post(`/dashboards`, dashboard, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteDashboard(dashboardId) {
+    return axiosClient.delete(`/dashboards/${dashboardId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };
