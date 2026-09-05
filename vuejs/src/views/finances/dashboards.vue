@@ -23,10 +23,33 @@ const themeSettingsStore = useThemeSettingsStore();
 const dashboards = ref([]);
 const dashboardData = ref(null);
 const selectedDashboard = ref(-1);
-const d = new Date();
-d.setMonth(d.getMonth()-5);
-const endDate = ref((new Date()).toISOString().split('T')[0]);
-const startDate = ref(d.toISOString().split('T')[0]);
+
+function convertDateToPickerString(d) {
+  return d.toISOString().split('T')[0];
+}
+
+// Default period is the current financial year
+const financialYearStartMonth = 3;
+const financialYearEndDate = 31;
+
+const startDateTime = new Date();
+startDateTime.setDate(1);
+if (startDateTime.getMonth() < financialYearStartMonth) {
+  startDateTime.setFullYear(startDateTime.getFullYear()-1);
+}
+startDateTime.setMonth(financialYearStartMonth);
+
+const endDateTime = new Date();
+if (endDateTime.getMonth() > financialYearStartMonth) {
+  endDateTime.setFullYear(endDateTime.getFullYear()+1);
+}
+endDateTime.setMonth(financialYearStartMonth-1);
+endDateTime.setDate(financialYearEndDate);
+
+
+const startDate = ref(convertDateToPickerString(startDateTime));
+const endDate = ref(convertDateToPickerString(endDateTime));
+
 const interval = ref('monthly');
 const intervalLabels = ref(['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']);
 const dashboardParts = ref([]);
@@ -170,7 +193,8 @@ function fetchDashboard() {
 
   const dashboard = dashboards.value[selectedDashboard.value];
   const dashboardQueries = dashboard.layout.map((layout) => layout.query);
-  const queryString = JSON.stringify(dashboardQueries).replaceAll('#startdate#', startDate.value)
+  const queryString = JSON.stringify(dashboardQueries)
+    .replaceAll('#startdate#', startDate.value)
     .replaceAll('#enddate#', endDate.value)
     .replaceAll('#interval#', interval.value);
 
@@ -411,6 +435,20 @@ function moveDashboardDown() {
     });
 }
 
+function changeYear(delta) {
+  console.log('changeYear', delta, endDate.value, startDate.value);
+  const end = new Date(endDate.value);
+  const start = new Date(startDate.value);
+  
+  console.log(end, start);
+  
+  end.setFullYear(end.getFullYear() + delta);
+  start.setFullYear(start.getFullYear() + delta);
+  
+  endDate.value = convertDateToPickerString(end);
+  startDate.value = convertDateToPickerString(start);
+}
+
 
 </script>
 
@@ -477,6 +515,18 @@ function moveDashboardDown() {
             >
             </flat-pickr>
           </div>
+          <div class="col-span-1 grid grid-cols-2 gap-5">
+            <DashButton
+              class="btn-sm mx-5"
+              @click="changeYear(-1)">
+              <Icon icon="heroicons-outline:chevron-left"/>
+            </DashButton>
+            <DashButton
+              class="btn-sm mx-5"
+              @click="changeYear(1)">
+              <Icon icon="heroicons-outline:chevron-right"/>
+            </DashButton>
+          </div>
           <div v-if="editMode" class="col-span-1 grid grid-cols-2 gap-5">
             <DashButton
               v-if="selectedDashboard !== -1"
@@ -501,7 +551,7 @@ function moveDashboardDown() {
               text="Delete"
               @click="deleteDashboard"/>
             <DashButton
-              class="btn-sm mx-5"
+              class="btn-sm mx-5 col-span-2"
               text="New"
               @click="openNewRenameDashboardModal(false)"/>
           </div>
