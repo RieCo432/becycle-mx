@@ -161,6 +161,11 @@ function fetchDashboard() {
     return;
   }
 
+  if (new Date(startDate.value) > new Date(endDate.value)) {
+    toast.error('Start date must be before end date', {timeout: 2000});
+    return;
+  }
+
   const dashboard = dashboards.value[selectedDashboard.value];
   const dashboardQueries = dashboard.layout.map((layout) => layout.query);
   const queryString = JSON.stringify(dashboardQueries).replaceAll('#startdate#', startDate.value)
@@ -256,7 +261,6 @@ function resetEditing() {
 
 function closeEditor() {
   resetEditing();
-  toast.error('Changes canceled', {timeout: 2000});
 }
 
 function submitChanges() {
@@ -325,26 +329,42 @@ function deleteDashboardPart(index) {
 }
 
 
-const showNewDashboardModal = ref(false);
-const newDashboardName = ref('');
+const showNewRenameDashboardModal = ref(false);
+const dashboardName = ref('');
+const newRenameModalTitle = ref('New Dashboard');
+let newRenameModalSubmit = () => {};
 
-function openNewDashboardModal() {
-  newDashboardName.value = '';
-  showNewDashboardModal.value = true;
+function openNewRenameDashboardModal(rename = false) {
+  if (rename) {
+    dashboardName.value = dashboards.value[selectedDashboard.value].name;
+    newRenameModalTitle.value = 'Rename Dashboard';
+    newRenameModalSubmit = renameDashboard;
+  } else {
+    dashboardName.value = '';
+    newRenameModalTitle.value = 'New Dashboard';
+    newRenameModalSubmit = addNewDashboard;
+  }
+  showNewRenameDashboardModal.value = true;
+}
+
+function renameDashboard() {
+  dashboards.value[selectedDashboard.value].name = dashboardName.value;
+  submitChanges();
+  showNewRenameDashboardModal.value = false;
 }
 
 function addNewDashboard() {
-  requests.postNewDashboard({name: newDashboardName.value, layout: '[]'})
+  requests.postNewDashboard({name: dashboardName.value, layout: '[]'})
     .then((response) => {
       dashboards.value.push(parseDashboard(response.data));
-      showNewDashboardModal.value = false;
-      selectedDashboard.value = dashboards.value.findIndex((dashboard) => dashboard.name === newDashboardName.value);
+      showNewRenameDashboardModal.value = false;
+      selectedDashboard.value = dashboards.value.findIndex((dashboard) => dashboard.name === dashboardName.value);
       fetchDashboard();
-      newDashboardName.value = '';
+      dashboardName.value = '';
       toast.success('Dashboard created', {timeout: 2000});
     })
     .catch((error) => {
-      showNewDashboardModal.value = false;
+      showNewRenameDashboardModal.value = false;
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
 }
@@ -366,28 +386,15 @@ function deleteDashboard() {
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-12">
+    <div class="col-span-12 lg:col-span-3 2xl:col-span-2">
       <Card title="Controls">
         <template #header>
-          <div class="grid grid-cols-3">
-            <DashButton
-              v-if="editMode"
-              class="btn-sm mx-5"
-              text="New"
-              @click="openNewDashboardModal"/>
-            <DashButton
-              v-if="editMode && selectedDashboard !== -1"
-              class="btn-sm mx-5 btn-danger dark:btn-danger"
-              text="Delete"
-              @click="deleteDashboard"/>
-            <div v-else></div>
-            <div class="pt-1">
-              <Switch class="d-inline-block mt-4" v-model="editMode" label="Edit Mode"/>
-            </div>
+          <div class="pt-1">
+            <Switch class="d-inline-block mt-4" v-model="editMode" label="Edit"/>
           </div>
         </template>
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-12 lg:col-span-6 items-center my-auto">
+        <div class="grid grid-cols-1 gap-5">
+          <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Dashboard</label>
             <Select
               :options="dashboards.map((dashboard, index) => ({
@@ -399,7 +406,7 @@ function deleteDashboard() {
               @change="fetchDashboard"
             ></Select>
           </div>
-          <div class="col-span-12 lg:col-span-6 items-center my-auto">
+          <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
               :data="intervalLabels"
@@ -415,7 +422,7 @@ function deleteDashboard() {
               class="m-auto"
             ></vue-slider>
           </div>
-          <div class="col-span-12 lg:col-span-6 content-center">
+          <div class="col-span-1 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period Start</label>
             <flat-pickr
               class="form-control m-auto"
@@ -428,7 +435,7 @@ function deleteDashboard() {
             >
             </flat-pickr>
           </div>
-          <div class="col-span-12 lg:col-span-6 content-center">
+          <div class="col-span-1 content-center">
             <label class="text-slate-700 dark:text-slate-300">Period End</label>
             <flat-pickr
               class="form-control m-auto"
@@ -440,14 +447,31 @@ function deleteDashboard() {
             >
             </flat-pickr>
           </div>
+          <div class="col-span-1 grid grid-cols-2 gap-5">
+            <DashButton
+              v-if="editMode"
+              class="btn-sm mx-5"
+              text="Rename"
+              @click="() => openNewRenameDashboardModal(true)"/>
+            <DashButton
+              v-if="editMode && selectedDashboard !== -1"
+              class="btn-sm mx-5 btn-danger dark:btn-danger"
+              text="Delete"
+              @click="deleteDashboard"/>
+            <DashButton
+              v-if="editMode"
+              class="btn-sm mx-5"
+              text="New"
+              @click="openNewRenameDashboardModal"/>
+          </div>
         </div>
       </Card>
     </div>
-    <div class="col-span-full grid grid-cols-12 gap-5">
+    <div class="col-span-12 lg:col-span-9 2xl:col-span-10 grid grid-cols-12 gap-5">
       <template v-if="dashboardParts && dashboardParts.length">
         <template v-for="(dashboardPart, index) in dashboardParts">
           <template v-if="editingIndex === null || editingIndex === index">
-            <div class="col-span-12 2xl:col-span-4" :key="dashboardPart.name">
+            <div class="col-span-12 2xl:col-span-6" :key="dashboardPart.name">
               <Card :title=dashboardPart.name>
                 <template #header v-if="editMode">
                   <DashButton
@@ -558,21 +582,21 @@ function deleteDashboard() {
       </div>
     </div>
     <Modal
-      title="New Dashboard"
-      :active-modal="showNewDashboardModal"
-      @close="showNewDashboardModal = false">
+      :title="newRenameModalTitle"
+      :active-modal="showNewRenameDashboardModal"
+      @close="showNewRenameDashboardModal = false">
       <div class="w-full h-full grid grid-cols-12 gap-5">
         <div class="col-span-12">
           <TextInput
             label="Dashboard Name"
             class="w-full"
-            v-model="newDashboardName"
+            v-model="dashboardName"
             placeholder="Dashboard Name"/>
         </div>
         <div class="col-span-12">
           <DashButton
             class="btn-dark h-full w-full flex items-center justify-center"
-            @click="addNewDashboard"
+            @click="newRenameModalSubmit"
             text="Submit"/>
         </div>
       </div>
