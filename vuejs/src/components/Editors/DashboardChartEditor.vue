@@ -166,9 +166,8 @@ const strokeCurveOptions = [
           v-model="chartOptions.chart.type"
         />
       </div>
-      <div class="w-full">
+      <div class="w-full" v-if="['area', 'line'].includes(chartOptions.chart.type)">
         <Select
-          v-if="['area', 'line'].includes(chartOptions.chart.type)"
           label="Stroke Curve"
           :options="strokeCurveOptions"
           v-model="chartOptions.stroke.curve"
@@ -179,6 +178,13 @@ const strokeCurveOptions = [
           label="Stacked"
           activeClass="ring-primary-500 bg-primary-500"
           v-model="chartOptions.chart.stacked"
+        />
+      </div>
+      <div class="w-full" v-if="chartOptions.chart.type === 'bar'">
+        <Checkbox
+          label="Distributed"
+          activeClass="ring-primary-500 bg-primary-500"
+          v-model="chartOptions.plotOptions.bar.distributed"
         />
       </div>
     </div>

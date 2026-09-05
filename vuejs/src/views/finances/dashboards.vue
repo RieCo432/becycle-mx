@@ -40,21 +40,9 @@ function parseDashboard(dashboard) {
 }
 
 
-function adjustChartOptions() {
-  dashboards.value.forEach((dashboard) => {
-    console.log('dashboard', dashboard);
-    dashboard.layout.forEach((part) => {
-      if (part.chartOptions?.tooltip?.theme) {
-        part.chartOptions.tooltip.theme = themeSettingsStore.theme;
-      }
-    });
-  });
-}
-
 
 requests.getDashboards().then((response) => {
   dashboards.value = response.data.map((dashboard) => (parseDashboard(dashboard)));
-  adjustChartOptions();
   selectedDashboard.value = 0;
   fetchDashboard();
 });
@@ -88,6 +76,105 @@ watch(interval, () => {
   fetchDashboard();
 });
 
+function getBlankChartOptions() {
+  return {
+    chart: {
+      type: 'bar',
+      zoom: {
+        enabled: false,
+        allowMouseWheelZoom: false,
+      },
+    },
+    colors: [],
+    dataLabels: {
+      enabled: false,
+    },
+    plotOptions: {
+      bar: {
+        distributed: true,
+      },
+    },
+    stroke: {
+      curve: 'smooth',
+    },
+    fill: {
+      type: 'solid',
+      gradient: {
+        opacityFrom: 0.6,
+        opacityTo: 0.8,
+      },
+    },
+    legend: {
+      showForSingleSeries: true,
+      position: 'right',
+      horizontalAlign: 'left',
+      labels: {
+        colors: '#CBD5E1',
+      },
+    },
+    tooltip: {
+      theme: 'dark',
+    },
+    xaxis: {
+      show: true,
+      type: 'datetime',
+      labels: {
+        style: {
+          colors: '#CBD5E1',
+        },
+      },
+      convertedCatToNumeric: false,
+      tickAmount: 'dataPoints',
+    },
+    yaxis: [
+      {
+        show: true,
+        labels: {
+          show: true,
+          style: {
+            colors: '#CBD5E1',
+            fontSize: '11px',
+            fontWeight: 400,
+            cssClass: '',
+          },
+        },
+        axisBorder: {
+          show: false,
+          color: '#e0e0e0',
+          width: 1,
+        },
+        axisTicks: {
+          show: false,
+          color: '#CBD5E1',
+          width: 6,
+        },
+        title: {
+          text: 'cashflow',
+          rotate: -90,
+          style: {
+            color: '#CBD5E1',
+            fontSize: '11px',
+            fontWeight: 900,
+            cssClass: '',
+          },
+        },
+        tooltip: {
+          enabled: false,
+        },
+        crosshairs: {
+          show: true,
+          position: 'front',
+          stroke: {
+            color: '#b6b6b6',
+            width: 1,
+            dashArray: 0,
+          },
+        },
+      },
+    ],
+  };
+}
+
 function fetchDashboard() {
   console.log('fetchDashboard', selectedDashboard.value);
   if (selectedDashboard.value < 0) {
@@ -111,6 +198,9 @@ function fetchDashboard() {
   
   function applyDefaultChartOptions(chartOptions) {
     chartOptions.yaxis[0].labels.formatter = (val) => (`\u00A3 ${val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
+    if (chartOptions?.tooltip?.theme) {
+      chartOptions.tooltip.theme = themeSettingsStore.theme;
+    }
     return chartOptions;
   }
 
@@ -126,17 +216,19 @@ function fetchDashboard() {
             chartOptions: applyDefaultChartOptions(dashboard.layout[index].chartOptions),
             series: dashboard.layout[index].query.mode === 'period' ?
               dashboardDataPart.series.map(
-                (seriesData) => ({
-                  name: `${seriesData.name}${seriesData.meta?.flow? `_${seriesData.meta.flow}` : ''}`,
-                  data: seriesData.data.map(
-                    (dataPoint) => (
-                      {
-                        x: new Date(dataPoint.date).getTime(),
-                        y: dataPoint.value / 100,
-                      }
-                    ),
-                  ).toSorted((a, b) => Date.parse(a.x) - Date.parse(b.x)),
-                }),
+                (seriesData) => {
+                  return {
+                    name: `${seriesData.name}${seriesData.meta?.flow? `_${seriesData.meta.flow}` : ''}`,
+                    data: seriesData.data.map(
+                      (dataPoint) => (
+                        {
+                          x: new Date(dataPoint.date).getTime(),
+                          y: dataPoint.value / 100,
+                        }
+                      ),
+                    ).toSorted((a, b) => Date.parse(a.x) - Date.parse(b.x)),
+                  };
+                },
               ) :
               [{
                 data: dashboardDataPart.series.map(
@@ -245,11 +337,7 @@ function addDashboardPart() {
       dimension: 'cashflow',
       fundId: null,
     },
-    chartOptions: {
-      chart: {
-        type: 'area',
-      },
-    },
+    chartOptions: getBlankChartOptions(),
   });
   console.log('layout', dashboards.value[selectedDashboard.value].layout);
   editData(dashboards.value[selectedDashboard.value].layout.length - 1);
@@ -352,10 +440,9 @@ function addNewDashboard() {
     >
       <template
         v-for="(dashboardPart, index) in dashboardParts"
-        :key="dashboardPart.name"
       >
         <template v-if="editingIndex === null || editingIndex === index">
-          <div class="col-span-12 2xl:col-span-4">
+          <div class="col-span-12 2xl:col-span-4" :key="dashboardPart.name">
             <Card :title=dashboardPart.name>
               <template #header v-if="editMode">
                 <DashButton v-if="editingIndex === index" class="btn-sm dark:btn-danger mx-3" @click="deleteDashboardPart(index)">
