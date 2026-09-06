@@ -85,7 +85,8 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
             colour=bike.colour,
             decals=bike.decals,
             serialNumber=bike.serialNumber,
-            contracts=contracts
+            contracts=contracts,
+            disposition=bike.disposition
         )
 
         leaderboard.append(leaderboard_entry)
