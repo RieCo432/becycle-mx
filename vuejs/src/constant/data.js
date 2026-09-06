@@ -145,20 +145,6 @@ export const topMenu = [
         childlink: '/finances/expenses/claims/manage',
         show: ['user'],
       },
-      // TODO: these need redone
-      // {
-      //   childtitle: 'Deposit Charts',
-      //   childicon: 'heroicons-outline:presentation-chart-line',
-      //   childlink: '/finances/deposit-charts',
-      //   show: ['user'],
-      // },
-      // TODO: these need redone
-      // {
-      //   childtitle: 'Cash Flow',
-      //   childicon: 'heroicons-outline:currency-pound',
-      //   childlink: '/finances/cash-flow',
-      //   show: ['user'],
-      // },
       {
         childtitle: 'Transaction History',
         childicon: 'heroicons-outline:table-cells',

@@ -11,6 +11,7 @@ from app.database.db import Base
 
 from typing import Self, List
 
+from .accounts import Account
 from .contractPhoto import ContractPhoto
 from .transactions import TransactionHeader
 from ..services.accounts_helpers import AccountTypes
@@ -68,13 +69,30 @@ class Contract(Base):
     depositTransactionHeaders: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.contractId], back_populates="contract")
     photos: Mapped[List["ContractPhoto"]] = relationship("ContractPhoto", foreign_keys=[ContractPhoto.contractId], back_populates="contract")
 
+
     @property
-    def liability_collected(self) -> int:
+    def liability_collected_transaction_header(self) -> TransactionHeader | None:
         for th in self.depositTransactionHeaders:
             if th.event == "deposit_collected":
-                for tl in th.transactionLines:
-                    if tl.account.type == AccountTypes.LIABILITY:
-                        return abs(tl.amount)
+                return th
+        return None
+    
+    @property
+    def liability_collected_account(self) -> Account | None:
+        th = self.liability_collected_transaction_header
+        if th is not None:
+            for tl in th.transactionLines:
+                if tl.account.type == AccountTypes.ASSET:
+                    return tl.account
+        return None
+
+    @property
+    def liability_collected(self) -> int:
+        th = self.liability_collected_transaction_header
+        if th is not None:
+            for tl in th.transactionLines:
+                if tl.account.type == AccountTypes.LIABILITY:
+                    return abs(tl.amount)
                     
         return 0
     
@@ -83,17 +101,33 @@ class Contract(Base):
         return f"{(self.liability_collected / 100):.2f}"
     
     @property
-    def deposit_amount_returned(self) -> int:
+    def deposit_returned_transaction_header(self) -> TransactionHeader | None:
         for th in self.depositTransactionHeaders:
             if th.event == "deposit_settled":
-                for tl in th.transactionLines:
-                    if tl.account.type == AccountTypes.ASSET:
-                        return abs(tl.amount)
-        return 0
+                return th
+        return None
+    
+    @property
+    def deposit_returned_account(self) -> Account | None:
+        th = self.deposit_returned_transaction_header
+        if th is not None:
+            for tl in th.transactionLines:
+                if tl.account.type == AccountTypes.ASSET:
+                    return tl.account
+        return None
+    
+    @property
+    def deposit_amount_returned(self) -> int:
+        th = self.deposit_returned_transaction_header
+        if th is not None:
+            for tl in th.transactionLines:
+                if tl.account.type == AccountTypes.ASSET:
+                    return abs(tl.amount)
+        return None
     
     @property
     def deposit_amount_returned_string(self) -> str:
-        return f"{(self.deposit_amount_returned / 100):.2f}"
+        return f"{(self.deposit_amount_returned / 100):.2f}" if self.deposit_amount_returned is not None else ""
 
     def __eq__dict(self, other: dict):
         return all([
@@ -201,15 +235,16 @@ class Contract(Base):
             "Working Volunteer": self.workingUser.username if self.workingUser is not None else "UNKNOWN",
             "Checking Volunteer": self.checkingUser.username if self.checkingUser is not None else "UNKNOWN",
             # TODO: deposit information needs to use new model
-            "Deposit Amount Collected": self.depositAmountCollected,
-            "Deposit Collected By": self.depositCollectingUser.username if self.depositCollectingUser is not None else "UNKNOWN",
+            "Deposit Amount Collected": self.liability_collected_string,
+            "Deposit Collected By": self.liability_collected_account.name if self.liability_collected_account is not None else None,
             "Returned Date": self.returnedDate,
             "Returned Date-day": "{:02d}".format(self.returnedDate.day) if self.returnedDate is not None else None,
             "Returned Date-month": "{:02d}".format(self.returnedDate.month) if self.returnedDate is not None else None,
             "Returned Date-year": "{:04d}".format(self.returnedDate.year) if self.returnedDate is not None else None,
             "Return Received By": self.returnAcceptingUser.username if self.returnAcceptingUser is not None else None,
-            "Deposit Amount Returned": self.depositAmountReturned,
-            "Deposit Returned By": self.depositReturningUser.username if self.depositReturningUser is not None else None
+            "Deposit Amount Returned": self.deposit_amount_returned_string,
+            "Deposit Returned By": self.deposit_returned_account.name if self.deposit_returned_account is not None else None,
+            "Draft": self.isDraft
         }
 
 

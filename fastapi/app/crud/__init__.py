@@ -4,7 +4,6 @@ from .bikes import *
 from .clients import *
 from .contracts import *
 from .depositExchanges import *
-from .finances import *
 from .roadSegments import *
 from .settings import *
 from .statistics import *

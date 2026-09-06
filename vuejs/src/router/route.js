@@ -235,26 +235,6 @@ const routes = [
         component: () => import('@/views/finances/dashboards.vue'),
       },
       {
-        path: '/finances/deposit-charts',
-        name: 'Deposit Charts',
-        meta: {
-          title: 'Deposit Charts',
-          restrictTo: ['user'],
-          selectNavPath: '/finances/deposit-charts',
-        },
-        component: () => import('@/views/finances/depositCharts.vue'),
-      },
-      {
-        path: '/finances/cash-flow',
-        name: 'Cash Flow',
-        meta: {
-          title: 'Cash Flow',
-          restrictTo: ['user'],
-          selectNavPath: '/finances/cash-flow',
-        },
-        component: () => import('@/views/finances/cashFlow.vue'),
-      },
-      {
         path: '/finances/expenses/submit', // TODO: this needs deleted
         name: 'Submit Expense',
         meta: {
