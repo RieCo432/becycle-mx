@@ -2,8 +2,8 @@ from datetime import datetime, timezone, date
 
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import select, and_, func, Integer
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import select, and_, func, Integer, Date
 from starlette import status
 
 from app import schemas, models, crud
@@ -12,7 +12,6 @@ from uuid import UUID
 from app.services.accounts_helpers import AccountsHelpers
 from typing import List
 
-from schemas import DashboardPartQuerySeries
 from services import get_interval_timedelta
 from services.accounts_helpers import AccountTypes, DashboardDimensions
 
@@ -360,4 +359,89 @@ def get_accounts_dashboard(db: Session, dashboard_queries: schemas.DashboardQuer
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": f"Invalid dashboard mode"})
             
     return schemas.DashboardData(name=dashboard_queries.name, parts=dashboard_parts)
-        
+
+
+def get_deposit_account_balances(db: Session, only_asset_accounts: bool = True, only_deposit_bearer_accounts: bool = True) -> schemas.DepositAccountBalances:
+    deposit_transaction_dates = db.scalars(select(models.TransactionHeader.postedOn.cast(Date).distinct())
+                                           .where(models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost']))
+                                           .order_by(models.TransactionHeader.postedOn.cast(Date)))
+
+
+    # Fetch ALL transactions at once with eager loading
+    all_deposit_transactions = db.scalars(
+        select(models.TransactionHeader)
+        .options(
+            joinedload(models.TransactionHeader.transactionLines).joinedload(models.TransactionLine.account),
+            joinedload(models.TransactionHeader.contract).joinedload(models.Contract.client)
+        )
+        .where(
+            models.TransactionHeader.event.in_(['deposit_collected', 'deposit_settled', 'deposit_exchanged', 'deposit_lost'])
+        )
+    ).unique().all()
+
+    # group the transactions by date
+    transactions_by_date = {}
+    for transaction in all_deposit_transactions:
+        tx_date = transaction.postedOn.date() if hasattr(transaction.postedOn, 'date') else transaction.postedOn
+        if tx_date not in transactions_by_date:
+            transactions_by_date[tx_date] = []
+        transactions_by_date[tx_date].append(transaction)
+
+
+    deposit_account_day_balances_before_this_day = {}
+    deposit_balances = schemas.DepositAccountBalances()
+
+
+    for deposit_transaction_date in deposit_transaction_dates:
+
+        deposit_transactions_on_this_date = transactions_by_date.get(deposit_transaction_date, [])
+
+        deposit_account_day_balances = schemas.DepositAccountsDayBalances()
+
+        for deposit_transaction in deposit_transactions_on_this_date:
+
+            # if we only want data for asset accounts, filter out non-asset accounts
+            filtered_lines = [
+                line for line in deposit_transaction.transactionLines
+                if (
+                           not only_asset_accounts
+                           or line.account.type == AccountTypes.ASSET
+                   )
+                   and (
+                           not only_deposit_bearer_accounts
+                           or "deposit" in line.account.showInUis or "return" in line.account.showInUis
+                   )
+            ]
+
+            for transaction_line in filtered_lines:
+                deposit_account_day_balances.diff[transaction_line.account.name] = deposit_account_day_balances.diff.get(transaction_line.account.name, 0) + transaction_line.amount
+
+
+            if deposit_transaction.contractId is not None and deposit_transaction.contract:
+                title = f"{deposit_transaction.contract.client.firstName} {deposit_transaction.contract.client.lastName}"
+            else:
+                title = deposit_transaction.event
+
+            deposit_account_day_balances.transactions.append(schemas.DepositAccountTransaction(
+                details=schemas.DepositTransactionDetails(
+                    title = title,
+                    contractId = deposit_transaction.contractId,
+                ),
+                event=deposit_transaction.event,
+                diff_by_account={line.account.name: line.amount for line in filtered_lines}
+            ))
+
+        all_account_names = set(deposit_account_day_balances_before_this_day.keys()) | set(deposit_account_day_balances.diff.keys())
+        deposit_account_day_balances.balances = {
+            account_name: deposit_account_day_balances.diff.get(account_name, 0) + deposit_account_day_balances_before_this_day.get(account_name, 0)
+            for account_name in all_account_names
+            if not (
+                    deposit_account_day_balances.diff.get(account_name, 0) == 0 and
+                    deposit_account_day_balances_before_this_day.get(account_name, 0) == 0
+            )}
+
+        deposit_account_day_balances_before_this_day = deposit_account_day_balances.balances
+        deposit_balances.dayBalances[deposit_transaction_date] = deposit_account_day_balances
+
+
+    return deposit_balances

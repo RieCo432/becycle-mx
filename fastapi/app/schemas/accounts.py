@@ -98,3 +98,24 @@ class DashboardPartPeriodQuery(DashboardPartQueryBase):
 class DashboardQuery(BaseModel):
     name: str
     queries: list[DashboardPartMomentQuery | DashboardPartPeriodQuery]
+
+
+class DepositTransactionDetails(BaseModel):
+    title: str
+    contractId: UUID | None = None
+
+
+class DepositAccountTransaction(BaseModel):
+    details: DepositTransactionDetails
+    event: str
+    diff_by_account: dict[str, int] = {}
+
+
+class DepositAccountsDayBalances(BaseModel):
+    transactions: list[DepositAccountTransaction] = []
+    diff: dict[str, int] = {}
+    balances: dict[str, int] = {}
+
+
+class DepositAccountBalances(BaseModel):
+    dayBalances: dict[date, DepositAccountsDayBalances] = {}

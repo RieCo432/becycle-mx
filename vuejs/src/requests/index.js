@@ -597,7 +597,7 @@ export default {
     });
   },
   getDepositBalances(onlyAssetAccounts=true, onlyDepositBearerAccounts=true) {
-    return axiosClient.get('/finances/deposit-accounts', {
+    return axiosClient.get('/accounts/deposits', {
       params: {
         only_asset_accounts: onlyAssetAccounts,
         only_deposit_bearer_accounts: onlyDepositBearerAccounts,
@@ -1000,104 +1000,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getTotalDepositsDateSeries(interval, startDate, endDate) {
-    return axiosClient.get('/finances/deposits/total', {
-      params: {
-        interval: interval,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getClaimableDepositsDateSeries(interval, gracePeriod, startDate=null, endDate=null) {
-    return axiosClient.get('/finances/deposits/claimable', {
-      params: {
-        interval: interval,
-        grace_period: gracePeriod,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getDepositsCollectedDateSeries(interval, startDate, endDate) {
-    return axiosClient.get('/finances/deposits/collected', {
-      params: {
-        interval: interval,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getDepositsReturnedDateSeries(interval, startDate, endDate) {
-    return axiosClient.get('/finances/deposits/returned', {
-      params: {
-        interval: interval,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getDepositFlowDateSeries(interval, startDate, endDate) {
-    return axiosClient.get('/finances/deposits/flow', {
-      params: {
-        interval: interval,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
   getContractsStatus(gracePeriod, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/status', {
       params: {
         grace_period: gracePeriod,
         ...(startDate && {start: startDate}),
         ...(endDate && {end: endDate}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getDepositsStatus(gracePeriod, startDate=null, endDate=null) {
-    return axiosClient.get('/finances/deposits/status', {
-      params: {
-        grace_period: gracePeriod,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getPercentageDepositReturnedAfterMonths(startDate, endDate) {
-    return axiosClient.get('/finances/deposits/return-percentage', {
-      params: {
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getWorstCaseRequiredDepositFloat() {
-    return axiosClient.get('/finances/deposits/required-float/worst-case', {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getRealisticRequiredDepositFloat(gracePeriod) {
-    return axiosClient.get('/finances/deposits/required-float/realistic', {
-      params: {
-        grace_period: gracePeriod,
       },
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -1226,42 +1134,6 @@ export default {
       responseType: 'blob',
     });
   },
-  getActualCashFlow(interval, startDate, endDate, tag) {
-    return axiosClient.get('/finances/cashflow/actual', {
-      params: {
-        interval: interval,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-        ...(tag && {tag: tag}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getProvisionalCashFlow(interval, startDate, endDate, tag) {
-    return axiosClient.get('/finances/cashflow/provisional', {
-      params: {
-        interval: interval,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-        ...(tag && {tag: tag}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getTotalCashFlow(interval, startDate, endDate, tag) {
-    return axiosClient.get('/finances/cashflow/total', {
-      params: {
-        interval: interval,
-        ...(startDate && {start: startDate}),
-        ...(endDate && {end: endDate}),
-        ...(tag && {tag: tag}),
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
   getMyPresentationCard() {
     return axiosClient.get('/users/me/presentation-card', {
       headers: credentialsStore.getApiRequestHeader(),
@@ -1368,11 +1240,6 @@ export default {
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getUpcomingClosures() {
-    return axiosClient.get('/public/upcoming-closures', {
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
   getUpcomingOpenDates() {
