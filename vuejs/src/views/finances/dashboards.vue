@@ -1,6 +1,6 @@
 <script setup>
 import 'vue-slider-component/theme/antd.css';
-import {ref, computed, watch} from 'vue';
+import {ref, watch} from 'vue';
 import Card from '@/components/Card/index.vue';
 import {useThemeSettingsStore} from '@/store/themeSettings';
 import Select from '@/components/Select/index.vue';
@@ -311,7 +311,6 @@ function saveChanges() {
   dashboards.value[selectedDashboard.value].layout[editingIndex.value].chartOptions = editChartOptions.value;
 
   submitChanges();
-  // resetEditing();
 }
 
 function livePreviewChartOptions(chartOptions) {
@@ -436,15 +435,12 @@ function moveDashboardDown() {
 }
 
 function changeYear(delta) {
-  console.log('changeYear', delta, endDate.value, startDate.value);
   const end = new Date(endDate.value);
   const start = new Date(startDate.value);
-  
-  console.log(end, start);
-  
+
   end.setFullYear(end.getFullYear() + delta);
   start.setFullYear(start.getFullYear() + delta);
-  
+
   endDate.value = convertDateToPickerString(end);
   startDate.value = convertDateToPickerString(start);
 }
@@ -649,7 +645,10 @@ function changeYear(delta) {
               </div>
             </template>
             <div class="w-full h-full" v-if="!editingModeRaw">
-              <DashboardChartEditor v-model="editChartOptions" @update:modelValue="(v) => livePreviewChartOptions(v)"/>
+              <DashboardChartEditor
+                v-model="editChartOptions"
+                @update:modelValue="(v) =>
+                 livePreviewChartOptions(v)"/>
             </div>
             <div
               class="w-full h-full"

@@ -135,7 +135,6 @@ const queryModeList = computed({
 });
 
 function setQueryModeList(i, value) {
-  console.log(value);
   graphQuery.value.series[i].query = value.map((item) => item.value);
 }
 
@@ -180,15 +179,12 @@ const cashflowOptions = [
 
 const cashflowDirectionsList = computed({
   get: () => graphQuery.value.series.map((series) => {
-    console.log(series);
     return cashflowOptions.filter((option) => series[option.value]);
   }),
 });
 
 function setCashflowDirectionsList(index, valueRaw) {
-  console.log(valueRaw);
   const value = valueRaw.map((item) => item.value);
-  console.log(value);
   if (!value.includes('credit')) {
     delete graphQuery.value.series[index].credit;
   } else {
