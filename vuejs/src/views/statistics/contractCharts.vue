@@ -101,10 +101,14 @@ export default {
           enabled: true,
         },
         legend: {
+          show: true,
           position: 'bottom',
           fontSize: '16px',
           fontFamily: 'Inter',
           fontWeight: 400,
+          horizontalAlign: 'left',
+          clusterGroupedSeriesOrientation: 'vertical',
+          height: '100px',
           labels: {
             colors: '#CBD5E1',
           },
@@ -223,65 +227,65 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-12 lg:col-span-3 2xl:col-span-2">
+  <div class="grid grid-cols-12 lg:grid-cols-8 2xl:grid-cols-10 gap-5">
+    <div class="col-span-full 2xl:col-span-2">
       <Card title="Controls">
         <div class="grid grid-cols-1 gap-5">
           <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
-                :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
-                name="interval"
-                v-model="interval"
-                direction="ltr"
-                :drag-on-click="true"
-                :clickable="false"
-                width="100%"
-                :max="56"
-                :min="0"
-                :interval="7"
-                class="m-auto"
-                @drag-end="fetchAllSeries"
+              :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
+              name="interval"
+              v-model="interval"
+              direction="ltr"
+              :drag-on-click="true"
+              :clickable="false"
+              width="100%"
+              :max="56"
+              :min="0"
+              :interval="7"
+              class="m-auto"
+              @drag-end="fetchAllSeries"
             ></vue-slider>
           </div>
           <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Grace Period (Days)</label>
             <vue-slider
-                name="gracePeriod"
-                v-model="gracePeriod"
-                direction="ltr"
-                :drag-on-click="true"
-                :clickable="false"
-                width="100%"
-                :max="371"
-                :min="0"
-                :interval="7"
-                class="m-auto"
-                @drag-end="fetchGracePeriodDependants"
+              name="gracePeriod"
+              v-model="gracePeriod"
+              direction="ltr"
+              :drag-on-click="true"
+              :clickable="false"
+              width="100%"
+              :max="371"
+              :min="0"
+              :interval="7"
+              class="m-auto"
+              @drag-end="fetchGracePeriodDependants"
             ></vue-slider>
           </div>
           <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Period Start</label>
             <flat-pickr
-                class="form-control m-auto"
-                name="startDate"
-                id="d3"
-                placeholder="dd-mm-yyyy"
-                v-model="startDate"
-                ref="startDatePicker"
-                :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+              class="form-control m-auto"
+              name="startDate"
+              id="d3"
+              placeholder="dd-mm-yyyy"
+              v-model="startDate"
+              ref="startDatePicker"
+              :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
             >
             </flat-pickr>
           </div>
           <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Period End</label>
             <flat-pickr
-                class="form-control m-auto"
-                name="endDate"
-                id="d3"
-                placeholder="dd-mm-yyyy"
-                v-model="endDate"
-                :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+              class="form-control m-auto"
+              name="endDate"
+              id="d3"
+              placeholder="dd-mm-yyyy"
+              v-model="endDate"
+              :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
             >
             </flat-pickr>
           </div>
@@ -300,72 +304,52 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-12 lg:col-span-9 2xl:col-span-10 grid grid-cols-12 gap-5">
-      <div class="col-span-12 2xl:col-span-6">
-        <Card title="Total Contracts">
-          <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-full">
-              <apexchart
-                class="text-slate-700 dark:text-slate-300"
-                type="area"
-                :options="chartOptions"
-                :series="totalContractSeries"/>
-            </div>
-          </div>
-        </Card>
-      </div>
-      <div class="col-span-12 2xl:col-span-6">
-        <Card title="Active Contracts">
-          <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-full">
-              <apexchart
-                class="text-slate-700 dark:text-slate-300"
-                type="area"
-                :options="chartOptions"
-                :series="activeContractSeries"/>
-            </div>
-          </div>
-        </Card>
-      </div>
-      <div class="col-span-12 2xl:col-span-6">
-        <Card title="New Contracts">
-          <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-full">
-              <apexchart
-                class="text-slate-700 dark:text-slate-300"
-                type="area"
-                :options="chartOptions"
-                :series="newContractSeries"/>
-            </div>
-          </div>
-        </Card>
-      </div>
-      <div class="col-span-12 2xl:col-span-6">
-        <Card title="Returned Contracts">
-          <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-full">
-              <apexchart
-                class="text-slate-700 dark:text-slate-300"
-                type="area"
-                :options="chartOptions"
-                :series="returnedContractSeries"/>
-            </div>
-          </div>
-        </Card>
-      </div>
-      <div class="col-span-12 2xl:col-span-6">
-        <Card title="Contracts Status">
-          <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-full">
-              <apexchart
-                class="text-slate-700 dark:text-slate-300"
-                type="donut"
-                :options="contractsStatusChartOptions"
-                :series="contractsStatusSeries"/>
-            </div>
-          </div>
-        </Card>
-      </div>
+    <div class="col-span-12 lg:col-span-4">
+      <Card title="Total Contracts">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300"
+          type="area"
+          :options="chartOptions"
+          :series="totalContractSeries"/>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
+      <Card title="Active Contracts">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300"
+          type="area"
+          :options="chartOptions"
+          :series="activeContractSeries"/>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4 2xl:col-span-2 row-start-6 lg:row-start-4 2xl:row-start-2 min-h-96">
+      <Card title="Contracts Status" className="h-full">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300 w-full h-full"
+          type="donut"
+          height="100%"
+          width="100%"
+          :options="contractsStatusChartOptions"
+          :series="contractsStatusSeries"/>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
+      <Card title="New Contracts">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300"
+          type="area"
+          :options="chartOptions"
+          :series="newContractSeries"/>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
+      <Card title="Returned Contracts">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300"
+          type="area"
+          :options="chartOptions"
+          :series="returnedContractSeries"/>
+      </Card>
     </div>
   </div>
 </template>

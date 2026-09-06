@@ -556,17 +556,13 @@ function changeYear(delta) {
                     text="Edit Chart"
                     @click="editChart(index)"/>
                 </template>
-                <div class="grid grid-cols-12 gap-5">
-                  <div class="col-span-full">
-                    <apexchart
-                      class="text-slate-700 dark:text-slate-300"
-                      :type="dashboardPart.chartOptions.chart.type"
-                      :options="dashboardPart.chartOptions"
-                      :series="dashboardPart.series"
-                      height="auto"
-                    />
-                  </div>
-                </div>
+                <apexchart
+                  class="text-slate-700 dark:text-slate-300"
+                  :type="dashboardPart.chartOptions.chart.type"
+                  :options="dashboardPart.chartOptions"
+                  :series="dashboardPart.series"
+                  height="auto"
+                />
               </Card>
             </div>
           </template>
