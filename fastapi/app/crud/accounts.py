@@ -154,14 +154,14 @@ def get_accounts_accounts_balance_period(db: Session, series: schemas.DashboardP
     
     current_period_before: date = end_date
     
-    while current_period_before >= start_date:
+    while current_period_before > start_date:
         balance = get_accounts_balance_moment_raw(db=db, moment=current_period_before, account_ids=account_ids, fund_id=fund_id)
         data_point = schemas.DataPoint(
-            date=current_period_before - relativedelta(days=1),
+            date=current_period_before,
             value=balance
         )
         data.append(data_point)
-        current_period_before -= get_interval_timedelta(interval)
+        current_period_before -= get_interval_timedelta(interval, current_period_before)
     
     
     series_data = schemas.DashboardDataSeries(
@@ -193,7 +193,7 @@ def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], perio
         .join(models.Account)
         .where(
             (models.Account.id.in_(account_ids))
-            & (models.TransactionHeader.postedOn >= after)
+            & (models.TransactionHeader.postedOn > after)
             & (models.TransactionHeader.postedOn < before)
             & (models.TransactionLine.amount < 0)
             & ((models.TransactionLine.fundId == fund_id) | (fund_id is None))
@@ -208,7 +208,7 @@ def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], perio
         .join(models.Account)
         .where(
             (models.Account.id.in_(account_ids))
-            & (models.TransactionHeader.postedOn >= after)
+            & (models.TransactionHeader.postedOn > after)
             & (models.TransactionHeader.postedOn < before)
             & (models.TransactionLine.amount > 0)
             & ((models.TransactionLine.fundId == fund_id) | (fund_id is None))
@@ -228,7 +228,7 @@ def get_accounts_cashflow_period(db: Session, series: schemas.DashboardPartQuery
     account_ids = get_accounts_list_for_series_query(db=db, query=series.query)
     
     current_period_before: date = end_date
-    current_period_since: date = current_period_before - get_interval_timedelta(interval)
+    current_period_since: date = current_period_before - get_interval_timedelta(interval, current_period_before)
     
     while current_period_before > start_date:
         cashflow = get_accounts_cashflow_period_raw(
@@ -244,7 +244,7 @@ def get_accounts_cashflow_period(db: Session, series: schemas.DashboardPartQuery
         data_net.append(schemas.DataPoint(date=current_period_before, value=cashflow.net))
 
         current_period_before = current_period_since
-        current_period_since = current_period_before - get_interval_timedelta(interval)
+        current_period_since = current_period_before - get_interval_timedelta(interval, current_period_before)
         
 
     return  (
