@@ -228,8 +228,6 @@ export default {
         username: username.value,
         password: password.value,
       }];
-      
-      console.log('transactionAuthDetails', saleTransactionsHeaderDraft);
 
       requests.createTransaction(saleTransactionsHeaderDraft, transactionAuthDetails)
         .then((response) => {

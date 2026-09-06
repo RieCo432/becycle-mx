@@ -9,6 +9,20 @@ class AccountTypes:
     REVENUE = "revenue"
     EXPENSE = "expense"
     DIVIDEND = "dividend"
+    
+    
+class DashboardDimensions:
+    BALANCE = "balance"
+    CASHFLOW = "cashflow"
+    
+    
+class DashboardIntervals:
+    DAILY = "daily"
+    FORTNIGHTLY = "fortnightly"
+    MONTHLY = "monthly"
+    QUARTERLY = "quarterly"
+    SEMIYEARLY = "semiyearly"
+    YEARLY = "yearly"
 
         
         

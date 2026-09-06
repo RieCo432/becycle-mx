@@ -225,6 +225,16 @@ const routes = [
         component: () => import('@/views/finances/depositBalances.vue'),
       },
       {
+        path: '/finances/dashboards',
+        name: 'Deposit Dashboards',
+        meta: {
+          title: 'Dashboards',
+          restrictTo: ['user'],
+          selectNavPath: '/finances/dashboards',
+        },
+        component: () => import('@/views/finances/dashboards.vue'),
+      },
+      {
         path: '/finances/deposit-charts',
         name: 'Deposit Charts',
         meta: {

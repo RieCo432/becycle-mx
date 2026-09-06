@@ -363,8 +363,7 @@ export default {
       const url = `${requests.getApiBaseUrl()}/public/photos/${photo.id}`;
 
       const html = `<img src="${url}" alt="photo">`;
-
-      console.log('html mode', this.editorHtmlMode);
+      
       if (this.editorHtmlMode) {
         await navigator.clipboard.writeText(html);
       } else {

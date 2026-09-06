@@ -37,8 +37,6 @@ const axiosClient = axios.create({
   baseURL: apiBaseUrl,
 });
 
-console.log(apiBaseUrl);
-
 export default {
   getApiBaseUrl() {
     return apiBaseUrl;
@@ -1849,6 +1847,48 @@ export default {
   },
   deletePhoto(photoId) {
     return axiosClient.delete(`/photos/${photoId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getDashboard(dashboardQuery) {
+    return axiosClient.post(`/accounts/dashboard`, dashboardQuery, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getDashboards() {
+    return axiosClient.get(`/dashboards`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDashboardUpdate(dashboardId, dashboardLayout) {
+    return axiosClient.put(`/dashboards/${dashboardId}`, dashboardLayout, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postNewDashboard(dashboard) {
+    return axiosClient.post(`/dashboards`, dashboard, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteDashboard(dashboardId) {
+    return axiosClient.delete(`/dashboards/${dashboardId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchMoveDashboardUp(dashboardId) {
+    return axiosClient.patch(`/dashboards/${dashboardId}/up`, {}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchMoveDashboardDown(dashboardId) {
+    return axiosClient.patch(`/dashboards/${dashboardId}/down`, {}, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

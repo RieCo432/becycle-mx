@@ -45,6 +45,11 @@ async def update_account(account_id: UUID, updated_account_data: schemas.Account
 @accounts.patch("/accounts/{account_id}/close")
 async def close_account(account_id: UUID, db: Session = Depends(dep.get_db), user: models.User = Depends(dep.get_current_active_user)) -> schemas.Account:
     account = crud.get_account(db=db, account_id=account_id)
+    if account is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": f"Account with ID {account_id} not found"}
+        )
     if account.balance != 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -57,6 +62,7 @@ async def close_account(account_id: UUID, db: Session = Depends(dep.get_db), use
         )
     return crud.close_account(db=db, account_id=account_id, user=user)
 
+
 @accounts.patch("/accounts/{account_id}/reopen")
 async def reopen_account(account_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.Account:
     account = crud.get_account(db=db, account_id=account_id)
@@ -66,3 +72,11 @@ async def reopen_account(account_id: UUID, db: Session = Depends(dep.get_db)) ->
             detail={"description": "Account is not closed."}
         )
     return crud.reopen_account(db=db, account_id=account_id)
+
+
+@accounts.post("/accounts/dashboard")
+async def get_accounts_dashboard(
+        dashboard_queries: schemas.DashboardQuery,
+        db: Session = Depends(dep.get_db)
+) -> schemas.DashboardData:
+    return crud.get_accounts_dashboard(db=db, dashboard_queries=dashboard_queries)
