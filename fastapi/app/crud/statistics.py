@@ -108,7 +108,6 @@ def get_total_contracts_statistics(db: Session, interval: str, start_date: date 
         start_date = oldest_contract.startDate
     if end_date is None:
         end_date = datetime.utcnow().date()
-    interval_timedelta = get_interval_timedelta(interval=interval)
 
     all_categories = [_ for _ in db.scalars(
         db.query(
@@ -139,7 +138,7 @@ def get_total_contracts_statistics(db: Session, interval: str, start_date: date 
             else:
                 data_series_by_breakdown[breakdown].append([end_date, count])
 
-        end_date -= interval_timedelta
+        end_date: date = end_date - get_interval_timedelta(interval=interval, dt=end_date)
 
     for breakdown in data_series_by_breakdown:
         data_series_by_breakdown[breakdown].reverse()
@@ -158,8 +157,6 @@ def get_active_contracts_statistics(db: Session, interval: str, grace_period: in
         start_date = oldest_contract.startDate
     if end_date is None:
         end_date = datetime.utcnow().date()
-
-    interval_timedelta = get_interval_timedelta(interval=interval)
 
     all_categories = [_ for _ in db.scalars(
         db.query(
@@ -198,7 +195,7 @@ def get_active_contracts_statistics(db: Session, interval: str, grace_period: in
             else:
                 data_series_by_breakdown[breakdown].append([end_date, count])
 
-        end_date -= interval_timedelta
+        end_date: date = end_date - get_interval_timedelta(interval=interval, dt=end_date)
 
     for breakdown in data_series_by_breakdown:
         data_series_by_breakdown[breakdown].reverse()
@@ -218,8 +215,6 @@ def get_new_contracts_statistics(db: Session, interval: str, start_date: date | 
     if end_date is None:
         end_date = datetime.utcnow().date()
 
-    interval_timedelta = get_interval_timedelta(interval=interval)
-
     all_categories = [_ for _ in db.scalars(
         db.query(
             models.Contract.contractType,
@@ -232,7 +227,7 @@ def get_new_contracts_statistics(db: Session, interval: str, start_date: date | 
     all_series = []
     data_series_by_breakdown = {}
     period_end_date = end_date
-    period_start_date = period_end_date - interval_timedelta
+    period_start_date = period_end_date - get_interval_timedelta(interval=interval, dt=period_end_date)
 
     while period_end_date >= start_date:
 
@@ -254,7 +249,7 @@ def get_new_contracts_statistics(db: Session, interval: str, start_date: date | 
                 data_series_by_breakdown[breakdown].append([period_end_date, count])
 
         period_end_date = period_start_date
-        period_start_date -= interval_timedelta
+        period_start_date: date = period_start_date - get_interval_timedelta(interval=interval, dt=period_start_date)
 
     for breakdown in data_series_by_breakdown:
         data_series_by_breakdown[breakdown].reverse()
@@ -275,8 +270,6 @@ list[schemas.DataSeries]:
     if end_date is None:
         end_date = datetime.utcnow().date()
 
-    interval_timedelta = get_interval_timedelta(interval=interval)
-
     all_categories = [_ for _ in db.scalars(
         db.query(
             models.Contract.contractType,
@@ -289,7 +282,7 @@ list[schemas.DataSeries]:
     all_series = []
     data_series_by_breakdown = {}
     period_end_date = end_date
-    period_start_date = period_end_date - interval_timedelta
+    period_start_date = period_end_date - get_interval_timedelta(interval=interval, dt=period_end_date)
 
     while period_end_date >= start_date:
 
@@ -312,7 +305,7 @@ list[schemas.DataSeries]:
                 data_series_by_breakdown[breakdown].append([period_end_date, count])
 
         period_end_date = period_start_date
-        period_start_date -= interval_timedelta
+        period_start_date: date = period_start_date - get_interval_timedelta(interval=interval, dt=period_start_date)
 
     for breakdown in data_series_by_breakdown:
         data_series_by_breakdown[breakdown].reverse()
