@@ -129,6 +129,34 @@ async def submit_contract(
     return contract_draft
 
 
+@contracts.put("/contracts/drafts/{contract_id}/sale")
+async def add_sale_to_contract(
+        contract_id: UUID,
+        sale_header_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    sale_header = crud.get_sale_header(db=db, sale_header_id=sale_header_id)
+    
+    if sale_header.transactionHeaderId is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Cannot add completed sale to contract!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    return crud.add_sale_to_contract(db=db, contract_id=contract_draft.id, sale_header_id=sale_header.id)
+
+@contracts.delete("/contracts/drafts/{contract_id}/sale")
+async def delete_sale_from_contract(
+        contract_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    
+    return crud.delete_sale_from_contract(db=db, contract_id=contract_id)
+
+
 @contracts.get("/contracts/types")
 async def get_contract_types(db: Session = Depends(dep.get_db)) -> list[schemas.ContractType]:
     return crud.get_contract_types(db=db)

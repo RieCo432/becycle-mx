@@ -8,7 +8,7 @@ from app import models, schemas, crud
 from typing import List, Annotated
 
 dashboards = APIRouter(
-    tags=["dashbaords"],
+    tags=["dashboards"],
     responses={404: {"description": "Not Found"}},
     dependencies=[Depends(dep.check_permissions)]
 )

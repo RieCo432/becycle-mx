@@ -55,7 +55,7 @@
               <div v-if="currentStepNumber === 0">
                 <NewContractStartForm
                   :current-contract-draft="currentContractDraft"
-                  @update:currentContractDraft="updateDraft"
+                  @update:currentContractDraft="(draft) => updateDraft(draft, false)"
                 />
               </div>
               <div v-if="currentStepNumber === 1">
@@ -185,12 +185,12 @@ function goBack() {
   currentStepNumber.value--;
 }
 
-function updateDraft(draft) {
+function updateDraft(draft, autoPromote = true) {
   currentContractDraft.value = draft;
-  nextStep();
+  nextStep(autoPromote);
 }
 
-function nextStep() {
+function nextStep(autoPromote = true) {
   if (!currentContractDraft.value.id) {
     currentStepNumber.value = 0;
     return;
@@ -221,7 +221,11 @@ function nextStep() {
     currentStepNumber.value = 6;
     return;
   }
-  promoteDraft();
+  if (autoPromote) {
+    promoteDraft();
+  } else {
+    currentStepNumber.value = 6;
+  }
 }
 
 function promoteDraft() {

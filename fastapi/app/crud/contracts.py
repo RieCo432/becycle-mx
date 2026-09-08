@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 import app.models as models
 import app.schemas as schemas
+from .sales import get_sale_header
 
 from .transactions import get_transaction_header, post_transaction_header
 from app.services.accounts_helpers import AccountTypes
@@ -436,9 +437,48 @@ def submit_contract(db: Session, contract_id: UUID) -> models.Contract:
             detail={"description": "Deposit transaction header must be posted before it can be used to collect deposit!"},
         )
     
+    if contract_draft.saleHeader is not None and contract_draft.saleHeader.transactionHeaderId is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Contract cannot be finalised until the sale is completed!"},
+        )
+    
     contract_draft.startDate = datetime.now(timezone.utc).date()
     contract_draft.endDate = datetime.now(timezone.utc) + relativedelta(months=CONTRACT_EXPIRE_MONTHS)
     contract_draft.isDraft = False
+    db.commit()
+    return contract_draft
+
+
+def add_sale_to_contract(db: Session, contract_id: UUID, sale_header_id: UUID) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
+    
+    contract_draft.saleHeaderId = sale_header_id
+    db.commit()
+
+    return contract_draft
+
+
+def delete_sale_from_contract(db: Session, contract_id: UUID) -> models.Contract:
+    contract_draft = get_contract_draft(db=db, contract_id=contract_id)
+    
+    sale_header = get_sale_header(db=db, sale_header_id=contract_draft.saleHeaderId)
+    if len(sale_header.catalogueItemSaleLines) > 0 or len(sale_header.bikeSaleLines) > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Cannot delete a sale with items in it!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if sale_header.transactionHeaderId is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Cannot delete a sale that has been paid for!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    contract_draft.saleHeaderId = None
+    db.commit()
+    db.delete(sale_header)
     db.commit()
     return contract_draft
 

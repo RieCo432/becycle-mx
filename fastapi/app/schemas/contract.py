@@ -61,6 +61,8 @@ class Contract(ContractPublic):
     
     client: Client | None = None
     bike: Bike | None = None
+    
+    saleHeaderId: UUID | None = None
 
     depositTransactionHeaders: List[TransactionHeader] = []
 
