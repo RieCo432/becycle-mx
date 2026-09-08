@@ -192,7 +192,7 @@ def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], perio
         .join(models.Account)
         .where(
             (models.Account.id.in_(account_ids))
-            & (models.TransactionHeader.postedOn > after)
+            & (models.TransactionHeader.postedOn >= after)
             & (models.TransactionHeader.postedOn < before)
             & (models.TransactionLine.amount < 0)
             & ((models.TransactionLine.fundId == fund_id) | (fund_id is None))
@@ -207,7 +207,7 @@ def get_accounts_cashflow_period_raw(db: Session, account_ids: list[UUID], perio
         .join(models.Account)
         .where(
             (models.Account.id.in_(account_ids))
-            & (models.TransactionHeader.postedOn > after)
+            & (models.TransactionHeader.postedOn >= after)
             & (models.TransactionHeader.postedOn < before)
             & (models.TransactionLine.amount > 0)
             & ((models.TransactionLine.fundId == fund_id) | (fund_id is None))
