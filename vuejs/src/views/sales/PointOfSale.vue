@@ -607,7 +607,7 @@ export default {
       return this.revenueAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.catalogueItemRevenueAccount.name ?? '').toLowerCase()))
+          .startsWith((this.catalogueItemRevenueAccount?.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -615,7 +615,7 @@ export default {
       return this.revenueAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.bikeRevenueAccount.name ?? '').toLowerCase()))
+          .startsWith((this.bikeRevenueAccount?.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -623,7 +623,7 @@ export default {
       return this.assetAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.paymentAssetAccount.name ?? '').toLowerCase()))
+          .startsWith((this.paymentAssetAccount?.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
