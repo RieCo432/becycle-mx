@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 import app.models as models
 import app.schemas as schemas
+from .accounts import get_default_fund
 from .sales import get_sale_header
 
 from .transactions import get_transaction_header, post_transaction_header
@@ -201,7 +202,8 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
             transaction_line = TransactionLine(
                 transactionHeaderId=liability_reactivated_transaction_header.id,
                 account=tl.account,
-                amount=-tl.amount
+                amount=-tl.amount,
+                fundId=tl.fundId
             )
             db.add(transaction_line)
         db.commit()
@@ -579,17 +581,24 @@ def make_contract_liability_dormant(db: Session, contract_id: UUID, active_liabi
     )
     db.add(liability_made_dormant_transaction_header)
     db.flush()
+    
+    th = contract.liability_collected_transaction_header
+    if th is None:
+        return
+    fundId = [tl for tl in th.transactionLines if tl.account.type == AccountTypes.LIABILITY][0].fundId
 
     remove_active_liability_transaction_line = TransactionLine(
         transactionHeaderId=liability_made_dormant_transaction_header.id,
         accountId=active_liability_account_id,
-        amount=contract.liability_collected
+        amount=contract.liability_collected,
+        fundId=fundId
     )
 
     add_dormant_liability_transaction_line = TransactionLine(
         transactionHeaderId=liability_made_dormant_transaction_header.id,
         accountId=dormant_liability_account_id,
-        amount=-contract.liability_collected
+        amount=-contract.liability_collected,
+        fundId=fundId
     )
 
     db.add(remove_active_liability_transaction_line)
