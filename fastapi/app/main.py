@@ -65,7 +65,9 @@ if os.environ["PRODUCTION"] == "true":
     db.close()
 
 db = SessionLocal()
-crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
+all_routes = [route for route in app.routes if isinstance(route, APIRoute)]
+crud.ensure_all_permissions_exist(db=db, routes=all_routes)
+crud.remove_permissions_for_nonexistent_routes(db=db, routes=all_routes)
 crud.fully_prune_tree(db=db)
 crud.ensure_default_admin_permissions_exist(db=db)
 crud.keep_admin_account_active(db=db)
