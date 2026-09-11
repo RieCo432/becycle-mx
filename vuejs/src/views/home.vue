@@ -333,7 +333,57 @@ export default {
     };
   },
   methods: {
+    getUpcomingOpenDates() {
+      this.calendarAttributes = [];
+      requests.getUpcomingOpenDates().then((response) => {
+        this.calendarAttributes = response.data.map((openDay, index) => {
+          const utcDate = new Date(`${openDay}T00:00:00Z`);
+          let day = null;
+          switch (utcDate.getDay()) {
+            case 0:
+              day = 'Sunday';
+              break;
+            case 1:
+              day = 'Monday';
+              break;
+            case 2:
+              day = 'Tuesday';
+              break;
+            case 3:
+              day = 'Wednesday';
+              break;
+            case 4:
+              day = 'Thursday';
+              break;
+            case 5:
+              day = 'Friday';
+              break;
+            case 6:
+              day = 'Saturday';
+              break;
+          }
 
+          let label = null;
+          if (day != null) {
+            const time = this.openingTimes.find(d => d.day === day)
+            if (time?.open != null && time?.close != null)
+              label = `${time?.open} - ${time?.close}`;
+          }
+
+          return {
+            key: `openDay-${index}`,
+            dates: utcDate,
+            content: {class: 'opacity-100'},
+            highlight: {color: 'white', fillMode: 'outline'},
+            popover: {
+              label,
+              visibility: 'hover'
+            }
+          };
+        });
+        this.loadingOpenDays = false;
+      });
+    },
     openEditor() {
       this.quillContent = this.aboutUsHtml;
       this.editorActive = true;
@@ -392,7 +442,7 @@ export default {
         });
     },
   },
-  mounted() {
+  async mounted() {
     if (credentialsStore.getTokenType() === 'user') {
       requests.getUserMe().then((response) => {
         this.editAllowed = response.data.appointmentManager;
@@ -401,23 +451,12 @@ export default {
     requests.getAboutUs().then((response) => {
       this.aboutUsHtml = response.data.html;
     });
-    requests.getOpeningTimes().then((response) => {
-      this.openingTimes = response.data;
-      this.loadingOpeningTimes = false;
-    });
-    requests.getUpcomingOpenDates().then((response) => {
-      this.calendarAttributes = [];
-      this.calendarAttributes = response.data.map((openDay, index) => {
-        const utcDate = new Date(`${openDay}T00:00:00Z`);
-        return {
-          key: `openDay-${index}`,
-          dates: utcDate,
-          content: {class: 'opacity-100'},
-          highlight: {color: 'white', fillMode: 'outline'},
-        };
-      });
-      this.loadingOpenDays = false;
-    });
+    const openingTimesResponse = await requests.getOpeningTimes()
+    this.openingTimes = openingTimesResponse.data;
+    this.loadingOpeningTimes = false;
+
+    this.getUpcomingOpenDates();
+
     requests.getAddress().then((response) => {
       this.address = response.data;
       this.loadingAddress = false;
