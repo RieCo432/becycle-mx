@@ -33,7 +33,7 @@ const endDate = ref(dateUtils.convertDateToPickerString(financialYear.end));
 const interval = ref('monthly');
 const intervalLabels = ['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly'];
 const dashboardParts = ref([]);
-const editMode = ref(true);
+const editMode = ref(false);
 
 function parseDashboard(dashboard) {
   return {
