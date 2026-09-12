@@ -132,7 +132,7 @@ async def submit_contract(
 @contracts.put("/contracts/drafts/{contract_id}/sale")
 async def add_sale_to_contract(
         contract_id: UUID,
-        sale_header_id: UUID,
+        sale_header_id: Annotated[UUID, Body(embed=True)],
         db: Session = Depends(dep.get_db)
 ) -> schemas.Contract:
     contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
