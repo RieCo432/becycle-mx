@@ -163,6 +163,12 @@ export const topMenu = [
         childlink: '/finances/sales',
         show: ['user'],
       },
+      {
+        childtitle: 'Contract Forfeiture',
+        childicon: 'heroicons-outline:archive-box-arrow-down',
+        childlink: '/finances/contract-forfeiture',
+        show: ['user'],
+      },
     ],
   },
   {
