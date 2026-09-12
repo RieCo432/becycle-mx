@@ -40,7 +40,7 @@ const props = defineProps({
         Next
       </template>
       <template v-else>
-        <VueSpinner size="20px" class="text-sky-500"/>
+        <VueSpinner size="20px" class="text-primary-500"/>
       </template>
       </Button>
   </div>
