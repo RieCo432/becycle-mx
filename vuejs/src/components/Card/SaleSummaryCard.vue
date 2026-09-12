@@ -43,8 +43,8 @@ export default {
           .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}`"
       class-name="border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full">
     <div class="grid h-full gap-5"
-         :class="saleHeader.transactionHeaderId == null ? 'grid-cols-2' : 'grid-cols-3'">
-      <div class="col-span-2">
+         :class="saleHeader.transactionHeaderId == null ? 'grid-cols-1' : 'grid-cols-2'">
+      <div class="col-span-full 2xl:col-span-1">
         <div class="flex flex-col">
           <div class="w-full flex-shrink">
             <div class="grid grid-cols-11 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
@@ -173,21 +173,10 @@ export default {
             </div>
           </div>
         </div>
-
-        <div class="col-span-1">
-          <div class="flex flex-col">
-            <div class="w-full flex-shrink">
-              <div class="grid grid-cols-10 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                <div class="col-span-full h-10"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-span-2"></div>
       </div>
 
       <div v-if="saleHeader.transactionHeaderId != null"
-           class="col-span-1 flex flex-col">
+           class="col-span-full 2xl:col-span-1 flex flex-col">
         <div class="flex flex-col justify-center items-center mb-2">
           <h4>Payment Transaction</h4>
         </div>
