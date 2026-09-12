@@ -51,10 +51,11 @@ export default {
               <div class="col-span-full text-center">
                 <h4>Sale Content</h4>
               </div>
-              <div class="col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                <div class="col-span-5 text-center h-10">
+              <div class="col-span-full lg:col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+                <div class="col-span-4 text-center h-10">
                   <h4>Catalogue Items</h4>
                 </div>
+                <div class="col-span-1 text-right h-8"></div>
                 <div class="col-span-3 text-left h-8">
                   <h6>Item</h6>
                 </div>
@@ -66,8 +67,8 @@ export default {
                 </div>
                 <template v-for="line in saleHeader.catalogueItemSaleLines"
                           :key="line.id">
-                  <div class="col-span-3 h-8">
-                    <span>{{ line.catalogueItem.name }}</span>
+                  <div class="col-span-3 h-8 truncate">
+                    <span class="w-full">{{ line.catalogueItem.name }}</span>
                   </div>
                   <div class="col-span-1 text-right h-8">
                     <span class="inline align-bottom mb-0">{{ line.quantity }}</span>
@@ -88,11 +89,12 @@ export default {
                     .toFixed(2) }}</h5>
                 </div>
               </div>
-              <div class="col-span-1"/>
-              <div class="col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                <div class="col-span-5 text-center h-10">
+              <div class="col-span-1 hidden lg:block"/>
+              <div class="col-span-full lg:col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+                <div class="col-span-4 text-center h-10">
                   <h4>Bikes</h4>
                 </div>
+                <div class="col-span-1 text-right h-8"></div>
                 <div class="col-span-1 text-left h-8">
                   <h6>Make</h6>
                 </div>
