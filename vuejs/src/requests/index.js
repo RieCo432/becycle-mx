@@ -300,6 +300,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getDraftContract(contractId) {
+    return axiosClient.get(`/contracts/drafts/${contractId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   putDraftContractClient(contractId, clientId) {
     return axiosClient.put(`/contracts/drafts/${contractId}/client`, {
       client_id: clientId,
@@ -332,6 +338,20 @@ export default {
       deposit_receiving_username: depositCollectingUser,
       deposit_receiving_user_password: depositCollectingPassword,
     }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putDraftContractSaleHeader(contractId, saleHeaderId) {
+    return axiosClient.put(`/contracts/drafts/${contractId}/sale`, {
+      sale_header_id: saleHeaderId,
+    }, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteDraftContractSale(contractId) {
+    return axiosClient.delete(`/contracts/drafts/${contractId}/sale`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -1412,6 +1432,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getAccount(accountId) {
+    return axiosClient.get(`/accounts/${accountId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   postNewAccount(name, description, type, owneruserId, ownerGroupId, scheduledClosureDate, isInternal, showInUis) {
     return axiosClient.post('/accounts', {
       name: name,
@@ -1759,5 +1785,20 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
+  },
+  getForfeitableContracts() {
+    return axiosClient.get(`/contracts/forfeitable`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchContractForfeit(contractId, forfeitRevenueAccountId) {
+    return axiosClient.patch(`/contracts/${contractId}/forfeit`,
+      {
+        forfeit_revenue_account_id: forfeitRevenueAccountId,
+      }, {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
   },
 };

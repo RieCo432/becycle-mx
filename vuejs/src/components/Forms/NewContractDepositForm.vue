@@ -287,7 +287,6 @@ const filteredDepositCollectedAssetAccountSuggestions = computed(() => {
       <div class="col-span-full">
         <FormStepNavigation
           :processing-submit="processingSubmit"
-          :submit="submit"
           :go-back="goBack"/>
       </div>
     </div>

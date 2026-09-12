@@ -5,35 +5,21 @@
         class="md:flex justify-between pb-6 md:space-y-0 space-y-3 items-center"
       >
         <h5>{{title}}</h5>
-        <InputGroup
-          v-model="searchTerm"
-          placeholder="Search"
-          type="text"
-          prependIcon="heroicons-outline:search"
-          merged
-        />
       </div>
-      <TableSkeleton v-if="transactions === null" :num-columns="columns.length"></TableSkeleton>
+      <TableSkeleton v-if="loading" :num-columns="columns.length"></TableSkeleton>
       <vue-good-table v-else
         :columns="columns"
         styleClass=" vgt-table bordered centered bg-slate-700"
-        :rows="transactions.sort(transactionSorting)"
+        :rows="transactions"
         :pagination-options="{
           enabled: false,
-          perPage: perpage,
+          position: 'top'
         }"
         :search-options="{
-          enabled: true,
-          externalQuery: searchTerm,
+          enabled: false,
         }"
         :select-options="{
           enabled: false,
-          selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
-          selectioninfoClass: 'custom-class',
-          selectionText: 'rows selected',
-          clearSelectionText: 'clear',
-          disableSelectinfo: true, // disable the select info-500 panel on top
-          selectAllByGroup: true,
         }"
         :group-options="{
           enabled: true,
@@ -77,25 +63,11 @@
             <Icon v-else icon="heroicons-outline:x-mark"/>
           </span>
           <span v-if="props.column.field === 'credit'">
-            <span v-if="props.row.credit > 0">&#163; {{(props.row.credit / 100).toFixed(2)}}</span>
+            <span v-if="props.row.credit > 0">{{ moneyUtils.moneyFormatter(props.row.credit) }}</span>
           </span>
           <span v-if="props.column.field === 'debit'">
-            <span v-if="props.row.debit > 0">&#163; {{(props.row.debit / 100 ).toFixed(2)}}</span>
+            <span v-if="props.row.debit > 0">{{ moneyUtils.moneyFormatter(props.row.debit) }}</span>
           </span>
-        </template>
-        <template #pagination-bottom="props">
-          <div class="py-4 px-3">
-            <Pagination
-              :total="advancedTable.length"
-              :current="current"
-              :per-page="perpage"
-              :pageRange="pageRange"
-              @page-changed="current = $event"
-              :pageChanged="props.pageChanged"
-              :perPageChanged="props.perPageChanged"
-              enableSearch>
-            </Pagination>
-          </div>
         </template>
       </vue-good-table>
     </Card>
@@ -108,6 +80,7 @@ import InputGroup from '@/components/InputGroup';
 import Pagination from '@/components/Pagination';
 import Tooltip from '@/components/Tooltip';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
+import moneyUtils from '@/util/moneyUtils';
 
 export default {
   name: 'TransactionsTable',
@@ -132,16 +105,16 @@ export default {
       type: Boolean,
       default: false,
     },
-  },
-  methods: {
-    transactionSorting(a, b) {
-      return b.createdOn.localeCompare(a.createdOn);
+    loading: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
     return {
+      moneyUtils,
       current: 1,
-      perpage: 10,
+      perpage: 50,
       pageRange: 5,
       searchTerm: '',
       columns: [

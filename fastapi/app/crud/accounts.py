@@ -107,6 +107,14 @@ def get_all_funds(db: Session) -> list[models.Fund]: # TODO: this should be able
     
     return funds
 
+def get_default_fund(db: Session) -> models.Fund:
+    fund = db.scalar(
+        select(models.Fund).where(models.Fund.isDefault == True)
+    )
+    if fund is None:
+        raise HTTPException(status_code=404, detail="Default fund not found")
+    return fund
+
 
 def get_fund(db: Session, fund_id: UUID) -> models.Fund | None:
     fund = db.scalar(

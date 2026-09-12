@@ -305,6 +305,16 @@ const routes = [
         component: () => import('@/views/sales/index.vue'),
       },
       {
+        path: '/finances/contract-forfeiture',
+        name: 'Contract Forfeiture',
+        meta: {
+          title: 'Contract Forfeiture',
+          restrictTo: ['user'],
+          selectNavPath: '/finances/contract-forfeiture',
+        },
+        component: () => import('@/views/finances/contractForfeiture.vue'),
+      },
+      {
         path: '/point-of-sale',
         name: 'Point of Sale',
         meta: {

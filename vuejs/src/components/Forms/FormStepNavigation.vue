@@ -11,7 +11,8 @@ const props = defineProps({
   },
   submit: {
     type: Function,
-    required: true,
+    required: false,
+    default: () => {},
   },
   processingSubmit: {
     type: Boolean,
@@ -33,12 +34,13 @@ const props = defineProps({
     />
     <Button
       btnClass="btn-dark"
+      @click="submit"
       :disabled="processingSubmit">
       <template v-if="!processingSubmit">
         Next
       </template>
       <template v-else>
-        <VueSpinner size="20px" class="text-sky-500"/>
+        <VueSpinner size="20px" class="text-primary-500"/>
       </template>
       </Button>
   </div>

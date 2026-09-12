@@ -43,18 +43,19 @@ export default {
           .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'})}`"
       class-name="border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full">
     <div class="grid h-full gap-5"
-         :class="saleHeader.transactionHeaderId == null ? 'grid-cols-2' : 'grid-cols-3'">
-      <div class="col-span-2">
+         :class="saleHeader.transactionHeaderId == null ? 'grid-cols-1' : 'grid-cols-2'">
+      <div class="col-span-full 2xl:col-span-1">
         <div class="flex flex-col">
           <div class="w-full flex-shrink">
             <div class="grid grid-cols-11 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
               <div class="col-span-full text-center">
                 <h4>Sale Content</h4>
               </div>
-              <div class="col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                <div class="col-span-5 text-center h-10">
+              <div class="col-span-full lg:col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+                <div class="col-span-4 text-center h-10">
                   <h4>Catalogue Items</h4>
                 </div>
+                <div class="col-span-1 text-right h-8"></div>
                 <div class="col-span-3 text-left h-8">
                   <h6>Item</h6>
                 </div>
@@ -66,8 +67,8 @@ export default {
                 </div>
                 <template v-for="line in saleHeader.catalogueItemSaleLines"
                           :key="line.id">
-                  <div class="col-span-3 h-8">
-                    <span>{{ line.catalogueItem.name }}</span>
+                  <div class="col-span-3 h-8 truncate">
+                    <span class="w-full">{{ line.catalogueItem.name }}</span>
                   </div>
                   <div class="col-span-1 text-right h-8">
                     <span class="inline align-bottom mb-0">{{ line.quantity }}</span>
@@ -88,11 +89,12 @@ export default {
                     .toFixed(2) }}</h5>
                 </div>
               </div>
-              <div class="col-span-1"/>
-              <div class="col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                <div class="col-span-5 text-center h-10">
+              <div class="col-span-1 hidden lg:block"/>
+              <div class="col-span-full lg:col-span-5 grid grid-cols-5 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
+                <div class="col-span-4 text-center h-10">
                   <h4>Bikes</h4>
                 </div>
+                <div class="col-span-1 text-right h-8"></div>
                 <div class="col-span-1 text-left h-8">
                   <h6>Make</h6>
                 </div>
@@ -173,21 +175,10 @@ export default {
             </div>
           </div>
         </div>
-
-        <div class="col-span-1">
-          <div class="flex flex-col">
-            <div class="w-full flex-shrink">
-              <div class="grid grid-cols-10 gap-2 divide-x divide-y dark:text-slate-300 text-slate-700 align-middle">
-                <div class="col-span-full h-10"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-span-2"></div>
       </div>
 
       <div v-if="saleHeader.transactionHeaderId != null"
-           class="col-span-1 flex flex-col">
+           class="col-span-full 2xl:col-span-1 flex flex-col">
         <div class="flex flex-col justify-center items-center mb-2">
           <h4>Payment Transaction</h4>
         </div>
