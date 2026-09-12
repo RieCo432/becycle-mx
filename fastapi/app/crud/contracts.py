@@ -11,8 +11,9 @@ from sqlalchemy.orm import Session
 
 import app.models as models
 import app.schemas as schemas
-from .accounts import get_default_fund
+from .accounts import get_account
 from .sales import get_sale_header
+from .users import get_user
 
 from .transactions import get_transaction_header, post_transaction_header
 from app.services.accounts_helpers import AccountTypes
@@ -585,20 +586,20 @@ def make_contract_liability_dormant(db: Session, contract_id: UUID, active_liabi
     th = contract.liability_collected_transaction_header
     if th is None:
         return
-    fundId = [tl for tl in th.transactionLines if tl.account.type == AccountTypes.LIABILITY][0].fundId
+    fund_id = [tl for tl in th.transactionLines if tl.account.type == AccountTypes.LIABILITY][0].fundId
 
     remove_active_liability_transaction_line = TransactionLine(
         transactionHeaderId=liability_made_dormant_transaction_header.id,
         accountId=active_liability_account_id,
         amount=contract.liability_collected,
-        fundId=fundId
+        fundId=fund_id
     )
 
     add_dormant_liability_transaction_line = TransactionLine(
         transactionHeaderId=liability_made_dormant_transaction_header.id,
         accountId=dormant_liability_account_id,
         amount=-contract.liability_collected,
-        fundId=fundId
+        fundId=fund_id
     )
 
     db.add(remove_active_liability_transaction_line)
@@ -608,6 +609,158 @@ def make_contract_liability_dormant(db: Session, contract_id: UUID, active_liabi
 
     post_transaction_header(db=db, transaction_header_id=liability_made_dormant_transaction_header.id, user=admin_user, override_access=True)
 
+
+def get_contracts_to_forfeit(db: Session) -> list[models.Contract]:
+    # Gather the grace period
+    grace_period = None
+    try:
+        grace_period = int(os.environ.get("CONTRACT_FORFEIT_AFTER_GRACE_PERIOD_MONTHS", 6))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={"description": "Error gathering grace period after grace period"})
+    
+    contracts_with_liability_dormant_at_some_point = db.scalars(
+        select(models.Contract)
+        .join(models.TransactionHeader)
+        .where(
+            (models.TransactionHeader.event == "liability_dormant")
+            & (models.Contract.returnedDate == None)
+        )
+    )
+    
+    contracts_to_forfeit = []
+    
+    for contract in contracts_with_liability_dormant_at_some_point:
+        liability_balances: dict[UUID, int] = {}
+        fund_id = None
+    
+        for th in contract.depositTransactionHeaders:
+            for tl in th.transactionLines:
+                if fund_id is None:
+                    fund_id = tl.fundId
+                liability_balances[tl.accountId] = liability_balances.get(tl.accountId, 0) + tl.amount
+    
+        current_liability_account = None
+        is_already_forfeited = False
+    
+        for accountId, balance in liability_balances.items():
+            if balance < 0:
+                account = get_account(db=db, account_id=accountId)
+                if account is not None and account.type == AccountTypes.LIABILITY:
+                    current_liability_account = account
+                    break
+                if account is not None and account.type == AccountTypes.REVENUE and "forfeit" in account.name:
+                    is_already_forfeited = True
+                    break
+    
+        if is_already_forfeited:
+            continue
+    
+        if current_liability_account is None and contract.liability_collected != 0:
+            raise HTTPException(status_code=404, detail={"description": "No current liability account found"})
+    
+        if fund_id is None:
+            raise HTTPException(status_code=404, detail={"description": "No fund ID found"})
+        
+        if current_liability_account is not None and "dormant" in current_liability_account.name:
+            liability_made_dormant_last_transaction_header = db.scalar(
+                select(models.TransactionHeader)
+                .where(
+                    (models.TransactionHeader.event == "liability_dormant")
+                    & (models.TransactionHeader.contractId == contract.id)
+                )
+                .order_by(models.TransactionHeader.postedOn.desc())
+                .limit(1)
+            )
+            
+            if liability_made_dormant_last_transaction_header is None:
+                raise HTTPException(status_code=404, detail={"description": "No liability made dormant transaction found"})
+            
+            forfeiture_date:datetime = (liability_made_dormant_last_transaction_header.postedOn + relativedelta(months=grace_period)).astimezone(timezone.utc)
+
+            if datetime.now(timezone.utc) > forfeiture_date:
+                contracts_to_forfeit.append(contract)
+                
+                
+    return contracts_to_forfeit
+            
+    
+def forfeit_contract(db: Session, contract_id: UUID, forfeit_revenue_account_id: UUID, current_user_id: UUID) -> models.Contract:
+    contract = get_contract(db=db, contract_id=contract_id)
+    forfeit_revenue_account = get_account(db=db, account_id=forfeit_revenue_account_id)
+    current_user = get_user(db=db, user_id=current_user_id)
+    
+    if contract is None:
+        raise HTTPException(status_code=404, detail={"description": "Contract not found"})
+    
+    if forfeit_revenue_account is None:
+        raise HTTPException(status_code=404, detail={"description": "Forfeit revenue account not found"})
+    
+    if current_user is None:
+        raise HTTPException(status_code=404, detail={"description": "Active user not found"})
+    
+    liability_balances: dict[UUID, int] = {}
+    fund_id = None
+    outstanding_liability = 0
+    
+    for th in contract.depositTransactionHeaders:
+        for tl in th.transactionLines:
+            if fund_id is None:
+                fund_id = tl.fundId
+            liability_balances[tl.accountId] = liability_balances.get(tl.accountId, 0) + tl.amount
+            
+    current_liability_account = None
+    
+    for accountId, balance in liability_balances.items():
+        if balance < 0:
+            outstanding_liability = balance
+            current_liability_account = get_account(db=db, account_id=accountId)
+            break
+            
+    if current_liability_account is None:
+        raise HTTPException(status_code=404, detail={"description": "No current liability account found"})
+    
+    if fund_id is None:
+        raise HTTPException(status_code=404, detail={"description": "No fund ID found"})
+    
+    forfeiting_transaction_header = TransactionHeader(
+        contractId=contract.id,
+        event="deposit_forfeited",
+        createdByUserId=current_user_id
+    )
+    
+    db.add(forfeiting_transaction_header)
+    db.flush()
+    
+    remove_liability_transaction_line = TransactionLine(
+        transactionHeaderId=forfeiting_transaction_header.id,
+        accountId=current_liability_account.id,
+        amount=-outstanding_liability,
+        fundId=fund_id
+    )
+    
+    add_revenue_transaction_line = TransactionLine(
+        transactionHeaderId=forfeiting_transaction_header.id,
+        accountId=forfeit_revenue_account.id,
+        amount=outstanding_liability,
+        fundId=fund_id
+    )
+    
+    db.add(remove_liability_transaction_line)
+    db.add(add_revenue_transaction_line)
+    
+    db.commit()
+    
+    try:
+        post_transaction_header(db=db, transaction_header_id=forfeiting_transaction_header.id, user=current_user)
+    except HTTPException as e:
+        db.delete(add_revenue_transaction_line)
+        db.delete(remove_liability_transaction_line)
+        db.delete(forfeiting_transaction_header)
+        db.commit()
+        raise e
+    
+    return contract
+    
 
 def make_all_old_liabilities_dormant(db: Session) -> None:
     # Gather the grace period

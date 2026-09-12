@@ -19,8 +19,8 @@ class TransactionHeader(Base):
     createdByUserId: Mapped[UUID] = mapped_column("createdbyuserid", ForeignKey("users.id"), nullable=False, quote=False, index=True)
     createdByUser: Mapped["User"] = relationship("User", foreign_keys=[createdByUserId], back_populates="transactionHeadersCreated")
 
-    postedOn: Mapped[datetime] = mapped_column("postedon", DateTime, nullable=True, quote=False, index=True)
-    postedByUserId: Mapped[UUID] = mapped_column("postedbyuserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False, index=True)
+    postedOn: Mapped[datetime | None] = mapped_column("postedon", DateTime, nullable=True, quote=False, index=True)
+    postedByUserId: Mapped[UUID | None] = mapped_column("postedbyuserid", ForeignKey("users.id"), nullable=True, server_default=text("NULL"), default=None, quote=False, index=True)
     postedByUser: Mapped["User"] = relationship("User", foreign_keys=[postedByUserId], back_populates="transactionHeadersPosted")
 
     contractId: Mapped[UUID] = mapped_column("contractid", ForeignKey("contracts.id"), nullable=True, quote=False, index=True)
