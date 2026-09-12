@@ -196,7 +196,7 @@ export default {
       return this.revenueAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.revenueAccounts.name ?? '').toLowerCase()))
+          .startsWith((this.revenueAccount.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
