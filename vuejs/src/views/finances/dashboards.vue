@@ -16,6 +16,8 @@ import Switch from '@/components/Switch/index.vue';
 import DashboardChartEditor from '@/components/Editors/DashboardChartEditor.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import dateUtils from '@/util/dateUtils';
+import moneyUtils from '@/util/moneyUtils';
+
 const toast = useToast();
 
 const themeSettingsStore = useThemeSettingsStore();
@@ -184,7 +186,7 @@ function fetchDashboard() {
   };
 
   function applyDefaultChartOptions(chartOptions) {
-    chartOptions.yaxis[0].labels.formatter = (val) => (`\u00A3 ${val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
+    chartOptions.yaxis[0].labels.formatter = moneyUtils.moneyFormatter;
     if (chartOptions?.tooltip?.theme) {
       chartOptions.tooltip.theme = themeSettingsStore.theme;
     }
@@ -208,7 +210,7 @@ function fetchDashboard() {
                       (dataPoint) => (
                         {
                           x: new Date(dataPoint.date).getTime(),
-                          y: dataPoint.value / 100,
+                          y: dataPoint.value,
                         }
                       ),
                     ).toSorted((a, b) => Date.parse(a.x) - Date.parse(b.x)),
@@ -220,7 +222,7 @@ function fetchDashboard() {
                   (seriesData) => (
                     {
                       x: seriesData.name,
-                      y: seriesData.data[0].value / 100,
+                      y: seriesData.data[0].value,
                     }
                   ),
                 ),
