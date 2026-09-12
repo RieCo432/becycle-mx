@@ -11,7 +11,8 @@ const props = defineProps({
   },
   submit: {
     type: Function,
-    required: true,
+    required: false,
+    default: () => {},
   },
   processingSubmit: {
     type: Boolean,
@@ -33,6 +34,7 @@ const props = defineProps({
     />
     <Button
       btnClass="btn-dark"
+      @click="submit"
       :disabled="processingSubmit">
       <template v-if="!processingSubmit">
         Next
