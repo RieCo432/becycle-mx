@@ -1432,6 +1432,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getAccount(accountId) {
+    return axiosClient.get(`/accounts/${accountId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   postNewAccount(name, description, type, owneruserId, ownerGroupId, scheduledClosureDate, isInternal, showInUis) {
     return axiosClient.post('/accounts', {
       name: name,
@@ -1779,5 +1785,20 @@ export default {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
+  },
+  getForfeitableContracts() {
+    return axiosClient.get(`/contracts/forfeitable`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchContractForfeit(contractId, forfeitRevenueAccountId) {
+    return axiosClient.patch(`/contracts/${contractId}/forfeit`,
+      {
+        forfeit_revenue_account_id: forfeitRevenueAccountId,
+      }, {
+        headers: credentialsStore.getApiRequestHeader(),
+        validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      });
   },
 };

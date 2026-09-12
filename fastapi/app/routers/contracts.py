@@ -173,6 +173,11 @@ async def get_paper_contract_suggestions(old_id: str | None = None, db: Session 
         return crud.get_paper_contract_suggestions(db=db, old_id=old_id)
     else:
         return []
+    
+
+@contracts.get("/contracts/forfeitable")
+async def get_forfeitable_contracts(db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
+    return crud.get_contracts_to_forfeit(db=db)
 
 
 @contracts.get("/contracts/{contract_id}")
@@ -282,4 +287,18 @@ async def extend_contract(
 
     email_tasks.add_task(contract.send_creation_email)
     
+    return contract
+
+
+@contracts.patch("/contracts/{contract_id}/forfeit")
+async def forfeit_contract(
+        contract_id: UUID,
+        forfeit_revenue_account_id: Annotated[UUID, Body(embed=True)],
+        email_tasks: BackgroundTasks,
+        current_user: models.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)) -> schemas.Contract:
+
+    contract = crud.forfeit_contract(db=db, contract_id=contract_id, forfeit_revenue_account_id=forfeit_revenue_account_id, current_user_id=current_user.id)
+    email_tasks.add_task(contract.send_deposit_forfeited_email)
+
     return contract
