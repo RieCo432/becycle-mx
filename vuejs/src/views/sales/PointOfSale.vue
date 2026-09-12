@@ -8,18 +8,20 @@ import Modal from '@/components/Modal/Modal.vue';
 import {Icon} from '@iconify/vue';
 import BikeCatalogue from '@/views/bike/BikeCatalogue.vue';
 import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
-import {ref, watch} from 'vue';
+import {computed, ref, watch} from 'vue';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import SaleSummaryCard from '@/components/Card/SaleSummaryCard.vue';
 import {VueSpinner} from 'vue3-spinners';
 import Select from '@/components/Select/index.vue';
+import Alert from '@/components/Alert/index.vue';
 
 const toast = useToast();
 export default {
   name: 'PointOfSale',
   components: {
+    Alert,
     Select,
     SaleSummaryCard,
     ComboboxTextInput,
@@ -56,8 +58,19 @@ export default {
     const browseSales = ref(false);
     const quantityError = ref(null);
     const processingSale = ref(false);
-
     const funds = ref([]);
+
+    const loadedUsers = ref(false);
+    const loadedAccounts = ref(false);
+    const loadedSales = ref(false);
+    const loadedItemCatalogue = ref(false);
+
+    const loadedAll = computed(
+      () => loadedUsers.value &&
+        loadedAccounts.value &&
+        loadedSales.value &&
+        loadedItemCatalogue.value,
+    );
 
     const saleCheckoutSchema = yup.object().shape({
       fundId: yup.string().required(' The fund is required '),
@@ -142,9 +155,11 @@ export default {
     });
 
     function getSales() {
+      loadedSales.value = false;
       requests.getSales(true, false)
         .then((response) => {
           openSales.value = response.data;
+          loadedSales.value = true;
         })
         .catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -238,6 +253,7 @@ export default {
             response.data.id)
             .then((response) => {
               toast.success('Sale completed!', {timeout: 2000});
+              context.emit('saleCompleted');
               closeSale();
               getSales();
             })
@@ -303,13 +319,42 @@ export default {
       funds,
       fundId,
       fundIdError,
+      loadedSales,
+      loadedUsers,
+      loadedAccounts,
+      loadedItemCatalogue,
+      loadedAll,
     };
   },
+  props: {
+    continueSaleHeaderId: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    noAllowNew: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    noAllowBikes: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    checkoutWarning: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
+  emits: ['saleCompleted'],
   created() {
     this.getSales();
     requests.getItemCatalogue(false)
       .then((response) => {
         this.catalogueItems = response.data;
+        this.loadedItemCatalogue = true;
       })
       .catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -323,6 +368,7 @@ export default {
       .then((response) => {
         this.revenueAccounts = response.data.filter((account) => account.type === 'revenue');
         this.assetAccounts = response.data.filter((account) => account.type === 'asset');
+        this.loadedAccounts = true;
       })
       .catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -331,6 +377,7 @@ export default {
     requests.getActiveUsers()
       .then((response) => {
         this.activeUsers = response.data.map((user) => user.username);
+        this.loadedUsers = true;
       })
       .catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -607,7 +654,7 @@ export default {
       return this.revenueAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.catalogueItemRevenueAccount.name ?? '').toLowerCase()))
+          .startsWith((this.catalogueItemRevenueAccount?.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -615,7 +662,7 @@ export default {
       return this.revenueAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.bikeRevenueAccount.name ?? '').toLowerCase()))
+          .startsWith((this.bikeRevenueAccount?.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -623,7 +670,7 @@ export default {
       return this.assetAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.paymentAssetAccount.name ?? '').toLowerCase()))
+          .startsWith((this.paymentAssetAccount?.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -642,6 +689,17 @@ export default {
         this.cancelCheckout();
       }
     },
+    loadedAll(newValue) {
+      if (newValue) {
+        if (this.continueSaleHeaderId) {
+          this.continueSale(this.continueSaleHeaderId);
+        }
+
+        if (this.noAllowBikes) {
+          this.showItems = true;
+        }
+      }
+    },
   },
 };
 </script>
@@ -657,7 +715,20 @@ export default {
         </span>
       </div>
       <div class="flex-grow flex flex-col p-2">
-        <template v-if="currentSale === null">
+        <template v-if="!loadedAll">
+          <div class="flex-1 min-h-full justify-items-center">
+            <Alert
+              type="primary-outline"
+            >
+              Loading PoS. Please wait...
+            </Alert>
+            <VueSpinner
+              size="200px"
+              class="text-primary-500 mt-5"
+            />
+          </div>
+        </template>
+        <template v-else-if="currentSale === null && !noAllowNew">
           <template v-if="!browseSales">
             <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-full">
               <div class="col-span-1 h-full">
@@ -703,9 +774,16 @@ export default {
             </div>
           </template>
         </template>
+        <template v-else-if="currentSale === null && noAllowNew">
+          <div class="flex-1">
+            <h3>Something has gone wrong!. If you are doing a sale from within the contract creation, please remove the sale and try again.</h3>
+          </div>
+        </template>
         <template v-else>
           <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-12">
+            <div
+              v-if="!noAllowNew"
+              class="col-span-12">
               <Button class="w-full dark:bg-slate-900 bg-slate-400"
                       text="Close Sale"
                       @click="closeSale"/>
@@ -729,19 +807,20 @@ export default {
                        class="grid grid-cols-2 gap-5">
                     <div class="col-span-full">
                       <Button
+                        v-if="!noAllowBikes"
                         text="Back"
                         @click="() => {showBikes = null; showItems = null}"
                         class="w-full dark:bg-slate-900 bg-slate-400"/>
                     </div>
                     <div class="col-span-1 row-span-4">
                       <Button
-                        text="New"
+                        text="New Parts"
                         @click="showUsed = false"
                         class="w-full h-full text-6xl dark:bg-slate-900 bg-slate-400 aspect-square"/>
                     </div>
                     <div class="col-span-1 row-span-4">
                       <Button
-                        text="Used"
+                        text="Used Parts"
                         @click="showUsed = true"
                         class="w-full h-full text-6xl dark:bg-slate-900 bg-slate-400 aspect-square"/>
                     </div>
@@ -802,6 +881,16 @@ export default {
               <template v-else>
                 <form @submit.prevent="submitSaleCheckout">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-if="checkoutWarning" class="col-span-full">
+                      <Alert
+                        type="warning-outline"
+                        icon="heroicons-outline:exclamation"
+                      >
+                        <span class="font-semibold">
+                          {{ checkoutWarning }}
+                        </span>
+                      </Alert>
+                    </div>
                     <div class="col-span-full">
                       <Select
                         :options="funds"

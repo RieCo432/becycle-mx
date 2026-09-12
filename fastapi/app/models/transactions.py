@@ -67,7 +67,7 @@ class TransactionLine(Base):
     
     amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)  # value in the smallest unit (penny), positive for debit, negative for credit
     
-    fundId: Mapped[UUID] = mapped_column("fundid", ForeignKey(Fund.id), nullable=True, quote=False, default=None, server_default=text("NULL"))
+    fundId: Mapped[UUID] = mapped_column("fundid", ForeignKey(Fund.id), nullable=False, quote=False)
     fund: Mapped["Fund"] = relationship(Fund, foreign_keys=[fundId], back_populates="transactionLines")
     
     

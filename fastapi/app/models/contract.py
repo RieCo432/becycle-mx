@@ -69,6 +69,8 @@ class Contract(Base):
     depositTransactionHeaders: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.contractId], back_populates="contract")
     photos: Mapped[List["ContractPhoto"]] = relationship("ContractPhoto", foreign_keys=[ContractPhoto.contractId], back_populates="contract")
 
+    saleHeaderId: Mapped[UUID] = mapped_column("saleheaderid", ForeignKey("saleheaders.id"), nullable=True, quote=False)
+    saleHeader: Mapped["SaleHeader"] = relationship("SaleHeader", foreign_keys=[saleHeaderId])
 
     @property
     def liability_collected_transaction_header(self) -> TransactionHeader | None:
