@@ -7,6 +7,7 @@ import moneyUtils from '@/util/moneyUtils';
 import {useThemeSettingsStore} from '@/store/themeSettings';
 import {useToast} from 'vue-toastification';
 import {Icon} from '@iconify/vue';
+import colours from 'tailwindcss/colors';
 
 const themeSettingsStore = useThemeSettingsStore();
 const toast = useToast();
@@ -32,27 +33,27 @@ const loadingAccountsData = ref(true);
 const accountColours = {
   default: {
     class: 'text-sky-500',
-    colour: '#0ff',
+    colour: colours.sky[500],
   },
   asset: {
     class: 'text-green-500',
-    colour: '#00ff00',
+    colour: colours.green[500],
   },
   liability: {
     class: 'text-red-500',
-    colour: '#ff0000',
+    colour: colours.red[500],
   },
   expense: {
     class: 'text-orange-500',
-    colour: '#ff8000',
+    colour: colours.orange[500],
   },
   revenue: {
     class: 'text-yellow-500',
-    colour: '#ffff00',
+    colour: colours.yellow[500],
   },
   equity: {
     class: 'text-purple-500',
-    colour: '#ff00ff',
+    colour: colours.purple[500],
   },
 };
 
