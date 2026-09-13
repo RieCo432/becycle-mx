@@ -116,7 +116,11 @@ export default {
 </script>
 
 <template>
-  <Card gap-null class-name="rounded-3xl" body-class="p-0">
+  <Card
+    gap-null
+    class-name="rounded-3xl"
+    body-class="p-0"
+  >
     <form @submit.prevent="submitCardDetails">
       <div class="grid grid-cols-5 md:grid-cols-9 lg:grid-cols-12">
         <div class="col-span-5">

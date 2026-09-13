@@ -188,7 +188,10 @@ watch(() => props.loading, (newValue) => {
 </script>
 
 <template>
-  <Card :title="title">
+  <Card
+    :title="title"
+    class-name="rounded-3xl"
+  >
     <div class="grid grid-cols-2 gap-5">
       <template v-if="!loading && !loadingAccountsData">
         <template v-for="account in accounts.toSorted((a, b) => a.name.localeCompare(b.name))" :key="account.id">
