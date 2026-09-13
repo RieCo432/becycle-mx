@@ -1801,4 +1801,29 @@ export default {
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       });
   },
+  getMyAccounts() {
+    return axiosClient.get(`/users/me/accounts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getMyGroups() {
+    return axiosClient.get(`/users/me/groups`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getGroupAccounts(groupId) {
+    console.log(`getGroupAccounts(${groupId})`);
+    return axiosClient.get(`/groups/${groupId}/accounts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getUserMyContracts() {
+    return axiosClient.get(`/users/me/contracts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
 };

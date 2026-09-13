@@ -96,9 +96,19 @@ const routes = [
         meta: {
           title: 'User',
           restrictTo: ['user'],
-          selectNavPath: '/me',
+          selectNavPath: '/users/me',
         },
-        component: () => import('@/views/user/me.vue'),
+        component: () => import('@/views/users/me.vue'),
+      },
+      {
+        path: '/users/:userId',
+        name: 'User',
+        meta: {
+          title: 'User',
+          restrictTo: ['user'],
+          selectNavPath: '/users/:userId',
+        },
+        component: () => import('@/views/users/index.vue'),
       },
       {
         path: '/clients/me',
