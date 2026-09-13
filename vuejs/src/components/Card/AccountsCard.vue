@@ -15,15 +15,15 @@ const toast = useToast();
 const props = defineProps({
   accounts: {
     type: Array,
-    required: true,
+    required: false,
   },
   loading: {
     type: Boolean,
-    required: true,
+    required: false,
   },
   title: {
     type: String,
-    required: true,
+    required: false,
   },
 });
 

@@ -10,55 +10,55 @@ import AccountsCard from '@/components/Card/AccountsCard.vue';
 const props = defineProps({
   presentationCard: {
     type: Object,
-    required: true,
+    required: false,
   },
   updateCardDetails: {
     type: Function,
-    required: true,
+    required: false,
   },
   deleteCard: {
     type: Function,
-    required: true,
+    required: false,
   },
   loadingPresentationCard: {
     type: Boolean,
-    required: true,
+    required: false,
   },
   userAccounts: {
     type: Array,
-    required: true,
+    required: false,
   },
   loadingUserAccounts: {
     type: Boolean,
-    required: true,
+    required: false,
   },
   userGroups: {
     type: Array,
-    required: true,
+    required: false,
   },
   loadingUserGroups: {
     type: Boolean,
-    required: true,
+    required: false,
   },
   groupAccounts: {
     type: Array,
-    required: true,
+    required: false,
   },
   loadingGroupAccounts: {
     type: Boolean,
-    required: true,
+    required: false,
   },
   contracts: {
     type: Array,
-    required: true,
+    required: false,
   },
   loadingContracts: {
     type: Boolean,
-    required: true,
+    required: false,
   },
   photoUrl: {
     type: String,
-    required: true,
+    required: false,
   },
 });
 
