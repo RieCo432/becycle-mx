@@ -6,8 +6,7 @@ import UserProfile from '@/views/users/UserProfile.vue';
 
 const toast = useToast();
 
-
-const username = ref('loading...');
+const user = ref(null);
 const presentationCardDetails = ref(null);
 const loadingPresentationCard = ref(true);
 
@@ -65,7 +64,7 @@ function deleteMyCard() {
   });
 }
 requests.getUserMe().then((response) => {
-  username.value = response.data.username;
+  user.value = response.data;
 });
 function getPresentationCard() {
   requests.getMyPresentationCard().then((response) => {
@@ -116,8 +115,6 @@ requests.getMyGroups().then((response) => {
   loadingMyGroups.value = false;
 });
 
-
-
 requests.getMyAccounts().then((response) => {
   myAccounts.value = response.data;
 }).catch((error) => {
@@ -133,7 +130,6 @@ requests.getUserMyContracts().then((response) => {
 }).finally(() => {
   loadingMyContracts.value = false;
 });
-
 
 </script>
 
@@ -152,6 +148,7 @@ requests.getUserMyContracts().then((response) => {
     :loading-group-accounts="loadingMyGroupAccounts"
     :contracts="myContracts"
     :loading-contracts="loadingMyContracts"
+    :user="user"
   />
 </template>
 

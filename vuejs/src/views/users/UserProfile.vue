@@ -60,6 +60,10 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  user: {
+    type: Object,
+    required: false,
+  },
 });
 
 
@@ -89,6 +93,7 @@ const props = defineProps({
       <UserContractsCard
         :loading="loadingContracts"
         :contracts="contracts"
+        :user="user"
       />
     </div>
     <div class="col-span-6">
