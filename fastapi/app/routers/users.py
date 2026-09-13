@@ -131,10 +131,25 @@ async def delete_my_presentation_card(
     return crud.delete_user_presentation_card(db=db, user=user)
 
 @users.get("/users/me/groups")
-async def get_user_groups(
+async def get_my_groups(
         user: models.User = Depends(dep.get_current_active_user),
 ) -> list[schemas.Group]:
     return user.groups
+
+
+@users.get("/users/me/accounts")
+async def get_my_accounts(
+        user: models.User = Depends(dep.get_current_active_user),
+) -> list[schemas.Account]:
+    return user.accountsOwned
+
+
+@users.get("/users/me/contracts")
+async def get_my_contracts(
+        user: models.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.Contract]:
+    return crud.get_contracts_by_user_id(db=db, user_id=user.id)
 
 
 @users.get("/users/{user_id}")
@@ -212,3 +227,22 @@ async def get_user_groups(
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User not found"})
     return user.groups
+
+@users.get("/users/{user_id}/accounts")
+async def get_user_accounts(
+        user_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.Account]:
+    user = crud.get_user(db=db, user_id=user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "User not found"})
+    return user.accountsOwned
+
+@users.get("/users/{user_id}/contracts")
+async def get_user_contracts(
+        user_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.Contract]:
+    return crud.get_contracts_by_user_id(db=db, user_id=user_id)
+
+
