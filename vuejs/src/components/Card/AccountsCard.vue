@@ -179,7 +179,6 @@ function getAccountsData() {
 }
 
 watch(() => props.loading, (newValue) => {
-  console.log('loading changed', newValue);
   if (!newValue) {
     getAccountsData();
   }

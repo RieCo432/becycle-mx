@@ -88,7 +88,6 @@ export default {
     });
 
     watch(() => props.photoUrl, (newValue) => {
-      console.log('photoFile changed', newValue);
       if (!!newValue) {
         files.value.splice(0, files.value.length, {
           preview: props.photoUrl,

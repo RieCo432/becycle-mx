@@ -1814,7 +1814,6 @@ export default {
     });
   },
   getGroupAccounts(groupId) {
-    console.log(`getGroupAccounts(${groupId})`);
     return axiosClient.get(`/groups/${groupId}/accounts`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
