@@ -1352,7 +1352,7 @@ export default {
       },
     );
   },
-  getUserGroups() {
+  getGroups() {
     return axiosClient.get('/groups',
       {
         headers: credentialsStore.getApiRequestHeader(),

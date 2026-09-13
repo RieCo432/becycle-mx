@@ -177,7 +177,7 @@ function deleteCardWrapped() {
   <div class="grid lg:grid-cols-12 grid-cols-6 gap-5">
     <div class="col-span-6">
       <UserPresentationCard
-        :loading="loadingPresentationCard"
+        :loading="loadingPresentationCard || loadingPhoto"
         :presentation-card-details="presentationCardDetails"
         editable
         :update-item-details="updateCardDetailsWrapped"
