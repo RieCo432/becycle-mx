@@ -39,6 +39,10 @@ const props = defineProps({
     type: Function,
     required: false,
   },
+  canEditCard: {
+    type: Boolean,
+    required: false,
+  },
 });
 
 const user = ref(null);
@@ -179,7 +183,7 @@ function deleteCardWrapped() {
       <UserPresentationCard
         :loading="loadingPresentationCard || loadingPhoto"
         :presentation-card-details="presentationCardDetails"
-        editable
+        :editable="canEditCard"
         :update-item-details="updateCardDetailsWrapped"
         :delete-card="deleteCardWrapped"
         :photo-url="photoUrl"

@@ -13,6 +13,7 @@ import UserProfile from '@/views/users/UserProfile.vue';
     :get-user-presentation-card="requests.getMyPresentationCard"
     :delete-card="requests.deleteMyPresentationCard"
     :update-card-details="requests.postMyPresentationCardDetails"
+    :can-edit-card="true"
   />
 </template>
 

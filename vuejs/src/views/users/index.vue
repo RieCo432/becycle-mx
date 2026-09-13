@@ -1,83 +1,23 @@
-<template>
-  <div class="grid lg:grid-cols-12 grid-cols-6 gap-5">
-    <div class="col-span-6">
-      <UserPresentationCard
-          v-if="!loadingPresentationCard"
-          :presentation-card-details="presentationCardDetails"
-          editable
-          :update-item-details="updateMyCardDetails"
-          :delete-card="deleteMyCard"
-      />
-    </div>
-  </div>
-</template>
-
-<script>
+<script setup>
 import requests from '@/requests';
-import UserPresentationCard from '@/components/Card/UserPresentationCard.vue';
-import {useToast} from 'vue-toastification';
+import UserProfile from '@/views/users/UserProfile.vue';
+import {useRoute} from 'vue-router';
 
-const toast = useToast();
-
-export default {
-  name: 'UserMe',
-  components: {
-    UserPresentationCard,
-  },
-  data() {
-    return {
-      username: 'loading...',
-      presentationCardDetails: null,
-      photoUrl: null,
-      loadingPresentationCard: true,
-    };
-  },
-  methods: {
-    updateMyCardDetails(name, bio, photo) {
-      requests.postMyPresentationCardDetails(name, bio, photo).then((response) => {
-        this.presentationCardDetails = response.data;
-        toast.success('Card Updated!', {timeout: 2000});
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
-    },
-    deleteMyCard() {
-      requests.deleteMyPresentationCard().then(() => {
-        this.presentationCardDetails = {
-          name: 'NOT SET',
-          bio: 'NOT SET',
-          id: 'NOTSET',
-          photoContentType: 'image/jpeg',
-        };
-      }).catch((error) => {
-        toast.error(error.response.data.detail.description, {timeout: 2000});
-      });
-    },
-  },
-  created() {
-    requests.getUserMe().then((response) => {
-      this.username = response.data.username;
-    });
-    requests.getMyPresentationCard().then((response) => {
-      this.presentationCardDetails = response.data;
-    }).catch((error) => {
-      if (error.status !== 404) {
-      }
-      this.presentationCardDetails = {
-        name: 'NOT SET',
-        bio: 'NOT SET',
-        id: 'NOTSET',
-        photoContentType: 'image/jpeg',
-      };
-    }).finally(() => {
-      this.loadingPresentationCard = false;
-    });
-  },
-};
-
+const route = useRoute();
+const userId = route.params.userId;
 
 </script>
 
+<template>
+  <UserProfile
+    :get-user="() => requests.getUser(userId)"
+    :get-user-accounts="() => requests.getUserAccounts(userId)"
+    :get-user-contracts="() => requests.getUserContracts(userId)"
+    :get-user-groups="() => requests.getUserGroups(userId)"
+    :get-user-presentation-card="() => requests.getUserPresentationCard(userId)"/>
+<!--    :delete-card="requests.deleteUser"-->
+<!--    :update-card-details="requests.postMyPresentationCardDetails"-->
+</template>
 
 <style scoped lang="scss">
 
