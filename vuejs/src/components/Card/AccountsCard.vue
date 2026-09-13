@@ -147,7 +147,7 @@ function getAccountsData() {
     name: 'My Dashboard',
     queries: JSON.parse(queryString),
   };
-  
+
   requests.getDashboard(dashboardQuery)
     .then((response) => {
       const parts = response.data.parts;
@@ -189,38 +189,43 @@ watch(() => props.loading, (newValue) => {
 
 <template>
   <Card :title="title">
-    <div v-if="!loading && !loadingAccountsData" class="grid grid-cols-2 gap-5">
-      <template v-for="account in accounts.toSorted((a, b) => a.name.localeCompare(b.name))" :key="account.id">
-        <div class="col-span-1 grid grid-cols-7 bg-slate-200 dark:bg-slate-900 p-2 rounded-lg gap-2">
-          <div class="col-span-1 p-3">
-            <Icon :class="`w-full h-full aspect-square self-center ${accountColours[account.type].class} dark:${accountColours[account.type].class}`" icon="heroicons-outline:banknotes" />
-          </div>
-          <div class="col-span-2 items-center">
-            <apexchart
-              class="h-full"
-              type="area"
-              height="65px"
-              width="100%"
-              :options="getChartOptions(account)"
-              :series="accountsData[account.id]"
-            />
-          </div>
-          <div class="col-span-4 grid grid-cols-1 content-between">
+    <div class="grid grid-cols-2 gap-5">
+      <template v-if="!loading && !loadingAccountsData">
+        <template v-for="account in accounts.toSorted((a, b) => a.name.localeCompare(b.name))" :key="account.id">
+          <div class="col-span-1 grid grid-cols-7 bg-slate-200 dark:bg-slate-900 p-2 rounded-lg gap-2">
+            <div class="col-span-1 p-3">
+              <Icon
+                :class="`w-full h-full aspect-square self-center
+                  ${accountColours[account.type].class}
+                  dark:${accountColours[account.type].class}`"
+                icon="heroicons-outline:banknotes" />
+            </div>
+            <div class="col-span-2 items-center">
+              <apexchart
+                class="h-full"
+                type="area"
+                height="65px"
+                width="100%"
+                :options="getChartOptions(account)"
+                :series="accountsData[account.id]"
+              />
+            </div>
+            <div class="col-span-4 grid grid-cols-1 content-between">
             <span class="text-slate-600 dark:text-slate-300 text-sm mb-1 font-medium text-start align-text-top">
                 {{ account.name }}
               </span>
-            <span class="text-slate-900 dark:text-white text-lg font-medium text-start align-text-bottom">
+              <span class="text-slate-900 dark:text-white text-lg font-medium text-start align-text-bottom">
                 {{ moneyUtils.moneyFormatter(account.balance) }}
               </span>
-<!--            <div class="flex space-x-3">-->
-<!--              <div class="flex-1">-->
-<!--                -->
-<!--              </div>-->
-<!--            </div>-->
+            </div>
           </div>
-          
-          
-        </div>
+        </template>
+      </template>
+      <template v-else>
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="col-span-1 h-[74px] bg-[#C4C4C4] dark:bg-slate-500 animate-pulse rounded-lg"/>
       </template>
     </div>
   </Card>
