@@ -9,8 +9,9 @@ const toast = useToast();
 
 const username = ref('loading...');
 const presentationCardDetails = ref(null);
-const photoUrl = ref('null');
 const loadingPresentationCard = ref(true);
+
+const photoUrl = ref('null');
 const loadingPhoto = ref(true);
 
 const loadingMyContracts = ref(true);
@@ -29,6 +30,7 @@ function updateMyCardDetails(name, bio, photo) {
   requests.postMyPresentationCardDetails(name, bio, photo).then((response) => {
     presentationCardDetails.value = response.data;
     toast.success('Card Updated!', {timeout: 2000});
+    getPresentationCard();
   }).catch((error) => {
     toast.error(error.response.data.detail.description, {timeout: 2000});
   });
@@ -39,7 +41,6 @@ function getImage() {
     requests.getPresentationCardPhoto(presentationCardDetails.value.id).then((response) => {
       const photoFile = new File([response.data], {type: presentationCardDetails.value.photoContentType});
       photoUrl.value = window.URL.createObjectURL(photoFile);
-      // this.files.splice(0, this.files.length, Object.assign(photoFile, {preview: this.photoUrl}));
     })
       .catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -58,6 +59,7 @@ function deleteMyCard() {
       id: 'NOTSET',
       photoContentType: 'image/jpeg',
     };
+    photoUrl.value = null;
   }).catch((error) => {
     toast.error(error.response.data.detail.description, {timeout: 2000});
   });
@@ -65,21 +67,27 @@ function deleteMyCard() {
 requests.getUserMe().then((response) => {
   username.value = response.data.username;
 });
-requests.getMyPresentationCard().then((response) => {
-  presentationCardDetails.value = response.data;
-  getImage();
-}).catch((error) => {
-  if (error.status !== 404) {
-  }
-  presentationCardDetails.value = {
-    name: 'NOT SET',
-    bio: 'NOT SET',
-    id: 'NOTSET',
-    photoContentType: 'image/jpeg',
-  };
-}).finally(() => {
-  loadingPresentationCard.value = false;
-});
+function getPresentationCard() {
+  requests.getMyPresentationCard().then((response) => {
+    presentationCardDetails.value = response.data;
+    getImage();
+  }).catch((error) => {
+    if (error.status !== 404) {
+    }
+    presentationCardDetails.value = {
+      name: 'NOT SET',
+      bio: 'NOT SET',
+      id: 'NOTSET',
+      photoContentType: 'image/jpeg',
+    };
+    photoUrl.value = null;
+    loadingPhoto.value = false;
+  }).finally(() => {
+    loadingPresentationCard.value = false;
+  });
+}
+
+getPresentationCard();
 
 requests.getMyGroups().then((response) => {
   myGroups.value = response.data;

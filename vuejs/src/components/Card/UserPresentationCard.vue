@@ -3,7 +3,7 @@ import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
-import {ref, toRef} from 'vue';
+import {ref, toRef, watch} from 'vue';
 import DashButton from '@/components/Button/index.vue';
 import TextInput from '@/components/TextInput/index.vue';
 import {useDropzone} from 'vue3-dropzone';
@@ -22,11 +22,11 @@ export default {
   props: {
     presentationCardDetails: {
       type: Object,
-      required: true,
+      required: false,
     },
     editable: {
       type: Boolean,
-      required: true,
+      required: false,
     },
     updateItemDetails: {
       type: Function,
@@ -53,7 +53,7 @@ export default {
       this.bio = this.presentationCardDetails.bio;
     },
   },
-  setup(props) {
+  setup(props, {emit}) {
     const inEditMode = ref(false);
     const isOldPhoto = ref(true);
     const updateItemDetails = toRef(props, 'updateItemDetails');
@@ -85,6 +85,17 @@ export default {
       updateItemDetails.value(name.value, bio.value, !isOldPhoto.value ? files.value[0] : undefined);
       inEditMode.value = false;
       isOldPhoto.value = true;
+    });
+
+    watch(() => props.photoUrl, (newValue) => {
+      console.log('photoFile changed', newValue);
+      if (!!newValue) {
+        files.value.splice(0, files.value.length, {
+          preview: props.photoUrl,
+        });
+      } else {
+        files.value.splice(0, files.value.length);
+      }
     });
 
     return {
@@ -187,7 +198,7 @@ export default {
                   </DashButton>
                 </div>
               </template>
-              
+
             </div>
             <div class="col-span-1 p-3">
               <template v-if="loading">
