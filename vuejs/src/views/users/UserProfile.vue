@@ -178,8 +178,8 @@ function deleteCardWrapped() {
 </script>
 
 <template>
-  <div class="grid lg:grid-cols-12 grid-cols-6 gap-5">
-    <div class="col-span-6">
+  <div class="grid grid-cols-12 gap-5">
+    <div class="col-span-full xl:col-span-6">
       <UserPresentationCard
         :loading="loadingPresentationCard || loadingPhoto"
         :presentation-card-details="presentationCardDetails"
@@ -189,7 +189,7 @@ function deleteCardWrapped() {
         :photo-url="photoUrl"
       />
     </div>
-    <div class="col-span-6">
+    <div class="col-span-full xl:col-span-6">
       <AccountsCard
         title="User Accounts"
         :accounts="accounts"
@@ -197,20 +197,20 @@ function deleteCardWrapped() {
         columns="2"
       />
     </div>
-    <div class="col-span-12">
+    <div class="col-span-full">
       <UserContractsCard
         :loading="loadingContracts"
         :contracts="contracts"
         :user="user"
       />
     </div>
-    <div class="col-span-3">
+    <div class="col-span-full xl:col-span-3">
       <GroupsCard
         :loading="loadingGroups"
         :groups="groups"
       />
     </div>
-    <div class="col-span-9">
+    <div class="col-span-full xl:col-span-9">
       <AccountsCard
         title="Group Accounts"
         :accounts="groupAccounts"
