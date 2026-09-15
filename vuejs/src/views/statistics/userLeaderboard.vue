@@ -3,8 +3,6 @@ import AdvancedTable from '@/components/Tables/AdvancedTable.vue';
 import Card from '@/components/Card/index.vue';
 import requests from '@/requests';
 
-// TODO: deposit amount calculations need updated
-
 export default {
   name: 'userLeaderboard',
   components: {Card, AdvancedTable},
@@ -30,26 +28,6 @@ export default {
         {
           field: 'contractsReturned',
           label: 'Returns Accepted',
-          type: 'number',
-        },
-        {
-          field: 'depositsCollected',
-          label: 'Deposits Collected',
-          type: 'number',
-        },
-        {
-          field: 'depositAmountCollected',
-          label: 'Deposit Amount Collected',
-          type: 'number',
-        },
-        {
-          field: 'depositsReturned',
-          label: 'Deposits Returned',
-          type: 'number',
-        },
-        {
-          field: 'depositAmountReturned',
-          label: 'Deposit Amount Returned',
           type: 'number',
         },
       ],

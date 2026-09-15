@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fromGroup relative"
+    class="fromGroup relative w-full h-full"
     :class="`${error ? 'has-error' : ''}  ${horizontal ? 'flex' : ''} ${
       validate ? 'is-valid' : ''
     } `"
@@ -14,7 +14,7 @@
     >
       {{ label }}</label
     >
-    <div class="relative" :class="horizontal ? 'flex-1' : ''">
+    <div class="relative h-full w-full" :class="horizontal ? 'flex-1' : ''">
       <textarea
         :name="name"
         :placeholder="placeholder"

@@ -37,7 +37,10 @@
         }"
       >
         <template v-slot:table-row="props">
-          <span v-if="props.column.field === 'username'" class="block w-full">
+          <span
+            @click="viewUser(props.row.id)"
+            v-if="props.column.field === 'username'"
+            class="block w-full">
             <span
                 class="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25"
                 :class="props.row.softDeleted
@@ -174,6 +177,12 @@ export default {
     userIsAdmin: {
       type: Boolean,
       default: false,
+    },
+  },
+  methods: {
+    viewUser(userId) {
+      const routeData = this.$router.resolve({path: `/users/${userId}`});
+      window.open(routeData.href, '_blank');
     },
   },
   data() {

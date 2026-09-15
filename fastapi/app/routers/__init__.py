@@ -4,7 +4,6 @@ from .bikes import bikes
 from .clients import clients
 from .contracts import contracts
 from .depositExchanges import deposit_exchanges
-from .finances import finances
 from .maps import maps
 from .public import public
 from .settings import settings
@@ -24,3 +23,4 @@ from .catalogue import catalogue
 from .sales import sales
 from .bugReports import bug_reports
 from .photos import photos
+from .dashboards import dashboards

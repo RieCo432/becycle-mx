@@ -56,6 +56,15 @@ export default {
     const isInWriteMode = ref(false);
     const userSelectionOptionsStatic = ref(true);
 
+    let fundId = null;
+    requests.getFunds()
+      .then((response) => {
+        fundId = response.data.find((fund) => fund.isDefault).id;
+      })
+      .catch((error) => {
+        toast.error(error.response.data.detail.description, {timeout: 5000});
+      });
+
     const steps = [
       {
         id: 1,
@@ -174,15 +183,19 @@ export default {
             {
               amount: depositAmountCollected.value,
               accountId: depositSettledLiabilityAccount.value.id,
+              fundId: fundId,
             },
             {
               amount: -Math.round(depositAmountReturned.value * 100),
-              accountId: depositSettledAssetAccount.value.id},
+              accountId: depositSettledAssetAccount.value.id,
+              fundId: fundId,
+            },
 
             ...((depositAmountReturned.value * 100 < depositAmountCollected.value) ?
               [{
                 amount: -Math.round(depositAmountCollected.value - depositAmountReturned.value * 100),
                 accountId: depositSettledRevenueAccount.value.id,
+                fundId: fundId,
               }] :
               []
             ),

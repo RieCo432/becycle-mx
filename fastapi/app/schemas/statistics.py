@@ -11,10 +11,6 @@ class UserLeaderboard(BaseModel):
     contractsDone: int
     contractsChecked: int
     contractsReturned: int
-    depositsCollected: int
-    depositAmountCollected: int
-    depositsReturned: int
-    depositAmountReturned: int
 
 
 class ClientLeaderboard(BaseModel):

@@ -18,11 +18,18 @@ accounts = APIRouter(
 async def get_accounts(
         ui_filters: Annotated[List[str] | None, Query()] = None, 
         types: Annotated[List[str] | None, Query()] = None,
-        project_id: str | None = None,
         for_user: bool = False,
         user: models.User = Depends(dep.get_current_active_user),
         db: Session = Depends(dep.get_db)) -> list[schemas.Account]:
-    return crud.get_accounts(db=db, ui_filters=ui_filters, types=types, projectId=project_id, for_user = user if for_user else None)
+    return crud.get_accounts(db=db, ui_filters=ui_filters, types=types, for_user = user if for_user else None)
+
+
+@accounts.get("/accounts/deposits")
+async def get_deposit_book(
+        only_asset_accounts: bool = True,
+        only_deposit_bearer_accounts: bool = True,
+        db: Session = Depends(dep.get_db)) -> schemas.DepositAccountBalances:
+    return crud.get_deposit_account_balances(db=db, only_asset_accounts=only_asset_accounts, only_deposit_bearer_accounts=only_deposit_bearer_accounts)
 
 
 @accounts.get("/accounts/{account_id}")
@@ -46,6 +53,11 @@ async def update_account(account_id: UUID, updated_account_data: schemas.Account
 @accounts.patch("/accounts/{account_id}/close")
 async def close_account(account_id: UUID, db: Session = Depends(dep.get_db), user: models.User = Depends(dep.get_current_active_user)) -> schemas.Account:
     account = crud.get_account(db=db, account_id=account_id)
+    if account is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"description": f"Account with ID {account_id} not found"}
+        )
     if account.balance != 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -58,6 +70,7 @@ async def close_account(account_id: UUID, db: Session = Depends(dep.get_db), use
         )
     return crud.close_account(db=db, account_id=account_id, user=user)
 
+
 @accounts.patch("/accounts/{account_id}/reopen")
 async def reopen_account(account_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.Account:
     account = crud.get_account(db=db, account_id=account_id)
@@ -67,3 +80,11 @@ async def reopen_account(account_id: UUID, db: Session = Depends(dep.get_db)) ->
             detail={"description": "Account is not closed."}
         )
     return crud.reopen_account(db=db, account_id=account_id)
+
+
+@accounts.post("/accounts/dashboard")
+async def get_accounts_dashboard(
+        dashboard_queries: schemas.DashboardQuery,
+        db: Session = Depends(dep.get_db)
+) -> schemas.DashboardData:
+    return crud.get_accounts_dashboard(db=db, dashboard_queries=dashboard_queries)

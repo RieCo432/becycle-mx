@@ -92,13 +92,23 @@ const routes = [
       },
       {
         path: '/users/me',
+        name: 'UserMe',
+        meta: {
+          title: 'User',
+          restrictTo: ['user'],
+          selectNavPath: '/users/me',
+        },
+        component: () => import('@/views/users/me.vue'),
+      },
+      {
+        path: '/users/:userId',
         name: 'User',
         meta: {
           title: 'User',
           restrictTo: ['user'],
-          selectNavPath: '/me',
+          selectNavPath: '/users/:userId',
         },
-        component: () => import('@/views/user/me.vue'),
+        component: () => import('@/views/users/index.vue'),
       },
       {
         path: '/clients/me',
@@ -225,24 +235,14 @@ const routes = [
         component: () => import('@/views/finances/depositBalances.vue'),
       },
       {
-        path: '/finances/deposit-charts',
-        name: 'Deposit Charts',
+        path: '/finances/dashboards',
+        name: 'Deposit Dashboards',
         meta: {
-          title: 'Deposit Charts',
+          title: 'Dashboards',
           restrictTo: ['user'],
-          selectNavPath: '/finances/deposit-charts',
+          selectNavPath: '/finances/dashboards',
         },
-        component: () => import('@/views/finances/depositCharts.vue'),
-      },
-      {
-        path: '/finances/cash-flow',
-        name: 'Cash Flow',
-        meta: {
-          title: 'Cash Flow',
-          restrictTo: ['user'],
-          selectNavPath: '/finances/cash-flow',
-        },
-        component: () => import('@/views/finances/cashFlow.vue'),
+        component: () => import('@/views/finances/dashboards.vue'),
       },
       {
         path: '/finances/expenses/submit', // TODO: this needs deleted
@@ -313,6 +313,16 @@ const routes = [
           selectNavPath: '/finances/sales',
         },
         component: () => import('@/views/sales/index.vue'),
+      },
+      {
+        path: '/finances/contract-forfeiture',
+        name: 'Contract Forfeiture',
+        meta: {
+          title: 'Contract Forfeiture',
+          restrictTo: ['user'],
+          selectNavPath: '/finances/contract-forfeiture',
+        },
+        component: () => import('@/views/finances/contractForfeiture.vue'),
       },
       {
         path: '/point-of-sale',

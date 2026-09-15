@@ -7,6 +7,7 @@ from .transactions import TransactionHeader
 from .user import User
 from .client import Client
 from .bike import Bike
+from .sales import SaleHeader
 
 class CrimeReportBase(BaseModel):
     crimeNumber: str
@@ -61,6 +62,9 @@ class Contract(ContractPublic):
     
     client: Client | None = None
     bike: Bike | None = None
+    
+    saleHeaderId: UUID | None = None
+    saleHeader: SaleHeader | None = None
 
     depositTransactionHeaders: List[TransactionHeader] = []
 

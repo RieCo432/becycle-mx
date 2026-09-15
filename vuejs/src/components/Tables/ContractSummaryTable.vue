@@ -4,9 +4,10 @@
       <div
         class="md:flex justify-between pb-6 md:space-y-0 space-y-3 items-center"
       >
-        <h5>{{title}}</h5>
+        <h5 v-if="title">{{title}}</h5>
         <InputGroup
-          v-model="searchTerm"
+          @update:modelValue="$emit('update:searchTerm', $event)"
+          :modelValue="searchTerm"
           placeholder="Search"
           type="text"
           prependIcon="heroicons-outline:search"
@@ -23,7 +24,7 @@
           perPage: perpage,
         }"
         :search-options="{
-          enabled: true,
+          enabled: false,
           externalQuery: searchTerm,
         }"
         :select-options="{
@@ -122,6 +123,24 @@
               {{ props.row.status }}
             </span>
           </span>
+          <span v-if="props.column.field === 'role'" class="block w-full">
+            <span
+              class="inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25"
+              :class="`${
+                props.row.role === 'Mechanic'
+                  ? 'text-success-500 bg-success-500'
+                  : ''
+              }
+            ${
+              props.row.role === 'Safety'
+                ? 'text-warning-500 bg-warning-500'
+                : ''
+            }
+             `"
+            >
+              {{ props.row.role }}
+            </span>
+          </span>
           <div v-if="props.column.field === 'action'" class="flex space-x-3 rtl:space-x-reverse">
             <Tooltip placement="top" arrow theme="dark" v-for="action in actions" :key="action.id">
               <template #button>
@@ -180,7 +199,7 @@ export default {
       required: true,
     },
     title: {
-      required: true,
+      required: false,
     },
     viewContract: {
       type: Function,
@@ -190,13 +209,17 @@ export default {
       type: Boolean,
       required: true,
     },
+    searchTerm: {
+      type: String,
+      default: '',
+    },
   },
+  emits: ['update:searchTerm'],
   data() {
     return {
       current: 1,
       perpage: 10,
       pageRange: 5,
-      searchTerm: '',
     };
   },
 };

@@ -5,13 +5,23 @@ import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 import requests from '@/requests';
 import {useThemeSettingsStore} from '@/store/themeSettings';
+import dateUtils from '@/util/dateUtils';
+import Icon from '@/components/Icon/index.vue';
+import DashButton from '@/components/Button/index.vue';
 
 const themeSettingsStore = useThemeSettingsStore();
+
+// Default period is the current financial year
+const financialYear = dateUtils.getFinancialYear();
+
+const initialStartDate = dateUtils.convertDateToPickerString(financialYear.start);
+const initialEndDate = dateUtils.convertDateToPickerString(financialYear.end);
 
 
 export default {
   name: 'contractCharts',
   components: {
+    DashButton, Icon,
     Card,
     VueSlider,
   },
@@ -19,15 +29,15 @@ export default {
     return {
       interval: 'monthly',
       gracePeriod: 182,
-      startDate: null,
-      endDate: null,
+      startDate: initialStartDate,
+      endDate: initialEndDate,
       chartOptions: {
         chart: {
           type: 'area',
           height: 300,
           stacked: true,
           zoom: {
-            enabled: true,
+            enabled: false,
             allowMouseWheelZoom: false,
           },
         },
@@ -91,10 +101,14 @@ export default {
           enabled: true,
         },
         legend: {
+          show: true,
           position: 'bottom',
           fontSize: '16px',
           fontFamily: 'Inter',
           fontWeight: 400,
+          horizontalAlign: 'left',
+          clusterGroupedSeriesOrientation: 'vertical',
+          height: '100px',
           labels: {
             colors: '#CBD5E1',
           },
@@ -144,53 +158,37 @@ export default {
     };
   },
   methods: {
-    updateStartDate(newStartDate) {
-      const newStartDateParsed = new Date(Date.parse(newStartDate));
-      const oldStartDateParsed = this.startDate ? new Date(Date.parse(this.startDate)) : null;
-      if (!oldStartDateParsed || newStartDateParsed < oldStartDateParsed) {
-        this.startDate = newStartDate;
-      }
-    },
-    updateEndDate(newEndDate) {
-      const newEndDateParsed = new Date(Date.parse(newEndDate));
-      const oldEndDateParsed = this.endDate ? new Date(Date.parse(this.endDate)) : null;
-      if (!oldEndDateParsed || newEndDateParsed > oldEndDateParsed) {
-        this.endDate = newEndDate;
-      }
-    },
     fetchTotalContractsSeries() {
-      requests.getTotalContractsDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
-        this.totalContractSeries = response.data;
-        this.updateStartDate(this.totalContractSeries[0].data[0][0]);
-        this.updateEndDate(this.totalContractSeries[0].data[this.totalContractSeries[0].data.length -1][0]);
-      });
+      requests.getTotalContractsDateSeries(this.interval, this.startDate, this.endDate)
+        .then((response) => {
+          this.totalContractSeries = response.data;
+        });
     },
     fetchActiveContractsSeries() {
-      requests.getActiveContractsDateSeries(this.interval, this.gracePeriod, this.startDate, this.endDate).then((response) => {
-        this.activeContractSeries = response.data;
-        this.updateStartDate(this.activeContractSeries[0].data[0][0]);
-        this.updateEndDate(this.activeContractSeries[0].data[this.activeContractSeries[0].data.length -1][0]);
-      });
+      requests.getActiveContractsDateSeries(this.interval, this.gracePeriod, this.startDate, this.endDate)
+        .then((response) => {
+          this.activeContractSeries = response.data;
+        });
     },
     fetchNewContractsSeries() {
-      requests.getNewContractsDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
-        this.newContractSeries = response.data;
-        this.updateStartDate(this.newContractSeries[0].data[0][0]);
-        this.updateEndDate(this.newContractSeries[0].data[this.newContractSeries[0].data.length -1][0]);
-      });
+      requests.getNewContractsDateSeries(this.interval, this.startDate, this.endDate)
+        .then((response) => {
+          this.newContractSeries = response.data;
+        });
     },
     fetchReturnedContractsSeries() {
-      requests.getReturnedContractsDateSeries(this.interval, this.startDate, this.endDate).then((response) => {
-        this.returnedContractSeries = response.data;
-        this.updateStartDate(this.returnedContractSeries[0].data[0][0]);
-        this.updateEndDate(this.returnedContractSeries[0].data[this.returnedContractSeries[0].data.length -1][0]);
-      });
+      requests.getReturnedContractsDateSeries(this.interval, this.startDate, this.endDate)
+        .then((response) => {
+          this.returnedContractSeries = response.data;
+        });
     },
     fetchContractsStatus() {
-      requests.getContractsStatus(this.gracePeriod, this.startDate, this.endDate).then((response) => {
-        this.contractsStatusChartOptions.labels.splice(0, this.contractsStatusChartOptions.labels.length, ...Object.keys(response.data));
-        this.contractsStatusSeries = Object.values(response.data);
-      });
+      requests.getContractsStatus(this.gracePeriod, this.startDate, this.endDate)
+        .then((response) => {
+          this.contractsStatusChartOptions.labels
+            .splice(0, this.contractsStatusChartOptions.labels.length, ...Object.keys(response.data));
+          this.contractsStatusSeries = Object.values(response.data);
+        });
     },
     fetchAllSeries() {
       this.fetchTotalContractsSeries();
@@ -203,34 +201,23 @@ export default {
       this.fetchContractsStatus();
       this.fetchActiveContractsSeries();
     },
-    handleSelection(chart, {xaxis}) {
-      if (xaxis.min) {
-        const newStartDate = new Date(xaxis.min);
-        this.startDate = `${newStartDate.getUTCFullYear()}-${(newStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}
-        -${newStartDate.getUTCDate().toString().padStart(2, '0')}`;
-      } else {
-        this.startDate = null;
-      }
-      if (xaxis.max) {
-        const newEndDate = new Date(xaxis.max);
-        this.endDate = `${newEndDate.getUTCFullYear()}-${(newEndDate.getUTCMonth() + 1).toString().padStart(2, '0')}
-        -${newEndDate.getUTCDate().toString().padStart(2, '0')}`;
-      } else {
-        this.endDate = null;
-      }
-      this.fetchAllSeries();
+    changeYear(delta) {
+      const end = new Date(this.endDate);
+      const start = new Date(this.startDate);
+
+      end.setUTCFullYear(end.getUTCFullYear() + delta);
+      start.setUTCFullYear(start.getUTCFullYear() + delta);
+
+      this.endDate = dateUtils.convertDateToPickerString(end);
+      this.startDate = dateUtils.convertDateToPickerString(start);
     },
   },
   watch: {
-    startDate(newStartDate, oldStartDate) {
-      if (oldStartDate !== null && newStartDate !== oldStartDate) {
-        this.fetchAllSeries();
-      }
+    startDate() {
+      this.fetchAllSeries();
     },
-    endDate(newEndDate, oldEndDate) {
-      if (oldEndDate !== null && newEndDate !== oldEndDate) {
-        this.fetchAllSeries();
-      }
+    endDate() {
+      this.fetchAllSeries();
     },
   },
   created() {
@@ -240,123 +227,131 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-12">
+  <div class="grid grid-cols-12 lg:grid-cols-8 2xl:grid-cols-10 gap-5">
+    <div class="col-span-full 2xl:col-span-2">
       <Card title="Controls">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-12 lg:col-span-6 items-center my-auto">
+        <div class="grid grid-cols-1 gap-5">
+          <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Granularity</label>
             <vue-slider
-                :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
-                name="interval"
-                v-model="interval"
-                direction="ltr"
-                :drag-on-click="true"
-                :clickable="false"
-                width="100%"
-                :max="56"
-                :min="0"
-                :interval="7"
-                class="m-auto"
-                @drag-end="fetchAllSeries"
+              :data="['daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'semiyearly', 'yearly']"
+              name="interval"
+              v-model="interval"
+              direction="ltr"
+              :drag-on-click="true"
+              :clickable="false"
+              width="100%"
+              :max="56"
+              :min="0"
+              :interval="7"
+              class="m-auto"
+              @drag-end="fetchAllSeries"
             ></vue-slider>
           </div>
-          <div class="col-span-12 lg:col-span-6 items-center my-auto">
+          <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Grace Period (Days)</label>
             <vue-slider
-                name="gracePeriod"
-                v-model="gracePeriod"
-                direction="ltr"
-                :drag-on-click="true"
-                :clickable="false"
-                width="100%"
-                :max="371"
-                :min="0"
-                :interval="7"
-                class="m-auto"
-                @drag-end="fetchGracePeriodDependants"
+              name="gracePeriod"
+              v-model="gracePeriod"
+              direction="ltr"
+              :drag-on-click="true"
+              :clickable="false"
+              width="100%"
+              :max="371"
+              :min="0"
+              :interval="7"
+              class="m-auto"
+              @drag-end="fetchGracePeriodDependants"
             ></vue-slider>
           </div>
-          <div class="col-span-6 content-center">
+          <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Period Start</label>
             <flat-pickr
-                class="form-control m-auto"
-                name="startDate"
-                id="d3"
-                placeholder="dd-mm-yyyy"
-                v-model="startDate"
-                ref="startDatePicker"
-                :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+              class="form-control m-auto"
+              name="startDate"
+              id="d3"
+              placeholder="dd-mm-yyyy"
+              v-model="startDate"
+              ref="startDatePicker"
+              :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
             >
             </flat-pickr>
           </div>
-          <div class="col-span-6 content-center">
+          <div class="col-span-1 items-center my-auto">
             <label class="text-slate-700 dark:text-slate-300">Period End</label>
             <flat-pickr
-                class="form-control m-auto"
-                name="endDate"
-                id="d3"
-                placeholder="dd-mm-yyyy"
-                v-model="endDate"
-                :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+              class="form-control m-auto"
+              name="endDate"
+              id="d3"
+              placeholder="dd-mm-yyyy"
+              v-model="endDate"
+              :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
             >
             </flat-pickr>
           </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-12 lg:col-span-6">
-      <Card title="Total Contracts">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="area"
-                       :options="chartOptions" :series="totalContractSeries"></apexchart>
-          </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-12 lg:col-span-6">
-      <Card title="Active Contracts">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area"
-                       :options="chartOptions" :series="activeContractSeries"></apexchart>
-          </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-12 lg:col-span-6">
-      <Card title="New Contracts">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area"
-                       :options="chartOptions" :series="newContractSeries"></apexchart>
-          </div>
-        </div>
-      </Card>
-    </div>
-    <div class="col-span-12 lg:col-span-6">
-      <Card title="Returned Contracts">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart class="text-slate-700 dark:text-slate-300" type="area"
-                       :options="chartOptions" :series="returnedContractSeries"></apexchart>
+          <div class="col-span-1 grid grid-cols-2 gap-5">
+            <DashButton
+              class="btn-sm mx-5"
+              @click="changeYear(-1)">
+              <Icon icon="heroicons-outline:chevron-left"/>
+            </DashButton>
+            <DashButton
+              class="btn-sm mx-5"
+              @click="changeYear(1)">
+              <Icon icon="heroicons-outline:chevron-right"/>
+            </DashButton>
           </div>
         </div>
       </Card>
     </div>
     <div class="col-span-12 lg:col-span-4">
-      <Card title="Contracts Status">
-        <div class="grid grid-cols-12 gap-5">
-          <div class="col-span-full">
-            <apexchart @zoomed="handleSelection" class="text-slate-700 dark:text-slate-300" type="donut"
-                       :options="contractsStatusChartOptions" :series="contractsStatusSeries"></apexchart>
-          </div>
-        </div>
+      <Card title="Total Contracts">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300"
+          type="area"
+          :options="chartOptions"
+          :series="totalContractSeries"/>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
+      <Card title="Active Contracts">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300"
+          type="area"
+          :options="chartOptions"
+          :series="activeContractSeries"/>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4 2xl:col-span-2 row-start-6 lg:row-start-4 2xl:row-start-2 min-h-96">
+      <Card title="Contracts Status" className="h-full">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300 w-full h-full"
+          type="donut"
+          height="100%"
+          width="100%"
+          :options="contractsStatusChartOptions"
+          :series="contractsStatusSeries"/>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
+      <Card title="New Contracts">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300"
+          type="area"
+          :options="chartOptions"
+          :series="newContractSeries"/>
+      </Card>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
+      <Card title="Returned Contracts">
+        <apexchart
+          class="text-slate-700 dark:text-slate-300"
+          type="area"
+          :options="chartOptions"
+          :series="returnedContractSeries"/>
       </Card>
     </div>
   </div>
-
 </template>
 
 <style lang="scss">

@@ -5,11 +5,12 @@ from pydantic import BaseModel, ConfigDict
 from typing import List
 
 from .user import User
-from .accounts import Account
+from .accounts import Account, Fund
 
 class TransactionLineBase(BaseModel):
     amount: int
     accountId: UUID
+    fundId: UUID
     
 class TransactionLineCreate(TransactionLineBase):
     pass
@@ -19,6 +20,7 @@ class TransactionLine(TransactionLineBase):
     id: UUID
     transactionHeaderId: UUID
     account: Account
+    fund: Fund
     
     
 class TransactionHeaderBase(BaseModel):
@@ -48,6 +50,7 @@ class TransactionLineFormatted(BaseModel):
     accountName: str
     credit: int = 0
     debit: int = 0
+    fundName: str
     
     
 class TransactionHeaderFormatted(BaseModel):

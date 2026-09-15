@@ -129,6 +129,34 @@ async def submit_contract(
     return contract_draft
 
 
+@contracts.put("/contracts/drafts/{contract_id}/sale")
+async def add_sale_to_contract(
+        contract_id: UUID,
+        sale_header_id: Annotated[UUID, Body(embed=True)],
+        db: Session = Depends(dep.get_db)
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    sale_header = crud.get_sale_header(db=db, sale_header_id=sale_header_id)
+    
+    if sale_header.transactionHeaderId is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"description": "Cannot add completed sale to contract!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    return crud.add_sale_to_contract(db=db, contract_id=contract_draft.id, sale_header_id=sale_header.id)
+
+@contracts.delete("/contracts/drafts/{contract_id}/sale")
+async def delete_sale_from_contract(
+        contract_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> schemas.Contract:
+    contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
+    
+    return crud.delete_sale_from_contract(db=db, contract_id=contract_id)
+
+
 @contracts.get("/contracts/types")
 async def get_contract_types(db: Session = Depends(dep.get_db)) -> list[schemas.ContractType]:
     return crud.get_contract_types(db=db)
@@ -145,6 +173,11 @@ async def get_paper_contract_suggestions(old_id: str | None = None, db: Session 
         return crud.get_paper_contract_suggestions(db=db, old_id=old_id)
     else:
         return []
+    
+
+@contracts.get("/contracts/forfeitable")
+async def get_forfeitable_contracts(db: Session = Depends(dep.get_db)) -> list[schemas.Contract]:
+    return crud.get_contracts_to_forfeit(db=db)
 
 
 @contracts.get("/contracts/{contract_id}")
@@ -254,4 +287,18 @@ async def extend_contract(
 
     email_tasks.add_task(contract.send_creation_email)
     
+    return contract
+
+
+@contracts.patch("/contracts/{contract_id}/forfeit")
+async def forfeit_contract(
+        contract_id: UUID,
+        forfeit_revenue_account_id: Annotated[UUID, Body(embed=True)],
+        email_tasks: BackgroundTasks,
+        current_user: models.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)) -> schemas.Contract:
+
+    contract = crud.forfeit_contract(db=db, contract_id=contract_id, forfeit_revenue_account_id=forfeit_revenue_account_id, current_user_id=current_user.id)
+    email_tasks.add_task(contract.send_deposit_forfeited_email)
+
     return contract

@@ -16,7 +16,7 @@ from .appointments import get_appointments
 from .bikes import get_all_bikes, get_bike
 from .clients import get_all_clients, get_client, get_client_logins
 from .contracts import get_contracts
-from .finances import get_deposit_balances_book
+from .accounts import get_deposit_account_balances
 
 
 def get_potential_client_duplicates_detected(db: Session) -> list[models.DetectedPotentialClientDuplicates]:
@@ -353,13 +353,13 @@ def get_contracts_takeout_excel(db: Session) -> str:
                                          "Working Volunteer", "Checking Volunteer",
                                          "Deposit Amount Collected", "Deposit Collected By",
                                          "Returned Date", "Return Received By",
-                                         "Deposit Amount Returned", "Deposit Returned By"])
+                                         "Deposit Amount Returned", "Deposit Returned By", "Draft"])
 
     for contract in contracts:
         contract_row = contract.to_raw_dict()
         contracts_df.loc[len(contracts_df)] = contract_row
 
-    deposit_book = get_deposit_balances_book(db=db)
+    deposit_book = get_deposit_account_balances(db=db)
 
     deposit_holders = []
     for date in deposit_book.dayBalances:
@@ -374,9 +374,9 @@ def get_contracts_takeout_excel(db: Session) -> str:
     deposit_book_df = pd.concat([
         pd.DataFrame([{
             "Date": date if i == 0 else None,
-            "Name": t.title,
-            "Type": t.type,
-            **t.diff_by_username
+            "Name": t.details,
+            "Type": t.event,
+            **t.diff_by_account
         } for i, t in enumerate(deposit_book.dayBalances[date].transactions)] + [{
             "Name": None,
             "Type": None,
@@ -435,13 +435,13 @@ def get_contracts_takeout_pdf(db: Session) -> str:
         "Working Volunteer": (188, 230),
         "Checking Volunteer": (414, 230),
         "Deposit Amount Collected": (184, 258),
-        "Deposit Collected By": (200, 258),
+        "Deposit Collected By": (140, 268),
         "Returned Date-day": (172, 177),
         "Returned Date-month": (214, 177),
         "Returned Date-year": (248, 177),
         "Return Received By": (432, 150),
         "Deposit Amount Returned": (454, 177),
-        "Deposit Returned By": (470, 177)
+        "Deposit Returned By": (360, 187)
     }
 
     current_dir = os.path.dirname(__file__)
@@ -475,6 +475,15 @@ def get_contracts_takeout_pdf(db: Session) -> str:
             text_object = can.beginText(165, 50)
             text_object.setFont("Courier", 146)
             text_object.textLine("RETURNED")
+
+            can.rotate(45)
+            can.drawText(text_object)
+            can.rotate(-45)
+
+        if contract_raw["Draft"]:
+            text_object = can.beginText(165, 50)
+            text_object.setFont("Courier", 146)
+            text_object.textLine("DRAFT")
 
             can.rotate(45)
             can.drawText(text_object)

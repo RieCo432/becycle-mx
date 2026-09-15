@@ -39,7 +39,6 @@ app.include_router(routers.settings)
 app.include_router(routers.appointments)
 app.include_router(routers.appointments_public)
 app.include_router(routers.deposit_exchanges)
-app.include_router(routers.finances)
 app.include_router(routers.statistics)
 # app.include_router(routers.maps)
 app.include_router(routers.admin)
@@ -53,6 +52,7 @@ app.include_router(routers.catalogue)
 app.include_router(routers.sales)
 app.include_router(routers.bug_reports)
 app.include_router(routers.photos)
+app.include_router(routers.dashboards)
 
 
 
@@ -65,7 +65,9 @@ if os.environ["PRODUCTION"] == "true":
     db.close()
 
 db = SessionLocal()
-crud.ensure_all_permissions_exist(db=db, routes=[route for route in app.routes if isinstance(route, APIRoute)])
+all_routes = [route for route in app.routes if isinstance(route, APIRoute)]
+crud.ensure_all_permissions_exist(db=db, routes=all_routes)
+crud.remove_permissions_for_nonexistent_routes(db=db, routes=all_routes)
 crud.fully_prune_tree(db=db)
 crud.ensure_default_admin_permissions_exist(db=db)
 crud.keep_admin_account_active(db=db)

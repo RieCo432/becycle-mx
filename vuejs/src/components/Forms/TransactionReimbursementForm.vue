@@ -1,6 +1,5 @@
 <script>
 import Button from '@/components/Button/index.vue';
-import Select from '@/components/Select/index.vue';
 import ComboboxTextInput from '@/components/ComboboxTextInput/ComboboxTextInput.vue';
 import TextInput from '@/components/TextInput/index.vue';
 import * as yup from 'yup';
@@ -13,9 +12,8 @@ const toast = useToast();
 
 export default {
   name: 'TransactionReimbursementForm',
-  components: {TextInput, ComboboxTextInput, Select, Button},
+  components: {TextInput, ComboboxTextInput, Button},
   setup(props, context) {
-    const projects = ref([]);
     const assetAccounts = ref([]);
 
     const expenseClaimInfo = toRef(props, 'expenseClaimInfo');
@@ -24,18 +22,17 @@ export default {
       .expenseTransactionHeader
       .transactionLines
       .find((line) => line.account.type === 'liability');
-    
+
     const amountOnLiabilityAccount = transactionLineOnLiabilityAccount ? Math.abs(transactionLineOnLiabilityAccount.amount) : 0;
     const liabilityAccountId = transactionLineOnLiabilityAccount ? transactionLineOnLiabilityAccount.accountId : null;
-    
-    const projectIdOfExpenseAccount = expenseClaimInfo.value
+
+    const fundIdOfExpenseTransaction = expenseClaimInfo.value
       .expenseTransactionHeader
       .transactionLines
       .find((line) => line.account.type === 'expense')
-      .account.restrictedToProjectId;
+      .fundId;
 
     const expenseReimbursementSchema = yup.object().shape({
-      projectId: yup.string().required(),
       amount: yup.number().required().max(amountOnLiabilityAccount / 100).min(0),
       assetAccount: yup.object().shape({
         id: yup.string().uuid().required(' The asset account id is required '),
@@ -52,31 +49,26 @@ export default {
       },
     });
 
-    const {value: projectId, errorMessage: projectIdError, setErrors: setProjectIdErrors} = useField('projectId');
     const {value: amount, errorMessage: amountError} = useField('amount');
     const {value: assetAccount, errorMessage: assetAccountError, resetField: resetAssetAccount} = useField('assetAccount');
 
     const submitExpenseReimbursement = handleSubmit(() => {
-      if ((projectId.value === 'null' ? null : projectId.value) !== projectIdOfExpenseAccount) {
-        setProjectIdErrors('The projectId of the asset account must match the projectId of the expense account');
-      }
-      
       const reimbursementTransactionDraft = {
         transactionHeader: {
           event: 'expense_reimbursed',
         },
         transactionLines: [
-          {amount: -Math.round(amount.value * 100), accountId: assetAccount.value.id},
-          {amount: Math.round(amount.value * 100), accountId: liabilityAccountId},
+          {amount: -Math.round(amount.value * 100), accountId: assetAccount.value.id, fundId: fundIdOfExpenseTransaction},
+          {amount: Math.round(amount.value * 100), accountId: liabilityAccountId, fundId: fundIdOfExpenseTransaction},
         ],
         attemptAutoPost: false,
       };
-      
+
       requests.createTransaction(reimbursementTransactionDraft).then((response) => {
         toast.success('Reimbursement Transaction Created!', {timeout: 2000});
-        
+
         const transactionHeaderId = response.data.id;
-        
+
         requests.patchExpenseClaimReimbursed(expenseClaimInfo.value.id, transactionHeaderId).then((response) => {
           toast.success('Expense Reimbursed!', {timeout: 2000});
           context.emit('expenseReimbursed', response.data);
@@ -89,10 +81,7 @@ export default {
     });
 
     return {
-      projects,
       assetAccounts,
-      projectId,
-      projectIdError,
       amount,
       amountError,
       assetAccount,
@@ -102,24 +91,12 @@ export default {
     };
   },
   methods: {
-    fetchProjects() {
-      requests.getProjects().then((response) => {
-        this.projects = [
-          {label: 'No Project', value: 'null'},
-          ...response.data.map((t) => (
-            {
-              label: `${t.id} --- ${t.description}`,
-              value: t.id,
-            }
-          ))];
-      });
-    },
     fetchAssetAccounts() {
       requests.getAccounts([
         {name: 'types', value: 'asset'},
         {name: 'for_user', value: true},
         {name: 'ui_filters', value: 'transfer'},
-        ...(this.projectId && this.projectId !== 'null' ? [{name: 'project_id', value: this.projectId}] : [])]).then((response) => {
+      ]).then((response) => {
         this.assetAccounts = response.data;
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 5000});
@@ -138,7 +115,6 @@ export default {
   },
   created() {
     this.fetchAssetAccounts();
-    this.fetchProjects();
   },
   computed: {
     filtered_asset_account_suggestions() {
@@ -164,19 +140,6 @@ export default {
   <div>
     <form @submit.prevent="submitExpenseReimbursement">
       <div class="grid grid-cols-6 xl:grid-cols-6 gap-5">
-
-        <div class="col-span-6">
-          <Select
-            :options="projects"
-            label="Tag/Project"
-            v-model="projectId"
-            name="projectId"
-            placeholder="Is this for a specific project? If so, select it here."
-            :error="projectIdError"
-            @change="fetchAssetAccounts"
-          />
-        </div>
-
         <div class="col-span-6" >
           <TextInput
             label="Amount (&pound;)"

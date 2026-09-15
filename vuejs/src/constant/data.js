@@ -122,9 +122,15 @@ export const topMenu = [
     show: ['user'],
     child: [
       {
-        childtitle: 'Deposit Accounting',
+        childtitle: 'Deposit Book',
         childicon: 'heroicons-outline:banknotes',
         childlink: '/finances/deposits',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Dashboards',
+        childicon: 'heroicons:rocket-launch',
+        childlink: '/finances/dashboards',
         show: ['user'],
       },
       {
@@ -139,20 +145,6 @@ export const topMenu = [
         childlink: '/finances/expenses/claims/manage',
         show: ['user'],
       },
-      // TODO: these need redone
-      // {
-      //   childtitle: 'Deposit Charts',
-      //   childicon: 'heroicons-outline:presentation-chart-line',
-      //   childlink: '/finances/deposit-charts',
-      //   show: ['user'],
-      // },
-      // TODO: these need redone
-      // {
-      //   childtitle: 'Cash Flow',
-      //   childicon: 'heroicons-outline:currency-pound',
-      //   childlink: '/finances/cash-flow',
-      //   show: ['user'],
-      // },
       {
         childtitle: 'Transaction History',
         childicon: 'heroicons-outline:table-cells',
@@ -169,6 +161,12 @@ export const topMenu = [
         childtitle: 'Sales History',
         childicon: 'material-symbols:receipt-long-outline',
         childlink: '/finances/sales',
+        show: ['user'],
+      },
+      {
+        childtitle: 'Contract Forfeiture',
+        childicon: 'heroicons-outline:archive-box-arrow-down',
+        childlink: '/finances/contract-forfeiture',
         show: ['user'],
       },
     ],

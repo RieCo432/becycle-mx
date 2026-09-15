@@ -238,7 +238,6 @@ function goBack() {
       <div class="col-span-full">
         <FormStepNavigation
           :processing-submit="processingSubmit"
-          :submit="submit"
           :goBack="goBack"/>
       </div>
     </div>

@@ -55,7 +55,7 @@
               <div v-if="currentStepNumber === 0">
                 <NewContractStartForm
                   :current-contract-draft="currentContractDraft"
-                  @update:currentContractDraft="updateDraft"
+                  @update:currentContractDraft="(draft) => updateDraft(draft, false)"
                 />
               </div>
               <div v-if="currentStepNumber === 1">
@@ -96,6 +96,17 @@
                 />
               </div>
               <div v-if="currentStepNumber === 6">
+                <NewContractPartsSaleForm
+                  :contract="currentContractDraft"
+                  @update:draft="updateDraft"
+                  @noSaleRequired="() => {
+                    noSaleRequired = true;
+                    nextStep();
+                  }"
+                  @go-back="goBack"
+                />
+              </div>
+              <div v-if="currentStepNumber === 7">
                 <NewContractDepositForm
                   :contract="currentContractDraft"
                   @update:draft="updateDraft"
@@ -140,6 +151,7 @@ import requests from '@/requests';
 import router from '@/router';
 import {VueSpinner} from 'vue3-spinners';
 import ContractPhotosCard from '@/components/Card/ContractPhotosCard.vue';
+import NewContractPartsSaleForm from '@/components/Forms/NewContractPartsSaleForm.vue';
 
 const toast = useToast();
 
@@ -170,6 +182,10 @@ const steps = [
   },
   {
     id: 7,
+    title: 'Parts Sale',
+  },
+  {
+    id: 8,
     title: 'Deposit',
   },
 ];
@@ -179,18 +195,20 @@ const promoting = ref(false);
 
 
 const currentContractDraft = defineModel();
+const noSaleRequired = ref(false);
 
 
 function goBack() {
+  noSaleRequired.value = false;
   currentStepNumber.value--;
 }
 
-function updateDraft(draft) {
+function updateDraft(draft, autoPromote = true) {
   currentContractDraft.value = draft;
-  nextStep();
+  nextStep(autoPromote);
 }
 
-function nextStep() {
+function nextStep(autoPromote = true) {
   if (!currentContractDraft.value.id) {
     currentStepNumber.value = 0;
     return;
@@ -217,11 +235,24 @@ function nextStep() {
     currentStepNumber.value = 5;
     return;
   }
-  if (!currentContractDraft.value.depositTransactionHeaders.find((th) => th.event === 'deposit_collected')) {
+  // either there's no sale and we haven't marked it as not required
+  // or there is a sale but it's not complete
+  if (
+    !currentContractDraft.value.saleHeaderId && !noSaleRequired.value ||
+    currentContractDraft.value.saleHeaderId && !currentContractDraft.value.saleHeader.transactionHeader
+  ) {
     currentStepNumber.value = 6;
     return;
   }
-  promoteDraft();
+  if (!currentContractDraft.value.depositTransactionHeaders.find((th) => th.event === 'deposit_collected')) {
+    currentStepNumber.value = 7;
+    return;
+  }
+  if (autoPromote) {
+    promoteDraft();
+  } else {
+    currentStepNumber.value = 7;
+  }
 }
 
 function promoteDraft() {

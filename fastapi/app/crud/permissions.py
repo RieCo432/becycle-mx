@@ -98,6 +98,22 @@ def prune_permissions_tree(db: Session, tree: schemas.PermissionNode) -> None:
     return
 
 
+def delete_permission(db: Session, permission: models.Permission) -> None:
+    for child_permission in permission.childPermissions:
+        delete_permission(db=db, permission=child_permission)
+    db.commit()
+    db.delete(permission)
+    db.commit()
+
+
+def remove_permissions_for_nonexistent_routes(db: Session, routes: list[APIRoute]) -> None:
+    permissions = db.scalars(select(models.Permission)).all()
+    for permission in permissions:
+        matching_routes = [route for route in routes if route.path.startswith(permission.route) and permission.method in route.methods]
+        if len(matching_routes) == 0:
+            delete_permission(db=db, permission=permission)
+
+
 def ensure_default_admin_permissions_exist(db: Session) -> None:
     admin_user = db.scalar(select(models.User).where(models.User.username == "admin"))
 

@@ -21,7 +21,7 @@ export default {
   setup(props, context) {
     const assetAccounts = ref([]);
     const expenseAccounts = ref([]);
-    const projects = ref([]);
+    const funds = ref([]);
     const eventSuggestions = ref([]);
 
     function getAssetAccounts() {
@@ -29,7 +29,6 @@ export default {
         {name: 'types', value: 'asset'},
         {name: 'for_user', value: true},
         {name: 'ui_filters', value: 'transfer'},
-        ...(projectId.value && projectId.value !== 'null' ? [{name: 'project_id', value: projectId.value}] : []),
       ]).then((response) => {
         assetAccounts.value = response.data;
       }).catch((error) => {
@@ -42,7 +41,6 @@ export default {
         {name: 'types', value: 'expense'},
         {name: 'for_user', value: true},
         {name: 'ui_filters', value: 'transfer'},
-        ...(projectId.value && projectId.value !== 'null' ? [{name: 'project_id', value: projectId.value}] : []),
       ]).then((response) => {
         expenseAccounts.value = response.data;
       }).catch((error) => {
@@ -50,15 +48,13 @@ export default {
       });
     }
 
-    requests.getProjects().then((response) => {
-      projects.value = [
-        {label: 'No Project', value: 'null'},
-        ...response.data.map((t) => (
-          {
-            label: `${t.id} --- ${t.description}`,
-            value: t.id,
-          }
-        ))];
+    requests.getFunds().then((response) => {
+      funds.value = response.data.map((t) => (
+        {
+          label: t.name,
+          value: t.id,
+        }
+      ));
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
@@ -70,7 +66,7 @@ export default {
     });
 
     const newPayoutSchema = yup.object().shape({
-      projectId: yup.string().required(' The project id is required '),
+      fundId: yup.string().required(' The fund is required '),
       sourceAssetAccount: yup.object().shape({
         id: yup.string().uuid().required(' The source asset account id is required '),
         name: yup.string().required(' The source asset account name is required '),
@@ -110,7 +106,7 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: projectId, errorMessage: projectIdError} = useField('projectId');
+    const {value: fundId, errorMessage: fundIdError} = useField('fundId');
     const {value: sourceAssetAccount, errorMessage: sourceAssetAccountError} = useField('sourceAssetAccount');
     const {value: destinationAssetAccount, errorMessage: destinationAssetAccountError} = useField('destinationAssetAccount');
     const {value: amountPayout, errorMessage: amountPayoutError, setErrors: setAmountPayoutErrors} = useField('amountPayout');
@@ -125,7 +121,7 @@ export default {
     feeExpenseAccount.value = {name: null, id: null};
 
     function resetNewPayoutForm() {
-      projectId.value = null;
+      fundId.value = null;
       sourceAssetAccount.value = {name: null, id: null};
       destinationAssetAccount.value = {name: null, id: null};
       amountPayout.value = null;
@@ -137,6 +133,7 @@ export default {
     }
 
     const submitNewPayout = handleSubmit(() => {
+      // TODO: I suppose this balance check might need to happen at a per-fund level
       if (amountPayout.value * 100 > sourceAssetAccount.value.balance) {
         setAmountPayoutErrors('Insufficient funds');
         return;
@@ -148,14 +145,20 @@ export default {
         transactionLines: [
           {
             accountId: sourceAssetAccount.value.id,
-            amount: -Math.round(amountPayout.value * 100)},
+            amount: -Math.round(amountPayout.value * 100),
+            fundId: fundId.value,
+          },
           {
             accountId: destinationAssetAccount.value.id,
-            amount: Math.round((amountPayout.value - (hasFee.value ? amountFee.value : 0)) * 100)},
+            amount: Math.round((amountPayout.value - (hasFee.value ? amountFee.value : 0)) * 100),
+            fundId: fundId.value,
+          },
           ...(hasFee.value ?
             [{
               accountId: feeExpenseAccount.value.id,
-              amount: Math.round(amountFee.value * 100)}] :
+              amount: Math.round(amountFee.value * 100),
+              fundId: fundId.value,
+            }] :
             []),
         ],
         attemptAutoPost: true,
@@ -171,11 +174,11 @@ export default {
     });
 
     return {
-      projects,
+      funds,
       assetAccounts,
       expenseAccounts,
-      projectId,
-      projectIdError,
+      fundId,
+      fundIdError,
       sourceAssetAccount,
       sourceAssetAccountError,
       destinationAssetAccount,
@@ -290,13 +293,12 @@ export default {
       <div class="grid grid-cols-12 gap-5">
         <div class="col-span-12">
           <Select
-            :options="projects"
-            label="Tag/Project"
-            v-model="projectId"
-            name="projectId"
-            placeholder="Is this for a specific project? If so, select it here."
-            :error="projectIdError"
-            @change="() => {getAssetAccounts(); getExpenseAccounts();}"
+            :options="funds"
+            label="Fund"
+            v-model="fundId"
+            name="fundId"
+            placeholder="Which fund?"
+            :error="fundIdError"
           />
         </div>
         <div class="col-span-12">

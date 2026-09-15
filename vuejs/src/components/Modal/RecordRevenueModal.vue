@@ -20,7 +20,7 @@ export default {
   setup(props, context) {
     const revenueAccounts = ref([]);
     const assetAccounts = ref([]);
-    const projects = ref([]);
+    const funds = ref([]);
     const eventSuggestions = ref([]);
 
     function getRevenueAccounts() {
@@ -28,7 +28,6 @@ export default {
         {name: 'types', value: 'revenue'},
         {name: 'for_user', value: true},
         {name: 'ui_filters', value: 'transfer'},
-        ...(projectId.value && projectId.value !== 'null' ? [{name: 'project_id', value: projectId.value}] : []),
       ]).then((response) => {
         revenueAccounts.value = response.data;
       }).catch((error) => {
@@ -41,7 +40,6 @@ export default {
         {name: 'types', value: 'asset'},
         {name: 'for_user', value: true},
         {name: 'ui_filters', value: 'transfer'},
-        ...(projectId.value && projectId.value !== 'null' ? [{name: 'project_id', value: projectId.value}] : []),
       ]).then((response) => {
         assetAccounts.value = response.data;
       }).catch((error) => {
@@ -49,15 +47,13 @@ export default {
       });
     }
 
-    requests.getProjects().then((response) => {
-      projects.value = [
-        {label: 'No Project', value: 'null'},
-        ...response.data.map((t) => (
-          {
-            label: `${t.id} --- ${t.description}`,
-            value: t.id,
-          }
-        ))];
+    requests.getFunds().then((response) => {
+      funds.value = response.data.map((t) => (
+        {
+          label: t.name,
+          value: t.id,
+        }
+      ));
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
@@ -68,8 +64,8 @@ export default {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
 
-    const newDonationsSchema = yup.object().shape({
-      projectId: yup.string().required(' The project id is required '),
+    const newRevenueSchema = yup.object().shape({
+      fundId: yup.string().required(' The fund is required '),
       revenueAccount: yup.object().shape({
         id: yup.string().uuid().required(' The revenue account id is required '),
         name: yup.string().required(' The revenue account name is required '),
@@ -92,11 +88,11 @@ export default {
     });
 
     const {handleSubmit} = useForm({
-      validationSchema: newDonationsSchema,
+      validationSchema: newRevenueSchema,
       keepValuesOnUnmount: true,
     });
 
-    const {value: projectId, errorMessage: projectIdError} = useField('projectId');
+    const {value: fundId, errorMessage: fundIdError} = useField('fundId');
     const {value: revenueAccount, errorMessage: revenueAccountError} = useField('revenueAccount');
     const {value: assetAccount, errorMessage: assetAccountError} = useField('assetAccount');
     const {value: amount, errorMessage: amountError} = useField('amount');
@@ -106,8 +102,8 @@ export default {
     assetAccount.value = {name: null, id: null};
     revenueAccount.value = {name: null, id: null};
     
-    function resetNewDonationsForm() {
-      projectId.value = 'null';
+    function resetNewRevenueForm() {
+      fundId.value = null;
       revenueAccount.value = {name: null, id: null};
       assetAccount.value = {name: null, id: null};
       amount.value = null;
@@ -115,21 +111,21 @@ export default {
       eventNotInList.value = false;
     }
 
-    const submitNewDonations = handleSubmit(() => {
+    const submitNewRevenue = handleSubmit(() => {
       const transactionDraft = {
         transactionHeader: {
           event: event.value,
         },
         transactionLines: [
-          {accountId: revenueAccount.value.id, amount: -Math.round(amount.value * 100)},
-          {accountId: assetAccount.value.id, amount: Math.round(amount.value * 100)},
+          {accountId: revenueAccount.value.id, amount: -Math.round(amount.value * 100), fundId: fundId.value},
+          {accountId: assetAccount.value.id, amount: Math.round(amount.value * 100), fundId: fundId.value},
         ],
         attemptAutoPost: true,
       };
 
       requests.createTransaction(transactionDraft).then((response) => {
         toast.success('Transaction Created and Posted!', {timeout: 2000});
-        resetNewDonationsForm();
+        resetNewRevenueForm();
         context.emit('close');
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
@@ -145,13 +141,13 @@ export default {
       revenueAccountError,
       assetAccountError,
       amountError,
-      submitNewDonations,
+      submitNewRevenue,
       getRevenueAccounts,
       getAssetAccounts,
-      projectId,
-      projectIdError,
-      resetNewDonationsForm,
-      projects,
+      fundId,
+      fundIdError,
+      resetNewRevenueForm,
+      funds,
       event,
       eventError,
       eventNotInList,
@@ -171,7 +167,7 @@ export default {
   },
   methods: {
     closeModal() {
-      this.resetNewDonationsForm();
+      this.resetNewRevenueForm();
       this.$emit('close');
     },
     selectRevenueAccount(event, i) {
@@ -200,7 +196,7 @@ export default {
       return this.revenueAccounts
         .filter((suggestion) => suggestion.name
           .toLowerCase()
-          .startsWith((this.revenueAccounts.name ?? '').toLowerCase()))
+          .startsWith((this.revenueAccount.name ?? '').toLowerCase()))
         // .sort(this.userSortingFunction)
         .slice(0, 10);
     },
@@ -232,17 +228,16 @@ export default {
 
 <template>
   <Modal :active-modal="activeModal" @close="closeModal" title="Record Revenue">
-    <form @submit.prevent="submitNewDonations">
+    <form @submit.prevent="submitNewRevenue">
       <div class="grid grid-cols-12 gap-5">
         <div class="col-span-12">
           <Select
-            :options="projects"
-            label="Tag/Project"
-            v-model="projectId"
-            name="projectId"
-            placeholder="Is this for a specific project? If so, select it here."
-            :error="projectIdError"
-            @change="() => {getAssetAccounts(); getRevenueAccounts();}"
+            :options="funds"
+            label="Fund"
+            v-model="fundId"
+            name="fundId"
+            placeholder="Which fund?"
+            :error="fundIdError"
           />
         </div>
         <div class="col-span-12">

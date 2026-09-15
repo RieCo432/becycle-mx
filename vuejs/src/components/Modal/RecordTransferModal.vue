@@ -20,22 +20,20 @@ export default {
   setup(props, context) {
     const creditAccounts = ref([]);
     const debitAccounts = ref([]);
-    const projects = ref([]);
+    const funds = ref([]);
     const eventSuggestions = ref([]);
 
     const creditUsers = ref([]);
     const debitUsers = ref([]);
     const loggedInUser = ref(null);
 
-    requests.getProjects().then((response) => {
-      projects.value = [
-        {label: 'No Project', value: 'null'},
-        ...response.data.map((t) => (
-          {
-            label: `${t.id} --- ${t.description}`,
-            value: t.id,
-          }
-        ))];
+    requests.getFunds().then((response) => {
+      funds.value = response.data.map((t) => (
+        {
+          label: t.name,
+          value: t.id,
+        }
+      ));
     }).catch((error) => {
       toast.error(error.response.data.detail.description, {timeout: 2000});
     });
@@ -56,7 +54,6 @@ export default {
       requests.getAccounts([
         {name: 'for_user', value: false},
         {name: 'ui_filters', value: 'transfer'},
-        ...(projectId.value && projectId.value !== 'null' ? [{name: 'project_id', value: projectId.value}] : []),
       ]).then((response) => {
         creditAccounts.value = response.data;
       }).catch((error) => {
@@ -70,7 +67,6 @@ export default {
           {name: 'types', value: creditAccount.value.type},
           {name: 'for_user', value: false},
           {name: 'ui_filters', value: 'transfer'},
-          ...(projectId.value && projectId.value !== 'null' ? [{name: 'project_id', value: projectId.value}] : []),
         ]).then((response) => {
           debitAccounts.value = response.data.filter((account) => account.id !== creditAccount.value.id);
         }).catch((error) => {
@@ -80,7 +76,7 @@ export default {
     }
 
     const newTransferSchema = yup.object().shape({
-      projectId: yup.string().required(' The project id is required '),
+      fundId: yup.string().required(' The fund is required '),
       creditAccount: yup.object().shape({
         id: yup.string().uuid().required(' The credit account id is required '),
         name: yup.string().required(' The credit account name is required '),
@@ -130,7 +126,7 @@ export default {
       keepValuesOnUnmount: true,
     });
 
-    const {value: projectId, errorMessage: projectIdError} = useField('projectId');
+    const {value: fundId, errorMessage: fundIdError} = useField('fundId');
     const {value: creditAccount, errorMessage: creditAccountError} = useField('creditAccount');
     const {value: loggedInUserCanSignCreditAccount, errorMessage: loggedInUserCanSignCreditAccountError} =
       useField('loggedInUserCanSignCreditAccount');
@@ -150,7 +146,7 @@ export default {
 
 
     function resetNewTransferForm() {
-      projectId.value = null;
+      fundId.value = null;
       creditAccount.value = {name: null, id: null};
       debitAccount.value = {name: null, id: null};
       amount.value = null;
@@ -174,8 +170,8 @@ export default {
           event: event.value,
         },
         transactionLines: [
-          {accountId: creditAccount.value.id, amount: -Math.round(amount.value * 100)},
-          {accountId: debitAccount.value.id, amount: Math.round(amount.value * 100)},
+          {accountId: creditAccount.value.id, amount: -Math.round(amount.value * 100), fundId: fundId.value},
+          {accountId: debitAccount.value.id, amount: Math.round(amount.value * 100), fundId: fundId.value},
         ],
         attemptAutoPost: true,
       };
@@ -199,11 +195,11 @@ export default {
 
 
     return {
-      projects,
+      funds,
       creditAccounts,
       debitAccounts,
-      projectId,
-      projectIdError,
+      fundId,
+      fundIdError,
       creditAccount,
       creditAccountError,
       loggedInUserCanSignCreditAccount,
@@ -389,13 +385,12 @@ export default {
       <div class="grid grid-cols-12 gap-5">
         <div class="col-span-12">
           <Select
-            :options="projects"
-            label="Tag/Project"
-            v-model="projectId"
-            name="projectId"
-            placeholder="Is this for a specific project? If so, select it here."
-            :error="projectIdError"
-            @change="getCreditAccounts"
+            :options="funds"
+            label="Fund"
+            v-model="fundId"
+            name="fundId"
+            placeholder="Which fund?"
+            :error="fundIdError"
           />
         </div>
         <div class="col-span-12">

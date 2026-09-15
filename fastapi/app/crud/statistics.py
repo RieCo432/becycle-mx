@@ -21,10 +21,6 @@ def get_user_leaderboard(db: Session) -> list[schemas.UserLeaderboard]:
         contracts_done = len(user.workedContracts)
         contracts_checked = len(user.checkedContracts)
         contracts_returned = len(user.returnedContracts)
-        deposits_collected = len(user.depositCollectedContracts)
-        deposit_amount_collected = sum([contract.depositAmountCollected for contract in user.depositCollectedContracts])
-        deposits_returned = len(user.depositReturnedContracts)
-        deposit_amount_returned = sum([contract.depositAmountReturned for contract in user.depositReturnedContracts])
 
         leaderboard_entry = schemas.UserLeaderboard(
             id=user.id,
@@ -32,10 +28,6 @@ def get_user_leaderboard(db: Session) -> list[schemas.UserLeaderboard]:
             contractsDone=contracts_done,
             contractsChecked=contracts_checked,
             contractsReturned=contracts_returned,
-            depositsCollected=deposits_collected,
-            depositAmountCollected=deposit_amount_collected,
-            depositsReturned=deposits_returned,
-            depositAmountReturned=deposit_amount_returned
         )
 
         leaderboard.append(leaderboard_entry)
@@ -93,7 +85,8 @@ def get_bike_leaderboard(db: Session) -> list[schemas.BikeLeaderboard]:
             colour=bike.colour,
             decals=bike.decals,
             serialNumber=bike.serialNumber,
-            contracts=contracts
+            contracts=contracts,
+            disposition=bike.disposition
         )
 
         leaderboard.append(leaderboard_entry)
@@ -108,30 +101,39 @@ def get_total_contracts_statistics(db: Session, interval: str, start_date: date 
         start_date = oldest_contract.startDate
     if end_date is None:
         end_date = datetime.utcnow().date()
-    interval_timedelta = get_interval_timedelta(interval=interval)
+        
+    cutoff_date: date = end_date + relativedelta(days=1)
 
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(models.Contract.contractType)
+        db.query(
+            models.Contract.contractType, 
+            func.count(models.Contract.contractType)
+        )
+        .where(models.Contract.isDraft == False)
+        .group_by(models.Contract.contractType)
     )]
 
     all_series = []
     data_series_by_breakdown = {}
 
-    while end_date >= start_date:
+    while cutoff_date > start_date:
         query = db.query(models.Contract.contractType, func.count(models.Contract.contractType))
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
-                                                             query.where(models.Contract.startDate <= end_date)
+                                                             query.where(
+                                                                 (models.Contract.startDate < cutoff_date) 
+                                                                 & (models.Contract.isDraft == False)
+                                                             )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
         for breakdown in all_categories:
             count = counts_by_breakdown.get(breakdown, 0)
             if breakdown not in data_series_by_breakdown:
-                data_series_by_breakdown[breakdown] = [[end_date, count]]
+                data_series_by_breakdown[breakdown] = [[cutoff_date - relativedelta(days=1), count]]
             else:
-                data_series_by_breakdown[breakdown].append([end_date, count])
+                data_series_by_breakdown[breakdown].append([cutoff_date - relativedelta(days=1), count])
 
-        end_date -= interval_timedelta
+        cutoff_date: date = cutoff_date - get_interval_timedelta(interval=interval, dt=cutoff_date)
 
     for breakdown in data_series_by_breakdown:
         data_series_by_breakdown[breakdown].reverse()
@@ -151,17 +153,21 @@ def get_active_contracts_statistics(db: Session, interval: str, grace_period: in
     if end_date is None:
         end_date = datetime.utcnow().date()
 
-    interval_timedelta = get_interval_timedelta(interval=interval)
-
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
-            models.Contract.contractType)
+        db.query(
+            models.Contract.contractType,
+            func.count(models.Contract.contractType)
+        )
+        .where(models.Contract.isDraft == False)
+        .group_by(models.Contract.contractType)
     )]
 
     all_series = []
     data_series_by_breakdown = {}
+    
+    cutoff_date: date = end_date + relativedelta(days=1)
 
-    while end_date >= start_date:
+    while cutoff_date > start_date:
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
                                                              db.query(models.Contract.contractType,
@@ -169,23 +175,24 @@ def get_active_contracts_statistics(db: Session, interval: str, grace_period: in
                                                              .where(
                                                                  (
                                                                          (models.Contract.returnedDate == None)
-                                                                         | (models.Contract.returnedDate >= end_date)
+                                                                         | (models.Contract.returnedDate >= cutoff_date)
                                                                  )
-                                                                 & (models.Contract.startDate <= end_date)
+                                                                 & (models.Contract.startDate < cutoff_date)
                                                                  & (
-                                                                             models.Contract.endDate >= end_date - relativedelta(
+                                                                             models.Contract.endDate >= cutoff_date - relativedelta(
                                                                          days=grace_period))
+                                                                 & (models.Contract.isDraft == False)
                                                              )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
         for breakdown in all_categories:
             count = counts_by_breakdown.get(breakdown, 0)
             if breakdown not in data_series_by_breakdown:
-                data_series_by_breakdown[breakdown] = [[end_date, count]]
+                data_series_by_breakdown[breakdown] = [[cutoff_date - relativedelta(days=1), count]]
             else:
-                data_series_by_breakdown[breakdown].append([end_date, count])
+                data_series_by_breakdown[breakdown].append([cutoff_date - relativedelta(days=1), count])
 
-        end_date -= interval_timedelta
+        cutoff_date: date = cutoff_date - get_interval_timedelta(interval=interval, dt=cutoff_date)
 
     for breakdown in data_series_by_breakdown:
         data_series_by_breakdown[breakdown].reverse()
@@ -205,38 +212,42 @@ def get_new_contracts_statistics(db: Session, interval: str, start_date: date | 
     if end_date is None:
         end_date = datetime.utcnow().date()
 
-    interval_timedelta = get_interval_timedelta(interval=interval)
-
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
-            models.Contract.contractType)
+        db.query(
+            models.Contract.contractType,
+            func.count(models.Contract.contractType)
+        )
+        .where(models.Contract.isDraft == False)
+        .group_by(models.Contract.contractType)
     )]
 
     all_series = []
     data_series_by_breakdown = {}
-    period_end_date = end_date
-    period_start_date = period_end_date - interval_timedelta
 
-    while period_end_date >= start_date:
+    before: date = end_date + relativedelta(days=1)
+    after: date = before - get_interval_timedelta(interval=interval, dt=before)
+
+    while before > start_date:
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
                                                              db.query(models.Contract.contractType,
                                                                       func.count(models.Contract.contractType))
                                                              .where(
-                                                                 (models.Contract.startDate > period_start_date)
-                                                                 & (models.Contract.startDate <= period_end_date)
+                                                                 (models.Contract.startDate >= after)
+                                                                 & (models.Contract.startDate < before)
+                                                                 & (models.Contract.isDraft == False)
                                                              )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
         for breakdown in all_categories:
             count = counts_by_breakdown.get(breakdown, 0)
             if breakdown not in data_series_by_breakdown:
-                data_series_by_breakdown[breakdown] = [[period_end_date, count]]
+                data_series_by_breakdown[breakdown] = [[before - relativedelta(days=1), count]]
             else:
-                data_series_by_breakdown[breakdown].append([period_end_date, count])
+                data_series_by_breakdown[breakdown].append([before - relativedelta(days=1), count])
 
-        period_end_date = period_start_date
-        period_start_date -= interval_timedelta
+        before: date = before - get_interval_timedelta(interval=interval, dt=before)
+        after: date = after - get_interval_timedelta(interval=interval, dt=after)
 
     for breakdown in data_series_by_breakdown:
         data_series_by_breakdown[breakdown].reverse()
@@ -257,39 +268,43 @@ list[schemas.DataSeries]:
     if end_date is None:
         end_date = datetime.utcnow().date()
 
-    interval_timedelta = get_interval_timedelta(interval=interval)
-
     all_categories = [_ for _ in db.scalars(
-        db.query(models.Contract.contractType, func.count(models.Contract.contractType)).group_by(
-            models.Contract.contractType)
+        db.query(
+            models.Contract.contractType,
+            func.count(models.Contract.contractType)
+        )
+        .where(models.Contract.isDraft == False)
+        .group_by(models.Contract.contractType)
     )]
 
     all_series = []
     data_series_by_breakdown = {}
-    period_end_date = end_date
-    period_start_date = period_end_date - interval_timedelta
 
-    while period_end_date >= start_date:
+    before: date = end_date + relativedelta(days=1)
+    after: date = before - get_interval_timedelta(interval=interval, dt=before)
+
+    while before > start_date:
 
         counts_by_breakdown = {cat: count for cat, count in [_ for _ in
                                                              db.query(models.Contract.contractType,
                                                                       func.count(models.Contract.contractType))
                                                              .where(
                                                                  (models.Contract.returnedDate != None)
-                                                                 & (models.Contract.returnedDate > period_start_date)
-                                                                 & (models.Contract.returnedDate <= period_end_date)
+                                                                 & (models.Contract.returnedDate >= after)
+                                                                 & (models.Contract.returnedDate < before)
+                                                                 & (models.Contract.isDraft == False)
                                                              )
                                                              .group_by(models.Contract.contractType)
                                                              ]}
         for breakdown in all_categories:
             count = counts_by_breakdown.get(breakdown, 0)
             if breakdown not in data_series_by_breakdown:
-                data_series_by_breakdown[breakdown] = [[period_end_date, count]]
+                data_series_by_breakdown[breakdown] = [[before - relativedelta(days=1), count]]
             else:
-                data_series_by_breakdown[breakdown].append([period_end_date, count])
+                data_series_by_breakdown[breakdown].append([before - relativedelta(days=1), count])
 
-        period_end_date = period_start_date
-        period_start_date -= interval_timedelta
+        before: date = before - get_interval_timedelta(interval=interval, dt=before)
+        after: date = after - get_interval_timedelta(interval=interval, dt=after)
 
     for breakdown in data_series_by_breakdown:
         data_series_by_breakdown[breakdown].reverse()
@@ -308,6 +323,8 @@ def get_contracts_status(db: Session, grace_period: int, start_date: date | None
         start_date = oldest_contract.startDate
     if end_date is None:
         end_date = datetime.utcnow().date()
+        
+    end_date = end_date + relativedelta(days=1)
 
     contracts_in_period = [
         _ for _ in db.scalars(

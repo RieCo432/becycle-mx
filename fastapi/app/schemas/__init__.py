@@ -4,7 +4,6 @@ from .bike import *
 from .client import *
 from .contract import *
 from .depositExchanges import *
-from .finances import *
 from .public import *
 from .roadSegment import *
 from .settings import *
@@ -24,3 +23,4 @@ from .catalogueItems import *
 from .sales import *
 from .bugReport import *
 from .photo import *
+from .dashboards import *

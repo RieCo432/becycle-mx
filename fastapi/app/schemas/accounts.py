@@ -5,12 +5,15 @@ from pydantic import BaseModel, ConfigDict
 from typing import List
 from .user import User
 from .group import Group
+from app.services.accounts_helpers import AccountTypes, DashboardDimensions, DashboardIntervals
 
 
-class Project(BaseModel):
-    id: str
+class Fund(BaseModel):
+    id: UUID
+    name: str
     description: str
-    active: bool
+    isActive: bool
+    isDefault: bool
 
 class AccountBase(BaseModel):
     name: str
@@ -24,7 +27,6 @@ class AccountCreate(AccountBase):
     ownerGroupId: UUID | None
     type: str
     isInternal: bool
-    restrictedToProjectId: str | None = None
 
 class Account(AccountCreate):
     model_config = ConfigDict(from_attributes=True)
@@ -35,7 +37,85 @@ class Account(AccountCreate):
     closedByUser: User | None = None
     balance: int
     normalisedBalance: int
-    restrictedToProject: Project | None = None
     
 class AccountUpdate(AccountBase):
     pass
+
+
+DashboardAccountsList = list[UUID]
+DashboardSeriesQuery = DashboardAccountsList | str
+
+
+class DashboardDataSeriesMeta(BaseModel):
+    flow: str
+
+
+class DataPoint(BaseModel):
+    date: date
+    value: int | float
+    
+
+class DashboardDataSeries(BaseModel):
+    name: str
+    meta: DashboardDataSeriesMeta | None = None
+    data: list[DataPoint]
+
+class DashboardDataPart(BaseModel):
+    name: str
+    series: list[DashboardDataSeries]
+    
+    
+class DashboardData(BaseModel):
+    name: str
+    parts: list[DashboardDataPart]
+
+
+
+class DashboardPartQuerySeries(BaseModel):
+    name: str
+    query: DashboardSeriesQuery
+    credit: bool = False
+    debit: bool = False
+    net: bool = False
+    
+    
+class DashboardPartQueryBase(BaseModel):
+    name: str
+    series: list[DashboardPartQuerySeries]
+    dimension: str
+    fundId: UUID | None = None
+
+class DashboardPartMomentQuery(DashboardPartQueryBase):
+    mode: str = "moment"
+    moment: date
+    
+class DashboardPartPeriodQuery(DashboardPartQueryBase):
+    mode: str = "period"
+    startDate: date | None
+    endDate: date | None
+    interval: str
+
+class DashboardQuery(BaseModel):
+    name: str
+    queries: list[DashboardPartMomentQuery | DashboardPartPeriodQuery]
+
+
+class DepositTransactionDetails(BaseModel):
+    title: str
+    contractId: UUID | None = None
+
+
+class DepositAccountTransaction(BaseModel):
+    details: DepositTransactionDetails
+    event: str
+    diff_by_account: dict[str, int] = {}
+
+
+class DepositAccountsDayBalances(BaseModel):
+    transactions: list[DepositAccountTransaction] = []
+    diff: dict[str, int] = {}
+    balances: dict[str, int] = {}
+
+
+class DepositAccountBalances(BaseModel):
+    dayBalances: dict[date, DepositAccountsDayBalances] = {}

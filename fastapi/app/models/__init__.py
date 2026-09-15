@@ -24,3 +24,5 @@ from .sales import *
 from .contractPhoto import *
 from .bugReports import *
 from .photos import *
+from .funds import *
+from .dashboard import *
