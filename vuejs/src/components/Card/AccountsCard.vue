@@ -195,13 +195,13 @@ watch(() => props.loading, (newValue) => {
     :title="title"
     class-name="rounded-3xl"
   >
-    <div :class="`grid grid-cols-${columns} gap-5`">
+    <div :class="`grid grid-cols-2 xl:grid-cols-${columns} gap-5`">
       <template v-if="!loading && !loadingAccountsData">
         <template v-for="account in accounts.toSorted((a, b) => a.name.localeCompare(b.name))" :key="account.id">
           <div class="col-span-1 grid grid-cols-7 bg-slate-200 dark:bg-slate-900 p-2 rounded-lg gap-2">
             <div class="col-span-1 p-3">
               <Icon
-                :class="`w-full h-full aspect-square self-center
+                :class="`hidden md:block xl:hidden 2xl:block w-full h-full aspect-square self-center
                   ${accountColours[account.type].class}
                   dark:${accountColours[account.type].class}`"
                 icon="heroicons-outline:banknotes" />
