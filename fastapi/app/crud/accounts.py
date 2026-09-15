@@ -12,7 +12,7 @@ from uuid import UUID
 from app.services.accounts_helpers import AccountsHelpers
 from typing import List
 
-from services import get_interval_timedelta
+from services.misc_helpers import get_interval_timedelta
 from services.accounts_helpers import AccountTypes, DashboardDimensions
 
 
