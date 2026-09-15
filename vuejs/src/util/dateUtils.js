@@ -22,6 +22,19 @@ export default {
       end,
     };
   },
+  getPastSixMonths() {
+    const end = new Date();
+    const start = new Date(end);
+    if (start.getMonth() < 6) {
+      start.setUTCFullYear(start.getUTCFullYear() - 1);
+    }
+    start.setMonth(start.getMonth() - 6);
+
+    return {
+      start,
+      end,
+    };
+  },
   convertDateToPickerString(d) {
     return d.toISOString().split('T')[0];
   },

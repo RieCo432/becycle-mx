@@ -26,7 +26,7 @@ export default {
     requests.getUsers().then((response) => {
       response.data.forEach((u) => users.value.push(u));
     });
-    requests.getUserGroups().then((response) => {
+    requests.getGroups().then((response) => {
       response.data.forEach((g) => groups.value.push(g));
     });
 

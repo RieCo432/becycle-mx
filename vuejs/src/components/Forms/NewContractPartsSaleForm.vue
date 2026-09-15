@@ -59,7 +59,6 @@ function startSale() {
 }
 
 function submit() {
-  console.log('submit');
   if (checkCurrentlyProcessing()) {
     return;
   }

@@ -177,7 +177,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    requests.getUserGroups().then((response) => {
+    requests.getGroups().then((response) => {
       this.userGroups = response.data;
     });
     requests.getPermissions().then((response) => {

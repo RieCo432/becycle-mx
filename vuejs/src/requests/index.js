@@ -1352,7 +1352,7 @@ export default {
       },
     );
   },
-  getUserGroups() {
+  getGroups() {
     return axiosClient.get('/groups',
       {
         headers: credentialsStore.getApiRequestHeader(),
@@ -1800,5 +1800,53 @@ export default {
         headers: credentialsStore.getApiRequestHeader(),
         validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       });
+  },
+  getMyAccounts() {
+    return axiosClient.get(`/users/me/accounts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getMyGroups() {
+    return axiosClient.get(`/users/me/groups`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getGroupAccounts(groupId) {
+    return axiosClient.get(`/groups/${groupId}/accounts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getUserMyContracts() {
+    return axiosClient.get(`/users/me/contracts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getUserAccounts(userId) {
+    return axiosClient.get(`/users/${userId}/accounts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getUserContracts(userId) {
+    return axiosClient.get(`/users/${userId}/contracts`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getUserGroups(userId) {
+    return axiosClient.get(`/users/${userId}/groups`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getUserPresentationCard(userId) {
+    return axiosClient.get(`/users/${userId}/presentation-card`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
   },
 };

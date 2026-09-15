@@ -19,11 +19,10 @@ const router = createRouter({
 });
 router.beforeEach((to, from, next) => {
   const credentialsStore = useCredentialsStore();
-
-  let title = to?.meta?.title
+  let title = to?.meta?.title;
   if (title == null) {
-    console.error("This route is missing it's page title, make sure it has been added to the router")
-    title = ''
+    console.error('This route is missing its page title, make sure it has been added to the router');
+    title = '';
   }
   document.title = `${import.meta.env.VITE_COMMON_NAME} - ${title}`;
 

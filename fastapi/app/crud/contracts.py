@@ -940,3 +940,14 @@ def get_contract_photos_ids(db: Session, contract_id: UUID) -> list[UUID]:
 
     return [photo_id for photo_id in photos_ids]
         
+        
+def get_contracts_by_user_id(db: Session, user_id: UUID) -> list[schemas.Contract]:
+    contracts = db.scalars(
+        select(models.Contract)
+        .where(
+            (models.Contract.workingUserId == user_id)
+            | (models.Contract.checkingUserId == user_id)
+        )
+    )
+
+    return [_ for _ in contracts]

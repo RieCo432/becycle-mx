@@ -81,3 +81,14 @@ async def remove_permission_from_group(
         db: Session = Depends(dep.get_db)
 ) -> list[UUID]:
     return crud.remove_permission_from_group(db=db, group_id=group_id, permission_id=permission_scope_id)
+
+
+@groups.get("/groups/{group_id}/accounts")
+async def get_group_accounts(
+        group_id: UUID,
+        db: Session = Depends(dep.get_db)
+) -> list[schemas.Account]:
+    group = crud.get_group(db=db, group_id=group_id)
+    if group is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Group not found"})
+    return group.accountsOwned
