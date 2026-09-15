@@ -5,6 +5,9 @@ import GroupsCard from '@/components/Card/GroupsCard.vue';
 import UserContractsCard from '@/components/Card/UserContractsCard.vue';
 import AccountsCard from '@/components/Card/AccountsCard.vue';
 import requests from '@/requests';
+import {useToast} from 'vue-toastification';
+
+const toast = useToast();
 
 const props = defineProps({
   getUserPresentationCard: {
@@ -151,8 +154,8 @@ props.getUserContracts().then((response) => {
   loadingContracts.value = false;
 });
 
-function updateCardDetailsWrapped(details) {
-  props.updateCardDetails(details).then((response) => {
+function updateCardDetailsWrapped(name, bio, photo) {
+  props.updateCardDetails(name, bio, photo).then((response) => {
     presentationCardDetails.value = response.data;
     getPresentationCard();
     toast.success('Card Updated!', {timeout: 2000});
