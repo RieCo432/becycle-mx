@@ -9,11 +9,10 @@ from starlette import status
 from app import schemas, models, crud
 from uuid import UUID
 
-from app.services.accounts_helpers import AccountsHelpers
+from app.services.accounts_helpers import AccountsHelpers, AccountTypes, DashboardDimensions
 from typing import List
 
-from services.misc_helpers import get_interval_timedelta
-from services.accounts_helpers import AccountTypes, DashboardDimensions
+from app.services.misc_helpers import get_interval_timedelta
 
 
 def get_account(db: Session, account_id: UUID) -> models.Account | None:
