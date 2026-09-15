@@ -17,6 +17,7 @@ export default {
   created() {
     requests.getPublicUserPresentationCards().then((response) => {
       this.allUserPresentationCardDetails = response.data;
+      this.getImages();
     });
     requests.getUserMeNo401Redirect().then((response) => {
       this.isUserAdmin = response.data.admin;
@@ -39,6 +40,18 @@ export default {
         toast.success('Card Deleted!', {timeout: 2000});
       });
     },
+    getImages() {
+      Promise.all(this.allUserPresentationCardDetails.map((c) => requests.getPresentationCardPhoto(c.id)))
+        .then((responses) => {
+          responses.forEach((response, index) => {
+            const photoFile = new File([response.data], {type: this.allUserPresentationCardDetails[index].photoContentType});
+            this.allUserPresentationCardDetails[index].photoUrl = window.URL.createObjectURL(photoFile);
+          });
+        })
+        .catch((error) => {
+          toast.error(error.response.data.detail.description, {timeout: 2000});
+        });
+    },
   },
 };
 </script>
@@ -53,6 +66,7 @@ export default {
           :update-item-details="(name, bio, photo) => updateUserPresentationCard(userPresentationCardDetails.id, name, bio, photo)"
           :presentation-card-details="userPresentationCardDetails"
           :delete-card="() => deleteUserPresentationCard(userPresentationCardDetails.id)"
+          :photo-url="userPresentationCardDetails.photoUrl"
       ></UserPresentationCard>
     </div>
   </div>
