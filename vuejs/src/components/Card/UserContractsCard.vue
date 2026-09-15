@@ -1,10 +1,14 @@
 <script setup>
-import {computed, defineProps} from 'vue';
+import {computed, defineProps, ref} from 'vue';
 import Card from '@/components/Card/index.vue';
 import ContractSummaryTable from '@/components/Tables/ContractSummaryTable.vue';
 import {useRouter} from 'vue-router';
+import Pagination from '@/components/Pagination/index.vue';
 
 const router = useRouter();
+
+const currentPage = ref(1);
+const perPage = ref(10);
 
 const props = defineProps({
   loading: {
@@ -119,6 +123,10 @@ const contractActions = [
   },
 ];
 
+const contractSummariesPaged = computed(() => {
+  return contractSummaries.value.slice((currentPage.value - 1) * perPage.value, currentPage.value * perPage.value);
+});
+
 </script>
 
 <template>
@@ -126,12 +134,19 @@ const contractActions = [
     title="Contracts"
     class-name="rounded-3xl"
   >
+    <Pagination
+      :total="contractSummaries.length"
+      :current="currentPage"
+      @page-changed="(page) => currentPage = page"
+      :per-page="perPage"
+      :pageRange="5"
+    />
     <ContractSummaryTable
       :loading="loading"
       :view-contract="viewContract"
       :actions="contractActions"
       :columns="contractColumns"
-      :advanced-table="contractSummaries"/>
+      :advanced-table="contractSummariesPaged"/>
   </Card>
 
 </template>
