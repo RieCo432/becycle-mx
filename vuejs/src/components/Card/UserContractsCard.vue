@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineProps, ref} from 'vue';
+import {computed, defineProps, ref, watch} from 'vue';
 import Card from '@/components/Card/index.vue';
 import ContractSummaryTable from '@/components/Tables/ContractSummaryTable.vue';
 import {useRouter} from 'vue-router';
@@ -9,6 +9,7 @@ const router = useRouter();
 
 const currentPage = ref(1);
 const perPage = ref(10);
+const searchTerm = ref('');
 
 const props = defineProps({
   loading: {
@@ -123,8 +124,24 @@ const contractActions = [
   },
 ];
 
+const contractSummariesFiltered = computed(() => {
+  return contractSummaries.value
+    .filter((c) => {
+      return !searchTerm.value ||
+        searchTerm.value.length === 0 ||
+        contractColumns.some((col) =>
+          c[col.field]?.toLowerCase().includes(searchTerm.value?.toLowerCase()),
+        );
+    });
+});
+
 const contractSummariesPaged = computed(() => {
-  return contractSummaries.value.slice((currentPage.value - 1) * perPage.value, currentPage.value * perPage.value);
+  return contractSummariesFiltered.value
+    .slice((currentPage.value - 1) * perPage.value, currentPage.value * perPage.value);
+});
+
+watch(() => searchTerm.value, () => {
+  currentPage.value = 1;
 });
 
 </script>
@@ -135,13 +152,14 @@ const contractSummariesPaged = computed(() => {
     class-name="rounded-3xl"
   >
     <Pagination
-      :total="contractSummaries.length"
+      :total="contractSummariesFiltered.length"
       :current="currentPage"
       @page-changed="(page) => currentPage = page"
       :per-page="perPage"
       :pageRange="5"
     />
     <ContractSummaryTable
+      v-model:search-term="searchTerm"
       :loading="loading"
       :view-contract="viewContract"
       :actions="contractActions"

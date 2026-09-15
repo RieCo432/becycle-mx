@@ -6,7 +6,8 @@
       >
         <h5 v-if="title">{{title}}</h5>
         <InputGroup
-          v-model="searchTerm"
+          @update:modelValue="$emit('update:searchTerm', $event)"
+          :modelValue="searchTerm"
           placeholder="Search"
           type="text"
           prependIcon="heroicons-outline:search"
@@ -23,7 +24,7 @@
           perPage: perpage,
         }"
         :search-options="{
-          enabled: true,
+          enabled: false,
           externalQuery: searchTerm,
         }"
         :select-options="{
@@ -208,13 +209,17 @@ export default {
       type: Boolean,
       required: true,
     },
+    searchTerm: {
+      type: String,
+      default: '',
+    },
   },
+  emits: ['update:searchTerm'],
   data() {
     return {
       current: 1,
       perpage: 10,
       pageRange: 5,
-      searchTerm: '',
     };
   },
 };
