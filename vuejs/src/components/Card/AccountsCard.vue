@@ -15,15 +15,19 @@ const toast = useToast();
 const props = defineProps({
   accounts: {
     type: Array,
-    required: false,
+    required: true,
   },
   loading: {
     type: Boolean,
-    required: false,
+    required: true,
   },
   title: {
     type: String,
-    required: false,
+    required: true,
+  },
+  columns: {
+    type: Number,
+    required: true,
   },
 });
 
@@ -191,7 +195,7 @@ watch(() => props.loading, (newValue) => {
     :title="title"
     class-name="rounded-3xl"
   >
-    <div class="grid grid-cols-2 gap-5">
+    <div :class="`grid grid-cols-${columns} gap-5`">
       <template v-if="!loading && !loadingAccountsData">
         <template v-for="account in accounts.toSorted((a, b) => a.name.localeCompare(b.name))" :key="account.id">
           <div class="col-span-1 grid grid-cols-7 bg-slate-200 dark:bg-slate-900 p-2 rounded-lg gap-2">

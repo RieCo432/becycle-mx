@@ -194,6 +194,7 @@ function deleteCardWrapped() {
         title="User Accounts"
         :accounts="accounts"
         :loading="loadingAccounts"
+        columns="2"
       />
     </div>
     <div class="col-span-12">
@@ -203,17 +204,18 @@ function deleteCardWrapped() {
         :user="user"
       />
     </div>
-    <div class="col-span-6">
+    <div class="col-span-3">
       <GroupsCard
         :loading="loadingGroups"
         :groups="groups"
       />
     </div>
-    <div class="col-span-6">
+    <div class="col-span-9">
       <AccountsCard
         title="Group Accounts"
         :accounts="groupAccounts"
         :loading="loadingGroupAccounts"
+        columns="3"
       />
     </div>
   </div>
