@@ -38,6 +38,9 @@ class Client(Base):
     createdOn: Mapped[DateTime] = mapped_column("createdon", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=False, quote=False)
     anonymised: Mapped[bool] = mapped_column("anonymised", Boolean, default=False, nullable=False, quote=False, server_default=text("FALSE"))
 
+    participantId: Mapped[UUID] = mapped_column("participantid", ForeignKey("participants.id"), nullable=True, quote=False)
+    participant: Mapped["Participant"] = relationship("Participant", back_populates="client")
+
     def __eq_dict__(self, other: dict):
         return all([
             str(self.id) == str(other.get("id")),

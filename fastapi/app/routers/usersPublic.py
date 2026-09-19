@@ -26,6 +26,6 @@ async def get_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
     if user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": "Incorrect username or password"})
 
-    access_token = auth.create_access_token(data={"sub": user.username})
+    access_token = auth.create_access_token(data={"sub": user.username, "participant_id": str(crud.get_or_create_participant(db=db, entity=user).id)})
 
     return {"access_token": access_token, "token_type": "bearer"}
