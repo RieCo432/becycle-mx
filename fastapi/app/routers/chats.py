@@ -1,6 +1,6 @@
 from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, Form, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, Form, BackgroundTasks, WebSocket
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import app.crud as crud
@@ -15,6 +15,8 @@ chats = APIRouter(
     dependencies=[Depends(dep.get_db)],
     responses={404: {"description": "Not Found"}}
 )
+
+manager = crud.ChatManager()
 
 
 @chats.get("/chats/conversations", dependencies=[Depends(dep.check_permissions)])
@@ -38,5 +40,16 @@ async def get_my_participant(
         db: Session = Depends(dep.get_db)
 ) -> schemas.Participant:
     return participant
+
+@chats.websocket("/chats/ws")
+async def websocket_endpoint(
+        websocket: WebSocket,
+):
+    try: 
+        participant = await manager.connect(websocket=websocket)
+        await manager.take_it_from_here(participant)
+    except Exception as e:
+        print(e)
+        # await websocket.close()
 
 
