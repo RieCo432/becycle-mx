@@ -31,50 +31,63 @@ function selectConversation(conversation) {
 requests.getParticipantMe().then((response) => {
   participantId.value = response.data.id;
 });
-
-const websocket = new WebSocket('ws://localhost:8000/chats/ws');
-
 const websocketStatus = ref(0);
 
-websocket.onopen = async (ev) => {
-  console.log('websocket opened');
-  websocket.send(JSON.stringify({
-    token: credentialStore.token,
-  }));
-  websocketStatus.value = websocket.readyState;
 
-  requests.getMyConversation().then((response) => {
-    selectConversation(response.data);
-    conversations.value.push(response.data);
-    subscribeToConversations([selectedConversation.value.id]);
-  });
-  
-  if (isUser) {
-    requests.getConversations().then((response) => {
-      conversations.value.push(...response.data);
-      subscribeToConversations(conversations.value.map((c) => c.id));
+let websocket = null;
+let wait = 500;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function connect() {
+  console.log('connecting');
+  websocket = new WebSocket('ws://localhost:8000/chats/ws');
+
+  websocket.onopen = async (ev) => {
+    console.log('websocket opened');
+    wait = 500;
+    websocket.send(JSON.stringify({
+      token: credentialStore.token,
+    }));
+
+    requests.getMyConversation().then((response) => {
+      selectConversation(response.data);
+      conversations.value.push(response.data);
+      subscribeToConversations([selectedConversation.value.id]);
     });
-  }
-};
 
-
-websocket.onmessage = (d) => {
-  // console.log(d);
-  websocketStatus.value = websocket.readyState;
-  const message = JSON.parse(d.data);
-  console.log({message, myConversation: myConversation.value});
-
-  conversations.value.forEach((c) => {
-    if (c.id === message.conversationId) {
-      c.messages.push(message);
+    if (isUser) {
+      requests.getConversations().then((response) => {
+        conversations.value.push(...response.data);
+        subscribeToConversations(conversations.value.map((c) => c.id));
+      });
     }
-  });
-};
+  };
 
-websocket.onclose = (ev) => {
-  console.log('websocket closed');
-  websocketStatus.value = websocket.readyState;
-};
+  websocket.onmessage = (d) => {
+    // console.log(d);
+    const message = JSON.parse(d.data);
+    console.log({message, myConversation: myConversation.value});
+
+    conversations.value.forEach((c) => {
+      if (c.id === message.conversationId) {
+        c.messages.push(message);
+      }
+    });
+  };
+
+  websocket.onclose = async (ev) => {
+    console.log('websocket closed');
+    console.log('sleeping', wait);
+    await sleep(wait);
+    connect();
+    wait *= 2;
+  };
+}
+
+connect();
 
 function sendMessage(conversationId, message) {
   websocket.send(JSON.stringify({
@@ -94,6 +107,10 @@ function subscribeToConversations(conversationIds) {
     },
   }));
 }
+
+setInterval(() => {
+  websocketStatus.value = websocket.readyState;
+}, 500);
 
 
 </script>
