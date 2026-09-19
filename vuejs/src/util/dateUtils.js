@@ -38,4 +38,25 @@ export default {
   convertDateToPickerString(d) {
     return d.toISOString().split('T')[0];
   },
+  convertToConvenientString(d) {
+    const now = new Date();
+    if (!d) {
+      return '';
+    }
+    const parsedDate = new Date(Date.parse(`${d}Z`));
+    
+    const isToday =
+      parsedDate.getDate() === now.getDate() &&
+      parsedDate.getMonth() === now.getMonth() &&
+      parsedDate.getFullYear() === now.getFullYear();
+    const isYesterday =
+      parsedDate.getDate() === now.getDate() - 1 &&
+      parsedDate.getMonth() === now.getMonth() &&
+      parsedDate.getFullYear() === now.getFullYear();
+    if (isToday || isYesterday) {
+      return `${isYesterday ? 'Yesterday ' : ''}${parsedDate.toLocaleString(undefined, {hour: 'numeric', minute: 'numeric'})}`;
+    }
+
+    return parsedDate.toLocaleDateString(undefined, {year: 'numeric', month: 'short', day: 'numeric'});
+  },
 };
