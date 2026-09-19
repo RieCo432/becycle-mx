@@ -1,3 +1,5 @@
+from enum import Enum
+
 from dateutil.relativedelta import relativedelta
 from datetime import date
 
@@ -86,3 +88,8 @@ def get_interval_timedelta(interval: str, dt: date | None = None):
         return relativedelta(days=(dt-current_at).days)
     else:
         return relativedelta(months=1)
+
+
+class WebSocketCommand(str, Enum):
+    SUBSCRIBE = "subscribe"
+    MESSAGE = "message"

@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict
 from .appointments import Appointment
 from .user import User
 from .client import Client
+from app.services.misc_helpers import WebSocketCommand
 
 class Participant(BaseModel):
     id: UUID
@@ -14,6 +15,7 @@ class Participant(BaseModel):
 
 
 class MessageBase(BaseModel):
+    model_config = ConfigDict(strict=True, from_attributes=True)
     id: UUID
 
     conversationId: UUID
@@ -29,6 +31,7 @@ class MessageBase(BaseModel):
 
 
 class MessageFull(MessageBase):
+    model_config = ConfigDict(strict=True, from_attributes=True)
     sentByParticipant: Participant
     seenByParticipant: Participant | None = None
     
@@ -39,5 +42,21 @@ class Conversation(BaseModel):
     initiatorParticipant: Participant
     
     messages: list[MessageFull]
+    
+    
+    
+class WebSocketSubscribe(BaseModel):
+    conversationIds: list[UUID]
+    
+    
+class WebSocketMessage(BaseModel):
+    conversationId: UUID
+    body: str
+    
+    
+class WebSocketRequest(BaseModel):
+    model_config = ConfigDict(strict=True)
+    command: WebSocketCommand
+    payload: WebSocketSubscribe | WebSocketMessage
     
     
