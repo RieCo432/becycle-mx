@@ -36,7 +36,7 @@ def upgrade() -> None:
     op.create_table('messages',
     sa.Column('id', sa.UUID(), server_default=sa.text('uuid_generate_v4()'), nullable=False),
     sa.Column('conversationid', sa.UUID(), nullable=False),
-    sa.Column('createdon', sa.DateTime(), server_default=sa.text("(current_timestamp at time zone 'utc')"), nullable=False),
+    sa.Column('senton', sa.DateTime(), server_default=sa.text("(current_timestamp at time zone 'utc')"), nullable=False),
     sa.Column('sentbyparticipantid', sa.UUID(), nullable=False),
     sa.Column('seenbyparticipantid', sa.UUID(), nullable=True),
     sa.Column('body', sa.Text(), nullable=False),
@@ -45,7 +45,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['sentbyparticipantid'], ['participants.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_messages_createdon'), 'messages', ['createdon'], unique=False)
+    op.create_index(op.f('ix_messages_senton'), 'messages', ['senton'], unique=False)
     op.create_index(op.f('ix_messages_id'), 'messages', ['id'], unique=False)
     op.add_column('clients', sa.Column('participantid', sa.UUID(), nullable=True))
     op.create_foreign_key("clients_participantid_fkey", 'clients', 'participants', ['participantid'], ['id'])
@@ -61,7 +61,7 @@ def downgrade() -> None:
     op.drop_constraint("clients_participantid_fkey", 'clients', type_='foreignkey')
     op.drop_column('clients', 'participantid')
     op.drop_index(op.f('ix_messages_id'), table_name='messages')
-    op.drop_index(op.f('ix_messages_createdon'), table_name='messages')
+    op.drop_index(op.f('ix_messages_senton'), table_name='messages')
     op.drop_table('messages')
     op.drop_index(op.f('ix_conversations_id'), table_name='conversations')
     op.drop_table('conversations')
