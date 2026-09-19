@@ -42,7 +42,12 @@ const emit = defineEmits(['conversationSelected']);
             </span>
               <span
                 class="block text-slate-600 dark:text-slate-300 text-xs font-normal"
-              >{{ myConversation.messages.length > 0 ? myConversation.messages[0].body : '' }}</span
+              >{{
+                  myConversation.messages.length > 0
+                    ? myConversation.messages
+                      .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[myConversation.messages.length - 1]
+                      .body
+                    : '' }}</span
               >
             </div>
             <div class="flex-none ltr:text-right rtl:text-end">
@@ -85,7 +90,12 @@ const emit = defineEmits(['conversationSelected']);
             >
               <span
                 class="block text-slate-600 dark:text-slate-300 text-xs font-normal"
-              >{{ conversation.messages.length > 0 ? conversation.messages[0].body : '' }}</span
+              >{{
+                  conversation.messages.length > 0
+                    ? conversation.messages
+                      .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[conversation.messages.length - 1]
+                      .body
+                    : '' }}</span
               >
             </div>
             <div class="flex-none ltr:text-right rtl:text-end">
