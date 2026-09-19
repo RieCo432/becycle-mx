@@ -1,7 +1,7 @@
 from typing import List
 from uuid import uuid4
 
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import String, UUID, text, DateTime, ForeignKey, Boolean, ARRAY, Float, Integer, DECIMAL
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,7 +15,7 @@ class TransactionHeader(Base):
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
     event: Mapped[str] = mapped_column("event", String(60), nullable=False, quote=False, index=True)
 
-    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False, index=True)
+    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), quote=False, index=True)
     createdByUserId: Mapped[UUID] = mapped_column("createdbyuserid", ForeignKey("users.id"), nullable=False, quote=False, index=True)
     createdByUser: Mapped["User"] = relationship("User", foreign_keys=[createdByUserId], back_populates="transactionHeadersCreated")
 

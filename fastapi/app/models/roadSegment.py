@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import text, Text, Integer, UUID, Float, ForeignKey, String, DateTime
@@ -55,7 +55,7 @@ class RoadSegmentReport(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, default=uuid4,
                                      server_default=text("uuid_generate_v4()"), index=True, quote=False)
-    datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=datetime.utcnow(), server_default=text("current_timestamp"))
+    datetime: Mapped[datetime] = mapped_column("datetime", DateTime, nullable=False, quote=False, default=lambda _: datetime.now(timezone.utc), server_default=text("current_timestamp"))
 
     roadSegmentId: Mapped[UUID] = mapped_column("roadsegmentid", ForeignKey(RoadSegment.id), nullable=False, quote=False)
     roadSegment: Mapped[RoadSegment] = relationship(RoadSegment)

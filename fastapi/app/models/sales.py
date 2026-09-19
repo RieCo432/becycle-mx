@@ -14,7 +14,7 @@ class SaleHeader(Base):
 
     id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
 
-    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
+    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
     createdByUserId: Mapped[UUID] = mapped_column("createdbyuserid", ForeignKey("users.id"), nullable=False, quote=False)
     createdByUser: Mapped["User"] = relationship("User", foreign_keys=[createdByUserId], back_populates="saleHeadersCreated")
 

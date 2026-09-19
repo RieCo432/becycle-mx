@@ -1,7 +1,7 @@
 from typing import List
 from uuid import uuid4
 
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import String, UUID, text, DateTime, Integer, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,7 +24,7 @@ class Bike(Base):
     decals: Mapped[str] = mapped_column("decals", String(40), nullable=True, quote=False)
     serialNumber: Mapped[str] = mapped_column("serialnumber", String(40), nullable=False, quote=False)
     rfidTagSerialNumber: Mapped[str] = mapped_column("rfidtagserialnumber", String(24), nullable=True, quote=False)
-    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
+    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
     roughValue: Mapped[int] = mapped_column("roughvalue", Integer, nullable=True, quote=False)
     disposition: Mapped[Disposition] = mapped_column("disposition", Enum(Disposition, native_enum=True), nullable=False, quote=False)
 
