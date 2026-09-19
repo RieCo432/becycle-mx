@@ -88,3 +88,11 @@ async def get_bike(
         db: Session = Depends(dep.get_db)
 ) -> schemas.Bike:
     return crud.get_bike(db=db, bike_id=bike_id)
+
+
+@clients_me.get("/clients/me/participant")
+async def client_get_my_participant(
+        client: models.Client = Depends(dep.get_current_client),
+        db: Session = Depends(dep.get_db)
+) -> schemas.Participant:
+    return crud.get_or_create_participant(db=db, entity=client)

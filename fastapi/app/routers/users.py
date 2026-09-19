@@ -152,6 +152,14 @@ async def get_my_contracts(
     return crud.get_contracts_by_user_id(db=db, user_id=user.id)
 
 
+@users.get("/users/me/participant")
+async def user_get_my_participant(
+        user: models.User = Depends(dep.get_current_active_user),
+        db: Session = Depends(dep.get_db)
+) -> schemas.Participant:
+    return crud.get_or_create_participant(db=db, entity=user)
+
+
 @users.get("/users/{user_id}")
 async def get_user(user_id: UUID, db: Session = Depends(dep.get_db)) -> schemas.User:
     return crud.get_user(db=db, user_id=user_id)

@@ -20,3 +20,4 @@ from .sales import *
 from .bugReports import *
 from .photos import *
 from .dashboards import *
+from .chats import *
