@@ -8,21 +8,17 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  myConversation: {
+    type: Object,
+    required: true,
+  },
+  conversations: {
+    type: Array,
+    required: true,
+  },
 });
 
-const myConversation = ref();
-const conversations = ref([]);
-
-requests.getMyConversation().then((response) => {
-  myConversation.value = response.data;
-});
-
-requests.getConversations().then((response) => {
-  conversations.value = response.data;
-});
-
-defineEmits(['conversationSelected']);
-
+const emit = defineEmits(['conversationSelected']);
 
 </script>
 
@@ -32,7 +28,7 @@ defineEmits(['conversationSelected']);
     <div class="divide-y divide-slate-100 dark:divide-slate-700">
       <div
         v-if="myConversation"
-        @click="$emit('conversationSelected', myConversation)"
+        @click="emit('conversationSelected', myConversation)"
         class="block w-full py-5 focus:ring-0 outline-none cursor-pointer group transition-all 
         duration-150 hover:bg-slate-100 dark:hover:bg-slate-600 dark:hover:bg-opacity-70"
       >
@@ -74,7 +70,7 @@ defineEmits(['conversationSelected']);
 
       <div class="overflow-y-scroll">
       <div
-        v-for="(conversation, i) in conversations"
+        v-for="(conversation, i) in conversations.filter((c) => c.id !== myConversation.id)"
         :key="i"
         @click="$emit('conversationSelected', conversation)"
         class="block w-full py-5 focus:ring-0 outline-none cursor-pointer group transition-all 

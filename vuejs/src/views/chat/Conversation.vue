@@ -2,7 +2,7 @@
 
 
 import Card from '@/components/Card/index.vue';
-import {ref} from 'vue';
+import {nextTick, ref, watch} from 'vue';
 import {Icon} from '@iconify/vue';
 
 const props = defineProps({
@@ -15,12 +15,32 @@ const props = defineProps({
     required: true,
   },
 });
+const emit = defineEmits(['sendMessage']);
 
 const newMessage = ref('');
 
 async function sendMessage() {
+  emit('sendMessage', props.conversation.id, newMessage.value);
   newMessage.value = '';
 }
+
+const chatHeight = ref(null);
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatHeight.value) {
+      chatHeight.value.scrollTop = chatHeight.value.scrollHeight;
+    }
+  });
+}
+
+watch(
+  () => props.conversation.messages.length,
+  () => {
+    scrollToBottom();
+  },
+  {immediate: true},
+);
 
 
 </script>
@@ -55,64 +75,55 @@ async function sendMessage() {
               </div>
             </div>
           </header>
-          <div class="chat-content parent-height">
-            <div
-              class="msgs overflow-y-auto msg-height pt-6 space-y-6"
-              ref="chatheight"
-            >
-              <div class="block md:px-6 px-4" v-for="(message, i) in conversation.messages" :key="i">
-
-                <div
-                  class="flex space-x-2 items-start justify-end group w-full rtl:space-x-reverse"
-                  v-if="message.sentByParticipantId === participantId"
-                >
-                  <div class="no flex space-x-4 rtl:space-x-reverse">
+          <div
+            class="custom-scrollbar h-[800px] chat-content msgs overflow-y-auto msg-height pt-6 space-y-6 msgs  msg-height"
+            ref="chatHeight">
+            <div class="block md:px-6 px-4" v-for="(message, i) in conversation.messages" :key="i">
+              <div
+                class="flex space-x-2 items-start justify-end group w-full rtl:space-x-reverse"
+                v-if="message.sentByParticipantId === participantId"
+              >
+                <div class="no flex space-x-4 rtl:space-x-reverse">
+                  <div
+                    class="opacity-0 invisible group-hover:opacity-100 group-hover:visible"
+                  >
+                  </div>
+                  <div class="whitespace-pre-wrap break-all">
                     <div
-                      class="opacity-0 invisible group-hover:opacity-100 group-hover:visible"
+                      class="text-contrent p-3 bg-slate-300 dark:bg-slate-900 dark:text-slate-300 text-slate-800 text-sm font-normal rounded-md flex-1 mb-1"
                     >
-
+                      {{ message.body }}
                     </div>
-
-                    <div class="whitespace-pre-wrap break-all">
-                      <div
-                        class="text-contrent p-3 bg-slate-300 dark:bg-slate-900 dark:text-slate-300 text-slate-800 text-sm font-normal rounded-md flex-1 mb-1"
-                      >
-                        {{ message.body }}
-                      </div>
-                      <span class="font-normal text-xs text-slate-400">
-                          time
-                        </span>
-                    </div>
+                    <span class="font-normal text-xs text-slate-400">
+                      time
+                    </span>
                   </div>
                 </div>
-                <!-- me  -->
-
-                <div
-                  class="flex space-x-2 items-start group rtl:space-x-reverse"
-                  v-else
-                >
-                  <div class="flex-1 flex space-x-4 rtl:space-x-reverse">
-                    <div>
-                      <div
-                        class="text-contrent p-3 bg-slate-100 dark:bg-slate-600 dark:text-slate-300 text-slate-600 text-sm font-normal mb-1 rounded-md flex-1 whitespace-pre-wrap break-all"
-                      >
-                        {{ message.body }}
-                      </div>
-                      <span
-                        class="font-normal text-xs text-slate-400 dark:text-slate-400"
-                      >12:20 pm</span
-                      >
-                    </div>
-                    <div
-                      class="opacity-0 invisible group-hover:opacity-100 group-hover:visible"
-                    >
-
-                    </div>
-                  </div>
-                </div>
-                <!-- sender -->
-                
               </div>
+              <!-- me  -->
+              <div
+                class="flex space-x-2 items-start group rtl:space-x-reverse"
+                v-else
+              >
+                <div class="flex-1 flex space-x-4 rtl:space-x-reverse">
+                  <div>
+                    <div
+                      class="text-contrent p-3 bg-slate-100 dark:bg-slate-600 dark:text-slate-300 text-slate-600 text-sm font-normal mb-1 rounded-md flex-1 whitespace-pre-wrap break-all"
+                    >
+                      {{ message.body }}
+                    </div>
+                    <span
+                      class="font-normal text-xs text-slate-400 dark:text-slate-400"
+                    >12:20 pm</span
+                    >
+                  </div>
+                  <div
+                    class="opacity-0 invisible group-hover:opacity-100 group-hover:visible"
+                  >
+                  </div>
+                </div>
+              </div>
+              <!-- sender -->
             </div>
           </div>
         </div>
@@ -152,5 +163,25 @@ async function sendMessage() {
 </template>
 
 <style scoped lang="scss">
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #64748b;
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
+}
 </style>
