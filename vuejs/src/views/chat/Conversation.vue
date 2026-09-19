@@ -1,9 +1,8 @@
 <script setup>
-
-
 import Card from '@/components/Card/index.vue';
 import {nextTick, ref, watch} from 'vue';
 import {Icon} from '@iconify/vue';
+import dateUtils from '@/util/dateUtils';
 
 const props = defineProps({
   conversation: {
@@ -46,7 +45,7 @@ watch(
 </script>
 
 <template>
-  <Card bodyClass="p-0 h-full" class="h-full">
+  <Card bodyClass="p-0 h-full">
     <div>
       <template v-if="conversation.messages.length === 0">
         <div
@@ -78,7 +77,11 @@ watch(
           <div
             class="custom-scrollbar h-[800px] chat-content msgs overflow-y-auto msg-height pt-6 space-y-6 msgs  msg-height"
             ref="chatHeight">
-            <div class="block md:px-6 px-4" v-for="(message, i) in conversation.messages" :key="i">
+            <div
+              class="block md:px-6 px-4"
+              v-for="(message, i) in conversation.messages
+                .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))"
+              :key="i">
               <div
                 class="flex space-x-2 items-start justify-end group w-full rtl:space-x-reverse"
                 v-if="message.sentByParticipantId === participantId"
@@ -95,7 +98,7 @@ watch(
                       {{ message.body }}
                     </div>
                     <span class="font-normal text-xs text-slate-400">
-                      time
+                      {{  dateUtils.convertToConvenientString(message.sentOn) }}
                     </span>
                   </div>
                 </div>
@@ -113,9 +116,9 @@ watch(
                       {{ message.body }}
                     </div>
                     <span
-                      class="font-normal text-xs text-slate-400 dark:text-slate-400"
-                    >12:20 pm</span
-                    >
+                      class="font-normal text-xs text-slate-400 dark:text-slate-400">
+                      {{  dateUtils.convertToConvenientString(message.sentOn) }}
+                    </span>
                   </div>
                   <div
                     class="opacity-0 invisible group-hover:opacity-100 group-hover:visible"
@@ -129,7 +132,7 @@ watch(
         </div>
       </template>
     </div>
-    
+
     <div
       class="md:px-6 px-4 sm:flex md:space-x-4 sm:space-x-2 rtl:space-x-reverse border-t md:pt-6 pt-4 border-slate-100 dark:border-slate-700"
     >
