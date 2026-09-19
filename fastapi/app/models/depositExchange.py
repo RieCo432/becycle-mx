@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from uuid import uuid4
 
 from sqlalchemy import UUID, text, ForeignKey, Date, Integer
@@ -21,7 +21,7 @@ class DepositExchange(Base):
     toUser: Mapped["User"] = relationship("User", foreign_keys=[toUserId])
 
     amount: Mapped[int] = mapped_column("amount", Integer, nullable=False, quote=False)
-    date: Mapped[date] = mapped_column("date", Date, default=datetime.utcnow().date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, quote=False)
+    date: Mapped[date] = mapped_column("date", Date, default=lambda _: datetime.now(timezone.utc).date(), server_default=text("(current_date at time zone 'utc')"), nullable=False, quote=False)
 
     def equal_to_dict(self, other: dict):
         return all([

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import UUID, text, Text, DateTime, ForeignKey
@@ -16,7 +16,7 @@ class Message(Base):
     conversationId: Mapped[UUID] = mapped_column("conversationid", ForeignKey("conversations.id"), nullable=False, quote=False)
     conversation: Mapped["Conversation"] = relationship("Conversation", back_populates="messages")
 
-    sentOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False, index=True)
+    sentOn: Mapped[datetime] = mapped_column("senton", DateTime, nullable=False, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), quote=False, index=True)
 
     sentByParticipantId: Mapped[UUID] = mapped_column("sentbyparticipantid", ForeignKey("participants.id"), nullable=False, quote=False)
     sentByParticipant: Mapped["Participant"] = relationship("Participant", foreign_keys=[sentByParticipantId], back_populates="messagesSent")

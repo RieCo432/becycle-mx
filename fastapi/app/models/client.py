@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from random import random
 from typing import List
 from uuid import uuid4
@@ -35,7 +35,7 @@ class Client(Base):
     contracts: Mapped[List["Contract"]] = relationship("Contract", back_populates="client")
     appointments: Mapped[List["Appointment"]] = relationship("Appointment", back_populates="client")
 
-    createdOn: Mapped[DateTime] = mapped_column("createdon", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=False, quote=False)
+    createdOn: Mapped[DateTime] = mapped_column("createdon", DateTime, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), nullable=False, quote=False)
     anonymised: Mapped[bool] = mapped_column("anonymised", Boolean, default=False, nullable=False, quote=False, server_default=text("FALSE"))
 
     participantId: Mapped[UUID] = mapped_column("participantid", ForeignKey("participants.id"), nullable=True, quote=False)

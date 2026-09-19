@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from uuid import uuid4
 
@@ -65,7 +65,7 @@ class User(Base):
     pin: Mapped[str] = mapped_column("pin", String(60), nullable=True, quote=False)
     rentalChecker: Mapped[bool] = mapped_column("rentalchecker", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
     softDeleted: Mapped[bool] = mapped_column("softdeleted", Boolean, default=False, nullable=False, server_default=text("FALSE"), quote=False)
-    lastAuthenticated: Mapped[datetime] = mapped_column("lastauthenticated", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=True, quote=False)
+    lastAuthenticated: Mapped[datetime] = mapped_column("lastauthenticated", DateTime, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), nullable=True, quote=False)
 
     participantId: Mapped[UUID] = mapped_column("participantid",  ForeignKey("participants.id"), nullable=True, quote=False)
     participant: Mapped["Participant"] = relationship("Participant", back_populates="user")
