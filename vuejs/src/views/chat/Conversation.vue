@@ -1,6 +1,6 @@
 <script setup>
 import Card from '@/components/Card/index.vue';
-import {nextTick, ref, watch} from 'vue';
+import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {Icon} from '@iconify/vue';
 import dateUtils from '@/util/dateUtils';
 import TextArea from '@/components/TextArea/index.vue';
@@ -25,14 +25,38 @@ async function sendMessage() {
 }
 
 const chatHeight = ref(null);
+const chatBody = ref(null);
+const maxMessageInputHeight = ref(null);
+let chatResizeObserver = null;
+
+function updateMaxMessageInputHeight() {
+  if (chatBody.value) {
+    maxMessageInputHeight.value = Math.floor(chatBody.value.clientHeight / 2);
+  }
+}
 
 function scrollToBottom() {
   nextTick(() => {
+    updateMaxMessageInputHeight();
+
     if (chatHeight.value) {
       chatHeight.value.scrollTop = chatHeight.value.scrollHeight;
     }
   });
 }
+
+onMounted(() => {
+  updateMaxMessageInputHeight();
+
+  if (chatBody.value) {
+    chatResizeObserver = new ResizeObserver(updateMaxMessageInputHeight);
+    chatResizeObserver.observe(chatBody.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  chatResizeObserver?.disconnect();
+});
 
 watch(
   () => props.conversation.messages.length,
@@ -46,7 +70,7 @@ watch(
 
 <template>
   <Card bodyClass="relative p-0 h-full overflow-hidden flex flex-col" className="h-full max-h-full overflow-hidden">
-    <div class="flex flex-col h-full min-h-0">
+    <div ref="chatBody" class="flex flex-col h-full min-h-0">
       <header class="flex-none border-b border-slate-100 dark:border-slate-700">
         <div class="flex py-6 md:px-6 px-3 items-center">
           <div
@@ -141,8 +165,10 @@ watch(
             rows="1"
             type="text"
             placeholder="Type your message..."
-            classInput="flex-1 m-1 p-2 min-h-0 dark:bg-slate-900 rounded-full chat-message-input focus:ring-0 focus:outline-0 block w-full bg-transparent dark:text-white resize-none"
+            classInput="flex-1 m-1 p-2 min-h-0 dark:bg-slate-900 rounded-2xl chat-message-input focus:ring-0 focus:outline-0 block w-full bg-transparent dark:text-white resize-none"
             v-model.trim="newMessage"
+            autoGrow
+            :maxGrowHeight="maxMessageInputHeight"
             @keydown.enter.exact.prevent="sendMessage"
             @keydown.enter.shift.exact.prevent="newMessage += '\n'"
           />
