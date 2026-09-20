@@ -1,7 +1,9 @@
 <script setup>
-import {ref, defineEmits} from 'vue';
+import {ref, defineEmits, computed} from 'vue';
 import requests from '@/requests';
 import Card from '@/components/Card/index.vue';
+import dateUtils from '@/util/dateUtils';
+import {Icon} from '@iconify/vue';
 
 const props = defineProps({
   selectedConversation: {
@@ -18,7 +20,22 @@ const props = defineProps({
   },
 });
 
+const searchTerm = ref('');
 const emit = defineEmits(['conversationSelected']);
+const filteredConversations = computed(() => {
+  return props.conversations
+    .filter((c) => c.id !== props.myConversation.id)
+    .filter((c) => {
+      const name = `${c.initiatorParticipant.client.firstName}} ${c.initiatorParticipant.client.lastName}`;
+      return name.toLowerCase().includes(searchTerm.value.toLowerCase());
+    })
+    .toSorted(
+      (c1, c2) =>
+        Math.max(...c1.messages.map((m) => Date.parse(m.sentOn))) -
+        Math.max(...c2.messages.map((m) => Date.parse(m.sentOn))),
+    )
+    .reverse();
+});
 
 </script>
 
@@ -53,7 +70,12 @@ const emit = defineEmits(['conversationSelected']);
             <div class="flex-none ltr:text-right rtl:text-end">
             <span
               class="block text-xs text-slate-400 dark:text-slate-400 font-normal"
-            >12:20 pm</span>
+            >{{
+                myConversation.messages.length > 0
+                  ? dateUtils.convertToConvenientString(myConversation.messages
+                    .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[myConversation.messages.length - 1]
+                    .sentOn)
+                  : '' }}</span>
             </div>
           </div>
         </div>
@@ -68,17 +90,18 @@ const emit = defineEmits(['conversationSelected']);
           </div>
           <input
             placeholder="Search..."
+            v-model="searchTerm"
             class="w-full flex-1 block bg-transparent placeholder:font-normal placeholder:text-slate-400 py-2 focus:ring-0 focus:outline-none dark:text-slate-200 dark:placeholder:text-slate-400"
           />
         </div>
       </div>
 
-      <div class="overflow-y-scroll">
+      <div class="overflow-y-scroll custom-scrollbar">
       <div
-        v-for="(conversation, i) in conversations.filter((c) => c.id !== myConversation.id)"
+        v-for="(conversation, i) in filteredConversations"
         :key="i"
         @click="$emit('conversationSelected', conversation)"
-        class="block w-full py-5 focus:ring-0 outline-none cursor-pointer group transition-all 
+        class="block w-full py-5 focus:ring-0 outline-none cursor-pointer group transition-all
         duration-150 hover:bg-slate-100 dark:hover:bg-slate-600 dark:hover:bg-opacity-70"
       >
         <div class="flex space-x-3 px-6 rtl:space-x-reverse">
@@ -101,11 +124,16 @@ const emit = defineEmits(['conversationSelected']);
             <div class="flex-none ltr:text-right rtl:text-end">
             <span
               class="block text-xs text-slate-400 dark:text-slate-400 font-normal"
-            >12:20 pm</span
+            >{{
+                conversation.messages.length > 0
+                  ? dateUtils.convertToConvenientString(conversation.messages
+                    .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[conversation.messages.length - 1]
+                    .sentOn)
+                  : '' }}</span
             >
               <span
                 v-if="true"
-                class="inline-flex flex-col items-center justify-center text-[10px] 
+                class="inline-flex flex-col items-center justify-center text-[10px]
                 font-medium w-4 h-4 bg-[#FFC155] text-white rounded-full"
               ></span
               >
