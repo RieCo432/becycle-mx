@@ -5,6 +5,7 @@ import ConversationPicker from '@/views/chat/ConversationPicker.vue';
 import {computed, reactive, ref, watch} from 'vue';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
+import Alert from '@/components/Alert/index.vue';
 
 const toast = useToast();
 const credentialStore = useCredentialsStore();
@@ -112,13 +113,28 @@ setInterval(() => {
   websocketStatus.value = websocket.readyState;
 }, 500);
 
+const websocketStatusReadable = computed(() => {
+  switch (websocketStatus.value) {
+  case 0:
+    return {value: 'warning-outline', label: 'Connecting...'};
+  case 1:
+    return {value: 'success-outline', label: 'Connected'};
+  case 2:
+    return {value: 'info-outline', label: 'Disconnecting...'};
+  case 3:
+    return {value: 'danger-outline', label: 'Disconnected'};
+  }
+});
+
 
 </script>
 
 <template>
     <div class="grid grid-cols-12 gap-5">
       <div class="col-span-full">
-        <span>{{websocketStatus}}</span>
+        <Alert
+          :type="websocketStatusReadable.value"
+        >{{websocketStatusReadable.label}}</Alert>
       </div>
       <template v-if="isUser">
         <div class="col-span-3">
