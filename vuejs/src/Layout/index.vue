@@ -1,6 +1,7 @@
 <template>
-  <main class="app-wrapper">
-    <Header :class="window.width > 1280 ? switchHeaderClass() : ''" />
+  <main class="app-wrapper h-full flex flex-col">
+    <Header
+      :class="window.width > 1280 ? switchHeaderClass() : ''" />
     <!-- end header -->
 
     <Sidebar
@@ -27,9 +28,9 @@
     <!-- mobile sidebar -->
 
     <div
-      class="content-wrapper transition-all duration-150"
+      class="transition-all duration-150 flex-1"
       :class="window.width > 1280 ? switchHeaderClass() : ''">
-      <div class="page-content page-min-height h-full">
+      <div class="h-full page-content">
           <router-view v-slot="{ Component }">
             <transition name="router-animation" mode="out-in" appear>
               <component :is="Component"></component>
@@ -138,10 +139,8 @@ export default {
 
 .page-content {
   @apply flex flex-col; // Add this
-  @apply md:pt-6 md:pb-[37px] md:px-6 pt-[15px] px-[15px] pb-24;
-}
-.page-min-height {
-  @apply flex flex-col; // Add this
+  @apply md:pt-6 md:pb-[37px] md:px-6 pt-[15px] px-[15px];
   min-height: calc(var(--vh, 1vh) * 100 - 133px);
 }
+
 </style>
