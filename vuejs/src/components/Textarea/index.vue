@@ -19,7 +19,7 @@
         ref="textarea"
         :name="name"
         :placeholder="placeholder"
-        :class="`input-control block w-full focus:outline-none ${classInput}`"
+        :class="`input-control block w-full focus:outline-none custom-scrollbar ${classInput}`"
         :value="modelValue"
         @input="handleInput"
         :error="error"
@@ -192,4 +192,32 @@ export default {
   },
 };
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #64748b;
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
+}
+</style>
