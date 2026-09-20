@@ -122,6 +122,7 @@ class ChatManager:
         if participant is None:
             raise WebSocketException
         self.active_connections[participant.id] = websocket
+        print("Active connections:", len(self.active_connections))
         return participant
     
     def subscribe(self, conversation_id: UUID, participant_id: UUID):
