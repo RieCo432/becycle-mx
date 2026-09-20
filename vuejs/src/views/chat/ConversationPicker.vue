@@ -17,6 +17,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  participantId: {
+    type: String,
+    required: true,
+  }
 });
 
 const searchTerm = ref('');
@@ -35,6 +39,13 @@ const filteredConversations = computed(() => {
     )
     .reverse();
 });
+
+function getNumberOfUnreadMessages(conversation) {
+  return conversation.messages
+    .filter((m) => m.sentByParticipantId !== props.participantId)
+    .filter((m) => !m.seenByParticipantId)
+    .length;
+}
 
 </script>
 
@@ -130,8 +141,10 @@ const filteredConversations = computed(() => {
                 <span
                   v-if="true"
                   class="inline-flex flex-col items-center justify-center text-[10px]
-                  font-medium w-4 h-4 bg-[#FFC155] text-white rounded-full"
-                ></span>
+                  font-medium w-4 h-4 bg-danger-500 text-white rounded-full"
+                >
+                  {{ getNumberOfUnreadMessages(conversation) }}
+                </span>
               </div>
             </div>
           </div>
