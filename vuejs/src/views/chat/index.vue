@@ -2,10 +2,15 @@
 import {useCredentialsStore} from '@/store/credentialsStore';
 import Conversation from '@/views/chat/Conversation.vue';
 import ConversationPicker from '@/views/chat/ConversationPicker.vue';
-import {computed, reactive, ref, watch} from 'vue';
+import {computed, onBeforeUnmount, reactive, ref, watch} from 'vue';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import Alert from '@/components/Alert/index.vue';
+
+const API_WS_PROTOCOL = import.meta.env.VITE_API_WS_PROTOCOL;
+const API_HOST = import.meta.env.VITE_API_HOST;
+const API_PORT = import.meta.env.VITE_API_PORT;
+const API_SUBDIR = import.meta.env.VITE_API_SUBDIR;
 
 const toast = useToast();
 const credentialStore = useCredentialsStore();
@@ -42,9 +47,11 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const wsBaseUrl = `${API_WS_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}/chats/ws`;
+
 function connect() {
   console.log('connecting');
-  websocket = new WebSocket('ws://localhost:8000/chats/ws');
+  websocket = new WebSocket(wsBaseUrl);
 
   websocket.onopen = async (ev) => {
     console.log('websocket opened');
@@ -52,6 +59,8 @@ function connect() {
     websocket.send(JSON.stringify({
       token: credentialStore.token,
     }));
+    
+    conversations.value.splice(0, conversations.value.length);
 
     requests.getMyConversation().then((response) => {
       selectConversation(response.data);
@@ -126,6 +135,11 @@ const websocketStatusReadable = computed(() => {
   }
 });
 
+onBeforeUnmount(() => {
+  websocket.onclose = () => {};
+  websocket.close();
+});
+
 
 </script>
 
@@ -145,6 +159,7 @@ const websocketStatusReadable = computed(() => {
               @conversation-selected="selectConversation"
               :conversations="conversations"
               :myConversation="myConversation"
+              :participantId="participantId"
             />
           </div>
         </template>

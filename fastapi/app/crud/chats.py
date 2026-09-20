@@ -137,8 +137,9 @@ class ChatManager:
             await websocket.send_json(schemas.MessageBase.model_validate(message, from_attributes=True).model_dump(mode="json"))
 
     async def disconnect(self, participant_id: UUID):
-        await self.active_connections[participant_id].close()
+        # await self.active_connections[participant_id].close()
         del self.active_connections[participant_id]
+        print("Active connections:", len(self.active_connections))
         
         
     async def take_it_from_here(self, participant: models.Participant):
