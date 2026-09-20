@@ -130,32 +130,35 @@ const websocketStatusReadable = computed(() => {
 </script>
 
 <template>
-    <div class="grid grid-cols-12 gap-5">
-      <div class="col-span-full">
+    <div class="flex flex-col gap-5 h-full min-h-0">
+      <div>
         <Alert
           :type="websocketStatusReadable.value"
         >{{websocketStatusReadable.label}}</Alert>
       </div>
-      <template v-if="isUser">
-        <div class="col-span-3">
-          <ConversationPicker
-            v-if="myConversation"
-            :selectedConversation="selectedConversation"
-            @conversation-selected="selectConversation"
-            :conversations="conversations"
-            :myConversation="myConversation"
+      <div class="flex gap-5 flex-1 min-h-0">
+        <template v-if="isUser">
+          <div class="basis-1/4 basis min-h-0">
+            <ConversationPicker
+              v-if="myConversation"
+              :selectedConversation="selectedConversation"
+              @conversation-selected="selectConversation"
+              :conversations="conversations"
+              :myConversation="myConversation"
+            />
+          </div>
+        </template>
+        <div
+          v-if="selectedConversation"
+          :class="`${isUser ? 'basis-3/4' : 'basis-full'} min-h-0`">
+          <Conversation
+            :conversation="selectedConversation"
+            :participantId="participantId"
+            @send-message="sendMessage"
           />
         </div>
-      </template>
-      <div
-        v-if="selectedConversation"
-        :class="`col-span-${isUser ? 9 : 12}`">
-        <Conversation
-          :conversation="selectedConversation"
-          :participantId="participantId"
-          @send-message="sendMessage"
-        />
       </div>
+      
     </div>
 
 </template>

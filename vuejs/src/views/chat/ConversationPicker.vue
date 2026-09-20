@@ -46,7 +46,7 @@ const filteredConversations = computed(() => {
       <div
         v-if="myConversation"
         @click="emit('conversationSelected', myConversation)"
-        class="block w-full py-5 focus:ring-0 outline-none cursor-pointer group transition-all 
+        class="block w-full py-5 focus:ring-0 outline-none cursor-pointer group transition-all
         duration-150 hover:bg-slate-100 dark:hover:bg-slate-600 dark:hover:bg-opacity-70"
       >
         <div class="flex space-x-3 px-6 rtl:space-x-reverse">
@@ -165,5 +165,26 @@ const filteredConversations = computed(() => {
 </template>
 
 <style scoped lang="scss">
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #64748b;
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
+}
 
 </style>

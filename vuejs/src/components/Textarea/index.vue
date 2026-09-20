@@ -18,7 +18,7 @@
       <textarea
         :name="name"
         :placeholder="placeholder"
-        :class="`${classInput} input-control block w-full focus:outline-none pt-3 `"
+        :class="`input-control block w-full focus:outline-none ${classInput}`"
         :value="modelValue"
         @input="$emit('update:modelValue', $event.target.value)"
         :error="error"
