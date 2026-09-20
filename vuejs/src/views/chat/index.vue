@@ -138,7 +138,7 @@ const websocketStatusReadable = computed(() => {
       </div>
       <div class="flex gap-5 flex-1 min-h-0">
         <template v-if="isUser">
-          <div class="basis-1/4 basis min-h-0">
+          <div class="basis-1/4 basis min-h-0 min-w-0 overflow-hidden">
             <ConversationPicker
               v-if="myConversation"
               :selectedConversation="selectedConversation"

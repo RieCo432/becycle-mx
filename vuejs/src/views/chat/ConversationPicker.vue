@@ -1,6 +1,5 @@
 <script setup>
 import {ref, defineEmits, computed} from 'vue';
-import requests from '@/requests';
 import Card from '@/components/Card/index.vue';
 import dateUtils from '@/util/dateUtils';
 import {Icon} from '@iconify/vue';
@@ -46,36 +45,35 @@ const filteredConversations = computed(() => {
       <div
         v-if="myConversation"
         @click="emit('conversationSelected', myConversation)"
-        class="block w-full py-5 focus:ring-0 outline-none cursor-pointer group transition-all
+        class="block w-full h-[88px] py-5 focus:ring-0 outline-none cursor-pointer group transition-all
         duration-150 hover:bg-slate-100 dark:hover:bg-slate-600 dark:hover:bg-opacity-70"
       >
         <div class="flex space-x-3 px-6 rtl:space-x-reverse">
-          <div class="flex-1 text-start flex">
-            <div class="flex-1">
-            <span
-              class="block text-slate-800 dark:text-slate-300 text-sm font-medium mb-[2px]"
-            >
-              My Conversation
-            </span>
+          <div class="flex-1 text-start flex min-w-0">
+            <div class="flex-1 min-w-0">
               <span
-                class="block text-slate-600 dark:text-slate-300 text-xs font-normal"
+                class="block text-slate-800 dark:text-slate-300 text-sm font-medium mb-[2px] truncate"
+              >
+                My Conversation
+              </span>
+              <span
+                class="block text-slate-600 dark:text-slate-300 text-xs font-normal conversation-preview"
               >{{
                   myConversation.messages.length > 0
                     ? myConversation.messages
                       .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[myConversation.messages.length - 1]
                       .body
-                    : '' }}</span
-              >
+                    : '' }}</span>
             </div>
             <div class="flex-none ltr:text-right rtl:text-end">
-            <span
-              class="block text-xs text-slate-400 dark:text-slate-400 font-normal"
-            >{{
-                myConversation.messages.length > 0
-                  ? dateUtils.convertToConvenientString(myConversation.messages
-                    .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[myConversation.messages.length - 1]
-                    .sentOn)
-                  : '' }}</span>
+              <span
+                class="block text-xs text-slate-400 dark:text-slate-400 font-normal whitespace-nowrap"
+              >{{
+                  myConversation.messages.length > 0
+                    ? dateUtils.convertToConvenientString(myConversation.messages
+                      .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[myConversation.messages.length - 1]
+                      .sentOn)
+                    : '' }}</span>
             </div>
           </div>
         </div>
@@ -97,74 +95,61 @@ const filteredConversations = computed(() => {
       </div>
 
       <div class="overflow-y-scroll custom-scrollbar">
-      <div
-        v-for="(conversation, i) in filteredConversations"
-        :key="i"
-        @click="$emit('conversationSelected', conversation)"
-        class="block w-full py-5 focus:ring-0 outline-none cursor-pointer group transition-all
-        duration-150 hover:bg-slate-100 dark:hover:bg-slate-600 dark:hover:bg-opacity-70"
-      >
-        <div class="flex space-x-3 px-6 rtl:space-x-reverse">
-          <div class="flex-1 text-start flex">
-            <div class="flex-1">
-            <span
-              class="block text-slate-800 dark:text-slate-300 text-sm font-medium mb-[2px]"
-            >{{ conversation.initiatorParticipant.client.firstName }} {{ conversation.initiatorParticipant.client.lastName }}</span
-            >
-              <span
-                class="block text-slate-600 dark:text-slate-300 text-xs font-normal"
-              >{{
-                  conversation.messages.length > 0
-                    ? conversation.messages
-                      .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[conversation.messages.length - 1]
-                      .body
-                    : '' }}</span
-              >
-            </div>
-            <div class="flex-none ltr:text-right rtl:text-end">
-            <span
-              class="block text-xs text-slate-400 dark:text-slate-400 font-normal"
-            >{{
-                conversation.messages.length > 0
-                  ? dateUtils.convertToConvenientString(conversation.messages
-                    .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[conversation.messages.length - 1]
-                    .sentOn)
-                  : '' }}</span
-            >
-              <span
-                v-if="true"
-                class="inline-flex flex-col items-center justify-center text-[10px]
-                font-medium w-4 h-4 bg-[#FFC155] text-white rounded-full"
-              ></span
-              >
+        <div
+          v-for="(conversation, i) in filteredConversations"
+          :key="i"
+          @click="$emit('conversationSelected', conversation)"
+          class="block w-full h-[88px] py-5 focus:ring-0 outline-none cursor-pointer group transition-all
+          duration-150 hover:bg-slate-100 dark:hover:bg-slate-600 dark:hover:bg-opacity-70"
+        >
+          <div class="flex space-x-3 px-6 rtl:space-x-reverse">
+            <div class="flex-1 text-start flex min-w-0">
+              <div class="flex-1 min-w-0">
+                <span
+                  class="block text-slate-800 dark:text-slate-300 text-sm font-medium mb-[2px] truncate">
+                  {{ conversation.initiatorParticipant.client.firstName }} {{ conversation.initiatorParticipant.client.lastName }}
+                </span>
+                <span
+                  class="block text-slate-600 dark:text-slate-300 text-xs font-normal conversation-preview"
+                >{{
+                    conversation.messages.length > 0
+                      ? conversation.messages
+                        .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[conversation.messages.length - 1]
+                        .body
+                      : '' }}</span>
+              </div>
+              <div class="flex-none ltr:text-right rtl:text-end">
+                <span
+                  class="block text-xs text-slate-400 dark:text-slate-400 font-normal"
+                >{{
+                    conversation.messages.length > 0
+                      ? dateUtils.convertToConvenientString(conversation.messages
+                        .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[conversation.messages.length - 1]
+                        .sentOn)
+                      : '' }}</span>
+                <span
+                  v-if="true"
+                  class="inline-flex flex-col items-center justify-center text-[10px]
+                  font-medium w-4 h-4 bg-[#FFC155] text-white rounded-full"
+                ></span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    </div>
 
-
-<!--    <div class="grid grid-cols-1">-->
-<!--      <div-->
-<!--        @click="$emit('conversationSelected', myConversation)"-->
-<!--        class="col-span-1">-->
-<!--        My Conversation-->
-<!--      </div>-->
-<!--      <div-->
-<!--        v-for="conversation in conversations"-->
-<!--        :key="conversation.id"-->
-<!--        class="col-span-1"-->
-<!--        @click="$emit('conversationSelected', conversation)">-->
-<!--        {{ conversation.initiatorParticipant.client.firstName }} {{ conversation.initiatorParticipant.client.lastName }}-->
-<!--      </div>-->
-<!--    </div>-->
   </Card>
-
-
 </template>
 
 <style scoped lang="scss">
+.conversation-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  line-height: 1rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #64748b transparent;
@@ -172,6 +157,17 @@ const filteredConversations = computed(() => {
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
+}
+
+::-webkit-scrollbar-button:increment {
+  display: none;
+  width: 0;
+  height: 0;
+}
+::-webkit-scrollbar-button:decrement {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
