@@ -24,9 +24,11 @@ const participantId = ref(null);
 const websocketStatus = ref(0);
 
 const wsBaseUrl = `${API_WS_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}/chats/ws`;
-const retryWait = 500;
+let retryWait = 500;
+const pingTime = 10000;
 let retryTimeout = null;
-const pongReceived = ref(false);
+const pongReceived = ref(true);
+const connecting = ref(false);
 let heartbeat = null;
 
 const myConversation = computed({
@@ -53,11 +55,13 @@ Promise.all([requests.getParticipantMe(), requests.getMyConversation(), ...(isUs
       conversations.value.push(...conversationsResponse.data);
     }
 
+    console.log('replacing websocket');
     websocket = createWebsocket();
   });
 
 
 function createWebsocket() {
+  console.log('creating websocket');
   const _websocket = new WebSocket(wsBaseUrl);
 
   _websocket.onopen = async (ev) => {
@@ -66,32 +70,43 @@ function createWebsocket() {
 
   _websocket.onmessage = (d) => {
     if (d.data === 'pong') {
-      pongReceived.value = true;
+
     } else {
       const message = JSON.parse(d.data);
-      conversations.value.forEach((c) => {
-        if (c.id === message.conversationId) {
-          c.messages.push(message);
-        }
-      });
+      if (message.command === 'pong') {
+        pongReceived.value = true;
+        retryWait = 500;
+      } else if (message.command === 'message') {
+        conversations.value.forEach((c) => {
+          if (c.id === message.payload.conversationId) {
+            c.messages.push(message.payload);
+          }
+        });
+      }
     }
   };
 
   _websocket.onerror = async (ev) => {
     retryTimeout = setTimeout(connect, retryWait);
-    retryWait *= 2;
   };
 
   _websocket.onclose = async (ev) => {
+    console.log('clearing heartbeat and retry');
     clearInterval(heartbeat);
     clearTimeout(retryTimeout);
-    websocket = createWebsocket();
+    retryTimeout = setTimeout(() => {
+      console.log('creating new websocket');
+      websocket = createWebsocket();
+    }, retryWait);
   };
 
   return _websocket;
 }
 
 async function connect() {
+  retryWait *= 1.5;
+  connecting.value = true;
+  console.log('Connecting...');
   clearTimeout(retryTimeout);
   clearInterval(heartbeat);
 
@@ -99,8 +114,10 @@ async function connect() {
     token: credentialStore.token,
   }));
 
+  pongReceived.value = true;
   heartbeat = setInterval(() => {
     if (!pongReceived.value) {
+      console.log('closing websocket');
       websocket.close();
       clearInterval(heartbeat);
       // Trigger reconnection logic
@@ -108,13 +125,14 @@ async function connect() {
     }
     pongReceived.value = false;
     websocket.send(JSON.stringify({command: 'ping'}));
-  }, 4000);
+  }, pingTime);
 
 
   subscribeToConversations([selectedConversation.value.id]);
   if (isUser) {
     subscribeToConversations(conversations.value.map((c) => c.id));
   }
+  setTimeout(() => connecting.value = false, 500);
 }
 
 function sendWebsocketCommand(command, payload) {
@@ -139,9 +157,15 @@ function subscribeToConversations(conversationIds) {
 
 setInterval(() => {
   websocketStatus.value = websocket.readyState;
-}, 500);
+  console.log('websocket status', websocketStatus.value);
+}, 1000);
 
 const websocketStatusReadable = computed(() => {
+  if (connecting.value) {
+    return {value: 'warning-outline', label: 'Connecting...'};
+  } else if (!pongReceived.value) {
+    return {value: 'danger-outline', label: 'Disconnected'};
+  }
   switch (websocketStatus.value) {
   case 0:
     return {value: 'warning-outline', label: 'Connecting...'};
@@ -158,8 +182,9 @@ const websocketStatusReadable = computed(() => {
 
 onBeforeUnmount(() => {
   clearInterval(heartbeat);
-  clearInterval(retryInterval);
+  clearInterval(retryTimeout);
   websocket.onclose = async () => {};
+  console.log('websocket closed');
   websocket.close();
 });
 
