@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -45,18 +46,38 @@ class Conversation(BaseModel):
     
     
     
-class WebSocketSubscribe(BaseModel):
+    
+class WebSocketPing(BaseModel):
+    model_config = ConfigDict(strict=True)
+    command: Literal[WebSocketCommand.PING]
+    
+    
+class WebSocketPong(BaseModel):
+    model_config = ConfigDict(strict=True)
+    command: Literal[WebSocketCommand.PONG]
+    
+    
+class WebSocketSubscribePayload(BaseModel):
     conversationIds: list[UUID]
+
+class WebSocketSubscribe(BaseModel):
+    model_config = ConfigDict(strict=True)
+    command: Literal[WebSocketCommand.SUBSCRIBE]
+    payload: WebSocketSubscribePayload
     
     
-class WebSocketMessage(BaseModel):
+    
+class WebSocketChatMessagePayload(BaseModel):
     conversationId: UUID
     body: str
     
-    
-class WebSocketRequest(BaseModel):
+class WebSocketChatMessage(BaseModel):
     model_config = ConfigDict(strict=True)
-    command: WebSocketCommand
-    payload: WebSocketSubscribe | WebSocketMessage
+    command: Literal[WebSocketCommand.MESSAGE]
+    payload: WebSocketChatMessagePayload | MessageBase
+    
+    
+    
+WebSocketMessage = WebSocketPing | WebSocketPong | WebSocketSubscribe | WebSocketChatMessage
     
     
