@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timezone
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import HTTPException, status, UploadFile
 from sqlalchemy import select, func
@@ -112,6 +112,7 @@ class ChatManager:
     def __init__(self):
         self.db: Session = SessionLocal()
         self.active_connections: dict[UUID, WebSocket] = {}
+        self.participant_sockets: dict[UUID, list[UUID]] = {}
         self.subscriptions: dict[UUID, set[UUID]] = {}
         
 
@@ -121,9 +122,15 @@ class ChatManager:
         participant = get_participant_by_token(token=token_message["token"], db=self.db)
         if participant is None:
             raise WebSocketException
-        self.active_connections[participant.id] = websocket
+        if participant.id not in self.participant_sockets:
+            self.participant_sockets[participant.id] = []
+            
+        socket_id = uuid4()
+        self.active_connections[socket_id] = websocket
+        self.participant_sockets[participant.id].append(socket_id)
+        
         print("Active connections:", len(self.active_connections))
-        return participant
+        return socket_id, participant
     
     def subscribe(self, conversation_id: UUID, participant_id: UUID):
         if conversation_id not in self.subscriptions:
@@ -132,20 +139,23 @@ class ChatManager:
         
     async def broadcast(self, message: models.Message):
         for participant_id in self.subscriptions[message.conversationId]:
-            websocket = self.active_connections[participant_id]
+            for websocket_id in self.participant_sockets[participant_id]:
+                websocket = self.active_connections[websocket_id]
+                await websocket.send_json(schemas.MessageBase.model_validate(message, from_attributes=True).model_dump(mode="json"))
 
-            await websocket.send_json(schemas.MessageBase.model_validate(message, from_attributes=True).model_dump(mode="json"))
-
-    async def disconnect(self, participant_id: UUID):
+    async def disconnect(self, socket_id: UUID, participant_id: UUID):
         # await self.active_connections[participant_id].close()
-        del self.active_connections[participant_id]
+        
+        self.participant_sockets[participant_id].remove(socket_id)
+        del self.active_connections[socket_id]
         print("Active connections:", len(self.active_connections))
         
         
-    async def take_it_from_here(self, participant: models.Participant):
+    async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
+        socket = self.active_connections[socket_id]
         while True:
             try:
-                request_json = await self.active_connections[participant.id].receive_text()
+                request_json = await socket.receive_text()
                 
                 request: schemas.WebSocketRequest = schemas.WebSocketRequest.model_validate_json(request_json)
                 
@@ -167,13 +177,17 @@ class ChatManager:
                     self.db.commit()
                     self.db.refresh(message)
                     await self.broadcast(message)
+                    
+                elif request.command == WebSocketCommand.PING:
+                    print(socket_id, "ping")
+                    await socket.send_text("pong")
                             
                 
                 
                 
             except Exception as e:
                 print(e)
-                await self.disconnect(participant.id)
+                await self.disconnect(socket_id, participant.id)
                 break
         
     
