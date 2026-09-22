@@ -93,3 +93,4 @@ def get_interval_timedelta(interval: str, dt: date | None = None):
 class WebSocketCommand(str, Enum):
     SUBSCRIBE = "subscribe"
     MESSAGE = "message"
+    PING = "ping"

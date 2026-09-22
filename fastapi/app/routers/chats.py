@@ -46,8 +46,8 @@ async def websocket_endpoint(
         websocket: WebSocket,
 ):
     try: 
-        participant = await manager.connect(websocket=websocket)
-        await manager.take_it_from_here(participant)
+        socket_id, participant = await manager.connect(websocket=websocket)
+        await manager.take_it_from_here(socket_id, participant)
     except Exception as e:
         print(e)
         # await websocket.close()

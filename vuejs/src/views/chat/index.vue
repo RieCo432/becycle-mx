@@ -2,7 +2,7 @@
 import {useCredentialsStore} from '@/store/credentialsStore';
 import Conversation from '@/views/chat/Conversation.vue';
 import ConversationPicker from '@/views/chat/ConversationPicker.vue';
-import {computed, onBeforeUnmount, reactive, ref, watch} from 'vue';
+import {computed, onBeforeUnmount, ref} from 'vue';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import Alert from '@/components/Alert/index.vue';
@@ -21,7 +21,13 @@ const conversations = ref([]);
 
 const selectedConversation = ref(null);
 const participantId = ref(null);
+const websocketStatus = ref(0);
 
+const wsBaseUrl = `${API_WS_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}/chats/ws`;
+const retryWait = 500;
+let retryTimeout = null;
+const pongReceived = ref(false);
+let heartbeat = null;
 
 const myConversation = computed({
   get() {
@@ -29,93 +35,106 @@ const myConversation = computed({
   },
 });
 
-
 function selectConversation(conversation) {
   selectedConversation.value = conversation;
 }
 
-requests.getParticipantMe().then((response) => {
-  participantId.value = response.data.id;
-});
-const websocketStatus = ref(0);
-
-
 let websocket = null;
-let wait = 500;
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-const wsBaseUrl = `${API_WS_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}/chats/ws`;
-
-function connect() {
-  console.log('connecting');
-  websocket = new WebSocket(wsBaseUrl);
-
-  websocket.onopen = async (ev) => {
-    console.log('websocket opened');
-    wait = 500;
-    websocket.send(JSON.stringify({
-      token: credentialStore.token,
-    }));
-    
+Promise.all([requests.getParticipantMe(), requests.getMyConversation(), ...(isUser ? [requests.getConversations()] : [])])
+  .then(([participantResponse, myConversationResponse, conversationsResponse]) => {
     conversations.value.splice(0, conversations.value.length);
 
-    requests.getMyConversation().then((response) => {
-      selectConversation(response.data);
-      conversations.value.push(response.data);
-      subscribeToConversations([selectedConversation.value.id]);
-    });
+    participantId.value = participantResponse.data.id;
+    selectConversation(myConversationResponse.data);
+    conversations.value.push(myConversationResponse.data);
 
-    if (isUser) {
-      requests.getConversations().then((response) => {
-        conversations.value.push(...response.data);
-        subscribeToConversations(conversations.value.map((c) => c.id));
+    if (isUser && conversationsResponse) {
+      conversations.value.push(...conversationsResponse.data);
+    }
+
+    websocket = createWebsocket();
+  });
+
+
+function createWebsocket() {
+  const _websocket = new WebSocket(wsBaseUrl);
+
+  _websocket.onopen = async (ev) => {
+    await connect();
+  };
+
+  _websocket.onmessage = (d) => {
+    if (d.data === 'pong') {
+      pongReceived.value = true;
+    } else {
+      const message = JSON.parse(d.data);
+      conversations.value.forEach((c) => {
+        if (c.id === message.conversationId) {
+          c.messages.push(message);
+        }
       });
     }
   };
 
-  websocket.onmessage = (d) => {
-    // console.log(d);
-    const message = JSON.parse(d.data);
-    console.log({message, myConversation: myConversation.value});
-
-    conversations.value.forEach((c) => {
-      if (c.id === message.conversationId) {
-        c.messages.push(message);
-      }
-    });
+  _websocket.onerror = async (ev) => {
+    retryTimeout = setTimeout(connect, retryWait);
+    retryWait *= 2;
   };
 
-  websocket.onclose = async (ev) => {
-    console.log('websocket closed');
-    console.log('sleeping', wait);
-    await sleep(wait);
-    connect();
-    wait *= 2;
+  _websocket.onclose = async (ev) => {
+    clearInterval(heartbeat);
+    clearTimeout(retryTimeout);
+    websocket = createWebsocket();
   };
+
+  return _websocket;
 }
 
-connect();
+async function connect() {
+  clearTimeout(retryTimeout);
+  clearInterval(heartbeat);
+
+  websocket.send(JSON.stringify({
+    token: credentialStore.token,
+  }));
+
+  heartbeat = setInterval(() => {
+    if (!pongReceived.value) {
+      websocket.close();
+      clearInterval(heartbeat);
+      // Trigger reconnection logic
+      return;
+    }
+    pongReceived.value = false;
+    websocket.send(JSON.stringify({command: 'ping'}));
+  }, 4000);
+
+
+  subscribeToConversations([selectedConversation.value.id]);
+  if (isUser) {
+    subscribeToConversations(conversations.value.map((c) => c.id));
+  }
+}
+
+function sendWebsocketCommand(command, payload) {
+  websocket.send(JSON.stringify({
+    command: command,
+    payload: payload,
+  }));
+}
 
 function sendMessage(conversationId, message) {
-  websocket.send(JSON.stringify({
-    command: 'message',
-    payload: {
-      conversationId: conversationId,
-      body: message,
-    },
-  }));
+  sendWebsocketCommand('message', {
+    conversationId: conversationId,
+    body: message,
+  });
 }
 
 function subscribeToConversations(conversationIds) {
-  websocket.send(JSON.stringify({
-    command: 'subscribe',
-    payload: {
-      conversationIds: conversationIds,
-    },
-  }));
+  sendWebsocketCommand('subscribe', {
+    conversationIds: conversationIds,
+  });
 }
 
 setInterval(() => {
@@ -132,11 +151,15 @@ const websocketStatusReadable = computed(() => {
     return {value: 'info-outline', label: 'Disconnecting...'};
   case 3:
     return {value: 'danger-outline', label: 'Disconnected'};
+  default:
+    return {value: 'danger-outline', label: 'Unknown'};
   }
 });
 
 onBeforeUnmount(() => {
-  websocket.onclose = () => {};
+  clearInterval(heartbeat);
+  clearInterval(retryInterval);
+  websocket.onclose = async () => {};
   websocket.close();
 });
 
@@ -173,7 +196,7 @@ onBeforeUnmount(() => {
           />
         </div>
       </div>
-      
+
     </div>
 
 </template>
