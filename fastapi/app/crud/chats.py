@@ -1,27 +1,22 @@
-import os
-from datetime import datetime, timezone
-from uuid import UUID, uuid4
+from uuid import uuid4, UUID
 
-from fastapi import HTTPException, status, UploadFile
-from sqlalchemy import select, func
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from pydantic import TypeAdapter
+from sqlalchemy import select
+
 from fastapi import WebSocket
 from starlette.exceptions import WebSocketException
+from starlette.websockets import WebSocketState
 
-import app.dependencies
 import app.models as models
 import app.schemas as schemas
 import os
-from typing import Annotated
-from uuid import UUID
 
 import sqlalchemy.exc
-from fastapi import Depends, HTTPException, status, Body, Request
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import HTTPException, status
+
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
-from app.dependencies import get_db
+
 
 from app.database.db import SessionLocal
 from services import WebSocketCommand
@@ -108,6 +103,12 @@ def get_participant_by_token(db: Session, token: str) -> models.Participant | No
     return participant
 
 
+async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMessage):
+    await socket.send_json(message.model_dump(mode="json"))
+
+
+websocket_message_adapter = TypeAdapter(schemas.WebSocketMessage)
+
 class ChatManager:
     def __init__(self):
         self.db: Session = SessionLocal()
@@ -141,10 +142,16 @@ class ChatManager:
         for participant_id in self.subscriptions[message.conversationId]:
             for websocket_id in self.participant_sockets[participant_id]:
                 websocket = self.active_connections[websocket_id]
-                await websocket.send_json(schemas.MessageBase.model_validate(message, from_attributes=True).model_dump(mode="json"))
+                websocket_message = schemas.WebSocketChatMessage(
+                    command=schemas.WebSocketCommand.MESSAGE,
+                    payload=schemas.MessageBase.model_validate(message, from_attributes=True)
+                )
+                await send_websocket_message(websocket, websocket_message)
 
     async def disconnect(self, socket_id: UUID, participant_id: UUID):
-        # await self.active_connections[participant_id].close()
+        if self.active_connections[socket_id] is not None and self.active_connections[socket_id].state == WebSocketState.CONNECTED:
+            print("Closing connection for participant:", participant_id)
+            await self.active_connections[participant_id].close()
         
         self.participant_sockets[participant_id].remove(socket_id)
         del self.active_connections[socket_id]
@@ -155,11 +162,10 @@ class ChatManager:
         socket = self.active_connections[socket_id]
         while True:
             try:
-                request_json = await socket.receive_text()
+                request_json = await socket.receive_text()  
+                request: schemas.WebSocketMessage = websocket_message_adapter.validate_json(request_json)
                 
-                request: schemas.WebSocketRequest = schemas.WebSocketRequest.model_validate_json(request_json)
-                
-                if request.command == WebSocketCommand.SUBSCRIBE and isinstance(request.payload, schemas.WebSocketSubscribe):
+                if isinstance(request, schemas.WebSocketSubscribe):
                     subscribe_errors = []
                     for id in request.payload.conversationIds:
                         try:
@@ -168,7 +174,7 @@ class ChatManager:
                         except Exception as e:
                             subscribe_errors.append(id)
                             
-                elif request.command == WebSocketCommand.MESSAGE  and isinstance(request.payload, schemas.WebSocketMessage):
+                elif isinstance(request, schemas.WebSocketChatMessage):
                     message = models.Message(
                         conversationId=request.payload.conversationId,
                         sentByParticipantId=participant.id,
@@ -178,9 +184,9 @@ class ChatManager:
                     self.db.refresh(message)
                     await self.broadcast(message)
                     
-                elif request.command == WebSocketCommand.PING:
+                elif isinstance(request, schemas.WebSocketPing):
                     print(socket_id, "ping")
-                    await socket.send_text("pong")
+                    await send_websocket_message(socket, schemas.WebSocketPong(command=schemas.WebSocketCommand.PONG))
                             
                 
                 

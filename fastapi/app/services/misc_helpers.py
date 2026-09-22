@@ -94,3 +94,4 @@ class WebSocketCommand(str, Enum):
     SUBSCRIBE = "subscribe"
     MESSAGE = "message"
     PING = "ping"
+    PONG = "pong"
