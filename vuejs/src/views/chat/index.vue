@@ -163,6 +163,10 @@ function closeConversation() {
   selectedConversation.value = null;
 }
 
+let websocketStatusInterval = null;
+
+websocketStatusInterval = setInterval(() => {
+  websocketStatus.value = websocket?.readyState;
   console.log('websocket status', websocketStatus.value);
 }, 1000);
 
@@ -188,10 +192,13 @@ const websocketStatusReadable = computed(() => {
 
 onBeforeUnmount(() => {
   clearInterval(heartbeat);
-  clearInterval(retryTimeout);
-  websocket.onclose = async () => {};
-  console.log('websocket closed');
-  websocket.close();
+  clearTimeout(retryTimeout);
+  clearInterval(websocketStatusInterval);
+  if (websocket) {
+    websocket.onclose = async () => {};
+    websocket.close();
+    console.log('websocket closed');
+  }
 });
 
 
