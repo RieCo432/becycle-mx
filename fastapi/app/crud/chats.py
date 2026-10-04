@@ -23,6 +23,7 @@ from services import WebSocketCommand
 
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
+PRODUCTION = os.environ['PRODUCTION'] == "true"
 
 
 def get_or_create_participant(db: Session, entity: models.User | models.Client) -> models.Participant:
@@ -150,7 +151,8 @@ class ChatManager:
 
     async def disconnect(self, socket_id: UUID, participant_id: UUID):
         if self.active_connections[socket_id] is not None and self.active_connections[socket_id].state == WebSocketState.CONNECTED:
-            print("Closing connection for participant:", participant_id)
+            if not PRODUCTION:
+                print("Closing connection for participant:", participant_id)
             await self.active_connections[participant_id].close()
         
         self.participant_sockets[participant_id].remove(socket_id)
@@ -185,7 +187,8 @@ class ChatManager:
                     await self.broadcast(message)
                     
                 elif isinstance(request, schemas.WebSocketPing):
-                    print(socket_id, "ping")
+                    if not PRODUCTION:
+                        print(socket_id, "ping")
                     await send_websocket_message(socket, schemas.WebSocketPong(command=schemas.WebSocketCommand.PONG))
                             
                 
