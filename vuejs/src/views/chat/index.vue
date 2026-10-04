@@ -190,6 +190,10 @@ const websocketStatusReadable = computed(() => {
   }
 });
 
+const showConversationPicker = computed(() => {
+  return isUser && !selectedConversation.value;
+});
+
 onBeforeUnmount(() => {
   clearInterval(heartbeat);
   clearTimeout(retryTimeout);
@@ -212,10 +216,9 @@ onBeforeUnmount(() => {
         >{{websocketStatusReadable.label}}</Alert>
       </div>
       <div class="flex gap-5 flex-1 min-h-0">
-        <template v-if="isUser">
-          <div class="basis-1/4 basis min-h-0 min-w-0 overflow-hidden">
+        <template v-if="isUser && myConversation && participantId">
+          <div :class="`basis min-h-0 min-w-0 overflow-hidden ${showConversationPicker ? 'basis-full  ' : 'hidden md:flex'} md:basis-6/12 lg:basis-5/12 2xl:basis-3/12`">
             <ConversationPicker
-              v-if="myConversation"
               :selectedConversation="selectedConversation"
               @conversation-selected="selectConversation"
               :conversations="conversations"
@@ -225,8 +228,8 @@ onBeforeUnmount(() => {
           </div>
         </template>
         <div
-          v-if="selectedConversation"
-          :class="`${isUser ? 'basis-3/4' : 'basis-full'} min-h-0`">
+          v-if="selectedConversation && participantId"
+          :class="`${showConversationPicker ? 'md:basis-6/12 lg:basis-7/12 2xl:basis-9/12' : 'basis-full'} min-h-0`">
           <Conversation
             :conversation="selectedConversation"
             :participantId="participantId"
