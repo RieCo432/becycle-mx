@@ -159,8 +159,10 @@ function subscribeToConversations(conversationIds) {
   });
 }
 
-setInterval(() => {
-  websocketStatus.value = websocket.readyState;
+function closeConversation() {
+  selectedConversation.value = null;
+}
+
   console.log('websocket status', websocketStatus.value);
 }, 1000);
 
@@ -222,6 +224,7 @@ onBeforeUnmount(() => {
             :conversation="selectedConversation"
             :participantId="participantId"
             @send-message="sendMessage"
+            @close-conversation="closeConversation"
           />
         </div>
       </div>
