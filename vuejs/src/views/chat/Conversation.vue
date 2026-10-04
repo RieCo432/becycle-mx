@@ -4,6 +4,10 @@ import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {Icon} from '@iconify/vue';
 import dateUtils from '@/util/dateUtils';
 import TextArea from '@/components/TextArea/index.vue';
+import {useCredentialsStore} from '@/store/credentialsStore';
+import {useRouter} from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
   conversation: {
@@ -15,7 +19,12 @@ const props = defineProps({
     required: true,
   },
 });
-const emit = defineEmits(['sendMessage']);
+
+const emit = defineEmits(['sendMessage', 'closeConversation']);
+
+const credentialStore = useCredentialsStore();
+
+const isUser = credentialStore.tokenType === 'user';
 
 const newMessage = ref('');
 
@@ -66,17 +75,38 @@ watch(
   {immediate: true},
 );
 
+function viewClient() {
+  if (!props.conversation.initiatorParticipant?.client) return;
+  const routeData = router.resolve({path: `/clients/${props.conversation.initiatorParticipant.client.id}`});
+  window.open(routeData.href, '_blank');
+}
+
 </script>
 
 <template>
   <Card bodyClass="relative p-0 h-full overflow-hidden flex flex-col" className="h-full max-h-full overflow-hidden">
     <div ref="chatBody" class="flex flex-col h-full min-h-0">
       <header class="flex-none border-b border-slate-100 dark:border-slate-700">
-        <div class="flex py-6 md:px-6 px-3 items-center">
+        <div class="flex basis py-6 md:px-6 px-3 items-center text-slate-700 dark:text-slate-300">
           <div
-            class="flex-none flex md:space-x-3 space-x-1 items-center rtl:space-x-reverse"
+            v-if="isUser"
+            class="basis-1/12"
           >
-            Something
+              <Icon
+                @click="emit('closeConversation')"
+                icon="heroicons-outline:arrow-left"/>
+          </div>
+          <div
+            :class="`basis-${isUser ? (conversation.initiatorParticipant?.client ? '10' : '11') : '12'}/12`"
+          >
+            {{ isUser && conversation.initiatorParticipant?.client ? `${conversation.initiatorParticipant.client.firstName} ${conversation.initiatorParticipant.client.lastName}` : 'BECYCLE'}}
+          </div>
+          <div
+            v-if="isUser && conversation.initiatorParticipant?.client"
+            class="basis-1/12">
+            <Icon
+              @click="viewClient"
+              icon="heroicons-outline:information-circle"/>
           </div>
         </div>
       </header>
