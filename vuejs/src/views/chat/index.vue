@@ -77,11 +77,15 @@ function createWebsocket() {
         pongReceived.value = true;
         retryWait = 500;
       } else if (message.command === 'message') {
-        conversations.value.forEach((c) => {
-          if (c.id === message.payload.conversationId) {
-            c.messages.push(message.payload);
-          }
-        });
+        const convo = conversations.value.find((c) => c.id === message.payload.conversationId);
+        convo?.messages.push(message.payload);
+        if (
+          message.payload.conversationId !== selectedConversation.value?.id &&
+          message.payload.sentByParticipantId !== participantId.value
+        ) {
+          const client = convo.initiatorParticipant.client;
+          toast.info(`${client?.firstName} ${client?.lastName}: ${message.payload.body.slice(0, 160)}`, {timeout: 2000});
+        }
       }
     }
   };
