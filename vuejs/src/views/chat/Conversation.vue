@@ -29,8 +29,10 @@ const isUser = credentialStore.tokenType === 'user';
 const newMessage = ref('');
 
 async function sendMessage() {
-  emit('sendMessage', props.conversation.id, newMessage.value);
-  newMessage.value = '';
+  if (newMessage.value.length > 0) {
+    emit('sendMessage', props.conversation.id, newMessage.value);
+    newMessage.value = '';
+  }
 }
 
 const chatHeight = ref(null);
@@ -112,7 +114,7 @@ function viewClient() {
       </header>
 
       <div
-        class="flex-1 min-h-0 custom-scrollbar chat-content msgs overflow-y-auto pt-6 space-y-6 pb-4"
+        class="flex-1 min-h-0 custom-scrollbar chat-content msgs overflow-y-auto overscroll-y-contain pt-6 space-y-6 pb-4"
         ref="chatHeight"
       >
         <template v-if="conversation.messages.length === 0">
@@ -137,7 +139,7 @@ function viewClient() {
             class="block md:px-6 px-4"
             v-for="(message, i) in conversation.messages
               .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))"
-            :key="i">
+            :key="message.id">
             <div
               class="flex space-x-2 items-start justify-end group w-full rtl:space-x-reverse"
               v-if="message.sentByParticipantId === participantId"
@@ -192,7 +194,6 @@ function viewClient() {
       >
         <div class="flex-1 relative flex space-x-3 rtl:space-x-reverse min-h-0 items-center">
           <TextArea
-            rows="1"
             type="text"
             placeholder="Type your message..."
             classInput="flex-1 m-1 p-2 min-h-0 dark:bg-slate-900 rounded-2xl chat-message-input focus:ring-0 focus:outline-0 block w-full bg-transparent dark:text-white resize-none"

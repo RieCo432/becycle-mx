@@ -7,7 +7,8 @@ import {Icon} from '@iconify/vue';
 const props = defineProps({
   selectedConversation: {
     type: Object,
-    required: true,
+    required: false,
+    default: null,
   },
   myConversation: {
     type: Object,
@@ -29,7 +30,7 @@ const filteredConversations = computed(() => {
   return props.conversations
     .filter((c) => c.id !== props.myConversation.id)
     .filter((c) => {
-      const name = `${c.initiatorParticipant.client.firstName}} ${c.initiatorParticipant.client.lastName}`;
+      const name = `${c.initiatorParticipant.client.firstName} ${c.initiatorParticipant.client.lastName}`;
       return name.toLowerCase().includes(searchTerm.value.toLowerCase());
     })
     .toSorted(
@@ -50,8 +51,7 @@ function getNumberOfUnreadMessages(conversation) {
 </script>
 
 <template>
-  <Card bodyClass=" relative p-0 h-full overflow-hidden " class="h-full">
-
+  <Card bodyClass="relative p-0 h-full overflow-hidden ">
     <div class="divide-y divide-slate-100 dark:divide-slate-700">
       <div
         v-if="myConversation"
@@ -139,7 +139,7 @@ function getNumberOfUnreadMessages(conversation) {
                         .sentOn)
                       : '' }}</span>
                 <span
-                  v-if="true"
+                  v-if="getNumberOfUnreadMessages(conversation) > 0"
                   class="inline-flex flex-col items-center justify-center text-[10px]
                   font-medium w-4 h-4 bg-danger-500 text-white rounded-full"
                 >
