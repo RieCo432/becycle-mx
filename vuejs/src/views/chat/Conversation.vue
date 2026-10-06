@@ -27,6 +27,8 @@ const credentialStore = useCredentialsStore();
 const isUser = credentialStore.tokenType === 'user';
 
 const newMessage = ref('');
+const timeRefreshKey = ref(0);
+let timeRefreshInterval = null;
 
 async function sendMessage() {
   if (newMessage.value.length > 0) {
@@ -59,6 +61,10 @@ function scrollToBottom() {
 onMounted(() => {
   updateMaxMessageInputHeight();
 
+  timeRefreshInterval = setInterval(() => {
+    timeRefreshKey.value += 1;
+  }, 60000);
+
   if (chatBody.value) {
     chatResizeObserver = new ResizeObserver(updateMaxMessageInputHeight);
     chatResizeObserver.observe(chatBody.value);
@@ -66,6 +72,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  clearInterval(timeRefreshInterval);
   chatResizeObserver?.disconnect();
 });
 
@@ -81,6 +88,11 @@ function viewClient() {
   if (!props.conversation.initiatorParticipant?.client) return;
   const routeData = router.resolve({path: `/clients/${props.conversation.initiatorParticipant.client.id}`});
   window.open(routeData.href, '_blank');
+}
+
+function getConvenientMessageTime(sentOn) {
+  timeRefreshKey.value;
+  return dateUtils.convertToConvenientString(sentOn);
 }
 
 </script>
@@ -150,7 +162,7 @@ function viewClient() {
                 >
                 </div>
                 <div class="whitespace-pre-wrap break-all">
-                  <div
+                    {{ getConvenientMessageTime(message.sentOn) }}
                     class="text-contrent p-3 bg-slate-300 dark:bg-slate-900 dark:text-slate-300 text-slate-800 text-sm font-normal rounded-md flex-1 mb-1"
                   >
                     {{ message.body }}
@@ -176,6 +188,7 @@ function viewClient() {
                   <span
                     class="font-normal text-xs text-slate-400 dark:text-slate-400">
                     {{  dateUtils.convertToConvenientString(message.sentOn) }}
+                    {{ getConvenientMessageTime(message.sentOn) }}
                   </span>
                 </div>
                 <div
