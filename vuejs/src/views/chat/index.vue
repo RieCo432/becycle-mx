@@ -50,7 +50,10 @@ Promise.all([
     conversations.value.splice(0, conversations.value.length);
 
     participantId.value = participantResponse.data.id;
-    selectConversation(myConversationResponse.data);
+    if (!isUser) {
+      selectConversation(myConversationResponse.data);
+    }
+    
     conversations.value.push(myConversationResponse.data);
 
     if (isUser && conversationsResponse) {
