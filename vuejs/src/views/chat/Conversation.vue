@@ -1,6 +1,6 @@
 <script setup>
 import Card from '@/components/Card/index.vue';
-import {nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {Icon} from '@iconify/vue';
 import dateUtils from '@/util/dateUtils';
 import TextArea from '@/components/TextArea/index.vue';
@@ -95,33 +95,49 @@ function getConvenientMessageTime(sentOn) {
   return dateUtils.convertToConvenientString(sentOn);
 }
 
+const conversationTitle = computed(() => {
+  const client = props.conversation.initiatorParticipant?.client;
+
+  if (!isUser || !client) {
+    return 'BECYCLE';
+  }
+
+  return `${client.firstName} ${client.lastName}`;
+});
+
 </script>
 
 <template>
   <Card bodyClass="relative p-0 h-full overflow-hidden flex flex-col" className="h-full max-h-full overflow-hidden">
     <div ref="chatBody" class="flex flex-col h-full min-h-0">
       <header class="flex-none border-b border-slate-100 dark:border-slate-700">
-        <div class="flex basis py-6 md:px-6 px-3 items-center text-slate-700 dark:text-slate-300">
-          <div
+        <div
+          class="flex py-6 md:px-6 px-3 items-center
+              text-slate-700 dark:text-slate-300"
+        >
+          <button
             v-if="isUser"
-            class="basis-1/12"
+            type="button"
+            class="flex-none w-8 text-left"
+            @click="emit('closeConversation')"
           >
-              <Icon
-                @click="emit('closeConversation')"
-                icon="heroicons-outline:arrow-left"/>
+            <Icon icon="heroicons-outline:arrow-left" />
+          </button>
+          <div v-else class="flex-none w-8"></div>
+
+          <div class="flex-1 min-w-0 px-3 truncate">
+            {{ conversationTitle }}
           </div>
-          <div
-            :class="`basis-${isUser ? (conversation.initiatorParticipant?.client ? '10' : '11') : '12'}/12`"
-          >
-            {{ isUser && conversation.initiatorParticipant?.client ? `${conversation.initiatorParticipant.client.firstName} ${conversation.initiatorParticipant.client.lastName}` : 'BECYCLE'}}
-          </div>
-          <div
+
+          <button
             v-if="isUser && conversation.initiatorParticipant?.client"
-            class="basis-1/12">
-            <Icon
-              @click="viewClient"
-              icon="heroicons-outline:information-circle"/>
-          </div>
+            type="button"
+            class="flex-none w-8 text-right"
+            @click="viewClient"
+          >
+            <Icon icon="heroicons-outline:information-circle" />
+          </button>
+          <div v-else class="flex-none w-8"></div>
         </div>
       </header>
 
