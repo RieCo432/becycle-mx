@@ -27,9 +27,8 @@ const wsBaseUrl = `${API_WS_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}/cha
 let retryWait = 500;
 const pingTime = 10000;
 let retryTimeout = null;
-const pongReceived = ref(true);
-const connecting = ref(false);
 let heartbeat = null;
+let pongMissedTimeout = null;
 
 const myConversation = computed({
   get() {
@@ -77,7 +76,7 @@ function createWebsocket() {
     } else {
       const message = JSON.parse(d.data);
       if (message.command === 'pong') {
-        pongReceived.value = true;
+        clearTimeout(pongMissedTimeout);
         retryWait = 500;
       } else if (message.command === 'message') {
         const convo = conversations.value.find((c) => c.id === message.payload.conversationId);
@@ -114,7 +113,6 @@ function createWebsocket() {
 
 async function connect() {
   retryWait *= 1.5;
-  connecting.value = true;
   console.log('Connecting...');
   clearTimeout(retryTimeout);
   clearInterval(heartbeat);
@@ -123,16 +121,13 @@ async function connect() {
     token: credentialStore.token,
   }));
 
-  pongReceived.value = true;
   heartbeat = setInterval(() => {
-    if (!pongReceived.value) {
+    pongMissedTimeout = setTimeout(() => {
+      toast.warning('Connection issues...', {timeout: 2000});
       console.log('closing websocket');
       websocket.close();
       clearInterval(heartbeat);
-      // Trigger reconnection logic
-      return;
-    }
-    pongReceived.value = false;
+    }, 2000);
     websocket.send(JSON.stringify({command: 'ping'}));
   }, pingTime);
 
@@ -141,7 +136,6 @@ async function connect() {
   if (isUser) {
     subscribeToConversations(conversations.value.map((c) => c.id));
   }
-  setTimeout(() => connecting.value = false, 500);
 }
 
 function sendWebsocketCommand(command, payload) {
@@ -176,36 +170,16 @@ websocketStatusInterval = setInterval(() => {
 }, 1000);
 
 const websocketStatusReadable = computed(() => {
-  if (connecting.value) {
-    return {value: 'warning-outline', label: 'Connecting...'};
-  } else if (!pongReceived.value) {
-    return {value: 'danger-outline', label: 'Disconnected'};
-  }
   switch (websocketStatus.value) {
   case 0:
     return {value: 'warning-outline', label: 'Connecting...'};
   case 1:
     return {value: 'success-outline', label: 'Connected'};
   case 2:
-    return {value: 'info-outline', label: 'Disconnecting...'};
   case 3:
     return {value: 'danger-outline', label: 'Disconnected'};
   default:
     return {value: 'danger-outline', label: 'Unknown'};
-  }
-});
-
-const websocketStatusIndicatorClass = computed(() => {
-  switch (websocketStatusReadable.value.value) {
-  case 'success-outline':
-    return 'bg-success-500';
-  case 'warning-outline':
-    return 'bg-warning-500';
-  case 'info-outline':
-    return 'bg-info-500';
-  case 'danger-outline':
-  default:
-    return 'bg-danger-500';
   }
 });
 
@@ -229,22 +203,10 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="relative flex flex-col gap-5 h-full min-h-0">
-    <div
-      class="md:hidden absolute top-2 right-2 z-20"
-      :title="websocketStatusReadable.label"
-      :aria-label="websocketStatusReadable.label"
-    >
-        <span
-          class="block h-3 w-3 rounded-full ring-2 ring-white dark:ring-slate-800"
-          :class="websocketStatusIndicatorClass"
-        ></span>
-    </div>
-
-    <div class="hidden md:block">
-      <Alert
-        :type="websocketStatusReadable.value"
-      >{{websocketStatusReadable.label}}</Alert>
-    </div>
+    <Alert
+      v-if="websocketStatus !== 1"
+      :type="websocketStatusReadable.value"
+    >{{websocketStatusReadable.label}}</Alert>
       <div class="flex gap-5 flex-1 min-h-0">
         <template v-if="isUser && myConversation && participantId">
           <div
