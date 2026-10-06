@@ -1,3 +1,6 @@
+import asyncio
+from asyncio import sleep
+from datetime import datetime, timezone
 from uuid import uuid4, UUID
 
 from pydantic import TypeAdapter
@@ -116,7 +119,22 @@ class ChatManager:
         self.active_connections: dict[UUID, WebSocket] = {}
         self.participant_sockets: dict[UUID, list[UUID]] = {}
         self.subscriptions: dict[UUID, set[UUID]] = {}
+        self.ping_times: dict[UUID, datetime] = {}
+        self.ping_loop = asyncio.create_task(self.keep_tabs())
         
+    async def keep_tabs(self):
+        while True:
+            if not PRODUCTION:
+                print("checking ping times")
+            for participant_id in self.participant_sockets.keys():
+                for socket_id in self.participant_sockets[participant_id]:
+                    if (datetime.now(timezone.utc) - self.ping_times[socket_id]).total_seconds() > 60:
+                        if not PRODUCTION:
+                            print("no ping received in 60 seconds")
+                        await self.disconnect(socket_id, participant_id)
+            await sleep(30)
+        
+
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -129,6 +147,7 @@ class ChatManager:
             
         socket_id = uuid4()
         self.active_connections[socket_id] = websocket
+        self.ping_times[socket_id] = datetime.now(timezone.utc)
         self.participant_sockets[participant.id].append(socket_id)
         
         print("Active connections:", len(self.active_connections))
@@ -159,7 +178,6 @@ class ChatManager:
         del self.active_connections[socket_id]
         print("Active connections:", len(self.active_connections))
         
-        
     async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
         socket = self.active_connections[socket_id]
         while True:
@@ -189,6 +207,7 @@ class ChatManager:
                 elif isinstance(request, schemas.WebSocketPing):
                     if not PRODUCTION:
                         print(socket_id, "ping")
+                    self.ping_times[socket_id] = datetime.now(timezone.utc)
                     await send_websocket_message(socket, schemas.WebSocketPong(command=schemas.WebSocketCommand.PONG))
                             
                 
