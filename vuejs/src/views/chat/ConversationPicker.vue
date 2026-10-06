@@ -21,7 +21,7 @@ const props = defineProps({
   participantId: {
     type: String,
     required: true,
-  }
+  },
 });
 
 const searchTerm = ref('');
@@ -100,7 +100,9 @@ function getNumberOfUnreadMessages(conversation) {
           <input
             placeholder="Search..."
             v-model="searchTerm"
-            class="w-full flex-1 block bg-transparent placeholder:font-normal placeholder:text-slate-400 py-2 focus:ring-0 focus:outline-none dark:text-slate-200 dark:placeholder:text-slate-400"
+            class="w-full flex-1 block bg-transparent placeholder:font-normal
+            placeholder:text-slate-400 py-2 focus:ring-0 focus:outline-none
+            dark:text-slate-200 dark:placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -118,7 +120,8 @@ function getNumberOfUnreadMessages(conversation) {
               <div class="flex-1 min-w-0">
                 <span
                   class="block text-slate-800 dark:text-slate-300 text-sm font-medium mb-[2px] truncate">
-                  {{ conversation.initiatorParticipant.client.firstName }} {{ conversation.initiatorParticipant.client.lastName }}
+                  {{ conversation.initiatorParticipant.client.firstName }}
+                  {{ conversation.initiatorParticipant.client.lastName }}
                 </span>
                 <span
                   class="block text-slate-600 dark:text-slate-300 text-xs font-normal conversation-preview"

@@ -43,7 +43,10 @@ function selectConversation(conversation) {
 
 let websocket = null;
 
-Promise.all([requests.getParticipantMe(), requests.getMyConversation(), ...(isUser ? [requests.getConversations()] : [])])
+Promise.all([
+  requests.getParticipantMe(),
+  requests.getMyConversation(),
+  ...(isUser ? [requests.getConversations()] : [])])
   .then(([participantResponse, myConversationResponse, conversationsResponse]) => {
     conversations.value.splice(0, conversations.value.length);
 
@@ -84,7 +87,9 @@ function createWebsocket() {
           message.payload.sentByParticipantId !== participantId.value
         ) {
           const client = convo.initiatorParticipant.client;
-          toast.info(`${client?.firstName} ${client?.lastName}: ${message.payload.body.slice(0, 160)}`, {timeout: 2000});
+          toast.info(
+            `${client?.firstName} ${client?.lastName}: ${message.payload.body.slice(0, 160)}`,
+            {timeout: 2000});
         }
       }
     }
@@ -190,6 +195,20 @@ const websocketStatusReadable = computed(() => {
   }
 });
 
+const websocketStatusIndicatorClass = computed(() => {
+  switch (websocketStatusReadable.value.value) {
+  case 'success-outline':
+    return 'bg-success-500';
+  case 'warning-outline':
+    return 'bg-warning-500';
+  case 'info-outline':
+    return 'bg-info-500';
+  case 'danger-outline':
+  default:
+    return 'bg-danger-500';
+  }
+});
+
 const showConversationPicker = computed(() => {
   return isUser && !selectedConversation.value;
 });
@@ -209,15 +228,29 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-5 h-full min-h-0">
-      <div>
-        <Alert
-          :type="websocketStatusReadable.value"
-        >{{websocketStatusReadable.label}}</Alert>
-      </div>
+  <div class="relative flex flex-col gap-5 h-full min-h-0">
+    <div
+      class="md:hidden absolute top-2 right-2 z-20"
+      :title="websocketStatusReadable.label"
+      :aria-label="websocketStatusReadable.label"
+    >
+        <span
+          class="block h-3 w-3 rounded-full ring-2 ring-white dark:ring-slate-800"
+          :class="websocketStatusIndicatorClass"
+        ></span>
+    </div>
+
+    <div class="hidden md:block">
+      <Alert
+        :type="websocketStatusReadable.value"
+      >{{websocketStatusReadable.label}}</Alert>
+    </div>
       <div class="flex gap-5 flex-1 min-h-0">
         <template v-if="isUser && myConversation && participantId">
-          <div :class="`basis min-h-0 min-w-0 overflow-hidden ${showConversationPicker ? 'basis-full  ' : 'hidden md:flex'} md:basis-6/12 lg:basis-5/12 2xl:basis-3/12`">
+          <div
+            :class="`basis min-h-0 min-w-0 overflow-hidden
+            ${showConversationPicker ? 'basis-full  ' : 'hidden md:flex'}
+            md:basis-6/12 lg:basis-5/12 2xl:basis-3/12`">
             <ConversationPicker
               :selectedConversation="selectedConversation"
               @conversation-selected="selectConversation"
