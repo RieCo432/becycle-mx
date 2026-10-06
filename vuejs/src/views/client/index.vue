@@ -94,7 +94,10 @@ export default {
       this.appointments = (await requests.getClientAppointments(this.client.id, true, true)).data;
 
       this.contractSummaries = (await Promise.all(this.contracts.map(async (contract) => {
-        const bike = (await requests.getBike(contract.bikeId)).data;
+        let bike = {};
+        if (contract.bikeId) {
+          bike = (await requests.getBike(contract.bikeId)).data;
+        }
         const lastDepositTransaction = contract.depositTransactionHeaders
           .toSorted((thA, thB) =>
             new Date(thB.postedOn) - new Date(thA.postedOn))[0];
