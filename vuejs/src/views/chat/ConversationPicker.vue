@@ -1,5 +1,5 @@
 <script setup>
-import {ref, defineEmits, computed} from 'vue';
+import {ref, defineEmits, computed, onMounted, onBeforeUnmount} from 'vue';
 import Card from '@/components/Card/index.vue';
 import dateUtils from '@/util/dateUtils';
 import {Icon} from '@iconify/vue';
@@ -26,6 +26,8 @@ const props = defineProps({
 
 const searchTerm = ref('');
 const emit = defineEmits(['conversationSelected']);
+const timeRefreshKey = ref(0);
+let timeRefreshInterval = null;
 const filteredConversations = computed(() => {
   return props.conversations
     .filter((c) => c.id !== props.myConversation.id)
@@ -47,6 +49,21 @@ function getNumberOfUnreadMessages(conversation) {
     .filter((m) => !m.seenByParticipantId)
     .length;
 }
+
+onMounted(() => {
+  timeRefreshInterval = setInterval(() => {
+    timeRefreshKey.value += 1;
+  }, 60000);
+});
+
+function getConvenientMessageTime(sentOn) {
+  timeRefreshKey.value;
+  return dateUtils.convertToConvenientString(sentOn);
+}
+
+onBeforeUnmount(() => {
+  clearInterval(timeRefreshInterval);
+});
 
 </script>
 
@@ -81,7 +98,7 @@ function getNumberOfUnreadMessages(conversation) {
                 class="block text-xs text-slate-400 dark:text-slate-400 font-normal whitespace-nowrap"
               >{{
                   myConversation.messages.length > 0
-                    ? dateUtils.convertToConvenientString(myConversation.messages
+                    ? getConvenientMessageTime(myConversation.messages
                       .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[myConversation.messages.length - 1]
                       .sentOn)
                     : '' }}</span>
@@ -137,7 +154,7 @@ function getNumberOfUnreadMessages(conversation) {
                   class="block text-xs text-slate-400 dark:text-slate-400 font-normal"
                 >{{
                     conversation.messages.length > 0
-                      ? dateUtils.convertToConvenientString(conversation.messages
+                      ? getConvenientMessageTime(conversation.messages
                         .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))[conversation.messages.length - 1]
                         .sentOn)
                       : '' }}</span>

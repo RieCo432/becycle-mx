@@ -53,7 +53,7 @@ Promise.all([
     if (!isUser) {
       selectConversation(myConversationResponse.data);
     }
-    
+
     conversations.value.push(myConversationResponse.data);
 
     if (isUser && conversationsResponse) {
