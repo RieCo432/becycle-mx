@@ -164,56 +164,50 @@ const conversationTitle = computed(() => {
 
         <template v-else>
           <div
-            class="block md:px-6 px-4"
+            class="flex md:px-6 px-4"
             v-for="(message, i) in conversation.messages
               .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))"
             :key="message.id">
+            <!-- my messages -->
             <div
-              class="flex space-x-2 items-start justify-end group w-full rtl:space-x-reverse"
+              class="flex justify-end group w-full"
               v-if="message.sentByParticipantId === participantId"
             >
-              <div class="no flex space-x-4 rtl:space-x-reverse">
+              <div class="max-w-[83.333333%] ml-auto">
                 <div
-                  class="opacity-0 invisible group-hover:opacity-100 group-hover:visible"
+                  class="text-content p-3 bg-slate-300 dark:bg-slate-900
+                      dark:text-slate-300 text-slate-800 text-sm font-normal
+                      rounded-md mb-1 whitespace-pre-wrap break-all"
                 >
+                  {{ message.body }}
                 </div>
-                <div class="whitespace-pre-wrap break-all">
+                <span class="block text-right font-normal text-xs text-slate-400">
                     {{ getConvenientMessageTime(message.sentOn) }}
-                    class="text-contrent p-3 bg-slate-300 dark:bg-slate-900 dark:text-slate-300 text-slate-800 text-sm font-normal rounded-md flex-1 mb-1"
-                  >
-                    {{ message.body }}
-                  </div>
-                  <span class="font-normal text-xs text-slate-400">
-                    {{  dateUtils.convertToConvenientString(message.sentOn) }}
                   </span>
-                </div>
               </div>
             </div>
-            <!-- me  -->
+            <!-- other person's messages -->
             <div
-              class="flex space-x-2 items-start group rtl:space-x-reverse"
+              class="flex justify-start w-full group"
               v-else
             >
-              <div class="flex-1 flex space-x-4 rtl:space-x-reverse">
-                <div>
-                  <div
-                    class="text-contrent p-3 bg-slate-100 dark:bg-slate-600 dark:text-slate-300 text-slate-600 text-sm font-normal mb-1 rounded-md flex-1 whitespace-pre-wrap break-all"
-                  >
-                    {{ message.body }}
-                  </div>
-                  <span
-                    class="font-normal text-xs text-slate-400 dark:text-slate-400">
-                    {{  dateUtils.convertToConvenientString(message.sentOn) }}
+              <div class="max-w-[83.333333%] mr-auto">
+                <div
+                  class="text-content p-3 bg-slate-100 dark:bg-slate-600
+                      dark:text-slate-300 text-slate-600 text-sm font-normal
+                      mb-1 rounded-md whitespace-pre-wrap break-all"
+                >
+                  {{ message.body }}
+                </div>
+                <span
+                  class="block text-left font-normal text-xs
+                      text-slate-400 dark:text-slate-400"
+                >
                     {{ getConvenientMessageTime(message.sentOn) }}
                   </span>
-                </div>
-                <div
-                  class="opacity-0 invisible group-hover:opacity-100 group-hover:visible"
-                >
-                </div>
               </div>
             </div>
-            <!-- sender -->
+            <!--  other person's messages -->
           </div>
         </template>
       </div>
