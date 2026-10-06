@@ -66,7 +66,10 @@ onMounted(() => {
   }, 60000);
 
   if (chatBody.value) {
-    chatResizeObserver = new ResizeObserver(updateMaxMessageInputHeight);
+    chatResizeObserver = new ResizeObserver(() => {
+      updateMaxMessageInputHeight();
+      scrollToBottom();
+    });
     chatResizeObserver.observe(chatBody.value);
   }
 });
@@ -213,22 +216,23 @@ const conversationTitle = computed(() => {
       </div>
 
       <div
-        class="chat-footer flex-none max-h-[50%] overflow-hidden md:px-6 px-4 sm:flex md:space-x-4
-        sm:space-x-2 rtl:space-x-reverse border-t md:pt-6 pt-4 md:pb-6 pb-4 border-slate-100 dark:border-slate-700"
+        class="chat-footer flex-none max-h-[50%] overflow-hidden md:px-6 px-4
+            sm:flex md:space-x-4 sm:space-x-2 rtl:space-x-reverse border-t
+            md:pt-6 pt-4 md:pb-6 pb-4 border-slate-100 dark:border-slate-700"
       >
         <div class="flex-1 relative flex space-x-3 rtl:space-x-reverse min-h-0 items-center">
-          <TextArea
-            :rows="1"
-            type="text"
-            placeholder="Type your message..."
-            classInput="flex-1 m-1 p-2 min-h-[40px] dark:bg-slate-900 rounded-2xl chat-message-input focus:ring-0
-            focus:outline-0 block w-full bg-transparent dark:text-white resize-none"
-            v-model.trim="newMessage"
-            autoGrow
-            :maxGrowHeight="maxMessageInputHeight"
-            @keydown.enter.exact.prevent="sendMessage"
-            @keydown.enter.shift.exact.prevent="newMessage += '\n'"
-          />
+            <TextArea
+              :rows="1"
+              type="text"
+              placeholder="Type your message..."
+              classInput="flex-1 m-1 p-2 min-h-[40px] dark:bg-slate-900 rounded-2xl chat-message-input focus:ring-0
+                focus:outline-0 block w-full bg-transparent dark:text-white resize-none"
+              v-model.trim="newMessage"
+              autoGrow
+              :maxGrowHeight="maxMessageInputHeight"
+              @keydown.enter.exact.prevent="sendMessage"
+              @keydown.enter.shift.exact.prevent="newMessage += '\n'"
+            />
           <button
             type="button"
             @click="sendMessage"
