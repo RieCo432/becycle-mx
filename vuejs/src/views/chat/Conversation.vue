@@ -217,9 +217,10 @@ const conversationTitle = computed(() => {
       >
         <div class="flex-1 relative flex space-x-3 rtl:space-x-reverse min-h-0 items-center">
           <TextArea
+            :rows="1"
             type="text"
             placeholder="Type your message..."
-            classInput="flex-1 m-1 p-2 min-h-0 dark:bg-slate-900 rounded-2xl chat-message-input focus:ring-0 focus:outline-0 block w-full bg-transparent dark:text-white resize-none"
+            classInput="flex-1 m-1 p-2 min-h-[40px] dark:bg-slate-900 rounded-2xl chat-message-input focus:ring-0 focus:outline-0 block w-full bg-transparent dark:text-white resize-none"
             v-model.trim="newMessage"
             autoGrow
             :maxGrowHeight="maxMessageInputHeight"
