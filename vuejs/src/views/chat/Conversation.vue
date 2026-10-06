@@ -18,6 +18,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  websocketConnected: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 const emit = defineEmits(['sendMessage', 'closeConversation']);
@@ -232,11 +236,13 @@ const conversationTitle = computed(() => {
               :maxGrowHeight="maxMessageInputHeight"
               @keydown.enter.exact.prevent="sendMessage"
               @keydown.enter.shift.exact.prevent="newMessage += '\n'"
+              :disabled="!websocketConnected"
             />
           <button
             type="button"
             @click="sendMessage"
             class="h-8 w-8 bg-slate-900 text-white flex flex-col justify-center items-center text-lg rounded-full"
+            :disabled="!websocketConnected"
           >
             <Icon
               icon="heroicons-outline:paper-airplane"
