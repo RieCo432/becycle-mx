@@ -230,6 +230,7 @@ onBeforeUnmount(() => {
             :participantId="participantId"
             @send-message="sendMessage"
             @close-conversation="closeConversation"
+            :websocketConnected="websocketStatus === 1"
           />
         </div>
       </div>
