@@ -16,6 +16,7 @@ class BikeBase(BaseModel):
     rfidTagSerialNumber: str | None = None
     disposition: Disposition
     roughValue: int | None = None
+    contractPhotoIds: dict[UUID, list[UUID]] | None = None
 
 
 class BikeCreate(BikeBase):

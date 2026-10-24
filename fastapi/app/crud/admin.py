@@ -1,4 +1,4 @@
-import io
+﻿import io
 import os
 from uuid import UUID
 
@@ -9,14 +9,24 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 import app.models as models
 from .appointments import get_appointments
-from .bikes import get_all_bikes, get_bike
+from .bikes import get_all_bikes, get_bike, attach_bike_contract_photo_ids
 from .clients import get_all_clients, get_client, get_client_logins
 from .contracts import get_contracts
 from .accounts import get_deposit_account_balances
+
+
+def bike_duplicate_serialization_options() -> list[selectinload]:
+    """selectinload chains covering everything schemas.DetectedPotentialBikeDuplicates reads lazily, so no lazy load fires during response serialization."""
+    return [
+        selectinload(models.DetectedPotentialBikeDuplicates.bike1).selectinload(models.Bike.colours),
+        selectinload(models.DetectedPotentialBikeDuplicates.bike1).selectinload(models.Bike.contracts),
+        selectinload(models.DetectedPotentialBikeDuplicates.bike2).selectinload(models.Bike.colours),
+        selectinload(models.DetectedPotentialBikeDuplicates.bike2).selectinload(models.Bike.contracts),
+    ]
 
 
 def get_potential_client_duplicates_detected(db: Session) -> list[models.DetectedPotentialClientDuplicates]:
@@ -178,10 +188,15 @@ def ignore_potential_client_duplicate(db: Session, potential_client_duplicate_id
 
 
 def get_potential_bike_duplicates_detected(db: Session) -> list[models.DetectedPotentialBikeDuplicates]:
-    return [_ for _ in db.scalars(
+    duplicates = [_ for _ in db.scalars(
         select(models.DetectedPotentialBikeDuplicates)
+        .options(*bike_duplicate_serialization_options())
         .order_by(models.DetectedPotentialBikeDuplicates.similarityScore)
     )]
+
+    attach_bike_contract_photo_ids(db=db, bikes=[d.bike1 for d in duplicates] + [d.bike2 for d in duplicates])
+
+    return duplicates
 
 
 def is_potential_bike_duplicate_detected_before(db: Session, bike1: models.Bike, bike2: models.Bike) -> bool:
@@ -284,6 +299,7 @@ def find_potential_bike_duplicates(db: Session) -> None:
 def get_potential_bike_duplicate(db: Session, potential_bike_duplicate_id: UUID) -> models.DetectedPotentialBikeDuplicates:
     return db.scalar(
         select(models.DetectedPotentialBikeDuplicates)
+        .options(*bike_duplicate_serialization_options())
         .where(models.DetectedPotentialBikeDuplicates.id == potential_bike_duplicate_id)
     )
 
@@ -340,6 +356,7 @@ def ignore_potential_bike_duplicate(db: Session, potential_bike_duplicate_id: UU
 
     db.commit()
 
+    attach_bike_contract_photo_ids(db=db, bikes=[potential_bike_duplicate.bike1, potential_bike_duplicate.bike2])
     return potential_bike_duplicate
 
 
@@ -504,3 +521,4 @@ def get_contracts_takeout_pdf(db: Session) -> str:
     output_stream.close()
 
     return output_file_path
+

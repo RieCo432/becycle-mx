@@ -2,14 +2,16 @@
 import BikeOverviewCard from '@/components/Card/BikeOverviewCard.vue';
 import Button from '@/components/Button/index.vue';
 import AddNewBikeCard from '@/components/Card/AddNewBikeCard.vue';
+import {VueSpinner} from 'vue3-spinners';
 
 export default {
   name: 'BikeCatalogue',
-  components: {AddNewBikeCard, BikeOverviewCard, Button},
+  components: {VueSpinner, AddNewBikeCard, BikeOverviewCard, Button},
   data() {
     return {
       bikesFound: [],
       bikeSearch: {},
+      loadingSearch: false,
     };
   },
   props: {
@@ -49,6 +51,9 @@ export default {
     handleBikeAdded(bike) {
       this.bikesFound.push(bike);
     },
+    handleSearchLoadingChanged(isLoading) {
+      this.loadingSearch = isLoading;
+    },
   },
 };
 </script>
@@ -64,11 +69,12 @@ export default {
             :include-sale-initial="includeSale"
             @updateSearch="handleSearchUpdate"
             @bike-added="handleBikeAdded"
+            @updateSearchLoading="handleSearchLoadingChanged"
           />
         </div>
       </div>
     </div>
-    <div :class="`${innerGridColSpanClasses} row-span-3 gap-2`">
+    <div v-if="!loadingSearch" :class="`${innerGridColSpanClasses} row-span-3 gap-2`">
       <div :class="`grid ${innerGridColClasses} gap-2`">
         <div class="col-span-1" v-for="bike in bikesFound" :key="bike.id">
           <BikeOverviewCard
@@ -85,6 +91,9 @@ export default {
           </BikeOverviewCard>
         </div>
       </div>
+    </div>
+    <div v-else :class="`${innerGridColSpanClasses} row-span-3 flex items-center justify-center`">
+      <VueSpinner size="100px" class="text-sky-500" />
     </div>
   </div>
 </template>

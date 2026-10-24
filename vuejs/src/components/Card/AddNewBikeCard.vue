@@ -38,7 +38,7 @@ export default {
       default: true,
     },
   },
-  emits: ['updateSearch'],
+  emits: ['updateSearch', 'updateSearchLoading'],
   setup(props, context) {
     const makeSuggestions = ref([]);
     const modelSuggestions = ref([]);
@@ -264,6 +264,7 @@ export default {
         if (this.includeRental) dispositions.push('rental');
         if (this.includeSale) dispositions.push('sale');
 
+        this.$emit('updateSearchLoading', true);
         requests.findBikes(
           this.make,
           this.model,
@@ -274,6 +275,8 @@ export default {
           4).then((response) => {
           this.bikeSuggestions = response.data;
           this.runFilter();
+        }).finally(() => {
+          this.$emit('updateSearchLoading', false);
         });
       }
     },

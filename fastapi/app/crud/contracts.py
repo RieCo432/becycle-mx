@@ -1,4 +1,4 @@
-import os
+﻿import os
 
 from datetime import date, datetime, timezone
 from math import ceil
@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 import app.models as models
 import app.schemas as schemas
 from .accounts import get_account
+from .bikes import attach_bike_contract_photo_ids
 from .sales import get_sale_header
 from .users import get_user
 
@@ -90,6 +91,8 @@ def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | No
         )
     )]
 
+    attach_bike_contract_photo_ids(db=db, bikes=[c.bike for c in contracts if c.bike is not None])
+
     return contracts
 
 
@@ -135,6 +138,7 @@ def get_contracts_grouped_by_returned_date(db: Session) -> dict[date, list[model
 def get_contract(db: Session, contract_id: UUID, throw_on_draft: bool = True) -> models.Contract:
     contract = db.scalar(
         select(models.Contract)
+        .options(*contract_serialization_options())
         .where(models.Contract.id == contract_id)
     )
     if contract is None:
@@ -143,6 +147,7 @@ def get_contract(db: Session, contract_id: UUID, throw_on_draft: bool = True) ->
     if throw_on_draft and contract.isDraft:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": f"Contract with id {contract_id} is a draft."})
     
+    attach_bike_contract_photo_ids(db=db, bikes=contract.bike)
     return contract
 
 
@@ -218,6 +223,7 @@ def return_contract(
 
     db.commit()
 
+    attach_bike_contract_photo_ids(db=db, bikes=contract.bike)
     return contract
 
 
@@ -264,6 +270,7 @@ def extend_contract(db: Session, contract_id: UUID) -> models.Contract:
 
     db.commit()
 
+    attach_bike_contract_photo_ids(db=db, bikes=contract.bike)
     return contract
 
 
@@ -277,6 +284,7 @@ def get_client_contract(db: Session, client_id: UUID, contract_id: UUID) -> mode
     )
     if contract is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": f"Contract with id {contract_id} not found."})
+    attach_bike_contract_photo_ids(db=db, bikes=contract.bike)
     return contract
 
 
@@ -347,6 +355,7 @@ def patch_contract_details(db: Session, contract_id: UUID, contract_patch_data: 
 
     db.commit()
 
+    attach_bike_contract_photo_ids(db=db, bikes=contract.bike)
     return contract
 
 
@@ -381,17 +390,20 @@ def start_new_contract(db: Session) -> models.Contract:
     db.add(contract_draft)
     db.commit()
 
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 def get_contract_draft(db: Session, contract_id: UUID) -> models.Contract:
     contract_draft = db.scalar(
         select(models.Contract)
+        .options(*contract_serialization_options())
         .where(models.Contract.id == contract_id)
         .where(models.Contract.isDraft == True)
     )
     if contract_draft is None:
         raise HTTPException(status_code=404, detail={"description": "Contract draft not found"})
 
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 
@@ -403,12 +415,14 @@ def update_contract_draft_client(db: Session, contract_id: UUID, client_id: UUID
     contract_draft = get_contract_draft(db=db, contract_id=contract_id)
     contract_draft.clientId = client_id
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 def update_contract_draft_bike(db: Session, contract_id: UUID, bike_id: UUID) -> models.Contract:
     contract_draft = get_contract_draft(db=db, contract_id=contract_id)
     contract_draft.bikeId = bike_id
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 def update_contract_draft_details(db: Session, contract_id: UUID, contract_details: schemas.ContractDetails) -> models.Contract:
@@ -417,6 +431,7 @@ def update_contract_draft_details(db: Session, contract_id: UUID, contract_detai
     contract_draft.contractType = contract_details.contractType
     contract_draft.notes = contract_details.notes
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 def update_contract_draft_deposit(db: Session, contract_id: UUID, deposit_collected_transaction_header_id: UUID) -> models.Contract:
@@ -437,12 +452,14 @@ def update_contract_draft_deposit(db: Session, contract_id: UUID, deposit_collec
     contract_draft.bike.roughValue = max(deposit_amount, 4000)
     transaction_header.contractId = contract_id
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 def update_contract_draft_working_user(db: Session, contract_draft_id: UUID, working_user: models.User) -> models.Contract:
     contract_draft = get_contract_draft(db=db, contract_id=contract_draft_id)
     contract_draft.workingUserId = working_user.id
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 def is_checking_user_same_as_working_user(db: Session, contract_draft_id: UUID, checking_user: models.User) -> bool:
@@ -453,6 +470,7 @@ def update_contract_draft_checking_user(db: Session, contract_id: UUID, checking
     contract_draft = get_contract_draft(db=db, contract_id=contract_id)
     contract_draft.checkingUserId = checking_user.id
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 def does_contract_exist_already(db: Session, contract_id: UUID) -> bool:
@@ -497,6 +515,7 @@ def submit_contract(db: Session, contract_id: UUID) -> models.Contract:
     contract_draft.endDate = datetime.now(timezone.utc) + relativedelta(months=CONTRACT_EXPIRE_MONTHS)
     contract_draft.isDraft = False
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 
@@ -506,6 +525,7 @@ def add_sale_to_contract(db: Session, contract_id: UUID, sale_header_id: UUID) -
     contract_draft.saleHeaderId = sale_header_id
     db.commit()
 
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 
@@ -530,6 +550,7 @@ def delete_sale_from_contract(db: Session, contract_id: UUID) -> models.Contract
     db.commit()
     db.delete(sale_header)
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=contract_draft.bike)
     return contract_draft
 
 
@@ -667,6 +688,7 @@ def get_contracts_to_forfeit(db: Session) -> list[models.Contract]:
     
     contracts_with_liability_dormant_at_some_point = db.scalars(
         select(models.Contract)
+        .options(*contract_serialization_options())
         .join(models.TransactionHeader)
         .where(
             (models.TransactionHeader.event == "liability_dormant")
@@ -728,6 +750,7 @@ def get_contracts_to_forfeit(db: Session) -> list[models.Contract]:
                 contracts_to_forfeit.append(contract)
                 
                 
+    attach_bike_contract_photo_ids(db=db, bikes=[c.bike for c in contracts_to_forfeit if c.bike is not None])
     return contracts_to_forfeit
             
     
@@ -806,6 +829,7 @@ def forfeit_contract(db: Session, contract_id: UUID, forfeit_revenue_account_id:
         db.commit()
         raise e
     
+    attach_bike_contract_photo_ids(db=db, bikes=contract.bike)
     return contract
     
 
@@ -998,4 +1022,7 @@ def get_contracts_by_user_id(db: Session, user_id: UUID) -> list[schemas.Contrac
         )
     )
 
-    return [_ for _ in contracts]
+    contracts = [_ for _ in contracts]
+    attach_bike_contract_photo_ids(db=db, bikes=[c.bike for c in contracts if c.bike is not None])
+
+    return contracts
