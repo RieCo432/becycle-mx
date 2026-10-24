@@ -14,6 +14,11 @@ COPY alembic.ini /code/alembic.ini
 COPY ./alembic /code/alembic
 COPY ./app /code/app
 
+# Dump Python stack traces to stderr when a segfault/signal occurs
+# (redundant with app/main.py's faulthandler.enable(), but covers processes
+# that don't import the app, e.g. alembic)
+ENV PYTHONFAULTHANDLER=1
+
 ENV CLIENT_LOGIN_CODE_EXPIRE_MINUTES=60
 # 1 DAY
 ENV CLIENT_EMAIL_VERIFY_EXPIRE_MINUTES=1440
