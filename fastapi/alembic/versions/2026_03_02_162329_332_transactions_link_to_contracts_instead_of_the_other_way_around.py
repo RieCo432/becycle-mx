@@ -1,4 +1,4 @@
-"""#322 transactions link to contracts instead of the other way around
+"""#332 transactions link to contracts instead of the other way around
 
 Revision ID: 5b7b52dbd99c
 Revises: 10bebd9ef862
