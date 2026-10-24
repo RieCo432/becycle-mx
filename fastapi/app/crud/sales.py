@@ -1,14 +1,15 @@
-from uuid import UUID
+﻿from uuid import UUID
 
 from fastapi import HTTPException
 from starlette import status
 
 import app.models as models
 import app.schemas as schemas
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, or_
 from datetime import datetime, timezone
 from .transactions import get_transaction_header
+from .bikes import attach_bike_contract_photo_ids
 from ..services.accounts_helpers import AccountTypes
 
 
@@ -82,6 +83,7 @@ def add_bike_sale_line(db: Session, bike_sale_line_data: schemas.BikeSaleLineCre
     db.add(bike_sale_line)
     db.commit()
     
+    attach_bike_contract_photo_ids(db=db, bikes=bike_sale_line.bike)
     return bike_sale_line
 
 
@@ -131,8 +133,12 @@ def get_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UUID)
 def get_bike_sale_line(db: Session, bike_sale_line_id: UUID) -> models.BikeSaleLine:
     bike_sale_line =  db.scalar(
         select(models.BikeSaleLine)
+        .options(
+            selectinload(models.BikeSaleLine.bike).selectinload(models.Bike.colours),
+        )
         .where(models.BikeSaleLine.id == bike_sale_line_id)
     )
+    attach_bike_contract_photo_ids(db=db, bikes=bike_sale_line.bike)
     return bike_sale_line
 
 def update_catalogue_item_sale_line(db: Session, catalogue_item_sale_line_id: UUID, catalogue_item_sale_line_update: schemas.CatalogueItemSaleLineUpdate) -> models.CatalogueItemSaleLine:
@@ -173,6 +179,7 @@ def update_bike_sale_line(db: Session, bike_sale_line_id: UUID, bike_sale_line_u
 
     db.commit()
 
+    attach_bike_contract_photo_ids(db=db, bikes=bike_sale_line.bike)
     return bike_sale_line
 
 

@@ -1,8 +1,8 @@
-from uuid import UUID
+﻿from uuid import UUID
 
 from fastapi import HTTPException
 from sqlalchemy import select, func, and_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from starlette import status
 
 import app.models as models
@@ -10,11 +10,50 @@ import app.schemas as schemas
 from app.extensions.disposition import Disposition
 
 
+def bike_serialization_options() -> list[selectinload]:
+    """selectinload chains covering everything schemas.Bike reads lazily, so no lazy load fires during response serialization."""
+    return [
+        selectinload(models.Bike.colours),
+    ]
+
+
+def attach_bike_contract_photo_ids(db: Session, bikes: models.Bike | list[models.Bike] | None) -> None:
+    """Populate `contractPhotoIds` on the given bikes: a mapping from each of the
+    bike's contract UUIDs to the list of photo UUIDs attached to that contract
+    (determined through the ContractPhoto rows).
+
+    Call this before any serialized response containing the given bikes is built.
+    It runs a single batched query instead of letting a lazy load of `contracts` /
+    `Contract.photos` fire during pydantic's response serialization â€” a lazy load at
+    that point is exactly what triggered the #415 segfault.
+    """
+    if bikes is None:
+        return
+    if isinstance(bikes, models.Bike):
+        bikes = [bikes]
+    bike_ids = [bike.id for bike in bikes if bike is not None and bike.id is not None]
+    contract_photo_ids: dict[UUID, dict[UUID, list[UUID]]] = {}
+    if bike_ids:
+        for bike_id, contract_id, photo_id in db.execute(
+            select(models.Contract.bikeId, models.Contract.id, models.ContractPhoto.id)
+            .select_from(models.Contract)
+            .join(models.ContractPhoto, models.ContractPhoto.contractId == models.Contract.id)
+            .where(models.Contract.bikeId.in_(bike_ids))
+        ).all():
+            contract_photo_ids.setdefault(bike_id, {}).setdefault(contract_id, []).append(photo_id)
+    for bike in bikes:
+        if bike is not None:
+            bike.contractPhotoIds = contract_photo_ids.get(bike.id, {})
+
+
 def get_bike(db: Session, bike_id: UUID) -> models.Bike:
-    return db.scalar(
+    bike = db.scalar(
         select(models.Bike)
+        .options(*bike_serialization_options())
         .where(models.Bike.id == bike_id)
     )
+    attach_bike_contract_photo_ids(db=db, bikes=bike)
+    return bike
 
 
 def find_similar_bikes(db: Session, make: str, model: str, colours: list[str], serialNumber: str) -> list[schemas.Bike]:
@@ -34,6 +73,9 @@ def find_similar_bikes(db: Session, make: str, model: str, colours: list[str], s
     )]
     
     bikes = []
+    if len(bike_candidates) > 0:
+        attach_bike_contract_photo_ids(db=db, bikes=bike_candidates)
+
     for bike_candidate in bike_candidates:
         bike_colours = [c.hex for c in bike_candidate.colours]
         query_colours = [c for c in colours]
@@ -76,22 +118,32 @@ def get_potential_bike_matches(db: Session, make: str | None = None, model: str 
 
     bikes = [bike for bike in db.scalars(
         select(models.Bike)
+        .options(*bike_serialization_options())
         .where(and_(*query_filter))
     )]
+
+    attach_bike_contract_photo_ids(db=db, bikes=bikes)
 
     return bikes
 
 
 def get_all_bikes(db: Session) -> list[schemas.Bike]:
-    return [_ for _ in db.scalars(
+    bikes = [_ for _ in db.scalars(
         select(models.Bike)
+        .options(*bike_serialization_options())
     )]
+
+    attach_bike_contract_photo_ids(db=db, bikes=bikes)
+
+    return bikes
 
 def get_bikes_by_rfid_tag_serial_number(db: Session, rfid_tag_serial_number: str) -> list[schemas.Bike]:
     bikes = [_ for _ in db.scalars(
         select(models.Bike)
+        .options(*bike_serialization_options())
         .where(models.Bike.rfidTagSerialNumber == rfid_tag_serial_number)
     )]
+    attach_bike_contract_photo_ids(db=db, bikes=bikes)
     return bikes
 
 
@@ -113,6 +165,7 @@ def create_bike(bike_data: schemas.BikeCreate, db: Session) -> schemas.Bike:
     )
     db.add(bike)
     db.commit()
+    attach_bike_contract_photo_ids(db=db, bikes=bike)
     return bike
 
 
@@ -209,4 +262,6 @@ def update_bike(db: Session, bike_id: UUID, updated_bike_data: schemas.BikeBase)
 
     db.commit()
 
+    attach_bike_contract_photo_ids(db=db, bikes=bike)
     return bike
+

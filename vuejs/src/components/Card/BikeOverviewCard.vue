@@ -48,27 +48,18 @@ export default {
         });
     },
     getAllBikePhotos() {
-      if (this.bike) {
-        requests.getBikeContracts(this.bike.id, true, true, true, true)
-          .then((response) => {
-            this.photoUrls.splice(0, this.photoUrls.length);
-            const contractIds = response.data.map((contract) => contract.id);
-            Promise.all(response.data.map((contract) => (requests.getContractPhotoIds(contract.id))))
-              .then((responses) => {
-                responses.forEach((response, i) => {
-                  const contractId = contractIds[i];
-                  this.photoUrls.push(...response.data.map((photoId) => ({
-                    id: photoId,
-                    contractId: contractId,
-                    loading: true,
-                    url: null,
-                  })));
-                });
-                this.photoUrls.forEach((photoUrl) => {
-                  this.getContractPhoto(photoUrl);
-                });
-              });
-          });
+      if (this.bike.contractPhotoIds && Object.keys(this.bike.contractPhotoIds).length > 0) {
+        for (const [contractId, photoIds] of Object.entries(this.bike.contractPhotoIds)) {
+          this.photoUrls.push(...photoIds.map((photoId) => ({
+            id: photoId,
+            contractId: contractId,
+            loading: true,
+            url: null,
+          })));
+        }
+        this.photoUrls.forEach((photoUrl) => {
+          this.getContractPhoto(photoUrl);
+        });
       }
     },
     deleteContractPhoto(contractId, photoId) {

@@ -1,5 +1,5 @@
 from typing import List
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from datetime import datetime
 from sqlalchemy import String, UUID, text, DateTime, Integer, Enum
@@ -41,6 +41,21 @@ class Bike(Base):
     @property
     def colours_names_string(self) -> str:
         return " + ".join([c.name for c in self.colours])
+
+    # `contractPhotoIds` (a mapping from each of this bike's contract UUIDs to
+    # the list of photo UUIDs attached to that contract, determined through
+    # ContractPhoto) is populated on the instance by
+    # `app.crud.bikes.attach_bike_contract_photo_ids`, which every serializing endpoint
+    # calls before returning. It deliberately performs NO lazy loading here:
+    # pydantic reads this attribute during response serialization, and it is
+    # exactly a lazy load at that point that triggered the #415 segfault.
+    @property
+    def contractPhotoIds(self) -> dict[UUID, list[UUID]]:
+        return self.__dict__.get("contractPhotoIds", {})
+
+    @contractPhotoIds.setter
+    def contractPhotoIds(self, value: dict[UUID, list[UUID]]) -> None:
+        self.__dict__["contractPhotoIds"] = {contract_id: list(photo_ids) for contract_id, photo_ids in value.items()}
 
     def __eq__(self, other: dict):
         return all([

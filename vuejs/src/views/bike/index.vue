@@ -148,18 +148,14 @@ export default {
             });
         });
     },
-    getContractPhotos(contractId) {
-      requests.getContractPhotoIds(contractId)
-        .then((response) => {
-          for (const photoId of response.data) {
+    getAllBikePhotos() {
+      if (this.bike.contractPhotoIds && Object.keys(this.bike.contractPhotoIds).length > 0) {
+        for (const [contractId, photoIds] of Object.entries(this.bike.contractPhotoIds)) {
+          for (const photoId of photoIds) {
             this.getContractPhoto(contractId, photoId);
           }
-        });
-    },
-    getAllBikePhotos() {
-      this.contractSummaries.forEach((contractSummary) => {
-        this.getContractPhotos(contractSummary.id);
-      });
+        }
+      }
     },
     deleteContractPhoto(contractId, photoId) {
       if (confirm('Are you sure you want to delete this photo?')) {

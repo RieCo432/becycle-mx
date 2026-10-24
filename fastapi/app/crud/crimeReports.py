@@ -1,12 +1,35 @@
-import datetime
+﻿import datetime
 from typing import List
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 import app.models as models
 import app.schemas as schemas
 from sqlalchemy import select, func
+
+from .bikes import attach_bike_contract_photo_ids
+from .contracts import _user_options, _transaction_header_lazy_options
+
+
+def crime_report_full_serialization_options() -> list[selectinload]:
+    """selectinload chains covering everything schemas.CrimeReportFull (i.e. CrimeReport â†’ Contract â†’ nested schemas) reads lazily, so no lazy load fires during response serialization."""
+    contract = selectinload(models.CrimeReport.contract)
+    return [
+        contract.selectinload(models.Contract.crimeReports),
+        contract.selectinload(models.Contract.client),
+        contract.selectinload(models.Contract.bike).selectinload(models.Bike.colours),
+        _user_options(contract.selectinload(models.Contract.workingUser)),
+        _user_options(contract.selectinload(models.Contract.checkingUser)),
+        _user_options(contract.selectinload(models.Contract.returnAcceptingUser)),
+        # Contract.depositTransactionHeaders (TransactionHeader)
+        *_transaction_header_lazy_options(contract.selectinload(models.Contract.depositTransactionHeaders)),
+        # Contract.saleHeader (SaleHeader)
+        _user_options(contract.selectinload(models.Contract.saleHeader).selectinload(models.SaleHeader.createdByUser)),
+        *_transaction_header_lazy_options(contract.selectinload(models.Contract.saleHeader).selectinload(models.SaleHeader.transactionHeader)),
+        contract.selectinload(models.Contract.saleHeader).selectinload(models.SaleHeader.catalogueItemSaleLines).selectinload(models.CatalogueItemSaleLine.catalogueItem),
+        contract.selectinload(models.Contract.saleHeader).selectinload(models.SaleHeader.bikeSaleLines).selectinload(models.BikeSaleLine.bike).selectinload(models.Bike.colours),
+    ]
 
 
 def get_crime_report(crime_report_id: UUID, db: Session) -> models.CrimeReport:
@@ -50,10 +73,15 @@ def close_crime_report(crime_report_id: UUID, db: Session) -> models.CrimeReport
 
 
 def find_crime_reports(db: Session, crime_number: str, max_distance: int = 4) -> List[models.CrimeReport]:
-    return [_ for _ in db.scalars(
+    reports = [_ for _ in db.scalars(
         select(models.CrimeReport)
+        .options(*crime_report_full_serialization_options())
         .where(
             (models.CrimeReport.crimeNumber.contains(crime_number))
             | (func.levenshtein(models.CrimeReport.crimeNumber, crime_number) <= max_distance)
         )
     )]
+
+    attach_bike_contract_photo_ids(db=db, bikes=[r.contract.bike for r in reports if r.contract is not None and r.contract.bike is not None])
+
+    return reports
