@@ -24,6 +24,9 @@ const props = defineProps({
   },
 });
 
+// TODO: as a user, show what user has sent previous messages
+// TODO: when opening a conversation, it should mark unread messages as read
+
 const emit = defineEmits(['sendMessage', 'closeConversation']);
 
 const credentialStore = useCredentialsStore();
