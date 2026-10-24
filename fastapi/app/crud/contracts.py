@@ -7,7 +7,7 @@ from uuid import UUID
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException, status, UploadFile
 from sqlalchemy import select, and_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 import app.models as models
 import app.schemas as schemas
@@ -21,6 +21,52 @@ from app.models import TransactionHeader, TransactionLine
 
 CONTRACT_EXPIRE_MONTHS = int(os.environ['CONTRACT_EXPIRE_MONTHS'])
 
+# Eager-load every relationship that schemas.Contract (and the schemas nested
+# in it) reads, so that serializing the response never triggers an implicit
+# lazy load. FastAPI/pydantic serialize the ORM objects *after* the endpoint
+# returns, i.e. from inside pydantic's validation; a lazy load there (e.g. the
+# Account.balance property reading Account.transactionLines) is what triggered
+# the #415 segfault, and it also caused N+1 queries per serialized response.
+# Every serialized User schema reads `groups`.
+_user_options = lambda parent: parent.selectinload(models.User.groups)
+
+def _transaction_header_lazy_options(header: selectinload) -> list[selectinload]:
+    """All lazy attributes read while serializing a TransactionHeader, rooted at `header`."""
+    line = header.selectinload(models.TransactionHeader.transactionLines)
+    account = line.selectinload(models.TransactionLine.account)
+    return [
+        _user_options(header.selectinload(models.TransactionHeader.createdByUser)),
+        _user_options(header.selectinload(models.TransactionHeader.postedByUser)),
+        # TransactionLine.account (Account)
+        _user_options(account.selectinload(models.Account.ownerUser)),
+        account.selectinload(models.Account.ownerGroup),
+        _user_options(account.selectinload(models.Account.closedByUser)),
+        # Account.balance / normalisedBalance sum this relationship
+        account.selectinload(models.Account.transactionLines),
+        # TransactionLine.fund
+        line.selectinload(models.TransactionLine.fund),
+    ]
+
+
+def contract_serialization_options() -> list[selectinload]:
+    """selectinload chains covering everything schemas.Contract reads lazily, so no lazy load fires during response serialization."""
+    return [
+        # Contract direct relationships
+        selectinload(models.Contract.crimeReports),
+        selectinload(models.Contract.client),
+        selectinload(models.Contract.bike).selectinload(models.Bike.colours),
+        _user_options(selectinload(models.Contract.workingUser)),
+        _user_options(selectinload(models.Contract.checkingUser)),
+        _user_options(selectinload(models.Contract.returnAcceptingUser)),
+        # Contract.depositTransactionHeaders (TransactionHeader)
+        *_transaction_header_lazy_options(selectinload(models.Contract.depositTransactionHeaders)),
+        # Contract.saleHeader (SaleHeader)
+        _user_options(selectinload(models.Contract.saleHeader).selectinload(models.SaleHeader.createdByUser)),
+        *_transaction_header_lazy_options(selectinload(models.Contract.saleHeader).selectinload(models.SaleHeader.transactionHeader)),
+        selectinload(models.Contract.saleHeader).selectinload(models.SaleHeader.catalogueItemSaleLines).selectinload(models.CatalogueItemSaleLine.catalogueItem),
+        selectinload(models.Contract.saleHeader).selectinload(models.SaleHeader.bikeSaleLines).selectinload(models.BikeSaleLine.bike).selectinload(models.Bike.colours),
+    ]
+
 
 def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | None = None, open: bool = True, closed: bool = True, expired: bool = True, draft: bool = False) -> list[models.Contract]:
     primary_query_filter = []
@@ -32,6 +78,7 @@ def get_contracts(db: Session, client_id: UUID | None = None, bike_id: UUID | No
 
     contracts = [_ for _ in db.scalars(
         select(models.Contract)
+        .options(*contract_serialization_options())
         .where(
             and_(*primary_query_filter)
             & (
@@ -944,6 +991,7 @@ def get_contract_photos_ids(db: Session, contract_id: UUID) -> list[UUID]:
 def get_contracts_by_user_id(db: Session, user_id: UUID) -> list[schemas.Contract]:
     contracts = db.scalars(
         select(models.Contract)
+        .options(*contract_serialization_options())
         .where(
             (models.Contract.workingUserId == user_id)
             | (models.Contract.checkingUserId == user_id)
