@@ -1,4 +1,9 @@
+import faulthandler
 import os
+
+# Always dump thread stacks to stderr on fatal signals (segfaults etc.),
+# independent of the PYTHONFAULTHANDLER environment variable.
+faulthandler.enable()
 
 import uvicorn
 from fastapi import FastAPI, Depends
