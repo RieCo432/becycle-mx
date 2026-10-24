@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY alembic.ini /code/alembic.ini
 COPY ./alembic /code/alembic
 COPY ./app /code/app
+COPY ./serve.sh /code/serve.sh
 
 # Dump Python stack traces to stderr when a segfault/signal occurs
 # (redundant with app/main.py's faulthandler.enable(), but covers processes
@@ -34,4 +35,4 @@ ENV API_HOST_ADDRESS=0.0.0.0
 ENV API_HOST_PORT=8000
 
 #
-CMD alembic upgrade head && uvicorn app.main:app --host ${API_HOST_ADDRESS} --port ${API_HOST_PORT}
+CMD sh -c "alembic upgrade head && exec sh /code/serve.sh"
