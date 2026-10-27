@@ -76,20 +76,14 @@
 <script>
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
-import InputGroup from '@/components/InputGroup';
-import Pagination from '@/components/Pagination';
-import Tooltip from '@/components/Tooltip';
 import TableSkeleton from '@/components/Skeleton/TableSkeleton.vue';
 import moneyUtils from '@/util/moneyUtils';
 
 export default {
   name: 'TransactionsTable',
   components: {
-    Pagination,
-    InputGroup,
     Icon,
     Card,
-    Tooltip,
     TableSkeleton,
   },
 
@@ -100,10 +94,6 @@ export default {
     },
     title: {
       required: false,
-    },
-    userIsAdmin: {
-      type: Boolean,
-      default: false,
     },
     loading: {
       type: Boolean,

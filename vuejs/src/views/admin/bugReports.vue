@@ -1,16 +1,15 @@
 <script>
-import Card from "@/components/Card/index.vue";
-import requests from "@/requests";
-import AdvancedTable from "@/components/Tables/AdvancedTable.vue";
-import Modal from "@/components/Modal/Modal.vue";
-import {useToast} from "vue-toastification";
-import DashButton from "@/components/Button/index.vue";
+import Card from '@/components/Card/index.vue';
+import requests from '@/requests';
+import AdvancedTable from '@/components/Tables/AdvancedTable.vue';
+import {useToast} from 'vue-toastification';
+import DashButton from '@/components/Button/index.vue';
 
 const toast = useToast();
 
 export default {
-  name: "bugReports",
-  components: {DashButton, Modal, AdvancedTable, Card},
+  name: 'bugReports',
+  components: {DashButton, AdvancedTable, Card},
   data() {
     return {
       loading: true,
@@ -36,7 +35,7 @@ export default {
           field: 'description',
           label: 'Description',
           type: 'string',
-          formatFn: this.formatDescription
+          formatFn: this.formatDescription,
         },
         {
           field: 'actions',
@@ -49,11 +48,11 @@ export default {
           icon: 'heroicons-outline:eye',
           func: (bugReportId) => this.viewBugReport(bugReportId),
         },
-        {
+        ...this.$can('deleteBugReport') ? [{
           label: 'Delete Bug Report',
           icon: 'heroicons-outline:trash',
           func: (bugReportId) => this.deleteBugReport(bugReportId),
-        },
+        }] : [],
       ],
       selectedRows: [],
     };
@@ -66,26 +65,28 @@ export default {
   },
   computed: {
     shouldUpdateBugReport() {
-      return this.$store.bugReportingStore.shouldUpdateBugReport
-    }
+      return this.$store.bugReportingStore.shouldUpdateBugReport;
+    },
   },
   methods: {
     formatDescription(description) {
-      if (description.length > 50)
+      if (description.length > 50) {
         return description.substring(0, 50) + '...';
-      return description
+      }
+      return description;
     },
     viewBugReport(bugReportId) {
-      const bugReport = this.bugReports.find(bugReport => bugReport.id === bugReportId)
+      const bugReport = this.bugReports.find((bugReport) => bugReport.id === bugReportId);
       this.$store.bugReportingStore.openModal(bugReport);
     },
     deleteBugReport(bugReportId) {
-      const shouldDelete = confirm('Are you sure to delete this bug report?')
-      if (!shouldDelete)
+      const shouldDelete = confirm('Are you sure to delete this bug report?');
+      if (!shouldDelete) {
         return;
+      }
 
       requests.deleteBugReport(bugReportId).then(() => {
-        const index = this.bugReports.findIndex(bugReport => bugReport.id === bugReportId)
+        const index = this.bugReports.findIndex((bugReport) => bugReport.id === bugReportId);
         this.bugReports.splice(index, 1);
         toast.success('Bug report deleted', {timeout: 2000});
       }).catch((error) => {
@@ -93,44 +94,47 @@ export default {
       });
     },
     selectedRowsChanged(selectedRows) {
-      this.selectedRows = selectedRows
+      this.selectedRows = selectedRows;
     },
     mergeBugReports() {
-      const shouldMerge = confirm('Are you sure to merge these bug reports?')
-      if (!shouldMerge)
+      const shouldMerge = confirm('Are you sure to merge these bug reports?');
+      if (!shouldMerge) {
         return;
+      }
 
       const bugReportIds = this.selectedRows.map((bugReport) => bugReport.id);
 
       requests.mergeBugReports(bugReportIds).then((response) => {
-        const mergedIndex = this.bugReports.findIndex(bugReport => bugReport.id === response.data.id)
+        const mergedIndex = this.bugReports.findIndex((bugReport) => bugReport.id === response.data.id);
         this.bugReports.splice(mergedIndex, 1, response.data);
 
-        for (let id of bugReportIds) {
-          if (id === response.data.id)
+        for (const id of bugReportIds) {
+          if (id === response.data.id) {
             continue;
-          const index = this.bugReports.findIndex(bugReport => bugReport.id === id)
+          }
+          const index = this.bugReports.findIndex((bugReport) => bugReport.id === id);
           this.bugReports.splice(index, 1);
         }
         toast.success('Bug reports merged', {timeout: 2000});
       }).catch((error) => {
         toast.error(error.response.data.detail.description, {timeout: 2000});
       });
-    }
+    },
   },
   watch: {
     shouldUpdateBugReport(newValue) {
       if (newValue === true) {
-        const index = this.bugReports.findIndex(bugReport => bugReport.id === this.$store.bugReportingStore.bugReport.id)
-        if (index === -1)
+        const index = this.bugReports.findIndex((bugReport) => bugReport.id === this.$store.bugReportingStore.bugReport.id);
+        if (index === -1) {
           this.bugReports.push(this.$store.bugReportingStore.bugReport);
-        else
+        } else {
           this.bugReports.splice(index, 1, this.$store.bugReportingStore.bugReport);
-        this.$store.bugReportingStore.shouldUpdateBugReport = false
+        }
+        this.$store.bugReportingStore.shouldUpdateBugReport = false;
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <template>
@@ -154,9 +158,10 @@ export default {
                 @selected-rows-change="selectedRowsChanged"
             >
               <template v-slot:selectedRowActions>
-                <DashButton text="Merge Selected Bug Reports"
-                            :isDisabled="selectedRows.length < 2"
-                            @click="mergeBugReports"></DashButton>
+                <DashButton
+                  text="Merge Selected Bug Reports"
+                  :is-disabled="selectedRows.length < 2 || !$can('mergeBugReports')"
+                  @click="mergeBugReports"></DashButton>
               </template>
             </AdvancedTable>
           </div>

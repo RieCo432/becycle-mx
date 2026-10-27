@@ -41,6 +41,7 @@
             <Switch
                 active-class="bg-primary-500"
                 v-model="props.row.active"
+                :disabled="!$can('patchAppointmentType')"
                 @update="(newValue) =>
                   patchAppointmentType(props.row.id, {active: newValue})"
             />

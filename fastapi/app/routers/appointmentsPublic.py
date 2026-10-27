@@ -1,9 +1,11 @@
 from datetime import date
 from uuid import UUID
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
+from starlette import status
 from sqlalchemy.orm import Session
 import app.crud as crud
 import app.dependencies as dep
+import app.models as models
 import app.schemas as schemas
 
 appointments_public = APIRouter(
@@ -58,9 +60,16 @@ async def reschedule_via_hyperlink(
 async def get_available_appointments(
         appointment_type_id: str,
         ignore_limits: bool = False,
+        current_user: models.User | None = Depends(dep.get_current_user_or_none),
         db: Session = Depends(dep.get_db)) -> dict[date, list[dict]]:
-    if ignore_limits:
-        Depends(dep.get_current_appointment_manager_user)
+    if ignore_limits and (current_user is None
+                          or not crud.user_holds_endpoint(db=db, user=current_user, method="POST", route="/appointments")):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"description": "Appointment manager privileges are required to ignore appointment slot limits!"},
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     available_slots = crud.get_available_start_dates_and_times_for_appointment_type(db=db, appointment_type_id=appointment_type_id, ignore_limits=ignore_limits)
 
     return available_slots

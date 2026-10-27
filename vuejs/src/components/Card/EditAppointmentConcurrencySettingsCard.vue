@@ -105,6 +105,7 @@ export default {
                   :max="10"
                   :min="0"
                   class="m-auto 2xl:h-full"
+                  :disabled="!$can('postAppointmentConcurrencyLimit')"
               ></vue-slider>
             </div>
             <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
@@ -113,6 +114,7 @@ export default {
                   :options="weekDayOptions"
                   v-model="newWeekDay"
                   name="weekDay"
+                  :disabled="!$can('postAppointmentConcurrencyLimit')"
               />
             </div>
             <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
@@ -122,12 +124,16 @@ export default {
                   id="d3"
                   placeholder="hh:mm"
                   v-model="newAfterTime"
+                  :disabled="!$can('postAppointmentConcurrencyLimit')"
                   :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true }"
               >
               </flat-pickr>
             </div>
             <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
-              <Button type="submit" class="btn btn-sm btn-dark block w-full text-center m-auto">
+              <Button 
+                :disabled="!$can('postAppointmentConcurrencyLimit')"
+                type="submit"
+                class="btn btn-sm btn-dark block w-full text-center m-auto">
                 Add
               </Button>
             </div>

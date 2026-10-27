@@ -101,7 +101,9 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="col-span-1">
+    <div 
+      class="col-span-1"
+      v-if="$can('postNewCatalogueItem')">
       <AddNewCatalogueItemCard
         @catalogue-item-added="addItemToCatalogue"
       ></AddNewCatalogueItemCard>

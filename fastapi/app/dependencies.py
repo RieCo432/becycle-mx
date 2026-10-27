@@ -88,8 +88,35 @@ async def get_current_active_user(current_user: Annotated[models.User, Depends(g
     return current_user
 
 
-async def get_current_appointment_manager_user(current_user: Annotated[models.User, Depends(get_current_active_user)]) -> models.User:
-    if not current_user.appointmentManager:
+async def get_current_user_or_none(request: Request, db: Session = Depends(get_db)) -> models.User | None:
+    """Resolve the user token on the request (if any) into the user it belongs to.
+
+    Dual-purpose (client and staff) routes use this to apply staff-only rules —
+    e.g. only appointment managers may pass ``ignore_limits`` — without
+    rejecting client tokens out of hand. Returns ``None`` when there is no
+    Authorization header, the token is not a valid user token (e.g. it is a
+    client token), or the user cannot be resolved / is soft-deleted.
+    """
+    authorization = request.headers.get("Authorization")
+    if authorization is None or not authorization.lower().startswith("bearer "):
+        return None
+    token = authorization.split(" ", 1)[1].strip()
+    try:
+        payload = jwt.decode(token, API_SECRET, algorithms=[API_SECRET_ALGORITHM])
+        username: str = payload.get("sub")
+    except JWTError:
+        return None
+    if username is None:
+        return None
+    user = crud.get_user_by_username(username=username, db=db)
+    if user is None or user.softDeleted:
+        return None
+    return user
+
+
+async def get_current_appointment_manager_user(current_user: Annotated[models.User, Depends(get_current_active_user)],
+                                                db: Session = Depends(get_db)) -> models.User:
+    if not crud.user_has_scope(db=db, user=current_user, scope_route="/appointments"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"description": "Appointment manager privileges are required for this action!"},
@@ -164,32 +191,6 @@ async def get_checking_user(
     return checking_user
 
 
-async def get_deposit_receiving_user(
-        deposit_receiving_username: Annotated[str, Body()],
-        deposit_receiving_user_password: Annotated[str, Body()],
-        db: Session = Depends(get_db)) -> models.User:
-    if len(deposit_receiving_username) == 0:
-        raise HTTPException(
-            status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            detail={"description": "No Deposit Bearer Volunteer provided."},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    deposit_receiving_user = crud.authenticate_user(username=deposit_receiving_username, password_cleartext=deposit_receiving_user_password, db=db)
-    if deposit_receiving_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Deposit receiving user wrong password"},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    if not deposit_receiving_user.depositBearer:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"description": "Not a deposit bearer!"},
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    return deposit_receiving_user
-
-
 async def get_deposit_returning_user(
         deposit_returning_username: Annotated[str, Body()],
         deposit_returning_user_password: Annotated[str, Body()],
@@ -201,7 +202,7 @@ async def get_deposit_returning_user(
             detail={"description": "Deposit returning user wrong password"},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    if not deposit_giving_user.depositBearer:
+    if not crud.user_holds_endpoint(db=db, user=deposit_giving_user, method="POST", route="/deposit-exchanges"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Not a deposit bearer!"},
@@ -221,7 +222,9 @@ async def get_deposit_exchange_to_user(
             detail={"description": "Deposit receiving user wrong password"},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    if not deposit_receiving_user.depositBearer and not deposit_receiving_user.treasurer and deposit_receiving_user.username != "BANK":
+    if (not crud.user_holds_endpoint(db=db, user=deposit_receiving_user, method="POST", route="/deposit-exchanges")
+            and not crud.user_holds_endpoint(db=db, user=deposit_receiving_user, method="PATCH", route="/expenses/{id}/transfer")
+            and deposit_receiving_user.username != "BANK"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Not a deposit bearer, treasurer or BANK!"},
@@ -241,7 +244,9 @@ async def get_deposit_exchange_from_user(
             detail={"description": "Deposit returning user wrong password"},
             headers={"WWW-Authenticate": "Bearer"}
         )
-    if not deposit_giving_user.depositBearer and not deposit_giving_user.treasurer and deposit_giving_user.username != "BANK":
+    if (not crud.user_holds_endpoint(db=db, user=deposit_giving_user, method="POST", route="/deposit-exchanges")
+            and not crud.user_holds_endpoint(db=db, user=deposit_giving_user, method="PATCH", route="/expenses/{id}/transfer")
+            and deposit_giving_user.username != "BANK"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"description": "Not a deposit bearer, treasurer or BANK!"},

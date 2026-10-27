@@ -1,44 +1,24 @@
 <script>
 import UpdateAddressCard from '@/components/Card/UpdateAddressCard.vue';
 import ManageContractTypesCard from '@/components/Card/ManageContractTypesCard.vue';
-import ManageExpenseTypesCard from '@/components/Card/ManageExpenseTypesCard.vue';
-import ManageExpenseTagsCard from '@/components/Card/ManageExpenseTagsCard.vue';
 import ManageFaqCard from '@/components/Card/ManageFaqCard.vue';
-import requests from '@/requests';
 
 export default {
   name: 'basicSettings',
-  components: {ManageFaqCard, ManageExpenseTypesCard, ManageContractTypesCard, UpdateAddressCard, ManageExpenseTagsCard},
-  data() {
-    return {
-      user: null,
-    };
-  },
-  mounted() {
-    requests.getUserMe().then((response) => {
-      this.user = response.data;
-    });
-  },
+  components: {ManageFaqCard, ManageContractTypesCard, UpdateAddressCard},
 };
 </script>
 
 <template>
   <div class="grid grid-cols-6 xl:grid-cols-12 gap-5">
     <div class="col-span-6">
-      <UpdateAddressCard v-if="user" :user="user"></UpdateAddressCard>
+      <UpdateAddressCard></UpdateAddressCard>
     </div>
     <div class="col-span-6">
-      <ManageExpenseTypesCard v-if="user" :user="user"></ManageExpenseTypesCard>
-    </div>
-    <div class="col-span-6">
-      <ManageContractTypesCard v-if="user" :user="user"></ManageContractTypesCard>
-    </div>
-    <div class="col-span-6">
-      <!-- TODO: this is obsolete now. Replace with a card for managing funds -->
-      <ManageExpenseTagsCard v-if="user" :user="user"></ManageExpenseTagsCard>
+      <ManageContractTypesCard></ManageContractTypesCard>
     </div>
     <div class="col-span-6 xl:col-span-12">
-      <ManageFaqCard v-if="user" :user="user"></ManageFaqCard>
+      <ManageFaqCard></ManageFaqCard>
     </div>
   </div>
 </template>

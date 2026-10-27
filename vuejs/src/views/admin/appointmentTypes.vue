@@ -167,21 +167,27 @@ export default {
     return {
       loadingAppointmentTypes: true,
       appointmentTypesActions: [
-        {
-          label: 'Edit',
-          icon: 'heroicons-outline:pencil-square',
-          func: this.openEditAppointmentTypeModal,
-        },
-        {
-          label: 'Move Up',
-          icon: 'heroicons-outline:arrow-up',
-          func: this.moveUpAppointmentType,
-        },
-        {
-          label: 'Move Down',
-          icon: 'heroicons-outline:arrow-down',
-          func: this.moveDownAppointmentType,
-        },
+        ...this.$can('patchAppointmentType') ?
+          [{
+            label: 'Edit',
+            icon: 'heroicons-outline:pencil-square',
+            func: this.openEditAppointmentTypeModal,
+          }] :
+          [],
+        ...this.$can('swapAppointmentTypes') ?
+          [
+            {
+              label: 'Move Up',
+              icon: 'heroicons-outline:arrow-up',
+              func: this.moveUpAppointmentType,
+            },
+            {
+              label: 'Move Down',
+              icon: 'heroicons-outline:arrow-down',
+              func: this.moveDownAppointmentType,
+            },
+          ] :
+          [],
       ],
       appointmentTypesColumns: [
         {
@@ -222,7 +228,7 @@ export default {
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="2xl:col-span-9 col-span-12">
+    <div :class="`2xl:col-span-${$can('postNewAppointmentType') ? 9 : 12} col-span-12`">
       <Card title="Appointment Types">
         <div class="grid grid-cols-12">
           <div class="col-span-12">
@@ -245,6 +251,7 @@ export default {
                         name="editAppointmentTypeTitle"
                         v-model="editAppointmentTypeTitle"
                         :error="editAppointmentTypeTitleError"
+                        :disabled="!$can('patchAppointmentType')"
                     />
                     <TextInput
                         label="Appointment Type Description"
@@ -253,6 +260,7 @@ export default {
                         name="editAppointmentTypeDescription"
                         v-model="editAppointmentTypeDescription"
                         :error="editAppointmentTypeDescriptionError"
+                        :disabled="!$can('patchAppointmentType')"
                     />
                     <TextInput
                         label="Appointment Type Duration"
@@ -261,13 +269,18 @@ export default {
                         name="editAppointmentTypeDuration"
                         v-model="editAppointmentTypeDuration"
                         :error="editAppointmentTypeDurationError"
+                        :disabled="!$can('patchAppointmentType')"
                     />
                     <Checkbox
                         label="Make Available?"
                         name="editAppointmentTypeActive"
                         v-model="editAppointmentTypeActive"
+                        :disabled="!$can('patchAppointmentType')"
                     />
-                    <Button type="submit" class="btn btn-dark block w-full text-center">
+                    <Button
+                      :is-disabled="!$can('patchAppointmentType')"
+                      type="submit"
+                      class="btn btn-dark block w-full text-center">
                       Submit
                     </Button>
                   </form>
@@ -278,7 +291,9 @@ export default {
         </div>
       </Card>
     </div>
-    <div class="2xl:col-span-3 col-span-12">
+    <div
+      v-if="$can('postNewAppointmentType')"
+      class="2xl:col-span-3 col-span-12">
       <CreateNewAppointmentTypeCard @new-appointment-type-created="(newAppointmentType) => appointmentTypes.push(newAppointmentType)">
       </CreateNewAppointmentTypeCard>
     </div>

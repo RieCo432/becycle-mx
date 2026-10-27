@@ -1,6 +1,6 @@
 <template>
     <div class="grid grid-cols-12 gap-5">
-      <div class="lg:col-span-6 col-span-12 row-span-2" v-if="aboutUsHtml !== null || editAllowed">
+      <div class="lg:col-span-6 col-span-12 row-span-2" v-if="aboutUsHtml !== null || $can('patchAboutUs')">
         <Card :title="`Welcome to ${COMMON_NAME}`">
           <div class="h-full">
             <div class="grid grid-cols-12 gap-5">
@@ -17,12 +17,12 @@
                     content-type="text"/>
                 <div v-if="!editorActive" v-html="aboutUsHtml" class="dark:text-slate-300 text-slate-700 h-full"/>
               </div>
-              <div v-if="!editorActive && editAllowed" class="col-span-2 col-end-13 mt-auto">
+              <div v-if="!editorActive && $can('patchAboutUs')" class="col-span-2 col-end-13 mt-auto">
                 <DashButton class="w-full" @click="openEditor">Edit</DashButton>
               </div>
             </div>
-            <div v-if="editorActive && editAllowed" class="grid grid-cols-3 col-span-full gap-5 justify-items-stretch mt-20">
-              <div class="col-span-full">
+            <div v-if="editorActive && $can('patchAboutUs')" class="grid grid-cols-3 col-span-full gap-5 justify-items-stretch mt-20">
+              <div v-if="$can('getPhotos')" class="col-span-full">
                 <DashButton class="w-full" @click="openPhotoManager">Photos</DashButton>
               </div>
               <div  class="justify-self-start">
@@ -143,6 +143,7 @@
 
                 <div class="relative inline-block w-full">
                   <DashButton
+                    v-if="$can('deletePhoto')"
                     @click="() => deletePhoto(photo.id)"
                     class="absolute top-0 right-0 z-10 rounded-full bg-danger-500 dark:bg-danger-500 shadow-lg"
                   >
@@ -160,7 +161,7 @@
             </div>
           </div>
 
-          <div class="col-span-full">
+          <div v-if="$can('postNewPhotos')" class="col-span-full">
             <div class="h-full">
               <div
                 v-bind="getRootProps()"
@@ -223,7 +224,6 @@ const FACEBOOK_LINK = import.meta.env.VITE_FACEBOOK_LINK;
 const INSTAGRAM_LINK = import.meta.env.VITE_INSTAGRAM_LINK;
 const PAYPAL_BUTTON_ID = import.meta.env.VITE_PAYPAL_DONATE_BUTTON_ID;
 
-const credentialsStore = useCredentialsStore();
 const themeSettingsStore = useThemeSettingsStore();
 const toast = useToast();
 const {mapCurrent} = useScreens({
@@ -301,7 +301,6 @@ export default {
       loadingAddress: true,
       openingTimes: null,
       address: null,
-      editAllowed: false,
       editorActive: false,
       editorHtmlMode: false,
       aboutUsHtml: null,
@@ -340,34 +339,35 @@ export default {
           const utcDate = new Date(`${openDay}T00:00:00Z`);
           let day = null;
           switch (utcDate.getDay()) {
-            case 0:
-              day = 'Sunday';
-              break;
-            case 1:
-              day = 'Monday';
-              break;
-            case 2:
-              day = 'Tuesday';
-              break;
-            case 3:
-              day = 'Wednesday';
-              break;
-            case 4:
-              day = 'Thursday';
-              break;
-            case 5:
-              day = 'Friday';
-              break;
-            case 6:
-              day = 'Saturday';
-              break;
+          case 0:
+            day = 'Sunday';
+            break;
+          case 1:
+            day = 'Monday';
+            break;
+          case 2:
+            day = 'Tuesday';
+            break;
+          case 3:
+            day = 'Wednesday';
+            break;
+          case 4:
+            day = 'Thursday';
+            break;
+          case 5:
+            day = 'Friday';
+            break;
+          case 6:
+            day = 'Saturday';
+            break;
           }
 
           let label = null;
           if (day != null) {
-            const time = this.openingTimes.find(d => d.day === day)
-            if (time?.open != null && time?.close != null)
+            const time = this.openingTimes.find((d) => d.day === day);
+            if (time?.open != null && time?.close != null) {
               label = `${time?.open} - ${time?.close}`;
+            }
           }
 
           return {
@@ -377,8 +377,8 @@ export default {
             highlight: {color: 'white', fillMode: 'outline'},
             popover: {
               label,
-              visibility: 'hover'
-            }
+              visibility: 'hover',
+            },
           };
         });
         this.loadingOpenDays = false;
@@ -413,7 +413,7 @@ export default {
       const url = `${requests.getApiBaseUrl()}/public/photos/${photo.id}`;
 
       const html = `<img src="${url}" alt="photo">`;
-      
+
       if (this.editorHtmlMode) {
         await navigator.clipboard.writeText(html);
       } else {
@@ -443,15 +443,10 @@ export default {
     },
   },
   async mounted() {
-    if (credentialsStore.getTokenType() === 'user') {
-      requests.getUserMe().then((response) => {
-        this.editAllowed = response.data.appointmentManager;
-      });
-    }
     requests.getAboutUs().then((response) => {
       this.aboutUsHtml = response.data.html;
     });
-    const openingTimesResponse = await requests.getOpeningTimes()
+    const openingTimesResponse = await requests.getOpeningTimes();
     this.openingTimes = openingTimesResponse.data;
     this.loadingOpeningTimes = false;
 

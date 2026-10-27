@@ -50,44 +50,12 @@
               {{ props.row.username }}
             </span>
           </span>
-          <span v-if="props.column.field === 'admin'" class="flex">
-            <Switch
-                :disabled="!userIsAdmin"
-                active-class="bg-primary-500"
-                v-model="props.row.admin"
-                @update="(newValue) => patchUser(props.row.id, {admin: newValue})"
-            />
-          </span>
-          <span v-if="props.column.field === 'depositBearer'" class="flex">
-            <Switch
-                :disabled="!userIsAdmin"
-                active-class="bg-primary-500"
-                v-model="props.row.depositBearer"
-                @update="(newValue) => patchUser(props.row.id, {depositBearer: newValue})"
-            />
-          </span>
           <span v-if="props.column.field === 'rentalChecker'" class="flex">
             <Switch
-                :disabled="!userIsAdmin"
+                :disabled="!$can('patchUser')"
                 active-class="bg-primary-500"
                 v-model="props.row.rentalChecker"
                 @update="(newValue) => patchUser(props.row.id, {rentalChecker: newValue})"
-            />
-          </span>
-          <span v-if="props.column.field === 'appointmentManager'" class="flex">
-            <Switch
-                :disabled="!userIsAdmin"
-                active-class="bg-primary-500"
-                v-model="props.row.appointmentManager"
-                @update="(newValue) => patchUser(props.row.id, {appointmentManager: newValue})"
-            />
-          </span>
-          <span v-if="props.column.field === 'treasurer'" class="flex">
-            <Switch
-                :disabled="!userIsAdmin"
-                active-class="bg-primary-500"
-                v-model="props.row.treasurer"
-                @update="(newValue) => patchUser(props.row.id, {treasurer: newValue})"
             />
           </span>
           <span v-if="props.column.field === 'lastAuthenticated' && props.row.lastAuthenticated !== null">
@@ -97,7 +65,7 @@
           </span>
           <span v-if="props.column.field === 'softDeleted'" class="flex">
             <Switch
-                :disabled="!userIsAdmin"
+                :disabled="!$can('patchUser')"
                 active-class="bg-primary-500"
                 v-model="props.row.softDeleted"
                 @update="(newValue) => patchUser(props.row.id, {softDeleted: newValue})"
@@ -173,10 +141,6 @@ export default {
     loading: {
       type: Boolean,
       required: true,
-    },
-    userIsAdmin: {
-      type: Boolean,
-      default: false,
     },
   },
   methods: {

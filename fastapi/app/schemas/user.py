@@ -7,11 +7,7 @@ from .group import Group
 
 class UserBase(BaseModel):
     username: str
-    admin: bool = False
-    depositBearer: bool = False
     rentalChecker: bool = False
-    appointmentManager: bool = False
-    treasurer: bool = False
 
 
 class UserCreate(UserBase):
@@ -31,16 +27,11 @@ class User(UserBase):
 class UserUpdate(BaseModel):
     passwordCleartext: str | None = None
     pinCleartext: str | None = None
-    admin: bool | None = None
-    depositBearer: bool | None = None
     rentalChecker: bool | None = None
-    appointmentManager: bool | None = None
-    treasurer: bool | None = None
     softDeleted: bool | None = None
 
     def roles_change(self):
-        return (self.admin is not None or self.depositBearer is not None or self.rentalChecker is not None or
-                self.appointmentManager is not None or self.treasurer is not None or self.softDeleted is not None)
+        return self.rentalChecker is not None or self.softDeleted is not None
 
 
 class UserPresentationCard(BaseModel):

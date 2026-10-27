@@ -65,7 +65,6 @@
                 <AppointmentSummaryTable
                     title="Appointments"
                     :is-client="false"
-                    :user-is-appointment-manager="userIsAppointmentManager"
                     :loading="clientAppointmentsLoading"
                     :reschedule-appointment="() => {}"
                     :edit-appointment-notes="() => {}"
@@ -80,15 +79,15 @@
                     class="mr-auto"
                     @click="viewClient"
                 >View Client</DashButton>
-                <template v-if="appointment.startDateTime > new Date() && userIsAppointmentManager">
+                <template v-if="appointment.startDateTime > new Date()">
                   <DashButton
                       class="bg-success-500 dark:bg-success-500"
-                      v-if="!appointment.confirmed && !appointment.cancelled"
+                      v-if="!appointment.confirmed && !appointment.cancelled && $can('confirmAppointment')"
                       @click="confirmAppointment"
                   >Accept</DashButton>
                   <DashButton
                       class="bg-danger-500 dark:bg-danger-500"
-                      v-if="!appointment.cancelled"
+                      v-if="!appointment.cancelled && $can('cancelAppointment')"
                       @click="showCancellationModal = true"
                   >{{ appointment.confirmed ? 'Cancel' : 'Deny'}} Appointment</DashButton>
                 </template>
@@ -250,10 +249,6 @@ export default {
     },
     appointment: {
       type: Object,
-      required: true,
-    },
-    userIsAppointmentManager: {
-      type: Boolean,
       required: true,
     },
     clientAppointmentSummaries: {

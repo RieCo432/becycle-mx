@@ -147,26 +147,6 @@ async def patch_expense(
     return crud.update_expense(db=db, expense_id=expense_id, updated_expense_data=updated_expense_data)
 
 
-@expenses.get("/expenses/tags")
-async def get_expense_tags(
-        inactive: bool = False,
-        db: Session = Depends(dep.get_db)) -> List[schemas.ExpenseTag]:
-    return crud.get_expense_tags(db=db, inactive=inactive)
-
-@expenses.post("/expenses/tags")
-async def post_expense_tag(
-        new_expense_tag: schemas.ExpenseTag,
-        db: Session = Depends(dep.get_db)) -> schemas.ExpenseTag:
-    return crud.create_expense_tag(db=db, expense_tag=new_expense_tag)
-
-@expenses.patch("/expenses/tags/{expense_tag_id}")
-async def patch_expense_tag(
-        expense_tag_id: str,
-        expense_tag_update: schemas.ExpenseTagUpdate,
-        db: Session = Depends(dep.get_db)
-) -> schemas.ExpenseTag:
-    return crud.update_expense_tag(db=db, expense_tag_id=expense_tag_id, expense_tag_update=expense_tag_update)
-
 @expenses.get("/expenses/all-receipts")
 async def get_all_expenses_and_receipts(
         start_date: date,

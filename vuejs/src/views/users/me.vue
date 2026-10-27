@@ -14,6 +14,7 @@ import UserProfile from '@/views/users/UserProfile.vue';
     :delete-card="requests.deleteMyPresentationCard"
     :update-card-details="requests.postMyPresentationCardDetails"
     :can-edit-card="true"
+    :can-delete-card="true"
   />
 </template>
 

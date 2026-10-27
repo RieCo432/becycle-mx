@@ -1,6 +1,5 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import requests from '@/requests';
 import * as yup from 'yup';
 import {useField, useForm} from 'vee-validate';
 import {ref, toRef, watch} from 'vue';
@@ -24,9 +23,15 @@ export default {
       type: Object,
       required: false,
     },
-    editable: {
+    canEdit: {
       type: Boolean,
       required: false,
+      default: false,
+    },
+    canDelete: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     updateItemDetails: {
       type: Function,
@@ -177,10 +182,16 @@ export default {
                   <p class="w-full col-span-6 text-slate-700 dark:text-slate-300 text-2xl truncate font-semibold">
                     {{presentationCardDetails.name}}
                   </p>
-                  <DashButton v-if="editable" @click="openEditMode" class="col-span-1 rounded-l-full">
+                  <DashButton
+                    v-if="canEdit"
+                    @click="openEditMode"
+                    class="col-span-1 rounded-l-full">
                     <Icon icon="heroicons-outline:pencil-square"></Icon>
                   </DashButton>
-                  <DashButton v-if="editable" @click="deleteCard" class="col-span-1 rounded-r-full bg-danger-600">
+                  <DashButton
+                    v-if="canDelete"
+                    @click="deleteCard"
+                    class="col-span-1 rounded-r-full bg-danger-600">
                     <Icon icon="heroicons-outline:trash"></Icon>
                   </DashButton>
 

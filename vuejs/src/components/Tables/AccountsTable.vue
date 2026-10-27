@@ -128,10 +128,6 @@ export default {
     title: {
       required: false,
     },
-    userIsAdmin: {
-      type: Boolean,
-      default: false,
-    },
     editAccount: {
       type: Function,
       required: true,
@@ -217,21 +213,21 @@ export default {
           icon: 'heroicons-outline:lock-closed',
           id: 1,
           func: (id) => this.$emit('close-account', id),
-          showIf: (row) => !row.closedOn,
+          showIf: (row) => !row.closedOn && this.$can('closeAccount'),
         },
         {
           label: 'Reopen Account',
           icon: 'heroicons-outline:lock-open',
           id: 2,
           func: (id) => this.$emit('reopen-account', id),
-          showIf: (row) => row.closedOn,
+          showIf: (row) => row.closedOn && this.$can('reopenAccount'),
         },
         {
           label: 'Edit',
           icon: 'heroicons-outline:pencil',
           id: 3,
           func: (id) => this.editAccount(id),
-          showIf: (row) => !row.closedOn,
+          showIf: (row) => !row.closedOn && this.$can('putUpdateAccount'),
         },
       ],
     };

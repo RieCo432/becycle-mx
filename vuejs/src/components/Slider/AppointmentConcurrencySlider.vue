@@ -116,6 +116,7 @@ export default {
             :width="window.width > 1536 ? '' : '100%'"
             :max="10"
             :min="0"
+            :disabled="!$can('patchAppointmentConcurrencyLimit')"
             @drag-end="setNewLimit"
             class="m-auto 2xl:h-full"
         ></vue-slider>
@@ -126,6 +127,7 @@ export default {
             :options="weekDayOptions"
             v-model="weekDay"
             name="weekDay"
+            :disabled="!$can('patchAppointmentConcurrencyLimit')"
         />
       </div>
       <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
@@ -134,12 +136,17 @@ export default {
             id="d3"
             placeholder="Time picker"
             v-model="afterTime"
+            :disabled="!$can('patchAppointmentConcurrencyLimit')"
             :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true,
                        onClose: setNewAfterTime, minuteIncrement: 15 }"
         />
       </div>
       <div class="col-span-2 2xl:col-span-1 2xl:h-8 content-center">
-        <Button @click="deleteConcurrencyLimit" type="submit" class="btn btn-sm btn-dark block w-full text-center m-auto">
+        <Button
+          @click="deleteConcurrencyLimit"
+          :disabled="!$can('deleteAppointmentConcurrencyLimit')"
+          type="submit"
+          class="btn btn-sm btn-dark block w-full text-center m-auto">
           Delete
         </Button>
       </div>

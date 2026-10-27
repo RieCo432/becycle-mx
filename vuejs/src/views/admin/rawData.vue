@@ -3,11 +3,9 @@ import Card from '@/components/Card/index.vue';
 import DashButton from '@/components/Button/index.vue';
 import requests from '@/requests';
 import ContractEditTable from '@/components/Tables/ContractEditTable.vue';
-import {useCredentialsStore} from '@/store/credentialsStore';
 import {useToast} from 'vue-toastification';
 
 const toast = useToast();
-const credentialsStore = useCredentialsStore();
 
 // TODO: this page needs fixed
 
@@ -18,7 +16,6 @@ export default {
     return {
       loadingContracts: true,
       rawContractData: [],
-      isUserAdmin: false,
       columns: [
         {
           label: 'Client ID',
@@ -137,13 +134,8 @@ export default {
   },
   created() {
     this.getContracts();
-    if (credentialsStore.getTokenType() === 'user') {
-      requests.getUserMe().then((response) => {
-        this.isUserAdmin = response.data.admin;
-        if (this.isUserAdmin) {
-          this.actions.push(...this.adminActions);
-        }
-      });
+    if (this.$can('deleteContract')) {
+      this.actions.push(...this.adminActions);
     }
   },
 };
@@ -154,8 +146,17 @@ export default {
     <div class="col-span-1">
       <Card title="Raw Data Access">
         <template #header>
-          <DashButton @click="downloadRawDataPdf">Download PDF</DashButton>
-          <DashButton @click="downloadRawDataExcel" class="ml-5">Download Excel</DashButton>
+          <DashButton
+            :is-disabled="!$can('downloadRawDataPdf')"
+            @click="downloadRawDataPdf">
+            Download PDF
+          </DashButton>
+          <DashButton
+            :is-disabled="!$can('downloadRawDataExcel')"
+            @click="downloadRawDataExcel"
+            class="ml-5">
+            Download Excel
+          </DashButton>
         </template>
         <div>
           <ContractEditTable

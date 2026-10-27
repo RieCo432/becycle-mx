@@ -14,12 +14,6 @@ const toast = useToast();
 export default {
   name: 'ManageFaqCard',
   components: {Card, TextInput, DashButton, Checkbox},
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-  },
   setup() {
     const faqs = ref([]);
     const editFaqId = ref(null);
@@ -187,21 +181,21 @@ export default {
             <div class="col-span-2 grid grid-cols-3 gap-x-2">
               <div class="col-span-1">
                 <DashButton
-                    v-if="i !== faqsSorted.length - 1 && user.appointmentManager"
+                    v-if="i !== faqsSorted.length - 1 && $can('swapFaq')"
                     class="btn-sm block-btn"
                     icon="heroicons-outline:arrow-down"
                     @click="() => swap(i, i+1)"/>
               </div>
               <div class="col-span-1">
                 <DashButton
-                    v-if="i !== 0 && user.appointmentManager"
+                    v-if="i !== 0 && $can('swapFaq')"
                     class="btn-sm block-btn"
                     icon="heroicons-outline:arrow-up"
                     @click="() => swap(i, i-1)"/>
               </div>
               <div class="col-span-1">
                 <DashButton
-                    v-if="user.appointmentManager"
+                    v-if="$can('patchFaq')"
                     :is-disabled="editFaqId != null"
                     @click="editFaq(faq.id, faq.question, faq.answer, faq.active)"
                     class="btn-sm block-btn"
@@ -247,7 +241,7 @@ export default {
         </template>
       </div>
     </form>
-    <form v-if="user.appointmentManager" @submit.prevent="submitNewFaq">
+    <form v-if="$can('postFaq')" @submit.prevent="submitNewFaq">
       <div class="grid grid-cols-12 gap-2 mt-2">
         <div class="col-span-4">
           <TextInput

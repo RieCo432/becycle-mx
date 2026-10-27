@@ -13,6 +13,7 @@
               name="description"
               :rows="6"
               :error="descriptionError"
+              :disabled="updatingBugReport ? !$can('patchBugReport') : !$can('createBugReport')"
           />
         </div>
         <div v-if="id != null" class="col-span-12">
@@ -27,7 +28,11 @@
           />
         </div>
         <div class="col-span-12">
-          <DashButton type="submit" class="btn-sm mx-auto block-btn" :text="submitButtonText"/>
+          <DashButton
+            :is-disabled="updatingBugReport ? !$can('patchBugReport') : !$can('createBugReport')"
+            type="submit"
+            class="btn-sm mx-auto block-btn"
+            :text="updatingBugReport ? 'Submit Bug Report' : 'Update Bug Report'"/>
         </div>
       </div>
     </form>
@@ -35,20 +40,20 @@
 </template>
 
 <script>
-import Modal from "@/components/Modal/Modal.vue";
-import DashButton from "@/components/Button/index.vue";
-import Textarea from "@/components/Textarea/index.vue";
-import TextInput from "@/components/TextInput/index.vue";
-import requests from "@/requests";
-import * as yup from "yup";
-import {useField, useForm} from "vee-validate";
-import {ref} from "vue";
-import {useToast} from "vue-toastification";
+import Modal from '@/components/Modal/Modal.vue';
+import DashButton from '@/components/Button/index.vue';
+import Textarea from '@/components/Textarea/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
+import requests from '@/requests';
+import * as yup from 'yup';
+import {useField, useForm} from 'vee-validate';
+import {ref} from 'vue';
+import {useToast} from 'vue-toastification';
 
 const toast = useToast();
 
 export default {
-  name: "BugReportModal",
+  name: 'BugReportModal',
   components: {TextInput, Textarea, DashButton, Modal},
   setup(props, context) {
     const id = ref(null);
@@ -68,22 +73,22 @@ export default {
         requests.createBugReport({
           description: values.description,
           pageAddress: window.location.href,
-          consoleHistory: localStorage.getItem("bugReportConsoleHistory"),
+          consoleHistory: localStorage.getItem('bugReportConsoleHistory'),
         }).then((response) => {
           toast.success('Bug report created', {timeout: 2000});
           context.emit('bugReportSubmitted', response.data);
-          resetForm()
+          resetForm();
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
-        })
+        });
       } else {
         requests.patchBugReport({id: id.value, description: values.description}).then((response) => {
           toast.success('Bug report updated', {timeout: 2000});
           context.emit('bugReportSubmitted', response.data);
-          resetForm()
+          resetForm();
         }).catch((error) => {
           toast.error(error.response.data.detail.description, {timeout: 2000});
-        })
+        });
       }
     });
     return {
@@ -91,32 +96,34 @@ export default {
       description,
       descriptionError,
       submitBugReport,
-      resetForm
+      resetForm,
     };
   },
   computed: {
-    submitButtonText() {
-      return this.$store.bugReportingStore.bugReport.id == null ? 'Submit Bug Report' : 'Update Bug Report';
+    updatingBugReport() {
+      return this.$store.bugReportingStore.bugReport.id != null;
     },
     activeModal() {
-      return this.$store.bugReportingStore.modalVisible
-    }
+      return this.$store.bugReportingStore.modalVisible;
+    },
   },
   watch: {
     activeModal(newValue) {
-      this.resetForm()
-      if (!newValue)
+      this.resetForm();
+      if (!newValue) {
         return;
+      }
       this.id = this.$store.bugReportingStore.bugReport.id;
-      if(this.id == null)
-        return
+      if (this.id == null) {
+        return;
+      }
 
       this.description = this.$store.bugReportingStore.bugReport.description;
-      this.consoleHistory = this.$store.bugReportingStore.bugReport.consoleHistory != null
-          ? JSON.stringify(JSON.parse(this.$store.bugReportingStore.bugReport.consoleHistory), null, 2) : null
-    }
-  }
-}
+      this.consoleHistory = this.$store.bugReportingStore.bugReport.consoleHistory != null ?
+        JSON.stringify(JSON.parse(this.$store.bugReportingStore.bugReport.consoleHistory), null, 2) : null;
+    },
+  },
+};
 </script>
 
 <style scoped lang="scss">

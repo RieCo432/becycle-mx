@@ -3,7 +3,6 @@ from .appointments import appointments
 from .bikes import bikes
 from .clients import clients
 from .contracts import contracts
-from .depositExchanges import deposit_exchanges
 from .maps import maps
 from .public import public
 from .settings import settings

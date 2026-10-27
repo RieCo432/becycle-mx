@@ -121,11 +121,7 @@ def ensure_default_admin_permissions_exist(db: Session) -> None:
         admin_user = models.User(
             username="admin",
             password=bcrypt.hashpw("admin", bcrypt.gensalt()),
-            admin=True,
-            depositBearer=True,
             rentalChecker=True,
-            appointmentManager=True,
-            treasurer=True,
             softDeleted=False
         )
         db.add(admin_user)
@@ -267,6 +263,47 @@ def delete_user_permission(db: Session, user_id: UUID, permission_scope_id: UUID
     return deleted_permission_ids
 
 
+def _collect_endpoint_leaves(node: Permission, visited: set, out: list) -> None:
+    """Recursively collect every endpoint (leaf) node at or below `node`.
+
+    Granting a scope (a non-endpoint parent) grants all of its endpoint
+    descendants; this mirrors the 'walk up to an ancestor' logic used by
+    ``check_permission`` when enforcing access on the server side.
+    """
+    if node.id in visited:
+        return
+    visited.add(node.id)
+    if node.isEndpoint:
+        out.append(node)
+    for child in node.childPermissions:
+        _collect_endpoint_leaves(child, visited, out)
+
+
+def get_user_allowed_endpoints(db: Session, user: User) -> list[Permission]:
+    """Return the set of endpoint permissions a user may call.
+
+    The union of the user's own grants and every grant held by a group the
+    user belongs to, each expanded to its endpoint leaves. This is the
+    client-facing, materialized form of the same decision the server makes
+    in ``check_permissions`` — so the frontend can gate UI (``can``) without
+    re-implementing/ duplicating the authorization logic. The server remains
+    the enforcement boundary.
+    """
+    holders = [user, *user.groups]
+    allowed: list[Permission] = []
+    seen = set()
+    for holder in holders:
+        for permission in holder.permissions:
+            _collect_endpoint_leaves(permission, set(), allowed)
+    # de-duplicate while preserving a stable order
+    unique: list[Permission] = []
+    for permission in allowed:
+        if permission.id not in seen:
+            seen.add(permission.id)
+            unique.append(permission)
+    return unique
+
+
 def check_permission_tree(permission_holder: User | Group, permission: Permission) -> bool:
     visited = set()
     while permission is not None:
@@ -284,3 +321,32 @@ def check_permission_tree(permission_holder: User | Group, permission: Permissio
 def check_permission(db: Session, user: User, permission: Permission) -> bool:
     return (check_permission_tree(permission_holder=user, permission=permission) 
             or any([check_permission_tree(permission_holder=group, permission=permission) for group in user.groups]))
+
+
+def user_holds_endpoint(db: Session, user: User, method: str, route: str) -> bool:
+    """Whether `user` may perform one specific endpoint action.
+
+    The same decision ``check_permissions`` makes for the currently-requested
+    route, but for an arbitrary user (e.g. one supplied via body credentials):
+    the user directly holds the endpoint permission, one of the user's groups
+    holds it, or they (a group) hold a more general scope of which the
+    endpoint is a descendant (e.g. the global root permission).
+    """
+    permission = get_permission_by_route_and_method(db=db, route=route, method=method)
+    if permission is None:
+        return False
+    return check_permission(db=db, user=user, permission=permission)
+
+
+def user_has_scope(db: Session, user: User, scope_route: str) -> bool:
+    """Whether `user` can act anywhere within `scope_route`, directly or via a
+    group — including through a more general scope covering it (e.g. the
+    global root), whose endpoint leaves all fall under the scope.
+    """
+    for holder in [user, *user.groups]:
+        leaves: list[Permission] = []
+        for granted in holder.permissions:
+            _collect_endpoint_leaves(granted, set(), leaves)
+        if any(leaf.route == scope_route or leaf.route.startswith(scope_route + "/") for leaf in leaves):
+            return True
+    return False

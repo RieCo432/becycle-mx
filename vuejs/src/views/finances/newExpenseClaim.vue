@@ -307,6 +307,7 @@ export default {
                 name="fundId"
                 placeholder="Which fund?"
                 :error="fundIdError"
+                :disabled="!$can('postNewExpenseClaim')"
               />
             </div>
 
@@ -324,6 +325,7 @@ export default {
                 v-model="expenseAccount.name"
                 :error="expenseAccountError"
                 @change="() => {}"
+                :disabled="!$can('postNewExpenseClaim')"
               />
             </div>
 
@@ -335,6 +337,7 @@ export default {
                   name="amount"
                   v-model="amount"
                   :error="amountError"
+                  :disabled="!$can('postNewExpenseClaim')"
               />
             </div>
 
@@ -353,6 +356,7 @@ export default {
                 v-model="liabilityAccount.name"
                 :error="liabilityAccountError"
                 @change="() => {}"
+                :disabled="!$can('postNewExpenseClaim')"
               />
             </div>
 
@@ -362,7 +366,8 @@ export default {
                 name="useAdvance"
                 activeClass="ring-primary-500 bg-primary-500"
                 v-model="useAdvance"
-                :error="useAdvanceError"/>
+                :error="useAdvanceError"
+                :disabled="!$can('postNewExpenseClaim')"/>
               <ErrorMessage name="useAdvance" :error="useAdvanceError" class="text-danger-500"/>
             </div>
 
@@ -389,19 +394,21 @@ export default {
                 v-model="assetAccount.name"
                 :error="assetAccountError"
                 @change="() => {}"
+                :disabled="!$can('postNewExpenseClaim')"
               />
             </div>
 
 
             <div class="col-span-6">
-                        <Textarea
-                            label="Notes"
-                            type="text"
-                            placeholder="anything noteworth"
-                            name="notes"
-                            v-model="notes"
-                            :error="notesError"
-                        />
+              <Textarea
+                label="Notes"
+                type="text"
+                placeholder="anything noteworth"
+                name="notes"
+                v-model="notes"
+                :error="notesError"
+                :disabled="!$can('postNewExpenseClaim')"
+              />
             </div>
             <div class="col-span-6 content-center">
               <label class="text-slate-700 dark:text-slate-300">Date of Expense</label>
@@ -411,6 +418,7 @@ export default {
                     name="expenseDate"
                     v-model="expenseDate"
                     :config="{ enableTime: false, dateFormat: 'Y-m-d', altInput: true, altFormat: 'D, d M Y'}"
+                    :disabled="!$can('postNewExpenseClaim')"
                 >
                 </flat-pickr>
               </div>
@@ -425,7 +433,10 @@ export default {
                     "
                 >
                   <div v-if="files.length === 0" class="w-full">
-                    <input v-bind="getInputProps()" class="hidden" />
+                    <input 
+                      :disabled="!$can('postNewExpenseClaim')"
+                      v-bind="getInputProps()"
+                      class="hidden" />
                     <img src="@/assets/images/svg/upload.svg" alt="" class="mx-auto mb-4" />
                     <p
                         v-if="isDragActive"
@@ -456,10 +467,16 @@ export default {
               <ErrorMessage name="file" :error="fileError" class="text-danger-500"/>
             </div>
             <div class="col-span-full">
-              <Button class="btn block w-full text-center bg-red-700 mb-4" style="text-transform: none;" @click="files = []">
+              <Button 
+                :disabled="!$can('postNewExpenseClaim')"
+                class="btn block w-full text-center bg-red-700 mb-4"
+                style="text-transform: none;" @click="files = []">
                 Clear File(s)
               </Button>
-              <Button type="submit" class="btn block w-full text-center">
+              <Button
+                :disabled="!$can('postNewExpenseClaim')"
+                type="submit"
+                class="btn block w-full text-center">
                 Submit
               </Button>
             </div>

@@ -114,6 +114,7 @@ export default {
                 v-model="openingDays"
                 :error="openingDaysError"
                 multiple
+                :disabled="!$can('patchAppointmentGeneralSettings')"
             />
           </div>
           <div class="col-span-6">
@@ -124,6 +125,7 @@ export default {
                 name="minBookAhead"
                 v-model="minBookAhead"
                 :error="minBookAheadError"
+                :disabled="!$can('patchAppointmentGeneralSettings')"
             />
           </div>
           <div class="col-span-6">
@@ -134,6 +136,7 @@ export default {
                 name="maxBookAhead"
                 v-model="maxBookAhead"
                 :error="maxBookAheadError"
+                :disabled="!$can('patchAppointmentGeneralSettings')"
             />
           </div>
           <div class="col-span-6">
@@ -144,6 +147,7 @@ export default {
                 name="slotDuration"
                 v-model="slotDuration"
                 :error="slotDurationError"
+                :disabled="!$can('patchAppointmentGeneralSettings')"
             />
           </div>
           <div class="col-span-6">
@@ -155,10 +159,14 @@ export default {
               name="gradualAvailability"
               active-class="bg-primary-500"
               v-model="gradualAvailability"
+              :disabled="!$can('patchAppointmentGeneralSettings')"
             />
           </div>
           <div class="col-span-12">
-            <Button type="submit" class="btn btn-dark block w-full text-center">
+            <Button
+              :disabled="!$can('patchAppointmentGeneralSettings')"
+              type="submit"
+              class="btn btn-dark block w-full text-center">
               Submit
             </Button>
           </div>

@@ -245,16 +245,6 @@ const routes = [
         component: () => import('@/views/finances/dashboards.vue'),
       },
       {
-        path: '/finances/expenses/submit', // TODO: this needs deleted
-        name: 'Submit Expense',
-        meta: {
-          title: 'Submit Expense',
-          restrictTo: ['user'],
-          selectNavPath: '/finances/expenses/submit',
-        },
-        component: () => import('@/views/finances/newExpense.vue'),
-      },
-      {
         path: '/finances/expenses/claim',
         name: 'Claim Expense',
         meta: {
@@ -263,16 +253,6 @@ const routes = [
           selectNavPath: '/finances/expenses/claim',
         },
         component: () => import('@/views/finances/newExpenseClaim.vue'),
-      },
-      {
-        path: '/finances/expenses/manage', // TODO: this needs deleted
-        name: 'Manage Expenses',
-        meta: {
-          title: 'Manage Expenses',
-          restrictTo: ['user'],
-          selectNavPath: '/finances/expenses/manage',
-        },
-        component: () => import('@/views/finances/manageExpenses.vue'),
       },
       {
         path: '/finances/expenses/claims/manage',

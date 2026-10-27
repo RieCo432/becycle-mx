@@ -1,5 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import {usePermissionStore} from '@/store/permissionStore';
 import {useToast} from 'vue-toastification';
 
 import routes from './route';
@@ -17,7 +18,7 @@ const router = createRouter({
     }
   },
 });
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const credentialsStore = useCredentialsStore();
   let title = to?.meta?.title;
   if (title == null) {
@@ -25,6 +26,13 @@ router.beforeEach((to, from, next) => {
     title = '';
   }
   document.title = `${import.meta.env.VITE_COMMON_NAME} - ${title}`;
+
+  // Make sure a staff user's endpoint permissions are loaded before any view
+  // is rendered (e.g. after a full page refresh). `load()` is idempotent and
+  // no-ops for non-staff (client) tokens, so this is cheap on later navigations.
+  if (credentialsStore.isUserLoggedIn()) {
+    await usePermissionStore().load().catch(() => {});
+  }
 
   if (to.meta.restrictTo == null) {
     next();

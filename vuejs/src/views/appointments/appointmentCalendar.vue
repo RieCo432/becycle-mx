@@ -177,7 +177,6 @@ export default {
   },
   data() {
     return {
-      userIsAppointmentManager: false,
       calendarApi: null,
       isLoading: true,
       clientAppointmentsLoading: true,
@@ -231,9 +230,6 @@ export default {
   },
   mounted() {
     this.calendarApi = this.$refs.fullCalendar.getApi();
-    requests.getUserMe().then((response) => {
-      this.userIsAppointmentManager = response.data.appointmentManager;
-    });
   },
 };
 </script>
@@ -264,7 +260,6 @@ export default {
         @close="showAppointmentModal = !showAppointmentModal"
         :appointment="appointmentModalInfo"
         @appointments-updated="calendarApi.getEventSourceById('main').refetch()"
-        :user-is-appointment-manager="userIsAppointmentManager"
         :client-appointments-loading="clientAppointmentsLoading"
         :client-appointment-summaries="clientAppointmentSummaries"
         size-class="max-w-4xl"

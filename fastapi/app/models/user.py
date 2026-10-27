@@ -61,11 +61,7 @@ class User(Base):
     username: Mapped[str] = mapped_column("username", String(40), nullable=False, index=True, quote=False, unique=True)
     password: Mapped[str] = mapped_column("password", String(60), nullable=False, index=True, quote=False)
     pin: Mapped[str] = mapped_column("pin", String(60), nullable=True, quote=False)
-    admin: Mapped[bool] = mapped_column("admin", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    depositBearer: Mapped[bool] = mapped_column("depositbearer", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
     rentalChecker: Mapped[bool] = mapped_column("rentalchecker", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    appointmentManager: Mapped[bool] = mapped_column("appointmentmanager", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
-    treasurer: Mapped[bool] = mapped_column("treasurer", Boolean, default=False, nullable=False, server_default=text("FALSE"), quote=False)
     softDeleted: Mapped[bool] = mapped_column("softdeleted", Boolean, default=False, nullable=False, server_default=text("FALSE"), quote=False)
     lastAuthenticated: Mapped[datetime] = mapped_column("lastauthenticated", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=True, quote=False)
 
@@ -101,11 +97,7 @@ class User(Base):
         return all([
             str(self.id) == str(other.get("id")),
             str(self.username) == str(other.get("username")),
-            str(self.admin) == str(other.get("admin")),
-            str(self.depositBearer) == str(other.get("depositBearer")),
             str(self.rentalChecker) == str(other.get("rentalChecker")),
-            str(self.appointmentManager) == str(other.get("appointmentManager")),
-            str(self.treasurer) == str(other.get("treasurer")),
             str(self.softDeleted) == str(other.get("softDeleted")),
         ])
 
@@ -116,11 +108,7 @@ class User(Base):
             return all([
                 self.id == other.id,
                 self.username == other.username,
-                self.admin == other.admin,
-                self.depositBearer == other.depositBearer,
                 self.rentalChecker == other.rentalChecker,
-                self.appointmentManager == other.appointmentManager,
-                self.treasurer == other.treasurer,
                 self.softDeleted == other.softDeleted
             ])
 

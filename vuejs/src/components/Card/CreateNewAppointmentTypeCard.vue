@@ -86,6 +86,7 @@ export default {
                 name="newAppointmentTypeId"
                 v-model="newAppointmentTypeId"
                 :error="newAppointmentTypeIdError"
+                :disabled="!$can('postNewAppointmentType')"
             />
             <TextInput
                 label="New Appointment Type Title"
@@ -94,6 +95,7 @@ export default {
                 name="newAppointmentTypeTitle"
                 v-model="newAppointmentTypeTitle"
                 :error="newAppointmentTypeTitleError"
+                :disabled="!$can('postNewAppointmentType')"
             />
             <TextInput
                 label="New Appointment Type Description"
@@ -102,6 +104,7 @@ export default {
                 name="newAppointmentTypeDescription"
                 v-model="newAppointmentTypeDescription"
                 :error="newAppointmentTypeDescriptionError"
+                :disabled="!$can('postNewAppointmentType')"
             />
             <TextInput
                 label="New Appointment Type Duration"
@@ -110,13 +113,18 @@ export default {
                 name="newAppointmentTypeDuration"
                 v-model="newAppointmentTypeDuration"
                 :error="newAppointmentTypeDurationError"
+                :disabled="!$can('postNewAppointmentType')"
             />
             <Checkbox
                 label="Make Available?"
                 name="newAppointmentTypeActive"
                 v-model="newAppointmentTypeActive"
+                :disabled="!$can('postNewAppointmentType')"
             />
-            <Button type="submit" class="btn btn-dark block w-full text-center">
+            <Button
+              type="submit" 
+              class="btn btn-dark block w-full text-center"
+              :is-disabled="!$can('postNewAppointmentType')">
               Submit
             </Button>
           </form>

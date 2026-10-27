@@ -54,24 +54,28 @@ export default {
           <Button
             text="Record Revenue"
             @click="openRecordRevenueModal"
+            :is-disabled="!$can('createTransaction')"
           />
         </div>
         <div class="col-span-3">
           <Button
             text="Record Payout"
             @click="openRecordPayoutModal"
+            :is-disabled="!$can('createTransaction')"
           />
         </div>
         <div class="col-span-3">
           <Button
             text="Record Transfer"
             @click="openRecordTransferModal"
+            :is-disabled="!$can('createTransaction')"
           />
         </div>
         <div class="col-span-3">
           <Button
             text="Record Other Transaction"
             @click="openRecordOtherTransactionModal"
+            :is-disabled="!$can('createTransaction')"
           />
         </div>
       </div>

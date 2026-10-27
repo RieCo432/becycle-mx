@@ -46,6 +46,10 @@ const props = defineProps({
     type: Boolean,
     required: false,
   },
+  canDeleteCard: {
+    type: Boolean,
+    required: false,
+  },
 });
 
 const user = ref(null);
@@ -186,7 +190,8 @@ function deleteCardWrapped() {
       <UserPresentationCard
         :loading="loadingPresentationCard || loadingPhoto"
         :presentation-card-details="presentationCardDetails"
-        :editable="canEditCard"
+        :can-edit="canEditCard"
+        :can-delete="canDeleteCard"
         :update-item-details="updateCardDetailsWrapped"
         :delete-card="deleteCardWrapped"
         :photo-url="photoUrl"

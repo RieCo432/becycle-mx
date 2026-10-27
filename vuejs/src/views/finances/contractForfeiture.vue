@@ -365,7 +365,7 @@ function ignoreContract(contractId) {
                       <Button
                         class="btn-danger dark:btn-danger"
                         @click="forfeitContract(props.contractId)"
-                        :is-disabled="processing"
+                        :is-disabled="processing || !$can('patchContractForfeit')"
                       >
                         <Icon icon="heroicons-outline:archive-box-arrow-down"/>
                       </Button>
