@@ -27,6 +27,7 @@ def attach_bike_contract_photo_ids(db: Session, bikes: models.Bike | list[models
     `Contract.photos` fire during pydantic's response serialization â€” a lazy load at
     that point is exactly what triggered the #415 segfault.
     """
+    # TODO: for some reason this breaks when adding a bike to a contract draft
     if bikes is None:
         return
     if isinstance(bikes, models.Bike):

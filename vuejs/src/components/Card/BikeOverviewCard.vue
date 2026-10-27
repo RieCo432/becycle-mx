@@ -48,7 +48,7 @@ export default {
         });
     },
     getAllBikePhotos() {
-      if (this.bike.contractPhotoIds && Object.keys(this.bike.contractPhotoIds).length > 0) {
+      if (this.bike && this.bike.contractPhotoIds && Object.keys(this.bike.contractPhotoIds).length > 0) {
         for (const [contractId, photoIds] of Object.entries(this.bike.contractPhotoIds)) {
           this.photoUrls.push(...photoIds.map((photoId) => ({
             id: photoId,
@@ -81,7 +81,7 @@ export default {
   },
   watch: {
     bike(newValue, oldValue) {
-      if (!oldValue && newValue) {
+      if (!oldValue && newValue || newValue && oldValue && newValue.id !== oldValue.id) {
         this.getAllBikePhotos();
       }
     },
