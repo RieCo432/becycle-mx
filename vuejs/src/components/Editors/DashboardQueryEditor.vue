@@ -209,12 +209,14 @@ function setCashflowDirectionsList(index, valueRaw) {
     <div class="col-span-3">
       <TextInput
         label="Graph Name"
+        :disabled="!$can('putDashboardUpdate')"
         v-model="graphQuery.name"/>
     </div>
     <div class="col-span-3">
       <Select
         label="Dimension"
         v-model="graphQuery.dimension"
+        :disabled="!$can('putDashboardUpdate')"
         :options="dimensionOptions"/>
     </div>
     <div class="col-span-3">
@@ -223,11 +225,13 @@ function setCashflowDirectionsList(index, valueRaw) {
         v-model="graphQuery.mode"
         :options="modeOptions"
         @change="changeQueryMode"
+        :disabled="!$can('putDashboardUpdate')"
       />
     </div>
     <div class="col-span-3">
       <Select
         label="Fund"
+        :disabled="!$can('putDashboardUpdate')"
         v-model="fundId"
         :options="fundOptions"/>
     </div>
@@ -239,6 +243,7 @@ function setCashflowDirectionsList(index, valueRaw) {
         <div class="col-span-3">
           <TextInput
             label="Name"
+            :disabled="!$can('putDashboardUpdate')"
             v-model="series.name"/>
         </div>
         <div class="col-span-2">
@@ -249,6 +254,7 @@ function setCashflowDirectionsList(index, valueRaw) {
             name="querySelector"
             class="mb-5"
             :modelValue="queryModes[i]"
+            :disabled="!$can('putDashboardUpdate')"
             @update:modelValue="(v) => setQueryMode(i, v)"
             :value="selector.value"
             :label="selector.label"
@@ -258,6 +264,7 @@ function setCashflowDirectionsList(index, valueRaw) {
           <template v-if="queryModes[i] === 'list'">
             <VueSelect
               label="Account List"
+              :disabled="!$can('putDashboardUpdate')"
               :modelValue="queryModeList[i]"
               @update:modelValue="(v) => setQueryModeList(i, v)"
               :options="queryModeListOptions"
@@ -267,6 +274,7 @@ function setCashflowDirectionsList(index, valueRaw) {
           <template v-else-if="queryModes[i] === 'type'">
             <Select
               label="Account Type"
+              :disabled="!$can('putDashboardUpdate')"
               v-model="graphQuery.series[i].query"
               :options="queryModeTypeOptions"
             />
@@ -274,6 +282,7 @@ function setCashflowDirectionsList(index, valueRaw) {
         </div>
         <div class="col-span-2" v-if="graphQuery.dimension === 'cashflow'">
           <VueSelect
+            :disabled="!$can('putDashboardUpdate')"
             label="Cashflow Directions"
             :modelValue="cashflowDirectionsList[i]"
             @update:modelValue="(v) => setCashflowDirectionsList(i, v)"
@@ -283,17 +292,28 @@ function setCashflowDirectionsList(index, valueRaw) {
         </div>
         <div class="col-span-2 grid grid-cols-3">
           <div class="col-span-1">
-            <DashButton v-if="i < graphQuery.series.length - 1" class="w-full" @click="() => moveSeriesDown(i)">
+            <DashButton
+              v-if="i < graphQuery.series.length - 1"
+              class="w-full"
+              :disabled="!$can('putDashboardUpdate')"
+              @click="() => moveSeriesDown(i)">
               <Icon icon="heroicons-outline:arrow-down"/>
             </DashButton>
           </div>
           <div class="col-span-1">
-            <DashButton v-if="i > 0" class="w-full" @click="() => moveSeriesUp(i)">
+            <DashButton
+              v-if="i > 0"
+              class="w-full"
+              :disabled="!$can('putDashboardUpdate')"
+              @click="() => moveSeriesUp(i)">
               <Icon icon="heroicons-outline:arrow-up"/>
             </DashButton>
           </div>
           <div class="col-span-1">
-            <DashButton class="dark:btn-danger w-full" @click="graphQuery.series.splice(i, 1)">
+            <DashButton
+              class="dark:btn-danger w-full"
+              :disabled="!$can('putDashboardUpdate')"
+              @click="graphQuery.series.splice(i, 1)">
               <Icon icon="heroicons-outline:trash"/>
             </DashButton>
           </div>
@@ -301,7 +321,10 @@ function setCashflowDirectionsList(index, valueRaw) {
       </div>
     </template>
     <div class="col-span-full">
-      <DashButton class="w-full" @click="graphQuery.series.push({name: '', query: ''})">
+      <DashButton
+        class="w-full"
+        :disabled="!$can('putDashboardUpdate')"
+        @click="graphQuery.series.push({name: '', query: ''})">
         <Icon icon="heroicons-outline:plus"/>
       </DashButton>
     </div>

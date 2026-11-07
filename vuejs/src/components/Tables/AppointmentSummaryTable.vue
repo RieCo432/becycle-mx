@@ -94,7 +94,7 @@
           <div v-if="props.column.field === 'action'" class="flex space-x-3 rtl:space-x-reverse">
             <template v-for="action in actions.filter((action) => !action.showIf || action.showIf(props.row))">
               <Tooltip placement="top" arrow theme="dark" :key="action.id"
-                       v-if="new Date(Date.parse(props.row.startDateTime)) > new Date() && (isClient || userIsAppointmentManager)">
+                       v-if="new Date(Date.parse(props.row.startDateTime)) > new Date() && (isClient || canActOn(action.id))">
                 <template #button >
                   <div class="action-btn">
                     <Icon
@@ -172,13 +172,23 @@ export default {
       type: Boolean,
       required: true,
     },
-    userIsAppointmentManager: {
-      type: Boolean,
-      required: true,
-    },
     isClient: {
       type: Boolean,
       required: true,
+    },
+  },
+  methods: {
+    // A client (isClient) manages their own appointments via ownership and
+    // bypasses the endpoint-permission check. Staff act on specific
+    // appointment endpoints, so each action maps to its own permission.
+    canActOn(actionId) {
+      if (this.isClient) return true;
+      switch (actionId) {
+      case 'confirm': return this.$can('confirmAppointment');
+      case 'cancel': return this.$can('cancelAppointment');
+      case 'reschedule': return this.$can('patchAppointmentReschedule');
+      default: return false;
+      }
     },
   },
   data() {

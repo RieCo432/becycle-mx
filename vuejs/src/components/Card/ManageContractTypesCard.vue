@@ -13,12 +13,6 @@ const toast = useToast();
 export default {
   name: 'ManageContractTypesCard',
   components: {DashButton, Card, TextInput},
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-  },
   setup() {
     const contractTypes = ref([]);
 
@@ -87,14 +81,14 @@ export default {
           </div>
           <div class="col-span-2">
             <DashButton
-                v-if="user.admin"
+                v-if="$can('deleteContractType')"
                 @click="deleteContractType(contractType.id)"
                 class="bg-danger-500 dark:bg-danger-600 btn-sm mx-auto block-btn"
                 icon="heroicons-outline:trash"/>
           </div>
         </template>
       </div>
-    <form v-if="user.admin" @submit.prevent="submitNewContractType">
+    <form v-if="$can('postContractType')" @submit.prevent="submitNewContractType">
       <div class="grid grid-cols-12 gap-2 mt-2">
           <div class="col-span-10">
             <TextInput

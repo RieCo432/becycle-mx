@@ -70,11 +70,7 @@ def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
         username=user_data.username,
         password=bcrypt.hashpw(user_data.password_cleartext, bcrypt.gensalt()),
         pin=bcrypt.hashpw(user_data.pin_cleartext, bcrypt.gensalt()) if user_data.pin_cleartext is not None else None,
-        admin=user_data.admin,
-        depositBearer=user_data.depositBearer,
-        appointmentManager=user_data.appointmentManager,
-        rentalChecker=user_data.rentalChecker,
-        treasurer=user_data.treasurer
+        rentalChecker=user_data.rentalChecker
     )
     try:
         db.add(user)
@@ -87,17 +83,19 @@ def create_user(user_data: schemas.UserCreate, db: Session) -> models.User:
     return user
 
 
-def get_deposit_bearers(db: Session) -> list[models.User]:
-    deposit_bearers = [_ for _ in db.scalars(
-        select(models.User)
-        .where(
-            models.User.depositBearer
-            & (~models.User.softDeleted)
-        )
-        .order_by(func.lower(models.User.username))
-    )]
-
-    return deposit_bearers
+def _permission_chain(db: Session, permission: models.Permission) -> list[models.Permission]:
+    """The endpoint permission plus every scope that contains it (walked up
+    the parent chain, cycle-guarded). Any holder of one of these — directly or
+    via a group — is allowed to perform the endpoint, which is exactly the
+    decision ``check_permissions`` makes at enforcement time."""
+    chain = []
+    visited = set()
+    cursor = permission
+    while cursor is not None and cursor.id not in visited:
+        visited.add(cursor.id)
+        chain.append(cursor)
+        cursor = cursor.parentPermission
+    return chain
 
 
 def get_rental_checkers(db: Session) -> list[models.User]:
@@ -131,16 +129,8 @@ def update_user(db: Session, user: models.User,
         user.password = bcrypt.hashpw(updated_user_data.passwordCleartext, bcrypt.gensalt())
     if updated_user_data.pinCleartext is not None:
         user.pin = bcrypt.hashpw(updated_user_data.pinCleartext, bcrypt.gensalt())
-    if updated_user_data.admin is not None:
-        user.admin = updated_user_data.admin
-    if updated_user_data.depositBearer is not None:
-        user.depositBearer = updated_user_data.depositBearer
     if updated_user_data.rentalChecker is not None:
         user.rentalChecker = updated_user_data.rentalChecker
-    if updated_user_data.appointmentManager is not None:
-        user.appointmentManager = updated_user_data.appointmentManager
-    if updated_user_data.treasurer is not None:
-        user.treasurer = updated_user_data.treasurer
     if updated_user_data.softDeleted is not None:
         user.softDeleted = updated_user_data.softDeleted
 

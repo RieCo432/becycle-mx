@@ -48,7 +48,12 @@
                 <Card title="Client 1">
                   <template #header>
                     <Button @click="viewClient(item.client1.id)">View</Button>
-                    <Button @click="resolvePotentialDuplicate(item.id, item.client1.id, item.client2.id)" class="ml-5">Keep</Button>
+                    <Button
+                      :is-disabled="!$can('putResolvePotentialClientDuplicate')"
+                      @click="resolvePotentialDuplicate(item.id, item.client1.id, item.client2.id)"
+                      class="ml-5">
+                      Keep
+                    </Button>
                   </template>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300 capitalize">
@@ -71,7 +76,12 @@
                 <Card title="Client 2">
                   <template #header>
                     <Button @click="viewClient(item.client2.id)">View</Button>
-                    <Button @click="resolvePotentialDuplicate(item.id, item.client2.id, item.client1.id)" class="ml-5">Keep</Button>
+                    <Button
+                      :is-disabled="!$can('putResolvePotentialClientDuplicate')"
+                      @click="resolvePotentialDuplicate(item.id, item.client2.id, item.client1.id)"
+                      class="ml-5">
+                      Keep
+                    </Button>
                   </template>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300 capitalize">
@@ -91,7 +101,12 @@
                 </Card>
               </div>
               <div class="col-span-full">
-                <Button class="block-btn" @click="ignorePotentialDuplicate(item.id)">Ignore This Potential Duplicate</Button>
+                <Button
+                  :is-disabled="!$can('patchIgnorePotentialClientDuplicate')"
+                  class="block-btn"
+                  @click="ignorePotentialDuplicate(item.id)">
+                  Ignore This Potential Duplicate
+                </Button>
               </div>
             </div>
           </div>

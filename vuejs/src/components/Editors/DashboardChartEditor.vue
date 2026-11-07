@@ -100,6 +100,7 @@ const strokeCurveOptions = [
             :show-list="true"
             :show-input-menu="true"
             :show-picker-mode="true"
+            :disabled="!$can('putDashboardUpdate')"
           />
         </Tooltip>
       </div>
@@ -126,6 +127,7 @@ const strokeCurveOptions = [
           label="Type"
           :options="fillTypeOptions"
           v-model="chartOptions.fill.type"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
       <template v-if="chartOptions.fill.type === 'gradient'">
@@ -134,6 +136,7 @@ const strokeCurveOptions = [
             label="Opacity From"
             type="number"
             v-model="chartOptions.fill.gradient.opacityFrom"
+            :disabled="!$can('putDashboardUpdate')"
             :error="
               chartOptions.fill.gradient.opacityFrom < 0 ||
               chartOptions.fill.gradient.opacityFrom > 1
@@ -146,6 +149,7 @@ const strokeCurveOptions = [
             label="Opacity To"
             type="number"
             v-model="chartOptions.fill.gradient.opacityTo"
+            :disabled="!$can('putDashboardUpdate')"
             :error="
               chartOptions.fill.gradient.opacityTo < 0 ||
               chartOptions.fill.gradient.opacityTo > 1
@@ -163,6 +167,7 @@ const strokeCurveOptions = [
         <Select
           label="Type"
           :options="chartTypeOptions"
+          :disabled="!$can('putDashboardUpdate')"
           v-model="chartOptions.chart.type"
         />
       </div>
@@ -171,6 +176,7 @@ const strokeCurveOptions = [
           label="Stroke Curve"
           :options="strokeCurveOptions"
           v-model="chartOptions.stroke.curve"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
       <div class="w-full">
@@ -178,6 +184,7 @@ const strokeCurveOptions = [
           label="Stacked"
           activeClass="ring-primary-500 bg-primary-500"
           v-model="chartOptions.chart.stacked"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
       <div class="w-full" v-if="chartOptions.chart.type === 'bar'">
@@ -185,6 +192,7 @@ const strokeCurveOptions = [
           label="Distributed"
           activeClass="ring-primary-500 bg-primary-500"
           v-model="chartOptions.plotOptions.bar.distributed"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
     </div>
@@ -197,6 +205,7 @@ const strokeCurveOptions = [
           label="Type"
           :options="xAxisTypeOptions"
           v-model="chartOptions.xaxis.type"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
     </div>
@@ -208,24 +217,28 @@ const strokeCurveOptions = [
         <TextInput
           label="Title"
           v-model="chartOptions.yaxis[0].title.text"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
       <div class="w-full">
         <TextInput
           label="Title Size"
           v-model="chartOptions.yaxis[0].title.style.fontSize"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
       <div class="w-full">
         <TextInput
           label="Title Weight"
           v-model="chartOptions.yaxis[0].title.style.fontWeight"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
       <div class="w-full">
         <TextInput
           label="Label Size"
           v-model="chartOptions.yaxis[0].labels.style.fontSize"
+          :disabled="!$can('putDashboardUpdate')"
         />
       </div>
     </div>

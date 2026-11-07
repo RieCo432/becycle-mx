@@ -11,16 +11,12 @@ export default {
   data() {
     return {
       allUserPresentationCardDetails: [],
-      isUserAdmin: false,
     };
   },
   created() {
     requests.getPublicUserPresentationCards().then((response) => {
       this.allUserPresentationCardDetails = response.data;
       this.getImages();
-    });
-    requests.getUserMeNo401Redirect().then((response) => {
-      this.isUserAdmin = response.data.admin;
     });
   },
   methods: {
@@ -62,7 +58,8 @@ export default {
          :key="userPresentationCardDetails.id">
       <UserPresentationCard
           :key="userPresentationCardDetails.id"
-          :editable="isUserAdmin"
+          :can-edit="$can('postUserPresentationCardDetails')"
+          :can-delete="$can('deleteUserPresentationCardDetails')"
           :update-item-details="(name, bio, photo) => updateUserPresentationCard(userPresentationCardDetails.id, name, bio, photo)"
           :presentation-card-details="userPresentationCardDetails"
           :delete-card="() => deleteUserPresentationCard(userPresentationCardDetails.id)"

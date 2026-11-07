@@ -13,12 +13,6 @@ const toast = useToast();
 export default {
   name: 'UpdateAddressCard',
   components: {DashButton, Card, TextInput},
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-  },
   setup() {
     const newAddressSchema = yup.object().shape({
       number: yup.string().required('Street Number is required'),
@@ -92,7 +86,7 @@ export default {
               name="number"
               v-model="number"
               :error="numberError"
-              :disabled="!user.admin"
+              :disabled="!$can('putAddress')"
           />
         </div>
         <div class="md:col-span-6 col-span-12">
@@ -103,7 +97,7 @@ export default {
               name="street"
               v-model="street"
               :error="streetError"
-              :disabled="!user.admin"
+              :disabled="!$can('putAddress')"
           />
         </div>
         <div class="col-span-6">
@@ -114,7 +108,7 @@ export default {
               name="postcode"
               v-model="postcode"
               :error="postcodeError"
-              :disabled="!user.admin"
+              :disabled="!$can('putAddress')"
           />
         </div>
         <div class="col-span-6">
@@ -125,11 +119,15 @@ export default {
               name="city"
               v-model="city"
               :error="cityError"
-              :disabled="!user.admin"
+              :disabled="!$can('putAddress')"
           />
         </div>
         <div class="col-span-12">
-          <DashButton v-if="user.admin" type="submit" class="btn btn-primary block w-full text-center" icon="heroicons-outline:check"/>
+          <DashButton
+            v-if="$can('putAddress')"
+            type="submit"
+            class="btn btn-primary block w-full text-center"
+            icon="heroicons-outline:check"/>
         </div>
       </div>
     </form>

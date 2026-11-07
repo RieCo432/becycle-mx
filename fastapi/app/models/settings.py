@@ -31,6 +31,8 @@ class AppointmentConcurrencyLimit(Base):
     )
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.weekDay) == str(other["weekday"]),
             str(self.afterTime) == str(other.get("afterTime")),
@@ -51,6 +53,8 @@ class AppointmentType(Base):
                                             index=True, nullable=False, quote=False)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id")),
             str(self.active) == str(other.get("active")),
@@ -67,6 +71,8 @@ class ClosedDay(Base):
     note: Mapped[str] = mapped_column("note", Text, nullable=False, quote=False)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             self.date.strftime("%Y-%m-%d") == str(other.get("date")),
             str(self.note) == str(other.get("note"))
@@ -83,6 +89,8 @@ class Address(Base):
     city: Mapped[str] = mapped_column("city", Text, nullable=False, quote=False)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.number) == str(other.get("number")),
             str(self.street) == str(other.get("street")),
@@ -98,6 +106,8 @@ class AboutUs(Base):
     html: Mapped[str] = mapped_column("html", Text, nullable=True, quote=False)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.html) == str(other.get("number")),
         ])
@@ -115,6 +125,8 @@ class Faq(Base):
     orderIndex: Mapped[int] = mapped_column("orderindex", Integer, Identity(start=1, cycle=True), unique=True, index=True, nullable=False, quote=False)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id")),
             str(self.active) == str(other.get("active")),
@@ -130,6 +142,8 @@ class ContractType(Base):
     id: Mapped[str] = mapped_column("id", String(20), nullable=False, quote=False, primary_key=True)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return str(self.id) == str(other.get("id"))
 
 
@@ -140,6 +154,8 @@ class ExpenseType(Base):
     description: Mapped[str] = mapped_column("description", Text, nullable=False, quote=False)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             self.id == other.get("id"),
             self.description == other.get("description")

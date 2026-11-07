@@ -74,7 +74,6 @@ async def update_contract_draft_details(
 async def update_contract_draft_deposit(
         contract_id: UUID,
         deposit_collected_transaction_header_id: Annotated[UUID, Body(embed=True)],
-        deposit_collecting_user: models.User = Depends(dep.get_deposit_receiving_user),
         db: Session = Depends(dep.get_db)
 ) -> schemas.Contract:
     contract_draft = crud.get_contract_draft(db=db, contract_id=contract_id)
@@ -258,7 +257,6 @@ async def return_bike(
         email_tasks: BackgroundTasks,
         deposit_settled_transaction_header_id: Annotated[UUID, Body()],
         working_user: models.User = Depends(dep.get_working_user),
-        deposit_returning_user: models.User = Depends(dep.get_deposit_returning_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
 

@@ -23,7 +23,7 @@ function validateCommonHTTPErrorCodes(status, options) {
     toast.error('Authentication required. Please log in.', {timeout: 3000});
     credentialsStore.logout();
     router.push('/users/login');
-  } else if (options.userLoginRequired && status === 403) {
+  } else if (status === 403) {
     toast.error('You do not have permission to access this resource. Please contact your administrator.', {timeout: 3000});
   } else if (status === 503) {
     toast.error('Service Temporarily Unavailable. Please try again later.', {timeout: false});
@@ -65,6 +65,12 @@ export default {
     return axiosClient.get('/users/me', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
+    });
+  },
+  getUserPermissionsMe() {
+    return axiosClient.get('/users/me/permissions', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
   getClientLoginCode(emailAddress) {
@@ -226,12 +232,6 @@ export default {
   },
   getBikeConditions() {
     return axiosClient.get('/bikes/conditions', {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getDepositBearers() {
-    return axiosClient.get('/users/deposit-bearers', {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -493,6 +493,7 @@ export default {
         appointment_type_id: appointmentTypeId,
         ...ignoreLimits && {ignore_limits: ignoreLimits},
       },
+      headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
@@ -638,16 +639,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  postNewUser(username, password, pin, admin, depositBearer, rentalChecker, appointmentManager, treasurer) {
+  postNewUser(username, password, pin, rentalChecker) {
     return axiosClient.post('/users', {
       username: username,
       password_cleartext: password,
       pin_cleartext: pin,
-      admin: admin,
-      depositBearer: depositBearer,
       rentalChecker: rentalChecker,
-      appointmentManager: appointmentManager,
-      treasurer: treasurer,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
@@ -727,18 +724,6 @@ export default {
     return axiosClient.patch(`/clients/me/appointments/${appointmentId}/cancel`, null, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {clientLoginRequired: true}),
-    });
-  },
-  postDepositExchange(amount, fromUsername, fromPassword, toUsername, toPassword) {
-    return axiosClient.post('/deposit-exchanges', {
-      amount: amount,
-      deposit_returning_username: fromUsername,
-      deposit_returning_user_password: fromPassword,
-      deposit_receiving_username: toUsername,
-      deposit_receiving_user_password: toPassword,
-    }, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
   getPaperIdSuggestions(paperId) {
@@ -1014,12 +999,6 @@ export default {
       },
     );
   },
-  getDepositExchangeUsers() {
-    return axiosClient.get('/deposit-exchanges/users', {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
   getContractsStatus(gracePeriod, startDate=null, endDate=null) {
     return axiosClient.get('/statistics/contracts/status', {
       params: {
@@ -1028,22 +1007,6 @@ export default {
         ...(endDate && {end: endDate}),
       },
       headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  postNewExpense(amount, type, tagId, notes, expenseDate, receiptFile) {
-    return axiosClient.post('/expenses', {
-      amount: amount,
-      expense_type: type,
-      tag_id: tagId,
-      notes: notes,
-      expense_date: expenseDate,
-      receipt_file: receiptFile,
-    }, {
-      headers: {
-        ...credentialsStore.getApiRequestHeader(),
-        'Content-Type': 'multipart/form-data',
-      },
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
@@ -1060,36 +1023,8 @@ export default {
       },
     });
   },
-  getExpenseTypes() {
-    return axiosClient.get('/expenses/types', {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getExpenseTags(inactive=false) {
-    return axiosClient.get('/expenses/tags', {
-      params: {
-        inactive: inactive,
-      },
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getExpenses(filterByTag=null) {
-    return axiosClient.get('/expenses', {
-      params: filterByTag ? {tag: filterByTag} : null,
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
   getExpenseClaims() {
     return axiosClient.get('/expenses/claims', {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  patchExpenseTransferred(expenseId) {
-    return axiosClient.patch(`/expenses/${expenseId}/transfer`, undefined, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
@@ -1108,23 +1043,6 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  patchExpense(expenseId, amount, type, tagId, notes,
-    expenseDate, expenseUserId, transferred, treasurerUserId, transferDate) {
-    return axiosClient.patch(`/expenses/${expenseId}`, {
-      amount: amount,
-      type: type,
-      tagId: tagId,
-      notes: notes,
-      expenseDate: expenseDate,
-      expenseUserId: expenseUserId,
-      transferred: transferred,
-      ...transferred && {treasurerUserId: treasurerUserId},
-      ...transferred && {transferDate: transferDate},
-    }, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
   putExpenseClaim(expenseClaimId, notes, expenseDate) {
     return axiosClient.put(`/expenses/claims/${expenseClaimId}`, {
       notes: notes,
@@ -1132,19 +1050,6 @@ export default {
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  deleteExpense(expenseId) {
-    return axiosClient.delete(`/expenses/${expenseId}`, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  getExpenseReceipt(expenseId) {
-    return axiosClient.get(`/expenses/${expenseId}/receipt`, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-      responseType: 'blob',
     });
   },
   getExpenseClaimReceipt(expenseClaimId) {
@@ -1215,48 +1120,6 @@ export default {
   postContractType(contractTypeId) {
     return axiosClient.post('/settings/contract-types', {
       id: contractTypeId,
-    }, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  deleteExpenseType(expenseTypeId) {
-    return axiosClient.delete(`/settings/expense-types/${expenseTypeId}`, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  postNewExpenseType(expenseTypeId, expenseTypeDescription) {
-    return axiosClient.post('/settings/expense-types', {
-      id: expenseTypeId,
-      description: expenseTypeDescription,
-    }, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  patchExpenseType(expenseTypeId, expenseTypeDescription) {
-    return axiosClient.patch(`/settings/expense-types/${expenseTypeId}`, {
-      description: expenseTypeDescription,
-    }, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  postNewExpenseTag(expenseTagId, expenseTagDescription) {
-    return axiosClient.post('/expenses/tags', {
-      id: expenseTagId,
-      description: expenseTagDescription,
-      active: true,
-    }, {
-      headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
-    });
-  },
-  patchExpenseTag(expenseTagId, expenseTagDescription, expenseTagActive) {
-    return axiosClient.patch(`/expenses/tags/${expenseTagId}`, {
-      description: expenseTagDescription,
-      active: expenseTagActive,
     }, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),

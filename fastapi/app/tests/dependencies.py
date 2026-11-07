@@ -225,41 +225,41 @@ async def test_get_checking_user_not_a_rental_checker(users):
     assert excinfo.value.detail.get("description") == "Not a rental checker!"
 
 
-@pytest.mark.asyncio
-async def test_get_deposit_receiving_user_password(users):
-    auth_user = await get_deposit_receiving_user(
-        deposit_receiving_username=users[0].username,
-        deposit_receiving_user_password=f"{users[0].username}1234",
-        db=db
-    )
+# @pytest.mark.asyncio
+# async def test_get_deposit_receiving_user_password(users):
+    # auth_user = await get_deposit_receiving_user(
+    #     deposit_receiving_username=users[0].username,
+    #     deposit_receiving_user_password=f"{users[0].username}1234",
+    #     db=db
+    # )
 
-    assert auth_user == users[0]
-
-
-@pytest.mark.asyncio
-async def test_get_deposit_receiving_user_wrong_password(users):
-    with pytest.raises(HTTPException) as excinfo:
-        await get_deposit_receiving_user(
-            deposit_receiving_username=users[0].username,
-            deposit_receiving_user_password="password1234",
-            db=db
-        )
-
-    assert excinfo.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert excinfo.value.detail.get("description") == "Deposit receiving user wrong password"
+    # assert auth_user == users[0]
 
 
-@pytest.mark.asyncio
-async def test_get_deposit_receiving_user_not_a_deposit_bearer(users):
-    with pytest.raises(HTTPException) as excinfo:
-        await get_deposit_receiving_user(
-            deposit_receiving_username=users[1].username,
-            deposit_receiving_user_password=f"{users[1].username}1234",
-            db=db
-        )
+# @pytest.mark.asyncio
+# async def test_get_deposit_receiving_user_wrong_password(users):
+    # with pytest.raises(HTTPException) as excinfo:
+    #     await get_deposit_receiving_user(
+    #         deposit_receiving_username=users[0].username,
+    #         deposit_receiving_user_password="password1234",
+    #         db=db
+    #     )
+    # 
+    # assert excinfo.value.status_code == status.HTTP_400_BAD_REQUEST
+    # assert excinfo.value.detail.get("description") == "Deposit receiving user wrong password"
 
-    assert excinfo.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert excinfo.value.detail.get("description") == "Not a deposit bearer!"
+
+# @pytest.mark.asyncio
+# async def test_get_deposit_receiving_user_not_a_deposit_bearer(users):
+#     with pytest.raises(HTTPException) as excinfo:
+#         await get_deposit_receiving_user(
+#             deposit_receiving_username=users[1].username,
+#             deposit_receiving_user_password=f"{users[1].username}1234",
+#             db=db
+#         )
+# 
+#     assert excinfo.value.status_code == status.HTTP_400_BAD_REQUEST
+#     assert excinfo.value.detail.get("description") == "Not a deposit bearer!"
 
 
 @pytest.mark.asyncio

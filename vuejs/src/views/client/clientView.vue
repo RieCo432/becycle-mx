@@ -3,7 +3,6 @@ import Card from '@/components/Card/index.vue';
 import ContractSummaryTable from '@/components/Tables/ContractSummaryTable.vue';
 import AppointmentSummaryTable from '@/components/Tables/AppointmentSummaryTable.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
-import requests from '@/requests';
 import DashButton from '@/components/Button/index.vue';
 import ContractClientCardSkeleton from '@/components/Skeleton/ContractClientCardSkeleton.vue';
 import Modal from '@/components/Modal/Modal.vue';
@@ -86,7 +85,6 @@ export default {
       showCancelAppointmentModal: false,
       cancelAppointmentModalId: null,
       cancelAppointmentModalInfo: {},
-      userIsAppointmentManager: false,
       contractActions: [
         {
           name: 'View',
@@ -219,13 +217,6 @@ export default {
 
     };
   },
-  created() {
-    if (credentialsStore.getTokenType() === 'user') {
-      requests.getUserMe().then((response) => {
-        this.userIsAppointmentManager = response.data.appointmentManager;
-      });
-    }
-  },
   computed: {
     name() {
       return this.client.firstName + ' ' + this.client.lastName;
@@ -289,7 +280,6 @@ export default {
                   :actions="appointmentActions"
                   :columns="appointmentColumns"
                   :advanced-table="appointmentSummaries"
-                  :user-is-appointment-manager="userIsAppointmentManager"
                   :is-client="isClient"
                   title="Appointments">
               </AppointmentSummaryTable>

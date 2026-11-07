@@ -35,6 +35,8 @@ class Colour(Base):
         return int(hex_value.lstrip('#'), 16)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id")),
             str(self.name) == str(other.get("name"))

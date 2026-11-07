@@ -48,7 +48,12 @@
                 <Card title="Bike 1">
                   <template #header>
                     <Button @click="viewBike(item.bike1.id)">View</Button>
-                    <Button @click="resolvePotentialDuplicate(item.id, item.bike1.id, item.bike2.id)" class="ml-5">Keep</Button>
+                    <Button
+                      :is-disabled="!$can('putResolvePotentialBikeDuplicate')"
+                      @click="resolvePotentialDuplicate(item.id, item.bike1.id, item.bike2.id)"
+                      class="ml-5">
+                      Keep
+                    </Button>
                   </template>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.bike1.make }} {{ item.bike1.model }}</p>
@@ -72,7 +77,12 @@
                 <Card title="Bike 2">
                   <template #header>
                     <Button @click="viewBike(item.bike2.id)">View</Button>
-                    <Button @click="resolvePotentialDuplicate(item.id, item.bike2.id, item.bike1.id)" class="ml-5">Keep</Button>
+                    <Button
+                      :is-disabled="!$can('putResolvePotentialBikeDuplicate')"
+                      @click="resolvePotentialDuplicate(item.id, item.bike2.id, item.bike1.id)"
+                      class="ml-5">
+                      Keep
+                    </Button>
                   </template>
                   <div class="col-span-full">
                     <p class="text-base text-slate-700 dark:text-slate-300 capitalize">{{ item.bike2.make }} {{ item.bike2.model }}</p>
@@ -93,7 +103,12 @@
                 </Card>
               </div>
               <div class="col-span-full">
-                <Button class="block-btn" @click="ignorePotentialDuplicate(item.id)">Ignore This Potential Duplicate</Button>
+                <Button
+                  :is-disabled="!$can('patchIgnorePotentialBikeDuplicate')"
+                  class="block-btn"
+                  @click="ignorePotentialDuplicate(item.id)">
+                  Ignore This Potential Duplicate
+                </Button>
               </div>
             </div>
           </div>

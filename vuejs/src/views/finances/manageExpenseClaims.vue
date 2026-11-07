@@ -24,8 +24,6 @@ export default {
     return {
 
       loadingExpenseClaims: true,
-      isUserTreasurer: false,
-      isUserAdmin: false,
       expenseClaims: [],
       expenseClaimInfo: {},
       showExpenseClaimInfoModal: false,
@@ -71,18 +69,18 @@ export default {
             this.showExpenseClaimInfoModal = true;
           },
         },
-        {
+        ...(this.$can('putExpenseClaim') ? [{
           id: 'editExpense',
           label: 'Edit Expense',
           icon: 'heroicons-outline:pencil',
           func: (expenseId) => this.openEditExpenseClaimModal(expenseId),
-        },
-        {
+        }] : []),
+        ...(this.$can('deleteExpenseClaim') ? [{
           id: 'delete',
           label: 'Delete expense',
           icon: 'heroicons-outline:trash',
           func: (expenseId) => this.deleteExpenseClaim(expenseId),
-        },
+        }] : []),
       ],
     };
   },
@@ -153,10 +151,6 @@ export default {
   },
   created() {
     this.getExpenseClaims();
-    requests.getUserMe().then((response) => {
-      this.isUserTreasurer = response.data.treasurer;
-      this.isUserAdmin = response.data.admin;
-    });
   },
 };
 </script>
@@ -194,7 +188,7 @@ export default {
               v-if="expenseClaimInfo.reimbursementTransactionHeaderId !== null"
               :transaction-header="expenseClaimInfo.reimbursementTransactionHeader"/>
             <TransactionReimbursementForm
-              v-else-if="expenseClaimInfo.status === 'Pending'"
+              v-else-if="expenseClaimInfo.status === 'Pending' && $can('patchExpenseClaimReimbursed')"
               :expense-claim-info="expenseClaimInfo"
               @expense-reimbursed="expenseClaimReimbursed"/>
           </div>

@@ -16,12 +16,6 @@ const toast = useToast();
 export default defineComponent({
   name: 'ManageUserGroupsCard',
   components: {Checkbox, SetNewPasswordModal, PermissionTree, TextInput, Card, DashButton},
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-  },
   setup() {
     const userGroups = ref([]);
     const permissionScopes = ref({});
@@ -205,28 +199,28 @@ export default defineComponent({
         </div>
         <div class="col-span-2">
           <DashButton
-              v-if="user.admin"
+              v-if="$can('addGroupUser')"
               @click="openEditGroupUsersModal(userGroup.id)"
               class="btn-sm mx-auto block-btn"
               icon="heroicons-outline:pencil-square"/>
         </div>
         <div class="col-span-2">
           <DashButton
-              v-if="user.admin"
+              v-if="$can('addGroupPermission')"
               @click="openEditGroupPermissionsModal(userGroup.id)"
               class="btn-sm mx-auto block-btn"
               icon="heroicons-outline:pencil-square"/>
         </div>
         <div class="col-span-2">
           <DashButton
-              v-if="user.admin"
+              v-if="$can('deleteUserGroup')"
               @click="deleteUserGroup(userGroup.id)"
               class="bg-danger-500 dark:bg-danger-600 btn-sm mx-auto block-btn"
               icon="heroicons-outline:trash"/>
         </div>
       </template>
     </div>
-    <form v-if="user.admin" @submit.prevent="submitNewUserGroup">
+    <form v-if="$can('postUserGroup')" @submit.prevent="submitNewUserGroup">
       <div class="grid grid-cols-12 gap-2 mt-2">
         <div class="col-span-6">
           <TextInput
@@ -253,7 +247,12 @@ export default defineComponent({
       <div class="col-span-1"></div>
       <div class="col-span-8 dark:text-slate-300">Route</div>
       <div class="col-span-3 grid grid-cols-5">
-        <div class="col-span-1 text-center dark:text-slate-300" v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="method">{{method}}</div>
+        <div
+          class="col-span-1 text-center dark:text-slate-300"
+          v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']"
+          :key="method">
+          {{method}}
+        </div>
       </div>
       <PermissionTree
           :tree="permissionScopes"

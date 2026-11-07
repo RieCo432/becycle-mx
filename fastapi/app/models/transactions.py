@@ -30,6 +30,8 @@ class TransactionHeader(Base):
 
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id", None)),
             str(self.event) == str(other.get("event", None)),
@@ -72,6 +74,8 @@ class TransactionLine(Base):
     
     
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id", None)),
             str(self.transactionHeaderId) == str(other.get("transactionHeaderId", None)),

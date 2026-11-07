@@ -154,6 +154,8 @@ class Contract(Base):
     def __eq__(self, other):
         if type(other) is dict:
             return self.__eq__dict(other)
+        if not isinstance(other, Contract):
+            return NotImplemented
         return all([
             # TODO: deposit information needs to use new model
             str(self.id) == str(other.id),

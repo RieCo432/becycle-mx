@@ -50,6 +50,8 @@ class Client(Base):
     def __eq__(self, other):
         if type(other) is dict:
             return self.__eq_dict__(other)
+        if not isinstance(other, Client):
+            return NotImplemented
         else:
             return all([
                 self.id == other.id,

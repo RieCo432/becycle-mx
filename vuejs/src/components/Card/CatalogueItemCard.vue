@@ -135,7 +135,7 @@ export default {
     class-name="rounded-3xl border border-solid dark:border-slate-600 border-l-2 border-t-2 shadow-lg dark:shadow-slate-900 h-full"
     body-class="p-0">
     <div v-if="!inEditMode" class="h-full w-full flex flex-col ">
-      
+
       <div class="grid grid-cols-4 md:grid-cols-3 lg:grid-cols-1 flex-shrink">
         <div class="col-span-1 row-span-5 lg:row-span-1">
           <img v-if="!inEditMode && photoUrl" :src="photoUrl" alt="Item Picture" class="aspect-square rounded-3xl h-full w-full"/>
@@ -164,10 +164,14 @@ export default {
       </div>
 
       <div v-if="editable" class="grid grid-cols-2 w-full mt-auto bottom-0">
-        <Button @click.prevent="openEditMode" class="col-span-1 rounded-l-full">
+        <Button
+          v-if="$can('putUpdateCatalogueItem')"
+          @click.prevent="openEditMode"
+          class="col-span-1 rounded-l-full">
           <Icon icon="heroicons-outline:pencil"></Icon>
         </Button>
         <Button
+          v-if="$can('patchCatalogueItemAvailability')"
           @click.prevent="toggleAvailability"
           class="col-span-1 rounded-r-full"
           :btn-class="itemDetails.available
@@ -178,7 +182,7 @@ export default {
         </Button>
       </div>
     </div>
-    
+
     <form v-else @submit.prevent="submitItemDetails">
       <div class="grid grid-cols-2">
         <div class="col-span-2">
@@ -194,7 +198,10 @@ export default {
             >
               <div v-if="files.length === 0" class="h-full flex items-center">
                 <div class="m-auto">
-                  <input v-bind="getInputProps()" class="hidden" />
+                  <input
+                    :disabled="!$can('putUpdateCatalogueItem')"
+                    v-bind="getInputProps()"
+                    class="hidden" />
                   <img src="@/assets/images/svg/upload.svg" alt="" class="m-auto"/>
                   <p
                       v-if="isDragActive"
@@ -225,6 +232,7 @@ export default {
               name="name"
               v-model="name"
               :error="nameError"
+              :disabled="!$can('putUpdateCatalogueItem')"
           />
         </div>
         <div class="col-span-2 p-2">
@@ -235,6 +243,7 @@ export default {
               name="description"
               v-model="description"
               :error="descriptionError"
+              :disabled="!$can('putUpdateCatalogueItem')"
           />
         </div>
         <div class="col-span-2 p-2">
@@ -242,11 +251,16 @@ export default {
             label="Is second hand?"
             name="isSecondHand"
             v-model="isSecondHand"
+            :disabled="!$can('putUpdateCatalogueItem')"
           />
         </div>
         <div class="col-span-2 p-3" v-if="inEditMode">
           <div class="grid grid-cols-2">
-            <Button v-if="inEditMode" @click="submitItemDetails" class="col-span-2 justify-self-end my-auto rounded-full">
+            <Button
+              :disabled="!$can('putUpdateCatalogueItem')"
+              v-if="inEditMode"
+              @click="submitItemDetails"
+              class="col-span-2 justify-self-end my-auto rounded-full">
               Update
             </Button>
           </div>

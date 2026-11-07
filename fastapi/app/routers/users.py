@@ -26,6 +26,13 @@ async def get_user_me(
     return current_user
 
 
+@users.get("/users/me/permissions")
+async def get_my_allowed_permissions(
+        user: Annotated[models.User, Depends(dep.get_current_active_user)],
+        db: Session = Depends(dep.get_db)) -> list[schemas.Permission]:
+    return crud.get_user_allowed_endpoints(db=db, user=user)
+
+
 @users.get("/users")
 async def get_users(db: Session = Depends(dep.get_db)) -> list[schemas.User]:
     return crud.get_users(db=db)
@@ -66,14 +73,6 @@ async def get_active_users(
 ) -> list[schemas.User]:
     active_users = crud.get_active_users(db=db)
     return active_users
-
-
-@users.get("/users/deposit-bearers")
-async def get_deposit_bearers(
-        db: Session = Depends(dep.get_db)
-) -> list[schemas.User]:
-    deposit_bearers = crud.get_deposit_bearers(db=db)
-    return deposit_bearers
 
 
 @users.get("/users/rental-checkers")

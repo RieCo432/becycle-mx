@@ -26,6 +26,10 @@ export const useCredentialsStore = defineStore('credentialsStore', {
       localStorage.removeItem('token');
       localStorage.removeItem('tokenType');
       localStorage.removeItem('name');
+
+      // Clear any cached endpoint permissions for the signed-out user. Loaded
+      // dynamically to avoid a circular import with the permission store.
+      import('@/store/permissionStore').then(({usePermissionStore}) => usePermissionStore().reset()).catch(() => {});
     },
     getApiRequestHeader() {
       if (this.token !== null) {

@@ -38,9 +38,11 @@ import requests from '@/requests';
 import TextInput from '@/components/TextInput/index.vue';
 import Card from '@/components/Card/index.vue';
 import {useCredentialsStore} from '@/store/credentialsStore';
+import {usePermissionStore} from '@/store/permissionStore';
 import {useToast} from 'vue-toastification';
 
 const credentialsStore = useCredentialsStore();
+const permissionStore = usePermissionStore();
 const toast = useToast();
 
 export default {
@@ -59,10 +61,13 @@ export default {
           credentialsStore.setName(this.username);
           requests.getUserMe()
             .then((response) => {
-              this.$router.push('/me');
+              // Load the user's effective endpoint permissions (best-effort,
+              // fail closed) and navigate once done, so `can(...)` works on
+              // the first screen they land on.
+              return permissionStore.load().finally(() => this.$router.push('/me'));
             })
             .catch((error) => {
-              if (error.response.status === 403) {
+              if (error.response && error.response.status === 403) {
                 this.$router.push('/home');
               }
             });

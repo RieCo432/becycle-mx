@@ -6,14 +6,12 @@ import EditClientDetailsModal from '@/components/Modal/EditClientDetailsModal.vu
 import EditBikeDetailsModal from '@/components/Modal/EditBikeDetailsModal.vue';
 import EditContractDetailsModal from '@/components/Modal/EditContractDetailsModal.vue';
 import Modal from '@/components/Modal/Modal.vue';
-import Card from '@/components/Card/index.vue';
 
 const toast = useToast();
 
 export default {
   name: 'contractIndex',
   components: {
-    Card,
     Modal,
     EditContractDetailsModal,
     EditBikeDetailsModal,
@@ -47,7 +45,6 @@ export default {
       showEditClientDetailsModal: false,
       showEditBikeDetailsModal: false,
       showEditContractDetailsModal: false,
-      isUserAdmin: false,
       photoUrls: [],
       loadingContractPhotos: false,
       photoUrl: null,
@@ -152,9 +149,6 @@ export default {
     requests.getActiveUsers().then((response) => {
       this.activeUsers = response.data.sort(this.userSortingFunction).map((user) => (user.username));
     });
-    requests.getUserMe().then((response) => {
-      this.isUserAdmin = response.data.admin;
-    });
   },
 };
 </script>
@@ -181,7 +175,6 @@ export default {
         :open-edit-bike-details-modal="() => showEditBikeDetailsModal = true"
         :go-to-bike="() => this.$router.push({path: `/bikes/${bike.id}`})"
         :is-user="true"
-        :is-user-admin="isUserAdmin"
         :open-edit-contract-details-modal="() => showEditContractDetailsModal = true"
         :patch-close-crime-report="patchCloseCrimeReport"
         @crime-report-added="(crimeReport) => (contract.crimeReports.push(crimeReport))"

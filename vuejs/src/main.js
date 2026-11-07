@@ -18,6 +18,7 @@ import './assets/scss/tailwind.scss';
 import router from '@/router';
 import {createPinia} from 'pinia';
 import {setupCalendar} from 'v-calendar';
+import {usePermissionStore} from '@/store/permissionStore';
 import '@/util/console-history';
 
 const pinia = createPinia();
@@ -41,6 +42,7 @@ app.use(VueSweetalert2)
 app.component('');
 
 app.config.globalProperties.$store = {};
+app.config.globalProperties.$can = (method, route) => usePermissionStore().can(method, route);
 app.mount('#app');
 
 import {useThemeSettingsStore} from '@/store/themeSettings';

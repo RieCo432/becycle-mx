@@ -396,10 +396,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    isUserAdmin: {
-      type: Boolean,
-      default: false,
-    },
     openEditClientDetailsModal: {
       type: Function,
       required: true,
@@ -578,7 +574,7 @@ export default {
                     Show Txs
                   </DashButton>
                 </div>
-                <div v-if="isUserAdmin" class="col-span-6 mt-auto">
+                <div v-if="$can('patchContractChangeDetails')" class="col-span-6 mt-auto">
                   <DashButton class="w-full btn-sm bg-danger-600" @click="openEditContractDetailsModal">
                     Edit Details
                   </DashButton>

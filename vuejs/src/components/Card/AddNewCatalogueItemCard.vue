@@ -196,8 +196,9 @@ export default {
         </div>
         <div class="col-span-1 p-2">
           <Button
-              type="submit"
-              btn-class="btn btn-primary block w-full text-center rounded-full">
+            :disabled="!$can('postNewCatalogueItem')"
+            type="submit"
+            btn-class="btn btn-primary block w-full text-center rounded-full">
             Submit
           </Button>
         </div>

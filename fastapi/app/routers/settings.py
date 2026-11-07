@@ -107,31 +107,6 @@ async def delete_contract_type(
     return crud.delete_contract_type(db=db, contract_type_id=contract_type_id)
 
 
-@settings.post("/settings/expense-types")
-async def add_expense_type(
-        new_expense_type: schemas.ExpenseType,
-        db: Session = Depends(dep.get_db)
-) -> schemas.ExpenseType:
-    return crud.add_expense_type(db=db, new_expense_type=new_expense_type)
-
-
-@settings.delete("/settings/expense-types/{expense_type_id}")
-async def delete_expense_type(
-        expense_type_id: str,
-        db: Session = Depends(dep.get_db)
-) -> schemas.ExpenseType:
-    return crud.delete_expense_type(db=db, expense_type_id=expense_type_id)
-
-
-@settings.patch("/settings/expense-types/{expense_type_id}")
-async def update_expense_type(
-        expense_type_id: str,
-        description: Annotated[str, Body(embed=True)],
-        db: Session = Depends(dep.get_db)
-) -> schemas.ExpenseType:
-    return crud.update_expense_type(db=db, expense_type_id=expense_type_id, description=description)
-
-
 @settings.patch("/settings/about-us")
 async def update_about_us(
         new_about_us: schemas.AboutUs,

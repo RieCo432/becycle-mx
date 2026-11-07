@@ -63,6 +63,8 @@ class Account(Base):
         return sum([line.amount for line in self.transactionLines])
     
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id", None)),
             str(self.name) == str(other.get("name", None)),

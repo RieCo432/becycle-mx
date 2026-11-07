@@ -436,7 +436,16 @@ function changeYear(delta) {
       <Card title="Controls">
         <template #header>
           <div class="pt-1">
-            <Switch class="d-inline-block mt-4" v-model="editMode" label="Edit"/>
+            <Switch
+              :disabled="!(
+                $can('postNewDashboard') ||
+                $can('deleteDashboard') ||
+                $can('patchMoveDashboardUp') ||
+                $can('patchMoveDashboardDown') ||
+                $can('putDashboardUpdate'))"
+              class="d-inline-block mt-4"
+              v-model="editMode"
+              label="Edit"/>
           </div>
         </template>
         <div class="grid grid-cols-1 gap-5">
@@ -509,12 +518,14 @@ function changeYear(delta) {
             <DashButton
               v-if="selectedDashboard !== -1"
               class="btn-sm mx-5"
+              :is-disabled="!$can('patchMoveDashboardUp')"
               @click="moveDashboardUp">
               <Icon icon="heroicons-outline:arrow-up"/>
             </DashButton>
             <DashButton
               v-if="selectedDashboard !== -1"
               class="btn-sm mx-5"
+              :is-disabled="!$can('patchMoveDashboardDown')"
               @click="moveDashboardDown">
               <Icon icon="heroicons-outline:arrow-down"/>
             </DashButton>
@@ -522,15 +533,18 @@ function changeYear(delta) {
               v-if="selectedDashboard !== -1"
               class="btn-sm mx-5"
               text="Rename"
+              :is-disabled="!$can('putDashboardUpdate')"
               @click="() => openNewRenameDashboardModal(true)"/>
             <DashButton
               v-if="selectedDashboard !== -1"
               class="btn-sm mx-5 btn-danger dark:btn-danger"
               text="Delete"
+              :is-disabled="!$can('deleteDashboard')"
               @click="deleteDashboard"/>
             <DashButton
               class="btn-sm mx-5 col-span-2"
               text="New"
+              :is-disabled="!$can('postNewDashboard')"
               @click="openNewRenameDashboardModal(false)"/>
           </div>
         </div>
@@ -546,16 +560,19 @@ function changeYear(delta) {
                   <DashButton
                     v-if="editingIndex === index"
                     class="btn-sm dark:btn-danger mx-3"
+                    :is-disabled="!$can('putDashboardUpdate')"
                     @click="deleteDashboardPart(index)">
                     <Icon icon="heroicons-outline:trash"/>
                   </DashButton>
                   <DashButton
                     class="btn-sm mx-3"
                     text="Edit Data"
+                    :is-disabled="!$can('putDashboardUpdate')"
                     @click="editData(index)"/>
                   <DashButton
                     class="btn-sm mx-3"
                     text="Edit Chart"
+                    :is-disabled="!$can('putDashboardUpdate')"
                     @click="editChart(index)"/>
                 </template>
                 <apexchart
@@ -582,6 +599,7 @@ function changeYear(delta) {
                 <DashButton
                   class="btn-sm mx-5 dark:btn-success"
                   text="Save"
+                  :is-disabled="!$can('putDashboardUpdate')"
                   @click="saveChanges"/>
                 <DashButton
                   class="btn-sm mx-5 dark:btn-danger"
@@ -597,6 +615,7 @@ function changeYear(delta) {
               v-if="editingModeRaw">
               <TextArea
                 classInput="w-full h-full"
+                :disabled="!$can('putDashboardUpdate')"
                 :modelValue="JSON.stringify(editDataSource, null, 2)"
                 @update:modelValue="(v) => editDataSource = JSON.parse(v)"
               ></TextArea>
@@ -615,6 +634,7 @@ function changeYear(delta) {
                 <DashButton
                   class="btn-sm mx-5 dark:btn-success"
                   text="Save"
+                  :is-disabled="!$can('putDashboardUpdate')"
                   @click="saveChanges"/>
                 <DashButton
                   class="btn-sm mx-5 dark:btn-danger"
@@ -633,6 +653,7 @@ function changeYear(delta) {
               v-if="editingModeRaw">
               <TextArea
                 classInput="w-full h-full"
+                :disabled="!$can('putDashboardUpdate')"
                 :modelValue="JSON.stringify(editChartOptions, null, 2)"
                 @update:modelValue="(v) => {editChartOptions = JSON.parse(v)}"/>
             </div>
@@ -640,7 +661,9 @@ function changeYear(delta) {
         </div>
       </template>
 
-      <div v-if="editMode && editingIndex === null && selectedDashboard >= 0" class="col-span-12 lg:col-span-4">
+      <div
+        v-if="editMode && editingIndex === null && selectedDashboard >= 0 && $can('putDashboardUpdate')"
+        class="col-span-12 lg:col-span-4">
         <DashButton
           class="btn-dark h-full w-full flex items-center justify-center"
           @click="addDashboardPart"

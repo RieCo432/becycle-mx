@@ -58,7 +58,7 @@ export default {
 
 <template>
   <div class="grid grid-cols-12 gap-5">
-    <div class="2xl:col-span-9 col-span-12">
+    <div :class="`2xl:col-span-${$can('postNewAccount') ? 9 : 12} col-span-12`">
       <Card title="Accounts Management" class="dark:text-slate-300 text-slate-700">
         <div class="grid grid-cols-12">
           <div class="col-span-12">
@@ -72,7 +72,7 @@ export default {
         </div>
       </Card>
     </div>
-    <div v-if="accounts !== null" class="2xl:col-span-3 col-span-12">
+    <div v-if="accounts !== null && $can('postNewAccount')" class="2xl:col-span-3 col-span-12">
       <AddNewAccountCard
               :accounts="accounts"
               @accountCreated="fetchAccounts"/>
