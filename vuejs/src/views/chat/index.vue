@@ -26,11 +26,25 @@ const websocketStatus = ref(0);
 const wsBaseUrl = `${API_WS_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}/chats/ws`;
 const RETRY_BASE = 500;
 const RETRY_MAX = 10000;
+// close code the server uses when the token is rejected — retrying with the
+// same token can never succeed, so this stops the reconnect loop
+const WS_CLOSE_AUTH_FAILED = 4401;
 let retryWait = RETRY_BASE;
 const pingTime = 10000;
 let retryTimeout = null;
 let heartbeat = null;
 let pongMissedTimeout = null;
+// true once the user leaves the page; onclose must not schedule a reconnect
+let isLeaving = false;
+
+let unauthorizedWarned = false;
+function showUnauthorizedWarning() {
+  if (unauthorizedWarned) {
+    return;
+  }
+  unauthorizedWarned = true;
+  toast.error('Your login has expired. Please sign in again.', {timeout: 10000});
+}
 
 const myConversation = computed({
   get() {
@@ -130,7 +144,11 @@ function createWebsocket() {
         }
         subscribeToConversations([message.payload.id]);
       } else if (message.command === 'error') {
-        if (message.payload?.command === 'message') {
+        if (message.payload?.reason === 'unauthorized') {
+          // the token was rejected; the socket is being closed with the
+          // terminal code, and onclose will stop the reconnect loop
+          showUnauthorizedWarning();
+        } else if (message.payload?.command === 'message') {
           toast.error('Message could not be sent. Please reload and try again.', {timeout: 4000});
         } else {
           toast.error('Some conversations could not be opened.', {timeout: 4000});
@@ -154,6 +172,17 @@ function createWebsocket() {
     clearTimeout(pongMissedTimeout);
     if (retryTimeout) {
       clearTimeout(retryTimeout);
+    }
+    // the user left the page: no reconnect
+    if (isLeaving) {
+      return;
+    }
+    // the server rejected the token: retrying the same token can never
+    // succeed, so surface it and stop the reconnect loop (a fresh page
+    // load / re-login starts clean)
+    if (ev && ev.code === WS_CLOSE_AUTH_FAILED) {
+      showUnauthorizedWarning();
+      return;
     }
     const wait = retryWait;
     retryWait = Math.min(Math.round(retryWait * 1.5), RETRY_MAX);
@@ -265,6 +294,8 @@ const showConversationPicker = computed(() => {
 });
 
 onBeforeUnmount(() => {
+  // belt and braces for the onclose override below: never reconnect
+  isLeaving = true;
   clearInterval(heartbeat);
   clearTimeout(retryTimeout);
   clearInterval(websocketStatusInterval);

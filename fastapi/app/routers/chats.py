@@ -2,6 +2,7 @@ from typing import Annotated
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Form, BackgroundTasks, WebSocket
 from fastapi.security import OAuth2PasswordRequestForm
+from starlette.websockets import WebSocketDisconnect
 from sqlalchemy.orm import Session
 import app.crud as crud
 import app.dependencies as dep
@@ -56,11 +57,33 @@ async def get_my_participant(
 async def websocket_endpoint(
         websocket: WebSocket,
 ):
-    try: 
+    socket_id = None
+    participant = None
+    try:
         socket_id, participant = await manager.connect(websocket=websocket)
         await manager.take_it_from_here(socket_id, participant)
+    except WebSocketDisconnect:
+        # The client went away (before sending a token, or mid-session).
+        # `take_it_from_here` cleaned up its own socket on the way out, and
+        # an accepted-but-never-serviced connection has nothing to release.
+        pass
     except Exception as e:
         print(e)
-        # await websocket.close()
+        # A failed handshake must not leave an accepted-but-unserviced
+        # connection open. `connect` already closed with the auth-failure
+        # code when the socket was still alive; this is the safety net for
+        # everything else.
+        try:
+            await websocket.close()
+        except Exception:
+            pass
+    finally:
+        # Whatever the path out, a registered socket must not be left in
+        # the manager's registries (disconnect is idempotent).
+        if socket_id is not None and participant is not None:
+            try:
+                await manager.disconnect(socket_id, participant.id)
+            except Exception as e:
+                print(f"cleanup for socket {socket_id} failed: {e}")
 
 

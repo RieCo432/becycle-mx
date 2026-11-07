@@ -80,7 +80,8 @@ class WebSocketChatMessage(BaseModel):
 class WebSocketErrorPayload(BaseModel):
     model_config = ConfigDict(strict=True)
     # the incoming command that was rejected
-    command: Literal[WebSocketCommand.SUBSCRIBE, WebSocketCommand.MESSAGE]
+    # (None: the connection itself was rejected, e.g. an invalid token)
+    command: Literal[WebSocketCommand.SUBSCRIBE, WebSocketCommand.MESSAGE] | None = None
     reason: str
     conversationIds: list[UUID] = []
 

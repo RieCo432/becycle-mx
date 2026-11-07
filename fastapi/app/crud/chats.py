@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from fastapi import WebSocket
 from starlette.exceptions import WebSocketException
-from starlette.websockets import WebSocketState
+from starlette.websockets import WebSocketDisconnect, WebSocketState
 
 import app.models as models
 import app.schemas as schemas
@@ -30,6 +30,15 @@ from .permissions import check_permission, get_permission_by_route_and_method
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
 PRODUCTION = os.environ['PRODUCTION'] == "true"
+
+# How long to wait for the client's token frame before giving up. A client
+# that accepts the connection and then sends nothing must not be able to
+# park a server task (and an open connection) forever.
+WS_HANDSHAKE_TIMEOUT = 10
+# 4xxx close codes are reserved for application use. The frontend treats
+# this as terminal: the token is bad, so retrying with the same token cannot
+# succeed.
+WS_CLOSE_AUTH_FAILED = 4401
 
 
 def get_or_create_participant(db: Session, entity: models.User | models.Client) -> models.Participant:
@@ -114,6 +123,38 @@ async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMe
     await socket.send_json(message.model_dump(mode="json"))
 
 
+async def close_websocket(websocket: WebSocket, code: int = 1000) -> None:
+    """Close the socket, tolerating a peer that already went away (a close
+    on a half-dead connection can itself raise) — by the time we are
+    closing because of a failure, the close is best-effort bookkeeping."""
+    try:
+        await websocket.close(code=code)
+    except Exception as e:
+        print(f"failed to close socket: {e}")
+
+
+async def send_unauthorized_frame(websocket: WebSocket) -> None:
+    """Best-effort 'here is why this connection is dying' frame, sent before
+    the auth-failure close so the client can surface a real message instead
+    of flapping. A peer that is already gone simply gets no frame — that
+    must not mask the original failure."""
+    if websocket.state != WebSocketState.CONNECTED:
+        return
+    try:
+        await send_websocket_message(
+            websocket,
+            schemas.WebSocketError(
+                command=schemas.WebSocketCommand.ERROR,
+                payload=schemas.WebSocketErrorPayload(
+                    command=None,
+                    reason="unauthorized",
+                ),
+            ),
+        )
+    except Exception:
+        pass
+
+
 # Only accept the client -> server commands; pong/error are server -> client.
 websocket_message_adapter = TypeAdapter(schemas.WebSocketMessageIn)
 
@@ -192,9 +233,33 @@ class ChatManager:
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        token_message = await websocket.receive_json()
-        async with session_scope() as db:
-            participant = get_participant_by_token(token=token_message["token"], db=db)
+        try:
+            token_message = await asyncio.wait_for(
+                websocket.receive_json(), timeout=WS_HANDSHAKE_TIMEOUT
+            )
+        except WebSocketDisconnect:
+            # The client went away before sending the token — nothing to do.
+            raise
+        except Exception:
+            # No token in time, or an unreadable first frame: tell the client
+            # (if it is still there) and close — an accepted-but-never-serviced
+            # connection must not be left open.
+            await send_unauthorized_frame(websocket)
+            await close_websocket(websocket, code=WS_CLOSE_AUTH_FAILED)
+            raise
+
+        try:
+            async with session_scope() as db:
+                participant = get_participant_by_token(token=token_message["token"], db=db)
+        except WebSocketDisconnect:
+            raise
+        except Exception:
+            # Bad/expired/unknown token. Tell the client why and close with
+            # the terminal auth-failure code, so it stops retrying the same
+            # token. Re-raise so the endpoint can log and clean up.
+            await send_unauthorized_frame(websocket)
+            await close_websocket(websocket, code=WS_CLOSE_AUTH_FAILED)
+            raise
         if participant is None:
             raise WebSocketException
         if participant.id not in self.participant_sockets:
