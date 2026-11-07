@@ -63,7 +63,6 @@ export const ENDPOINTS = {
   cancelAppointment: {method: 'PATCH', route: '/appointments/{appointment_id}/cancel'},
   patchAppointmentReschedule: {method: 'PATCH', route: '/appointments/{appointment_id}/reschedule'},
   patchAppointmentDidClientShowUp: {method: 'PATCH', route: '/appointments/{appointment_id}/showup'},
-  AppointmentDidClientShowUp: {method: 'PATCH', route: '/appointments/{appointment_id}/showup'},
   postNewAppointmentType: {method: 'POST', route: '/appointments/types'},
   patchAppointmentType: {method: 'PATCH', route: '/appointments/types/{appointment_type_id}'},
   swapAppointmentTypes: {method: 'PATCH', route: '/settings/appointments/swap'},

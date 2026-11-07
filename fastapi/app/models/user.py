@@ -115,13 +115,3 @@ class User(Base):
                 self.rentalChecker == other.rentalChecker,
                 self.softDeleted == other.softDeleted
             ])
-
-    def get_deposit_bearer_balance(self):
-        contract_balance = sum([contract.depositAmountCollected for contract in self.depositCollectedContracts]) - sum(
-            [contract.depositAmountReturned for contract in self.depositReturnedContracts])
-
-        deposit_exchange_balance = sum(
-            [deposit_exchange.amount for deposit_exchange in self.depositExchangesReceived]) - sum(
-            [deposit_exchange.amount for deposit_exchange in self.depositExchangesGiven])
-
-        return contract_balance + deposit_exchange_balance

@@ -91,7 +91,7 @@
                       @click="showCancellationModal = true"
                   >{{ appointment.confirmed ? 'Cancel' : 'Deny'}} Appointment</DashButton>
                 </template>
-                <template v-if="new Date(this.appointment.startDateTime.toISOString().replace(/Z$/, '')) < new Date()">
+                <template v-if="new Date(this.appointment.startDateTime.toISOString().replace(/Z$/, '')) < new Date() && $can('patchAppointmentDidClientShowUp')">
                   <DashButton
                       class="bg-danger-500 dark:bg-danger-500"
                       @click="() => markDidClientShowUp(appointment.didClientShowUp === false ? null : false)"

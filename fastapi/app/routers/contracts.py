@@ -257,7 +257,6 @@ async def return_bike(
         email_tasks: BackgroundTasks,
         deposit_settled_transaction_header_id: Annotated[UUID, Body()],
         working_user: models.User = Depends(dep.get_working_user),
-        deposit_returning_user: models.User = Depends(dep.get_deposit_returning_user),
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
 

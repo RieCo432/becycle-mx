@@ -98,30 +98,6 @@ def _permission_chain(db: Session, permission: models.Permission) -> list[models
     return chain
 
 
-def get_users_holding_endpoint(db: Session, method: str, route: str) -> list[models.User]:
-    """Every user allowed to perform a specific endpoint action (holds the
-    endpoint permission, or a scope containing it, directly or via a group),
-    de-duplicated. Includes soft-deleted users; filter at the caller if needed.
-    """
-    endpoint_permission = db.scalar(
-        select(models.Permission)
-        .where(models.Permission.route == route)
-        .where(models.Permission.method == method)
-        .where(models.Permission.isEndpoint == True)
-    )
-    if endpoint_permission is None:
-        return []
-
-    users: list[models.User] = []
-    seen: set[UUID] = set()
-    for permission in _permission_chain(db=db, permission=endpoint_permission):
-        for user in list(permission.users) + [member for group in permission.groups for member in group.users]:
-            if user.id not in seen:
-                seen.add(user.id)
-                users.append(user)
-    return users
-
-
 def get_rental_checkers(db: Session) -> list[models.User]:
     rental_checkers = [_ for _ in db.scalars(
         select(models.User)
