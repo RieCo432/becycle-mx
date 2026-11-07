@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 
 
 from app.database.db import SessionLocal
-from services import WebSocketCommand
+from app.services.misc_helpers import WebSocketCommand
 
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
@@ -126,12 +126,17 @@ class ChatManager:
         while True:
             if not PRODUCTION:
                 print("checking ping times")
-            for participant_id in self.participant_sockets.keys():
-                for socket_id in self.participant_sockets[participant_id]:
-                    if (datetime.now(timezone.utc) - self.ping_times[socket_id]).total_seconds() > 60:
-                        if not PRODUCTION:
-                            print("no ping received in 60 seconds")
-                        await self.disconnect(socket_id, participant_id)
+            now = datetime.now(timezone.utc)
+            for participant_id, socket_ids in list(self.participant_sockets.items()):
+                for socket_id in list(socket_ids):
+                    try:
+                        last_ping = self.ping_times.get(socket_id)
+                        if last_ping is not None and (now - last_ping).total_seconds() > 60:
+                            if not PRODUCTION:
+                                print("no ping received in 60 seconds")
+                            await self.disconnect(socket_id, participant_id)
+                    except Exception as e:
+                        print(f"keep_tabs: failed to disconnect stale socket {socket_id}: {e}")
             await sleep(30)
         
 
@@ -169,13 +174,22 @@ class ChatManager:
                 await send_websocket_message(websocket, websocket_message)
 
     async def disconnect(self, socket_id: UUID, participant_id: UUID):
-        if self.active_connections[socket_id] is not None and self.active_connections[socket_id].state == WebSocketState.CONNECTED:
+        websocket = self.active_connections.pop(socket_id, None)
+        if websocket is not None and websocket.state == WebSocketState.CONNECTED:
             if not PRODUCTION:
                 print("Closing connection for participant:", participant_id)
-            await self.active_connections[participant_id].close()
-        
-        self.participant_sockets[participant_id].remove(socket_id)
-        del self.active_connections[socket_id]
+            try:
+                await websocket.close()
+            except Exception as e:
+                print(f"Failed to close socket {socket_id}: {e}")
+
+        socket_ids = self.participant_sockets.get(participant_id)
+        if socket_ids is not None and socket_id in socket_ids:
+            socket_ids.remove(socket_id)
+            if not socket_ids:
+                del self.participant_sockets[participant_id]
+
+        self.ping_times.pop(socket_id, None)
         print("Active connections:", len(self.active_connections))
         
     async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
