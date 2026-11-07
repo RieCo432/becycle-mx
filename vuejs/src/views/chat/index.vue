@@ -115,44 +115,40 @@ function createWebsocket() {
   };
 
   _websocket.onmessage = (d) => {
-    if (d.data === 'pong') {
-
-    } else {
-      const message = JSON.parse(d.data);
-      if (message.command === 'pong') {
-        clearTimeout(pongMissedTimeout);
-        retryWait = RETRY_BASE;
-      } else if (message.command === 'message') {
-        const convo = conversations.value.find((c) => c.id === message.payload.conversationId);
-        convo?.messages.push(message.payload);
-        if (
-          message.payload.conversationId !== selectedConversation.value?.id &&
-          message.payload.sentByParticipantId !== participantId.value
-        ) {
-          const client = convo.initiatorParticipant.client;
-          toast.info(
-            `${client?.firstName} ${client?.lastName}: ${message.payload.body.slice(0, 160)}`,
-            {timeout: 2000});
-        }
-      } else if (message.command === 'conversation') {
-        // a conversation was just created (a client opened the chat view for
-        // the first time): show it in the picker and start receiving its
-        // messages
-        const existing = conversations.value.find((c) => c.id === message.payload.id);
-        if (!existing) {
-          conversations.value.push(message.payload);
-        }
-        subscribeToConversations([message.payload.id]);
-      } else if (message.command === 'error') {
-        if (message.payload?.reason === 'unauthorized') {
-          // the token was rejected; the socket is being closed with the
-          // terminal code, and onclose will stop the reconnect loop
-          showUnauthorizedWarning();
-        } else if (message.payload?.command === 'message') {
-          toast.error('Message could not be sent. Please reload and try again.', {timeout: 4000});
-        } else {
-          toast.error('Some conversations could not be opened.', {timeout: 4000});
-        }
+    const message = JSON.parse(d.data);
+    if (message.command === 'pong') {
+      clearTimeout(pongMissedTimeout);
+      retryWait = RETRY_BASE;
+    } else if (message.command === 'message') {
+      const convo = conversations.value.find((c) => c.id === message.payload.conversationId);
+      convo?.messages.push(message.payload);
+      if (
+        message.payload.conversationId !== selectedConversation.value?.id &&
+        message.payload.sentByParticipantId !== participantId.value
+      ) {
+        const client = convo.initiatorParticipant.client;
+        toast.info(
+          `${client?.firstName} ${client?.lastName}: ${message.payload.body.slice(0, 160)}`,
+          {timeout: 2000});
+      }
+    } else if (message.command === 'conversation') {
+      // a conversation was just created (a client opened the chat view for
+      // the first time): show it in the picker and start receiving its
+      // messages
+      const existing = conversations.value.find((c) => c.id === message.payload.id);
+      if (!existing) {
+        conversations.value.push(message.payload);
+      }
+      subscribeToConversations([message.payload.id]);
+    } else if (message.command === 'error') {
+      if (message.payload?.reason === 'unauthorized') {
+        // the token was rejected; the socket is being closed with the
+        // terminal code, and onclose will stop the reconnect loop
+        showUnauthorizedWarning();
+      } else if (message.payload?.command === 'message') {
+        toast.error('Message could not be sent. Please reload and try again.', {timeout: 4000});
+      } else {
+        toast.error('Some conversations could not be opened.', {timeout: 4000});
       }
     }
   };
@@ -268,11 +264,8 @@ function closeConversation() {
   selectedConversation.value = null;
 }
 
-let websocketStatusInterval = null;
-
-websocketStatusInterval = setInterval(() => {
+const websocketStatusInterval = setInterval(() => {
   websocketStatus.value = websocket?.readyState;
-  console.log('websocket status', websocketStatus.value);
 }, 1000);
 
 const websocketStatusReadable = computed(() => {
