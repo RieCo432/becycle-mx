@@ -75,9 +75,25 @@ class WebSocketChatMessage(BaseModel):
     model_config = ConfigDict(strict=True)
     command: Literal[WebSocketCommand.MESSAGE]
     payload: WebSocketChatMessagePayload | MessageBase
-    
-    
-    
-WebSocketMessage = WebSocketPing | WebSocketPong | WebSocketSubscribe | WebSocketChatMessage
+
+
+class WebSocketErrorPayload(BaseModel):
+    model_config = ConfigDict(strict=True)
+    # the incoming command that was rejected
+    command: Literal[WebSocketCommand.SUBSCRIBE, WebSocketCommand.MESSAGE]
+    reason: str
+    conversationIds: list[UUID] = []
+
+
+class WebSocketError(BaseModel):
+    model_config = ConfigDict(strict=True)
+    command: Literal[WebSocketCommand.ERROR]
+    payload: WebSocketErrorPayload
+
+
+# client -> server
+WebSocketMessageIn = WebSocketPing | WebSocketSubscribe | WebSocketChatMessage
+# client <-> server
+WebSocketMessage = WebSocketMessageIn | WebSocketPong | WebSocketError
     
     

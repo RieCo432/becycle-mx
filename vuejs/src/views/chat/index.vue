@@ -93,6 +93,12 @@ function createWebsocket() {
             `${client?.firstName} ${client?.lastName}: ${message.payload.body.slice(0, 160)}`,
             {timeout: 2000});
         }
+      } else if (message.command === 'error') {
+        if (message.payload?.command === 'message') {
+          toast.error('Message could not be sent. Please reload and try again.', {timeout: 4000});
+        } else {
+          toast.error('Some conversations could not be opened.', {timeout: 4000});
+        }
       }
     }
   };

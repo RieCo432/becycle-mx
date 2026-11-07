@@ -25,6 +25,8 @@ from sqlalchemy.orm import Session
 from app.database.db import SessionLocal
 from app.services.misc_helpers import WebSocketCommand
 
+from .permissions import check_permission, get_permission_by_route_and_method
+
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
 PRODUCTION = os.environ['PRODUCTION'] == "true"
@@ -112,7 +114,34 @@ async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMe
     await socket.send_json(message.model_dump(mode="json"))
 
 
-websocket_message_adapter = TypeAdapter(schemas.WebSocketMessage)
+# Only accept the client -> server commands; pong/error are server -> client.
+websocket_message_adapter = TypeAdapter(schemas.WebSocketMessageIn)
+
+
+def participant_can_access_conversation(db: Session, participant_id: UUID, conversation_id: UUID) -> bool:
+    """A participant may use a conversation over the websocket if they could
+    read it via REST: a client may use their own conversation, and a staff
+    user may use every conversation when they hold the
+    ``GET /chats/conversations`` permission (the same gate as the list route)."""
+    conversation = db.scalar(
+        select(models.Conversation)
+        .where(models.Conversation.id == conversation_id)
+    )
+    if conversation is None:
+        return False
+
+    if conversation.initiatorParticipantId == participant_id:
+        return True
+
+    user = db.scalar(
+        select(models.User)
+        .where(models.User.participantId == participant_id)
+    )
+    if user is None:
+        return False
+
+    permission = get_permission_by_route_and_method(db=db, route="/chats/conversations", method="GET")
+    return permission is not None and check_permission(db=db, user=user, permission=permission)
 
 
 @asynccontextmanager
@@ -214,18 +243,52 @@ class ChatManager:
                 request: schemas.WebSocketMessage = websocket_message_adapter.validate_json(request_json)
                 
                 if isinstance(request, schemas.WebSocketSubscribe):
-                    subscribe_errors = []
-                    for id in request.payload.conversationIds:
-                        try:
-                            assert isinstance(id, UUID)
-                            self.subscribe(conversation_id=id, participant_id=participant.id)  
-                        except Exception as e:
-                            subscribe_errors.append(id)
-                            
-                elif isinstance(request, schemas.WebSocketChatMessage):
+                    rejected = []
                     async with session_scope() as db:
+                        for conversation_id in request.payload.conversationIds:
+                            if participant_can_access_conversation(
+                                db=db, participant_id=participant.id, conversation_id=conversation_id
+                            ):
+                                self.subscribe(conversation_id=conversation_id, participant_id=participant.id)
+                            else:
+                                rejected.append(conversation_id)
+
+                    if rejected:
+                        print(f"denied: participant {participant.id} may not use conversations: {rejected}")
+                        await send_websocket_message(
+                            socket,
+                            schemas.WebSocketError(
+                                command=schemas.WebSocketCommand.ERROR,
+                                payload=schemas.WebSocketErrorPayload(
+                                    command=schemas.WebSocketCommand.SUBSCRIBE,
+                                    reason="forbidden",
+                                    conversationIds=rejected,
+                                ),
+                            ),
+                        )
+
+                elif isinstance(request, schemas.WebSocketChatMessage):
+                    conversation_id = request.payload.conversationId
+                    async with session_scope() as db:
+                        if not participant_can_access_conversation(
+                            db=db, participant_id=participant.id, conversation_id=conversation_id
+                        ):
+                            print(f"denied: participant {participant.id} may not message conversation {conversation_id}")
+                            await send_websocket_message(
+                                socket,
+                                schemas.WebSocketError(
+                                    command=schemas.WebSocketCommand.ERROR,
+                                    payload=schemas.WebSocketErrorPayload(
+                                        command=schemas.WebSocketCommand.MESSAGE,
+                                        reason="forbidden",
+                                        conversationIds=[conversation_id],
+                                    ),
+                                ),
+                            )
+                            continue
+
                         message = models.Message(
-                            conversationId=request.payload.conversationId,
+                            conversationId=conversation_id,
                             sentByParticipantId=participant.id,
                             body=request.payload.body)
                         db.add(message)
