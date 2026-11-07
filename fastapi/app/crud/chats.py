@@ -207,14 +207,29 @@ class ChatManager:
         self.subscriptions[conversation_id].add(participant_id)
         
     async def broadcast(self, message: models.Message):
-        for participant_id in self.subscriptions[message.conversationId]:
-            for websocket_id in self.participant_sockets[participant_id]:
-                websocket = self.active_connections[websocket_id]
-                websocket_message = schemas.WebSocketChatMessage(
-                    command=schemas.WebSocketCommand.MESSAGE,
-                    payload=schemas.MessageBase.model_validate(message, from_attributes=True)
-                )
-                await send_websocket_message(websocket, websocket_message)
+        # Nobody may be subscribed to this conversation (subscriptions are
+        # only requested once, at connect time) — nothing to deliver.
+        participant_ids = self.subscriptions.get(message.conversationId)
+        if not participant_ids:
+            return
+
+        websocket_message = schemas.WebSocketChatMessage(
+            command=schemas.WebSocketCommand.MESSAGE,
+            payload=schemas.MessageBase.model_validate(message, from_attributes=True)
+        )
+        # Snapshot both levels: another socket's task may run while we await
+        # a send and change either collection (e.g. a disconnect).
+        for participant_id in list(participant_ids):
+            for websocket_id in list(self.participant_sockets.get(participant_id, ())):
+                websocket = self.active_connections.get(websocket_id)
+                if websocket is None:
+                    continue
+                try:
+                    await send_websocket_message(websocket, websocket_message)
+                except Exception as e:
+                    # One dead recipient must not stop delivery to the rest,
+                    # or tear down the sender's connection.
+                    print(f"failed to deliver message to socket {websocket_id}: {e}")
 
     async def disconnect(self, socket_id: UUID, participant_id: UUID):
         websocket = self.active_connections.pop(socket_id, None)
