@@ -58,6 +58,8 @@ class Bike(Base):
         self.__dict__["contractPhotoIds"] = {contract_id: list(photo_ids) for contract_id, photo_ids in value.items()}
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id", None)),
             str(self.make) == str(other.get("make", None)),

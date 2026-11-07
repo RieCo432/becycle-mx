@@ -28,6 +28,8 @@ class Group(Base):
     accountsOwned: Mapped[List["Account"]] = relationship("Account", foreign_keys=[Account.ownerGroupId], back_populates="ownerGroup")
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id")),
             str(self.name) == str(other.get("name"))

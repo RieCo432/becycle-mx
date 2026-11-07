@@ -46,6 +46,8 @@ class UserPresentationCard(Base):
     photoContentType: Mapped[str] = mapped_column("photocontenttype", Text, nullable=True, quote=False)
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id")),
             str(self.name) == str(other.get("name")),
@@ -104,6 +106,8 @@ class User(Base):
     def __eq__(self, other):
         if type(other) is dict:
             return self.__eq_dict__(other)
+        if not isinstance(other, User):
+            return NotImplemented
         else:
             return all([
                 self.id == other.id,

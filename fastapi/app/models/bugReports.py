@@ -23,6 +23,8 @@ class BugReport(Base):
         return self.reportedByUser.username
 
     def __eq__(self, other: dict):
+        if not isinstance(other, dict):
+            return NotImplemented
         return all([
             str(self.id) == str(other.get("id", None)),
             str(self.reportedByUserId) == str(other.get("reportedByUserId", None)),

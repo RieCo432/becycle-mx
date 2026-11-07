@@ -35,6 +35,8 @@ class DepositExchange(Base):
     def __eq__(self, other):
         if type(other) is dict:
             return self.equal_to_dict(other)
+        if not isinstance(other, DepositExchange):
+            return NotImplemented
         else:
             return all([
                 self.id == other.id,

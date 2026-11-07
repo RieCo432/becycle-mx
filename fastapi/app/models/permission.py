@@ -30,6 +30,8 @@ class Permission(Base):
     groups: Mapped[List["Group"]] = relationship(secondary=group_permission_association_table, back_populates="permissions")
 
     def __eq__(self, other: Permission):
+        if not isinstance(other, Permission):
+            return NotImplemented
         return all([
             self.id == other.id,
             self.route == other.route,
