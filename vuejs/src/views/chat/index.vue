@@ -24,7 +24,9 @@ const participantId = ref(null);
 const websocketStatus = ref(0);
 
 const wsBaseUrl = `${API_WS_PROTOCOL}://${API_HOST}:${API_PORT}${API_SUBDIR}/chats/ws`;
-let retryWait = 500;
+const RETRY_BASE = 500;
+const RETRY_MAX = 10000;
+let retryWait = RETRY_BASE;
 const pingTime = 10000;
 let retryTimeout = null;
 let heartbeat = null;
@@ -69,8 +71,10 @@ function createWebsocket() {
   console.log('creating websocket');
   const _websocket = new WebSocket(wsBaseUrl);
 
-  _websocket.onopen = async (ev) => {
-    await connect();
+  _websocket.onopen = () => {
+    // a socket that opened is healthy: reset the backoff
+    retryWait = RETRY_BASE;
+    connect(_websocket);
   };
 
   _websocket.onmessage = (d) => {
@@ -80,7 +84,7 @@ function createWebsocket() {
       const message = JSON.parse(d.data);
       if (message.command === 'pong') {
         clearTimeout(pongMissedTimeout);
-        retryWait = 500;
+        retryWait = RETRY_BASE;
       } else if (message.command === 'message') {
         const convo = conversations.value.find((c) => c.id === message.payload.conversationId);
         convo?.messages.push(message.payload);
@@ -103,51 +107,77 @@ function createWebsocket() {
     }
   };
 
-  _websocket.onerror = async (ev) => {
-    retryTimeout = setTimeout(connect, retryWait);
+  // onclose is the single reconnection driver: the browser always fires it
+  // (after onerror) for a failed socket, and it also follows our own
+  // deliberate closes (heartbeat timeout). Scheduling a reconnect from
+  // onerror as well let two reconnectors race, and a stale connect() would
+  // double-send token+subscribes onto the replacement socket.
+  _websocket.onerror = (ev) => {
+    console.log('websocket error; onclose will reconnect');
   };
 
-  _websocket.onclose = async (ev) => {
+  _websocket.onclose = (ev) => {
     console.log('clearing heartbeat and retry');
     clearInterval(heartbeat);
-    clearTimeout(retryTimeout);
+    clearTimeout(pongMissedTimeout);
+    if (retryTimeout) {
+      clearTimeout(retryTimeout);
+    }
+    const wait = retryWait;
+    retryWait = Math.min(Math.round(retryWait * 1.5), RETRY_MAX);
     retryTimeout = setTimeout(() => {
+      retryTimeout = null;
       console.log('creating new websocket');
       websocket = createWebsocket();
-    }, retryWait);
+    }, wait);
   };
 
   return _websocket;
 }
 
-async function connect() {
-  retryWait *= 1.5;
+function connect(ws) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    // socket went away between open and now: force the reconnect path
+    if (ws) {
+      ws.close();
+    }
+    return;
+  }
   console.log('Connecting...');
-  clearTimeout(retryTimeout);
   clearInterval(heartbeat);
 
-  websocket.send(JSON.stringify({
+  ws.send(JSON.stringify({
     token: credentialStore.token,
   }));
 
   heartbeat = setInterval(() => {
     pongMissedTimeout = setTimeout(() => {
       toast.warning('Connection issues...', {timeout: 2000});
-      console.log('closing websocket');
-      websocket.close();
+      console.log('closing unresponsive websocket');
+      ws.close(); // onclose handles the reconnect
       clearInterval(heartbeat);
     }, 2000);
-    websocket.send(JSON.stringify({command: 'ping'}));
+    ws.send(JSON.stringify({command: 'ping'}));
   }, pingTime);
 
-
-  subscribeToConversations([selectedConversation.value.id]);
+  // selectedConversation may be null (conversation closed) — previously this
+  // threw after the heartbeat started, leaving the socket connected but
+  // subscribed to nothing.
+  if (selectedConversation.value) {
+    subscribeToConversations([selectedConversation.value.id]);
+  }
   if (isUser) {
     subscribeToConversations(conversations.value.map((c) => c.id));
   }
 }
 
 function sendWebsocketCommand(command, payload) {
+  // the socket may be closed/reconnecting when the user acts; sending on a
+  // non-open socket throws InvalidStateError
+  if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+    console.log('websocket not open; dropping', command);
+    return;
+  }
   websocket.send(JSON.stringify({
     command: command,
     payload: payload,
