@@ -34,11 +34,18 @@ const credentialStore = useCredentialsStore();
 const isUser = credentialStore.tokenType === 'user';
 
 const newMessage = ref('');
+// Keep in sync with the backend's CHAT_MESSAGE_MAX_LENGTH
+// (fastapi/app/crud/chats.py): longer messages are rejected there with an
+// error frame, so block them here before they are sent.
+const MAX_MESSAGE_LENGTH = 2000;
+
+const messageLength = computed(() => newMessage.value.length);
+const overLimit = computed(() => messageLength.value > MAX_MESSAGE_LENGTH);
 const timeRefreshKey = ref(0);
 let timeRefreshInterval = null;
 
 async function sendMessage() {
-  if (newMessage.value.length > 0) {
+  if (newMessage.value.length > 0 && !overLimit.value) {
     emit('sendMessage', props.conversation.id, newMessage.value);
     newMessage.value = '';
   }
@@ -241,11 +248,19 @@ const conversationTitle = computed(() => {
               @keydown.enter.shift.exact.prevent="newMessage += '\n'"
               :disabled="!websocketConnected"
             />
+          <span
+            class="flex-none text-xs tabular-nums"
+            :class="overLimit
+              ? 'text-danger-500 dark:text-danger-500'
+              : 'text-slate-400 dark:text-slate-500'"
+          >
+            {{ messageLength }} / {{ MAX_MESSAGE_LENGTH }}
+          </span>
           <button
             type="button"
             @click="sendMessage"
-            class="h-8 w-8 bg-slate-900 text-white flex flex-col justify-center items-center text-lg rounded-full"
-            :disabled="!websocketConnected"
+            class="h-8 w-8 bg-slate-900 text-white flex flex-col justify-center items-center text-lg rounded-full disabled:opacity-50"
+            :disabled="!websocketConnected || overLimit"
           >
             <Icon
               icon="heroicons-outline:paper-airplane"

@@ -69,6 +69,9 @@ class WebSocketSubscribe(BaseModel):
     
 class WebSocketChatMessagePayload(BaseModel):
     conversationId: UUID
+    # Bounded by ChatManager (CHAT_MESSAGE_MAX_LENGTH), not here: a schema
+    # violation would tear down the connection, but an oversized body is a
+    # rejectable message, not a protocol violation.
     body: str
     
 class WebSocketChatMessage(BaseModel):

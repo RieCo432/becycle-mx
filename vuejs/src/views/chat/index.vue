@@ -146,7 +146,7 @@ function createWebsocket() {
         // terminal code, and onclose will stop the reconnect loop
         showUnauthorizedWarning();
       } else if (message.payload?.command === 'message') {
-        toast.error('Message could not be sent. Please reload and try again.', {timeout: 4000});
+        toast.error('Message could not be sent. Please try again.', {timeout: 4000});
       } else {
         toast.error('Some conversations could not be opened.', {timeout: 4000});
       }

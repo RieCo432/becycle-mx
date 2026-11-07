@@ -1,5 +1,7 @@
 import asyncio
+import time
 from asyncio import sleep
+from collections import deque
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from uuid import uuid4, UUID
@@ -39,6 +41,12 @@ WS_HANDSHAKE_TIMEOUT = 10
 # this as terminal: the token is bad, so retrying with the same token cannot
 # succeed.
 WS_CLOSE_AUTH_FAILED = 4401
+
+# A human can't type this fast: more messages than this from a single socket
+# within this window is a client bug or abuse, not typing.
+MSG_RATE_LIMIT = 5        # messages per socket within the window
+MSG_RATE_WINDOW = 5.0     # seconds
+CHAT_MESSAGE_MAX_LENGTH = 2000  # characters
 
 
 def get_or_create_participant(db: Session, entity: models.User | models.Client) -> models.Participant:
@@ -210,6 +218,8 @@ class ChatManager:
         self.participant_sockets: dict[UUID, list[UUID]] = {}
         self.subscriptions: dict[UUID, set[UUID]] = {}
         self.ping_times: dict[UUID, datetime] = {}
+        # socket_id -> monotonic timestamps of its recent message frames (rate limit)
+        self.message_times: dict[UUID, deque[float]] = {}
         self.ping_loop = asyncio.create_task(self.keep_tabs())
         
     async def keep_tabs(self):
@@ -277,6 +287,19 @@ class ChatManager:
         if conversation_id not in self.subscriptions:
             self.subscriptions[conversation_id] = set()
         self.subscriptions[conversation_id].add(participant_id)
+
+    def message_allowed(self, socket_id: UUID) -> bool:
+        """Per-socket sliding-window rate limit for message frames. Only
+        accepted frames are recorded, so a flood of rejects cannot extend its
+        own lockout."""
+        now = time.monotonic()
+        times = self.message_times.setdefault(socket_id, deque())
+        while times and now - times[0] > MSG_RATE_WINDOW:
+            times.popleft()
+        if len(times) >= MSG_RATE_LIMIT:
+            return False
+        times.append(now)
+        return True
         
     async def broadcast(self, message: models.Message):
         # Nobody may be subscribed to this conversation (subscriptions are
@@ -355,6 +378,7 @@ class ChatManager:
                     del self.subscriptions[conversation_id]
 
         self.ping_times.pop(socket_id, None)
+        self.message_times.pop(socket_id, None)
         print("Active connections:", len(self.active_connections))
         
     async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
@@ -391,6 +415,41 @@ class ChatManager:
 
                 elif isinstance(request, schemas.WebSocketChatMessage):
                     conversation_id = request.payload.conversationId
+                    # In-memory hardening first: a flood or an oversized body
+                    # is rejected without ever touching the database. Every
+                    # message frame consumes rate budget — including ones we
+                    # are about to reject for size — so a flood of junk cannot
+                    # bypass the limit.
+                    if not self.message_allowed(socket_id):
+                        print(f"denied: message rate limit exceeded for socket {socket_id}")
+                        await send_websocket_message(
+                            socket,
+                            schemas.WebSocketError(
+                                command=schemas.WebSocketCommand.ERROR,
+                                payload=schemas.WebSocketErrorPayload(
+                                    command=schemas.WebSocketCommand.MESSAGE,
+                                    reason="rate_limited",
+                                    conversationIds=[conversation_id],
+                                ),
+                            ),
+                        )
+                        continue
+
+                    if len(request.payload.body) > CHAT_MESSAGE_MAX_LENGTH:
+                        print(f"denied: body of {len(request.payload.body)} chars exceeds {CHAT_MESSAGE_MAX_LENGTH} (socket {socket_id})")
+                        await send_websocket_message(
+                            socket,
+                            schemas.WebSocketError(
+                                command=schemas.WebSocketCommand.ERROR,
+                                payload=schemas.WebSocketErrorPayload(
+                                    command=schemas.WebSocketCommand.MESSAGE,
+                                    reason="too_long",
+                                    conversationIds=[conversation_id],
+                                ),
+                            ),
+                        )
+                        continue
+
                     async with session_scope() as db:
                         if not participant_can_access_conversation(
                             db=db, participant_id=participant.id, conversation_id=conversation_id
