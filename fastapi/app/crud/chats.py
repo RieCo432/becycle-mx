@@ -50,21 +50,21 @@ def get_or_create_participant(db: Session, entity: models.User | models.Client) 
     return participant
 
 
-def get_or_create_conversation(db: Session, participant: models.Participant) -> models.Conversation:
+def get_or_create_conversation(db: Session, participant: models.Participant) -> tuple[models.Conversation, bool]:
     conversation = db.scalar(
         select(models.Conversation)
         .where(models.Conversation.initiatorParticipantId == participant.id)
     )
-    
-    if conversation is None:
-        conversation = models.Conversation(
-            initiatorParticipantId=participant.id
-        )
-        db.add(conversation)
-        db.commit()
-        db.refresh(conversation)
-        
-    return conversation
+    if conversation is not None:
+        return conversation, False
+
+    conversation = models.Conversation(
+        initiatorParticipantId=participant.id
+    )
+    db.add(conversation)
+    db.commit()
+    db.refresh(conversation)
+    return conversation, True
 
 
 def get_participant_by_id(db: Session, participant_id: UUID) -> models.Participant | None:
@@ -118,11 +118,26 @@ async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMe
 websocket_message_adapter = TypeAdapter(schemas.WebSocketMessageIn)
 
 
+def participant_may_see_conversations(db: Session, participant_id: UUID) -> bool:
+    """Whether a participant may see the conversation list at all: staff
+    users holding the ``GET /chats/conversations`` permission (the same
+    gate as the list route)."""
+    user = db.scalar(
+        select(models.User)
+        .where(models.User.participantId == participant_id)
+    )
+    if user is None:
+        return False
+
+    permission = get_permission_by_route_and_method(db=db, route="/chats/conversations", method="GET")
+    return permission is not None and check_permission(db=db, user=user, permission=permission)
+
+
 def participant_can_access_conversation(db: Session, participant_id: UUID, conversation_id: UUID) -> bool:
     """A participant may use a conversation over the websocket if they could
     read it via REST: a client may use their own conversation, and a staff
-    user may use every conversation when they hold the
-    ``GET /chats/conversations`` permission (the same gate as the list route)."""
+    user may use every conversation when they may see the conversation
+    list (see ``participant_may_see_conversations``)."""
     conversation = db.scalar(
         select(models.Conversation)
         .where(models.Conversation.id == conversation_id)
@@ -133,15 +148,7 @@ def participant_can_access_conversation(db: Session, participant_id: UUID, conve
     if conversation.initiatorParticipantId == participant_id:
         return True
 
-    user = db.scalar(
-        select(models.User)
-        .where(models.User.participantId == participant_id)
-    )
-    if user is None:
-        return False
-
-    permission = get_permission_by_route_and_method(db=db, route="/chats/conversations", method="GET")
-    return permission is not None and check_permission(db=db, user=user, permission=permission)
+    return participant_may_see_conversations(db=db, participant_id=participant_id)
 
 
 @asynccontextmanager
@@ -231,6 +238,34 @@ class ChatManager:
                     # or tear down the sender's connection.
                     print(f"failed to deliver message to socket {websocket_id}: {e}")
 
+    async def notify_new_conversation(self, conversation: schemas.Conversation):
+        """Push a freshly-created conversation to every connected participant
+        who may see the conversation list (staff with the matching
+        permission). Mirrors the list route: only client-initiated
+        conversations are pushed. Clients never receive this — they only
+        ever see their own conversation, which their REST response already
+        contains."""
+        if conversation.initiatorParticipant.client is None:
+            return
+
+        frame = schemas.WebSocketConversation(
+            command=schemas.WebSocketCommand.CONVERSATION,
+            payload=conversation,
+        )
+        for participant_id in list(self.participant_sockets.keys()):
+            async with session_scope() as db:
+                if not participant_may_see_conversations(db=db, participant_id=participant_id):
+                    continue
+            for websocket_id in list(self.participant_sockets.get(participant_id, ())):
+                websocket = self.active_connections.get(websocket_id)
+                if websocket is None:
+                    continue
+                try:
+                    await send_websocket_message(websocket, frame)
+                except Exception as e:
+                    # One dead recipient must not stop the others.
+                    print(f"failed to notify socket {websocket_id} about conversation {conversation.id}: {e}")
+
     async def disconnect(self, socket_id: UUID, participant_id: UUID):
         websocket = self.active_connections.pop(socket_id, None)
         if websocket is not None and websocket.state == WebSocketState.CONNECTED:
@@ -246,6 +281,13 @@ class ChatManager:
             socket_ids.remove(socket_id)
             if not socket_ids:
                 del self.participant_sockets[participant_id]
+                # The participant is fully gone: drop their subscriptions so
+                # they don't accumulate forever. They re-subscribe on
+                # reconnect (the client sends subscribe after every connect).
+                for conversation_id, participants in self.subscriptions.items():
+                    participants.discard(participant_id)
+                for conversation_id in [cid for cid, p in self.subscriptions.items() if not p]:
+                    del self.subscriptions[conversation_id]
 
         self.ping_times.pop(socket_id, None)
         print("Active connections:", len(self.active_connections))

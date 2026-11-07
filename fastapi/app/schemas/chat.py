@@ -91,9 +91,15 @@ class WebSocketError(BaseModel):
     payload: WebSocketErrorPayload
 
 
+class WebSocketConversation(BaseModel):
+    model_config = ConfigDict(strict=True)
+    command: Literal[WebSocketCommand.CONVERSATION]
+    payload: Conversation
+
+
 # client -> server
 WebSocketMessageIn = WebSocketPing | WebSocketSubscribe | WebSocketChatMessage
 # client <-> server
-WebSocketMessage = WebSocketMessageIn | WebSocketPong | WebSocketError
+WebSocketMessage = WebSocketMessageIn | WebSocketPong | WebSocketError | WebSocketConversation
     
     

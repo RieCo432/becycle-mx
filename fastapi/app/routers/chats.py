@@ -31,7 +31,18 @@ async def get_my_conversation(
         participant: models.Participant = Depends(dep.get_current_participant),
         db: Session = Depends(dep.get_db)
 ) -> schemas.Conversation:
-    return crud.get_or_create_conversation(participant=participant, db=db)
+    conversation, created = crud.get_or_create_conversation(participant=participant, db=db)
+    if created:
+        # Push the newcomer to the staff who are online right now (their
+        # REST list is otherwise static). Best-effort: a failed push must
+        # not fail the request — staff catch up on their next (re)connect.
+        try:
+            await manager.notify_new_conversation(
+                conversation=schemas.Conversation.model_validate(conversation, from_attributes=True)
+            )
+        except Exception as e:
+            print(f"failed to notify about new conversation {conversation.id}: {e}")
+    return conversation
 
 
 @chats.get("/chats/participants/me")

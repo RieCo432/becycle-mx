@@ -40,6 +40,29 @@ const myConversation = computed({
 
 function selectConversation(conversation) {
   selectedConversation.value = conversation;
+  // make sure we are actually subscribed (the conversation may have appeared
+  // after the socket connected); the server's subscribe is idempotent
+  subscribeToConversations([conversation.id]);
+}
+
+// A client's conversation comes into existence the moment they first open
+// the chat view (the server get-or-creates it), and the server pushes it
+// over the websocket (command: 'conversation'). This one-shot catch-up
+// refetch runs on every (re)connect and covers the window in which this
+// socket was disconnected when the conversation was created (the push was
+// then missed).
+async function refreshConversations() {
+  if (!isUser) {
+    return;
+  }
+  const response = await requests.getConversations();
+  const known = new Set(conversations.value.map((c) => c.id));
+  const newConversations = response.data.filter((c) => !known.has(c.id));
+  if (newConversations.length) {
+    conversations.value.push(...newConversations);
+    // subscribe, or the newcomer's messages are invisible until a reload
+    subscribeToConversations(newConversations.map((c) => c.id));
+  }
 }
 
 let websocket = null;
@@ -97,6 +120,15 @@ function createWebsocket() {
             `${client?.firstName} ${client?.lastName}: ${message.payload.body.slice(0, 160)}`,
             {timeout: 2000});
         }
+      } else if (message.command === 'conversation') {
+        // a conversation was just created (a client opened the chat view for
+        // the first time): show it in the picker and start receiving its
+        // messages
+        const existing = conversations.value.find((c) => c.id === message.payload.id);
+        if (!existing) {
+          conversations.value.push(message.payload);
+        }
+        subscribeToConversations([message.payload.id]);
       } else if (message.command === 'error') {
         if (message.payload?.command === 'message') {
           toast.error('Message could not be sent. Please reload and try again.', {timeout: 4000});
@@ -169,6 +201,12 @@ function connect(ws) {
   if (isUser) {
     subscribeToConversations(conversations.value.map((c) => c.id));
   }
+
+  // the socket may have been down while a conversation was created and its
+  // push missed — one catch-up refetch per (re)connect (staff only)
+  refreshConversations().catch((e) => {
+    console.log('conversation catch-up failed', e);
+  });
 }
 
 function sendWebsocketCommand(command, payload) {
