@@ -1,5 +1,6 @@
 import asyncio
 from asyncio import sleep
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from uuid import uuid4, UUID
 
@@ -113,9 +114,21 @@ async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMe
 
 websocket_message_adapter = TypeAdapter(schemas.WebSocketMessage)
 
+
+@asynccontextmanager
+async def session_scope():
+    # One fresh session per websocket operation: sessions are not safe to
+    # share across concurrent sockets, and closing in `finally` guarantees
+    # the connection is released even if the operation raises.
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 class ChatManager:
     def __init__(self):
-        self.db: Session = SessionLocal()
         self.active_connections: dict[UUID, WebSocket] = {}
         self.participant_sockets: dict[UUID, list[UUID]] = {}
         self.subscriptions: dict[UUID, set[UUID]] = {}
@@ -144,7 +157,8 @@ class ChatManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         token_message = await websocket.receive_json()
-        participant = get_participant_by_token(token=token_message["token"], db=self.db)
+        async with session_scope() as db:
+            participant = get_participant_by_token(token=token_message["token"], db=db)
         if participant is None:
             raise WebSocketException
         if participant.id not in self.participant_sockets:
@@ -209,13 +223,18 @@ class ChatManager:
                             subscribe_errors.append(id)
                             
                 elif isinstance(request, schemas.WebSocketChatMessage):
-                    message = models.Message(
-                        conversationId=request.payload.conversationId,
-                        sentByParticipantId=participant.id,
-                        body=request.payload.body)
-                    self.db.add(message)
-                    self.db.commit()
-                    self.db.refresh(message)
+                    async with session_scope() as db:
+                        message = models.Message(
+                            conversationId=request.payload.conversationId,
+                            sentByParticipantId=participant.id,
+                            body=request.payload.body)
+                        db.add(message)
+                        db.commit()
+                        db.refresh(message)
+                    # The session is closed before the broadcast on purpose:
+                    # no DB connection is held open while sending to sockets.
+                    # `message` is fully loaded, so serialising it while
+                    # detached is safe.
                     await self.broadcast(message)
                     
                 elif isinstance(request, schemas.WebSocketPing):
