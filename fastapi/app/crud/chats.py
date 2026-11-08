@@ -11,7 +11,7 @@ from sqlalchemy import select
 
 from fastapi import WebSocket
 from starlette.exceptions import WebSocketException
-from starlette.websockets import WebSocketDisconnect, WebSocketState
+from starlette.websockets import WebSocketDisconnect, WebSocketState, WebSocket
 
 import app.models as models
 import app.schemas as schemas

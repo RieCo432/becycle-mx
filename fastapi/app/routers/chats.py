@@ -17,7 +17,17 @@ chats = APIRouter(
     responses={404: {"description": "Not Found"}}
 )
 
-manager = crud.ChatManager()
+# Built on first use (inside a running event loop): ChatManager.__init__
+# schedules a background task, which asyncio.create_task requires a live
+# loop for, so the manager cannot be constructed at import time.
+_chat_manager: "crud.ChatManager | None" = None
+
+
+def _ensure_chat_manager() -> "crud.ChatManager":
+    global _chat_manager
+    if _chat_manager is None:
+        _chat_manager = crud.ChatManager()
+    return _chat_manager
 
 
 @chats.get("/chats/conversations", dependencies=[Depends(dep.check_permissions)])
@@ -38,7 +48,7 @@ async def get_my_conversation(
         # REST list is otherwise static). Best-effort: a failed push must
         # not fail the request — staff catch up on their next (re)connect.
         try:
-            await manager.notify_new_conversation(
+            await _ensure_chat_manager().notify_new_conversation(
                 conversation=schemas.Conversation.model_validate(conversation, from_attributes=True)
             )
         except Exception as e:
@@ -60,8 +70,9 @@ async def websocket_endpoint(
     socket_id = None
     participant = None
     try:
-        socket_id, participant = await manager.connect(websocket=websocket)
-        await manager.take_it_from_here(socket_id, participant)
+        chat_manager = _ensure_chat_manager()
+        socket_id, participant = await chat_manager.connect(websocket=websocket)
+        await chat_manager.take_it_from_here(socket_id, participant)
     except WebSocketDisconnect:
         # The client went away (before sending a token, or mid-session).
         # `take_it_from_here` cleaned up its own socket on the way out, and
@@ -82,7 +93,7 @@ async def websocket_endpoint(
         # the manager's registries (disconnect is idempotent).
         if socket_id is not None and participant is not None:
             try:
-                await manager.disconnect(socket_id, participant.id)
+                await _ensure_chat_manager().disconnect(socket_id, participant.id)
             except Exception as e:
                 print(f"cleanup for socket {socket_id} failed: {e}")
 
