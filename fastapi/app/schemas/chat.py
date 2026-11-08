@@ -34,7 +34,8 @@ class Message(BaseModel):
     sentByParticipantId:UUID
     sentByParticipant: Participant | None = None
 
-    seenByParticipantId: UUID | None = None
+    readByParticipantId: UUID | None = None
+    readOn: datetime | None = None
 
     body: str
     readByParticipant: Participant | None = None
@@ -87,7 +88,7 @@ class WebSocketErrorPayload(BaseModel):
     model_config = ConfigDict(strict=True)
     # the incoming command that was rejected
     # (None: the connection itself was rejected, e.g. an invalid token)
-    command: Literal[WebSocketCommand.SUBSCRIBE, WebSocketCommand.MESSAGE] | None = None
+    command: Literal[WebSocketCommand.SUBSCRIBE, WebSocketCommand.MESSAGE, WebSocketCommand.MARK_READ] | None = None
     reason: str
     conversationIds: list[UUID] = []
 
@@ -102,10 +103,24 @@ class WebSocketConversation(BaseModel):
     model_config = ConfigDict(strict=True)
     command: Literal[WebSocketCommand.CONVERSATION]
     payload: Conversation
+    
+    
+class WebsocketMarkReadPayload(BaseModel):
+    conversationId: UUID
+    messageIds: list[UUID]
+    participantId: UUID
+    readOn: datetime
+    readByParticipant: Participant | None = None
+
+
+class WebSocketMarkRead(BaseModel):
+    model_config = ConfigDict(strict=True)
+    command: Literal[WebSocketCommand.MARK_READ]
+    payload: WebsocketMarkReadPayload
 
 
 # client -> server
-WebSocketMessageIn = WebSocketPing | WebSocketSubscribe | WebSocketChatMessage
+WebSocketMessageIn = WebSocketPing | WebSocketSubscribe | WebSocketChatMessage | WebSocketMarkRead
 # client <-> server
 WebSocketMessage = WebSocketMessageIn | WebSocketPong | WebSocketError | WebSocketConversation
     

@@ -20,9 +20,11 @@ class Message(Base):
 
     sentByParticipantId: Mapped[UUID] = mapped_column("sentbyparticipantid", ForeignKey("participants.id"), nullable=False, quote=False)
     sentByParticipant: Mapped["Participant"] = relationship("Participant", foreign_keys=[sentByParticipantId], back_populates="messagesSent")
+    
+    readOn: Mapped[datetime | None] = mapped_column("seenon", DateTime, nullable=True, quote=False, index=True)
 
-    seenByParticipantId: Mapped[UUID] = mapped_column("seenbyparticipantid", ForeignKey("participants.id"), nullable=True, quote=False)
-    seenByParticipant: Mapped["Participant"] = relationship("Participant", foreign_keys=[seenByParticipantId], back_populates="messagesSeen")
+    readByParticipantId: Mapped[UUID] = mapped_column("readbyparticipantid", ForeignKey("participants.id"), nullable=True, quote=False)
+    readByParticipant: Mapped["Participant"] = relationship("Participant", foreign_keys=[readByParticipantId], back_populates="messagesRead")
 
     body: Mapped[str] = mapped_column("body", Text, nullable=False, quote=False)
     
@@ -36,7 +38,7 @@ class Participant(Base):
     
     conversation: Mapped["Conversation"] = relationship("Conversation", back_populates="initiatorParticipant")
     messagesSent: Mapped[List["Message"]] = relationship("Message", foreign_keys=[Message.sentByParticipantId], back_populates="sentByParticipant")
-    messagesSeen: Mapped[List["Message"]] = relationship("Message", foreign_keys=[Message.seenByParticipantId], back_populates="seenByParticipant")
+    messagesRead: Mapped[List["Message"]] = relationship("Message", foreign_keys=[Message.readByParticipantId], back_populates="readByParticipant")
     
 
 class Conversation(Base):

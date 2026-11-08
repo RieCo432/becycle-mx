@@ -31,7 +31,7 @@ const props = defineProps({
 // TODO: as a user, show what user has sent previous messages
 // TODO: when opening a conversation, it should mark unread messages as read
 
-const emit = defineEmits(['sendMessage', 'closeConversation']);
+const emit = defineEmits(['sendMessage', 'closeConversation', 'markRead']);
 
 const credentialStore = useCredentialsStore();
 
@@ -105,6 +105,16 @@ watch(
   {immediate: true},
 );
 
+watch(
+  () => getUnreadMessages(),
+  (unReadMessages) => {
+    if (unReadMessages.length > 0) {
+      emit('markRead', unReadMessages.map((m) => m.id));
+    }
+  },
+  {immediate: true},
+);
+
 function viewClient() {
   if (!props.conversation.initiatorParticipant?.client) return;
   const routeData = router.resolve({path: `/clients/${props.conversation.initiatorParticipant.client.id}`});
@@ -125,6 +135,12 @@ const conversationTitle = computed(() => {
 
   return `${client.firstName} ${client.lastName}`;
 });
+
+function getUnreadMessages() {
+  return props.conversation.messages
+    .filter((m) => !props.mySide(m))
+    .filter((m) => !m.readOn);
+}
 
 </script>
 
@@ -205,9 +221,13 @@ const conversationTitle = computed(() => {
                 <span class="block text-right font-normal text-xs text-slate-400">
                   {{
                     `${getConvenientMessageTime(message.sentOn)}
-                    ${isUser ? `(${message.sentByParticipant.user?.username ?? 'System'})` : ''}
-                    ${message.seenOn ? `\nSeen: ${getConvenientMessageTime(message.seenOn)}` : '' }`
+                    ${isUser ? `(${message.sentByParticipant.user?.username ?? 'System'})` : ''}`
                   }}
+                  <Icon
+                    icon="heroicons-outline:check-circle"
+                    v-if="message.readOn"
+                    class="inline-block align-middle ml-1 h-4 w-4 text-green-500"
+                  />
                   </span>
               </div>
             </div>

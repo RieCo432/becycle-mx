@@ -150,6 +150,14 @@ function createWebsocket() {
       } else {
         toast.error('Some conversations could not be opened.', {timeout: 4000});
       }
+    } else if (message.command === 'mark_read') {
+      const conversation = conversations.value.find((c) => c.id === message.payload.conversationId);
+      message.payload.messageIds.forEach((id) => {
+        const m = conversation.messages.find((m) => m.id === id);
+        m.readOn = message.payload.readOn;
+        m.readByParticipant = message.payload.readByParticipant;
+        m.readByParticipantId = message.payload.participantId;
+      });
     }
   };
 
@@ -301,12 +309,23 @@ onBeforeUnmount(() => {
 
 function mySide(conversation, message) {
   if (isUser) {
-    return message.sentByParticipantId !== conversation.initiatorParticipant?.id;
+    return (
+      message.sentByParticipantId !== conversation.initiatorParticipant?.id ||
+      conversation.initiatorParticipant?.id === participantId.value
+    );
   } else {
     return message.sentByParticipantId === participantId.value;
   }
 }
 
+function markRead(conversationId, messageIds) {
+  sendWebsocketCommand('mark_read', {
+    conversationId: conversationId,
+    messageIds: messageIds,
+    participantId: participantId.value,
+    readOn: new Date(),
+  });
+}
 
 </script>
 
@@ -342,6 +361,7 @@ function mySide(conversation, message) {
             @close-conversation="closeConversation"
             :websocketConnected="websocketStatus === 1"
             :my-side="(message) => mySide(selectedConversation, message)"
+            @mark-read="(messageIds) => markRead(selectedConversation.id, messageIds)"
           />
         </div>
       </div>

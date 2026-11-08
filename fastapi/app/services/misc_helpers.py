@@ -97,3 +97,4 @@ class WebSocketCommand(str, Enum):
     PONG = "pong"
     ERROR = "error"
     CONVERSATION = "conversation"
+    MARK_READ = "mark_read"

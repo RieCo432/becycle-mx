@@ -310,7 +310,7 @@ class ChatManager:
         times.append(now)
         return True
         
-    async def broadcast(self, websocket_message: schemas.WebSocketChatMessage):
+    async def broadcast(self, websocket_message: schemas.WebSocketChatMessage | schemas.WebSocketMarkRead):
         # Nobody may be subscribed to this conversation (subscriptions are
         # only requested once, at connect time) — nothing to deliver.
         participant_ids = self.subscriptions.get(websocket_message.payload.conversationId)
@@ -487,8 +487,6 @@ class ChatManager:
                         )
                     # The session is closed before the broadcast on purpose:
                     # no DB connection is held open while sending to sockets.
-                    # `message` is fully loaded, so serialising it while
-                    # detached is safe.
                     
                     await self.broadcast(websocket_message)
                     
@@ -498,7 +496,47 @@ class ChatManager:
                     self.ping_times[socket_id] = datetime.now(timezone.utc)
                     await send_websocket_message(socket, schemas.WebSocketPong(command=schemas.WebSocketCommand.PONG))
                     
-                
+                elif isinstance(request, schemas.WebSocketMarkRead):
+                    conversation_id = request.payload.conversationId
+                    if not PRODUCTION:
+                        print(socket_id, "mark_read")
+
+                    async with session_scope() as db:
+                        if not participant_can_access_conversation(
+                                db=db, participant_id=participant.id, conversation_id=conversation_id
+                        ):
+                            print(f"denied: participant {participant.id} may not message conversation {conversation_id}")
+                            await send_websocket_message(
+                                socket,
+                                schemas.WebSocketError(
+                                    command=schemas.WebSocketCommand.ERROR,
+                                    payload=schemas.WebSocketErrorPayload(
+                                        command=schemas.WebSocketCommand.MARK_READ,
+                                        reason="forbidden",
+                                        conversationIds=[conversation_id],
+                                    ),
+                                ),
+                            )
+                            continue
+    
+                        for messageId in request.payload.messageIds:
+                            message = get_message(db=db, conversation_id=conversation_id, message_id=messageId)
+                            if message is not None:
+                                message.readByParticipantId = participant.id
+                                message.readOn = request.payload.readOn
+                                db.commit()
+                        
+                        request.payload.readByParticipant = participant
+                        
+                        websocket_message = schemas.WebSocketMarkRead(
+                            command=schemas.WebSocketCommand.MARK_READ,
+                            payload=schemas.WebsocketMarkReadPayload.model_validate(request.payload, from_attributes=True)
+                        )
+
+                    # The session is closed before the broadcast on purpose:
+                    # no DB connection is held open while sending to sockets.
+    
+                    await self.broadcast(websocket_message)
                 
                 
             except Exception as e:
