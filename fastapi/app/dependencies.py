@@ -19,11 +19,27 @@ API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
 
 user_oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="public/users/token",
-    scheme_name="user_oauth2_scheme")
+    scheme_name="user_oauth2_scheme"
+)
 
 client_oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="public/clients/token",
-    scheme_name="client_oauth2_scheme")
+    scheme_name="client_oauth2_scheme"
+)
+
+
+user_oauth2_scheme_no_error = OAuth2PasswordBearer(
+    tokenUrl="public/users/token",
+    scheme_name="user_oauth2_scheme",
+    auto_error=False
+)
+
+client_oauth2_scheme_no_error = OAuth2PasswordBearer(
+    tokenUrl="public/clients/token",
+    scheme_name="client_oauth2_scheme",
+    auto_error=False
+)
+
 
 
 def get_db():
@@ -276,3 +292,11 @@ async def get_active_users(
             )
         active_users.append(user)
     return active_users
+
+
+
+
+async def get_current_participant(user_token: Annotated[str, Depends(user_oauth2_scheme_no_error)], client_token: Annotated[str, Depends(client_oauth2_scheme_no_error)], db: Session = Depends(get_db)) -> models.Participant:
+    token = user_token or client_token
+
+    return crud.get_participant_by_token(db=db, token=token)

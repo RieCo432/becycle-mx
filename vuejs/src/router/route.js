@@ -524,6 +524,16 @@ const routes = [
         },
         component: () => import('@/views/crimereports/find.vue'),
       },
+      {
+        path: '/chat',
+        name: 'Chat',
+        meta: {
+          title: 'Chat',
+          restrictTo: ['user', 'client'],
+          selectNavPath: '/chat',
+        },
+        component: () => import('@/views/chat/index.vue'),
+      },
     ],
   },
 ];

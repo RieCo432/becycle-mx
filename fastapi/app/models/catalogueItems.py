@@ -1,7 +1,7 @@
 ﻿from typing import List
 from uuid import uuid4
 
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import String, UUID, text, DateTime, LargeBinary, ForeignKey, Integer, Text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,7 +17,7 @@ class CatalogueItem(Base):
     purchasePrice: Mapped[int] = mapped_column("purchaseprice", Integer, nullable=True, quote=False)
     recommendedRetailPrice: Mapped[int] = mapped_column("recommendedretailprice", Integer, nullable=True, quote=False)
     available: Mapped[bool] = mapped_column("available", Boolean, nullable=False, default=True, server_default=text("TRUE"), quote=False)
-    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
+    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
     catalogueItemPhotoId: Mapped[UUID] = mapped_column("photoid", ForeignKey("catalogueitemphotos.id"), nullable=True, quote=False)
     catalogueItemPhoto: Mapped["CatalogueItemPhoto"] = relationship("CatalogueItemPhoto")
     isSecondHand: Mapped[bool] = mapped_column("issecondhand", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)

@@ -16,17 +16,19 @@
     >
     <div class="relative h-full w-full" :class="horizontal ? 'flex-1' : ''">
       <textarea
+        ref="textarea"
         :name="name"
         :placeholder="placeholder"
-        :class="`${classInput} input-control block w-full focus:outline-none pt-3 `"
+        :class="`input-control block w-full focus:outline-none custom-scrollbar ${classInput}`"
         :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
+        @input="handleInput"
         :error="error"
         :id="name"
         :readonly="isReadonly"
         :disabled="disabled"
         :rows="rows"
         :validate="validate"
+        :style="textareaStyle"
       ></textarea>
 
       <div
@@ -129,18 +131,93 @@ export default {
     description: {
       type: String,
     },
+    autoGrow: {
+      type: Boolean,
+      default: false,
+    },
+    maxGrowHeight: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
     return {
       types: this.type,
     };
   },
+  computed: {
+    textareaStyle() {
+      if (!this.autoGrow) {
+        return undefined;
+      }
+
+      return {
+        maxHeight: this.maxGrowHeight ? `${this.maxGrowHeight}px` : undefined,
+        overflowY: 'auto',
+      };
+    },
+  },
+  watch: {
+    modelValue() {
+      this.$nextTick(this.resizeTextarea);
+    },
+  },
+  mounted() {
+    this.resizeTextarea();
+  },
   methods: {
-    toggleType() {
-      // toggle the type of the input field
-      this.types = this.types === 'text' ? 'password' : 'text';
+    handleInput(event) {
+      this.$emit('update:modelValue', event.target.value);
+      this.$nextTick(this.resizeTextarea);
+    },
+    resizeTextarea() {
+      if (!this.autoGrow || !this.$refs.textarea) {
+        return;
+      }
+
+      const textarea = this.$refs.textarea;
+      const maxHeight = this.maxGrowHeight || Infinity;
+
+      textarea.style.height = 'auto';
+
+      const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
+      const nextHeightValue = `${nextHeight}px`;
+
+      if (textarea.style.height !== nextHeightValue) {
+        textarea.style.height = nextHeightValue;
+      }
+
+      textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
     },
   },
 };
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #64748b;
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
+}
+</style>

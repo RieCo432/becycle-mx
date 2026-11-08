@@ -36,6 +36,12 @@ export const topMenu = [
     ],
   },
   {
+    title: 'Chat',
+    icon: 'heroicons-outline:chat',
+    link: '/chat',
+    show: ['client', 'user'],
+  },
+  {
     title: 'Book Appointment',
     icon: 'heroicons-outline:calendar',
     link: '/appointments/book',

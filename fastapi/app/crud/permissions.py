@@ -111,6 +111,7 @@ def remove_permissions_for_nonexistent_routes(db: Session, routes: list[APIRoute
     for permission in permissions:
         matching_routes = [route for route in routes if route.path.startswith(permission.route) and permission.method in route.methods]
         if len(matching_routes) == 0:
+            print("deleting permission:", permission.method, permission.route)
             delete_permission(db=db, permission=permission)
 
 

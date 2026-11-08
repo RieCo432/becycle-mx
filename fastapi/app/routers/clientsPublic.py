@@ -37,7 +37,7 @@ async def verify_client_temp(
 
     client = crud.verify_client_temp(db=db, client_temp_id=client_temp_id, verification_code=verification_code)
 
-    access_token = auth.create_access_token(data={"sub": str(client.id)})
+    access_token = auth.create_access_token(data={"sub": str(client.id), "participant_id": str(crud.get_or_create_participant(db=db, entity=client).id)})
 
     return schemas.Token(
         access_token=access_token,
@@ -72,7 +72,7 @@ async def get_token(
 
     client = crud.authenticate_client(db=db, client_id=UUID(form_data.username), login_code=form_data.password)
 
-    access_token = auth.create_access_token(data={"sub": str(client.id)})
+    access_token = auth.create_access_token(data={"sub": str(client.id), "participant_id": str(crud.get_or_create_participant(db=db, entity=client).id)})
 
     return schemas.Token(
         access_token=access_token,

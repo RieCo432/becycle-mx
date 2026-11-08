@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from uuid import uuid4
 
@@ -65,7 +65,13 @@ class User(Base):
     pin: Mapped[str] = mapped_column("pin", String(60), nullable=True, quote=False)
     rentalChecker: Mapped[bool] = mapped_column("rentalchecker", Boolean, default=False, server_default=text("FALSE"), nullable=False, quote=False)
     softDeleted: Mapped[bool] = mapped_column("softdeleted", Boolean, default=False, nullable=False, server_default=text("FALSE"), quote=False)
-    lastAuthenticated: Mapped[datetime] = mapped_column("lastauthenticated", DateTime, default=datetime.utcnow(), server_default=text("(current_timestamp at time zone 'utc')"), nullable=True, quote=False)
+    lastAuthenticated: Mapped[datetime] = mapped_column("lastauthenticated", DateTime, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), nullable=True, quote=False)
+
+    participantId: Mapped[UUID] = mapped_column("participantid",  ForeignKey("participants.id"), nullable=True, quote=False)
+    participant: Mapped["Participant"] = relationship("Participant", back_populates="user")
+
+
+
 
     workedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.workingUserId], back_populates="workingUser")
     checkedContracts: Mapped[List["Contract"]] = relationship("Contract", foreign_keys=[Contract.checkingUserId], back_populates="checkingUser")
@@ -74,23 +80,21 @@ class User(Base):
     depositExchangesReceived: Mapped[List[DepositExchange]] = relationship("DepositExchange", foreign_keys=[DepositExchange.toUserId], back_populates="toUser")
     depositExchangesGiven: Mapped[List[DepositExchange]] = relationship("DepositExchange", foreign_keys=[DepositExchange.fromUserId], back_populates="fromUser")
 
+
+
     expenses: Mapped[List["Expense"]] = relationship("Expense", foreign_keys=[Expense.expenseUserId], back_populates="expenseUser")
     transfers: Mapped[List["Expense"]] = relationship("Expense", foreign_keys=[Expense.treasurerUserId],
                                                      back_populates="treasurerUser")
 
     presentationCard: Mapped["UserPresentationCard"] = relationship("UserPresentationCard", foreign_keys=[UserPresentationCard.userId],
                                                              back_populates="user")
-
     permissions: Mapped[List["Permission"]] = relationship(secondary=user_permission_association_table, back_populates="users")
     groups: Mapped[List["Group"]] = relationship(secondary=group_user_association_table, back_populates="users")
-
     accountsOwned: Mapped[List["Account"]] = relationship("Account", foreign_keys=[Account.ownerUserId], back_populates="ownerUser")
     accountsClosed: Mapped[List["Account"]] = relationship("Account", foreign_keys=[Account.closedByUserId], back_populates="closedByUser")
     transactionHeadersCreated: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.createdByUserId], back_populates="createdByUser")
     transactionHeadersPosted: Mapped[List["TransactionHeader"]] = relationship("TransactionHeader", foreign_keys=[TransactionHeader.postedByUserId], back_populates="postedByUser")
-    
     saleHeadersCreated: Mapped[List["SaleHeader"]] = relationship("SaleHeader", foreign_keys=[SaleHeader.createdByUserId], back_populates="createdByUser")
-
     bugReports: Mapped[List["BugReport"]] = relationship("BugReport", foreign_keys=[BugReport.reportedByUserId], back_populates="reportedByUser")
     photos: Mapped[List["Photo"]] = relationship("Photo", foreign_keys=[Photo.userId], back_populates="user")
 
