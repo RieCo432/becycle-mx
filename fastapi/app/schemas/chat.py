@@ -9,13 +9,20 @@ from .user import User
 from .client import Client
 from app.services.misc_helpers import WebSocketCommand
 
+
+class UserMinimal(BaseModel):
+    id: UUID
+    username: str
+
+
+
 class Participant(BaseModel):
     id: UUID
-    user: User | None = None
+    user: UserMinimal | None = None
     client: Client | None = None
 
 
-class MessageBase(BaseModel):
+class Message(BaseModel):
     model_config = ConfigDict(strict=True, from_attributes=True)
     id: UUID
 
@@ -25,16 +32,12 @@ class MessageBase(BaseModel):
     sentOn: datetime
 
     sentByParticipantId:UUID
+    sentByParticipant: Participant | None = None
 
     seenByParticipantId: UUID | None = None
 
     body: str
-
-
-class MessageFull(MessageBase):
-    model_config = ConfigDict(strict=True, from_attributes=True)
-    sentByParticipant: Participant
-    seenByParticipant: Participant | None = None
+    readByParticipant: Participant | None = None
     
     
 class Conversation(BaseModel):
@@ -42,7 +45,7 @@ class Conversation(BaseModel):
     initiatorParticipantId: UUID
     initiatorParticipant: Participant
     
-    messages: list[MessageFull]
+    messages: list[Message]
     
     
     
@@ -77,7 +80,7 @@ class WebSocketChatMessagePayload(BaseModel):
 class WebSocketChatMessage(BaseModel):
     model_config = ConfigDict(strict=True)
     command: Literal[WebSocketCommand.MESSAGE]
-    payload: WebSocketChatMessagePayload | MessageBase
+    payload: WebSocketChatMessagePayload | Message
 
 
 class WebSocketErrorPayload(BaseModel):

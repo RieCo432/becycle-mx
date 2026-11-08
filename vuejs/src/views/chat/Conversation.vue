@@ -22,6 +22,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  mySide: {
+    type: Function,
+    required: true,
+  },
 });
 
 // TODO: as a user, show what user has sent previous messages
@@ -188,7 +192,7 @@ const conversationTitle = computed(() => {
             <!-- my messages -->
             <div
               class="flex justify-end group w-full"
-              v-if="message.sentByParticipantId === participantId"
+              v-if="mySide(message)"
             >
               <div class="max-w-[83.333333%] ml-auto">
                 <div
@@ -199,7 +203,11 @@ const conversationTitle = computed(() => {
                   {{ message.body }}
                 </div>
                 <span class="block text-right font-normal text-xs text-slate-400">
-                    {{ getConvenientMessageTime(message.sentOn) }}
+                  {{
+                    `${getConvenientMessageTime(message.sentOn)}
+                    ${isUser ? `(${message.sentByParticipant.user?.username ?? 'System'})` : ''}
+                    ${message.seenOn ? `\nSeen: ${getConvenientMessageTime(message.seenOn)}` : '' }`
+                  }}
                   </span>
               </div>
             </div>

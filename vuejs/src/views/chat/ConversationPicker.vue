@@ -22,6 +22,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  mySide: {
+    type: Function,
+    required: true,
+  },
 });
 
 const searchTerm = ref('');
@@ -45,8 +49,8 @@ const filteredConversations = computed(() => {
 
 function getNumberOfUnreadMessages(conversation) {
   return conversation.messages
-    .filter((m) => m.sentByParticipantId !== props.participantId)
-    .filter((m) => !m.seenByParticipantId)
+    .filter((m) => !props.mySide(conversation, m))
+    .filter((m) => !m.readByParticipantId)
     .length;
 }
 

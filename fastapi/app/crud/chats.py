@@ -200,6 +200,15 @@ def participant_can_access_conversation(db: Session, participant_id: UUID, conve
     return participant_may_see_conversations(db=db, participant_id=participant_id)
 
 
+def get_message(db: Session, conversation_id: UUID, message_id: UUID) -> models.Message | None:
+    """Get a message by conversation and message ID."""
+    return db.scalar(
+        select(models.Message)
+        .where(models.Message.conversationId == conversation_id)
+        .where(models.Message.id == message_id)
+    )
+
+
 @asynccontextmanager
 async def session_scope():
     # One fresh session per websocket operation: sessions are not safe to
@@ -301,17 +310,13 @@ class ChatManager:
         times.append(now)
         return True
         
-    async def broadcast(self, message: models.Message):
+    async def broadcast(self, websocket_message: schemas.WebSocketChatMessage):
         # Nobody may be subscribed to this conversation (subscriptions are
         # only requested once, at connect time) — nothing to deliver.
-        participant_ids = self.subscriptions.get(message.conversationId)
+        participant_ids = self.subscriptions.get(websocket_message.payload.conversationId)
         if not participant_ids:
             return
 
-        websocket_message = schemas.WebSocketChatMessage(
-            command=schemas.WebSocketCommand.MESSAGE,
-            payload=schemas.MessageBase.model_validate(message, from_attributes=True)
-        )
         # Snapshot both levels: another socket's task may run while we await
         # a send and change either collection (e.g. a disconnect).
         for participant_id in list(participant_ids):
@@ -475,18 +480,24 @@ class ChatManager:
                         db.add(message)
                         db.commit()
                         db.refresh(message)
+
+                        websocket_message = schemas.WebSocketChatMessage(
+                            command=schemas.WebSocketCommand.MESSAGE,
+                            payload=schemas.Message.model_validate(message, from_attributes=True)
+                        )
                     # The session is closed before the broadcast on purpose:
                     # no DB connection is held open while sending to sockets.
                     # `message` is fully loaded, so serialising it while
                     # detached is safe.
-                    await self.broadcast(message)
+                    
+                    await self.broadcast(websocket_message)
                     
                 elif isinstance(request, schemas.WebSocketPing):
                     if not PRODUCTION:
                         print(socket_id, "ping")
                     self.ping_times[socket_id] = datetime.now(timezone.utc)
                     await send_websocket_message(socket, schemas.WebSocketPong(command=schemas.WebSocketCommand.PONG))
-                            
+                    
                 
                 
                 

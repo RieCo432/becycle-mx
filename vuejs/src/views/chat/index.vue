@@ -299,6 +299,14 @@ onBeforeUnmount(() => {
   }
 });
 
+function mySide(conversation, message) {
+  if (isUser) {
+    return message.sentByParticipantId !== conversation.initiatorParticipant?.id;
+  } else {
+    return message.sentByParticipantId === participantId.value;
+  }
+}
+
 
 </script>
 
@@ -320,6 +328,7 @@ onBeforeUnmount(() => {
               :conversations="conversations"
               :myConversation="myConversation"
               :participantId="participantId"
+              :my-side="mySide"
             />
           </div>
         </template>
@@ -332,6 +341,7 @@ onBeforeUnmount(() => {
             @send-message="sendMessage"
             @close-conversation="closeConversation"
             :websocketConnected="websocketStatus === 1"
+            :my-side="(message) => mySide(selectedConversation, message)"
           />
         </div>
       </div>
