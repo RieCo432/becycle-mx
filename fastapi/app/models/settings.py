@@ -160,3 +160,13 @@ class ExpenseType(Base):
             self.id == other.get("id"),
             self.description == other.get("description")
         ])
+
+
+class LlmSettings(Base):
+    __tablename__ = "llmsettings"
+
+    id: Mapped[int] = mapped_column("id", Integer, primary_key=True, nullable=False, default=1, server_default=text("1"), index=True, quote=False)
+    model: Mapped[str] = mapped_column("model", String(128), nullable=False, quote=False)
+    systemPrompt: Mapped[str] = mapped_column("systemprompt", Text, nullable=True, quote=False)
+    classificationPrompt: Mapped[str] = mapped_column("classificationprompt", Text, nullable=True, quote=False)
+    customerFreeForm: Mapped[bool] = mapped_column("customerfreeform", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
