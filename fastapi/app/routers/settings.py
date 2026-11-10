@@ -157,3 +157,19 @@ async def get_funds(db: Session = Depends(dep.get_db)) -> list[schemas.Fund]:
 
 # TODO: need some endpoints for adding and disabling funds
 
+
+@settings.get("/settings/llm")
+async def get_llm_settings(db: Session = Depends(dep.get_db)) -> schemas.LlmSettings:
+    return crud.get_llm_settings(db=db)
+
+
+@settings.put("/settings/llm")
+async def update_llm_settings(new_llm_settings: schemas.LlmSettings, db: Session = Depends(dep.get_db)) -> schemas.LlmSettings:
+    return crud.update_llm_settings(db=db, new_llm_settings=new_llm_settings)
+
+
+@settings.get("/settings/llm/models")
+async def get_llm_models() -> list[str]:
+    # Placeholder until the LLM Agent lands — the Agent will query Ollama (GET /api/tags) instead.
+    return ["Gemma4:12b"]
+

@@ -969,6 +969,24 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getLlmSettings() {
+    return axiosClient.get('/settings/llm', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  putLlmSettings(newLlmSettings) {
+    return axiosClient.put('/settings/llm', newLlmSettings, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getLlmModels() {
+    return axiosClient.get('/settings/llm/models', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   patchAboutUs(newAboutUs) {
     return axiosClient.patch(`/settings/about-us`, {html: newAboutUs}, {
       headers: credentialsStore.getApiRequestHeader(),

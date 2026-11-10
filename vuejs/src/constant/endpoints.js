@@ -43,6 +43,7 @@ export const ENDPOINTS = {
 
   // settings ----------------------------------------------------------------
   putAddress: {method: 'PUT', route: '/settings/address'},
+  putLlmSettings: {method: 'PUT', route: '/settings/llm'},
   patchAboutUs: {method: 'PATCH', route: '/settings/about-us'},
   patchFaq: {method: 'PATCH', route: '/settings/faq/{faq_id}'},
   postFaq: {method: 'POST', route: '/settings/faq'},
@@ -97,11 +98,11 @@ export const ENDPOINTS = {
   patchIgnorePotentialBikeDuplicate: {method: 'PATCH', route: '/admin/duplicates/bikes/{potential_bike_duplicate_id}/ignore'},
   putResolvePotentialClientDuplicate: {method: 'PUT', route: '/admin/duplicates/clients/{potential_client_duplicate_id}/resolve'},
   patchIgnorePotentialClientDuplicate: {method: 'PATCH', route: '/admin/duplicates/clients/{potential_client_duplicate_id}/ignore'},
-  
+
   // takeout -----------------------------------------------------------------
   downloadRawDataPdf: {method: 'GET', route: '/admin/takeout/contracts.pdf'},
   downloadRawDataExcel: {method: 'GET', route: '/admin/takeout/contracts.xlsx'},
-  
+
   // bug reports -------------------------------------------------------------
   deleteBugReport: {method: 'DELETE', route: '/bugreports/{bug_report_id}'},
   mergeBugReports: {method: 'POST', route: '/bugreports/merge'},
