@@ -7,6 +7,7 @@ from starlette import status
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
+from app.services.llm_agent import list_models
 
 settings = APIRouter(
     tags=["settings"],
@@ -170,6 +171,5 @@ async def update_llm_settings(new_llm_settings: schemas.LlmSettings, db: Session
 
 @settings.get("/settings/llm/models")
 async def get_llm_models() -> list[str]:
-    # Placeholder until the LLM Agent lands — the Agent will query Ollama (GET /api/tags) instead.
-    return ["Gemma4:12b"]
+    return await list_models()
 
