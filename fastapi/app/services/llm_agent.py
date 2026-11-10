@@ -1,4 +1,6 @@
+import json
 import os
+import re
 
 import httpx
 from pydantic_ai import Agent
@@ -31,7 +33,7 @@ LLM_V1_BASE_URL = f"{LLM_BASE_URL}/v1" if LLM_BASE_URL else ""
 # HTTP call (an httpx client timeout), while converse is a whole model turn
 # (plain seconds handed to agent.run).
 _TIMEOUT = httpx.Timeout(15.0, connect=5.0)
-_LLM_TIMEOUT = 30.0
+_LLM_TIMEOUT = 60.0
 
 # A-10 / A-11: code-defined default persona — neutral and domain-focused.
 # ORG-1: no org-specific name is hardcoded here. The admin can override via
@@ -43,6 +45,21 @@ _DEFAULT_PERSONA = (
     "parts, and opening hours. Be friendly, clear, and concise. "
     "If you don't know the answer, say so rather than guessing."
 )
+
+# A-12: the authoritative, closed set of intents the Agent may classify a message
+# as. This tuple is the single source of truth: the code-default classification
+# prompt is generated from it and classify() validates the model's output against
+# it, so the set, the instructions, and the validation can't drift apart. To add an
+# intent, append it here — the prompt and validation pick it up automatically.
+# (Initial working set; to be extended to the full set.)
+INTENTS = ("booking", "hours", "repair_request", "parts_inquiry", "other")
+
+# A-6: the "unmatched" sentinel — returned when the model can't map a message to a
+# real intent. Distinct from None, which means "no LLM was run" (A-4 / A-13).
+NONE_INTENT = "none"
+
+# The closed set the model is allowed to return: the real intents plus the sentinel.
+_VALID_INTENTS = frozenset(INTENTS) | {NONE_INTENT}
 
 
 def _extract_text(message) -> str:
@@ -84,6 +101,64 @@ def _persona(settings) -> str:
     if system_prompt and system_prompt.strip():
         return system_prompt.strip()
     return _DEFAULT_PERSONA
+
+
+def _default_classification_prompt() -> str:
+    """A-10/A-11: code-default classification instructions, derived from INTENTS.
+
+    Defines the closed intent set and a strict machine-parseable JSON contract.
+    Because the allowed list is generated from INTENTS, extending the set never
+    desynchronises the instructions from the validation.
+    """
+    allowed = ", ".join(INTENTS)
+    return (
+        "You are a message classifier, not a conversational assistant. "
+        "Do not answer the customer. "
+        f"Classify their latest message into exactly one intent: {allowed}, "
+        f"or \"{NONE_INTENT}\" if it fits none of them. "
+        "Respond with JSON only: {\"intent\": \"<one of the above>\"}"
+    )
+
+
+def _classification_instructions(settings) -> str:
+    """A-10: LlmSettings.classificationPrompt, else the code default."""
+    prompt = getattr(settings, "classificationPrompt", None)
+    if prompt and prompt.strip():
+        return prompt.strip()
+    return _default_classification_prompt()
+
+
+def _extract_intent(raw) -> str:
+    """Reduce the model's output to a valid intent, else the none sentinel (A-6/A-12).
+
+    Prefers a well-formed {"intent": "..."} object, then a bare known intent word,
+    then a lenient pull from a noisy/fenced response. Anything unrecognised degrades
+    to NONE_INTENT rather than raising (best-effort).
+    """
+    text = raw.strip() if isinstance(raw, str) else ("" if raw is None else str(raw).strip())
+    if not text:
+        return NONE_INTENT
+
+    # 1) strict: a JSON object with an "intent" key whose value is in the closed set
+    try:
+        data = json.loads(text)
+        if isinstance(data, dict) and isinstance(data.get("intent"), str):
+            intent = data["intent"].strip().lower()
+            if intent in _VALID_INTENTS:
+                return intent
+    except (ValueError, TypeError):
+        pass
+
+    # 2) lenient: the whole response is a single known intent word
+    if text.lower() in _VALID_INTENTS:
+        return text.lower()
+
+    # 3) lenient: pull "intent": "<value>" out of a fenced/noisy response
+    match = re.search(r'"?intent"?\s*[:=]\s*"?([a-z0-9_]+)"?', text, re.IGNORECASE)
+    if match and match.group(1).lower() in _VALID_INTENTS:
+        return match.group(1).lower()
+
+    return NONE_INTENT
 
 
 async def list_models() -> list[str]:
@@ -162,3 +237,53 @@ async def converse(db: Session, messages, context: dict | None = None) -> str | 
     if isinstance(output, str) and output.strip():
         return output.strip()
     return None
+
+
+async def classify(db: Session, messages, context: dict | None = None) -> str | None:
+    """Classify a debounced burst of messages into an intent (A-6).
+
+    The Agent is the only component that invokes the LLM (A-1). The active config —
+    model, shared persona, and classification instructions — is read from
+    LlmSettings per operation (A-3); the instructions fall back to a code-defined
+    default when blank (A-10) and carry a strict machine-parseable contract (A-11).
+    When no model is configured the Agent is inactive and makes no LLM call (A-4).
+
+    Returns one of INTENTS, or the NONE_INTENT sentinel when the model can't map the
+    message to a real intent. Returns None when no LLM call is made (no model,
+    unconfigured/dead backend, timeout) — best-effort per A-13 — so the caller falls
+    back to the base human chat.
+
+    Args:
+        db: session used to read the active LlmSettings row (A-3).
+        messages: a batch of messages (A-9) — strings, or dicts/objects exposing
+            their text via `content` / `body` / `text`.
+        context: the caller's per-org / per-thread context (A-9). Accepted so the
+            signature matches the shared contract; reserved for future use.
+    """
+    settings = get_llm_settings(db=db)
+
+    model = _active_model(settings)
+    if not model:
+        return None  # A-4: no model configured -> inactive, no LLM call
+    if not LLM_V1_BASE_URL:
+        return None  # A-13: backend not configured -> no-op
+
+    prompt = _compose_user_prompt(messages)
+    if not prompt:
+        return None  # nothing to classify
+
+    # A-10: the shared persona alone for converse; persona + classification
+    # instructions for classify.
+    system_prompt = _persona(settings) + "\n\n" + _classification_instructions(settings)
+
+    agent = Agent(
+        OllamaModel(model, provider=OllamaProvider(base_url=LLM_V1_BASE_URL)),
+        system_prompt=system_prompt,
+    )
+    try:
+        result = await agent.run(prompt, timeout=_LLM_TIMEOUT)
+    except Exception as exc:  # A-13: any transport failure -> no-op
+        print(f"LLM classify failed: {exc}")
+        return None
+
+    return _extract_intent(getattr(result, "output", None))
