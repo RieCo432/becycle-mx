@@ -37,10 +37,12 @@ _LLM_TIMEOUT = 60.0
 
 # #505 P-1: code-defined default persona — the shared core: the agent's identity
 # and behaviour, identical for every workshop that runs this codebase.
-# ORG-1: no org-specific name or fact is hardcoded here. A site extends this core
-# with its own identity and firm policy via LlmSettings.systemPrompt (AS-5), and
-# with changeable facts (hours, prices, stock, FAQ) via the dynamic block (D-1) —
-# so no changeable operational fact belongs here (P-3).
+# ORG-1: no org-specific name or fact is hardcoded here. A site configures its
+# own complete persona in LlmSettings.systemPrompt, which fully replaces this
+# core when set (see _persona, AS-5); this default is the fallback for
+# unconfigured sites. No changeable operational fact belongs here (P-3) — hours,
+# prices, stock and policy come from the site's database, editable without a
+# deploy.
 _DEFAULT_PERSONA = """\
 You are Allen, the assistant of the workshop (the name is a nod to the allen key,
 the mechanic's everyday tool). You help the workshop's clients, volunteers, and
