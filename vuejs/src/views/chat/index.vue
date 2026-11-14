@@ -310,8 +310,11 @@ onBeforeUnmount(() => {
 function mySide(conversation, message) {
   if (isUser) {
     return (
-      message.sentByParticipantId !== conversation.initiatorParticipant?.id ||
-      conversation.initiatorParticipant?.id === participantId.value
+      // message was not sent by initiator (volunteer sent message in client chat)
+      // EXCLUSIVE OR
+      // the conversation belongs to the volunteer
+      (message.sentByParticipantId !== conversation.initiatorParticipant?.id) !==
+      (conversation.initiatorParticipant?.id === participantId.value)
     );
   } else {
     return message.sentByParticipantId === participantId.value;
