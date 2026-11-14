@@ -385,6 +385,16 @@ const routes = [
         component: () => import('@/views/admin/basicSettings.vue'),
       },
       {
+        path: '/admin/llm-settings',
+        name: 'LLM Settings',
+        meta: {
+          title: 'LLM Settings',
+          restrictTo: ['user'],
+          selectNavPath: '/admin/llm-settings',
+        },
+        component: () => import('@/views/admin/llmSettings.vue'),
+      },
+      {
         path: '/contracts/find-paper-contract',
         name: 'Find Paper Contract',
         meta: {

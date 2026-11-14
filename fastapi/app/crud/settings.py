@@ -425,6 +425,26 @@ def update_address(db: Session, new_address: schemas.Address) -> models.Address:
     return current_address
 
 
+def get_llm_settings(db: Session) -> models.LlmSettings:
+    return db.scalar(
+        select(models.LlmSettings)
+        .where(models.LlmSettings.id == 1)
+    )
+
+
+def update_llm_settings(db: Session, new_llm_settings: schemas.LlmSettings) -> models.LlmSettings:
+    current_llm_settings = get_llm_settings(db=db)
+
+    current_llm_settings.model = new_llm_settings.model
+    current_llm_settings.systemPrompt = new_llm_settings.systemPrompt
+    current_llm_settings.classificationPrompt = new_llm_settings.classificationPrompt
+    current_llm_settings.customerFreeForm = new_llm_settings.customerFreeForm
+
+    db.commit()
+
+    return current_llm_settings
+
+
 def get_expense_types(db: Session) -> list[models.ExpenseType]:
     return [
         _ for _ in db.scalars(

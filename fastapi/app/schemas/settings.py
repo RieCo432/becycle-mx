@@ -87,3 +87,11 @@ class Faq(FaqBase):
 
 class UpdateFaq(FaqBase):
     active: bool
+
+
+class LlmSettings(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    model: str
+    systemPrompt: str | None
+    classificationPrompt: str | None
+    customerFreeForm: bool

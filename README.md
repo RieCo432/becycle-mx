@@ -50,6 +50,7 @@ The following are required if you wish to run the vuejs app and python api direc
 2. For the `secrets/api.env` update:
 	- `API_SECRET` can be generated using `openssl rand -hex 32`
 	- `GOOGLE_ACCOUNT` and `GOOGLE_APP_PASSWORD` can be obtained from the Google Account Security settings, but are not required for dev purposes.
+	- `LLM_HOST` and `LLM_PORT` are only required if you use the LLM backend. Ollama's default port is `11434` (e.g. `phoenix.local`).
 3. For `secrets/postgres.env` put whatever you find appropriate here:
 	- `POSTGRES_USER`
 	- `POSTGRES_DB`
@@ -61,6 +62,8 @@ The following are required if you wish to run the vuejs app and python api direc
 		- `EMAIL_FROM`
 		- `GOOGLE_ACCOUNT`
 		- `GOOGLE_APP_PASSWORD`
+		- `LLM_HOST`
+		- `LLM_PORT`
 	- Set the following as the same as in `postgres.env`.
 		- `POSTGRES_USER`
 		- `POSTGRES_DB`

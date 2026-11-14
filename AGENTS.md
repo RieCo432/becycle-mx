@@ -8,6 +8,7 @@ The same codebase serves multiple bike shops (becycle-mx, belfastcyclecoop-mx); 
 
 - **Never commit anything.** No `git commit` (or push) — for security reasons. Leave changes in the working tree for the owner to review.
 - **Avoid accessing the database if possible.** Do not start the API, run migrations, or run tests against Postgres unless there is no other way to verify the change.
+- **No write operations on GitHub without explicit, per-action consent.** Reads (`gh issue view`, API GETs, etc.) are fine. Any write — commenting on or editing an issue, opening/merging a PR, pushing — requires me to ask about that specific action and get a clear go-ahead first; a past "yes" does not carry over.
 
 ## Layout
 

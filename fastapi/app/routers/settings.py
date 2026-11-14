@@ -7,6 +7,7 @@ from starlette import status
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
+from app.services.llm_agent import list_models
 
 settings = APIRouter(
     tags=["settings"],
@@ -156,4 +157,19 @@ async def get_funds(db: Session = Depends(dep.get_db)) -> list[schemas.Fund]:
     return crud.get_all_funds(db=db)
 
 # TODO: need some endpoints for adding and disabling funds
+
+
+@settings.get("/settings/llm")
+async def get_llm_settings(db: Session = Depends(dep.get_db)) -> schemas.LlmSettings:
+    return crud.get_llm_settings(db=db)
+
+
+@settings.put("/settings/llm")
+async def update_llm_settings(new_llm_settings: schemas.LlmSettings, db: Session = Depends(dep.get_db)) -> schemas.LlmSettings:
+    return crud.update_llm_settings(db=db, new_llm_settings=new_llm_settings)
+
+
+@settings.get("/settings/llm/models")
+async def get_llm_models() -> list[str]:
+    return await list_models()
 

@@ -196,6 +196,12 @@ export const topMenu = [
         show: ['user'],
       },
       {
+        childtitle: 'LLM Settings',
+        childicon: 'heroicons-outline:chat-bubble-left-right',
+        childlink: '/admin/llm-settings',
+        show: ['user'],
+      },
+      {
         childtitle: 'Accounts',
         childicon: 'material-symbols:wallet',
         childlink: '/admin/accounts',
