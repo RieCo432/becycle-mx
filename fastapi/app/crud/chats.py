@@ -252,18 +252,21 @@ class _DebounceBuffer:
     """
 
     def __init__(self, loop: asyncio.AbstractEventLoop, on_flush):
-        # on_flush: async (conversation_id, batch: list[str]) -> None
+        # on_flush: async (conversation_id, batch: list[tuple[UUID, str]]) -> None
+        # Each batch entry is (message_id, body): the body is what the agent sees,
+        # the id lets the handler act on exactly these messages (e.g. mark them
+        # read, V-6) instead of re-deriving them.
         # The silence window and batch cap are supplied per submit() so admin edits
         # to LlmSettings apply live (no restart).
         self._loop = loop
         self._on_flush = on_flush
-        self._buffers: dict[UUID, list[str]] = {}
+        self._buffers: dict[UUID, list[tuple[UUID, str]]] = {}
         self._timers: dict[UUID, asyncio.TimerHandle] = {}
 
-    def submit(self, conversation_id: UUID, body: str, window_s: float, cap: int) -> None:
+    def submit(self, conversation_id: UUID, message_id: UUID, body: str, window_s: float, cap: int) -> None:
         key = conversation_id
         buffer = self._buffers.setdefault(key, [])
-        buffer.append(body)
+        buffer.append((message_id, body))
         if len(buffer) >= cap:
             # Cap reached: fire now rather than wait out the silence window.
             self._fire(key)
@@ -296,7 +299,7 @@ class _DebounceBuffer:
         # and never propagates into the loop.
         task.add_done_callback(self._reap)
 
-    async def _safe_flush(self, conversation_id: UUID, batch: list[str]) -> None:
+    async def _safe_flush(self, conversation_id: UUID, batch: list[tuple[UUID, str]]) -> None:
         try:
             await self._on_flush(conversation_id, batch)
         except Exception as e:  # best-effort: a handler failure means "nothing happens"
@@ -486,7 +489,7 @@ class ChatManager:
         self.message_times.pop(socket_id, None)
         print("Active connections:", len(self.active_connections))
         
-    async def _on_agent_flush(self, conversation_id: UUID, batch: list[str]) -> None:
+    async def _on_agent_flush(self, conversation_id: UUID, batch: list[tuple[UUID, str]]) -> None:
         """Route a finished owner burst by the owner's role (H-3: the harness is
         role-agnostic; the route lives in the handler).
 
@@ -495,14 +498,18 @@ class ChatManager:
           - owner is a client              -> intent classification (#501); a no-op
             in #500
 
-        On a reply we persist it as a Message sent by the assistant (AS-4) and
-        broadcast it to the conversation; on `None` (no model, Ollama down,
-        timeout, empty) we do nothing (H-5). The AI-mark is implicit: the sender
-        is the assistant. Best-effort and non-blocking (H-2): the flush runs in
-        its own session, closed before the broadcast, so the base human chat is
-        never affected.
+        Each batch entry is (message_id, body): the bodies go to the agent, the
+        ids let us act on exactly the messages it answered. On a reply we persist
+        it as a Message sent by the assistant (AS-4) and broadcast it to the
+        conversation, and mark the burst it answered read by the assistant
+        (V-6); on `None` (no model, Ollama down, timeout, empty) we do nothing
+        (H-5). The
+        AI-mark is implicit: the sender is the assistant. Best-effort and
+        non-blocking (H-2): the flush runs in its own session, closed before the
+        broadcast, so the base human chat is never affected.
         """
         websocket_message = None
+        mark_read_message = None
         async with session_scope() as db:
             conversation = db.scalar(
                 select(models.Conversation).where(models.Conversation.id == conversation_id)
@@ -518,10 +525,11 @@ class ChatManager:
                 # AS-4: the stable `ai-agent` account's participant is the sender.
                 assistant = get_user_by_username("ai-agent", db=db)
                 if assistant is not None and assistant.participantId is not None:
-                    # V-2: converse with the shared persona; returns a reply or None.
-                    # converse() re-checks the model (A-4), so a model cleared
-                    # after the harness gate still safely no-ops here.
-                    reply = await converse(db=db, messages=batch, context=None)
+                    # V-2: converse with the shared persona (bodies only);
+                    # returns a reply or None. converse() re-checks the model
+                    # (A-4), so a model cleared after the harness gate still
+                    # safely no-ops here.
+                    reply = await converse(db=db, messages=[body for _, body in batch], context=None)
                     if reply:
                         # V-3: the reply is a normal Message sent by the assistant,
                         # broadcast to the conversation exactly like any other.
@@ -531,12 +539,51 @@ class ChatManager:
                             body=reply,
                         )
                         db.add(message)
+
+                        # The agent has read exactly this burst to produce the
+                        # reply, so record that (V-6): mark the burst's
+                        # still-unread messages read by the assistant. Only
+                        # happens on a reply — if converse returned None the
+                        # burst stays as it was (V-4/H-5).
+                        read_on = datetime.now(timezone.utc)
+                        read_messages = db.scalars(
+                            select(models.Message)
+                            .where(
+                                models.Message.id.in_([message_id for message_id, _ in batch]),
+                                models.Message.readByParticipantId.is_(None),
+                            )
+                        ).all()
+                        read_message_ids = [m.id for m in read_messages]
+                        for m in read_messages:
+                            m.readByParticipantId = assistant.participantId
+                            m.readOn = read_on
+
                         db.commit()
                         db.refresh(message)
                         websocket_message = schemas.WebSocketChatMessage(
                             command=schemas.WebSocketCommand.MESSAGE,
                             payload=schemas.Message.model_validate(message, from_attributes=True)
                         )
+                        if read_message_ids:
+                            # Tell live clients the owner's burst is read so the
+                            # picker's unread badge clears (V-6; same protocol
+                            # as a human's mark_read).
+                            mark_read_message = schemas.WebSocketMarkRead(
+                                command=schemas.WebSocketCommand.MARK_READ,
+                                payload=schemas.WebsocketMarkReadPayload(
+                                    conversationId=conversation_id,
+                                    messageIds=read_message_ids,
+                                    participantId=assistant.participantId,
+                                    readOn=read_on,
+                                    # The payload field is the pydantic Participant
+                                    # (not the ORM model), so build it from the
+                                    # assistant's plain columns.
+                                    readByParticipant=schemas.Participant(
+                                        id=assistant.participantId,
+                                        user=schemas.UserMinimal(id=assistant.id, username=assistant.username),
+                                    ),
+                                ),
+                            )
                 elif not PRODUCTION:
                     print("agent flush: no assistant (ai-agent) participant found -> nothing")
             else:
@@ -551,6 +598,8 @@ class ChatManager:
         # held open while sending to sockets (same as the human-message path above).
         if websocket_message is not None:
             await self.broadcast(websocket_message)
+            if mark_read_message is not None:
+                await self.broadcast(mark_read_message)
 
     async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
         socket = self.active_connections[socket_id]
@@ -646,6 +695,10 @@ class ChatManager:
                         db.add(message)
                         db.commit()
                         db.refresh(message)
+                        # Capture the id while the session is open: the harness
+                        # buffers it so the agent flush can act on exactly this
+                        # message (e.g. mark it read, V-6).
+                        message_id = message.id
 
                         websocket_message = schemas.WebSocketChatMessage(
                             command=schemas.WebSocketCommand.MESSAGE,
@@ -680,6 +733,7 @@ class ChatManager:
                         if owned and llm is not None and (llm.model or "").strip():
                             self.agent_buffer.submit(
                                 conversation_id=conversation_id,
+                                message_id=message_id,
                                 body=request.payload.body,
                                 window_s=float(llm.debounceWindowSeconds),
                                 cap=int(llm.debounceBatchCap),
