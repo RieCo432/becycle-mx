@@ -97,3 +97,12 @@ class LlmSettings(BaseModel):
     customerFreeForm: bool
     debounceWindowSeconds: int
     debounceBatchCap: int
+
+
+class LlmPromptPreview(BaseModel):
+    # #505: the dynamic block exactly as it will be assembled for the agent —
+    # the part of the system prompt built from this site's database at call
+    # time (see llm_agent.build_dynamic_block). Exposed for debugging: it shows
+    # the live, per-request content rather than anything cached.
+    dynamicBlock: str
+    charCount: int

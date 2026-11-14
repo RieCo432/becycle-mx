@@ -987,6 +987,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getLlmPromptPreview() {
+    return axiosClient.get('/settings/llm/prompt-preview', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   patchAboutUs(newAboutUs) {
     return axiosClient.patch(`/settings/about-us`, {html: newAboutUs}, {
       headers: credentialsStore.getApiRequestHeader(),

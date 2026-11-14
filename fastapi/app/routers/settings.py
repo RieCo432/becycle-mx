@@ -7,7 +7,7 @@ from starlette import status
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
-from app.services.llm_agent import list_models
+from app.services.llm_agent import list_models, build_dynamic_block
 
 settings = APIRouter(
     tags=["settings"],
@@ -172,4 +172,14 @@ async def update_llm_settings(new_llm_settings: schemas.LlmSettings, db: Session
 @settings.get("/settings/llm/models")
 async def get_llm_models() -> list[str]:
     return await list_models()
+
+
+@settings.get("/settings/llm/prompt-preview")
+async def get_llm_prompt_preview(db: Session = Depends(dep.get_db)) -> schemas.LlmPromptPreview:
+    # #505: debugging aid — return the dynamic block exactly as it will be
+    # assembled from this site's database at call time (the part of the system
+    # prompt appended after the persona). Best-effort: an empty block means the
+    # site's database produced no sections, so the preview simply shows none.
+    block = build_dynamic_block(db)
+    return schemas.LlmPromptPreview(dynamicBlock=block, charCount=len(block))
 
