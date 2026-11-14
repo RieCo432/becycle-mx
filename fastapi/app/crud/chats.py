@@ -25,10 +25,12 @@ from sqlalchemy.orm import Session
 
 
 from app.database.db import SessionLocal
+from app.services.llm_agent import converse
 from app.services.misc_helpers import WebSocketCommand
 
 from .permissions import check_permission, get_permission_by_route_and_method
 from .settings import get_llm_settings
+from .users import get_user_by_username
 
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
@@ -485,17 +487,70 @@ class ChatManager:
         print("Active connections:", len(self.active_connections))
         
     async def _on_agent_flush(self, conversation_id: UUID, batch: list[str]) -> None:
-        """Harness flush seam (#500). Called with one finished burst for a
-        conversation. The burst always belongs to the conversation's owner (the
-        harness only buffers the owner's messages), so the handler resolves the
-        owner from the conversation when it needs to route: owner is a
-        volunteer/staff -> `converse` free-form reply (V-*), owner is a client ->
-        `classify` (#501). Until the route handlers land, this is a no-op that
-        surfaces the burst in dev so the debounce is observable. Any exception
-        here is swallowed by the buffer (best-effort)."""
-        if not PRODUCTION:
-            print(f"agent burst ready: conversation={conversation_id} "
-                  f"messages={len(batch)}")
+        """Route a finished owner burst by the owner's role (H-3: the harness is
+        role-agnostic; the route lives in the handler).
+
+          - owner is a staff/volunteer user -> free-form reply via `converse`,
+            broadcast as the assistant (#500 V-1..V-5)
+          - owner is a client              -> intent classification (#501); a no-op
+            in #500
+
+        On a reply we persist it as a Message sent by the assistant (AS-4) and
+        broadcast it to the conversation; on `None` (no model, Ollama down,
+        timeout, empty) we do nothing (H-5). The AI-mark is implicit: the sender
+        is the assistant. Best-effort and non-blocking (H-2): the flush runs in
+        its own session, closed before the broadcast, so the base human chat is
+        never affected.
+        """
+        websocket_message = None
+        async with session_scope() as db:
+            conversation = db.scalar(
+                select(models.Conversation).where(models.Conversation.id == conversation_id)
+            )
+            if conversation is None:
+                return
+            owner = conversation.initiatorParticipant
+            if owner is None:
+                return
+
+            if owner.user is not None:
+                # Volunteer free-form route (#500 V-1..V-5).
+                # AS-4: the stable `ai-agent` account's participant is the sender.
+                assistant = get_user_by_username("ai-agent", db=db)
+                if assistant is not None and assistant.participantId is not None:
+                    # V-2: converse with the shared persona; returns a reply or None.
+                    # converse() re-checks the model (A-4), so a model cleared
+                    # after the harness gate still safely no-ops here.
+                    reply = await converse(db=db, messages=batch, context=None)
+                    if reply:
+                        # V-3: the reply is a normal Message sent by the assistant,
+                        # broadcast to the conversation exactly like any other.
+                        message = models.Message(
+                            conversationId=conversation_id,
+                            sentByParticipantId=assistant.participantId,
+                            body=reply,
+                        )
+                        db.add(message)
+                        db.commit()
+                        db.refresh(message)
+                        websocket_message = schemas.WebSocketChatMessage(
+                            command=schemas.WebSocketCommand.MESSAGE,
+                            payload=schemas.Message.model_validate(message, from_attributes=True)
+                        )
+                elif not PRODUCTION:
+                    print("agent flush: no assistant (ai-agent) participant found -> nothing")
+            else:
+                # Client intent route (#501): classify the burst and dispatch by
+                # intent. Not part of #500, so a client owner's burst is a no-op
+                # here; this branch is where that route will land.
+                if not PRODUCTION:
+                    print(f"agent flush: client-owned conversation {conversation_id}; "
+                          f"client route is #501")
+
+        # The session is closed before the broadcast on purpose: no DB connection is
+        # held open while sending to sockets (same as the human-message path above).
+        if websocket_message is not None:
+            await self.broadcast(websocket_message)
 
     async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
         socket = self.active_connections[socket_id]
