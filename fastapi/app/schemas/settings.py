@@ -95,3 +95,5 @@ class LlmSettings(BaseModel):
     systemPrompt: str | None
     classificationPrompt: str | None
     customerFreeForm: bool
+    debounceWindowSeconds: int
+    debounceBatchCap: int

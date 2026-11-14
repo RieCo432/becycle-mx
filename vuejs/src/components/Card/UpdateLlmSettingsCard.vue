@@ -2,6 +2,7 @@
 import Card from '@/components/Card/index.vue';
 import Select from '@/components/Select/index.vue';
 import Textarea from '@/components/Textarea/index.vue';
+import TextInput from '@/components/TextInput/index.vue';
 import Button from '@/components/Button/index.vue';
 import Switch from '@/components/Switch';
 import {useToast} from 'vue-toastification';
@@ -17,6 +18,7 @@ export default {
     Switch,
     Button,
     Textarea,
+    TextInput,
     Select,
     Card,
   },
@@ -26,6 +28,8 @@ export default {
       systemPrompt: yup.string().nullable(),
       classificationPrompt: yup.string().nullable(),
       customerFreeForm: yup.bool(),
+      debounceWindowSeconds: yup.number().integer().min(1, 'Must be at least 1'),
+      debounceBatchCap: yup.number().integer().min(1, 'Must be at least 1'),
     });
 
     const {handleSubmit: handleLlmSettingsSubmit} = useForm({
@@ -41,6 +45,16 @@ export default {
       resetField: resetClassificationPromptField,
     } = useField('classificationPrompt');
     const {value: customerFreeForm, resetField: resetCustomerFreeFormField} = useField('customerFreeForm');
+    const {
+      value: debounceWindowSeconds,
+      errorMessage: debounceWindowSecondsError,
+      resetField: resetDebounceWindowSecondsField,
+    } = useField('debounceWindowSeconds');
+    const {
+      value: debounceBatchCap,
+      errorMessage: debounceBatchCapError,
+      resetField: resetDebounceBatchCapField,
+    } = useField('debounceBatchCap');
 
     const modelOptions = ref([
       {
@@ -54,6 +68,8 @@ export default {
       resetSystemPromptField({value: data.systemPrompt ?? ''});
       resetClassificationPromptField({value: data.classificationPrompt ?? ''});
       resetCustomerFreeFormField({value: data.customerFreeForm});
+      resetDebounceWindowSecondsField({value: data.debounceWindowSeconds.toString()});
+      resetDebounceBatchCapField({value: data.debounceBatchCap.toString()});
     };
 
     const putLlmSettings = handleLlmSettingsSubmit(() => {
@@ -62,6 +78,8 @@ export default {
         systemPrompt: systemPrompt.value,
         classificationPrompt: classificationPrompt.value,
         customerFreeForm: customerFreeForm.value,
+        debounceWindowSeconds: parseInt(debounceWindowSeconds.value),
+        debounceBatchCap: parseInt(debounceBatchCap.value),
       }).then((response) => {
         toast.success('LLM Settings updated', {timeout: 2000});
         setFields(response.data);
@@ -93,6 +111,10 @@ export default {
       classificationPrompt,
       classificationPromptError,
       customerFreeForm,
+      debounceWindowSeconds,
+      debounceWindowSecondsError,
+      debounceBatchCap,
+      debounceBatchCapError,
       modelOptions,
       putLlmSettings,
     };
@@ -137,6 +159,27 @@ export default {
             />
           </div>
           <div class="col-span-6">
+            <TextInput
+              label="Debounce Window (seconds)"
+              type="number"
+              name="debounceWindowSeconds"
+              v-model="debounceWindowSeconds"
+              :error="debounceWindowSecondsError"
+              placeholder="30"
+              :disabled="!$can('putLlmSettings')"
+            />
+          </div>
+          <div class="col-span-6">
+            <TextInput
+              label="Debounce Batch Cap (messages)"
+              type="number"
+              name="debounceBatchCap"
+              v-model="debounceBatchCap"
+              :error="debounceBatchCapError"
+              placeholder="6"
+              :disabled="!$can('putLlmSettings')"
+            />
+          <div class="col-span-full">
             <label
               class="flex-0 mr-6 w-[140px] break-words ltr:inline-block rtl:block input-label">
               Customer Free-Form
@@ -147,6 +190,7 @@ export default {
               v-model="customerFreeForm"
               :disabled="!$can('putLlmSettings')"
             />
+          </div>
           </div>
           <div class="col-span-12">
             <Button
