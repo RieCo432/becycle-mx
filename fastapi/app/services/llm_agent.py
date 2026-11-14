@@ -221,18 +221,22 @@ def _section_appointments(db: Session) -> str:
 
 
 def _section_lending(db: Session) -> str:
-    """D-2: Lending terms — contract types + the lease/grace/forfeit config."""
+    """D-2: Lending terms — contract types + the lease config.
+
+    Deliberately does not state the grace/forfeit lengths: quoting an exact
+    post-expiry deadline to a client reads as a green light to keep the bike longer.
+    It conveys that a grace period exists (so a slightly-late return isn't a crisis)
+    and that reminders go out, without a specific number.
+    """
     contract_types = get_contract_types(db)
     if not contract_types:
         return ""
     lease_months = int(os.environ.get("CONTRACT_EXPIRE_MONTHS", 6))
-    grace_months = int(os.environ.get("CONTRACT_GRACE_PERIOD_AFTER_EXPIRY_MONTHS", 6))
-    forfeit_months = int(os.environ.get("CONTRACT_FORFEIT_AFTER_GRACE_PERIOD_MONTHS", 3))
     type_names = ", ".join(t.id for t in contract_types)
     return (
         f"**Lending:** {lease_months}-month lease, renewable in person after the "
-        f"bike is checked. Grace period {grace_months} months, then "
-        f"{forfeit_months} months before a deposit is forfeited. "
+        f"bike is checked. There's a grace period after the contract ends and we send "
+        f"reminders, so a slightly-late return isn't a crisis. "
         f"Contract types: {type_names}."
     )
 
