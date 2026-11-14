@@ -39,14 +39,58 @@ class Message(BaseModel):
 
     body: str
     readByParticipant: Participant | None = None
-    
-    
+
+    # #501 C-7: the intent this reply was produced for (see the model).
+    intent: str | None = None
+
+
 class Conversation(BaseModel):
     id: UUID
     initiatorParticipantId: UUID
     initiatorParticipant: Participant
-    
+
     messages: list[Message]
+
+
+class ChatIntentBase(BaseModel):
+    # `name` is the classifier's slug + the dispatch key, so it must be a stable
+    # token (lowercase letters, digits, underscores). The crud layer normalises
+    # whatever the UI sends (spaces, capitals) into this form.
+    name: str
+    whenToUse: str | None = None
+    replyTemplate: str
+    enabled: bool = True
+    orderIndex: int = 0
+
+
+class ChatIntentCreate(ChatIntentBase):
+    pass
+
+
+class ChatIntentUpdate(BaseModel):
+    # All optional: a partial patch. `name` is re-normalised like on create.
+    name: str | None = None
+    whenToUse: str | None = None
+    replyTemplate: str | None = None
+    enabled: bool | None = None
+    orderIndex: int | None = None
+
+
+class ChatIntent(ChatIntentBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+
+
+class FragmentInfo(BaseModel):
+    """A live-data fragment a reply template can reference (#501).
+
+    `example` is computed from this shop's own data at call time; it is None when
+    the shop has no data for that fragment (in which case a template referencing
+    it falls through to the free-form fallback rather than sending a gap).
+    """
+    name: str
+    description: str
+    example: str | None = None
     
     
     
