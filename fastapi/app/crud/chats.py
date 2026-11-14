@@ -28,6 +28,7 @@ from app.database.db import SessionLocal
 from app.services.misc_helpers import WebSocketCommand
 
 from .permissions import check_permission, get_permission_by_route_and_method
+from .settings import get_llm_settings
 
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
@@ -200,6 +201,16 @@ def participant_can_access_conversation(db: Session, participant_id: UUID, conve
     return participant_may_see_conversations(db=db, participant_id=participant_id)
 
 
+def conversation_is_owned_by(db: Session, conversation_id: UUID, participant_id: UUID) -> bool:
+    """Whether ``participant_id`` is the conversation's owner (initiator) — the
+    chat's client, as opposed to the staff user serving it. The agent harness
+    reacts only to the owner's messages; staff messages are ordinary human chat."""
+    conversation = db.scalar(
+        select(models.Conversation).where(models.Conversation.id == conversation_id)
+    )
+    return conversation is not None and conversation.initiatorParticipantId == participant_id
+
+
 def get_message(db: Session, conversation_id: UUID, message_id: UUID) -> models.Message | None:
     """Get a message by conversation and message ID."""
     return db.scalar(
@@ -221,6 +232,85 @@ async def session_scope():
         db.close()
 
 
+class _DebounceBuffer:
+    """Accumulate a chat owner's message bursts, per conversation, and fire a
+    callback once a burst is "done" — either the silence window elapses or the
+    batch cap is reached, whichever first.
+
+    This is the harness core for #500 (H-1, H-6). It is deliberately role-agnostic:
+    it only accumulates and fires; the flushed handler decides what to do with the
+    batch (converse for a volunteer, classify for a client in #501). The harness
+    only ever buffers the conversation's owner's messages, so the conversation id
+    alone is a sufficient key — the owner is resolved from the conversation when
+    the handler needs it. It owns no database, agent, or websocket state — just
+    in-memory timing on the caller's event loop.
+
+    Best-effort by contract: the flushed handler is scheduled fire-and-forget and
+    its exceptions are swallowed, so the buffer can never raise into the chat path.
+    """
+
+    def __init__(self, loop: asyncio.AbstractEventLoop, on_flush):
+        # on_flush: async (conversation_id, batch: list[str]) -> None
+        # The silence window and batch cap are supplied per submit() so admin edits
+        # to LlmSettings apply live (no restart).
+        self._loop = loop
+        self._on_flush = on_flush
+        self._buffers: dict[UUID, list[str]] = {}
+        self._timers: dict[UUID, asyncio.TimerHandle] = {}
+
+    def submit(self, conversation_id: UUID, body: str, window_s: float, cap: int) -> None:
+        key = conversation_id
+        buffer = self._buffers.setdefault(key, [])
+        buffer.append(body)
+        if len(buffer) >= cap:
+            # Cap reached: fire now rather than wait out the silence window.
+            self._fire(key)
+        else:
+            # Debounce: (re)start the silence window from this message.
+            self._reset_timer(key, window_s)
+
+    def _reset_timer(self, key, window_s: float) -> None:
+        existing = self._timers.get(key)
+        if existing is not None:
+            existing.cancel()
+        self._timers[key] = self._loop.call_later(window_s, self._on_timer, key)
+
+    def _on_timer(self, key) -> None:
+        self._timers.pop(key, None)
+        self._fire(key)
+
+    def _fire(self, key) -> None:
+        # Synchronous and atomic with respect to the event loop (no awaits), so a
+        # burst is flushed exactly once even if submit() and the timer interleave.
+        buffer = self._buffers.pop(key, None)
+        timer = self._timers.pop(key, None)
+        if timer is not None:
+            timer.cancel()
+        if not buffer:
+            return
+        task = self._loop.create_task(
+            self._safe_flush(key, list(buffer)))
+        # Reap so a failure never surfaces as "Task exception was never retrieved"
+        # and never propagates into the loop.
+        task.add_done_callback(self._reap)
+
+    async def _safe_flush(self, conversation_id: UUID, batch: list[str]) -> None:
+        try:
+            await self._on_flush(conversation_id, batch)
+        except Exception as e:  # best-effort: a handler failure means "nothing happens"
+            if not PRODUCTION:
+                print(f"agent on_flush raised (ignored): {e!r}")
+
+    @staticmethod
+    def _reap(task: asyncio.Task) -> None:
+        try:
+            exc = task.exception()
+        except asyncio.CancelledError:
+            return
+        if exc is not None and not PRODUCTION:
+            print(f"agent flush task raised (ignored): {exc!r}")
+
+
 class ChatManager:
     def __init__(self):
         self.active_connections: dict[UUID, WebSocket] = {}
@@ -230,6 +320,14 @@ class ChatManager:
         # socket_id -> monotonic timestamps of its recent message frames (rate limit)
         self.message_times: dict[UUID, deque[float]] = {}
         self.ping_loop = asyncio.create_task(self.keep_tabs())
+
+        # Agent harness (#500): debounce each sender's burst before firing the
+        # agent. Built on this manager's event loop; best-effort, never raises.
+        # The window/cap come from LlmSettings, read per message in take_it_from_here.
+        self.agent_buffer = _DebounceBuffer(
+            loop=asyncio.get_running_loop(),
+            on_flush=self._on_agent_flush,
+        )
         
     async def keep_tabs(self):
         while True:
@@ -386,6 +484,19 @@ class ChatManager:
         self.message_times.pop(socket_id, None)
         print("Active connections:", len(self.active_connections))
         
+    async def _on_agent_flush(self, conversation_id: UUID, batch: list[str]) -> None:
+        """Harness flush seam (#500). Called with one finished burst for a
+        conversation. The burst always belongs to the conversation's owner (the
+        harness only buffers the owner's messages), so the handler resolves the
+        owner from the conversation when it needs to route: owner is a
+        volunteer/staff -> `converse` free-form reply (V-*), owner is a client ->
+        `classify` (#501). Until the route handlers land, this is a no-op that
+        surfaces the burst in dev so the debounce is observable. Any exception
+        here is swallowed by the buffer (best-effort)."""
+        if not PRODUCTION:
+            print(f"agent burst ready: conversation={conversation_id} "
+                  f"messages={len(batch)}")
+
     async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
         socket = self.active_connections[socket_id]
         while True:
@@ -489,7 +600,39 @@ class ChatManager:
                     # no DB connection is held open while sending to sockets.
                     
                     await self.broadcast(websocket_message)
-                    
+
+                    # Best-effort Agent harness (#500): feed this message into the
+                    # per-conversation debounce buffer (one burst per conversation,
+                    # always the owner's). The window/cap are read from LlmSettings
+                    # each message so admin edits apply live. Entirely best-effort —
+                    # on any error we skip the agent and the base chat path above is
+                    # unaffected.
+                    try:
+                        async with session_scope() as db:
+                            llm = get_llm_settings(db=db)
+                            # The harness reacts only to the chat's owner — a staff
+                            # member in their own chat, or a client in theirs. It
+                            # never reacts to the non-owner (a staff user serving a
+                            # client's chat), whose messages are ordinary human chat.
+                            owned = conversation_is_owned_by(
+                                db=db, conversation_id=conversation_id, participant_id=participant.id)
+                        # Engage the agent only for the owner, and only while it is
+                        # active (a model is configured; A-4). Without either we skip
+                        # buffering entirely — no state, timer, or fire — instead of
+                        # engaging the pipeline only to end at converse() returning
+                        # None. The agent's own fire-time check stays authoritative
+                        # (the model could be cleared mid-burst).
+                        if owned and llm is not None and (llm.model or "").strip():
+                            self.agent_buffer.submit(
+                                conversation_id=conversation_id,
+                                body=request.payload.body,
+                                window_s=float(llm.debounceWindowSeconds),
+                                cap=int(llm.debounceBatchCap),
+                            )
+                    except Exception as e:
+                        if not PRODUCTION:
+                            print(f"agent harness skipped: {e!r}")
+
                 elif isinstance(request, schemas.WebSocketPing):
                     if not PRODUCTION:
                         print(socket_id, "ping")
