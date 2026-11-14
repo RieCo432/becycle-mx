@@ -7,6 +7,7 @@ import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
 from app import auth
+from app.services.email_helpers import email_task
 
 
 public_clients = APIRouter(
@@ -24,7 +25,7 @@ async def create_client_temp(
 
     client_temp = crud.post_client_temp(db=db, client_data=client_data)
 
-    email_tasks.add_task(client_temp.send_email_verification_link)
+    email_tasks.add_task(email_task, type(client_temp), client_temp.id, "send_email_verification_link")
 
     return client_temp
 
@@ -58,7 +59,7 @@ async def get_client_login_code(
 
     client_login = crud.create_client_login_code(db=db, client=client)
 
-    email_tasks.add_task(client_login.send_login_code)
+    email_tasks.add_task(email_task, type(client_login), client_login.id, "send_login_code")
 
     return schemas.ClientPreAuth(
         id=client.id

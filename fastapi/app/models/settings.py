@@ -170,3 +170,5 @@ class LlmSettings(Base):
     systemPrompt: Mapped[str] = mapped_column("systemprompt", Text, nullable=True, quote=False)
     classificationPrompt: Mapped[str] = mapped_column("classificationprompt", Text, nullable=True, quote=False)
     customerFreeForm: Mapped[bool] = mapped_column("customerfreeform", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
+    debounceWindowSeconds: Mapped[int] = mapped_column("debouncewindowseconds", Integer, nullable=False, default=30, server_default=text("30"), quote=False)
+    debounceBatchCap: Mapped[int] = mapped_column("debouncebatchcap", Integer, nullable=False, default=6, server_default=text("6"), quote=False)

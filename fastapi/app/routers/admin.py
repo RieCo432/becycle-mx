@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
+from app.services.misc_helpers import run_in_new_session
 
 admin = APIRouter(
     tags=["admin"],
@@ -21,9 +22,8 @@ async def get_admin_duplicates_clients(db: Session = Depends(dep.get_db)) -> lis
 
 @admin.get("/admin/duplicates/clients/refresh")
 async def admin_duplicates_clients_refresh(
-        refresh_tasks: BackgroundTasks,
-        db: Session = Depends(dep.get_db)) -> None:
-    refresh_tasks.add_task(crud.find_potential_client_duplicates, db)
+        refresh_tasks: BackgroundTasks) -> None:
+    refresh_tasks.add_task(run_in_new_session, crud.find_potential_client_duplicates)
 
 
 @admin.put("/admin/duplicates/clients/{potential_client_duplicate_id}/resolve")
@@ -51,9 +51,8 @@ async def get_admin_duplicates_bikes(db: Session = Depends(dep.get_db)) -> list[
 
 @admin.get("/admin/duplicates/bikes/refresh")
 async def admin_duplicates_bikes_refresh(
-        refresh_tasks: BackgroundTasks,
-        db: Session = Depends(dep.get_db)) -> None:
-    refresh_tasks.add_task(crud.find_potential_bike_duplicates, db)
+        refresh_tasks: BackgroundTasks) -> None:
+    refresh_tasks.add_task(run_in_new_session, crud.find_potential_bike_duplicates)
 
 
 @admin.put("/admin/duplicates/bikes/{potential_bike_duplicate_id}/resolve")

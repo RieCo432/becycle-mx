@@ -8,6 +8,7 @@ import app.crud as crud
 import app.dependencies as dep
 import app.models as models
 import app.schemas as schemas
+from app.services.email_helpers import email_task
 
 contracts = APIRouter(
     tags=["contracts"],
@@ -123,7 +124,7 @@ async def submit_contract(
         )
     contract = crud.submit_contract(db=db, contract_id=contract_id)
 
-    email_tasks.add_task(contract.send_creation_email)
+    email_tasks.add_task(email_task, type(contract), contract.id, "send_creation_email")
 
     return contract_draft
 
@@ -270,7 +271,7 @@ async def return_bike(
                                     deposit_settled_transaction_header_id=deposit_settled_transaction_header_id,
                                     return_accepting_user_id=working_user.id)
 
-    email_tasks.add_task(contract.send_return_email)
+    email_tasks.add_task(email_task, type(contract), contract.id, "send_return_email")
 
     return contract
 
@@ -283,7 +284,7 @@ async def extend_contract(
 
     contract = crud.extend_contract(db=db, contract_id=contract_id)
 
-    email_tasks.add_task(contract.send_creation_email)
+    email_tasks.add_task(email_task, type(contract), contract.id, "send_creation_email")
     
     return contract
 
@@ -297,6 +298,6 @@ async def forfeit_contract(
         db: Session = Depends(dep.get_db)) -> schemas.Contract:
 
     contract = crud.forfeit_contract(db=db, contract_id=contract_id, forfeit_revenue_account_id=forfeit_revenue_account_id, current_user_id=current_user.id)
-    email_tasks.add_task(contract.send_deposit_forfeited_email)
+    email_tasks.add_task(email_task, type(contract), contract.id, "send_deposit_forfeited_email")
 
     return contract

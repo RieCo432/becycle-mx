@@ -4,6 +4,25 @@ from dateutil.relativedelta import relativedelta
 from datetime import date
 
 
+def run_in_new_session(fn, *args):
+    """Run ``fn(db, *args)`` inside its own short-lived DB session.
+
+    FastAPI background tasks run *after* the request's get_db session has been
+    closed, so passing that session (or ORM objects bound to it) into a task is
+    invalid. Open a fresh session, run the work in it, and close it. ``fn`` must
+    take a Session as its first parameter (the house CRUD convention); any further
+    ``args`` should be plain values captured before the request session closes.
+    """
+    # Imported here to avoid any import cycle between services and the db module.
+    from app.database.db import SessionLocal
+
+    db = SessionLocal()
+    try:
+        return fn(db, *args)
+    finally:
+        db.close()
+
+
 def number_of_days_in_month(dt: date):
     # by setting the day to 28 we are guaranteed to be in the last day of the shortest month
     # adding 4 days guarantees that we go into the next month, even if the current month has 31 days

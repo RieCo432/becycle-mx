@@ -439,6 +439,8 @@ def update_llm_settings(db: Session, new_llm_settings: schemas.LlmSettings) -> m
     current_llm_settings.systemPrompt = new_llm_settings.systemPrompt
     current_llm_settings.classificationPrompt = new_llm_settings.classificationPrompt
     current_llm_settings.customerFreeForm = new_llm_settings.customerFreeForm
+    current_llm_settings.debounceWindowSeconds = new_llm_settings.debounceWindowSeconds
+    current_llm_settings.debounceBatchCap = new_llm_settings.debounceBatchCap
 
     db.commit()
 
