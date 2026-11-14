@@ -9,6 +9,7 @@ from starlette import status
 import app.crud as crud
 import app.dependencies as dep
 import app.schemas as schemas
+from app.services.email_helpers import email_task
 
 appointments = APIRouter(
     tags=["appointments"],
@@ -26,7 +27,7 @@ async def create_appointment(
 
     appointment = crud.create_appointment(db=db, appointment_data=appointment_data, auto_confirm=True, ignore_limits=ignore_limits)
 
-    email_tasks.add_task(appointment.send_confirmation_email)
+    email_tasks.add_task(email_task, type(appointment), appointment.id, "send_confirmation_email")
 
     return appointment
 
@@ -59,7 +60,7 @@ async def confirm_appointment(
 
     appointment = crud.confirm_appointment(db=db, appointment_id=appointment_id)
 
-    email_tasks.add_task(appointment.send_confirmation_email)
+    email_tasks.add_task(email_task, type(appointment), appointment.id, "send_confirmation_email")
 
     return appointment
 
@@ -74,9 +75,9 @@ async def cancel_appointment(
     appointment = crud.cancel_appointment(db=db, appointment_id=appointment_id, cancellation_detail=cancellation_detail)
 
     if appointment.confirmed:
-        email_tasks.add_task(appointment.send_cancellation_email)
+        email_tasks.add_task(email_task, type(appointment), appointment.id, "send_cancellation_email")
     else:
-        email_tasks.add_task(appointment.send_request_denied_email)
+        email_tasks.add_task(email_task, type(appointment), appointment.id, "send_request_denied_email")
 
     return appointment
 
@@ -91,7 +92,7 @@ async def patch_appointment_showup(
     appointment = crud.patch_appointment_showup(db=db, appointment_id=appointment_id, did_client_show_up=did_client_show_up)
     
     if not appointment.didClientShowUp:
-        email_tasks.add_task(appointment.send_appointment_attendance_email)
+        email_tasks.add_task(email_task, type(appointment), appointment.id, "send_appointment_attendance_email")
 
     return appointment
 
@@ -112,7 +113,8 @@ async def reschedule_appointment(
 
     appointment = crud.reschedule_appointment(db=db, reschedule_appointment_id=reschedule_appointment_id, appointment_data=appointment_data, auto_confirm=True, ignore_limits=ignore_limits)
 
-    email_tasks.add_task(appointment.send_rescheduled_email(appointment_to_reschedule))
+    email_tasks.add_task(email_task, type(appointment), appointment.id, "send_rescheduled_email",
+                         ((type(appointment_to_reschedule), appointment_to_reschedule.id),))
     
     return appointment
 

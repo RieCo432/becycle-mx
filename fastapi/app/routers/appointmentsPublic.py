@@ -7,6 +7,7 @@ import app.crud as crud
 import app.dependencies as dep
 import app.models as models
 import app.schemas as schemas
+from app.services.email_helpers import email_task
 
 appointments_public = APIRouter(
     tags=["appointments-public"],
@@ -36,7 +37,7 @@ async def cancel_appointment_via_hyperlink(
         reason="Cancelled via hyperlink"
     ))
 
-    email_tasks.add_task(appointment.send_client_cancellation_email)
+    email_tasks.add_task(email_task, type(appointment), appointment.id, "send_client_cancellation_email")
     
     
 @appointments_public.patch("/public/appointment/reschedule")
@@ -52,7 +53,8 @@ async def reschedule_via_hyperlink(
     appointment_to_reschedule = crud.get_appointment(db=db, appointment_id=appointment_id)
     
     appointment = crud.reschedule_appointment(db=db, reschedule_appointment_id=appointment_id, appointment_data=new_appointment_info, auto_confirm=False, ignore_limits=False)
-    email_tasks.add_task(appointment.send_rescheduled_email(appointment_to_reschedule))
+    email_tasks.add_task(email_task, type(appointment), appointment.id, "send_rescheduled_email",
+                         ((type(appointment_to_reschedule), appointment_to_reschedule.id),))
 
 
 

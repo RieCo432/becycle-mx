@@ -79,3 +79,31 @@ def send_email(destination: str, subject: str, content: str) -> bool:
 def render_template(template_name: str, client: "Client", **kwargs) -> str:
     template = env.get_template(template_name+".html")
     return template.render(env=os.environ, client=client, **kwargs)
+
+
+def email_task(entity_model, entity_id, method_name: str, related: "tuple" = ()):
+    """Run ``entity_model``'s ``send_*`` email method as a FastAPI background task.
+
+    Background tasks run *after* the request's get_db session has been closed, and
+    expire_on_commit=True has expired the row's attributes — so calling the method
+    on the request-scoped instance would lazy-load a detached object and raise
+    DetachedInstanceError (e.g. reading ``.client``). Instead, re-fetch the entity
+    (and any related instances given in ``related``) in a fresh session and call
+    the method while that session is open, so lazy relationships resolve.
+
+    ``entity_id`` and each ``related`` id must be captured by the caller *before*
+    the session closes (i.e. at the call site). ``related`` is a sequence of
+    ``(model, id)`` pairs, passed to the method as positional args in order.
+    """
+    # Imported here to avoid any import cycle between services and the db module.
+    from app.database.db import SessionLocal
+
+    db = SessionLocal()
+    try:
+        entity = db.get(entity_model, entity_id)
+        if entity is None:
+            return
+        related_entities = [db.get(model, id) for (model, id) in related]
+        getattr(entity, method_name)(*related_entities)
+    finally:
+        db.close()

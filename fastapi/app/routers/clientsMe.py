@@ -7,6 +7,7 @@ import app.dependencies as dep
 import app.models as models
 import app.schemas as schemas
 from app.services.accounts_helpers import AccountTypes
+from app.services.email_helpers import email_task
 
 clients_me = APIRouter(
     tags=["clients"],
@@ -69,7 +70,7 @@ async def request_appointment(
 
     appointment = crud.create_appointment(db=db, appointment_data=appointment_create_data)
 
-    email_tasks.add_task(appointment.send_request_received_email)
+    email_tasks.add_task(email_task, type(appointment), appointment.id, "send_request_received_email")
 
     return appointment
 
