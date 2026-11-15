@@ -1,6 +1,5 @@
 <script>
 import Card from '@/components/Card/index.vue';
-import Textarea from '@/components/Textarea/index.vue';
 import Button from '@/components/Button/index.vue';
 import requests from '@/requests';
 import {onBeforeMount, ref, computed} from 'vue';
@@ -9,7 +8,6 @@ export default {
   name: 'LlmPromptPreviewCard',
   components: {
     Card,
-    Textarea,
     Button,
   },
   setup() {
@@ -58,17 +56,16 @@ export default {
 </script>
 
 <template>
-  <Card title="Prompt Preview" :subtitle="subtitle">
+  <Card title="Prompt Preview">
     <template #header>
       <Button @click="refresh" text="Refresh" />
     </template>
-    <Textarea
-      name="llmPromptPreview"
-      label="Dynamic block"
-      :isReadonly="true"
-      :rows="18"
-      :modelValue="displayValue"
-    />
+    <p class="text-sm mb-4 text-slate-700 dark:text-slate-300">{{ subtitle }}</p>
+    <label class="input-label block">Dynamic block</label>
+    <pre class="whitespace-pre-wrap break-words text-sm leading-relaxed p-4
+                text-slate-700 dark:text-slate-300
+                rounded-md bg-gray-50 dark:bg-slate-900
+                border border-gray-200 dark:border-slate-700">{{ displayValue }}</pre>
   </Card>
 </template>
 

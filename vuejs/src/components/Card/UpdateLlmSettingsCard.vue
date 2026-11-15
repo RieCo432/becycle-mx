@@ -144,7 +144,7 @@ export default {
                 name="systemPrompt"
                 v-model="systemPrompt"
                 :error="systemPromptError"
-                :rows="4"
+                :rows="24"
                 :disabled="!$can('putLlmSettings')"
             />
           </div>
@@ -154,7 +154,7 @@ export default {
                 name="classificationPrompt"
                 v-model="classificationPrompt"
                 :error="classificationPromptError"
-                :rows="4"
+                :rows="24"
                 :disabled="!$can('putLlmSettings')"
             />
           </div>
