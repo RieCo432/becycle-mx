@@ -317,7 +317,7 @@ class _DebounceBuffer:
             print(f"agent flush task raised (ignored): {exc!r}")
 
 
-def resolve_reply(db: Session, intent: str, messages: list[str]) -> str | None:
+async def resolve_reply(db: Session, intent: str, messages: list[str]) -> str | None:
     """#501: turn a classified client intent into a reply (or None -> no reply).
 
     A configured intent assembles its stored template from live per-org data
@@ -339,10 +339,10 @@ def resolve_reply(db: Session, intent: str, messages: list[str]) -> str | None:
         faq_answer = get_faq_answer_by_key(db=db, key=intent)
         if faq_answer:
             return faq_answer
-    return _free_form_fallback(db=db, messages=messages)
+    return await _free_form_fallback(db=db, messages=messages)
 
 
-def _free_form_fallback(db: Session, messages: list[str]) -> str | None:
+async def _free_form_fallback(db: Session, messages: list[str]) -> str | None:
     """C-6: the customerFreeForm gate for unclassified / unhandled client bursts.
 
     Off (or unset) -> do nothing; on -> a free-form reply via the Agent.
@@ -350,7 +350,7 @@ def _free_form_fallback(db: Session, messages: list[str]) -> str | None:
     settings = get_llm_settings(db=db)
     if settings is None or not settings.customerFreeForm:
         return None
-    return converse(db=db, messages=messages)
+    return await converse(db=db, messages=messages)
 
 
 class ChatManager:
@@ -582,7 +582,7 @@ class ChatManager:
                     # C-8: no model / Ollama down / timeout -> nothing happens, chat
                     # continues unaffected.
                     return
-                reply = resolve_reply(db=db, intent=intent, messages=bodies)
+                reply = await resolve_reply(db=db, intent=intent, messages=bodies)
 
             if not reply:
                 # No model (volunteer), or an intent that yields no reply (free-form
