@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 import app.models as models
 import app.schemas as schemas
 
-from .settings import get_opening_times, get_closed_days
+from .settings import get_opening_times, get_closed_days, get_active_faq
 from .appointments import get_appointment_types
 from .catalogue import get_catalogue
 
@@ -231,6 +231,57 @@ def list_fragments(db: Session) -> list[schemas.FragmentInfo]:
             example = None
         out.append(schemas.FragmentInfo(name=name, description=description, example=example))
     return out
+
+
+# ---------------------------------------------------------------------------
+# FAQ classification targets (#501)
+#
+# Active FAQs double as classifiable targets: a message that matches a FAQ is
+# routed to that FAQ's stored answer (deterministic, editable in the existing
+# FAQ UI). classify() lists them in the prompt and crud.chats.resolve_reply()
+# looks the answer up by the same key, so both sides derive keys from one shared
+# helper and the key the model emits is always the key we resolve (C-3-style
+# no-drift).
+# ---------------------------------------------------------------------------
+
+def _slugify(text: str) -> str:
+    """A stable lowercase [a-z0-9_] key from free text — the same shape the
+    classifier emits and intent names use (see _normalise_name)."""
+    slug = (text or "").strip().lower().replace(" ", "_").replace("-", "_")
+    return re.sub(r"[^a-z0-9_]", "", slug)
+
+
+def get_active_faq_targets(db: Session) -> list[tuple[str, str, str]]:
+    """The active FAQs as classifier targets, in display order:
+    (key, question, answer).
+
+    Each key is a slug of its question; colliding slugs are de-duplicated
+    deterministically (base, base_2, base_3, ...). classify() uses the key and
+    question to build the prompt; resolve_reply() maps key -> answer. Shared by
+    both so the two sides can never disagree on a key.
+    """
+    faqs = sorted(get_active_faq(db), key=lambda f: f.orderIndex)
+    used: set[str] = set()
+    out: list[tuple[str, str, str]] = []
+    for faq in faqs:
+        base = _slugify(faq.question) or "faq"
+        key = base
+        n = 2
+        while key in used:
+            key = f"{base}_{n}"
+            n += 1
+        used.add(key)
+        out.append((key, faq.question, faq.answer))
+    return out
+
+
+def get_faq_answer_by_key(db: Session, key: str) -> str | None:
+    """The stored answer for a classified FAQ key, or None when it is not an
+    active FAQ (so the caller falls through to the free-form fallback)."""
+    for k, _q, answer in get_active_faq_targets(db):
+        if k == key:
+            return answer
+    return None
 
 
 # ---------------------------------------------------------------------------

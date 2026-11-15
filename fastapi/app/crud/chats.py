@@ -25,11 +25,12 @@ from sqlalchemy.orm import Session
 
 
 from app.database.db import SessionLocal
-from app.services.llm_agent import converse
+from app.services.llm_agent import converse, classify, NONE_INTENT
 from app.services.misc_helpers import WebSocketCommand
 
 from .permissions import check_permission, get_permission_by_route_and_method
 from .settings import get_llm_settings
+from .intents import get_intent_by_name, evaluate_template, get_faq_answer_by_key
 from .users import get_user_by_username
 
 API_SECRET = os.environ['API_SECRET']
@@ -316,6 +317,42 @@ class _DebounceBuffer:
             print(f"agent flush task raised (ignored): {exc!r}")
 
 
+def resolve_reply(db: Session, intent: str, messages: list[str]) -> str | None:
+    """#501: turn a classified client intent into a reply (or None -> no reply).
+
+    A configured intent assembles its stored template from live per-org data
+    (C-2/C-4/C-5). A classified FAQ replies with its stored answer (deterministic,
+    editable in the existing FAQ UI). If neither yields a reply — a fragment has no
+    data, or the intent has no row / is disabled — fall through to the
+    customerFreeForm free-form fallback (C-6). `none` goes straight to the
+    fallback. Returns None when nothing should be said (C-8). The classified
+    ``intent`` is what the caller records on the reply (C-7), whatever path
+    produced the text.
+    """
+    if intent != NONE_INTENT:
+        row = get_intent_by_name(db=db, name=intent)
+        if row is not None and row.enabled:
+            reply = evaluate_template(db=db, template=row.replyTemplate)
+            if reply is not None:
+                return reply
+            # A referenced fragment had no data -> fall through (the no-data rule).
+        faq_answer = get_faq_answer_by_key(db=db, key=intent)
+        if faq_answer:
+            return faq_answer
+    return _free_form_fallback(db=db, messages=messages)
+
+
+def _free_form_fallback(db: Session, messages: list[str]) -> str | None:
+    """C-6: the customerFreeForm gate for unclassified / unhandled client bursts.
+
+    Off (or unset) -> do nothing; on -> a free-form reply via the Agent.
+    """
+    settings = get_llm_settings(db=db)
+    if settings is None or not settings.customerFreeForm:
+        return None
+    return converse(db=db, messages=messages)
+
+
 class ChatManager:
     def __init__(self):
         self.active_connections: dict[UUID, WebSocket] = {}
@@ -520,79 +557,46 @@ class ChatManager:
             if owner is None:
                 return
 
-            if owner.user is not None:
-                # Volunteer free-form route (#500 V-1..V-5).
-                # AS-4: the stable `ai-agent` account's participant is the sender.
-                assistant = get_user_by_username("ai-agent", db=db)
-                if assistant is not None and assistant.participantId is not None:
-                    # V-2: converse with the shared persona (bodies only);
-                    # returns a reply or None. converse() re-checks the model
-                    # (A-4), so a model cleared after the harness gate still
-                    # safely no-ops here.
-                    reply = await converse(db=db, messages=[body for _, body in batch], context=None)
-                    if reply:
-                        # V-3: the reply is a normal Message sent by the assistant,
-                        # broadcast to the conversation exactly like any other.
-                        message = models.Message(
-                            conversationId=conversation_id,
-                            sentByParticipantId=assistant.participantId,
-                            body=reply,
-                        )
-                        db.add(message)
-
-                        # The agent has read exactly this burst to produce the
-                        # reply, so record that (V-6): mark the burst's
-                        # still-unread messages read by the assistant. Only
-                        # happens on a reply — if converse returned None the
-                        # burst stays as it was (V-4/H-5).
-                        read_on = datetime.now(timezone.utc)
-                        read_messages = db.scalars(
-                            select(models.Message)
-                            .where(
-                                models.Message.id.in_([message_id for message_id, _ in batch]),
-                                models.Message.readByParticipantId.is_(None),
-                            )
-                        ).all()
-                        read_message_ids = [m.id for m in read_messages]
-                        for m in read_messages:
-                            m.readByParticipantId = assistant.participantId
-                            m.readOn = read_on
-
-                        db.commit()
-                        db.refresh(message)
-                        websocket_message = schemas.WebSocketChatMessage(
-                            command=schemas.WebSocketCommand.MESSAGE,
-                            payload=schemas.Message.model_validate(message, from_attributes=True)
-                        )
-                        if read_message_ids:
-                            # Tell live clients the owner's burst is read so the
-                            # picker's unread badge clears (V-6; same protocol
-                            # as a human's mark_read).
-                            mark_read_message = schemas.WebSocketMarkRead(
-                                command=schemas.WebSocketCommand.MARK_READ,
-                                payload=schemas.WebsocketMarkReadPayload(
-                                    conversationId=conversation_id,
-                                    messageIds=read_message_ids,
-                                    participantId=assistant.participantId,
-                                    readOn=read_on,
-                                    # The payload field is the pydantic Participant
-                                    # (not the ORM model), so build it from the
-                                    # assistant's plain columns.
-                                    readByParticipant=schemas.Participant(
-                                        id=assistant.participantId,
-                                        user=schemas.UserMinimal(id=assistant.id, username=assistant.username),
-                                    ),
-                                ),
-                            )
-                elif not PRODUCTION:
-                    print("agent flush: no assistant (ai-agent) participant found -> nothing")
-            else:
-                # Client intent route (#501): classify the burst and dispatch by
-                # intent. Not part of #500, so a client owner's burst is a no-op
-                # here; this branch is where that route will land.
+            # Both routes send as the stable assistant identity (AS-4). If it's
+            # missing we can't act at all, so no-op before making any LLM call.
+            assistant = get_user_by_username("ai-agent", db=db)
+            if assistant is None or assistant.participantId is None:
                 if not PRODUCTION:
-                    print(f"agent flush: client-owned conversation {conversation_id}; "
-                          f"client route is #501")
+                    print("agent flush: no assistant (ai-agent) participant found -> nothing")
+                return
+
+            bodies = [body for _, body in batch]
+
+            if owner.user is not None:
+                # Volunteer free-form route (#500 V-1..V-5). V-2: converse with the
+                # shared persona (bodies only); returns a reply or None. converse()
+                # re-checks the model (A-4), so a model cleared after the harness
+                # gate still safely no-ops here.
+                reply = await converse(db=db, messages=bodies, context=None)
+                intent = None
+            else:
+                # Client intent route (#501): classify the burst (C-1) and dispatch to
+                # a code handler (C-2/C-3) or the free-form fallback (C-6).
+                intent = await classify(db=db, messages=bodies)
+                if intent is None:
+                    # C-8: no model / Ollama down / timeout -> nothing happens, chat
+                    # continues unaffected.
+                    return
+                reply = resolve_reply(db=db, intent=intent, messages=bodies)
+
+            if not reply:
+                # No model (volunteer), or an intent that yields no reply (free-form
+                # off, or a fragment with no data) -> nothing is said or marked
+                # (C-8 / C-10).
+                if not PRODUCTION:
+                    who = owner.user.username if owner.user else "client"
+                    print(f"agent flush: {who} burst, no reply (intent={intent}) -> nothing")
+                return
+
+            websocket_message, mark_read_message = self._compose_assistant_reply(
+                db=db, conversation_id=conversation_id, batch=batch,
+                assistant=assistant, reply=reply, intent=intent,
+            )
 
         # The session is closed before the broadcast on purpose: no DB connection is
         # held open while sending to sockets (same as the human-message path above).
@@ -600,6 +604,69 @@ class ChatManager:
             await self.broadcast(websocket_message)
             if mark_read_message is not None:
                 await self.broadcast(mark_read_message)
+
+    def _compose_assistant_reply(
+        self, db: Session, conversation_id: UUID, batch: list[tuple[UUID, str]],
+        assistant: models.User, reply: str, intent: str | None,
+    ) -> tuple[schemas.WebSocketChatMessage, schemas.WebSocketMarkRead | None]:
+        """Persist an assistant auto-reply, mark the answered burst read, and build
+        the websocket messages to broadcast (V-6 / C-10) — shared by both routes so
+        the send / mark-read / broadcast logic stays in one place and in sync.
+
+        `intent` is recorded on the reply for audit (C-7). Returns
+        (websocket_message, mark_read_message); the latter is None when the whole
+        burst was already read.
+        """
+        message = models.Message(
+            conversationId=conversation_id,
+            sentByParticipantId=assistant.participantId,
+            body=reply,
+            intent=intent,
+        )
+        db.add(message)
+
+        # The agent has read exactly this burst to produce the reply, so record
+        # that: mark the burst's still-unread messages read by the assistant.
+        read_on = datetime.now(timezone.utc)
+        read_messages = db.scalars(
+            select(models.Message)
+            .where(
+                models.Message.id.in_([message_id for message_id, _ in batch]),
+                models.Message.readByParticipantId.is_(None),
+            )
+        ).all()
+        read_message_ids = [m.id for m in read_messages]
+        for m in read_messages:
+            m.readByParticipantId = assistant.participantId
+            m.readOn = read_on
+
+        db.commit()
+        db.refresh(message)
+
+        websocket_message = schemas.WebSocketChatMessage(
+            command=schemas.WebSocketCommand.MESSAGE,
+            payload=schemas.Message.model_validate(message, from_attributes=True),
+        )
+        mark_read_message = None
+        if read_message_ids:
+            # Tell live clients the owner's burst is read so the picker's unread
+            # badge clears (same protocol as a human's mark_read).
+            mark_read_message = schemas.WebSocketMarkRead(
+                command=schemas.WebSocketCommand.MARK_READ,
+                payload=schemas.WebsocketMarkReadPayload(
+                    conversationId=conversation_id,
+                    messageIds=read_message_ids,
+                    participantId=assistant.participantId,
+                    readOn=read_on,
+                    # The payload field is the pydantic Participant (not the ORM
+                    # model), so build it from the assistant's plain columns.
+                    readByParticipant=schemas.Participant(
+                        id=assistant.participantId,
+                        user=schemas.UserMinimal(id=assistant.id, username=assistant.username),
+                    ),
+                ),
+            )
+        return websocket_message, mark_read_message
 
     async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
         socket = self.active_connections[socket_id]
