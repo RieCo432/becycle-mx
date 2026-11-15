@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import httpx
 from pydantic_ai import Agent
 from pydantic_ai.models.ollama import OllamaModel
+from pydantic_ai.models.openai import OpenAIChatModelSettings
 from pydantic_ai.providers.ollama import OllamaProvider
 from sqlalchemy.orm import Session
 
@@ -99,6 +100,27 @@ How to answer:
 # A-6: the "unmatched" sentinel — returned when the model can't map a message to a
 # configured intent. Distinct from None, which means "no LLM was run" (A-4 / A-13).
 NONE_INTENT = "none"
+
+# #501 C-15: classify() runs with the model's thinking OFF. classify is a routing
+# task — the chain-of-thought adds nothing to the label we keep, and was measured
+# at +103% latency on the local backend (9.5s on vs 4.7s off; 336 vs 7 tokens,
+# ~329 of them discarded). converse() deliberately keeps the model's default
+# (thinking on), which future reasoning work (e.g. #502) may rely on.
+#
+# Two settings are set together:
+# - openai_reasoning_effort="none" is the mechanism that works on this stack
+#   (Ollama 0.40.15): it is forwarded as-is and Ollama's OpenAI-compatible /v1
+#   endpoint honours it — the response's reasoning field disappears.
+# - thinking=False is the unified, future-proof knob: it is silently dropped on
+#   the current gemma profile (it declares supports_thinking=False, and
+#   pydantic-ai 2.66.0 strips a unified thinking setting for such profiles
+#   before it reaches the wire), but it will be honoured when the active model's
+#   profile supports thinking — e.g. after switching models. Verified 2026-11-15
+#   that the two coexist: the wire is unchanged (only reasoning_effort is sent).
+# Note `think: false` does NOT work on /v1 — that is a native /api/chat field only.
+# If a future model rejects reasoning_effort "none", drop the explicit setting and
+# let thinking=False resolve to that model's lowest accepted effort.
+_CLASSIFY_NO_THINKING = OpenAIChatModelSettings(openai_reasoning_effort="none", thinking=False)
 
 
 def _extract_text(message) -> str:
@@ -490,6 +512,10 @@ async def converse(db: Session, messages, context: dict | None = None) -> str | 
         system_prompt=_system_prompt(db, settings),
     )
     try:
+        # #501 C-15: converse keeps the model's default thinking (on) — classify() is
+        # the only call that turns it off (_CLASSIFY_NO_THINKING). Leave this
+        # asymmetry in place: future reasoning work may rely on converse thinking
+        # by default.
         result = await agent.run(prompt, timeout=_LLM_TIMEOUT)
     except Exception as exc:  # A-13: any failure -> no-op
         print(f"LLM converse failed: {exc}")
@@ -574,7 +600,12 @@ async def classify(db: Session, messages, context: dict | None = None) -> str | 
         system_prompt=system_prompt,
     )
     try:
-        result = await agent.run(prompt, timeout=_LLM_TIMEOUT)
+        # #501: thinking OFF for this routing call (see _CLASSIFY_NO_THINKING).
+        result = await agent.run(
+            prompt,
+            model_settings=_CLASSIFY_NO_THINKING,
+            timeout=_LLM_TIMEOUT,
+        )
     except Exception as exc:  # A-13: any transport failure -> no-op
         print(f"LLM classify failed: {exc}")
         return None
