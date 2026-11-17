@@ -126,9 +126,21 @@ function createWebsocket() {
         message.payload.conversationId !== selectedConversation.value?.id &&
         message.payload.sentByParticipantId !== participantId.value
       ) {
-        const client = convo.initiatorParticipant.client;
+        // Show who actually sent it (staff variants carry the sender; a
+        // colleague's message must not be labelled with the client's name).
+        const sender = message.payload.sentByParticipant;
+        const client = convo?.initiatorParticipant?.client;
+        const who = (
+          sender?.user ?
+            (message.payload.agentSent ? 'AI assistant' : sender.user.username) :
+            (
+              sender?.client ?
+                `${sender.client.firstName} ${sender.client.lastName}` :
+                `${client?.firstName ?? ''} ${client?.lastName ?? ''}`.trim()
+            )
+        );
         toast.info(
-          `${client?.firstName} ${client?.lastName}: ${message.payload.body.slice(0, 160)}`,
+          `${who}: ${message.payload.body.slice(0, 160)}`,
           {timeout: 2000});
       }
     } else if (message.command === 'conversation') {
@@ -155,7 +167,6 @@ function createWebsocket() {
       message.payload.messageIds.forEach((id) => {
         const m = conversation.messages.find((m) => m.id === id);
         m.readOn = message.payload.readOn;
-        m.readByParticipant = message.payload.readByParticipant;
         m.readByParticipantId = message.payload.participantId;
       });
     }
