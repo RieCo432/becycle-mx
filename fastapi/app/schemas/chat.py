@@ -32,13 +32,25 @@ class Message(BaseModel):
     sentOn: datetime
 
     sentByParticipantId:UUID
+    # Staff variant: the sender — a username for a staff/AI message, the client
+    # record for the client's — so staff see who sent what in a client's chat.
+    # Client variant: stays None — a customer must not receive the serving
+    # volunteer's username (crud.chats.message_payload builds both variants).
     sentByParticipant: Participant | None = None
 
     readByParticipantId: UUID | None = None
     readOn: datetime | None = None
+    # Staff variant only (None in the client variant), as above.
+    readByParticipant: Participant | None = None
 
     body: str
-    readByParticipant: Participant | None = None
+
+    # #501 C-16: True when this message was sent by the workshop's assistant
+    # (the stable ai-agent identity) — computed by the server from the sending
+    # participant at serialisation time, never stored (the DB has no such
+    # column, so the flag follows the identity if it ever moves). Always False
+    # for human messages, in both variants. Drives the "AI" flag in the chat UI.
+    agentSent: bool = False
 
     # #501 C-7: the intent this reply was produced for (see the model).
     intent: str | None = None
@@ -154,6 +166,9 @@ class WebsocketMarkReadPayload(BaseModel):
     messageIds: list[UUID]
     participantId: UUID
     readOn: datetime
+    # Staff variant: who marked it read (username/client record). Client
+    # variant: None — no usernames cross to the customer (crud.chats builds
+    # both variants).
     readByParticipant: Participant | None = None
 
 

@@ -52,6 +52,11 @@ MSG_RATE_LIMIT = 5        # messages per socket within the window
 MSG_RATE_WINDOW = 5.0     # seconds
 CHAT_MESSAGE_MAX_LENGTH = 2000  # characters
 
+# The stable assistant identity (#500 AS-4): the Agent always sends as this
+# user. Single source of truth for both looking it up (agent flush) and
+# recognising its messages (message_payload's agentSent flag).
+AI_AGENT_USERNAME = "ai-agent"
+
 
 def get_or_create_participant(db: Session, entity: models.User | models.Client) -> models.Participant:
     participant = db.scalar(
@@ -105,7 +110,10 @@ def get_conversations(db: Session) -> list[schemas.Conversation]:
     client_conversations = []
     for conversation in all_conversations:
         if conversation.initiatorParticipant.client is not None:
-            client_conversations.append(conversation)
+            # Staff-only list: the full variant (staff see who sent what).
+            client_conversations.append(
+                conversation_payload(conversation, include_participants=True)
+            )
 
     return client_conversations
 
@@ -129,6 +137,71 @@ def get_participant_by_token(db: Session, token: str) -> models.Participant | No
     if participant is None:
         raise credentials_exception
     return participant
+
+
+def message_payload(message: models.Message, *, include_participants: bool = False) -> schemas.Message:
+    """Serialise one message for the wire (REST history + WS frames).
+
+    Two variants, chosen by who receives it:
+    - `include_participants=True` (staff variant): the nested sender is
+      included — a username for a staff/AI message, the client record for the
+      client's — so staff see who sent what in a client's chat.
+    - `include_participants=False` (client variant): the nested objects stay
+      None — a customer must not receive the serving volunteer's username;
+      the opaque participant IDs stay (own-side detection in the UI).
+
+    `agentSent` is computed from the sending participant — the stable
+    assistant identity (ai-agent) — in both variants, and never stored: the
+    DB has no such column, so the flag follows the identity if it ever moves.
+
+    The single place that decides what a message looks like to a client, so
+    the rules can't drift between the send paths. Call with the session open
+    (the participant relationships are lazy-loaded).
+    """
+    sender = message.sentByParticipant
+    reader = message.readByParticipant if include_participants else None
+    return schemas.Message(
+        id=message.id,
+        conversationId=message.conversationId,
+        sentOn=message.sentOn,
+        sentByParticipantId=message.sentByParticipantId,
+        sentByParticipant=(
+            schemas.Participant.model_validate(sender, from_attributes=True)
+            if include_participants else None
+        ),
+        readByParticipantId=message.readByParticipantId,
+        readOn=message.readOn,
+        readByParticipant=(
+            schemas.Participant.model_validate(reader, from_attributes=True)
+            if reader is not None else None
+        ),
+        body=message.body,
+        agentSent=bool(
+            sender is not None
+            and sender.user is not None
+            and sender.user.username == AI_AGENT_USERNAME
+        ),
+        intent=message.intent,
+    )
+
+
+def conversation_payload(
+    conversation: models.Conversation, *, include_participants: bool = False
+) -> schemas.Conversation:
+    """Serialise a conversation for the wire: the initiator (staff need the
+    client's name; a client only ever sees their own record) plus the messages
+    via message_payload. Call with the session open."""
+    return schemas.Conversation(
+        id=conversation.id,
+        initiatorParticipantId=conversation.initiatorParticipantId,
+        initiatorParticipant=schemas.Participant.model_validate(
+            conversation.initiatorParticipant, from_attributes=True
+        ),
+        messages=[
+            message_payload(m, include_participants=include_participants)
+            for m in conversation.messages
+        ],
+    )
 
 
 async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMessage):
@@ -450,26 +523,55 @@ class ChatManager:
         times.append(now)
         return True
         
-    async def broadcast(self, websocket_message: schemas.WebSocketChatMessage | schemas.WebSocketMarkRead):
+    def _recipient_frames(
+        self, db: Session, conversation_id: UUID,
+        staff_frames: list[schemas.WebSocketMessage],
+        client_frames: list[schemas.WebSocketMessage],
+    ) -> dict[UUID, list[schemas.WebSocketMessage]]:
+        """Map each subscribed recipient to its frame variant: staff get the
+        full variant (sender identity included), clients the stripped variant
+        (no volunteer usernames). The recipient kinds are read while the
+        session is open; the broadcast itself happens after it closes.
+        """
+        subscribed = self.subscriptions.get(conversation_id)
+        if not subscribed:
+            return {}
+        rows = db.scalars(
+            select(models.Participant).where(models.Participant.id.in_(set(subscribed)))
+        ).all()
+        client_ids = {p.id for p in rows if p.client is not None}
+        return {
+            pid: (client_frames if pid in client_ids else staff_frames)
+            for pid in subscribed
+        }
+
+    async def broadcast(self, conversation_id: UUID, frames: dict[UUID, list[schemas.WebSocketMessage]]):
+        """Deliver per-recipient frame sets to a conversation's subscribers.
+
+        `frames` maps participant_id → the ordered frames for that participant
+        (the staff/client variants, built while the session was open — a
+        broadcast never touches the database).
+        """
         # Nobody may be subscribed to this conversation (subscriptions are
         # only requested once, at connect time) — nothing to deliver.
-        participant_ids = self.subscriptions.get(websocket_message.payload.conversationId)
+        participant_ids = self.subscriptions.get(conversation_id)
         if not participant_ids:
             return
 
         # Snapshot both levels: another socket's task may run while we await
         # a send and change either collection (e.g. a disconnect).
         for participant_id in list(participant_ids):
-            for websocket_id in list(self.participant_sockets.get(participant_id, ())):
-                websocket = self.active_connections.get(websocket_id)
-                if websocket is None:
-                    continue
-                try:
-                    await send_websocket_message(websocket, websocket_message)
-                except Exception as e:
-                    # One dead recipient must not stop delivery to the rest,
-                    # or tear down the sender's connection.
-                    print(f"failed to deliver message to socket {websocket_id}: {e}")
+            for websocket_message in frames.get(participant_id, ()):
+                for websocket_id in list(self.participant_sockets.get(participant_id, ())):
+                    websocket = self.active_connections.get(websocket_id)
+                    if websocket is None:
+                        continue
+                    try:
+                        await send_websocket_message(websocket, websocket_message)
+                    except Exception as e:
+                        # One dead recipient must not stop delivery to the rest,
+                        # or tear down the sender's connection.
+                        print(f"failed to deliver message to socket {websocket_id}: {e}")
 
     async def notify_new_conversation(self, conversation: schemas.Conversation):
         """Push a freshly-created conversation to every connected participant
@@ -559,10 +661,10 @@ class ChatManager:
 
             # Both routes send as the stable assistant identity (AS-4). If it's
             # missing we can't act at all, so no-op before making any LLM call.
-            assistant = get_user_by_username("ai-agent", db=db)
+            assistant = get_user_by_username(AI_AGENT_USERNAME, db=db)
             if assistant is None or assistant.participantId is None:
                 if not PRODUCTION:
-                    print("agent flush: no assistant (ai-agent) participant found -> nothing")
+                    print(f"agent flush: no assistant ({AI_AGENT_USERNAME}) participant found -> nothing")
                 return
 
             bodies = [body for _, body in batch]
@@ -593,29 +695,29 @@ class ChatManager:
                     print(f"agent flush: {who} burst, no reply (intent={intent}) -> nothing")
                 return
 
-            websocket_message, mark_read_message = self._compose_assistant_reply(
+            frames = self._compose_assistant_reply(
                 db=db, conversation_id=conversation_id, batch=batch,
                 assistant=assistant, reply=reply, intent=intent,
             )
 
         # The session is closed before the broadcast on purpose: no DB connection is
         # held open while sending to sockets (same as the human-message path above).
-        if websocket_message is not None:
-            await self.broadcast(websocket_message)
-            if mark_read_message is not None:
-                await self.broadcast(mark_read_message)
+        if frames:
+            await self.broadcast(conversation_id, frames)
 
     def _compose_assistant_reply(
         self, db: Session, conversation_id: UUID, batch: list[tuple[UUID, str]],
         assistant: models.User, reply: str, intent: str | None,
-    ) -> tuple[schemas.WebSocketChatMessage, schemas.WebSocketMarkRead | None]:
+    ) -> dict[UUID, list[schemas.WebSocketMessage]]:
         """Persist an assistant auto-reply, mark the answered burst read, and build
-        the websocket messages to broadcast (V-6 / C-10) — shared by both routes so
-        the send / mark-read / broadcast logic stays in one place and in sync.
+        the per-recipient websocket frames to broadcast (V-6 / C-10) — shared by
+        both routes so the send / mark-read / broadcast logic stays in one place
+        and in sync.
 
-        `intent` is recorded on the reply for audit (C-7). Returns
-        (websocket_message, mark_read_message); the latter is None when the whole
-        burst was already read.
+        `intent` is recorded on the reply for audit (C-7). Each recipient gets
+        their variant (staff: full — they see the assistant identity; client:
+        stripped). Returns the per-recipient frame map (message frame plus the
+        mark-read frame when the burst had unread messages), ready to broadcast.
         """
         message = models.Message(
             conversationId=conversation_id,
@@ -643,30 +745,46 @@ class ChatManager:
         db.commit()
         db.refresh(message)
 
-        websocket_message = schemas.WebSocketChatMessage(
-            command=schemas.WebSocketCommand.MESSAGE,
-            payload=schemas.Message.model_validate(message, from_attributes=True),
-        )
-        mark_read_message = None
+        staff_frames: list[schemas.WebSocketMessage] = [
+            schemas.WebSocketChatMessage(
+                command=schemas.WebSocketCommand.MESSAGE,
+                payload=message_payload(message, include_participants=True),
+            )
+        ]
+        client_frames: list[schemas.WebSocketMessage] = [
+            schemas.WebSocketChatMessage(
+                command=schemas.WebSocketCommand.MESSAGE,
+                payload=message_payload(message),
+            )
+        ]
         if read_message_ids:
-            # Tell live clients the owner's burst is read so the picker's unread
-            # badge clears (same protocol as a human's mark_read).
-            mark_read_message = schemas.WebSocketMarkRead(
+            # Tell live recipients the owner's burst is read so the picker's
+            # unread badge clears (same protocol as a human's mark_read).
+            # `assistant` is the User (not its participant), so the staff
+            # variant's nested participant is built from its plain columns.
+            staff_frames.append(schemas.WebSocketMarkRead(
                 command=schemas.WebSocketCommand.MARK_READ,
                 payload=schemas.WebsocketMarkReadPayload(
                     conversationId=conversation_id,
                     messageIds=read_message_ids,
                     participantId=assistant.participantId,
                     readOn=read_on,
-                    # The payload field is the pydantic Participant (not the ORM
-                    # model), so build it from the assistant's plain columns.
                     readByParticipant=schemas.Participant(
                         id=assistant.participantId,
                         user=schemas.UserMinimal(id=assistant.id, username=assistant.username),
                     ),
                 ),
-            )
-        return websocket_message, mark_read_message
+            ))
+            client_frames.append(schemas.WebSocketMarkRead(
+                command=schemas.WebSocketCommand.MARK_READ,
+                payload=schemas.WebsocketMarkReadPayload(
+                    conversationId=conversation_id,
+                    messageIds=read_message_ids,
+                    participantId=assistant.participantId,
+                    readOn=read_on,
+                ),
+            ))
+        return self._recipient_frames(db, conversation_id, staff_frames, client_frames)
 
     async def take_it_from_here(self, socket_id: UUID, participant: models.Participant):
         socket = self.active_connections[socket_id]
@@ -767,14 +885,24 @@ class ChatManager:
                         # message (e.g. mark it read, V-6).
                         message_id = message.id
 
-                        websocket_message = schemas.WebSocketChatMessage(
-                            command=schemas.WebSocketCommand.MESSAGE,
-                            payload=schemas.Message.model_validate(message, from_attributes=True)
-                        )
+                        staff_frames: list[schemas.WebSocketMessage] = [
+                            schemas.WebSocketChatMessage(
+                                command=schemas.WebSocketCommand.MESSAGE,
+                                payload=message_payload(message, include_participants=True),
+                            )
+                        ]
+                        client_frames: list[schemas.WebSocketMessage] = [
+                            schemas.WebSocketChatMessage(
+                                command=schemas.WebSocketCommand.MESSAGE,
+                                payload=message_payload(message),
+                            )
+                        ]
+                        frames = self._recipient_frames(db, conversation_id, staff_frames, client_frames)
                     # The session is closed before the broadcast on purpose:
                     # no DB connection is held open while sending to sockets.
-                    
-                    await self.broadcast(websocket_message)
+
+                    if frames:
+                        await self.broadcast(conversation_id, frames)
 
                     # Best-effort Agent harness (#500): feed this message into the
                     # per-conversation debounce buffer (one burst per conversation,
@@ -845,17 +973,46 @@ class ChatManager:
                                 message.readOn = request.payload.readOn
                                 db.commit()
                         
-                        request.payload.readByParticipant = participant
-                        
-                        websocket_message = schemas.WebSocketMarkRead(
-                            command=schemas.WebSocketCommand.MARK_READ,
-                            payload=schemas.WebsocketMarkReadPayload.model_validate(request.payload, from_attributes=True)
+                        # Rebuilt (not re-validated from the request): staff get
+                        # the nested "who marked it read", clients only the
+                        # opaque ID (message_payload's rules).
+                        # The ws `participant` is detached (bound to connect()'s
+                        # now-closed session), so it must not be lazy-loaded:
+                        # re-fetch it from the current session instead.
+                        reader = get_participant_by_id(db=db, participant_id=participant.id)
+                        base_payload = dict(
+                            conversationId=request.payload.conversationId,
+                            messageIds=request.payload.messageIds,
+                            participantId=request.payload.participantId,
+                            readOn=request.payload.readOn,
                         )
+                        staff_frames = [
+                            schemas.WebSocketMarkRead(
+                                command=schemas.WebSocketCommand.MARK_READ,
+                                payload=schemas.WebsocketMarkReadPayload(
+                                    **base_payload,
+                                    readByParticipant=(
+                                        schemas.Participant.model_validate(
+                                            reader, from_attributes=True
+                                        )
+                                        if reader is not None else None
+                                    ),
+                                ),
+                            )
+                        ]
+                        client_frames = [
+                            schemas.WebSocketMarkRead(
+                                command=schemas.WebSocketCommand.MARK_READ,
+                                payload=schemas.WebsocketMarkReadPayload(**base_payload),
+                            )
+                        ]
+                        frames = self._recipient_frames(db, conversation_id, staff_frames, client_frames)
 
                     # The session is closed before the broadcast on purpose:
                     # no DB connection is held open while sending to sockets.
-    
-                    await self.broadcast(websocket_message)
+
+                    if frames:
+                        await self.broadcast(conversation_id, frames)
                 
                 
             except Exception as e:

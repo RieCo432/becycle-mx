@@ -43,17 +43,24 @@ async def get_my_conversation(
         db: Session = Depends(dep.get_db)
 ) -> schemas.Conversation:
     conversation, created = crud.get_or_create_conversation(participant=participant, db=db)
+    # The requester sees their variant: a client gets the stripped messages
+    # (no volunteer usernames), a staff member the full ones (who sent what).
+    # agentSent is computed server-side in both.
+    payload = crud.conversation_payload(
+        conversation, include_participants=participant.user is not None
+    )
     if created:
         # Push the newcomer to the staff who are online right now (their
-        # REST list is otherwise static). Best-effort: a failed push must
-        # not fail the request — staff catch up on their next (re)connect.
+        # REST list is otherwise static). Staff-only push — full variant.
+        # Best-effort: a failed push must not fail the request — staff catch
+        # up on their next (re)connect.
         try:
             await _ensure_chat_manager().notify_new_conversation(
-                conversation=schemas.Conversation.model_validate(conversation, from_attributes=True)
+                conversation=crud.conversation_payload(conversation, include_participants=True)
             )
         except Exception as e:
             print(f"failed to notify about new conversation {conversation.id}: {e}")
-    return conversation
+    return payload
 
 
 @chats.get("/chats/participants/me")
