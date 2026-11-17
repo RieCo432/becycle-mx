@@ -28,9 +28,6 @@ const props = defineProps({
   },
 });
 
-// TODO: as a user, show what user has sent previous messages
-// TODO: when opening a conversation, it should mark unread messages as read
-
 const emit = defineEmits(['sendMessage', 'closeConversation', 'markRead']);
 
 const credentialStore = useCredentialsStore();
@@ -126,6 +123,19 @@ function getConvenientMessageTime(sentOn) {
   return dateUtils.convertToConvenientString(sentOn);
 }
 
+// Label for staff on their ("my") side: a human staff member's username, so
+// they can tell which colleague sent what. AI replies are left to their "AI"
+// badge. The other side is the client's — their messages are the only ones
+// that can appear there, so it needs no label. Customers (tokenType 'client',
+// not isUser) get nothing — their payload carries no nested participants.
+function senderLabel(message) {
+  if (!isUser) return null;
+  const p = message.sentByParticipant;
+  if (!p || message.agentSent) return null;
+  if (p.user) return p.user.username;
+  return null;
+}
+
 const conversationTitle = computed(() => {
   const client = props.conversation.initiatorParticipant?.client;
 
@@ -219,10 +229,15 @@ function getUnreadMessages() {
                   {{ message.body }}
                 </div>
                 <span class="block text-right font-normal text-xs text-slate-400">
-                  {{
-                    `${getConvenientMessageTime(message.sentOn)}
-                    ${isUser ? `(${message.sentByParticipant.user?.username ?? 'System'})` : ''}`
-                  }}
+                  {{ getConvenientMessageTime(message.sentOn) }}
+                  <span v-if="senderLabel(message)" class="ml-1">{{ senderLabel(message) }}</span>
+                  <span
+                    v-if="message.agentSent"
+                    class="ml-2 inline-block align-middle rounded bg-slate-200 dark:bg-slate-700
+                             px-1.5 py-0.5 text-[10px] font-semibold leading-none
+                             text-slate-500 dark:text-slate-300"
+                    title="Sent by the workshop assistant (AI)"
+                  >AI</span>
                   <Icon
                     icon="heroicons-outline:check-circle"
                     v-if="message.readOn"
@@ -249,6 +264,13 @@ function getUnreadMessages() {
                       text-slate-400 dark:text-slate-400"
                 >
                     {{ getConvenientMessageTime(message.sentOn) }}
+                    <span
+                      v-if="message.agentSent"
+                      class="ml-2 inline-block align-middle rounded bg-slate-200 dark:bg-slate-700
+                             px-1.5 py-0.5 text-[10px] font-semibold leading-none
+                             text-slate-500 dark:text-slate-300"
+                      title="Sent by the workshop assistant (AI)"
+                    >AI</span>
                   </span>
               </div>
             </div>

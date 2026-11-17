@@ -993,6 +993,36 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
+  getChatIntents() {
+    return axiosClient.get('/settings/llm/intents', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  postChatIntent(newChatIntent) {
+    return axiosClient.post('/settings/llm/intents', newChatIntent, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  patchChatIntent(intentId, updatedChatIntent) {
+    return axiosClient.patch(`/settings/llm/intents/${intentId}`, updatedChatIntent, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  deleteChatIntent(intentId) {
+    return axiosClient.delete(`/settings/llm/intents/${intentId}`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getChatIntentFragments() {
+    return axiosClient.get('/settings/llm/intents/fragments', {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
   patchAboutUs(newAboutUs) {
     return axiosClient.patch(`/settings/about-us`, {html: newAboutUs}, {
       headers: credentialsStore.getApiRequestHeader(),

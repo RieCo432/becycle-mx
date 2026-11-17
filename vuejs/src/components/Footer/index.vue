@@ -28,7 +28,7 @@ export default {
     footerClass() {
       switch (this.$store.themeSettingsStore.footerType) {
       case 'sticky':
-        return 'sticky bottom-0 z-[999]';
+        return 'fixed bottom-0 left-0 right-0 z-[999]';
       case 'static':
         return 'static';
       case 'hidden':

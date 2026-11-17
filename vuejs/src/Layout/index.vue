@@ -53,7 +53,7 @@ import Settings from '../components/Settings';
 import Sidebar from '../components/Sidebar/';
 import window from '@/mixins/window';
 import MobileSidebar from '@/components/Sidebar/MobileSidebar.vue';
-import BugReportModal from "@/components/Modal/BugReportModal.vue";
+import BugReportModal from '@/components/Modal/BugReportModal.vue';
 
 export default {
   mixins: [window],
@@ -83,7 +83,7 @@ export default {
       this.$store.bugReportingStore.bugReport = bugReport;
       this.$store.bugReportingStore.shouldUpdateBugReport = true;
       this.$store.bugReportingStore.closeModal();
-    }
+    },
   },
 };
 </script>
@@ -138,8 +138,8 @@ export default {
 }
 
 .page-content {
-  @apply flex flex-col; // Add this
-  @apply md:pt-6 md:pb-[37px] md:px-6 pt-[15px] px-[15px];
+  @apply flex flex-col overflow-y-auto; // Add this
+  @apply md:pt-6 md:pb-[80px] md:px-6 pt-[15px] px-[15px];
   min-height: calc(var(--vh, 1vh) * 100 - 133px);
 }
 

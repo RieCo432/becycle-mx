@@ -6,6 +6,7 @@ from .contracts import *
 from .depositExchanges import *
 from .roadSegments import *
 from .settings import *
+from .intents import *
 from .statistics import *
 from .users import *
 from .expenses import *

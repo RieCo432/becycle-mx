@@ -3,6 +3,7 @@ from typing import Annotated
 from uuid import UUID
 from fastapi import APIRouter, Depends, Body, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from starlette import status
 import app.crud as crud
 import app.dependencies as dep
@@ -182,4 +183,56 @@ async def get_llm_prompt_preview(db: Session = Depends(dep.get_db)) -> schemas.L
     # site's database produced no sections, so the preview simply shows none.
     block = build_dynamic_block(db)
     return schemas.LlmPromptPreview(dynamicBlock=block, charCount=len(block))
+
+
+# --- #501: client-chat intents (the Agent's dispatch set + pre-formed replies) ---
+
+@settings.get("/settings/llm/intents")
+async def get_all_chat_intents(db: Session = Depends(dep.get_db)) -> list[schemas.ChatIntent]:
+    return crud.get_all_intents(db=db)
+
+
+@settings.post("/settings/llm/intents")
+async def create_chat_intent(
+        new_intent: schemas.ChatIntentCreate,
+        db: Session = Depends(dep.get_db)) -> schemas.ChatIntent:
+    try:
+        return crud.create_intent(db=db, data=new_intent)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": str(e)})
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"description": "An intent with that name already exists."})
+
+
+@settings.patch("/settings/llm/intents/{intent_id}")
+async def update_chat_intent(
+        intent_id: UUID,
+        updated_intent: schemas.ChatIntentUpdate,
+        db: Session = Depends(dep.get_db)) -> schemas.ChatIntent:
+    intent = crud.get_intent_by_id(db=db, intent_id=intent_id)
+    if intent is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Intent not found."})
+    try:
+        return crud.update_intent(db=db, intent=intent, data=updated_intent)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"description": str(e)})
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"description": "An intent with that name already exists."})
+
+
+@settings.delete("/settings/llm/intents/{intent_id}")
+async def delete_chat_intent(intent_id: UUID, db: Session = Depends(dep.get_db)) -> None:
+    intent = crud.get_intent_by_id(db=db, intent_id=intent_id)
+    if intent is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"description": "Intent not found."})
+    crud.delete_intent(db=db, intent=intent)
+
+
+@settings.get("/settings/llm/intents/fragments")
+async def list_chat_intent_fragments(db: Session = Depends(dep.get_db)) -> list[schemas.FragmentInfo]:
+    """The live-data fragments a reply template may reference, each with an example
+    computed from this shop's own data (the palette the Intents UI offers)."""
+    return crud.list_fragments(db=db)
 

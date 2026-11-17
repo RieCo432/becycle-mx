@@ -16,7 +16,7 @@ export const useThemeSettingsStore = defineStore('themeSettings', {
     menuLayout: 'vertical',
     navbarType: 'sticky',
     isMouseHovered: false,
-    footerType: 'static',
+    footerType: 'sticky',
     direction: false,
     chartColors: {
       title: 'red',

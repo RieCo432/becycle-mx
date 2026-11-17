@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import httpx
 from pydantic_ai import Agent
 from pydantic_ai.models.ollama import OllamaModel
+from pydantic_ai.models.openai import OpenAIChatModelSettings
 from pydantic_ai.providers.ollama import OllamaProvider
 from sqlalchemy.orm import Session
 
@@ -34,6 +35,8 @@ from app.crud.settings import (
 LLM_HOST = os.environ.get('LLM_HOST', '')
 LLM_PORT = os.environ.get('LLM_PORT', '11434')
 
+PRODUCTION = os.environ['PRODUCTION'] == "true"
+
 # Shared origin for the native Ollama API (GET /api/tags, used by list_models) ...
 LLM_BASE_URL = f"http://{LLM_HOST}:{LLM_PORT}" if LLM_HOST else ""
 # ... and the OpenAI-compatible endpoint (…/v1) that converse()/classify() use.
@@ -45,7 +48,7 @@ LLM_V1_BASE_URL = f"{LLM_BASE_URL}/v1" if LLM_BASE_URL else ""
 # HTTP call (an httpx client timeout), while converse is a whole model turn
 # (plain seconds handed to agent.run).
 _TIMEOUT = httpx.Timeout(15.0, connect=5.0)
-_LLM_TIMEOUT = 60.0
+_LLM_TIMEOUT = 120
 
 # #505 P-1: code-defined default persona — the shared core: the agent's identity
 # and behaviour, identical for every workshop that runs this codebase.
@@ -87,20 +90,37 @@ How to answer:
   unrelated topics.
 """
 
-# A-12: the authoritative, closed set of intents the Agent may classify a message
-# as. This tuple is the single source of truth: the code-default classification
-# prompt is generated from it and classify() validates the model's output against
-# it, so the set, the instructions, and the validation can't drift apart. To add an
-# intent, append it here — the prompt and validation pick it up automatically.
-# (Initial working set; to be extended to the full set.)
-INTENTS = ("booking", "hours", "repair_request", "parts_inquiry", "other")
-
+# A-12: the closed set of intents the Agent may classify a message as. As of #501
+# this lives in the site's own database — the `chat_intents` table, editable per
+# org via the LLM settings UI — rather than a code constant. classify() builds its
+# classification prompt from the enabled rows and validates the model's output
+# against them (crud.intents.get_enabled_intents), so the set, the instructions,
+# and the validation can't drift apart (C-3). To add an intent, add a row — the
+# prompt and validation pick it up automatically.
 # A-6: the "unmatched" sentinel — returned when the model can't map a message to a
-# real intent. Distinct from None, which means "no LLM was run" (A-4 / A-13).
+# configured intent. Distinct from None, which means "no LLM was run" (A-4 / A-13).
 NONE_INTENT = "none"
 
-# The closed set the model is allowed to return: the real intents plus the sentinel.
-_VALID_INTENTS = frozenset(INTENTS) | {NONE_INTENT}
+# #501 C-15: classify() runs with the model's thinking OFF. classify is a routing
+# task — the chain-of-thought adds nothing to the label we keep, and was measured
+# at +103% latency on the local backend (9.5s on vs 4.7s off; 336 vs 7 tokens,
+# ~329 of them discarded). converse() deliberately keeps the model's default
+# (thinking on), which future reasoning work (e.g. #502) may rely on.
+#
+# Two settings are set together:
+# - openai_reasoning_effort="none" is the mechanism that works on this stack
+#   (Ollama 0.40.15): it is forwarded as-is and Ollama's OpenAI-compatible /v1
+#   endpoint honours it — the response's reasoning field disappears.
+# - thinking=False is the unified, future-proof knob: it is silently dropped on
+#   the current gemma profile (it declares supports_thinking=False, and
+#   pydantic-ai 2.66.0 strips a unified thinking setting for such profiles
+#   before it reaches the wire), but it will be honoured when the active model's
+#   profile supports thinking — e.g. after switching models. Verified 2026-11-15
+#   that the two coexist: the wire is unchanged (only reasoning_effort is sent).
+# Note `think: false` does NOT work on /v1 — that is a native /api/chat field only.
+# If a future model rejects reasoning_effort "none", drop the explicit setting and
+# let thinking=False resolve to that model's lowest accepted effort.
+_CLASSIFY_NO_THINKING = OpenAIChatModelSettings(openai_reasoning_effort="none", thinking=False)
 
 
 def _extract_text(message) -> str:
@@ -341,38 +361,63 @@ def _system_prompt(db: Session, settings) -> str:
     return prompt
 
 
-def _default_classification_prompt() -> str:
-    """A-10/A-11: code-default classification instructions, derived from INTENTS.
+def _closed_set(intent_rows, faq_targets) -> str:
+    """The closed set the model may classify into: the enabled intents plus the
+    active FAQs, and the "or none" opt-out. Always appended to the classification
+    prompt (whether or not the admin overrode the instructions) so the model
+    always sees exactly what it may choose AND can always decline; the validator
+    enforces the same set (C-3), so the list, the instructions, and the validation
+    can't drift apart.
 
-    Defines the closed intent set and a strict machine-parseable JSON contract.
-    Because the allowed list is generated from INTENTS, extending the set never
-    desynchronises the instructions from the validation.
+    `faq_targets` is (key, question, answer); only the key and question go in the
+    prompt — the answer is the routed reply, resolved in crud.chats.resolve_reply.
     """
-    allowed = ", ".join(INTENTS)
+    sections = ["Classify into exactly one of these:"]
+    if intent_rows:
+        lines = []
+        for row in intent_rows:
+            desc = (row.whenToUse or "").strip()
+            lines.append(f"- {row.name}: {desc}" if desc else f"- {row.name}")
+        sections.append("\n".join(lines))
+    if faq_targets:
+        faq_lines = "\n".join(f"- {key}: {question}" for key, question, _answer in faq_targets)
+        sections.append(faq_lines)
+    sections.append(f'or "{NONE_INTENT}" if it fits none of them.')
+    return "\n".join(sections)
+
+
+def _default_classification_prompt() -> str:
+    """A-10/A-11: code-default classification instructions (a strict
+    machine-parseable JSON contract). Deliberately does NOT list the intents —
+    the closed set is always appended separately (_intent_listing) so a custom
+    Classification Prompt never silently drops the intent names the model must
+    pick from."""
     return (
         "You are a message classifier, not a conversational assistant. "
         "Do not answer the customer. "
-        f"Classify their latest message into exactly one intent: {allowed}, "
-        f"or \"{NONE_INTENT}\" if it fits none of them. "
-        "Respond with JSON only: {\"intent\": \"<one of the above>\"}"
+        "Classify their latest message into exactly one of the intents listed below. "
+        'Respond with JSON only: {"intent": "<one of the above>"}'
     )
 
 
 def _classification_instructions(settings) -> str:
-    """A-10: LlmSettings.classificationPrompt, else the code default."""
+    """A-10: LlmSettings.classificationPrompt override, else the code default
+    instructions (the closed intent set is always appended separately in classify)."""
     prompt = getattr(settings, "classificationPrompt", None)
     if prompt and prompt.strip():
         return prompt.strip()
     return _default_classification_prompt()
 
 
-def _extract_intent(raw) -> str:
-    """Reduce the model's output to a valid intent, else the none sentinel (A-6/A-12).
+def _extract_intent(raw, valid_names) -> str:
+    """Reduce the model's output to a valid intent (one of ``valid_names``), else
+    the none sentinel (A-6/A-12).
 
     Prefers a well-formed {"intent": "..."} object, then a bare known intent word,
     then a lenient pull from a noisy/fenced response. Anything unrecognised degrades
     to NONE_INTENT rather than raising (best-effort).
     """
+    valid = frozenset(n.lower() for n in valid_names) | {NONE_INTENT}
     text = raw.strip() if isinstance(raw, str) else ("" if raw is None else str(raw).strip())
     if not text:
         return NONE_INTENT
@@ -382,18 +427,18 @@ def _extract_intent(raw) -> str:
         data = json.loads(text)
         if isinstance(data, dict) and isinstance(data.get("intent"), str):
             intent = data["intent"].strip().lower()
-            if intent in _VALID_INTENTS:
+            if intent in valid:
                 return intent
     except (ValueError, TypeError):
         pass
 
     # 2) lenient: the whole response is a single known intent word
-    if text.lower() in _VALID_INTENTS:
+    if text.lower() in valid:
         return text.lower()
 
     # 3) lenient: pull "intent": "<value>" out of a fenced/noisy response
     match = re.search(r'"?intent"?\s*[:=]\s*"?([a-z0-9_]+)"?', text, re.IGNORECASE)
-    if match and match.group(1).lower() in _VALID_INTENTS:
+    if match and match.group(1).lower() in valid:
         return match.group(1).lower()
 
     return NONE_INTENT
@@ -467,6 +512,10 @@ async def converse(db: Session, messages, context: dict | None = None) -> str | 
         system_prompt=_system_prompt(db, settings),
     )
     try:
+        # #501 C-15: converse keeps the model's default thinking (on) — classify() is
+        # the only call that turns it off (_CLASSIFY_NO_THINKING). Leave this
+        # asymmetry in place: future reasoning work may rely on converse thinking
+        # by default.
         result = await agent.run(prompt, timeout=_LLM_TIMEOUT)
     except Exception as exc:  # A-13: any failure -> no-op
         print(f"LLM converse failed: {exc}")
@@ -479,28 +528,35 @@ async def converse(db: Session, messages, context: dict | None = None) -> str | 
 
 
 async def classify(db: Session, messages, context: dict | None = None) -> str | None:
-    """Classify a debounced burst of messages into an intent (A-6).
+    """Classify a debounced burst of messages into an intent (A-6 / #501 C-1).
 
     The Agent is the only component that invokes the LLM (A-1). The active config —
     model, shared persona, and classification instructions — is read from
-    LlmSettings per operation (A-3); the instructions fall back to a code-defined
-    default when blank (A-10) and carry a strict machine-parseable contract (A-11).
-    The dynamic block of workshop facts is assembled from the site's database at
-    call time (#505 D-1). When no model is configured the Agent is inactive and
-    makes no LLM call (A-4).
+    LlmSettings per operation (A-3); the classification set comes from the site's
+    `chat_intents` table (C-9/C-3) plus its active FAQs, and the instructions fall
+    back to a code-defined default (A-10). The dynamic block of workshop facts is
+    assembled from the site's database at call time (#505 D-1).
+    When no model is configured the Agent is inactive and makes no LLM call (A-4).
 
-    Returns one of INTENTS, or the NONE_INTENT sentinel when the model can't map the
-    message to a real intent. Returns None when no LLM call is made (no model,
-    unconfigured/dead backend, timeout) — best-effort per A-13 — so the caller falls
-    back to the base human chat.
+    Returns one of the site's enabled intent names or an active FAQ key (a slug of
+    its question), or the NONE_INTENT sentinel when the model can't map the message
+    to either. Returns None when no LLM call is made (no model, unconfigured/dead
+    backend, timeout) — best-effort per A-13 — so the caller falls back to the base
+    human chat.
 
     Args:
-        db: session used to read the active LlmSettings row (A-3).
+        db: session used to read the active LlmSettings row and the enabled
+            intents (A-3 / C-9).
         messages: a batch of messages (A-9) — strings, or dicts/objects exposing
             their text via `content` / `body` / `text`.
         context: the caller's per-org / per-thread context (A-9). Accepted so the
             signature matches the shared contract; reserved for future use.
     """
+    # Lazy import: the intent set now lives in crud.intents (the DB-backed table).
+    # Imported at call time so module-load order can never create a crud<->services
+    # import cycle (crud.chats imports this module, and this reaches back into crud).
+    from app.crud.intents import get_enabled_intents, get_active_faq_targets
+
     settings = get_llm_settings(db=db)
 
     model = _active_model(settings)
@@ -513,18 +569,45 @@ async def classify(db: Session, messages, context: dict | None = None) -> str | 
     if not prompt:
         return None  # nothing to classify
 
-    # A-10 / #505 D-1: persona (site row or core) + dynamic block for both
-    # routes; classify adds the classification contract (A-11).
-    system_prompt = _system_prompt(db, settings) + "\n\n" + _classification_instructions(settings)
+    intent_rows = get_enabled_intents(db)
+    faq_targets = get_active_faq_targets(db)  # [(key, question, answer)]
+    if not intent_rows and not faq_targets:
+        # Nothing to classify into -> no LLM call. Return the none sentinel (not
+        # None) so the caller routes to the free-form fallback rather than making
+        # a pointless LLM call.
+        return NONE_INTENT
+
+    valid_names = {row.name for row in intent_rows} | {key for key, _q, _a in faq_targets}
+
+    # classify is a routing task: it needs the classifier role (the instructions)
+    # and the closed set to route into — NOT the dynamic block of workshop facts,
+    # which only matters when composing an answer. Dropping it here cuts the prompt
+    # the model pre-fills (and so the latency / variance) on the common client path;
+    # converse() keeps the full block for free-form answers. The persona is kept so
+    # the model still knows the workshop context it's routing within.
+    system_prompt = (
+        _persona(settings)
+        + "\n\n" + _classification_instructions(settings)
+        + "\n\n" + _closed_set(intent_rows, faq_targets)
+    )
+    
+    if not PRODUCTION:
+        print("system prompt:", system_prompt)
+        print("prompt:", prompt)
 
     agent = Agent(
         OllamaModel(model, provider=OllamaProvider(base_url=LLM_V1_BASE_URL)),
         system_prompt=system_prompt,
     )
     try:
-        result = await agent.run(prompt, timeout=_LLM_TIMEOUT)
+        # #501: thinking OFF for this routing call (see _CLASSIFY_NO_THINKING).
+        result = await agent.run(
+            prompt,
+            model_settings=_CLASSIFY_NO_THINKING,
+            timeout=_LLM_TIMEOUT,
+        )
     except Exception as exc:  # A-13: any transport failure -> no-op
         print(f"LLM classify failed: {exc}")
         return None
 
-    return _extract_intent(getattr(result, "output", None))
+    return _extract_intent(getattr(result, "output", None), valid_names)

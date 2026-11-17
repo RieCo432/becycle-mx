@@ -44,6 +44,11 @@ export const ENDPOINTS = {
   // settings ----------------------------------------------------------------
   putAddress: {method: 'PUT', route: '/settings/address'},
   putLlmSettings: {method: 'PUT', route: '/settings/llm'},
+  getChatIntents: {method: 'GET', route: '/settings/llm/intents'},
+  postChatIntent: {method: 'POST', route: '/settings/llm/intents'},
+  patchChatIntent: {method: 'PATCH', route: '/settings/llm/intents/{intent_id}'},
+  deleteChatIntent: {method: 'DELETE', route: '/settings/llm/intents/{intent_id}'},
+  getChatIntentFragments: {method: 'GET', route: '/settings/llm/intents/fragments'},
   patchAboutUs: {method: 'PATCH', route: '/settings/about-us'},
   patchFaq: {method: 'PATCH', route: '/settings/faq/{faq_id}'},
   postFaq: {method: 'POST', route: '/settings/faq'},
