@@ -65,6 +65,35 @@ class Conversation(BaseModel):
     messages: list[Message]
 
 
+class ClientMinimal(BaseModel):
+    id: UUID
+    firstName: str
+    lastName: str
+
+
+class AiAuditContextMessage(BaseModel):
+    """A client message shown as prompting context for an AI reply (#510 A-4)."""
+    id: UUID
+    sentOn: datetime
+    body: str
+
+
+class AiAuditEntry(BaseModel):
+    """One client-route AI reply with its audit data (#510 A-2..A-4): the
+    detected intent (an intent/FAQ slug, or the "none" sentinel) and the most
+    recent client messages preceding the reply — context, not a strict causal
+    record (#510's open question, resolved against read-receipt
+    reconstruction).
+    """
+    id: UUID
+    sentOn: datetime
+    body: str
+    intent: str | None
+    conversationId: UUID
+    client: ClientMinimal
+    context: list[AiAuditContextMessage]
+
+
 class ChatIntentBase(BaseModel):
     # `name` is the classifier's slug + the dispatch key, so it must be a stable
     # token (lowercase letters, digits, underscores). The crud layer normalises

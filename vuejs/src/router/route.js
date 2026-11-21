@@ -395,6 +395,16 @@ const routes = [
         component: () => import('@/views/admin/llmSettings.vue'),
       },
       {
+        path: '/admin/ai-replies',
+        name: 'AI Replies',
+        meta: {
+          title: 'AI Replies',
+          restrictTo: ['user'],
+          selectNavPath: '/admin/ai-replies',
+        },
+        component: () => import('@/views/admin/aiReplies.vue'),
+      },
+      {
         path: '/contracts/find-paper-contract',
         name: 'Find Paper Contract',
         meta: {

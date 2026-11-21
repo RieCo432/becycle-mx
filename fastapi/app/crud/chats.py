@@ -21,7 +21,7 @@ import sqlalchemy.exc
 from fastapi import HTTPException, status
 
 from jose import jwt, JWTError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 
 from app.database.db import SessionLocal
@@ -204,6 +204,68 @@ def conversation_payload(
             for m in conversation.messages
         ],
     )
+
+
+def get_client_route_ai_replies(db: Session, context_limit: int = 5) -> list[schemas.AiAuditEntry]:
+    """#510 A-2..A-4: every client-route AI reply, newest first, with its
+    detected intent and prompting context.
+
+    A client-route reply is one the assistant (the stable ai-agent identity)
+    sent in a client's conversation (the initiator participant has a client).
+    Volunteer-route replies are excluded by construction: those conversations
+    are staff-initiated.
+
+    The context is the ``context_limit`` most recent client messages preceding
+    the reply — context, not a strict causal record (any burst message a human
+    had already read before the reply was composed carries no assistant read
+    receipt, so it cannot be attributed afterwards; #510's open question was
+    resolved against reconstructing that).
+    """
+    sender = aliased(models.Participant)
+    initiator = aliased(models.Participant)
+    replies = (
+        db.query(models.Message)
+        .join(sender, sender.id == models.Message.sentByParticipantId)
+        .join(models.User, models.User.participantId == sender.id)
+        .join(models.Conversation, models.Conversation.id == models.Message.conversationId)
+        .join(initiator, initiator.id == models.Conversation.initiatorParticipantId)
+        .join(models.Client, models.Client.participantId == initiator.id)
+        .filter(models.User.username == AI_AGENT_USERNAME)
+        .order_by(models.Message.sentOn.desc())
+        .all()
+    )
+
+    entries = []
+    for reply in replies:
+        conversation = reply.conversation
+        context = (
+            db.query(models.Message)
+            .filter(models.Message.conversationId == conversation.id)
+            .filter(models.Message.sentByParticipantId == conversation.initiatorParticipantId)
+            .filter(models.Message.sentOn < reply.sentOn)
+            .order_by(models.Message.sentOn.desc())
+            .limit(context_limit)
+            .all()
+        )
+        client = conversation.initiatorParticipant.client
+        entries.append(schemas.AiAuditEntry(
+            id=reply.id,
+            sentOn=reply.sentOn,
+            body=reply.body,
+            intent=reply.intent,
+            conversationId=conversation.id,
+            client=schemas.ClientMinimal(
+                id=client.id,
+                firstName=client.firstName,
+                lastName=client.lastName,
+            ),
+            # Reversed: the query is newest-first, the view reads chronologically.
+            context=[
+                schemas.AiAuditContextMessage(id=message.id, sentOn=message.sentOn, body=message.body)
+                for message in reversed(context)
+            ],
+        ))
+    return entries
 
 
 async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMessage):

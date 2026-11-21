@@ -87,3 +87,13 @@ async def get_contracts_takeout_pdf(db: Session = Depends(dep.get_db)):
 async def get_permissions(db: Session = Depends(dep.get_db)) -> schemas.PermissionNode:
     result = crud.get_permissions_tree(db=db)
     return result
+
+
+# #510 A-2..A-5: the AI audit trail — all client-route AI replies, newest
+# first, each with its detected intent and the prompting context. Admin-only:
+# this router enforces check_permissions, the permission row for the route is
+# created by the startup sync, and only the admin group holds a scope
+# covering it (regular staff groups hold narrower scopes).
+@admin.get("/admin/ai-replies")
+async def get_ai_replies(db: Session = Depends(dep.get_db)) -> list[schemas.AiAuditEntry]:
+    return crud.get_client_route_ai_replies(db=db)
