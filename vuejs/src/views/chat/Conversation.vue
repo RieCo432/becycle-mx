@@ -132,7 +132,7 @@ function getConvenientMessageTime(sentOn) {
 
 // #510 A-1: shown on click of an AI reply — the intent the classification
 // recorded (#501 C-7): an intent/FAQ slug, or the "none" sentinel for the
-// free-form fallback. Staff only (disabled for clients via v-tippy below).
+// free-form fallback. Staff only (gated via the v-tippy onShow below).
 function intentLabel(message) {
   if (!message.intent || message.intent === 'none') {
     return 'Free-form reply (no intent matched)';
@@ -247,7 +247,11 @@ function getUnreadMessages() {
                     trigger: 'click',
                     placement: 'top',
                     animation: 'scale',
-                    disabled: !(isUser && message.agentSent),
+                    // Staff-only (#510 A-1/A-5): a falsy return from onShow
+                    // cancels the show. (Note: `disabled` is NOT a tippy prop —
+                    // disable()/enable() are instance methods — so passing it
+                    // here is silently ignored.)
+                    onShow: () => isUser && message.agentSent,
                     // Keep the popover inside the chat panel: appended to the
                     // page (tippy's default) it would extend the document's
                     // scrollable area whenever it drifts past the panel's
@@ -294,7 +298,11 @@ function getUnreadMessages() {
                     trigger: 'click',
                     placement: 'top',
                     animation: 'scale',
-                    disabled: !(isUser && message.agentSent),
+                    // Staff-only (#510 A-1/A-5): a falsy return from onShow
+                    // cancels the show. (Note: `disabled` is NOT a tippy prop —
+                    // disable()/enable() are instance methods — so passing it
+                    // here is silently ignored.)
+                    onShow: () => isUser && message.agentSent,
                     // Keep the popover inside the chat panel: appended to the
                     // page (tippy's default) it would extend the document's
                     // scrollable area whenever it drifts past the panel's
