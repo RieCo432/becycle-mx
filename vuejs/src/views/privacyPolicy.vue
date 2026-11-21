@@ -32,6 +32,15 @@ export default {
             </h4>
           </Card>
         </div>
+        <!-- #511 D-7: the "AI" card joins the hub; the AI page links back. -->
+        <div class="lg:col-span-6 col-span-12">
+          <Card title="AI">
+            <h4 class="dark:text-slate-300 text-slate-700">
+              To view how we use AI, please click
+                <router-link to="/about-our-ai" class="text-blue-500">here</router-link>.
+            </h4>
+          </Card>
+        </div>
     </div>
 </template>
 

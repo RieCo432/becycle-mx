@@ -50,6 +50,7 @@ export const ENDPOINTS = {
   deleteChatIntent: {method: 'DELETE', route: '/settings/llm/intents/{intent_id}'},
   getChatIntentFragments: {method: 'GET', route: '/settings/llm/intents/fragments'},
   patchAboutUs: {method: 'PATCH', route: '/settings/about-us'},
+  getAiDisclosure: {method: 'GET', route: '/public/ai-disclosure'},
   patchFaq: {method: 'PATCH', route: '/settings/faq/{faq_id}'},
   postFaq: {method: 'POST', route: '/settings/faq'},
   swapFaq: {method: 'PATCH', route: '/settings/faq/swap'},

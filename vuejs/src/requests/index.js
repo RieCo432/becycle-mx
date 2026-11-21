@@ -581,6 +581,12 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status),
     });
   },
+  getAiDisclosure() {
+    // #511: public "About our AI" page — no auth header (public information).
+    return axiosClient.get('/public/ai-disclosure', {
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
+    });
+  },
   getAppointments(startDate, endDate) {
     return axiosClient.get('/appointments/calendar', {
       params: {

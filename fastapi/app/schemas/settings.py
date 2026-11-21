@@ -76,6 +76,11 @@ class AboutUs(BaseModel):
     html: str
 
 
+# #511: the public "About our AI" disclosure — plain Markdown.
+class AiDisclosure(BaseModel):
+    content: str
+
+
 class FaqBase(BaseModel):
     question: str
     answer: str
@@ -97,6 +102,10 @@ class LlmSettings(BaseModel):
     customerFreeForm: bool
     debounceWindowSeconds: int
     debounceBatchCap: int
+    # #511: the public "About our AI" disclosure (plain Markdown). Optional:
+    # clients that don't know the field omit it, and the crud skips a None
+    # value so such a save can't wipe the existing text.
+    aiDisclosure: str | None = None
 
 
 class LlmPromptPreview(BaseModel):

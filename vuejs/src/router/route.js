@@ -31,6 +31,17 @@ const routes = [
         component: () => import('@/views/privacyPolicy.vue'),
       },
       {
+        // #511: public "About our AI" disclosure page (no login required).
+        path: '/about-our-ai',
+        name: 'aboutOurAi',
+        meta: {
+          title: 'About our AI',
+          restrictTo: null,
+          selectNavPath: null,
+        },
+        component: () => import('@/views/aboutOurAi.vue'),
+      },
+      {
         path: '/me',
         name: 'Profile',
         meta: {
