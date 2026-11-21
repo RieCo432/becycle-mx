@@ -15,6 +15,7 @@ function validateCommonHTTPErrorCodes(status, options) {
   options = options ?? {};
   options.clientLoginRequired = options.clientLoginRequired ?? false;
   options.userLoginRequired = options.userLoginRequired ?? false;
+  options.silent403 = options.silent403 ?? false;
   if (options.clientLoginRequired && status === 401) {
     toast.error('Authentication required. Please log in.', {timeout: 3000});
     credentialsStore.logout();
@@ -24,7 +25,11 @@ function validateCommonHTTPErrorCodes(status, options) {
     credentialsStore.logout();
     router.push('/users/login');
   } else if (status === 403) {
-    toast.error('You do not have permission to access this resource. Please contact your administrator.', {timeout: 3000});
+    // silent403: the caller handles a denial as an expected state (e.g. the
+    // chat page degrading to agent-chat-only) — still rejects, no toast.
+    if (!options.silent403) {
+      toast.error('You do not have permission to access this resource. Please contact your administrator.', {timeout: 3000});
+    }
   } else if (status === 503) {
     toast.error('Service Temporarily Unavailable. Please try again later.', {timeout: false});
   } else return status < 300;
@@ -1775,11 +1780,38 @@ export default {
   getConversations() {
     return axiosClient.get(`/chats/conversations`, {
       headers: credentialsStore.getApiRequestHeader(),
-      validateStatus: (status) => validateCommonHTTPErrorCodes(status),
+      // A 403 here is an expected state (staff without the conversations
+      // permission still keep their own agent chat) — the caller degrades
+      // gracefully, so no permission toast.
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {silent403: true}),
     });
   },
   getParticipantMe() {
     return axiosClient.get(`/chats/participants/me`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+    });
+  },
+  getAiReplies(search, limit, rating) {
+    const params = {};
+    if (search) {
+      params.search = search;
+    }
+    if (limit) {
+      params.limit = limit;
+    }
+    if (rating) {
+      params.rating = rating;
+    }
+    return axiosClient.get(`/admin/ai-replies`, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      params,
+    });
+  },
+  // #510 A-8: set ('good' | 'not-good') or clear ('unrated') the rating.
+  rateAiReply(messageId, rating) {
+    return axiosClient.post(`/admin/ai-replies/${messageId}/rating`, {rating: rating}, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });

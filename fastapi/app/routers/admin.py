@@ -1,6 +1,6 @@
 from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import app.crud as crud
@@ -87,3 +87,42 @@ async def get_contracts_takeout_pdf(db: Session = Depends(dep.get_db)):
 async def get_permissions(db: Session = Depends(dep.get_db)) -> schemas.PermissionNode:
     result = crud.get_permissions_tree(db=db)
     return result
+
+
+# #510 A-2..A-5: the AI audit trail — all client-route AI replies, newest
+# first, each with its detected intent and the prompting context. Admin-only:
+# this router enforces check_permissions, the permission row for the route is
+# created by the startup sync, and only the admin group holds a scope
+# covering it (regular staff groups hold narrower scopes).
+@admin.get("/admin/ai-replies")
+async def get_ai_replies(
+        search: Annotated[str | None, Query()] = None,
+        rating: Annotated[str | None, Query()] = None,
+        limit: Annotated[int, Query(ge=1, le=200)] = 50,
+        db: Session = Depends(dep.get_db)) -> list[schemas.AiAuditEntry]:
+    # `search` (#510 A-6): case-insensitive match on the reply body, intent,
+    # the shown context, or the client's name/email.
+    # `rating` (#510 A-8): 'good' | 'not-good' | 'unrated', or all when absent.
+    # `limit`: batch size, newest first (the admin view loads the last 50).
+    if rating is not None and rating not in crud.QUALITY_RATINGS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail={"description": "rating must be 'good', 'not-good' or 'unrated'"})
+    return crud.get_client_route_ai_replies(db=db, search=search, rating=rating, limit=limit)
+
+
+# #510 A-8: set or clear the quality rating on an AI reply. A dedicated
+# route, guarded by the existing permission system like the rest of this
+# router (the startup sync creates its permission row; only the admin group
+# holds a scope covering it).
+@admin.post("/admin/ai-replies/{message_id}/rating")
+async def rate_ai_reply(
+        message_id: UUID,
+        update: schemas.QualityRatingUpdate,
+        db: Session = Depends(dep.get_db)) -> schemas.QualityRatingState:
+    if update.rating not in crud.QUALITY_RATINGS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail={"description": "rating must be 'good', 'not-good' or 'unrated'"})
+    if not crud.set_message_quality_rating(db=db, message_id=message_id, rating=update.rating):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail={"description": "Message not found"})
+    return schemas.QualityRatingState(qualityRating=crud.QUALITY_RATINGS[update.rating])

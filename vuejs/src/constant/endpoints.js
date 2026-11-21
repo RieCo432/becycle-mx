@@ -113,6 +113,10 @@ export const ENDPOINTS = {
   mergeBugReports: {method: 'POST', route: '/bugreports/merge'},
   patchBugReport: {method: 'PATCH', route: '/bugreports/{bug_report_id}'},
   createBugReport: {method: 'POST', route: '/bugreports'},
+
+  // AI audit trail (#510) ----------------------------------------------------
+  getAiReplies: {method: 'GET', route: '/admin/ai-replies'},
+  postRateAiReply: {method: 'POST', route: '/admin/ai-replies/{message_id}/rating'},
 };
 
 export default ENDPOINTS;

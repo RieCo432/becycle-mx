@@ -53,6 +53,7 @@ class Message(BaseModel):
     agentSent: bool = False
 
     # #501 C-7: the intent this reply was produced for (see the model).
+    # Staff variant only — None in the client variant (#510 A-5).
     intent: str | None = None
 
 
@@ -62,6 +63,49 @@ class Conversation(BaseModel):
     initiatorParticipant: Participant
 
     messages: list[Message]
+
+
+class ClientMinimal(BaseModel):
+    id: UUID
+    firstName: str
+    lastName: str
+    emailAddress: str
+
+
+class AiAuditContextMessage(BaseModel):
+    """A client message shown as prompting context for an AI reply (#510 A-4)."""
+    id: UUID
+    sentOn: datetime
+    body: str
+
+
+class AiAuditEntry(BaseModel):
+    """One client-route AI reply with its audit data (#510 A-2..A-4): the
+    detected intent (an intent/FAQ slug, or the "none" sentinel) and the most
+    recent client messages preceding the reply — context, not a strict causal
+    record (#510's open question, resolved against read-receipt
+    reconstruction).
+    """
+    id: UUID
+    sentOn: datetime
+    body: str
+    intent: str | None
+    qualityRating: bool | None
+    conversationId: UUID
+    client: ClientMinimal
+    context: list[AiAuditContextMessage]
+
+
+class QualityRatingUpdate(BaseModel):
+    """#510 A-8: the quality rating to set on an AI reply: 'good',
+    'not-good', or 'unrated' (clears the rating)."""
+    rating: str
+
+
+class QualityRatingState(BaseModel):
+    """#510 A-8: the quality rating currently set on an AI reply
+    (None = unrated)."""
+    qualityRating: bool | None
 
 
 class ChatIntentBase(BaseModel):

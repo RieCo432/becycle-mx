@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from uuid import uuid4, UUID
 
 from pydantic import TypeAdapter
-from sqlalchemy import select
+from sqlalchemy import select, or_, func
 
 from fastapi import WebSocket
 from starlette.exceptions import WebSocketException
@@ -21,7 +21,7 @@ import sqlalchemy.exc
 from fastapi import HTTPException, status
 
 from jose import jwt, JWTError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 
 from app.database.db import SessionLocal
@@ -181,7 +181,9 @@ def message_payload(message: models.Message, *, include_participants: bool = Fal
             and sender.user is not None
             and sender.user.username == AI_AGENT_USERNAME
         ),
-        intent=message.intent,
+        # Staff variant only: the classification must not leak to the client
+        # side of the wire (#510 A-5), like the participant objects above.
+        intent=message.intent if include_participants else None,
     )
 
 
@@ -202,6 +204,145 @@ def conversation_payload(
             for m in conversation.messages
         ],
     )
+
+
+# #510 A-8: the three rating states and their stored values (true = good,
+# false = not good, None = unrated).
+QUALITY_RATINGS = {"good": True, "not-good": False, "unrated": None}
+
+
+def get_client_route_ai_replies(
+        db: Session, context_limit: int = 5, search: str | None = None,
+        rating: str | None = None, limit: int = 50) -> list[schemas.AiAuditEntry]:
+    """#510 A-2..A-4: every client-route AI reply, newest first, with its
+    detected intent and prompting context.
+
+    A client-route reply is one the assistant (the stable ai-agent identity)
+    sent in a client's conversation (the initiator participant has a client).
+    Volunteer-route replies are excluded by construction: those conversations
+    are staff-initiated.
+
+    The context is the ``context_limit`` most recent client messages preceding
+    the reply — context, not a strict causal record (any burst message a human
+    had already read before the reply was composed carries no assistant read
+    receipt, so it cannot be attributed afterwards; #510's open question was
+    resolved against reconstructing that).
+
+    ``search`` (#510 A-6), when given, narrows to replies whose AI body, or
+    whose client's name or email, or one of the ``context_limit`` client
+    messages shown in the context, matches the term (case-insensitive
+    substring) — deliberately not the whole conversation history.
+
+    ``limit`` caps the batch returned (newest first) — the admin view loads
+    the most recent 50, and searches refetch the most recent 50 matches.
+
+    ``rating`` (#510 A-8), when given ('good' | 'not-good' | 'unrated'),
+    narrows to replies carrying that quality rating (all when None).
+    """
+    sender = aliased(models.Participant)
+    initiator = aliased(models.Participant)
+    query = (
+        db.query(models.Message)
+        .join(sender, sender.id == models.Message.sentByParticipantId)
+        .join(models.User, models.User.participantId == sender.id)
+        .join(models.Conversation, models.Conversation.id == models.Message.conversationId)
+        .join(initiator, initiator.id == models.Conversation.initiatorParticipantId)
+        .join(models.Client, models.Client.participantId == initiator.id)
+        .filter(models.User.username == AI_AGENT_USERNAME)
+    )
+
+    if search is not None and search.strip():
+        term = f"%{search.strip()}%"
+        # Aliased so the subquery is unambiguously "another message" (the
+        # outer Message/Conversation are correlated automatically).
+        prompting = aliased(models.Message)
+        # Exactly the context that is shown: the context_limit most recent
+        # preceding client messages, ranked in the same order the context
+        # query below uses (newest first).
+        context_ranked = (
+            select(
+                prompting.id,
+                prompting.body,
+                func.row_number().over(order_by=prompting.sentOn.desc()).label("rn"),
+            )
+            .where(
+                prompting.conversationId == models.Message.conversationId,
+                prompting.sentByParticipantId == models.Conversation.initiatorParticipantId,
+                prompting.sentOn < models.Message.sentOn,
+            )
+            .subquery()
+        )
+        query = query.filter(or_(
+            models.Message.body.ilike(term),
+            models.Message.intent.ilike(term),
+            models.Client.firstName.concat(" ").concat(models.Client.lastName).ilike(term),
+            models.Client.emailAddress.ilike(term),
+            select(context_ranked.c.id)
+            .where(context_ranked.c.rn <= context_limit, context_ranked.c.body.ilike(term))
+            .exists(),
+        ))
+
+    if rating == "good":
+        query = query.filter(models.Message.qualityRating.is_(True))
+    elif rating == "not-good":
+        query = query.filter(models.Message.qualityRating.is_(False))
+    elif rating == "unrated":
+        query = query.filter(models.Message.qualityRating.is_(None))
+
+    replies = query.order_by(models.Message.sentOn.desc()).limit(limit).all()
+
+    entries = []
+    for reply in replies:
+        conversation = reply.conversation
+        context = (
+            db.query(models.Message)
+            .filter(models.Message.conversationId == conversation.id)
+            .filter(models.Message.sentByParticipantId == conversation.initiatorParticipantId)
+            .filter(models.Message.sentOn < reply.sentOn)
+            .order_by(models.Message.sentOn.desc())
+            .limit(context_limit)
+            .all()
+        )
+        client = conversation.initiatorParticipant.client
+        entries.append(schemas.AiAuditEntry(
+            id=reply.id,
+            sentOn=reply.sentOn,
+            body=reply.body,
+            intent=reply.intent,
+            qualityRating=reply.qualityRating,
+            conversationId=conversation.id,
+            client=schemas.ClientMinimal(
+                id=client.id,
+                firstName=client.firstName,
+                lastName=client.lastName,
+                emailAddress=client.emailAddress,
+            ),
+            # Reversed: the query is newest-first, the view reads chronologically.
+            context=[
+                schemas.AiAuditContextMessage(id=message.id, sentOn=message.sentOn, body=message.body)
+                for message in reversed(context)
+            ],
+        ))
+    return entries
+
+
+def set_message_quality_rating(db: Session, message_id: UUID, rating: str) -> bool:
+    """#510 A-8: set (or, 'unrated', clear) the quality rating on an AI reply.
+
+    Only replies sent by the assistant can be rated — anything else is a 400
+    (the rating is audit data about the assistant, not about humans). Returns
+    False when the message does not exist (the router 404s).
+    """
+    message = db.get(models.Message, message_id)
+    if message is None:
+        return False
+    sender = db.get(models.Participant, message.sentByParticipantId)
+    if sender is None or sender.user is None or sender.user.username != AI_AGENT_USERNAME:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail={"description": "Only AI replies can be rated"})
+    message.qualityRating = QUALITY_RATINGS[rating]
+    db.commit()
+    return True
 
 
 async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMessage):

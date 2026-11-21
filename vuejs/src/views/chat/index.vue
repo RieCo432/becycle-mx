@@ -2,7 +2,8 @@
 import {useCredentialsStore} from '@/store/credentialsStore';
 import Conversation from '@/views/chat/Conversation.vue';
 import ConversationPicker from '@/views/chat/ConversationPicker.vue';
-import {computed, onBeforeUnmount, ref} from 'vue';
+import {computed, onBeforeUnmount, ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import Alert from '@/components/Alert/index.vue';
@@ -14,6 +15,7 @@ const API_SUBDIR = import.meta.env.VITE_API_SUBDIR;
 
 const toast = useToast();
 const credentialStore = useCredentialsStore();
+const route = useRoute();
 
 const isUser = credentialStore.tokenType === 'user';
 
@@ -34,6 +36,10 @@ const pingTime = 10000;
 let retryTimeout = null;
 let heartbeat = null;
 let pongMissedTimeout = null;
+// True once the conversation list was 403-denied: this staff member serves
+// no client conversations, but still keeps their own agent chat. The
+// reconnect catch-up refetch is then pointless (the denial is stable).
+let conversationListDenied = false;
 // true once the user leaves the page; onclose must not schedule a reconnect
 let isLeaving = false;
 
@@ -66,7 +72,7 @@ function selectConversation(conversation) {
 // socket was disconnected when the conversation was created (the push was
 // then missed).
 async function refreshConversations() {
-  if (!isUser) {
+  if (!isUser || conversationListDenied) {
     return;
   }
   const response = await requests.getConversations();
@@ -84,7 +90,17 @@ let websocket = null;
 Promise.all([
   requests.getParticipantMe(),
   requests.getMyConversation(),
-  ...(isUser ? [requests.getConversations()] : [])])
+  ...(isUser ? [
+    // Staff without the conversations permission keep their own agent chat:
+    // a denied list degrades to "no client conversations" instead of
+    // rejecting the whole setup (which would leave the page dead).
+    requests.getConversations().catch((error) => {
+      if (error.response?.status === 403) {
+        conversationListDenied = true;
+      }
+      return null;
+    }),
+  ] : [])])
   .then(([participantResponse, myConversationResponse, conversationsResponse]) => {
     conversations.value.splice(0, conversations.value.length);
 
@@ -99,9 +115,30 @@ Promise.all([
       conversations.value.push(...conversationsResponse.data);
     }
 
+    // #510 A-7: /chat?conversation=<id> (the AI-replies audit deep link)
+    // opens that conversation instead of the staff member's own.
+    const target = conversations.value.find((c) => c.id === route.query.conversation);
+    if (target) {
+      selectConversation(target);
+    }
+
     console.log('replacing websocket');
     websocket = createWebsocket();
   });
+
+watch(
+  // Re-navigating with a different ?conversation= while already on /chat.
+  () => route.query.conversation,
+  (id) => {
+    if (!id) {
+      return;
+    }
+    const target = conversations.value.find((c) => c.id === id);
+    if (target) {
+      selectConversation(target);
+    }
+  },
+);
 
 
 function createWebsocket() {
@@ -371,6 +408,7 @@ function markRead(conversationId, messageIds) {
           <Conversation
             :conversation="selectedConversation"
             :participantId="participantId"
+            :focusMessageId="route.query.focus || null"
             @send-message="sendMessage"
             @close-conversation="closeConversation"
             :websocketConnected="websocketStatus === 1"

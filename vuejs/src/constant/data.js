@@ -202,6 +202,12 @@ export const topMenu = [
         show: ['user'],
       },
       {
+        childtitle: 'AI Replies',
+        childicon: 'heroicons-outline:eye',
+        childlink: '/admin/ai-replies',
+        show: ['user'],
+      },
+      {
         childtitle: 'Accounts',
         childicon: 'material-symbols:wallet',
         childlink: '/admin/accounts',
