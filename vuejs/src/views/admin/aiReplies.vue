@@ -280,8 +280,11 @@ export default {
                   :title="`Detected intent: ${entry.intent ?? '—'}`"
                 >{{ intentLabel(entry) }}</span>
                 <span class="ml-auto flex items-center gap-1">
-                  <!-- #510 A-8: rate good / not good; clicking the active one clears it. -->
+                  <!-- #510 A-8: rate good / not good; clicking the active one clears it.
+                       Hidden (not just disabled) when the user lacks the POST
+                       permission, in case a read-only audit role ever exists. -->
                   <button
+                    v-if="$can('postRateAiReply')"
                     type="button"
                     class="rounded px-2 py-1 text-xs border"
                     :class="ratingButtonClass(entry, 'good')"
@@ -291,6 +294,7 @@ export default {
                     Good
                   </button>
                   <button
+                    v-if="$can('postRateAiReply')"
                     type="button"
                     class="rounded px-2 py-1 text-xs border"
                     :class="ratingButtonClass(entry, 'not-good')"
