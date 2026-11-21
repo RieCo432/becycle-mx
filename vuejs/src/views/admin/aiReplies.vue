@@ -79,13 +79,15 @@ export default {
         this.loadError = error.response?.data?.detail?.description ?? 'AI replies could not be loaded.';
       });
     },
-    // #510 A-7: open the conversation in the chat view, scrolled to and
+    // #510 A-7: open the conversation in the chat view (new tab, so the
+    // audit page stays put for further review), scrolled to and
     // highlighting this AI reply.
     openInChat(entry) {
-      this.$router.push({
+      const {href} = this.$router.resolve({
         path: '/chat',
         query: {conversation: entry.conversationId, focus: entry.id},
       });
+      window.open(href, '_blank');
     },
     // Client-side preview filter (#510 A-6): the same visible fields the
     // server matches — reply text, intent, shown context, name/email.
