@@ -1784,10 +1784,18 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getAiReplies() {
+  getAiReplies(search, limit) {
+    const params = {};
+    if (search) {
+      params.search = search;
+    }
+    if (limit) {
+      params.limit = limit;
+    }
     return axiosClient.get(`/admin/ai-replies`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
+      params,
     });
   },
 };

@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from uuid import uuid4, UUID
 
 from pydantic import TypeAdapter
-from sqlalchemy import select
+from sqlalchemy import select, or_, func
 
 from fastapi import WebSocket
 from starlette.exceptions import WebSocketException
@@ -206,7 +206,8 @@ def conversation_payload(
     )
 
 
-def get_client_route_ai_replies(db: Session, context_limit: int = 5) -> list[schemas.AiAuditEntry]:
+def get_client_route_ai_replies(
+        db: Session, context_limit: int = 5, search: str | None = None, limit: int = 50) -> list[schemas.AiAuditEntry]:
     """#510 A-2..A-4: every client-route AI reply, newest first, with its
     detected intent and prompting context.
 
@@ -220,10 +221,18 @@ def get_client_route_ai_replies(db: Session, context_limit: int = 5) -> list[sch
     had already read before the reply was composed carries no assistant read
     receipt, so it cannot be attributed afterwards; #510's open question was
     resolved against reconstructing that).
+
+    ``search`` (#510 A-6), when given, narrows to replies whose AI body, or
+    whose client's name or email, or one of the ``context_limit`` client
+    messages shown in the context, matches the term (case-insensitive
+    substring) — deliberately not the whole conversation history.
+
+    ``limit`` caps the batch returned (newest first) — the admin view loads
+    the most recent 50, and searches refetch the most recent 50 matches.
     """
     sender = aliased(models.Participant)
     initiator = aliased(models.Participant)
-    replies = (
+    query = (
         db.query(models.Message)
         .join(sender, sender.id == models.Message.sentByParticipantId)
         .join(models.User, models.User.participantId == sender.id)
@@ -231,9 +240,40 @@ def get_client_route_ai_replies(db: Session, context_limit: int = 5) -> list[sch
         .join(initiator, initiator.id == models.Conversation.initiatorParticipantId)
         .join(models.Client, models.Client.participantId == initiator.id)
         .filter(models.User.username == AI_AGENT_USERNAME)
-        .order_by(models.Message.sentOn.desc())
-        .all()
     )
+
+    if search is not None and search.strip():
+        term = f"%{search.strip()}%"
+        # Aliased so the subquery is unambiguously "another message" (the
+        # outer Message/Conversation are correlated automatically).
+        prompting = aliased(models.Message)
+        # Exactly the context that is shown: the context_limit most recent
+        # preceding client messages, ranked in the same order the context
+        # query below uses (newest first).
+        context_ranked = (
+            select(
+                prompting.id,
+                prompting.body,
+                func.row_number().over(order_by=prompting.sentOn.desc()).label("rn"),
+            )
+            .where(
+                prompting.conversationId == models.Message.conversationId,
+                prompting.sentByParticipantId == models.Conversation.initiatorParticipantId,
+                prompting.sentOn < models.Message.sentOn,
+            )
+            .subquery()
+        )
+        query = query.filter(or_(
+            models.Message.body.ilike(term),
+            models.Message.intent.ilike(term),
+            models.Client.firstName.concat(" ").concat(models.Client.lastName).ilike(term),
+            models.Client.emailAddress.ilike(term),
+            select(context_ranked.c.id)
+            .where(context_ranked.c.rn <= context_limit, context_ranked.c.body.ilike(term))
+            .exists(),
+        ))
+
+    replies = query.order_by(models.Message.sentOn.desc()).limit(limit).all()
 
     entries = []
     for reply in replies:
@@ -258,6 +298,7 @@ def get_client_route_ai_replies(db: Session, context_limit: int = 5) -> list[sch
                 id=client.id,
                 firstName=client.firstName,
                 lastName=client.lastName,
+                emailAddress=client.emailAddress,
             ),
             # Reversed: the query is newest-first, the view reads chronologically.
             context=[

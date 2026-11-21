@@ -1,25 +1,58 @@
 <script>
 import Card from '@/components/Card/index.vue';
+import {Icon} from '@iconify/vue';
+import {debounce} from 'lodash-es';
 import requests from '@/requests';
 import dateUtils from '@/util/dateUtils';
 
+const REPLY_BATCH = 50;
+
 export default {
   name: 'aiReplies',
-  components: {Card},
+  components: {Card, Icon},
   data() {
     return {
-      loading: true,
+      initialLoading: true,
       entries: [],
       loadError: null,
+      search: '',
     };
   },
   created() {
+    // #510 A-6, the client/bike-search pattern: typing filters what is
+    // already loaded instantly; a debounced refetch then fetches the
+    // newest 50 matches so searches reach beyond the initial batch. (The
+    // server matches exactly the same visible fields, so its results always
+    // pass the client filter — nothing vanishes and pops back.)
+    this.runSearch = debounce(this.runSearch, 500, {leading: false, trailing: true});
     this.load();
+  },
+  beforeUnmount() {
+    this.runSearch.cancel();
+  },
+  watch: {
+    search() {
+      this.runSearch();
+    },
+  },
+  computed: {
+    replyBatch() {
+      return REPLY_BATCH;
+    },
+    visibleEntries() {
+      const term = this.search.trim().toLowerCase();
+      if (!term) {
+        return this.entries;
+      }
+      // Instant client-side preview; the server refetch (same visible
+      // fields) lands as the authoritative result set.
+      return this.entries.filter((entry) => this.matches(entry, term));
+    },
   },
   methods: {
     load() {
-      this.loading = true;
-      requests.getAiReplies().then((response) => {
+      this.initialLoading = true;
+      requests.getAiReplies(undefined, REPLY_BATCH).then((response) => {
         this.entries = response.data;
         this.loadError = null;
       }).catch((error) => {
@@ -27,8 +60,36 @@ export default {
         // this is the in-page state for that and any other failure.
         this.loadError = error.response?.data?.detail?.description ?? 'AI replies could not be loaded.';
       }).finally(() => {
-        this.loading = false;
+        this.initialLoading = false;
       });
+    },
+    runSearch() {
+      const term = this.search.trim();
+      requests.getAiReplies(term || undefined, REPLY_BATCH).then((response) => {
+        // Ignore stale responses from faster typing — a newer query superseded it.
+        if (this.search.trim() !== term) {
+          return;
+        }
+        this.entries = response.data;
+        this.loadError = null;
+      }).catch((error) => {
+        if (this.search.trim() !== term) {
+          return;
+        }
+        this.loadError = error.response?.data?.detail?.description ?? 'AI replies could not be loaded.';
+      });
+    },
+    // Client-side preview filter (#510 A-6): the same visible fields the
+    // server matches — reply text, intent, shown context, name/email.
+    matches(entry, term) {
+      const haystacks = [
+        entry.body,
+        entry.intent,
+        `${entry.client.firstName} ${entry.client.lastName}`,
+        entry.client.emailAddress,
+        ...entry.context.map((message) => message.body),
+      ];
+      return haystacks.some((haystack) => (haystack ?? '').toLowerCase().includes(term));
     },
     time(dateString) {
       return dateUtils.convertToConvenientString(dateString);
@@ -55,13 +116,37 @@ export default {
         bodyClass="p-6 flex flex-col h-full min-h-0 overflow-hidden"
       >
         <p class="text-sm text-slate-500 dark:text-slate-400 flex-none -mt-2 mb-4">
-          Every reply the workshop assistant sent in a client conversation, newest first — with the
-          detected intent and the client messages that prompted it (the most recent ones before each reply).
+          The most recent {{ replyBatch }} replies the workshop assistant sent in client conversations —
+          each with the detected intent and the client messages that prompted it.
+          Search by reply text, detected intent, client message text, or client name/email.
         </p>
+
+        <div class="flex-none relative mb-4">
+          <input
+            v-model.trim="search"
+            type="text"
+            placeholder="Search replies, intent, client messages, client name or email…"
+            class="w-full p-2 pl-9 pr-8 text-sm bg-slate-100 dark:bg-slate-900
+                   border border-slate-200 dark:border-slate-700 rounded-md
+                   focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+          <Icon
+            icon="heroicons-outline:magnifying-glass"
+            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none"
+          />
+          <button
+            v-if="search"
+            type="button"
+            class="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            @click="search = ''"
+          >
+            <Icon icon="heroicons-outline:x-circle" class="h-4 w-4" />
+          </button>
+        </div>
 
         <div class="custom-scrollbar flex-1 min-h-0 overflow-y-auto">
           <div
-            v-if="loading"
+            v-if="initialLoading"
             class="py-8 text-center text-sm text-slate-500 dark:text-slate-400"
           >
             Loading…
@@ -72,15 +157,15 @@ export default {
           </div>
 
           <div
-            v-else-if="entries.length === 0"
+            v-else-if="visibleEntries.length === 0"
             class="py-8 text-center text-sm text-slate-500 dark:text-slate-400"
           >
-            No AI replies in client conversations yet.
+            {{ search.trim() ? 'No AI replies match your search.' : 'No AI replies in client conversations yet.' }}
           </div>
 
           <div v-else class="space-y-4">
             <div
-              v-for="entry in entries"
+              v-for="entry in visibleEntries"
               :key="entry.id"
               class="border border-slate-100 dark:border-slate-700 rounded-md p-4"
             >
@@ -88,6 +173,7 @@ export default {
                 <span class="font-semibold text-slate-800 dark:text-slate-200">
                   {{ entry.client.firstName }} {{ entry.client.lastName }}
                 </span>
+                <span class="text-slate-400">{{ entry.client.emailAddress }}</span>
                 <span class="text-slate-400">{{ time(entry.sentOn) }}</span>
                 <span
                   class="inline-block align-middle rounded bg-slate-200 dark:bg-slate-700

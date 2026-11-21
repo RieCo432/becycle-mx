@@ -69,6 +69,7 @@ class ClientMinimal(BaseModel):
     id: UUID
     firstName: str
     lastName: str
+    emailAddress: str
 
 
 class AiAuditContextMessage(BaseModel):

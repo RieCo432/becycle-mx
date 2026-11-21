@@ -1,6 +1,6 @@
 from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import app.crud as crud
@@ -95,5 +95,11 @@ async def get_permissions(db: Session = Depends(dep.get_db)) -> schemas.Permissi
 # created by the startup sync, and only the admin group holds a scope
 # covering it (regular staff groups hold narrower scopes).
 @admin.get("/admin/ai-replies")
-async def get_ai_replies(db: Session = Depends(dep.get_db)) -> list[schemas.AiAuditEntry]:
-    return crud.get_client_route_ai_replies(db=db)
+async def get_ai_replies(
+        search: Annotated[str | None, Query()] = None,
+        limit: Annotated[int, Query(ge=1, le=200)] = 50,
+        db: Session = Depends(dep.get_db)) -> list[schemas.AiAuditEntry]:
+    # `search` (#510 A-6): case-insensitive match on the reply body, the
+    # client's name/email, or any client message preceding the reply.
+    # `limit`: batch size, newest first (the admin view loads the last 50).
+    return crud.get_client_route_ai_replies(db=db, search=search, limit=limit)
