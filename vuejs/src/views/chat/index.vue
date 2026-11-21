@@ -36,6 +36,10 @@ const pingTime = 10000;
 let retryTimeout = null;
 let heartbeat = null;
 let pongMissedTimeout = null;
+// True once the conversation list was 403-denied: this staff member serves
+// no client conversations, but still keeps their own agent chat. The
+// reconnect catch-up refetch is then pointless (the denial is stable).
+let conversationListDenied = false;
 // true once the user leaves the page; onclose must not schedule a reconnect
 let isLeaving = false;
 
@@ -68,7 +72,7 @@ function selectConversation(conversation) {
 // socket was disconnected when the conversation was created (the push was
 // then missed).
 async function refreshConversations() {
-  if (!isUser) {
+  if (!isUser || conversationListDenied) {
     return;
   }
   const response = await requests.getConversations();
@@ -86,7 +90,17 @@ let websocket = null;
 Promise.all([
   requests.getParticipantMe(),
   requests.getMyConversation(),
-  ...(isUser ? [requests.getConversations()] : [])])
+  ...(isUser ? [
+    // Staff without the conversations permission keep their own agent chat:
+    // a denied list degrades to "no client conversations" instead of
+    // rejecting the whole setup (which would leave the page dead).
+    requests.getConversations().catch((error) => {
+      if (error.response?.status === 403) {
+        conversationListDenied = true;
+      }
+      return null;
+    }),
+  ] : [])])
   .then(([participantResponse, myConversationResponse, conversationsResponse]) => {
     conversations.value.splice(0, conversations.value.length);
 
