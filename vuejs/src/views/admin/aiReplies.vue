@@ -79,6 +79,14 @@ export default {
         this.loadError = error.response?.data?.detail?.description ?? 'AI replies could not be loaded.';
       });
     },
+    // #510 A-7: open the conversation in the chat view, scrolled to and
+    // highlighting this AI reply.
+    openInChat(entry) {
+      this.$router.push({
+        path: '/chat',
+        query: {conversation: entry.conversationId, focus: entry.id},
+      });
+    },
     // Client-side preview filter (#510 A-6): the same visible fields the
     // server matches — reply text, intent, shown context, name/email.
     matches(entry, term) {
@@ -181,6 +189,17 @@ export default {
                          text-slate-500 dark:text-slate-300"
                   :title="`Detected intent: ${entry.intent ?? '—'}`"
                 >{{ intentLabel(entry) }}</span>
+                <button
+                  type="button"
+                  class="ml-auto inline-flex items-center gap-1 rounded px-2 py-1 text-xs
+                         text-slate-500 dark:text-slate-400
+                         border border-slate-200 dark:border-slate-700
+                         hover:bg-slate-100 dark:hover:bg-slate-800"
+                  @click="openInChat(entry)"
+                >
+                  <Icon icon="heroicons-outline:chat-bubble-left-right" class="h-3.5 w-3.5" />
+                  Open in chat
+                </button>
               </div>
 
               <p

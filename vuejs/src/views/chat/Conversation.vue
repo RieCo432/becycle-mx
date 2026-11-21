@@ -28,6 +28,10 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  focusMessageId: {
+    type: String,
+    default: null,
+  },
 });
 
 const emit = defineEmits(['sendMessage', 'closeConversation', 'markRead']);
@@ -101,9 +105,36 @@ onBeforeUnmount(() => {
   chatResizeObserver?.disconnect();
 });
 
+let focusHandled = false;
+
+// #510 A-7: the AI-replies audit deep link (/chat?conversation=<id>&focus=<messageId>)
+// — scroll to that message once and flash it, instead of the usual
+// jump-to-bottom.
+function focusMessage() {
+  if (focusHandled || !props.focusMessageId) {
+    return;
+  }
+  const el = document.getElementById(`chat-msg-${props.focusMessageId}`);
+  if (!el) {
+    return; // not rendered yet: retried on the next messages change
+  }
+  focusHandled = true;
+  el.scrollIntoView({behavior: 'smooth', block: 'center'});
+  el.classList.add('message-focused');
+  setTimeout(() => el.classList.remove('message-focused'), 2000);
+}
+
+watch(() => props.focusMessageId, () => {
+  focusHandled = false;
+});
+
 watch(
   () => props.conversation.messages.length,
   () => {
+    if (!focusHandled && props.focusMessageId) {
+      nextTick(() => focusMessage());
+      return;
+    }
     scrollToBottom();
   },
   {immediate: true},
@@ -234,7 +265,8 @@ function getUnreadMessages() {
             class="flex md:px-6 px-4"
             v-for="message in conversation.messages
               .toSorted((m1, m2) => Date.parse(m1.sentOn) - Date.parse(m2.sentOn))"
-            :key="message.id">
+            :key="message.id"
+            :id="`chat-msg-${message.id}`">
             <!-- my messages -->
             <div
               class="flex justify-end group w-full"
@@ -404,5 +436,20 @@ function getUnreadMessages() {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #475569;
+}
+
+/* #510 A-7: the brief flash marking the audit deep-link target message. */
+.message-focused {
+  animation: message-flash 2s ease-out;
+  border-radius: 0.375rem;
+}
+
+@keyframes message-flash {
+  from {
+    background-color: rgba(59, 130, 246, 0.3);
+  }
+  to {
+    background-color: transparent;
+  }
 }
 </style>

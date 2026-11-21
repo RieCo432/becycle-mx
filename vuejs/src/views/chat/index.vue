@@ -2,7 +2,8 @@
 import {useCredentialsStore} from '@/store/credentialsStore';
 import Conversation from '@/views/chat/Conversation.vue';
 import ConversationPicker from '@/views/chat/ConversationPicker.vue';
-import {computed, onBeforeUnmount, ref} from 'vue';
+import {computed, onBeforeUnmount, ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
 import requests from '@/requests';
 import {useToast} from 'vue-toastification';
 import Alert from '@/components/Alert/index.vue';
@@ -14,6 +15,7 @@ const API_SUBDIR = import.meta.env.VITE_API_SUBDIR;
 
 const toast = useToast();
 const credentialStore = useCredentialsStore();
+const route = useRoute();
 
 const isUser = credentialStore.tokenType === 'user';
 
@@ -99,9 +101,30 @@ Promise.all([
       conversations.value.push(...conversationsResponse.data);
     }
 
+    // #510 A-7: /chat?conversation=<id> (the AI-replies audit deep link)
+    // opens that conversation instead of the staff member's own.
+    const target = conversations.value.find((c) => c.id === route.query.conversation);
+    if (target) {
+      selectConversation(target);
+    }
+
     console.log('replacing websocket');
     websocket = createWebsocket();
   });
+
+watch(
+  // Re-navigating with a different ?conversation= while already on /chat.
+  () => route.query.conversation,
+  (id) => {
+    if (!id) {
+      return;
+    }
+    const target = conversations.value.find((c) => c.id === id);
+    if (target) {
+      selectConversation(target);
+    }
+  },
+);
 
 
 function createWebsocket() {
@@ -371,6 +394,7 @@ function markRead(conversationId, messageIds) {
           <Conversation
             :conversation="selectedConversation"
             :participantId="participantId"
+            :focusMessageId="route.query.focus || null"
             @send-message="sendMessage"
             @close-conversation="closeConversation"
             :websocketConnected="websocketStatus === 1"
