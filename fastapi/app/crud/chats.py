@@ -206,8 +206,14 @@ def conversation_payload(
     )
 
 
+# #510 A-8: the three rating states and their stored values (true = good,
+# false = not good, None = unrated).
+QUALITY_RATINGS = {"good": True, "not-good": False, "unrated": None}
+
+
 def get_client_route_ai_replies(
-        db: Session, context_limit: int = 5, search: str | None = None, limit: int = 50) -> list[schemas.AiAuditEntry]:
+        db: Session, context_limit: int = 5, search: str | None = None,
+        rating: str | None = None, limit: int = 50) -> list[schemas.AiAuditEntry]:
     """#510 A-2..A-4: every client-route AI reply, newest first, with its
     detected intent and prompting context.
 
@@ -229,6 +235,9 @@ def get_client_route_ai_replies(
 
     ``limit`` caps the batch returned (newest first) — the admin view loads
     the most recent 50, and searches refetch the most recent 50 matches.
+
+    ``rating`` (#510 A-8), when given ('good' | 'not-good' | 'unrated'),
+    narrows to replies carrying that quality rating (all when None).
     """
     sender = aliased(models.Participant)
     initiator = aliased(models.Participant)
@@ -273,6 +282,13 @@ def get_client_route_ai_replies(
             .exists(),
         ))
 
+    if rating == "good":
+        query = query.filter(models.Message.qualityRating.is_(True))
+    elif rating == "not-good":
+        query = query.filter(models.Message.qualityRating.is_(False))
+    elif rating == "unrated":
+        query = query.filter(models.Message.qualityRating.is_(None))
+
     replies = query.order_by(models.Message.sentOn.desc()).limit(limit).all()
 
     entries = []
@@ -293,6 +309,7 @@ def get_client_route_ai_replies(
             sentOn=reply.sentOn,
             body=reply.body,
             intent=reply.intent,
+            qualityRating=reply.qualityRating,
             conversationId=conversation.id,
             client=schemas.ClientMinimal(
                 id=client.id,
@@ -307,6 +324,25 @@ def get_client_route_ai_replies(
             ],
         ))
     return entries
+
+
+def set_message_quality_rating(db: Session, message_id: UUID, rating: str) -> bool:
+    """#510 A-8: set (or, 'unrated', clear) the quality rating on an AI reply.
+
+    Only replies sent by the assistant can be rated — anything else is a 400
+    (the rating is audit data about the assistant, not about humans). Returns
+    False when the message does not exist (the router 404s).
+    """
+    message = db.get(models.Message, message_id)
+    if message is None:
+        return False
+    sender = db.get(models.Participant, message.sentByParticipantId)
+    if sender is None or sender.user is None or sender.user.username != AI_AGENT_USERNAME:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail={"description": "Only AI replies can be rated"})
+    message.qualityRating = QUALITY_RATINGS[rating]
+    db.commit()
+    return True
 
 
 async def send_websocket_message(socket: WebSocket, message: schemas.WebSocketMessage):

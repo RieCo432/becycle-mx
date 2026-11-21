@@ -116,6 +116,7 @@ export const ENDPOINTS = {
 
   // AI audit trail (#510) ----------------------------------------------------
   getAiReplies: {method: 'GET', route: '/admin/ai-replies'},
+  postRateAiReply: {method: 'POST', route: '/admin/ai-replies/{message_id}/rating'},
 };
 
 export default ENDPOINTS;

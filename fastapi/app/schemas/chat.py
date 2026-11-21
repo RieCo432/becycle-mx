@@ -90,9 +90,22 @@ class AiAuditEntry(BaseModel):
     sentOn: datetime
     body: str
     intent: str | None
+    qualityRating: bool | None
     conversationId: UUID
     client: ClientMinimal
     context: list[AiAuditContextMessage]
+
+
+class QualityRatingUpdate(BaseModel):
+    """#510 A-8: the quality rating to set on an AI reply: 'good',
+    'not-good', or 'unrated' (clears the rating)."""
+    rating: str
+
+
+class QualityRatingState(BaseModel):
+    """#510 A-8: the quality rating currently set on an AI reply
+    (None = unrated)."""
+    qualityRating: bool | None
 
 
 class ChatIntentBase(BaseModel):

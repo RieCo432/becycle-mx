@@ -1784,7 +1784,7 @@ export default {
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
-  getAiReplies(search, limit) {
+  getAiReplies(search, limit, rating) {
     const params = {};
     if (search) {
       params.search = search;
@@ -1792,10 +1792,20 @@ export default {
     if (limit) {
       params.limit = limit;
     }
+    if (rating) {
+      params.rating = rating;
+    }
     return axiosClient.get(`/admin/ai-replies`, {
       headers: credentialsStore.getApiRequestHeader(),
       validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
       params,
+    });
+  },
+  // #510 A-8: set ('good' | 'not-good') or clear ('unrated') the rating.
+  rateAiReply(messageId, rating) {
+    return axiosClient.post(`/admin/ai-replies/${messageId}/rating`, {rating: rating}, {
+      headers: credentialsStore.getApiRequestHeader(),
+      validateStatus: (status) => validateCommonHTTPErrorCodes(status, {userLoginRequired: true}),
     });
   },
 };

@@ -34,6 +34,10 @@ class Message(Base):
     # or removed later without breaking replies that already recorded it.
     intent: Mapped[str | None] = mapped_column("intent", String(64), nullable=True, quote=False)
 
+    # #510 A-8: the staff quality rating of an AI reply, set in the audit
+    # trail: true = good, false = not good, null = not yet rated.
+    qualityRating: Mapped[bool | None] = mapped_column("qualityrating", Boolean, nullable=True, quote=False)
+
 
 class ChatIntent(Base):
     """A client-chat intent (#501): a classified route the Agent dispatches to.
