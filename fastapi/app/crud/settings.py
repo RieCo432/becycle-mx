@@ -441,6 +441,10 @@ def update_llm_settings(db: Session, new_llm_settings: schemas.LlmSettings) -> m
     current_llm_settings.customerFreeForm = new_llm_settings.customerFreeForm
     current_llm_settings.debounceWindowSeconds = new_llm_settings.debounceWindowSeconds
     current_llm_settings.debounceBatchCap = new_llm_settings.debounceBatchCap
+    # #511: only write the disclosure when the caller actually sent one -
+    # a client that doesn't know the field must not wipe the existing text.
+    if new_llm_settings.aiDisclosure is not None:
+        current_llm_settings.aiDisclosure = new_llm_settings.aiDisclosure
 
     db.commit()
 
@@ -569,6 +573,12 @@ def set_about_us_html(db: Session, new_about_us: schemas.AboutUs) -> models.Abou
     db.commit()
 
     return about_us
+
+
+# --- #511: public "About our AI" disclosure (LlmSettings row, plain Markdown) ---
+
+def get_ai_disclosure(db: Session) -> schemas.AiDisclosure:
+    return schemas.AiDisclosure(content=get_llm_settings(db=db).aiDisclosure)
 
 
 def get_active_faq(db: Session) -> list[models.Faq]:

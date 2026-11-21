@@ -2,10 +2,11 @@
 import UpdateLlmSettingsCard from '@/components/Card/UpdateLlmSettingsCard.vue';
 import LlmPromptPreviewCard from '@/components/Card/LlmPromptPreviewCard.vue';
 import UpdateChatIntentsCard from '@/components/Card/UpdateChatIntentsCard.vue';
+import UpdateAiDisclosureCard from '@/components/Card/UpdateAiDisclosureCard.vue';
 
 export default {
   name: 'llmSettings',
-  components: {UpdateLlmSettingsCard, LlmPromptPreviewCard, UpdateChatIntentsCard},
+  components: {UpdateLlmSettingsCard, LlmPromptPreviewCard, UpdateChatIntentsCard, UpdateAiDisclosureCard},
 };
 </script>
 
@@ -19,6 +20,9 @@ export default {
     </div>
     <div class="col-span-12">
       <UpdateChatIntentsCard></UpdateChatIntentsCard>
+    </div>
+    <div class="col-span-12 xl:col-span-6">
+      <UpdateAiDisclosureCard></UpdateAiDisclosureCard>
     </div>
   </div>
 </template>

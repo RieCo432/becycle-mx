@@ -81,6 +81,14 @@ async def get_about_us(
 ) -> schemas.AboutUs:
     return crud.get_about_us(db=db)
 
+
+# #511: the public "About our AI" disclosure — plain Markdown, no auth.
+@public.get("/public/ai-disclosure")
+async def get_ai_disclosure(
+        db: Session = Depends(dep.get_db)
+) -> schemas.AiDisclosure:
+    return crud.get_ai_disclosure(db=db)
+
 @public.get("/public/faq")
 async def get_active_faq(
         db: Session = Depends(dep.get_db)

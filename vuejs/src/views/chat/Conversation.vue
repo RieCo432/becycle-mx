@@ -58,6 +58,13 @@ async function sendMessage() {
   }
 }
 
+// #511: the "About our AI" disclosure page, opened in a new tab so the
+// conversation stays put.
+function openAboutOurAi() {
+  const {href} = router.resolve({name: 'aboutOurAi'});
+  window.open(href, '_blank');
+}
+
 const chatHeight = ref(null);
 const chatBody = ref(null);
 const maxMessageInputHeight = ref(null);
@@ -310,6 +317,17 @@ function getUnreadMessages() {
                              text-slate-500 dark:text-slate-300"
                     title="Sent by the workshop assistant (AI)"
                   >AI</span>
+                  <!-- #511 D-1: info affordance next to the AI badge. -->
+                  <button
+                    v-if="message.agentSent"
+                    type="button"
+                    class="ml-1 inline-flex items-center align-middle
+                           text-slate-400 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400"
+                    title="About our AI"
+                    @click="openAboutOurAi"
+                  >
+                    <Icon icon="heroicons-outline:information-circle" class="h-3.5 w-3.5" />
+                  </button>
                   <Icon
                     icon="heroicons-outline:check-circle"
                     v-if="message.readOn"
@@ -363,6 +381,17 @@ function getUnreadMessages() {
                              text-slate-500 dark:text-slate-300"
                       title="Sent by the workshop assistant (AI)"
                     >AI</span>
+                    <!-- #511 D-1: info affordance next to the AI badge. -->
+                    <button
+                      v-if="message.agentSent"
+                      type="button"
+                      class="ml-1 inline-flex items-center align-middle
+                             text-slate-400 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400"
+                      title="About our AI"
+                      @click="openAboutOurAi"
+                    >
+                      <Icon icon="heroicons-outline:information-circle" class="h-3.5 w-3.5" />
+                    </button>
                   </span>
               </div>
             </div>

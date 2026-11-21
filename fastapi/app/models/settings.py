@@ -172,3 +172,8 @@ class LlmSettings(Base):
     customerFreeForm: Mapped[bool] = mapped_column("customerfreeform", Boolean, nullable=False, default=False, server_default=text("FALSE"), quote=False)
     debounceWindowSeconds: Mapped[int] = mapped_column("debouncewindowseconds", Integer, nullable=False, default=30, server_default=text("30"), quote=False)
     debounceBatchCap: Mapped[int] = mapped_column("debouncebatchcap", Integer, nullable=False, default=6, server_default=text("6"), quote=False)
+    # #511: the public "About our AI" disclosure - plain Markdown, rendered
+    # and sanitised client-side. In the LlmSettings schema it is optional
+    # (default None), and update_llm_settings skips a None value, so a
+    # client that doesn't know the field can't wipe it.
+    aiDisclosure: Mapped[str] = mapped_column("aidisclosure", Text, nullable=True, quote=False)
