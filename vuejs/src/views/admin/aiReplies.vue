@@ -94,7 +94,9 @@ export default {
         if (this.search.trim() !== term) {
           return;
         }
-        // this.loadError = error.response?.data?.detail?.description ?? 'AI replies could not be loaded.';
+        // A failed search toasts rather than swapping the list for an error
+        // state — the last successful results stay visible.
+        toast.error(error.response?.data?.detail?.description ?? 'AI replies could not be loaded.', {timeout: 2000});
       });
     },
     setRatingFilter(value) {
