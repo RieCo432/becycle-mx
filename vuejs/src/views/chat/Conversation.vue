@@ -3,6 +3,8 @@ import Card from '@/components/Card/index.vue';
 import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {Icon} from '@iconify/vue';
 import dateUtils from '@/util/dateUtils';
+import 'tippy.js/animations/scale.css';
+import 'tippy.js/dist/tippy.css';
 import TextArea from '@/components/TextArea';
 import {useCredentialsStore} from '@/store/credentialsStore';
 import {useRouter} from 'vue-router';
@@ -81,9 +83,14 @@ onMounted(() => {
   }, 60000);
 
   if (chatBody.value) {
+    // Only the input's max height reacts to a panel resize. Deliberately NOT
+    // scrolling the list here: the observer fires on ANY size change (window
+    // resize, scrollbar appearing, the AI-intent popover overflowing the panel
+    // while scrolling up — #510), and yanking the list to the newest message
+    // there destroys the user's reading position. Auto-scrolling on new
+    // messages is the messages.length watch below.
     chatResizeObserver = new ResizeObserver(() => {
       updateMaxMessageInputHeight();
-      scrollToBottom();
     });
     chatResizeObserver.observe(chatBody.value);
   }
@@ -121,6 +128,19 @@ function viewClient() {
 function getConvenientMessageTime(sentOn) {
   timeRefreshKey.value;
   return dateUtils.convertToConvenientString(sentOn);
+}
+
+// #510 A-1: shown on click of an AI reply — the intent the classification
+// recorded (#501 C-7): an intent/FAQ slug, or the "none" sentinel for the
+// free-form fallback. Staff only (disabled for clients via v-tippy below).
+function intentLabel(message) {
+  if (!message.intent || message.intent === 'none') {
+    return 'Free-form reply (no intent matched)';
+  }
+  if (message.intent) {
+    return `Detected intent: ${message.intent}`;
+  }
+  return 'Sent by the workshop assistant (AI)';
 }
 
 // Label for staff on their ("my") side: a human staff member's username, so
@@ -222,9 +242,25 @@ function getUnreadMessages() {
             >
               <div class="max-w-[83.333333%] ml-auto">
                 <div
-                  class="text-content p-3 bg-slate-300 dark:bg-slate-900
+                  v-tippy="{
+                    content: intentLabel(message),
+                    trigger: 'click',
+                    placement: 'top',
+                    animation: 'scale',
+                    disabled: !(isUser && message.agentSent),
+                    // Keep the popover inside the chat panel: appended to the
+                    // page (tippy's default) it would extend the document's
+                    // scrollable area whenever it drifts past the panel's
+                    // bottom edge while scrolling, growing a page scrollbar —
+                    // and the resulting reflow was what kept firing the panel's
+                    // ResizeObserver (#510). The card's overflow-hidden then
+                    // clips it cleanly at the panel edge instead.
+                    appendTo: () => chatBody || document.body,
+                  }"
+                  :class="`text-content p-3 bg-slate-300 dark:bg-slate-900
                       dark:text-slate-300 text-slate-800 text-sm font-normal
-                      rounded-md mb-1 whitespace-pre-wrap break-all"
+                      rounded-md mb-1 whitespace-pre-wrap break-all
+                      ${isUser && message.agentSent ? 'cursor-pointer' : ''}`"
                 >
                   {{ message.body }}
                 </div>
@@ -253,9 +289,25 @@ function getUnreadMessages() {
             >
               <div class="max-w-[83.333333%] mr-auto">
                 <div
-                  class="text-content p-3 bg-slate-100 dark:bg-slate-600
+                  v-tippy="{
+                    content: intentLabel(message),
+                    trigger: 'click',
+                    placement: 'top',
+                    animation: 'scale',
+                    disabled: !(isUser && message.agentSent),
+                    // Keep the popover inside the chat panel: appended to the
+                    // page (tippy's default) it would extend the document's
+                    // scrollable area whenever it drifts past the panel's
+                    // bottom edge while scrolling, growing a page scrollbar —
+                    // and the resulting reflow was what kept firing the panel's
+                    // ResizeObserver (#510). The card's overflow-hidden then
+                    // clips it cleanly at the panel edge instead.
+                    appendTo: () => chatBody || document.body,
+                  }"
+                  :class="`text-content p-3 bg-slate-100 dark:bg-slate-600
                       dark:text-slate-300 text-slate-600 text-sm font-normal
-                      mb-1 rounded-md whitespace-pre-wrap break-all"
+                      mb-1 rounded-md whitespace-pre-wrap break-all
+                      ${isUser && message.agentSent ? 'cursor-pointer' : ''}`"
                 >
                   {{ message.body }}
                 </div>

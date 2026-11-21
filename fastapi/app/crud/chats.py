@@ -181,7 +181,9 @@ def message_payload(message: models.Message, *, include_participants: bool = Fal
             and sender.user is not None
             and sender.user.username == AI_AGENT_USERNAME
         ),
-        intent=message.intent,
+        # Staff variant only: the classification must not leak to the client
+        # side of the wire (#510 A-5), like the participant objects above.
+        intent=message.intent if include_participants else None,
     )
 
 

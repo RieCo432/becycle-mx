@@ -53,6 +53,7 @@ class Message(BaseModel):
     agentSent: bool = False
 
     # #501 C-7: the intent this reply was produced for (see the model).
+    # Staff variant only — None in the client variant (#510 A-5).
     intent: str | None = None
 
 
