@@ -62,7 +62,7 @@ export default {
             }}
           </p>
           <p>Confirmed: {{appointment.confirmed ? 'Yes' : 'No'}}</p>
-          <p>Notes: {{appointment.notes}}</p>
+          <p class="whitespace-pre-wrap">Notes: {{appointment.notes}}</p>
           <br>
           <Button
               @click="cancelAppointment"

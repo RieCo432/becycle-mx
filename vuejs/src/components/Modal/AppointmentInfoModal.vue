@@ -59,7 +59,7 @@
                         .toLocaleString(undefined, {hour: "2-digit", minute: "2-digit", hour12: false, timeZone: 'UTC' })
                   }}</p>
                 <p v-if="appointment.typeTitle !== 'Closed Day'">Confirmed: {{appointment.confirmed ? 'Yes' : 'No'}}</p>
-                <p>Notes: {{appointment.notes}}</p>
+                <p class="whitespace-pre-wrap">Notes: {{appointment.notes}}</p>
               </div>
               <div v-if="appointment.typeTitle !== 'Closed Day'">
                 <AppointmentSummaryTable

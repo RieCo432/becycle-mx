@@ -91,6 +91,9 @@
               {{ props.row.didClientShowUp ? 'Yes' : 'No' }}
             </span>
           </span>
+          <div v-if="props.column.field === 'notes'" class="whitespace-pre-wrap break-words text-left">
+            {{ props.row.notes }}
+          </div>
           <div v-if="props.column.field === 'action'" class="flex space-x-3 rtl:space-x-reverse">
             <template v-for="action in actions.filter((action) => !action.showIf || action.showIf(props.row))">
               <Tooltip placement="top" arrow theme="dark" :key="action.id"
