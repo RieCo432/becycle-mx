@@ -32,6 +32,9 @@ from .permissions import check_permission, get_permission_by_route_and_method
 from .settings import get_llm_settings
 from .intents import get_intent_by_name, evaluate_template, get_faq_answer_by_key
 from .users import get_user_by_username
+# #503: the booking flow (imported after app.services.llm_agent above, which
+# booking_flow itself imports — the order in this module keeps that acyclic).
+from .booking_flow import BOOKING_INTENT, get_active_booking_flow, handle_booking_burst
 
 API_SECRET = os.environ['API_SECRET']
 API_SECRET_ALGORITHM = os.environ['API_SECRET_ALGORITHM']
@@ -775,8 +778,9 @@ class ChatManager:
 
           - owner is a staff/volunteer user -> free-form reply via `converse`,
             broadcast as the assistant (#500 V-1..V-5)
-          - owner is a client              -> intent classification (#501); a no-op
-            in #500
+          - owner is a client              -> an active booking flow (if any) runs
+            the booking step (#503 B-9); else intent classification (#501), with
+            the booking intent starting the flow (B-1)
 
         Each batch entry is (message_id, body): the bodies go to the agent, the
         ids let us act on exactly the messages it answered. On a reply we persist
@@ -818,14 +822,26 @@ class ChatManager:
                 reply = await converse(db=db, messages=bodies, context=None)
                 intent = None
             else:
-                # Client intent route (#501): classify the burst (C-1) and dispatch to
-                # a code handler (C-2/C-3) or the free-form fallback (C-6).
-                intent = await classify(db=db, messages=bodies)
-                if intent is None:
-                    # C-8: no model / Ollama down / timeout -> nothing happens, chat
-                    # continues unaffected.
-                    return
-                reply = await resolve_reply(db=db, intent=intent, messages=bodies)
+                # Client route (#501, #503). An active booking flow takes
+                # precedence over classification (B-9): a burst inside an ongoing
+                # booking is a booking step, whatever else it says.
+                if get_active_booking_flow(db=db, conversation_id=conversation.id) is not None:
+                    intent = BOOKING_INTENT
+                    reply = await handle_booking_burst(db=db, conversation=conversation, bodies=bodies)
+                else:
+                    # No flow in progress: classify the burst (C-1) and dispatch to
+                    # a code handler (C-2/C-3) or the free-form fallback (C-6).
+                    intent = await classify(db=db, messages=bodies)
+                    if intent is None:
+                        # C-8: no model / Ollama down / timeout -> nothing happens,
+                        # chat continues unaffected.
+                        return
+                    if intent == BOOKING_INTENT:
+                        # #503 B-1..B-5: the booking intent runs the guided flow
+                        # (which starts it) instead of the stored stub template.
+                        reply = await handle_booking_burst(db=db, conversation=conversation, bodies=bodies)
+                    else:
+                        reply = await resolve_reply(db=db, intent=intent, messages=bodies)
 
             if not reply:
                 # No model (volunteer), or an intent that yields no reply (free-form

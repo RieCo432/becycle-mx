@@ -93,8 +93,8 @@ class ChatActionFlow(Base):
     Future chat-based action flows (a lending flow, a parts order, ...) reuse
     this table rather than adding one per flow: `flowtype` says which handler
     owns the row, and the flow's own state lives in the JSON `data` payload,
-    validated by that flow's crud (for 'booking': appointmentTypeId, needSummary,
-    offeredSlots, reoffersUsed — see the BookingFlowData shape there).
+    validated by that flow's crud (for 'booking': appointmentTypeId,
+    pendingSlot, offeredSlots, reoffersUsed — see the BookingFlowData shape there).
 
     #503 B-9: this is the one stateful route — unlike the stateless #500 / #501
     handlers, the flow remembers where it is across debounced bursts, so it can
