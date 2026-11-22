@@ -1,13 +1,12 @@
 from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import app.crud as crud
 import app.dependencies as dep
 import app.models as models
 import app.schemas as schemas
 from app.services.accounts_helpers import AccountTypes
-from app.services.email_helpers import email_task
 
 clients_me = APIRouter(
     tags=["clients"],
@@ -58,21 +57,17 @@ async def get_my_appointments(
 async def request_appointment(
         appointment_request_data: schemas.AppointmentRequest,
         client: Annotated[models.Client, Depends(dep.get_current_client)],
-        email_tasks: BackgroundTasks,
         db: Session = Depends(dep.get_db)) -> schemas.Appointment:
 
-    appointment_create_data = schemas.AppointmentCreate(
-        typeId=appointment_request_data.typeId,
-        startDateTime=appointment_request_data.startDateTime,
-        notes=appointment_request_data.notes,
-        clientId=client.id
+    return crud.request_appointment(
+        db=db,
+        appointment_data=schemas.AppointmentCreate(
+            typeId=appointment_request_data.typeId,
+            startDateTime=appointment_request_data.startDateTime,
+            notes=appointment_request_data.notes,
+            clientId=client.id
+        )
     )
-
-    appointment = crud.create_appointment(db=db, appointment_data=appointment_create_data)
-
-    email_tasks.add_task(email_task, type(appointment), appointment.id, "send_request_received_email")
-
-    return appointment
 
 
 @clients_me.patch("/clients/me/appointments/{appointment_id}/cancel")

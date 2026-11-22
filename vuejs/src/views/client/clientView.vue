@@ -294,7 +294,7 @@ export default {
                         hour: "2-digit", minute: "2-digit", hour12: false, }) }}
                 </p>
                 <p class="text-slate-700 dark:text-slate-300">Type: {{ cancelAppointmentModalInfo.type }}</p>
-                <p class="text-slate-700 dark:text-slate-300">Notes: {{ cancelAppointmentModalInfo.notes }}</p>
+                <p class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">Notes: {{ cancelAppointmentModalInfo.notes }}</p>
 
                 <template #footer>
                   <DashButton

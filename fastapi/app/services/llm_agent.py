@@ -10,7 +10,8 @@ from pydantic_ai.models.openai import OpenAIChatModelSettings
 from pydantic_ai.providers.ollama import OllamaProvider
 from sqlalchemy.orm import Session
 
-from app.crud.appointments import get_appointment_types
+from app.extensions.chatactionflowstage import ChatActionFlowStage
+from app.crud.appointments import get_appointment_type, get_appointment_types
 from app.crud.catalogue import get_catalogue
 from app.crud.settings import (
     get_about_us,
@@ -611,3 +612,347 @@ async def classify(db: Session, messages, context: dict | None = None) -> str | 
         return None
 
     return _extract_intent(getattr(result, "output", None), valid_names)
+
+
+# --- #503: the booking flow's conversation step (B-2..B-5) ---
+#
+# The flow itself — its state, budgets, messages, and the booking — lives in
+# crud.booking_flow. This is the LLM side only: one call per burst, given the
+# stage and the flow's data, it returns the step's DECISION (which type /
+# whether it's confirmed / which slot / a specific ask / re-offer / abort).
+# It does not write the customer-facing text — the app composes every message
+# from fixed strings (the owner wants the AI's own prose minimal), so this
+# model never has to generate a reply.
+# B-3: only the Agent invokes the LLM; the closed sets (active types, offered
+# slots) are passed in and the decision is validated against them here, so the
+# LLM can never name a type or slot that doesn't exist (the same no-drift
+# pattern as classify's _extract_intent).
+#
+# The LLM sees no conversation history (a single turn, like converse/classify):
+# everything it needs — the proposed type, the offered slots — is assembled
+# into the system prompt from the flow's data by the caller.
+
+STAGE_ELICITING = ChatActionFlowStage.BOOKING_ELICITING
+STAGE_AWAITING_SLOT_CHOICE = ChatActionFlowStage.BOOKING_AWAITING_SLOT_CHOICE
+STAGE_AWAITING_CONFIRM = ChatActionFlowStage.BOOKING_AWAITING_CONFIRM
+
+
+def _extract_json_object(raw) -> dict | None:
+    """Reduce the model's output to a JSON object, leniently (fenced or noisy
+    responses tolerated), or None when there is no object in it."""
+    text = raw.strip() if isinstance(raw, str) else ("" if raw is None else str(raw).strip())
+    if not text:
+        return None
+    try:
+        data = json.loads(text)
+        if isinstance(data, dict):
+            return data
+    except (ValueError, TypeError):
+        pass
+    # Lenient: the first balanced {...} block that parses as an object.
+    start = text.find("{")
+    while start != -1:
+        depth = 0
+        for i in range(start, len(text)):
+            if text[i] == "{":
+                depth += 1
+            elif text[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    try:
+                        candidate = json.loads(text[start:i + 1])
+                        if isinstance(candidate, dict):
+                            return candidate
+                    except (ValueError, TypeError):
+                        pass
+                    break
+        start = text.find("{", start + 1)
+    return None
+
+
+def _slot_ref(value) -> dict | None:
+    """A {date, time} string pair, or None when the shape is wrong."""
+    if not isinstance(value, dict):
+        return None
+    date = value.get("date")
+    time = value.get("time")
+    if not isinstance(date, str) or not isinstance(time, str):
+        return None
+    return {"date": date.strip(), "time": time.strip()}
+
+
+def _slot_minutes(time: str) -> int | None:
+    """'HH:MM' or 'HH:MM:SS' to minutes-of-day, or None (lenient time compare)."""
+    parts = time.split(":")
+    if len(parts) not in (2, 3):
+        return None
+    try:
+        return int(parts[0]) * 60 + int(parts[1])
+    except ValueError:
+        return None
+
+
+def _slot_in_offered(slot: dict | None, offered) -> bool:
+    """Whether a slot is one of the ones actually offered (B-5: the pick is
+    validated against exactly the offered set)."""
+    if slot is None:
+        return False
+    for entry in offered or []:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("date") == slot["date"] and _slot_minutes(str(entry.get("time", ""))) == _slot_minutes(slot["time"]):
+            return True
+    return False
+
+
+def _booking_type_listing(db: Session) -> str:
+    """The closed set for stage ELICITING: the shop's active appointment
+    types, id | title | duration | description (description is what the
+    type is FOR — the primary signal for the pick; the decision rules live
+    in the prompt, not here)."""
+    types = sorted(get_appointment_types(db, inactive=False), key=lambda t: t.orderIndex)
+    lines = []
+    for t in types:
+        line = f"- {t.id} | {t.title} | {t.duration} min"
+        description = (t.description or "").strip()
+        if description:
+            line += f" | {description}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def _booking_slot_listing(offered) -> str:
+    """The closed set for stage AWAITING_SLOT_CHOICE: the slots offered so
+    far, exactly as stored (ISO date + time) for the LLM to copy back."""
+    lines = []
+    for entry in offered or []:
+        if isinstance(entry, dict) and entry.get("date") and entry.get("time"):
+            lines.append(f"- {entry['date']} {entry['time']}")
+    return "\n".join(lines)
+
+
+def _booking_step_json_contract(stage: ChatActionFlowStage) -> str:
+    # The model returns the decision ONLY (no prose) - the app composes the
+    # customer-facing message from fixed strings.
+    if stage == STAGE_ELICITING:
+        return (
+            'Respond with JSON only: {"type": "<one id from the list above, or empty string>", '
+            '"confirmed": false, "aborted": false}'
+        )
+    if stage == STAGE_AWAITING_SLOT_CHOICE:
+        return (
+            'Respond with JSON only: {"choice": {"date": "...", "time": "..."} or null, '
+            '"specificAsk": {"date": "...", "time": "..."} or null, "reoffer": false, "aborted": false}'
+        )
+    return (
+        'Respond with JSON only: {"confirmed": false, "denied": false, '
+        '"newChoice": {"date": "...", "time": "..."} or null, '
+        '"specificAsk": {"date": "...", "time": "..."} or null, "aborted": false}'
+    )
+
+
+def _booking_step_system_prompt(db: Session, settings, stage: ChatActionFlowStage, data: dict) -> str:
+    """The booking step's system prompt: the shared persona, the stage's rules,
+    and the stage's closed set (active types, or the offered slots). The LLM
+    returns the decision only (no prose - the app composes the message). It
+    has no conversation history, so the flow's progress so far (the proposed
+    type) is included from the flow's data."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    base = (
+        _persona(settings)
+        + "\n\n"
+        + "You are helping this customer book a workshop appointment. "
+        + f"Today is {today}. You only decide; you do not write any customer-facing text."
+    )
+
+    if stage == STAGE_ELICITING:
+        proposed = (data.get("appointmentTypeId") or "").strip()
+        proposed_line = ""
+        if proposed:
+            proposed_line = f"\nYou already proposed this type in a previous message: {proposed}.\n"
+        return (
+            base
+            + "\n"
+            + "Available appointment types (id | title | duration | description):\n"
+            + (_booking_type_listing(db) or "- (none available)")
+            + proposed_line
+            + "\nDecide this customer message:\n"
+            + "- Choose the single best-fitting type by its description; when two fit equally well, "
+            "prefer the longer appointment. Put its id in \"type\".\n"
+            + "- If the need is unclear and you cannot pick a type, leave \"type\" as an empty string.\n"
+            + "- Set \"confirmed\" to true ONLY when a type was already proposed earlier and the "
+            "customer is now accepting it (repeat that type's id in \"type\").\n"
+            + "- If the customer drops the booking (e.g. \"never mind\"), set \"aborted\" to true.\n"
+            + "- Never invent an appointment type id.\n\n"
+            + _booking_step_json_contract(stage)
+        )
+
+    if stage == STAGE_AWAITING_CONFIRM:
+        pending = data.get("pendingSlot") or {}
+        pending_line = ""
+        if pending.get("date") and pending.get("time"):
+            day = datetime.strptime(str(pending["date"]), "%Y-%m-%d")
+            pending_line = (
+                f"\nThe pending request: a booking on {day.strftime('%a %d %b')} "
+                f"at {str(pending['time'])[:5]}.\n"
+            )
+        slot_type = None
+        type_id = (data.get("appointmentTypeId") or "").strip()
+        if type_id:
+            slot_type = get_appointment_type(db=db, appointment_type_id=type_id)
+        return (
+            base
+            + "\n"
+            + (f"The appointment type being booked: {slot_type.title} ({slot_type.duration} min).\n" if slot_type else "")
+            + pending_line
+            + "\nOffered slots (copy the date and time EXACTLY as listed, only for a different-slot ask):\n"
+            + (_booking_slot_listing(data.get("offeredSlots")) or "- (none on offer yet)")
+            + "\nDecide this customer message (set exactly ONE of confirmed / denied / newChoice / specificAsk, or none):\n"
+            + "- confirmed: the customer accepts the pending request.\n"
+            + "- denied: the customer declines it.\n"
+            + "- newChoice: the customer names a different one of the offered slots instead (exact strings; "
+            "if more than one could fit, the most recent offer - listed last - is the likelier one).\n"
+            + "- specificAsk: the customer asks for a slot not in the list (your best resolution to a "
+            "concrete date and time; the workshop will check whether it is free).\n"
+            + "- If the customer drops the booking entirely (e.g. \"never mind\"), set \"aborted\" to true.\n"
+            + "- Never invent a slot that is not in the list.\n\n"
+            + _booking_step_json_contract(stage)
+        )
+
+    # STAGE_AWAITING_SLOT_CHOICE
+    slot_type = None
+    type_id = (data.get("appointmentTypeId") or "").strip()
+    if type_id:
+        slot_type = get_appointment_type(db=db, appointment_type_id=type_id)
+    return (
+        base
+        + "\n"
+        + (f"The appointment being booked: {slot_type.title} ({slot_type.duration} min).\n" if slot_type else "")
+        + "\nOffered slots (copy the date and time EXACTLY as listed when the customer picks one):\n"
+        + (_booking_slot_listing(data.get("offeredSlots")) or "- (none on offer yet)")
+        + "\nDecide this customer message:\n"
+        + "- If the customer picks one of the offered slots, set \"choice\" to that slot (exact strings).\n"
+        + "- If the customer refers to a slot by its position (e.g. 'the 3rd at 6:15') and more than one "
+        "offered slot could fit, resolve it to the single most likely one: the offers are listed oldest "
+        "first, so the customer is most likely pointing at a slot from the most recent offer (last).\n"
+        + "- If the customer asks for a specific slot not in the list, set \"specificAsk\" to your best "
+        "resolution of it as a concrete date and time; the workshop will check whether it is free.\n"
+        + "- If the customer says none of the offered slots suit, set \"reoffer\" to true.\n"
+        + "- If the customer drops the booking, or says they meant a different kind of appointment, "
+        "set \"aborted\" to true.\n"
+        + "- Otherwise (a question, a tangent), leave \"choice\", \"specificAsk\" and \"reoffer\" all "
+        "empty/false.\n"
+        + "- Never invent a slot that is not in the list.\n\n"
+        + _booking_step_json_contract(stage)
+    )
+
+
+def _sanitize_booking_step(raw, stage: ChatActionFlowStage, data: dict, db: Session) -> dict | None:
+    """Reduce the model's output to the booking step's validated decision, or
+    None when there is no usable object (best-effort, like _extract_intent).
+    The model returns decisions only (no prose), so a parsed object is a valid
+    step even when every decision field is empty; each decision field that
+    fails its closed-set check is dropped rather than raising."""
+    parsed = _extract_json_object(raw)
+    if parsed is None:
+        return None
+
+    out = {
+        "type": None,
+        "confirmed": False,
+        "denied": False,
+        "choice": None,
+        "newChoice": None,
+        "specificAsk": None,
+        "reoffer": False,
+        "aborted": parsed.get("aborted") is True,
+    }
+
+    if stage == STAGE_ELICITING:
+        type_id = parsed.get("type")
+        if isinstance(type_id, str) and type_id.strip():
+            # B-3: the picked type must be one of the shop's active types.
+            out["type"] = type_id.strip() if get_appointment_type(
+                db=db, appointment_type_id=type_id.strip()) is not None else None
+        # "confirmed" stands on its own: the flow settles it against the type
+        # proposed in the previous turn (it may even be empty - "yes" is enough).
+        out["confirmed"] = parsed.get("confirmed") is True
+    elif stage == STAGE_AWAITING_SLOT_CHOICE:
+        offered = data.get("offeredSlots") or []
+        choice = _slot_ref(parsed.get("choice"))
+        out["choice"] = choice if _slot_in_offered(choice, offered) else None
+        # specificAsk is shape-checked only: the flow checks it live against
+        # availability before acting on it (a not-in-list ask is legit).
+        out["specificAsk"] = _slot_ref(parsed.get("specificAsk"))
+        out["reoffer"] = parsed.get("reoffer") is True
+    else:
+        # STAGE_AWAITING_CONFIRM: the yes/no on the pending request.
+        offered = data.get("offeredSlots") or []
+        new_choice = _slot_ref(parsed.get("newChoice"))
+        out["newChoice"] = new_choice if _slot_in_offered(new_choice, offered) else None
+        out["specificAsk"] = _slot_ref(parsed.get("specificAsk"))
+        out["confirmed"] = parsed.get("confirmed") is True
+        out["denied"] = parsed.get("denied") is True
+
+    return out
+
+
+async def booking_step(
+    db: Session,
+    *,
+    stage: ChatActionFlowStage,
+    data: dict,
+    messages,
+) -> dict | None:
+    """#503: one step of the booking flow conversation (B-2..B-5).
+
+    Given the flow's stage and data, return the step's decision, reduced to a
+    validated shape (see _sanitize_booking_step): stage-dependent keys
+    (type / confirmed when eliciting; choice / specificAsk / reoffer when
+    awaiting the slot choice), plus aborted. The model writes no prose - the
+    app composes the customer-facing message. The closed sets are validated
+    here (B-3), so the flow can trust every key it receives.
+
+    Best-effort (A-13): an unconfigured backend, a dead backend, a timeout,
+    or an unusable result all yield None - never an exception - so the flow
+    says nothing, consumes no turn, and the base chat continues.
+
+    Args:
+        db: session used to read the active LlmSettings row and the shop's
+            active appointment types (A-3 / B-3).
+        stage: the flow's current stage (a ChatActionFlowStage).
+        data: the flow's data payload (appointmentTypeId / offeredSlots / ...),
+            as stored on the flow row.
+        messages: a batch of messages (A-9).
+    """
+    settings = get_llm_settings(db=db)
+
+    model = _active_model(settings)
+    if not model:
+        return None  # A-4: no model configured -> inactive, no LLM call
+    if not LLM_V1_BASE_URL:
+        return None  # A-13: backend not configured -> no-op
+
+    prompt = _compose_user_prompt(messages)
+    if not prompt:
+        return None  # nothing to reply to
+
+    system_prompt = _booking_step_system_prompt(db, settings, stage, data or {})
+
+    if not PRODUCTION:
+        print("booking_step system prompt:", system_prompt)
+        print("booking_step prompt:", prompt)
+
+    agent = Agent(
+        OllamaModel(model, provider=OllamaProvider(base_url=LLM_V1_BASE_URL)),
+        system_prompt=system_prompt,
+    )
+    try:
+        # A conversational step (not a routing task): keep the model's default
+        # thinking, as converse() does.
+        result = await agent.run(prompt, timeout=_LLM_TIMEOUT)
+    except Exception as exc:  # A-13: any failure -> no-op
+        print(f"LLM booking_step failed: {exc}")
+        return None
+
+    return _sanitize_booking_step(getattr(result, "output", None), stage, data or {}, db)

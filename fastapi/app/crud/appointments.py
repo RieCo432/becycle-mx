@@ -2,6 +2,7 @@ from datetime import timezone, datetime
 import math
 from uuid import UUID
 from .settings import *
+from app.services.email_helpers import email_task
 from sqlalchemy.orm import Session
 
 
@@ -26,6 +27,22 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate,
 
     db.add(appointment)
     db.commit()
+
+    return appointment
+
+
+def request_appointment(db: Session, appointment_data: schemas.AppointmentCreate) -> models.Appointment:
+    """A client's appointment request: create the (pending) appointment and
+    send the request-received email. The single place both the client
+    endpoint (POST /clients/me/appointments/request) and the chat booking
+    flow (#503) use, so the two paths can't drift (same create, same email).
+
+    The email is best-effort: email_task re-fetches in its own session and
+    swallows its own failures, so a dead SMTP can never sink a valid request.
+    """
+    appointment = create_appointment(db=db, appointment_data=appointment_data, auto_confirm=False)
+
+    email_task(type(appointment), appointment.id, "send_request_received_email")
 
     return appointment
 

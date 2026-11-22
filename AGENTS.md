@@ -40,6 +40,7 @@ The same codebase serves multiple bike shops (becycle-mx, belfastcyclecoop-mx); 
 
 ## Migrations
 
+- **Workflow: when possible, write the Python model class first, then generate the migration with Alembic autogenerate** (`alembic revision --autogenerate -m "what changed"`), then amend the generated file with seed data and the bits autogeneration missed (enum types, unique indexes, etc.).
 - The Docker API entrypoint runs `alembic upgrade head` on every container start (`fastapi/Dockerfile`); a broken migration breaks deploy.
 - Migration filenames use a custom `YYYY_MM_DD_HHMMSS_slug` template (`alembic.ini`); slugs are capped at 234 chars.
 

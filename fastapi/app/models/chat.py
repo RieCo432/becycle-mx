@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import UUID, text, Text, DateTime, ForeignKey, String, Boolean, Integer
+from sqlalchemy import UUID, text, Text, DateTime, ForeignKey, String, Boolean, Integer, JSON, Enum, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.db import Base
+from app.extensions.chatactionflowtype import ChatActionFlowType
+from app.extensions.chatactionflowstage import ChatActionFlowStage
 
 from typing import List
 
@@ -81,6 +83,62 @@ class Conversation(Base):
     initiatorParticipant: Mapped[Participant] = relationship("Participant", back_populates="conversation")
 
     messages: Mapped[List["Message"]] = relationship("Message", back_populates="conversation")
+
+    flows: Mapped[List["ChatActionFlow"]] = relationship("ChatActionFlow", back_populates="conversation")
+
+
+class ChatActionFlow(Base):
+    """One in-progress chat action flow — generic across flow types (#503).
+
+    Future chat-based action flows (a lending flow, a parts order, ...) reuse
+    this table rather than adding one per flow: `flowtype` says which handler
+    owns the row, and the flow's own state lives in the JSON `data` payload,
+    validated by that flow's crud (for 'booking': appointmentTypeId,
+    pendingSlot, offeredSlots, reoffersUsed — see the BookingFlowData shape there).
+
+    #503 B-9: this is the one stateful route — unlike the stateless #500 / #501
+    handlers, the flow remembers where it is across debounced bursts, so it can
+    resume mid-flow.
+
+    Ephemeral by design: at most one active flow of each type per conversation
+    (the unique conversationid+flowtype means "a flow of that type is in
+    progress"), and a terminal outcome — booked, handed off, turn budget
+    exhausted — deletes the row, so the next flow starts fresh. The audit trail
+    of what actually happened is the assistant's replies themselves (messages
+    with intent 'booking', #510).
+    """
+    __tablename__ = "chatactionflows"
+    __table_args__ = (
+        # One active flow of each type per conversation: a 'booking' flow and a
+        # future 'lending' flow may coexist, but a second of the same type
+        # cannot (a burst must never branch into two of the same flow).
+        UniqueConstraint("conversationid", "flowtype", name="uq_chatactionflows_conversationid_flowtype"),
+    )
+
+    id: Mapped[UUID] = mapped_column("id", UUID, primary_key=True, nullable=False, default=uuid4, server_default=text("uuid_generate_v4()"), index=True, quote=False)
+
+    conversationId: Mapped[UUID] = mapped_column("conversationid", ForeignKey("conversations.id"), nullable=False, quote=False)
+    conversation: Mapped["Conversation"] = relationship("Conversation", back_populates="flows")
+
+    # Which handler owns this row (extensions/chatactionflowtype.py): 'booking'
+    # for the #503 booking flow. A future action flow adds its value in its own
+    # migration rather than adding a table.
+    flowtype: Mapped[ChatActionFlowType] = mapped_column("flowtype", Enum(ChatActionFlowType, native_enum=True), nullable=False, quote=False)
+
+    # Where the flow is (extensions/chatactionflowstage.py), namespaced per
+    # flow type (BOOKING_*) so the shared column can't hold a stage that is
+    # not in its flow type's vocabulary.
+    stage: Mapped[ChatActionFlowStage] = mapped_column("stage", Enum(ChatActionFlowStage, native_enum=True), nullable=False, quote=False)
+
+    # The flow's own payload (see the class docstring for the booking shape).
+    data: Mapped[dict] = mapped_column("data", JSON, nullable=False, server_default=text("'{}'"), quote=False)
+
+    # The flow's turn budget counter (a turn is one assistant message in the
+    # flow). The budget itself is per flow type — 6 for booking, enforced by
+    # the flow crud.
+    turnsUsed: Mapped[int] = mapped_column("turnsused", Integer, nullable=False, default=0, server_default=text("0"), quote=False)
+
+    createdOn: Mapped[datetime] = mapped_column("createdon", DateTime, nullable=False, default=lambda _: datetime.now(timezone.utc), server_default=text("(current_timestamp at time zone 'utc')"), quote=False)
 
 
 # conversation_participants_association_table = Table(
